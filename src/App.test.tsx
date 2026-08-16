@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import App from './App'
+import { AUDIT_HISTORY, PENDING_REVIEWS } from './data/mockData'
 
 const getMenu = () => screen.getByRole('menu', { name: 'Systems' })
 const getWorkspaceMenu = () => screen.getByRole('menu', { name: 'Workspace' })
@@ -182,6 +183,77 @@ describe('Task 7 modal overlays', () => {
     expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
   })
 })
+
+// ---------------------------------------------------------------------------
+// Task 10 — Konteks Learned drawer (integration)
+// ---------------------------------------------------------------------------
+
+describe('Task 10 — Konteks Learned drawer', () => {
+  const getLearnedDialog = () => screen.getByRole('dialog', { name: 'Konteks Learned' })
+
+  /** Exactly one overlay surface: one dialog, one backdrop, no menus. */
+  const expectSingleOverlay = () => {
+    expect(screen.getAllByRole('dialog')).toHaveLength(1)
+    expect(document.querySelectorAll('.kx-modal-backdrop')).toHaveLength(1)
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+  }
+
+  it('opens the drawer directly on Pending from the composer "Reviews waiting" trigger — the sidebar stays untouched (AC20/AC39)', () => {
+    render(<App />)
+    const sidebar = document.querySelector('.kx-sidebar')!
+    const sidebarHtml = sidebar.outerHTML
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('reviews-waiting'))
+
+    const drawer = getLearnedDialog()
+    expect(drawer).toHaveClass('kx-drawer', 'kx-learned')
+    expectSingleOverlay()
+
+    // Pending is the default/primary tab (AC20).
+    const tabs = within(drawer).getAllByRole('tab')
+    expect(tabs.map((tab) => tab.textContent)).toEqual(['Pending', 'Audit History'])
+    expect(within(drawer).getByRole('tab', { name: 'Pending' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+
+    // The persistent sidebar keeps its exact DOM — the drawer stacks on
+    // top through fixed overlay geometry, it never touches the sidebar.
+    expect(document.querySelector('.kx-sidebar')).toBe(sidebar)
+    expect(sidebar.outerHTML).toBe(sidebarHtml)
+
+    // Escape closes through the CLOSE_OVERLAY contract (AC45).
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
+  })
+
+  it('lists the waiting reviews on Pending, then switches in place to the Audit History timeline and closes from the header control (AC39)', () => {
+    render(<App />)
+    fireEvent.click(screen.getByTestId('reviews-waiting'))
+    const drawer = getLearnedDialog()
+
+    for (const review of PENDING_REVIEWS) {
+      expect(within(drawer).getByText(review.title)).toBeInTheDocument()
+      expect(within(drawer).getByRole('button', { name: `Approve ${review.title}` })).toBeInTheDocument()
+    }
+
+    fireEvent.click(within(drawer).getByRole('tab', { name: 'Audit History' }))
+    expect(within(drawer).getByRole('tab', { name: 'Audit History' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    const timeline = within(drawer).getByRole('list', { name: 'Audit history' })
+    expect(within(timeline).getAllByRole('listitem')).toHaveLength(AUDIT_HISTORY.length)
+
+    // The header close control dismisses it (§16).
+    fireEvent.click(within(drawer).getByRole('button', { name: 'Close' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
+  })
+})
+
 
 // ---------------------------------------------------------------------------
 // Task 9 — Customize shell (integration, Part A)
