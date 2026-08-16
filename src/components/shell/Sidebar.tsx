@@ -7,13 +7,15 @@
  * itself is Part B), recent sessions newest-first with system + time
  * (AC10), the "View all" control that navigates to session history while
  * the sidebar stays untouched (AC11), the collapse toggle to the 64px icon
- * rail (AC12), and the user row whose sliders icon opens Customize on the
- * agents tab with a keyboard-focusable tooltip (AC9). No "All Systems"
- * page or link exists anywhere here (AC14).
+ * rail (AC12), the user row that opens the account menu (Task 12, AC42),
+ * and the sliders icon beside it that opens Customize on the agents tab
+ * with a keyboard-focusable tooltip (AC9). No "All Systems" page or
+ * link exists anywhere here (AC14).
  */
 import { useState } from 'react'
 import { RECENT_SESSIONS, WORKSPACE } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import { ACCOUNT_TRIGGER_ID } from '../account/accountFocus'
 
 const LOGO_EXPANDED_SRC = '/assets/konteks/logo-text-main.png'
 const LOGO_RAIL_SRC = '/assets/konteks/web-topbar-icon-128.png'
@@ -200,10 +202,24 @@ export default function Sidebar() {
       </section>
 
       <div className="kx-sidebar__user">
-        <span className="kx-sidebar__user-avatar" aria-hidden="true">
-          {USER_INITIALS}
-        </span>
-        <span className="kx-sidebar__user-name">{USER_NAME}</span>
+        {/* User row — opens the account menu (Task 12, spec §14, AC42).
+            The sliders button beside it stays the separate Customize
+            trigger and must never open the account menu (AC9). */}
+        <button
+          type="button"
+          id={ACCOUNT_TRIGGER_ID}
+          className="kx-sidebar__user-trigger"
+          aria-label="Open account menu"
+          aria-haspopup="menu"
+          aria-expanded={state.overlay.kind === 'account-menu'}
+          data-testid="account-trigger"
+          onClick={() => dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'account-menu' } })}
+        >
+          <span className="kx-sidebar__user-avatar" aria-hidden="true">
+            {USER_INITIALS}
+          </span>
+          <span className="kx-sidebar__user-name">{USER_NAME}</span>
+        </button>
         <button
           type="button"
           className="kx-icon-btn kx-tooltip-host kx-sidebar__customize"
