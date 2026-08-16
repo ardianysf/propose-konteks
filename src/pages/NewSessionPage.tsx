@@ -5,9 +5,11 @@
  * (AC15), the Engineering-only setup row (AC17 — hidden entirely in
  * Planning, AC16), and the Composer (AC18–AC21). Owns no input state;
  * every trigger dispatches an existing overlay kind — the repository
- * modal (Task 7) and the component menu (Task 8) render later, so only
- * their triggers exist here.
+ * modal (Task 7) and, since Task 8, the anchored component menu, which
+ * mounts from the Component trigger's anchor wrapper below while
+ * overlay.kind === 'component-menu'.
  */
+import ComponentMenu from '../components/composer/ComponentMenu'
 import Composer from '../components/composer/Composer'
 import SessionMode from '../components/composer/SessionMode'
 import { useMockup } from '../state/MockupContext'
@@ -91,8 +93,9 @@ export default function NewSessionPage() {
       <SessionMode />
 
       {/* Engineering-only setup row (AC17); Planning hides it entirely
-          (AC16). Triggers dispatch existing overlay kinds — the modal and
-          menu surfaces arrive in Tasks 7/8. */}
+          (AC16). Triggers dispatch existing overlay kinds: the repository
+          modal (Task 7), and the anchored component menu, which floats
+          from the Component trigger's anchor wrapper (Task 8, AC30). */}
       {engineering && (
         <div className="kx-setup-row">
           <button
@@ -115,22 +118,32 @@ export default function NewSessionPage() {
             </span>
             <ChevronRight />
           </button>
-          <button
-            type="button"
-            className="kx-setup-row__trigger"
-            aria-haspopup="menu"
-            data-testid="component-trigger"
-            onClick={() => dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'component-menu' } })}
-          >
-            <span className="kx-setup-row__trigger-icon" aria-hidden="true">
-              <ComponentIcon />
-            </span>
-            <span className="kx-setup-row__trigger-copy">
-              <span className="kx-setup-row__trigger-caption">Component</span>
-              <span className="kx-setup-row__trigger-value">{componentValue}</span>
-            </span>
-            <ChevronRight />
-          </button>
+          {/* Anchor wrapper around the Component trigger — the menu
+              (Task 8) floats from here, under the trigger's left edge
+              (AC30); it renders only while the component-menu overlay
+              is the open kind. */}
+          <div className="kx-setup-row__component-anchor">
+            <button
+              type="button"
+              className="kx-setup-row__trigger"
+              aria-haspopup="menu"
+              aria-expanded={state.overlay.kind === 'component-menu'}
+              data-testid="component-trigger"
+              onClick={() =>
+                dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'component-menu' } })
+              }
+            >
+              <span className="kx-setup-row__trigger-icon" aria-hidden="true">
+                <ComponentIcon />
+              </span>
+              <span className="kx-setup-row__trigger-copy">
+                <span className="kx-setup-row__trigger-caption">Component</span>
+                <span className="kx-setup-row__trigger-value">{componentValue}</span>
+              </span>
+              <ChevronRight />
+            </button>
+            {state.overlay.kind === 'component-menu' && <ComponentMenu />}
+          </div>
         </div>
       )}
 

@@ -158,10 +158,66 @@ describe('NewSessionPage — Engineering mode (AC17)', () => {
     expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
   })
 
-  it('component trigger dispatches OPEN_OVERLAY component-menu (menu arrives in Task 8)', () => {
+  it('component trigger opens the component-menu overlay and the anchored menu mounts from its trigger (Task 8)', () => {
     const { bucket } = renderNewSessionPage()
     fireEvent.click(screen.getByTestId('component-trigger'))
     expect(bucket.current?.overlay).toEqual({ kind: 'component-menu' })
+    expect(screen.getByTestId('component-menu')).toBeInTheDocument()
+  })
+
+  // ---------------------------------------------------------------------------
+  // Component trigger anchoring (Task 8, spec §7.4 — AC30)
+  // ---------------------------------------------------------------------------
+
+  describe('NewSessionPage — Component menu anchoring (Task 8, AC30)', () => {
+    it('wraps the Component trigger in an anchor wrapper that hosts the menu as the trigger’s sibling', () => {
+      renderNewSessionPage()
+      const trigger = screen.getByTestId('component-trigger')
+      expect(trigger).toHaveAttribute('aria-haspopup', 'menu')
+      expect(trigger).toHaveAttribute('aria-expanded', 'false')
+      expect(screen.queryByTestId('component-menu')).not.toBeInTheDocument()
+
+      fireEvent.click(trigger)
+      const menu = screen.getByTestId('component-menu')
+      expect(trigger).toHaveAttribute('aria-expanded', 'true')
+
+      // Anchor DOM relation: the menu mounts inside the trigger's
+      // anchor wrapper, not a page-level overlay slot (AC30).
+      const anchor = trigger.closest('.kx-setup-row__component-anchor')
+      expect(anchor).not.toBeNull()
+      expect(menu.closest('.kx-setup-row__component-anchor')).toBe(anchor)
+    })
+
+    it('unmounts on Escape and reopens cleanly with the committed selection intact', () => {
+      const { bucket } = renderNewSessionPage()
+      const trigger = screen.getByTestId('component-trigger')
+      fireEvent.click(trigger)
+      const menu = screen.getByTestId('component-menu')
+      fireEvent.click(within(menu).getByRole('menuitemcheckbox', { name: /canteen-api/ }))
+      expect(bucket.current?.selectedComponentIds).toEqual(['comp-canteen-api'])
+
+      fireEvent.keyDown(document, { key: 'Escape' })
+      expect(bucket.current?.overlay).toEqual({ kind: 'none' })
+      expect(screen.queryByTestId('component-menu')).not.toBeInTheDocument()
+      expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+      fireEvent.click(trigger)
+      const reopened = screen.getByTestId('component-menu')
+      expect(
+        within(reopened).getByRole('menuitemcheckbox', { name: /canteen-api/, checked: true }),
+      ).toBeInTheDocument()
+      expect(within(reopened).getByText('1 selected')).toBeInTheDocument()
+    })
+
+    it('switching overlays unmounts the component menu — exactly one overlay at a time', () => {
+      const { bucket } = renderNewSessionPage()
+      fireEvent.click(screen.getByTestId('component-trigger'))
+      expect(screen.getByTestId('component-menu')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /system \/ repositories/i }))
+      expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
+      expect(screen.queryByTestId('component-menu')).not.toBeInTheDocument()
+    })
   })
 })
 
@@ -326,6 +382,36 @@ describe('NewSessionPage — AppShell integration', () => {
     // Navigating away unmounts the page, the composer, and its anchored menu.
     fireEvent.click(screen.getByRole('button', { name: /view all/i }))
     expect(screen.queryByTestId('execution-profile-menu')).not.toBeInTheDocument()
+    expect(within(main).queryByRole('radiogroup', { name: 'Session mode' })).not.toBeInTheDocument()
+    expect(within(main).getByRole('heading', { name: /session history/i })).toBeInTheDocument()
+  })
+
+  it('unmounts when navigating away; the Task 8 component menu mounts from the setup row anchor and swaps with other overlays', () => {
+    const { bucket } = renderAppShell()
+    const main = screen.getByRole('main')
+
+    // Task 8: the anchored Component menu mounts from the page's setup
+    // row anchor — inside main, not the AppShell overlay slot (AC30).
+    fireEvent.click(within(main).getByTestId('component-trigger'))
+    expect(bucket.current?.overlay).toEqual({ kind: 'component-menu' })
+    const componentMenu = screen.getByTestId('component-menu')
+    expect(componentMenu.closest('main')).toBe(main)
+    expect(
+      within(componentMenu).getByRole('menuitemcheckbox', { name: /mytok-mobile/ }),
+    ).toBeInTheDocument()
+
+    // Exactly one overlay: the Task 7 repository modal replaces the
+    // anchored component menu.
+    fireEvent.click(within(main).getByTestId('repository-trigger'))
+    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
+    expect(screen.queryByTestId('component-menu')).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Choose work repositories' })).toBeInTheDocument()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    // Navigating away unmounts the page and its anchored menus.
+    fireEvent.click(screen.getByRole('button', { name: /view all/i }))
+    expect(screen.queryByTestId('component-menu')).not.toBeInTheDocument()
     expect(within(main).queryByRole('radiogroup', { name: 'Session mode' })).not.toBeInTheDocument()
     expect(within(main).getByRole('heading', { name: /session history/i })).toBeInTheDocument()
   })
