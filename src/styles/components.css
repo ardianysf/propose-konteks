@@ -8,6 +8,7 @@
 /* ── App shell ────────────────────────────────────────────────────────
  * Grid: 240px white sidebar | matcha main canvas, full viewport height. */
 .kx-app {
+  position: relative; /* floating anchored menus (system menu, §6.2) anchor here */
   display: grid;
   grid-template-columns: var(--kx-sidebar-w) 1fr;
   height: 100vh;
@@ -281,4 +282,601 @@
 .kx-segmented__btn--active {
   background: var(--kx-pale);
   color: var(--kx-primary);
+}
+
+/* ── Sidebar (Task 4, spec §6.1) ──────────────────────────────────────
+ * 240px expanded white rail → 64px icon rail when collapsed (AC12).
+ * The workspace box (.kx-sidebar-box) is the ONLY persistent boxed
+ * container in the sidebar (AC6); everything else stays unboxed until
+ * hover. Colors/dimensions come exclusively from tokens.css. */
+
+.kx-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--kx-sidebar-w);
+  min-width: var(--kx-sidebar-w);
+  padding: 14px 12px 10px;
+  gap: 10px;
+  background: var(--kx-sidebar-bg);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.kx-sidebar--rail {
+  width: var(--kx-sidebar-rail);
+  min-width: var(--kx-sidebar-rail);
+  padding: 14px 8px 10px;
+}
+
+/* Brand + collapse toggle */
+
+.kx-sidebar__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 2px 2px;
+}
+
+.kx-sidebar__logo {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.kx-sidebar__logo-img {
+  height: 26px;
+  width: auto;
+}
+
+/* The single persistent boxed container — workspace only (AC6) */
+
+.kx-sidebar-box {
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+}
+
+/* Controls — unboxed until hover; chevron-right marks menus that open
+ * to the right (AC7). */
+
+.kx-sidebar__control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-sidebar__control:hover {
+  background: var(--kx-pale);
+}
+
+.kx-sidebar__workspace .kx-sidebar__control {
+  border-radius: 11px; /* stay inside the box's 12px corners */
+}
+
+.kx-sidebar__control-copy {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-sidebar__control-caption {
+  font-size: var(--kx-text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kx-muted);
+}
+
+.kx-sidebar__control-name {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-sidebar__chevron {
+  flex-shrink: 0;
+  color: var(--kx-muted);
+}
+
+.kx-sidebar__workspace-avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--kx-accent), var(--kx-accent-strong));
+  color: var(--kx-raised);
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+}
+
+.kx-sidebar__system-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-strong);
+}
+
+/* Recent sessions (AC10) + View all (AC11) */
+
+.kx-sidebar__recent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  margin-top: 2px;
+  padding-top: 10px;
+  border-top: 1px solid var(--kx-border);
+}
+
+.kx-sidebar__recent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px 4px;
+}
+
+.kx-sidebar__label {
+  font-size: var(--kx-text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kx-muted);
+}
+
+.kx-sidebar__view-all {
+  padding: 2px 4px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-strong);
+  cursor: pointer;
+}
+
+.kx-sidebar__view-all:hover {
+  color: var(--kx-accent);
+  text-decoration: underline;
+}
+
+.kx-sidebar__session-list {
+  list-style: none;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  gap: 2px;
+  align-content: start;
+}
+
+.kx-sidebar__session {
+  padding: 8px;
+  border-radius: 10px;
+}
+
+.kx-sidebar__session:hover {
+  background: var(--kx-pale);
+}
+
+.kx-sidebar__session-title {
+  display: block;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-sidebar__session-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted);
+}
+
+.kx-sidebar__session-system {
+  max-width: 120px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--kx-pale);
+  color: var(--kx-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* User row + sliders → Customize (AC9) */
+
+.kx-sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px 4px 2px;
+  border-top: 1px solid var(--kx-border);
+}
+
+.kx-sidebar__user-avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-strong);
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+}
+
+.kx-sidebar__user-name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-sidebar__customize {
+  position: relative; /* tooltip anchor */
+  flex-shrink: 0;
+}
+
+/* Tooltip grows leftward so it never clips the sidebar's right edge */
+.kx-sidebar__tooltip {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+/* Rail (collapsed) mode — icons only; the workspace box persists */
+
+.kx-sidebar--rail .kx-sidebar__top {
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kx-sidebar--rail .kx-sidebar__logo {
+  width: 100%;
+  justify-content: center;
+}
+
+.kx-sidebar--rail .kx-sidebar__logo-img {
+  height: 32px;
+  width: 32px;
+}
+
+.kx-sidebar--rail .kx-sidebar__control {
+  justify-content: center;
+  gap: 0;
+  padding: 8px 0;
+}
+
+.kx-sidebar--rail .kx-sidebar__control-copy,
+.kx-sidebar--rail .kx-sidebar__chevron,
+.kx-sidebar--rail .kx-sidebar__recent,
+.kx-sidebar--rail .kx-sidebar__user-name {
+  display: none;
+}
+
+.kx-sidebar--rail .kx-sidebar__user {
+  justify-content: center;
+  gap: 10px;
+}
+
+/* ── Anchored menu geometry (Task 4, spec §6.1/§6.2) ──────────────────
+ * Shared horizontal anchoring for every sidebar-anchored floating menu
+ * (workspace, system): they open to the right of the sidebar — never
+ * behind a modal backdrop (AC7) — token-aware for both sidebar widths:
+ * expanded (240px) and collapsed rail (64px). Each menu keeps its own
+ * vertical alignment under its control below. */
+
+.kx-workspace-menu,
+.kx-system-menu {
+  left: calc(var(--kx-sidebar-w) + 12px);
+}
+
+.kx-app--rail .kx-workspace-menu,
+.kx-app--rail .kx-system-menu {
+  left: calc(var(--kx-sidebar-rail) + 12px);
+}
+
+/* ── System floating menu (Task 4 Part B, spec §6.2) ─────────────────
+ * Anchored right of the sidebar's system control — no backdrop, no
+ * header (AC7/AC13). */
+
+.kx-system-menu {
+  top: 118px; /* aligned under the sidebar's system control */
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  max-height: min(420px, calc(100vh - 148px));
+  overflow: hidden; /* the list is the only scrolling region */
+  padding: 8px;
+}
+
+/* Labeled search region (§6.2) */
+
+.kx-system-menu__search {
+  padding: 2px 2px 8px;
+}
+
+.kx-system-menu__search-input {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+/* Pinned "All systems" scope row — stays above the list in every state */
+
+.kx-system-menu__all {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 2px 6px;
+  padding: 8px 8px;
+  border-radius: 10px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-strong);
+}
+
+.kx-system-menu__all-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: var(--kx-raised);
+  color: var(--kx-accent-strong);
+}
+
+.kx-system-menu__all-label {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+/* Scrolling system list — the only region that scrolls (max-height via
+ * the flex menu; custom scrollbar, §6.2) */
+
+.kx-system-menu__list {
+  flex: 1;
+  min-height: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  display: grid;
+  gap: 2px;
+  align-content: start;
+  padding: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-system-menu__list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kx-system-menu__list::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 999px;
+}
+
+.kx-system-menu__empty {
+  padding: 16px 10px;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted);
+  text-align: center;
+}
+
+/* System rows — inline neutral SVG + name + repository count, no avatar
+ * imagery (AC8) */
+
+.kx-system-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 7px 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-system-menu__item:hover {
+  background: var(--kx-pale);
+}
+
+.kx-system-menu__item--active {
+  background: var(--kx-pale);
+}
+
+.kx-system-menu__item-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-strong);
+}
+
+.kx-system-menu__item--active .kx-system-menu__item-icon {
+  background: var(--kx-raised);
+}
+
+.kx-system-menu__item-copy {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-system-menu__item-name {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-system-menu__item-count {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted);
+}
+
+/* Sticky footer — pinned below the scrolling list; never scrolls away
+ * (AC13) */
+
+.kx-system-menu__footer {
+  position: sticky;
+  bottom: 0;
+  padding: 8px 2px 2px;
+  border-top: 1px solid var(--kx-border);
+  background: var(--kx-raised);
+}
+
+.kx-system-menu__create {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px dashed var(--kx-accent);
+  border-radius: 10px;
+  background: transparent;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-strong);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.kx-system-menu__create:hover {
+  background: var(--kx-pale);
+  border-color: var(--kx-accent-strong);
+}
+
+/* ── Workspace floating menu (Task 4, spec §6.1/AC7) ──────────────────
+ * Anchored right of the sidebar's workspace control via the shared
+ * geometry above. Minimal scope: only the current workspace as a
+ * selected illustrative row — no workspace management. It is a
+ * transient overlay, not a persistent sidebar box, so AC6's single-box
+ * rule is untouched. */
+
+.kx-workspace-menu {
+  top: 62px; /* aligned under the sidebar's workspace control */
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+  padding: 8px;
+}
+
+.kx-workspace-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-workspace-menu__item:hover {
+  background: var(--kx-pale);
+}
+
+/* The current workspace row — selected */
+
+.kx-workspace-menu__item--current {
+  background: var(--kx-pale);
+}
+
+.kx-workspace-menu__item-avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--kx-accent), var(--kx-accent-strong));
+  color: var(--kx-raised);
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+}
+
+.kx-workspace-menu__item-copy {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-workspace-menu__item-name {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-workspace-menu__item-plan {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted);
+}
+
+/* ── Route placeholder (Part A) ───────────────────────────────────── */
+
+.kx-page-placeholder {
+  display: grid;
+  gap: 6px;
+  padding: 28px 32px;
+}
+
+.kx-page-placeholder h1 {
+  font-size: var(--kx-text-3xl);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-page-placeholder p {
+  font-size: var(--kx-text-md);
+  color: var(--kx-muted);
 }

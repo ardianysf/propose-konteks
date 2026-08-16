@@ -207,6 +207,7 @@ describe('NAVIGATE', () => {
 // ---------------------------------------------------------------------------
 
 const everyOverlayOpen: OpenOverlayPayload[] = [
+  { kind: 'workspace-menu' },
   { kind: 'system-menu' },
   { kind: 'execution-profile-menu' },
   { kind: 'component-menu' },
