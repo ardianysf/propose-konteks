@@ -1,9 +1,10 @@
 /*
  * Composer — the prompt input region (Task 5, spec §7.2, AC18–AC21).
  *
- * Boundaries: input + toolbar + footer ONLY — the Execution Profile and
- * Component anchored menus are separate components arriving in Tasks 6/8;
- * this file renders just their triggers. The outer container is the soft
+ * Boundaries: input + toolbar + footer ONLY — the Component anchored
+ * menu is a separate component arriving in Task 8; the Execution Profile
+ * menu (Task 6) mounts from the profile control's anchor wrapper below.
+ * The outer container is the soft
  * matcha wash wrapping the white input (AC18); toolbar icons are unboxed
  * with hover affordances (AC19); the send button is the soft-accent
  * element and stays disabled while the input is empty (AC19/AC43). The
@@ -15,6 +16,7 @@
 import { useState } from 'react'
 import { EXECUTION_PROFILES, PENDING_REVIEWS } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import ExecutionProfileMenu from './ExecutionProfileMenu'
 
 const PLANNING_PLACEHOLDER = 'Describe the product outcome you want to plan…'
 const ENGINEERING_PLACEHOLDER = 'Describe the engineering task…'
@@ -167,26 +169,30 @@ export default function Composer() {
         </button>
 
         {/* Execution Profile — bottom-left of the toolbar, immediately
-            after the text/document control (AC21). Button only: the
-            anchored menu itself arrives in Task 6. */}
-        <button
-          type="button"
-          className="kx-composer__profile"
-          aria-haspopup="menu"
-          data-testid="execution-profile-trigger"
-          onClick={() =>
-            dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'execution-profile-menu' } })
-          }
-        >
-          <span className="kx-composer__profile-icon" aria-hidden="true">
-            <GaugeIcon />
-          </span>
-          <span className="kx-composer__profile-copy">
-            <span className="kx-composer__profile-caption">Execution Profile</span>
-            <span className="kx-composer__profile-name">{activeProfile.name}</span>
-          </span>
-          <ChevronDown />
-        </button>
+            after the text/document control (AC21). The anchor wrapper
+            hosts the anchored menu (Task 6) adjacent to the control. */}
+        <div className="kx-composer__profile-anchor">
+          <button
+            type="button"
+            className="kx-composer__profile"
+            aria-haspopup="menu"
+            aria-expanded={state.overlay.kind === 'execution-profile-menu'}
+            data-testid="execution-profile-trigger"
+            onClick={() =>
+              dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'execution-profile-menu' } })
+            }
+          >
+            <span className="kx-composer__profile-icon" aria-hidden="true">
+              <GaugeIcon />
+            </span>
+            <span className="kx-composer__profile-copy">
+              <span className="kx-composer__profile-caption">Execution Profile</span>
+              <span className="kx-composer__profile-name">{activeProfile.name}</span>
+            </span>
+            <ChevronDown />
+          </button>
+          {state.overlay.kind === 'execution-profile-menu' && <ExecutionProfileMenu />}
+        </div>
 
         <button
           type="button"

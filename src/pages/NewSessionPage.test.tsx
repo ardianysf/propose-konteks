@@ -255,10 +255,11 @@ describe('Composer — Execution Profile control (AC21)', () => {
     expect(profile.closest('.kx-composer__toolbar')).not.toBeNull()
   })
 
-  it('opens the execution-profile-menu overlay kind (menu UI arrives in Task 6)', () => {
+  it('opens the execution-profile-menu overlay kind — the anchored menu mounts with Task 6', () => {
     const { bucket } = renderNewSessionPage()
     fireEvent.click(screen.getByRole('button', { name: /execution profile/i }))
     expect(bucket.current?.overlay).toEqual({ kind: 'execution-profile-menu' })
+    expect(screen.getByTestId('execution-profile-menu')).toBeInTheDocument()
   })
 })
 
@@ -304,16 +305,24 @@ describe('NewSessionPage — AppShell integration', () => {
     expect(within(main).getByRole('textbox', { name: /prompt/i })).toBeInTheDocument()
   })
 
-  it('unmounts when navigating away, and later-task overlay kinds set state without mounting UI', () => {
+  it('unmounts when navigating away; the Task 6 profile menu mounts while later overlay kinds only set state', () => {
     const { bucket } = renderAppShell()
     const main = screen.getByRole('main')
 
+    // Task 6: the anchored Execution Profile menu mounts from the composer.
     fireEvent.click(within(main).getByRole('button', { name: /execution profile/i }))
     expect(bucket.current?.overlay).toEqual({ kind: 'execution-profile-menu' })
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('execution-profile-menu')).not.toBeInTheDocument()
+    expect(screen.getByTestId('execution-profile-menu')).toBeInTheDocument()
 
+    // Later-task overlay kinds (repository modal — Task 7) still set state
+    // without mounting UI.
+    fireEvent.click(within(main).getByTestId('repository-trigger'))
+    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    // Navigating away unmounts the page, the composer, and its anchored menu.
     fireEvent.click(screen.getByRole('button', { name: /view all/i }))
+    expect(screen.queryByTestId('execution-profile-menu')).not.toBeInTheDocument()
     expect(within(main).queryByRole('radiogroup', { name: 'Session mode' })).not.toBeInTheDocument()
     expect(within(main).getByRole('heading', { name: /session history/i })).toBeInTheDocument()
   })
