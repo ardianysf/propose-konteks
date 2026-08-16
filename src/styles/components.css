@@ -3683,8 +3683,33 @@
   color: var(--kx-muted);
 }
 
-.kx-history__clear {
+.kx-history__empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
   margin-top: 8px;
+}
+
+.kx-history__open {
+  padding: 6px 12px;
+  border: 1px solid var(--kx-border);
+  border-radius: 8px;
+  background: transparent;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  cursor: not-allowed;
+}
+
+.kx-history__open:disabled {
+  opacity: 0.55;
+  background: var(--kx-pale);
+  color: var(--kx-muted);
+  border-color: var(--kx-border);
+}
+
+.kx-history__clear {
   padding: 6px 12px;
   border: 1px solid var(--kx-border);
   border-radius: 8px;

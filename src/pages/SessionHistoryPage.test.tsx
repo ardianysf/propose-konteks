@@ -205,6 +205,44 @@ describe('SessionHistoryPage — three-dot action and local menu', () => {
     expect(screen.getByRole('menu', { name: /Review attendance integration/ })).toBeInTheDocument()
     expect(screen.queryByRole('menu', { name: /EDP Integration Fix - Mobile/ })).not.toBeInTheDocument()
   })
+
+  it('closes the open menu and restores focus to the trigger when Escape is pressed while the trigger is still focused', () => {
+    renderSessionHistoryPage()
+    const rows = within(screen.getByRole('list', { name: 'Session history' })).getAllByRole('listitem')
+    const action = within(rows[0]).getByRole('button', { name: 'Actions for EDP Integration Fix - Mobile' })
+
+    fireEvent.click(action)
+    expect(screen.getByRole('menu', { name: 'Actions for EDP Integration Fix - Mobile' })).toBeInTheDocument()
+
+    // Immediately after opening, focus is still on the three-dot trigger.
+    action.focus()
+    expect(action).toHaveFocus()
+
+    fireEvent.keyDown(action, { key: 'Escape' })
+
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(action).toHaveAttribute('aria-expanded', 'false')
+    expect(action).toHaveFocus()
+  })
+
+  it('closes the open menu and restores focus to the row trigger when Escape is pressed on a menu item', () => {
+    renderSessionHistoryPage()
+    const rows = within(screen.getByRole('list', { name: 'Session history' })).getAllByRole('listitem')
+    const action = within(rows[0]).getByRole('button', { name: 'Actions for EDP Integration Fix - Mobile' })
+
+    fireEvent.click(action)
+    const menu = screen.getByRole('menu', { name: 'Actions for EDP Integration Fix - Mobile' })
+    const firstItem = within(menu).getByRole('menuitem', { name: 'Open session' })
+
+    firstItem.focus()
+    expect(firstItem).toHaveFocus()
+
+    fireEvent.keyDown(firstItem, { key: 'Escape' })
+
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(action).toHaveAttribute('aria-expanded', 'false')
+    expect(action).toHaveFocus()
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -277,6 +315,24 @@ describe('SessionHistoryPage — search and combined filters', () => {
     expect(screen.queryByRole('list', { name: 'Session history' })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }))
+    expect(screen.queryByTestId('history-no-results')).not.toBeInTheDocument()
+    expect(rows()).toHaveLength(SESSION_HISTORY.length)
+  })
+
+  it('exposes a disabled Open session action in no-results while Clear filters stays enabled and restores results', () => {
+    renderSessionHistoryPage()
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search sessions' }), {
+      target: { value: 'zzzz-no-match' },
+    })
+
+    const noResults = screen.getByTestId('history-no-results')
+    const openAction = within(noResults).getByRole('button', { name: 'Open session' })
+    expect(openAction).toBeDisabled()
+
+    const clearFilters = within(noResults).getByRole('button', { name: 'Clear filters' })
+    expect(clearFilters).toBeEnabled()
+
+    fireEvent.click(clearFilters)
     expect(screen.queryByTestId('history-no-results')).not.toBeInTheDocument()
     expect(rows()).toHaveLength(SESSION_HISTORY.length)
   })

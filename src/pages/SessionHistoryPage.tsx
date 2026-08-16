@@ -10,7 +10,7 @@
  * skeleton, the demo empty state, and the designed no-results state
  * (AC43). No fetch, no emoji, fully semantic.
  */
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SESSION_HISTORY, type SessionMode } from '../data/mockData'
 import { useMockup } from '../state/MockupContext'
 
@@ -47,6 +47,25 @@ export default function SessionHistoryPage() {
   const [modeFilter, setModeFilter] = useState<ModeFilter>('all')
   const [systemFilter, setSystemFilter] = useState('all')
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+  const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+
+  // Escape handling lives at the document level while a menu is open so it
+  // works regardless of whether focus is still on the trigger or has moved
+  // to a menu item. Close the open menu and hand focus back to its trigger.
+  useEffect(() => {
+    if (openMenuId === null) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setOpenMenuId(null)
+        triggerRefs.current[openMenuId]?.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [openMenuId])
 
   const systems = state.systems
   const q = query.trim().toLowerCase()
@@ -141,9 +160,22 @@ export default function SessionHistoryPage() {
           <div className="kx-history__empty kx-history__empty--no-results" data-testid="history-no-results">
             <p className="kx-history__empty-title">No sessions match your filters</p>
             <p className="kx-history__empty-hint">Try a different search or clear the filters.</p>
-            <button type="button" className="kx-history__clear" onClick={clearFilters}>
-              Clear filters
-            </button>
+            <div className="kx-history__empty-actions">
+              <button
+                type="button"
+                className="kx-history__open"
+                disabled
+                aria-describedby="kx-history-no-results-note"
+              >
+                Open session
+              </button>
+              <button type="button" className="kx-history__clear" onClick={clearFilters}>
+                Clear filters
+              </button>
+              <span id="kx-history-no-results-note" className="kx-visually-hidden">
+                No matching session to open.
+              </span>
+            </div>
           </div>
         ) : (
           <ul className="kx-history__list" aria-label="Session history">
@@ -161,6 +193,9 @@ export default function SessionHistoryPage() {
                   <span className="kx-history__row-time">{entry.time}</span>
                   <div className="kx-history__row-actions">
                     <button
+                      ref={(element) => {
+                        triggerRefs.current[entry.id] = element
+                      }}
                       type="button"
                       className="kx-history__action"
                       aria-haspopup="menu"
@@ -171,7 +206,11 @@ export default function SessionHistoryPage() {
                       <MoreIcon />
                     </button>
                     {open && (
-                      <div className="kx-history__menu" role="menu" aria-label={`Actions for ${entry.title}`}>
+                      <div
+                        className="kx-history__menu"
+                        role="menu"
+                        aria-label={`Actions for ${entry.title}`}
+                      >
                         {MENU_ITEMS.map((label) => (
                           <button
                             key={label}
