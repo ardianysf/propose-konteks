@@ -6,8 +6,8 @@
  * the right. Anchored overlay menus — the system floating menu today,
  * later the profile/component menus, modals, and drawer — mount inside
  * this grid so they float right of the sidebar, never behind a modal
- * backdrop (§6.2). The new-session page renders here (Task 5); session
- * history keeps a placeholder until Task 11.
+ * backdrop (§6.2). The new-session page (Task 5) and the Session
+ * History page (Task 11) render here, swapped by the route.
  */
 import Sidebar from './Sidebar'
 import SystemMenu from './SystemMenu'
@@ -18,6 +18,7 @@ import RepositorySelectorModal from '../context/RepositorySelectorModal'
 import CustomizeModal from '../customize/CustomizeModal'
 import LearnedDrawer from '../reviews/LearnedDrawer'
 import NewSessionPage from '../../pages/NewSessionPage'
+import SessionHistoryPage from '../../pages/SessionHistoryPage'
 import { useMockup } from '../../state/MockupContext'
 
 export default function AppShell() {
@@ -27,16 +28,12 @@ export default function AppShell() {
     <div className={state.sidebarCollapsed ? 'kx-app kx-app--rail' : 'kx-app'}>
       <Sidebar />
       <main className="kx-main">
-        {/* Route switch — the new-session page (Task 5); session history
-            keeps its placeholder until Task 11. Overlays mount on top of
-            this. */}
+        {/* Route switch — the new-session page (Task 5) and the dedicated
+            Session History page (Task 11). Overlays mount on top of this. */}
         {state.route === 'new-session' ? (
           <NewSessionPage />
         ) : (
-          <section className="kx-page-placeholder">
-            <h1>Session history</h1>
-            <p>Route placeholder — page content arrives with the page tasks.</p>
-          </section>
+          <SessionHistoryPage />
         )}
       </main>
       {/* Overlay union slot — exactly one overlay at a time; the anchored
