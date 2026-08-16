@@ -182,3 +182,60 @@ describe('Task 7 modal overlays', () => {
     expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
   })
 })
+
+// ---------------------------------------------------------------------------
+// Task 9 — Customize shell (integration, Part A)
+// ---------------------------------------------------------------------------
+
+describe('Task 9 — Customize shell', () => {
+  const getCustomizeDialog = () => screen.getByRole('dialog', { name: 'Customize' })
+
+  /** Exactly one overlay surface: one dialog, one backdrop, no menus. */
+  const expectSingleOverlay = () => {
+    expect(screen.getAllByRole('dialog')).toHaveLength(1)
+    expect(document.querySelectorAll('.kx-modal-backdrop')).toHaveLength(1)
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+  }
+
+  it('opens Customize on the Agents tab in one click from the sidebar sliders icon — exactly one overlay (AC9)', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Customize' }))
+
+    const dialog = getCustomizeDialog()
+    expect(dialog).toHaveClass('kx-modal', 'kx-customize')
+    expectSingleOverlay()
+    expect(within(dialog).getByRole('tab', { name: 'Agents' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+
+    // Escape closes through the CLOSE_OVERLAY contract (AC45).
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
+  })
+
+  it('opens Customize on the Agents tab from the Execution Profile Manage trigger — the menu swaps for the modal (AC22)', () => {
+    render(<App />)
+    fireEvent.click(screen.getByTestId('execution-profile-trigger'))
+    fireEvent.click(
+      within(screen.getByRole('menu', { name: 'Execution Profile' })).getByRole('menuitem', {
+        name: /manage \/ customize profile/i,
+      }),
+    )
+
+    // The anchored menu unmounts — the modal replaces it as the one overlay.
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    const dialog = getCustomizeDialog()
+    expectSingleOverlay()
+    expect(within(dialog).getByRole('tab', { name: 'Agents' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+
+    // The header close control dismisses it (§16).
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
+  })
+})

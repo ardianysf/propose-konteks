@@ -556,6 +556,105 @@ export const PRESERVED_TOOLS: PreservedItem[] = [
 ]
 
 // ---------------------------------------------------------------------------
+// Customize tab content — illustrative entries for the Agents / Context /
+// integration tabs (Task 9 Part B, spec §11, AC36/AC37). Every value is
+// an illustrative placeholder exactly like the rest of this file (AC46).
+// ---------------------------------------------------------------------------
+
+/** AI roles the agent runtime assigns (Agents tab, AC36). */
+export interface AgentRoleEntry {
+  id: string
+  role: string
+  description: string
+  currentModel: string
+}
+
+export const AGENT_ROLES: AgentRoleEntry[] = [
+  {
+    id: 'role-planner',
+    role: 'Planner',
+    description: 'Breaks a request into ordered execution steps',
+    currentModel: 'GPT-4o mini on Default',
+  },
+  {
+    id: 'role-executor',
+    role: 'Executor',
+    description: 'Runs each step against the selected repositories',
+    currentModel: 'Claude Haiku 4.5 on Commerce Platform',
+  },
+  {
+    id: 'role-reviewer',
+    role: 'Reviewer',
+    description: 'Summarizes changes for Konteks Learned reviews',
+    currentModel: 'GPT-4.1 mini on Core Banking',
+  },
+]
+
+/** Model providers available to agent roles (Agents tab, AC36). */
+export interface ProviderEntry {
+  id: string
+  name: string
+  models: string
+  status: 'connected' | 'needs-setup'
+}
+
+export const AI_PROVIDERS: ProviderEntry[] = [
+  { id: 'provider-openai', name: 'OpenAI', models: 'GPT-4o, GPT-4.1, GPT-4o mini', status: 'connected' },
+  { id: 'provider-anthropic', name: 'Anthropic', models: 'Claude Sonnet 4.5, Claude Haiku 4.5', status: 'connected' },
+  { id: 'provider-azure', name: 'Azure OpenAI', models: 'Not configured', status: 'needs-setup' },
+]
+
+/** Archived agents kept for reference (Agents tab, AC36). */
+export interface ArchivedAgentEntry {
+  id: string
+  name: string
+  archivedOn: string
+}
+
+export const ARCHIVED_AGENTS: ArchivedAgentEntry[] = [
+  { id: 'agent-hris-promotion-reviewer', name: 'hris-promotion-reviewer', archivedOn: 'Aug 12, 2026' },
+  { id: 'agent-canteen-audit-writer', name: 'canteen-audit-writer', archivedOn: 'Aug 9, 2026' },
+]
+
+/** Context files surfaced to sessions (Context tab, AC37). */
+export interface ContextFileEntry {
+  id: string
+  path: string
+  note: string
+}
+
+export const CONTEXT_FILES: ContextFileEntry[] = [
+  { id: 'file-agents-md', path: 'AGENTS.md', note: 'Workspace agent instructions' },
+  { id: 'file-architecture', path: 'docs/architecture.md', note: 'System architecture notes' },
+  { id: 'file-konteks-context', path: '.konteks/context.md', note: 'Session context overrides' },
+]
+
+/** Configured MCP servers (Integrations → MCP, AC37). */
+export interface McpServerEntry {
+  id: string
+  name: string
+  transport: string
+  status: 'connected' | 'needs-setup'
+}
+
+export const MCP_SERVERS: McpServerEntry[] = [
+  { id: 'mcp-context7', name: 'Context7', transport: 'HTTP', status: 'connected' },
+  { id: 'mcp-filesystem', name: 'Filesystem', transport: 'STDIO', status: 'connected' },
+  { id: 'mcp-puppeteer', name: 'Puppeteer', transport: 'STDIO', status: 'needs-setup' },
+]
+
+/** Workspace connectors (Integrations → Connectors, AC37) — the empty
+ * list drives the tab's designed empty state. */
+export interface ConnectorEntry {
+  id: string
+  name: string
+  hint: string
+  status: 'connected' | 'needs-setup'
+}
+
+export const CONNECTORS: ConnectorEntry[] = []
+
+// ---------------------------------------------------------------------------
 // Aggregate consumed by components (mockData.profiles, mockData.components, …)
 // ---------------------------------------------------------------------------
 
