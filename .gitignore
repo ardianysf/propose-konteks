@@ -31,6 +31,12 @@ test-results/
 # Vite cache
 .vite/
 
+# Generated screenshots/mockup artifacts
+artifacts/
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
 # Logs
 *.log
 
