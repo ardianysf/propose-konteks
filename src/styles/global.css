@@ -10,10 +10,14 @@
   box-sizing: border-box;
 }
 
+/* The app shell (.kx-app) is the single fixed viewport frame; page-level
+ * vertical scrolling belongs to .kx-main only (§44). Locking the document
+ * guarantees no accidental body scrollbar at 1200×720/827/719. */
 html,
 body {
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 body {

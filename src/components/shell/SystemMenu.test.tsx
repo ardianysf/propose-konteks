@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import SystemMenu from './SystemMenu'
+import { OverlayLifecycleProvider } from './OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
 import {
   initialState,
@@ -37,7 +38,9 @@ function renderSystemMenu(overlay: MockupOverlay = { kind: 'none' }) {
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
-        {state.overlay.kind === 'system-menu' && <SystemMenu />}
+        <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+          {state.overlay.kind === 'system-menu' && <SystemMenu />}
+        </OverlayLifecycleProvider>
       </MockupContext.Provider>
     )
   }

@@ -15,7 +15,6 @@
  * through a single document listener (AC45).
  */
 import {
-  useEffect,
   useId,
   useRef,
   useState,
@@ -24,7 +23,8 @@ import {
 import { ILLUSTRATIVE_DATA_NOTE, SETTINGS_SECTIONS } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 import { DEFAULT_SETTINGS_SECTION, type SettingsSection } from '../../state/mockupReducer'
-import { focusAccountTrigger } from './accountFocus'
+import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
+import { useFocusContainment } from '../shell/useFocusContainment'
 
 /** Close — the header dismiss control. */
 function CloseIcon() {
@@ -62,26 +62,6 @@ const BILLING_PANEL_ID = 'kx-settings-billing-panel'
 const sectionTabId = (id: SettingsSection) => `kx-settings-section-${id}`
 const billingTabId = (label: string) =>
   `kx-settings-billing-tab-${label.toLowerCase().replace(/\s+/g, '-')}`
-
-/**
- * Tab-trap focus targets — only genuinely tabbable controls inside the
- * dialog. Roving-tabindex tabs carry tabindex="-1" except the selected
- * one, so those unselected tabs are correctly excluded from the Tab order.
- */
-function getFocusable(container: HTMLElement | null): HTMLElement[] {
-  if (!container) return []
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]',
-    ),
-  ).filter((element) => {
-    if (element.hasAttribute('disabled')) return false
-    if (element.getAttribute('aria-hidden') === 'true') return false
-    const tabIndex = element.getAttribute('tabindex')
-    if (tabIndex !== null && Number(tabIndex) < 0) return false
-    return true
-  })
-}
 
 /** Roving-tabindex arrow/Home/End keyboard movement for both tablists. */
 function tablistKeyHandler<T extends string>(
@@ -265,6 +245,7 @@ function BillingPanel({
 
 export default function SettingsModal() {
   const { state, dispatch } = useMockup()
+  const { dismissOverlay } = useOverlayLifecycle()
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
 
@@ -275,51 +256,11 @@ export default function SettingsModal() {
     overlay.kind === 'settings' ? overlay.section : DEFAULT_SETTINGS_SECTION
   const [subtab, setSubtab] = useState<string>(BILLING_SUBTABS[0])
 
-  // Focus moves to the dialog on mount (§16 keyboard contract).
-  useEffect(() => {
-    dialogRef.current?.focus()
-  }, [])
+  // Shared focus containment owns initial focus, Tab trapping, and the
+  // focusin safety net (Task 13); Escape is owned by OverlayLifecycle.
+  useFocusContainment(dialogRef)
 
-  // Escape closes from any focused descendant and returns focus to the
-  // sidebar account trigger; Tab is trapped within the dialog (AC45). A
-  // single document listener handles both, so there is no duplication.
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        focusAccountTrigger()
-        dispatch({ type: 'CLOSE_OVERLAY' })
-        return
-      }
-      if (event.key !== 'Tab') return
-
-      const focusable = getFocusable(dialogRef.current)
-      if (focusable.length === 0) {
-        event.preventDefault()
-        return
-      }
-
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      const active = document.activeElement as HTMLElement | null
-      const index = active ? focusable.indexOf(active) : -1
-
-      // Manual Tab handling makes wrap deterministic in both directions:
-      // last → first on Tab, first → last on Shift+Tab.
-      event.preventDefault()
-      if (event.shiftKey) {
-        ;(index <= 0 ? last : focusable[index - 1]).focus()
-      } else {
-        ;(index === -1 || index === focusable.length - 1 ? first : focusable[index + 1]).focus()
-      }
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [dispatch])
-
-  const close = () => {
-    focusAccountTrigger()
-    dispatch({ type: 'CLOSE_OVERLAY' })
-  }
+  const close = () => dismissOverlay()
 
   const sectionKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) =>
     tablistKeyHandler(

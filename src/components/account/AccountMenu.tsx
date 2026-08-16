@@ -15,30 +15,17 @@
 import { useEffect, useRef } from 'react'
 import { ACCOUNT_ACTIONS, type AccountAction } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
-import { focusAccountTrigger } from './accountFocus'
+import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 
 export default function AccountMenu() {
   const { dispatch } = useMockup()
+  const { dismissOverlay } = useOverlayLifecycle()
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Move focus into the menu on open (§16 keyboard contract).
   useEffect(() => {
     menuRef.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus()
   }, [])
-
-  // Escape closes from any focused descendant (AC45) and returns focus to
-  // the sidebar account trigger. A single document listener (no container
-  // onKeyDown duplication) avoids double dispatch.
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        focusAccountTrigger()
-        dispatch({ type: 'CLOSE_OVERLAY' })
-      }
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [dispatch])
 
   const handleAction = (action: AccountAction) => {
     if (action.id === 'account-settings') {
@@ -50,7 +37,7 @@ export default function AccountMenu() {
       return
     }
     // Illustrative actions stay represented but safely close — no new IA.
-    dispatch({ type: 'CLOSE_OVERLAY' })
+    dismissOverlay()
   }
 
   return (

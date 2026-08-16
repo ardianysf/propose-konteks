@@ -16,10 +16,12 @@
  * modals arrive in later Task 7 parts; this modal only dispatches their
  * overlay kinds. AppShell integration is likewise a later part.
  */
-import { useEffect, useId, useRef } from 'react'
+import { useId, useRef } from 'react'
 import { REPOSITORIES } from '../../data/mockData'
 import type { Repository, System } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
+import { useFocusContainment } from '../shell/useFocusContainment'
 
 /** Plus — marks the create/add affordances (AC27/AC28). */
 function PlusIcon() {
@@ -73,25 +75,15 @@ interface VisibleGroup {
 
 export default function RepositorySelectorModal() {
   const { state, dispatch } = useMockup()
+  const { dismissOverlay } = useOverlayLifecycle()
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
 
-  // Focus moves to the dialog on mount (§16 keyboard contract).
-  useEffect(() => {
-    dialogRef.current?.focus()
-  }, [])
+  // Shared focus containment replaces the component-local initial-focus
+  // and Escape effects (Task 13).
+  useFocusContainment(dialogRef)
 
-  // Escape closes — local listener now; the shared overlay helpers
-  // (focus return, single source) land with Task 13 (AC45).
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') dispatch({ type: 'CLOSE_OVERLAY' })
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [dispatch])
-
-  const close = () => dispatch({ type: 'CLOSE_OVERLAY' })
+  const close = () => dismissOverlay()
 
   // One shared query filters system names and repository names together:
   // a system survives when its own name matches or any of its

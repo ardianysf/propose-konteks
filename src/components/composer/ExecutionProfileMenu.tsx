@@ -11,13 +11,13 @@
  * a visually separated "Workspace settings" divider + label, outside the
  * profile list (AC24). "Manage / Customize Profile" swaps this menu for
  * the Customize overlay on the Agents tab (modal UI itself is Task 9).
- * Escape closes via a local listener today; the shared global hardening
- * arrives in Task 13 (AC45).
+ * Escape closes through the shared OverlayLifecycle listener (AC45).
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { EXECUTION_PROFILES, WORKSPACE_SETTINGS } from '../../data/mockData'
 import type { ExecutionProfile, Readiness } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 
 const READINESS_LABELS: Record<Readiness, string> = {
   ready: 'Ready',
@@ -59,17 +59,8 @@ function TuneIcon() {
 
 export default function ExecutionProfileMenu() {
   const { state, dispatch } = useMockup()
+  const { dismissOverlay } = useOverlayLifecycle()
   const [previewedId, setPreviewedId] = useState<string | null>(null)
-
-  // Escape closes — local listener now; the shared overlay helpers
-  // (focus return, single source) land with Task 13 (AC45).
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') dispatch({ type: 'CLOSE_OVERLAY' })
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [dispatch])
 
   const activeProfile: ExecutionProfile =
     EXECUTION_PROFILES.find((profile) => profile.id === state.activeProfileId) ??
@@ -108,7 +99,7 @@ export default function ExecutionProfileMenu() {
                 onBlur={() => setPreviewedId(null)}
                 onClick={() => {
                   dispatch({ type: 'SET_ACTIVE_PROFILE', profileId: profile.id })
-                  dispatch({ type: 'CLOSE_OVERLAY' })
+                  dismissOverlay()
                 }}
               >
                 <span className="kx-profile-menu__item-copy">

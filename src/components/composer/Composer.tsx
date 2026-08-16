@@ -16,6 +16,7 @@
 import { useState } from 'react'
 import { EXECUTION_PROFILES, PENDING_REVIEWS } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import ExecutionProfileMenu from './ExecutionProfileMenu'
 
 const PLANNING_PLACEHOLDER = 'Describe the product outcome you want to plan…'
@@ -130,6 +131,7 @@ function ChevronDown() {
 
 export default function Composer() {
   const { state, dispatch } = useMockup()
+  const { beginOverlayChain } = useOverlayLifecycle()
   const [value, setValue] = useState('')
   const planning = state.sessionMode === 'planning'
   const canSubmit = value.trim().length > 0
@@ -178,9 +180,10 @@ export default function Composer() {
             aria-haspopup="menu"
             aria-expanded={state.overlay.kind === 'execution-profile-menu'}
             data-testid="execution-profile-trigger"
-            onClick={() =>
+            onClick={(event) => {
+              beginOverlayChain(event.currentTarget)
               dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'execution-profile-menu' } })
-            }
+            }}
           >
             <span className="kx-composer__profile-icon" aria-hidden="true">
               <GaugeIcon />
@@ -222,9 +225,10 @@ export default function Composer() {
           type="button"
           className="kx-composer__reviews"
           data-testid="reviews-waiting"
-          onClick={() =>
+          onClick={(event) => {
+            beginOverlayChain(event.currentTarget)
             dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'learned', tab: 'pending' } })
-          }
+          }}
         >
           Reviews waiting
           <span className="kx-composer__badge">{pendingCount}</span>

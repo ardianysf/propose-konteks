@@ -17,8 +17,10 @@
  * (AC39). Demo variants swap the panel region only: skeleton rows
  * while loading, designed empty states when empty (AC43).
  */
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { useMockup } from '../../state/MockupContext'
+import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
+import { useFocusContainment } from '../shell/useFocusContainment'
 import { DEFAULT_LEARNED_TAB, type LearnedTab } from '../../state/mockupReducer'
 import { AUDIT_HISTORY, PENDING_REVIEWS, SYSTEMS } from '../../data/mockData'
 
@@ -158,6 +160,7 @@ function AuditPanel() {
 
 export default function LearnedDrawer() {
   const { state, dispatch } = useMockup()
+  const { dismissOverlay } = useOverlayLifecycle()
   const titleId = useId()
   const drawerRef = useRef<HTMLDivElement>(null)
 
@@ -166,22 +169,11 @@ export default function LearnedDrawer() {
   const overlay = state.overlay
   const tab: LearnedTab = overlay.kind === 'learned' ? overlay.tab : DEFAULT_LEARNED_TAB
 
-  // Focus moves to the drawer on mount (§16 keyboard contract).
-  useEffect(() => {
-    drawerRef.current?.focus()
-  }, [])
+  // Shared focus containment owns initial focus, Tab trapping, and the
+  // focusin safety net (Task 13); Escape is owned by OverlayLifecycle.
+  useFocusContainment(drawerRef)
 
-  // Escape closes — local listener now; the shared overlay helpers
-  // (focus return, single source) land with Task 13 (AC45).
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') dispatch({ type: 'CLOSE_OVERLAY' })
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [dispatch])
-
-  const close = () => dispatch({ type: 'CLOSE_OVERLAY' })
+  const close = () => dismissOverlay()
 
   const tabButtonId = (id: LearnedTab) => `kx-learned-tab-${id}`
   const panelId = 'kx-learned-panel'

@@ -13,26 +13,14 @@
  * plus a Clear action dispatching CLEAR_COMPONENTS (AC32). Demo variants
  * swap the list region only — skeletons while loading, designed empty
  * states for an empty workspace and for no search matches (AC43).
- * Escape closes via a local listener today; the shared global hardening
- * arrives in Task 13 (AC45).
+ * Escape closes through the shared OverlayLifecycle listener (AC45).
  */
-import { useEffect } from 'react'
 import { COMPONENTS, REPOSITORIES } from '../../data/mockData'
 import type { ComponentEntry } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 
 export default function ComponentMenu() {
   const { state, dispatch } = useMockup()
-
-  // Escape closes — local listener now; the shared overlay helpers
-  // (focus return, single source) land with Task 13 (AC45).
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') dispatch({ type: 'CLOSE_OVERLAY' })
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [dispatch])
 
   // One query matches the component's own name OR its repository's
   // name — a system-scoped "what was that module in…" lookup (AC31).

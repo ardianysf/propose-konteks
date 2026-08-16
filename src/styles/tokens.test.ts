@@ -15,6 +15,8 @@ const palette = [
   '#F4F8EE',
   '#8FBF6A',
   '#5F8D4E',
+  '#607260',
+  '#4F7044',
 ]
 
 it.each(palette)('tokens.css defines %s', (hex) =>
@@ -31,4 +33,10 @@ it('defines fixed dimensions (19.5px corners, 240px sidebar, 790x580 customize, 
   expect(css).toContain('790px')
   expect(css).toContain('580px')
   expect(css).toContain('450px')
+})
+
+it('defines the three Task 13 AA contrast semantics (AC9)', () => {
+  expect(css).toContain('--kx-muted-text-aa: #607260')
+  expect(css).toContain('--kx-accent-text-aa: #4f7044')
+  expect(css).toContain('--kx-accent-solid-aa: #4f7044')
 })

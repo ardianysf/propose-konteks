@@ -2,6 +2,7 @@ import { useEffect, useReducer } from 'react'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import NewSessionPage from './NewSessionPage'
 import AppShell from '../components/shell/AppShell'
+import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../state/MockupContext'
 import { initialState, mockupReducer, type MockupState } from '../state/mockupReducer'
 import { PENDING_REVIEWS } from '../data/mockData'
@@ -29,7 +30,9 @@ function renderNewSessionPage() {
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
-        <NewSessionPage />
+        <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+          <NewSessionPage />
+        </OverlayLifecycleProvider>
       </MockupContext.Provider>
     )
   }

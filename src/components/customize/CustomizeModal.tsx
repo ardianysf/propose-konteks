@@ -15,8 +15,10 @@
  * IntegrationsTab (MCP / Connectors / VCS), and the preserved
  * SkillsTab / ToolsTab driven by the preservedContent adapter.
  */
-import { useEffect, useId, useRef } from 'react'
+import { useId, useRef } from 'react'
 import { useMockup } from '../../state/MockupContext'
+import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
+import { useFocusContainment } from '../shell/useFocusContainment'
 import { DEFAULT_CUSTOMIZE_TAB, type CustomizeTab } from '../../state/mockupReducer'
 import AgentsTab from './AgentsTab'
 import ContextTab from './ContextTab'
@@ -79,6 +81,7 @@ function TabPanelContent({ tab }: { tab: CustomizeTab }) {
 
 export default function CustomizeModal() {
   const { state, dispatch } = useMockup()
+  const { dismissOverlay } = useOverlayLifecycle()
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
 
@@ -87,22 +90,11 @@ export default function CustomizeModal() {
   const overlay = state.overlay
   const tab: CustomizeTab = overlay.kind === 'customize' ? overlay.tab : DEFAULT_CUSTOMIZE_TAB
 
-  // Focus moves to the dialog on mount (§16 keyboard contract).
-  useEffect(() => {
-    dialogRef.current?.focus()
-  }, [])
+  // Shared focus containment owns initial focus, Tab trapping, and the
+  // focusin safety net (Task 13); Escape is owned by OverlayLifecycle.
+  useFocusContainment(dialogRef)
 
-  // Escape closes — local listener now; the shared overlay helpers
-  // (focus return, single source) land with Task 13 (AC45).
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') dispatch({ type: 'CLOSE_OVERLAY' })
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [dispatch])
-
-  const close = () => dispatch({ type: 'CLOSE_OVERLAY' })
+  const close = () => dismissOverlay()
 
   const tabButtonId = (id: CustomizeTab) => `kx-customize-tab-${id}`
   const panelId = 'kx-customize-panel'
