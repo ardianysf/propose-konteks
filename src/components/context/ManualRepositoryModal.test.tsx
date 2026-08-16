@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { vi } from 'vitest'
 import ManualRepositoryModal from './ManualRepositoryModal'
+import { OverlayLifecycleProvider } from '../shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
 import {
   initialState,
@@ -47,7 +48,9 @@ function renderManualRepositoryModal(
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
-        {state.overlay.kind === 'manual-repo-modal' && <ManualRepositoryModal />}
+        <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+          {state.overlay.kind === 'manual-repo-modal' && <ManualRepositoryModal />}
+        </OverlayLifecycleProvider>
       </MockupContext.Provider>
     )
   }

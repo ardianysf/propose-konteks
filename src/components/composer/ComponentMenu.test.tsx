@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import NewSessionPage from '../../pages/NewSessionPage'
+import { OverlayLifecycleProvider } from '../shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
 import { initialState, mockupReducer, type MockupState } from '../../state/mockupReducer'
 import { COMPONENTS, REPOSITORIES } from '../../data/mockData'
@@ -33,7 +34,9 @@ function renderPage(initial?: Partial<MockupState>) {
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
-        <NewSessionPage />
+        <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+          <NewSessionPage />
+        </OverlayLifecycleProvider>
       </MockupContext.Provider>
     )
   }
@@ -348,7 +351,7 @@ describe('ComponentMenu — demo variants (AC43)', () => {
 // ---------------------------------------------------------------------------
 
 describe('ComponentMenu — Escape + semantics + hygiene', () => {
-  it('Escape dispatches CLOSE_OVERLAY — local listener now, global hardening lands in Task 13', () => {
+  it('Escape dispatches CLOSE_OVERLAY through the shared OverlayLifecycle listener', () => {
     const { bucket } = renderPage()
     openMenu()
     expect(bucket.current?.overlay).toEqual({ kind: 'component-menu' })

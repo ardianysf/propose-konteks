@@ -12,6 +12,7 @@
 import Sidebar from './Sidebar'
 import SystemMenu from './SystemMenu'
 import WorkspaceMenu from './WorkspaceMenu'
+import { OverlayLifecycleProvider } from './OverlayLifecycle'
 import CreateSystemModal from '../context/CreateSystemModal'
 import ManualRepositoryModal from '../context/ManualRepositoryModal'
 import RepositorySelectorModal from '../context/RepositorySelectorModal'
@@ -24,34 +25,36 @@ import SessionHistoryPage from '../../pages/SessionHistoryPage'
 import { useMockup } from '../../state/MockupContext'
 
 export default function AppShell() {
-  const { state } = useMockup()
+  const { state, dispatch } = useMockup()
 
   return (
-    <div className={state.sidebarCollapsed ? 'kx-app kx-app--rail' : 'kx-app'}>
-      <Sidebar />
-      <main className="kx-main">
-        {/* Route switch — the new-session page (Task 5) and the dedicated
-            Session History page (Task 11). Overlays mount on top of this. */}
-        {state.route === 'new-session' ? (
-          <NewSessionPage />
-        ) : (
-          <SessionHistoryPage />
-        )}
-      </main>
-      {/* Overlay union slot — exactly one overlay at a time; the anchored
-          menus, the Task 7 context modals (repo selector, manual repo
-          form, Create System), the Task 9 Customize shell, and the Task 10
-          Konteks Learned drawer are the wired kinds. Later tasks add the
-          rest. */}
-      {state.overlay.kind === 'workspace-menu' && <WorkspaceMenu />}
-      {state.overlay.kind === 'system-menu' && <SystemMenu />}
-      {state.overlay.kind === 'repository-modal' && <RepositorySelectorModal />}
-      {state.overlay.kind === 'manual-repo-modal' && <ManualRepositoryModal />}
-      {state.overlay.kind === 'create-system-modal' && <CreateSystemModal />}
-      {state.overlay.kind === 'customize' && <CustomizeModal />}
-      {state.overlay.kind === 'learned' && <LearnedDrawer />}
-      {state.overlay.kind === 'account-menu' && <AccountMenu />}
-      {state.overlay.kind === 'settings' && <SettingsModal />}
-    </div>
+    <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+      <div className={state.sidebarCollapsed ? 'kx-app kx-app--rail' : 'kx-app'}>
+        <Sidebar />
+        <main className="kx-main">
+          {/* Route switch — the new-session page (Task 5) and the dedicated
+              Session History page (Task 11). Overlays mount on top of this. */}
+          {state.route === 'new-session' ? (
+            <NewSessionPage />
+          ) : (
+            <SessionHistoryPage />
+          )}
+        </main>
+        {/* Overlay union slot — exactly one overlay at a time; the anchored
+            menus, the Task 7 context modals (repo selector, manual repo
+            form, Create System), the Task 9 Customize shell, and the Task 10
+            Konteks Learned drawer are the wired kinds. Later tasks add the
+            rest. */}
+        {state.overlay.kind === 'workspace-menu' && <WorkspaceMenu />}
+        {state.overlay.kind === 'system-menu' && <SystemMenu />}
+        {state.overlay.kind === 'repository-modal' && <RepositorySelectorModal />}
+        {state.overlay.kind === 'manual-repo-modal' && <ManualRepositoryModal />}
+        {state.overlay.kind === 'create-system-modal' && <CreateSystemModal />}
+        {state.overlay.kind === 'customize' && <CustomizeModal />}
+        {state.overlay.kind === 'learned' && <LearnedDrawer />}
+        {state.overlay.kind === 'account-menu' && <AccountMenu />}
+        {state.overlay.kind === 'settings' && <SettingsModal />}
+      </div>
+    </OverlayLifecycleProvider>
   )
 }

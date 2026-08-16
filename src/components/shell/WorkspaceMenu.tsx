@@ -9,19 +9,16 @@
  * selected row; Escape closes through the CLOSE_OVERLAY contract (AC45).
  */
 import { WORKSPACE } from '../../data/mockData'
-import { useMockup } from '../../state/MockupContext'
+import { useOverlayLifecycle } from './OverlayLifecycle'
 
 export default function WorkspaceMenu() {
-  const { dispatch } = useMockup()
+  const { dismissOverlay } = useOverlayLifecycle()
 
   return (
     <div
       role="menu"
       aria-label="Workspace"
       className="kx-menu kx-workspace-menu"
-      onKeyDown={(event) => {
-        if (event.key === 'Escape') dispatch({ type: 'CLOSE_OVERLAY' })
-      }}
     >
       {/* The current workspace — illustrative row, marked selected.
           Clicking keeps it current and just closes the menu. */}
@@ -30,7 +27,7 @@ export default function WorkspaceMenu() {
         role="menuitem"
         className="kx-workspace-menu__item kx-workspace-menu__item--current"
         aria-current="true"
-        onClick={() => dispatch({ type: 'CLOSE_OVERLAY' })}
+        onClick={() => dismissOverlay()}
       >
         <span className="kx-workspace-menu__item-avatar" aria-hidden="true">
           {WORKSPACE.name[0]}

@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import Composer from './Composer'
+import { OverlayLifecycleProvider } from '../shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
 import {
   initialState,
@@ -38,7 +39,9 @@ function renderComposer(overlay: MockupOverlay = { kind: 'none' }) {
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
-        <Composer />
+        <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+          <Composer />
+        </OverlayLifecycleProvider>
       </MockupContext.Provider>
     )
   }
@@ -242,7 +245,7 @@ describe('ExecutionProfileMenu — Workspace settings (AC24)', () => {
 // ---------------------------------------------------------------------------
 
 describe('ExecutionProfileMenu — Escape + accessibility', () => {
-  it('Escape dispatches CLOSE_OVERLAY — local listener now, global hardening lands in Task 13', () => {
+  it('Escape dispatches CLOSE_OVERLAY through the shared OverlayLifecycle listener', () => {
     const { bucket } = renderComposer()
     openMenu()
 

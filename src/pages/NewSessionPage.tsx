@@ -12,6 +12,7 @@
 import ComponentMenu from '../components/composer/ComponentMenu'
 import Composer from '../components/composer/Composer'
 import SessionMode from '../components/composer/SessionMode'
+import { useOverlayLifecycle } from '../components/shell/OverlayLifecycle'
 import { useMockup } from '../state/MockupContext'
 
 /** Chevron-right — marks setup triggers whose surfaces open to the right (AC7 language). */
@@ -73,6 +74,7 @@ function ComponentIcon() {
 
 export default function NewSessionPage() {
   const { state, dispatch } = useMockup()
+  const { beginOverlayChain } = useOverlayLifecycle()
   const engineering = state.sessionMode === 'engineering'
   const activeSystem =
     state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
@@ -103,9 +105,10 @@ export default function NewSessionPage() {
             className="kx-setup-row__trigger"
             aria-haspopup="dialog"
             data-testid="repository-trigger"
-            onClick={() =>
+            onClick={(event) => {
+              beginOverlayChain(event.currentTarget)
               dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'repository-modal' } })
-            }
+            }}
           >
             <span className="kx-setup-row__trigger-icon" aria-hidden="true">
               <RepositoryIcon />
@@ -129,9 +132,10 @@ export default function NewSessionPage() {
               aria-haspopup="menu"
               aria-expanded={state.overlay.kind === 'component-menu'}
               data-testid="component-trigger"
-              onClick={() =>
+              onClick={(event) => {
+                beginOverlayChain(event.currentTarget)
                 dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'component-menu' } })
-              }
+              }}
             >
               <span className="kx-setup-row__trigger-icon" aria-hidden="true">
                 <ComponentIcon />

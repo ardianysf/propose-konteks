@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import CustomizeModal from './CustomizeModal'
+import { OverlayLifecycleProvider } from '../shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
 import {
   initialState,
@@ -57,7 +58,9 @@ function renderCustomizeModal(
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
-        {state.overlay.kind === 'customize' && <CustomizeModal />}
+        <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+          {state.overlay.kind === 'customize' && <CustomizeModal />}
+        </OverlayLifecycleProvider>
       </MockupContext.Provider>
     )
   }
@@ -586,8 +589,8 @@ describe('CustomizeModal — integration variants (AC37)', () => {
 
   it('styles integration rows as compact semantic tables with status chips — shared table CSS, no giant cards', () => {
     expect(css).toMatch(/\.kx-customize-tab__table\s*\{[^}]*border-collapse:\s*collapse/)
-    expect(css).toMatch(/\.kx-integrations__status--connected\s*\{[^}]*color:\s*var\(--kx-accent-strong\)/)
-    expect(css).toMatch(/\.kx-integrations__status--setup\s*\{[^}]*color:\s*var\(--kx-muted\)/)
+    expect(css).toMatch(/\.kx-integrations__status--connected\s*\{[^}]*color:\s*var\(--kx-accent-text-aa\)/)
+    expect(css).toMatch(/\.kx-integrations__status--setup\s*\{[^}]*color:\s*var\(--kx-muted-text-aa\)/)
   })
 })
 

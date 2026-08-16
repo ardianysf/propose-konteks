@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { vi } from 'vitest'
 import CreateSystemModal from './CreateSystemModal'
+import { OverlayLifecycleProvider } from '../shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
 import {
   initialState,
@@ -42,7 +43,9 @@ function renderCreateSystemModal(
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
-        {state.overlay.kind === 'create-system-modal' && <CreateSystemModal />}
+        <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+          {state.overlay.kind === 'create-system-modal' && <CreateSystemModal />}
+        </OverlayLifecycleProvider>
       </MockupContext.Provider>
     )
   }

@@ -12,6 +12,13 @@
   --kx-primary: #243025; /* Primary text, headings, dark surfaces */
   --kx-secondary: #58735a; /* Secondary text, subdued labels */
   --kx-muted: #778c78; /* Tertiary/muted text, placeholders */
+  /* AA-grade contrast semantics (Task 13, AC9). These are intentionally
+   * separate from the mixed-purpose originals: --kx-muted stays for icons/
+   * disabled states, --kx-accent-strong stays for outlines/borders/gradients/
+   * toggles/decorative indicators. The two accent AA values currently match. */
+  --kx-muted-text-aa: #607260; /* Enabled muted text/placeholders (≥4.5:1 on white/canvas/pale) */
+  --kx-accent-text-aa: #4f7044; /* Enabled accent text + text-like glyphs (≥4.5:1) */
+  --kx-accent-solid-aa: #4f7044; /* White-text solid backgrounds (≥4.5:1) */
   --kx-border: #e2e9d5; /* Dividers, input borders, hairlines */
   --kx-pale: #f4f8ee; /* Hover fills, selected states, subtle washes */
   --kx-accent: #8fbf6a; /* Primary action accent, highlights */

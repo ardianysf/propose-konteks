@@ -1,6 +1,7 @@
 import { useEffect, useReducer } from 'react'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import Sidebar from './Sidebar'
+import { OverlayLifecycleProvider } from './OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
 import { initialState, mockupReducer, type MockupState } from '../../state/mockupReducer'
 import { RECENT_SESSIONS, SYSTEMS, WORKSPACE } from '../../data/mockData'
@@ -28,8 +29,10 @@ function renderSidebar() {
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
-        <Sidebar />
-        <main data-testid="route">{state.route}</main>
+        <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+          <Sidebar />
+          <main data-testid="route">{state.route}</main>
+        </OverlayLifecycleProvider>
       </MockupContext.Provider>
     )
   }

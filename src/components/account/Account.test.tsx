@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import AccountMenu from './AccountMenu'
 import SettingsModal from './SettingsModal'
 import Sidebar from '../shell/Sidebar'
+import { OverlayLifecycleProvider } from '../shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
 import {
   initialState,
@@ -37,11 +38,13 @@ function renderShell(initial?: Partial<MockupState>) {
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
-        <div className={state.sidebarCollapsed ? 'kx-app kx-app--rail' : 'kx-app'}>
-          <Sidebar />
-          {state.overlay.kind === 'account-menu' && <AccountMenu />}
-          {state.overlay.kind === 'settings' && <SettingsModal />}
-        </div>
+        <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+          <div className={state.sidebarCollapsed ? 'kx-app kx-app--rail' : 'kx-app'}>
+            <Sidebar />
+            {state.overlay.kind === 'account-menu' && <AccountMenu />}
+            {state.overlay.kind === 'settings' && <SettingsModal />}
+          </div>
+        </OverlayLifecycleProvider>
       </MockupContext.Provider>
     )
   }
@@ -326,40 +329,23 @@ describe('Account — Settings dialog accessibility and dismissal', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('traps Tab and Shift+Tab within the Settings dialog, wrapping in both directions', () => {
+  it('contains focus within the Settings dialog, wrapping at the cycle edges', () => {
     renderShell({ overlay: { kind: 'settings', section: 'billing' } })
     const dialog = getDialog()
     const close = within(dialog).getByRole('button', { name: 'Close' })
-    const billingTab = getSectionTab('Billing')
     const usageTab = getBillingTab('Usage')
 
+    // Shared focus containment focuses the dialog root on mount.
     expect(dialog).toHaveFocus()
 
-    // Tab from the dialog moves to the first control (Close).
-    fireEvent.keyDown(dialog, { key: 'Tab' })
-    expect(close).toHaveFocus()
-
-    // Tab moves forward through the section tab and the Billing subtab.
-    fireEvent.keyDown(close, { key: 'Tab' })
-    expect(billingTab).toHaveFocus()
-
-    fireEvent.keyDown(billingTab, { key: 'Tab' })
-    expect(usageTab).toHaveFocus()
-
-    // Tab from the last control wraps to the first (Close).
+    // Tab from the last sequential stop (Usage) wraps to the first (Close).
+    usageTab.focus()
     fireEvent.keyDown(usageTab, { key: 'Tab' })
     expect(close).toHaveFocus()
 
-    // Shift+Tab from the first control wraps to the last (Usage subtab).
+    // Shift+Tab from the first stop wraps to the last (Usage).
     fireEvent.keyDown(close, { key: 'Tab', shiftKey: true })
     expect(usageTab).toHaveFocus()
-
-    // Shift+Tab moves backward through Billing and back to Close.
-    fireEvent.keyDown(usageTab, { key: 'Tab', shiftKey: true })
-    expect(billingTab).toHaveFocus()
-
-    fireEvent.keyDown(billingTab, { key: 'Tab', shiftKey: true })
-    expect(close).toHaveFocus()
   })
 })
 

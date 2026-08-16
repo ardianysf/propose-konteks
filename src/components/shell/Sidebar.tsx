@@ -15,7 +15,7 @@
 import { useState } from 'react'
 import { RECENT_SESSIONS, WORKSPACE } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
-import { ACCOUNT_TRIGGER_ID } from '../account/accountFocus'
+import { useOverlayLifecycle } from './OverlayLifecycle'
 
 const LOGO_EXPANDED_SRC = '/assets/konteks/logo-text-main.png'
 const LOGO_RAIL_SRC = '/assets/konteks/web-topbar-icon-128.png'
@@ -98,6 +98,7 @@ function SlidersIcon() {
 
 export default function Sidebar() {
   const { state, dispatch } = useMockup()
+  const { beginOverlayChain } = useOverlayLifecycle()
   const collapsed = state.sidebarCollapsed
   const activeSystem =
     state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
@@ -135,7 +136,10 @@ export default function Sidebar() {
           className="kx-sidebar__control"
           aria-label={`${WORKSPACE.name} workspace`}
           aria-haspopup="menu"
-          onClick={() => dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'workspace-menu' } })}
+          onClick={(event) => {
+            beginOverlayChain(event.currentTarget)
+            dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'workspace-menu' } })
+          }}
         >
           <span className="kx-sidebar__workspace-avatar" aria-hidden="true">
             {WORKSPACE.name[0]}
@@ -155,7 +159,10 @@ export default function Sidebar() {
         className="kx-sidebar__control kx-sidebar__system"
         aria-label={`${activeSystem.name} — open system menu`}
         aria-haspopup="menu"
-        onClick={() => dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'system-menu' } })}
+        onClick={(event) => {
+          beginOverlayChain(event.currentTarget)
+          dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'system-menu' } })
+        }}
       >
         <span className="kx-sidebar__system-icon">
           <svg data-icon="system" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
@@ -207,13 +214,15 @@ export default function Sidebar() {
             trigger and must never open the account menu (AC9). */}
         <button
           type="button"
-          id={ACCOUNT_TRIGGER_ID}
           className="kx-sidebar__user-trigger"
           aria-label="Open account menu"
           aria-haspopup="menu"
           aria-expanded={state.overlay.kind === 'account-menu'}
           data-testid="account-trigger"
-          onClick={() => dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'account-menu' } })}
+          onClick={(event) => {
+            beginOverlayChain(event.currentTarget)
+            dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'account-menu' } })
+          }}
         >
           <span className="kx-sidebar__user-avatar" aria-hidden="true">
             {USER_INITIALS}
@@ -224,7 +233,10 @@ export default function Sidebar() {
           type="button"
           className="kx-icon-btn kx-tooltip-host kx-sidebar__customize"
           aria-label="Customize"
-          onClick={() => dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', tab: 'agents' } })}
+          onClick={(event) => {
+            beginOverlayChain(event.currentTarget)
+            dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', tab: 'agents' } })
+          }}
           onMouseEnter={() => setCustomizeTooltipShown(true)}
           onMouseLeave={() => setCustomizeTooltipShown(false)}
           onFocus={() => setCustomizeTooltipShown(true)}

@@ -16,9 +16,11 @@
  * never a network call. Loading/empty variants swap the picker region
  * only (AC43). AppShell integration is a later Task 7 part.
  */
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { EXECUTION_PROFILES, REPOSITORIES, VCS_CONNECTORS } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
+import { useFocusContainment } from '../shell/useFocusContainment'
 
 /** Results per picker page — keeps pagination observable in the mockup. */
 const PAGE_SIZE = 2
@@ -101,6 +103,7 @@ function LinkIcon() {
 
 export default function ManualRepositoryModal() {
   const { state, dispatch } = useMockup()
+  const { dismissOverlay } = useOverlayLifecycle()
   const titleId = useId()
   const connectorId = useId()
   const executionSelectId = useId()
@@ -122,22 +125,11 @@ export default function ManualRepositoryModal() {
   const [selected, setSelected] = useState<string[]>([])
   const [privateNetwork, setPrivateNetwork] = useState(false)
 
-  // Focus moves to the dialog on mount (§16 keyboard contract).
-  useEffect(() => {
-    dialogRef.current?.focus()
-  }, [])
+  // Shared focus containment owns initial focus, Tab trapping, and the
+  // focusin safety net (Task 13); Escape is owned by OverlayLifecycle.
+  useFocusContainment(dialogRef)
 
-  // Escape closes — local listener now; the shared overlay helpers
-  // (focus return, single source) land with Task 13 (AC45).
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') dispatch({ type: 'CLOSE_OVERLAY' })
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [dispatch])
-
-  const close = () => dispatch({ type: 'CLOSE_OVERLAY' })
+  const close = () => dismissOverlay()
 
   // The picker is scoped to the one active system (AC29): only its
   // repositories are searchable, and only they can commit on Connect.
@@ -200,7 +192,7 @@ export default function ManualRepositoryModal() {
         dispatch({ type: 'TOGGLE_REPO', repoId: entry })
       }
     }
-    dispatch({ type: 'CLOSE_OVERLAY' })
+    dismissOverlay()
   }
 
   const countLabel = `${matching.length} ${matching.length === 1 ? 'result' : 'results'}`

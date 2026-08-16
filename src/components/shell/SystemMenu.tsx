@@ -10,6 +10,7 @@
  * (AC13). Selecting a system commits it to the store and closes the menu.
  */
 import { useMockup } from '../../state/MockupContext'
+import { useOverlayLifecycle } from './OverlayLifecycle'
 
 /** Grid-of-four — the same neutral system glyph the sidebar control uses. */
 function SystemIcon() {
@@ -54,6 +55,7 @@ function PlusIcon() {
 
 export default function SystemMenu() {
   const { state, dispatch } = useMockup()
+  const { dismissOverlay } = useOverlayLifecycle()
   const query = state.search.systems.trim().toLowerCase()
   const visibleSystems = query
     ? state.systems.filter((system) => system.name.toLowerCase().includes(query))
@@ -102,7 +104,7 @@ export default function SystemMenu() {
                 aria-current={active ? 'true' : undefined}
                 onClick={() => {
                   dispatch({ type: 'SET_ACTIVE_SYSTEM', systemId: system.id })
-                  dispatch({ type: 'CLOSE_OVERLAY' })
+                  dismissOverlay()
                 }}
               >
                 <span className="kx-system-menu__item-icon" aria-hidden="true">

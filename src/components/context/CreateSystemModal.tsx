@@ -13,8 +13,10 @@
  * There is nothing to load: no network is involved, so no loading state
  * exists either.
  */
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { useMockup } from '../../state/MockupContext'
+import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
+import { useFocusContainment } from '../shell/useFocusContainment'
 
 /** Close — the header dismiss control. */
 function CloseIcon() {
@@ -40,6 +42,7 @@ function CloseIcon() {
 
 export default function CreateSystemModal() {
   const { dispatch } = useMockup()
+  const { dismissOverlay } = useOverlayLifecycle()
   const titleId = useId()
   const nameId = useId()
   const descriptionId = useId()
@@ -51,22 +54,11 @@ export default function CreateSystemModal() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
 
-  // Focus moves to the dialog on mount (§16 keyboard contract).
-  useEffect(() => {
-    dialogRef.current?.focus()
-  }, [])
+  // Shared focus containment owns initial focus, Tab trapping, and the
+  // focusin safety net (Task 13); Escape is owned by OverlayLifecycle.
+  useFocusContainment(dialogRef)
 
-  // Escape closes — local listener now; the shared overlay helpers
-  // (focus return, single source) land with Task 13 (AC45).
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') dispatch({ type: 'CLOSE_OVERLAY' })
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [dispatch])
-
-  const close = () => dispatch({ type: 'CLOSE_OVERLAY' })
+  const close = () => dismissOverlay()
 
   const trimmedName = name.trim()
   const canCreate = trimmedName !== ''
@@ -81,7 +73,7 @@ export default function CreateSystemModal() {
       name: trimmedName,
       description: description.trim() || undefined,
     })
-    dispatch({ type: 'CLOSE_OVERLAY' })
+    dismissOverlay()
   }
 
   return (
