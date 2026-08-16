@@ -3,7 +3,7 @@
  *
  * jsdom does not apply real CSS, so these are source-string assertions
  * against the committed stylesheets (same convention as responsive.test.ts).
- * The file embeds the complete 114-consumer inventory — 65 muted-token
+ * The file embeds the complete 115-consumer inventory — 66 muted-token
  * consumers and 49 accent-strong consumers — and proves three things:
  *
  *   1. The three AA semantics are defined in tokens.css and every candidate
@@ -129,6 +129,7 @@ const mutedM = [
   '.kx-history__row-meta',
   '.kx-history__empty-hint',
   '.kx-settings__note',
+  '.kx-illustrative-note',
 ]
 
 const mutedU = [
@@ -306,14 +307,14 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = [...extractUsages(components, COMPONENTS), ...extractUsages(global, GLOBAL)]
 
-  it('covers exactly 114 consumers — 65 muted and 49 accent-strong', () => {
-    expect(inventory).toHaveLength(114)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(65)
+  it('covers exactly 115 consumers — 66 muted and 49 accent-strong', () => {
+    expect(inventory).toHaveLength(115)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(66)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(49)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(61)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(62)
     expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(26)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(2)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(25)

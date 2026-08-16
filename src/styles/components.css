@@ -453,7 +453,7 @@
 }
 
 .kx-sidebar__view-all:hover {
-  color: var(--kx-accent);
+  color: var(--kx-primary);
   text-decoration: underline;
 }
 
@@ -577,7 +577,8 @@
 .kx-sidebar--rail .kx-sidebar__control-copy,
 .kx-sidebar--rail .kx-sidebar__chevron,
 .kx-sidebar--rail .kx-sidebar__recent,
-.kx-sidebar--rail .kx-sidebar__user-name {
+.kx-sidebar--rail .kx-sidebar__user-name,
+.kx-sidebar--rail .kx-sidebar__note {
   display: none;
 }
 
@@ -3978,6 +3979,22 @@
   color: var(--kx-muted-text-aa);
 }
 
+/* Visible illustrative marker (AC46) — one shared subtle note rendered in
+ * the sidebar footer and at the foot of both pages from the single
+ * mockData.ILLUSTRATIVE_DATA_NOTE constant (never duplicated). */
+.kx-illustrative-note {
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+/* Sidebar footer variant — slightly tighter so the collapsed rail hides it
+ * cleanly (see the rail + ≤1280px rules). */
+.kx-sidebar__note {
+  padding: 0 6px 2px;
+  font-size: var(--kx-text-2xs);
+}
+
 /* ── Responsive rail + viewport hardening (Task 13, AC12/AC43/AC44) ──
  * At ≤1280px the sidebar renders as the existing 64px icon rail regardless
  * of the stored collapse preference, reclaiming the extra 176px for the
@@ -4022,6 +4039,10 @@
   .kx-sidebar__chevron,
   .kx-sidebar__recent,
   .kx-sidebar__user-name {
+    display: none;
+  }
+
+  .kx-sidebar__note {
     display: none;
   }
 

@@ -11,7 +11,7 @@
  * (AC43). No fetch, no emoji, fully semantic.
  */
 import { useEffect, useRef, useState } from 'react'
-import { SESSION_HISTORY, type SessionMode } from '../data/mockData'
+import { ILLUSTRATIVE_DATA_NOTE, SESSION_HISTORY, type SessionMode } from '../data/mockData'
 import { useMockup } from '../state/MockupContext'
 
 const MODE_LABELS: Record<SessionMode, string> = {
@@ -231,6 +231,11 @@ export default function SessionHistoryPage() {
           </ul>
         )}
       </div>
+
+      {/* AC46 — the single visible illustrative-data marker for this page. */}
+      <p className="kx-illustrative-note" data-testid="illustrative-data-note">
+        {ILLUSTRATIVE_DATA_NOTE}
+      </p>
     </section>
   )
 }
