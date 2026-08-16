@@ -17,6 +17,8 @@ import ManualRepositoryModal from '../context/ManualRepositoryModal'
 import RepositorySelectorModal from '../context/RepositorySelectorModal'
 import CustomizeModal from '../customize/CustomizeModal'
 import LearnedDrawer from '../reviews/LearnedDrawer'
+import AccountMenu from '../account/AccountMenu'
+import SettingsModal from '../account/SettingsModal'
 import NewSessionPage from '../../pages/NewSessionPage'
 import SessionHistoryPage from '../../pages/SessionHistoryPage'
 import { useMockup } from '../../state/MockupContext'
@@ -48,6 +50,8 @@ export default function AppShell() {
       {state.overlay.kind === 'create-system-modal' && <CreateSystemModal />}
       {state.overlay.kind === 'customize' && <CustomizeModal />}
       {state.overlay.kind === 'learned' && <LearnedDrawer />}
+      {state.overlay.kind === 'account-menu' && <AccountMenu />}
+      {state.overlay.kind === 'settings' && <SettingsModal />}
     </div>
   )
 }
