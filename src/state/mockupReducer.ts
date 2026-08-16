@@ -19,6 +19,7 @@ export type SettingsSection = 'general' | 'billing' | 'team'
 
 export type MockupOverlay =
   | { kind: 'none' }
+  | { kind: 'workspace-menu' }
   | { kind: 'system-menu' }
   | { kind: 'execution-profile-menu' }
   | { kind: 'component-menu' }
@@ -32,6 +33,7 @@ export type MockupOverlay =
 
 /** Payload for OPEN_OVERLAY; tab/section default when omitted. */
 export type OpenOverlayPayload =
+  | { kind: 'workspace-menu' }
   | { kind: 'system-menu' }
   | { kind: 'execution-profile-menu' }
   | { kind: 'component-menu' }
@@ -235,6 +237,7 @@ function resolveOverlay(payload: OpenOverlayPayload): MockupOverlay {
       return { kind: 'learned', tab: payload.tab ?? DEFAULT_LEARNED_TAB }
     case 'settings':
       return { kind: 'settings', section: payload.section ?? DEFAULT_SETTINGS_SECTION }
+    case 'workspace-menu':
     case 'system-menu':
     case 'execution-profile-menu':
     case 'component-menu':
