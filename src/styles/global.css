@@ -1,0 +1,102 @@
+/*
+ * Konteks — global base styles (Task 2, plan step 6).
+ * Reset, DM Sans body defaults, focus rings, palette-matched scrollbars,
+ * and reduced-motion support. Component styling lives in components.css.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--kx-font-family);
+  font-size: var(--kx-text-md); /* MD 13 — normal-weight default body/UI text */
+  font-weight: var(--kx-font-normal);
+  line-height: 1.5;
+  color: var(--kx-primary);
+  background: var(--kx-canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+/* Visible keyboard focus on every control (§16, AC45). */
+:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbars matched to the Warm Enterprise palette (§15). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--kx-secondary);
+}
+
+/* Respect reduced-motion preferences (§15). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

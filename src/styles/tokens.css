@@ -1,0 +1,42 @@
+/*
+ * Konteks — Warm Enterprise design tokens (spec §5).
+ * Source of truth: docs/superpowers/specs/2026-08-16-konteks-visual-revamp-design.md
+ * Palette and type scale here override any conflicting Figma/prototype values (spec §2).
+ */
+
+:root {
+  /* ── Palette — Warm Enterprise (AC4) ─────────────────────────────── */
+  --kx-canvas: #faf8ef; /* Main content background (matcha paper) */
+  --kx-raised: #fff; /* Cards, inputs, modals, popover surfaces */
+  --kx-sidebar-bg: #ffffff; /* Expanded sidebar is white (spec §5.1) */
+  --kx-primary: #243025; /* Primary text, headings, dark surfaces */
+  --kx-secondary: #58735a; /* Secondary text, subdued labels */
+  --kx-muted: #778c78; /* Tertiary/muted text, placeholders */
+  --kx-border: #e2e9d5; /* Dividers, input borders, hairlines */
+  --kx-pale: #f4f8ee; /* Hover fills, selected states, subtle washes */
+  --kx-accent: #8fbf6a; /* Primary action accent, highlights */
+  --kx-accent-strong: #5f8d4e; /* Emphasized actions, active indicators */
+
+  /* ── Typography — DM Sans (AC5). Spec §5.2 scale, nothing else. ──── */
+  /* NOTE: MD (13px) is the normal-weight default body/UI text size. */
+  --kx-font-family: 'DM Sans', sans-serif;
+  --kx-text-3xl: 24px; /* Page titles */
+  --kx-text-2xl: 20px; /* Section titles, modal headers */
+  --kx-text-xl: 18px; /* Subsection titles */
+  --kx-text-l: 16px; /* Body emphasis, buttons */
+  --kx-text-md: 13px; /* Normal body/UI text (default) */
+  --kx-text-sm: 12px; /* Captions, meta text */
+  --kx-text-xs: 11px; /* Micro labels */
+  --kx-text-2xs: 10px; /* Badges, fine print */
+  --kx-font-normal: 400;
+  --kx-font-medium: 500;
+  --kx-font-bold: 700;
+
+  /* ── Fixed dimensions (AC2, AC34, AC39, §5.1, §11, §12) ─────────── */
+  --kx-radius-main: 19.5px; /* Main canvas corners, top-left/bottom-left */
+  --kx-sidebar-w: 240px; /* Expanded white sidebar */
+  --kx-sidebar-rail: 64px; /* Collapsed sidebar icon rail */
+  --kx-customize-w: 790px; /* Customize modal width — fixed on every tab */
+  --kx-customize-h: 580px; /* Customize modal height — fixed on every tab */
+  --kx-drawer-w: 450px; /* Konteks Learned right drawer */
+}
