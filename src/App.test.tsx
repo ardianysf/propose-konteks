@@ -92,3 +92,93 @@ it('renders exactly one overlay at a time — workspace and system menus are mut
   expect(getWorkspaceMenu()).toBeInTheDocument()
   expect(screen.queryByRole('menu', { name: 'Systems' })).not.toBeInTheDocument()
 })
+
+// ---------------------------------------------------------------------------
+// Task 7 — repo selector, manual repo form, Create System (integration)
+// ---------------------------------------------------------------------------
+
+describe('Task 7 modal overlays', () => {
+  const getRepoDialog = () => screen.getByRole('dialog', { name: 'Choose work repositories' })
+  const getCreateDialog = () => screen.getByRole('dialog', { name: 'Create a new system' })
+  const getManualDialog = () => screen.getByRole('dialog', { name: 'Add repository manually' })
+
+  /** Exactly one overlay surface: one dialog, one backdrop, no menus. */
+  const expectSingleOverlay = () => {
+    expect(screen.getAllByRole('dialog')).toHaveLength(1)
+    expect(document.querySelectorAll('.kx-modal-backdrop')).toHaveLength(1)
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+  }
+
+  it('opens the repository selector modal from the setup trigger — exactly one overlay (AC25)', () => {
+    render(<App />)
+    fireEvent.click(screen.getByTestId('repository-trigger'))
+    expect(getRepoDialog()).toHaveClass('kx-modal', 'kx-repo-modal')
+    expectSingleOverlay()
+
+    // Escape closes through the CLOSE_OVERLAY contract (AC45).
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
+  })
+
+  it('opens the Create System modal from the SystemMenu Create new system footer — exactly one overlay (AC33)', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: /open system menu/i }))
+    fireEvent.click(within(getMenu()).getByRole('menuitem', { name: /create new system/i }))
+    // The anchored menu unmounts — the modal replaces it as the one overlay.
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(getCreateDialog()).toHaveClass('kx-modal', 'kx-create-modal')
+    expectSingleOverlay()
+  })
+
+  it('creates a system end-to-end — it becomes active, the repo selection clears, and every overlay closes (AC33)', () => {
+    render(<App />)
+
+    // Preselect one repository in the default system through the real UI.
+    fireEvent.click(screen.getByTestId('repository-trigger'))
+    fireEvent.click(within(getRepoDialog()).getByRole('checkbox', { name: 'bsi/hris-frontend-shared' }))
+    fireEvent.click(within(getRepoDialog()).getByRole('button', { name: 'Done' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByTestId('repository-trigger')).toHaveTextContent(/1 of 3 repositories/i)
+
+    // SystemMenu → Create new system → Create modal → create.
+    fireEvent.click(screen.getByRole('button', { name: /open system menu/i }))
+    fireEvent.click(within(getMenu()).getByRole('menuitem', { name: /create new system/i }))
+    fireEvent.change(within(getCreateDialog()).getByRole('textbox', { name: /^name/i }), {
+      target: { value: 'QA Platform' },
+    })
+    fireEvent.click(within(getCreateDialog()).getByRole('button', { name: 'Create' }))
+
+    // All overlays close; the new system is active with an empty repo scope.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
+    expect(screen.getByRole('button', { name: /qa platform.*open system menu/i })).toBeInTheDocument()
+    expect(screen.getByTestId('repository-trigger')).toHaveTextContent(
+      /qa platform.*select repositories/i,
+    )
+  })
+
+  it("swaps the selector for the Create modal through the selector's Add new system — exactly one overlay", () => {
+    render(<App />)
+    fireEvent.click(screen.getByTestId('repository-trigger'))
+    fireEvent.click(within(getRepoDialog()).getByRole('button', { name: 'Add new system' }))
+    expect(screen.queryByRole('dialog', { name: 'Choose work repositories' })).not.toBeInTheDocument()
+    expect(getCreateDialog()).toBeInTheDocument()
+    expectSingleOverlay()
+  })
+
+  it("swaps the selector for the manual repo form through the selector's Add repository manually — exactly one overlay (AC28)", () => {
+    render(<App />)
+    fireEvent.click(screen.getByTestId('repository-trigger'))
+    fireEvent.click(within(getRepoDialog()).getByRole('button', { name: /add repository manually/i }))
+    expect(screen.queryByRole('dialog', { name: 'Choose work repositories' })).not.toBeInTheDocument()
+    expect(getManualDialog()).toHaveClass('kx-modal', 'kx-manual-modal')
+    expectSingleOverlay()
+
+    // Escape closes through the CLOSE_OVERLAY contract (AC45).
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
+  })
+})

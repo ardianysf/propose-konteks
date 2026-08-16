@@ -305,7 +305,7 @@ describe('NewSessionPage — AppShell integration', () => {
     expect(within(main).getByRole('textbox', { name: /prompt/i })).toBeInTheDocument()
   })
 
-  it('unmounts when navigating away; the Task 6 profile menu mounts while later overlay kinds only set state', () => {
+  it('unmounts when navigating away; the Task 6 profile menu and the Task 7 repository modal mount from their triggers', () => {
     const { bucket } = renderAppShell()
     const main = screen.getByRole('main')
 
@@ -314,10 +314,13 @@ describe('NewSessionPage — AppShell integration', () => {
     expect(bucket.current?.overlay).toEqual({ kind: 'execution-profile-menu' })
     expect(screen.getByTestId('execution-profile-menu')).toBeInTheDocument()
 
-    // Later-task overlay kinds (repository modal — Task 7) still set state
-    // without mounting UI.
+    // Task 7: the repository trigger sets state and mounts the real
+    // selector modal — exactly one dialog replaces the anchored menu.
     fireEvent.click(within(main).getByTestId('repository-trigger'))
     expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
+    expect(screen.queryByTestId('execution-profile-menu')).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Choose work repositories' })).toBeInTheDocument()
+    fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
     // Navigating away unmounts the page, the composer, and its anchored menu.

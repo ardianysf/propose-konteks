@@ -1,0 +1,328 @@
+/*
+ * RepositorySelectorModal — the system/repository selector modal
+ * (Task 7 Part A, spec §8.1, AC25–AC28 + AC43 variants).
+ *
+ * A centered .kx-modal over the shared backdrop primitive. Repositories
+ * group under exactly one active system: the active group renders
+ * enabled, checkable repositories plus the contextual "Add repository
+ * manually" action, while every other system renders its repositories
+ * disabled (AC25). System heads switch the active system through
+ * SET_ACTIVE_SYSTEM — the reducer clears the previous selection (AC26).
+ * One search input filters system names and repository names together,
+ * retaining the owning system group (AC27), with "Add new system" pinned
+ * at the top of the list (AC27). The footer is a single row — status
+ * left, Cancel/Done right (AC28). Loading/empty variants swap the group
+ * region only (AC43). The manual repository form and Create System
+ * modals arrive in later Task 7 parts; this modal only dispatches their
+ * overlay kinds. AppShell integration is likewise a later part.
+ */
+import { useEffect, useId, useRef } from 'react'
+import { REPOSITORIES } from '../../data/mockData'
+import type { Repository, System } from '../../data/mockData'
+import { useMockup } from '../../state/MockupContext'
+
+/** Plus — marks the create/add affordances (AC27/AC28). */
+function PlusIcon() {
+  return (
+    <svg
+      data-icon="plus"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M8 3v10M3 8h10"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+/** Close — the header dismiss control. */
+function CloseIcon() {
+  return (
+    <svg
+      data-icon="close"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M4 4l8 8M12 4l-8 8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+/** One system group surviving the shared search, with its narrowed rows. */
+interface VisibleGroup {
+  system: System
+  repos: Repository[]
+}
+
+export default function RepositorySelectorModal() {
+  const { state, dispatch } = useMockup()
+  const titleId = useId()
+  const dialogRef = useRef<HTMLDivElement>(null)
+
+  // Focus moves to the dialog on mount (§16 keyboard contract).
+  useEffect(() => {
+    dialogRef.current?.focus()
+  }, [])
+
+  // Escape closes — local listener now; the shared overlay helpers
+  // (focus return, single source) land with Task 13 (AC45).
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') dispatch({ type: 'CLOSE_OVERLAY' })
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [dispatch])
+
+  const close = () => dispatch({ type: 'CLOSE_OVERLAY' })
+
+  // One shared query filters system names and repository names together:
+  // a system survives when its own name matches or any of its
+  // repositories matches, and the query narrows the repositories inside
+  // a surviving group (AC27).
+  const query = state.search.repositories.trim().toLowerCase()
+  const repoById = new Map(REPOSITORIES.map((repo) => [repo.id, repo]))
+  const resolveRepos = (system: System): Repository[] =>
+    system.repoIds
+      .map((repoId) => repoById.get(repoId))
+      .filter((repo): repo is Repository => repo !== undefined)
+
+  const visibleGroups: VisibleGroup[] = state.systems
+    .map((system) => {
+      const repos = resolveRepos(system)
+      if (!query) return { system, repos }
+      const matching = repos.filter((repo) => repo.name.toLowerCase().includes(query))
+      const nameMatches = system.name.toLowerCase().includes(query)
+      if (!nameMatches && matching.length === 0) return null
+      return { system, repos: nameMatches && matching.length === 0 ? repos : matching }
+    })
+    .filter((group): group is VisibleGroup => group !== null)
+
+  const activeSystem =
+    state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
+  const selectedCount = state.selectedRepoIds.length
+
+  return (
+    <>
+      <div className="kx-modal-backdrop" aria-hidden="true" />
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className="kx-modal kx-repo-modal"
+      >
+        <header className="kx-repo-modal__head">
+          <div className="kx-repo-modal__head-copy">
+            <h2 id={titleId} className="kx-repo-modal__title">
+              Choose work repositories
+            </h2>
+            <p className="kx-repo-modal__subtitle">
+              Search by system or repository. Scope locks when the session starts.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="kx-icon-btn kx-repo-modal__close"
+            aria-label="Close"
+            onClick={close}
+          >
+            <CloseIcon />
+          </button>
+        </header>
+
+        <div className="kx-repo-modal__body">
+          {/* Add new system — pinned at the top of the system list (AC27). */}
+          <div className="kx-repo-modal__toolbar">
+            <button
+              type="button"
+              className="kx-btn kx-btn--primary kx-repo-modal__add-system"
+              onClick={() =>
+                dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'create-system-modal' } })
+              }
+            >
+              <PlusIcon />
+              <span className="kx-repo-modal__add-system-label">Add new system</span>
+            </button>
+          </div>
+
+          {/* The single search input — system + repository names (AC27). */}
+          <input
+            type="search"
+            className="kx-input kx-repo-modal__search"
+            aria-label="Search systems or repositories"
+            placeholder="Search systems or repositories"
+            value={state.search.repositories}
+            onChange={(event) =>
+              dispatch({ type: 'SET_SEARCH', list: 'repositories', value: event.target.value })
+            }
+          />
+
+          {/* The only scrolling region — groups or designed states (AC43). */}
+          <div className="kx-repo-modal__groups">
+            {state.demoVariant === 'loading' ? (
+              <div
+                className="kx-repo-modal__loading"
+                role="status"
+                aria-label="Loading systems and repositories"
+              >
+                {Array.from({ length: 4 }, (_, index) => (
+                  <div key={index} className="kx-repo-modal__skeleton" aria-hidden="true" />
+                ))}
+              </div>
+            ) : state.demoVariant === 'empty' ? (
+              <div className="kx-repo-modal__empty">
+                <p className="kx-repo-modal__empty-title">No systems yet</p>
+                <p className="kx-repo-modal__empty-hint">
+                  Create a system to group repositories and components for your sessions.
+                </p>
+              </div>
+            ) : visibleGroups.length === 0 ? (
+              <div className="kx-repo-modal__empty">
+                <p className="kx-repo-modal__empty-title">No matches</p>
+                <p className="kx-repo-modal__empty-hint">
+                  No systems or repositories match your search.
+                </p>
+              </div>
+            ) : (
+              visibleGroups.map(({ system, repos }) => {
+                const active = system.id === activeSystem.id
+                const count = system.repoIds.length
+                return (
+                  <section
+                    key={system.id}
+                    aria-label={system.name}
+                    className={
+                      active
+                        ? 'kx-repo-modal__system kx-repo-modal__system--active'
+                        : 'kx-repo-modal__system'
+                    }
+                  >
+                    <button
+                      type="button"
+                      className="kx-repo-modal__system-head"
+                      aria-current={active ? 'true' : undefined}
+                      onClick={() =>
+                        dispatch({ type: 'SET_ACTIVE_SYSTEM', systemId: system.id })
+                      }
+                    >
+                      <span className="kx-repo-modal__system-radio" aria-hidden="true" />
+                      <span className="kx-repo-modal__system-copy">
+                        <span className="kx-repo-modal__system-name">{system.name}</span>
+                        {system.description && (
+                          <span className="kx-repo-modal__system-desc">
+                            {system.description}
+                          </span>
+                        )}
+                      </span>
+                      <span className="kx-repo-modal__system-count">
+                        {count} {count === 1 ? 'repository' : 'repositories'}
+                      </span>
+                    </button>
+
+                    <div className="kx-repo-modal__repos">
+                      {repos.map((repo) => (
+                        <label
+                          key={repo.id}
+                          className={
+                            active
+                              ? 'kx-repo-modal__repo'
+                              : 'kx-repo-modal__repo kx-repo-modal__repo--disabled'
+                          }
+                        >
+                          <input
+                            type="checkbox"
+                            className="kx-repo-modal__repo-check"
+                            aria-label={repo.name}
+                            checked={state.selectedRepoIds.includes(repo.id)}
+                            disabled={!active}
+                            onChange={() => dispatch({ type: 'TOGGLE_REPO', repoId: repo.id })}
+                          />
+                          <span className="kx-repo-modal__repo-copy">
+                            <span className="kx-repo-modal__repo-name">{repo.name}</span>
+                            <span className="kx-repo-modal__repo-meta">
+                              Updated {repo.updatedAt}
+                            </span>
+                          </span>
+                          <span className="kx-repo-modal__repo-vcs">{repo.vcs}</span>
+                        </label>
+                      ))}
+
+                      {/* Contextual manual add — only inside the expanded
+                          active system group (AC28); the form modal itself
+                          is a later Task 7 part. */}
+                      {active && (
+                        <button
+                          type="button"
+                          className="kx-repo-modal__add-repo"
+                          onClick={() =>
+                            dispatch({
+                              type: 'OPEN_OVERLAY',
+                              overlay: { kind: 'manual-repo-modal' },
+                            })
+                          }
+                        >
+                          <PlusIcon />
+                          <span className="kx-repo-modal__add-repo-label">
+                            Add repository manually
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                  </section>
+                )
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Single-row footer — status left, actions right (AC28). */}
+        <footer className="kx-repo-modal__footer">
+          <p className="kx-repo-modal__status">
+            <span className="kx-repo-modal__status-system">{activeSystem.name}</span>
+            <span className="kx-repo-modal__status-divider" aria-hidden="true">
+              ·
+            </span>
+            <span className="kx-repo-modal__status-count">
+              {selectedCount} {selectedCount === 1 ? 'repository' : 'repositories'} selected
+            </span>
+          </p>
+          <div className="kx-repo-modal__actions">
+            <button
+              type="button"
+              className="kx-btn kx-btn--ghost kx-repo-modal__cancel"
+              onClick={close}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="kx-btn kx-btn--primary kx-repo-modal__done"
+              onClick={close}
+            >
+              Done
+            </button>
+          </div>
+        </footer>
+      </div>
+    </>
+  )
+}
