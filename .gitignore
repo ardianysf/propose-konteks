@@ -1,0 +1,40 @@
+# macOS
+.DS_Store
+
+# Agent / orchestration internals
+.pi/
+.superpowers/
+
+# Brainstorming working notes
+BRAINSTORMING-RESUME.md
+
+# Root reference videos
+/*.mp4
+
+# Root screenshots
+/Screenshot*.png
+
+# Local scratch folder
+/untitled folder/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
+
+# Vite cache
+.vite/
+
+# Logs
+*.log
+
+# Environment files (keep the example)
+.env
+.env.*
+!.env.example
