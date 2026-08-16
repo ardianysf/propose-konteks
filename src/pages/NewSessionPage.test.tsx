@@ -5,7 +5,7 @@ import AppShell from '../components/shell/AppShell'
 import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../state/MockupContext'
 import { initialState, mockupReducer, type MockupState } from '../state/mockupReducer'
-import { PENDING_REVIEWS } from '../data/mockData'
+import { ILLUSTRATIVE_DATA_NOTE, PENDING_REVIEWS } from '../data/mockData'
 
 // ---------------------------------------------------------------------------
 // Harness — the page under the real reducer via the mockup context, with a
@@ -426,5 +426,13 @@ describe('NewSessionPage — AppShell integration', () => {
     for (const button of screen.getAllByRole('button')) {
       expect(button).toHaveAccessibleName()
     }
+  })
+
+  it('renders the visible illustrative-data marker from the shared constant (AC46)', () => {
+    renderNewSessionPage()
+    const notes = screen.getAllByTestId('illustrative-data-note')
+    expect(notes).toHaveLength(1)
+    expect(notes[0]).toHaveClass('kx-illustrative-note')
+    expect(notes[0]).toHaveTextContent(ILLUSTRATIVE_DATA_NOTE)
   })
 })

@@ -4,7 +4,7 @@ import Sidebar from './Sidebar'
 import { OverlayLifecycleProvider } from './OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
 import { initialState, mockupReducer, type MockupState } from '../../state/mockupReducer'
-import { RECENT_SESSIONS, SYSTEMS, WORKSPACE } from '../../data/mockData'
+import { ILLUSTRATIVE_DATA_NOTE, RECENT_SESSIONS, SYSTEMS, WORKSPACE } from '../../data/mockData'
 
 // ---------------------------------------------------------------------------
 // Harness — Sidebar under the real reducer via the mockup context, with a
@@ -172,6 +172,15 @@ describe('Sidebar', () => {
   it('uses no emoji anywhere in the sidebar chrome', () => {
     renderSidebar()
     expect(getSidebarNav().textContent).not.toMatch(EMOJI)
+  })
+
+  it('renders the single illustrative-data marker in the sidebar footer from the shared constant (AC46)', () => {
+    renderSidebar()
+    const notes = screen.getAllByTestId('illustrative-data-note')
+    expect(notes).toHaveLength(1)
+    expect(notes[0]).toHaveClass('kx-illustrative-note', 'kx-sidebar__note')
+    expect(notes[0]).toHaveTextContent(ILLUSTRATIVE_DATA_NOTE)
+    expect(ILLUSTRATIVE_DATA_NOTE).toBe('Illustrative data')
   })
 
   it('contains no All Systems page or link — navigation stays inside the sidebar (AC14)', () => {

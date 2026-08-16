@@ -9,6 +9,7 @@
  * mounts from the Component trigger's anchor wrapper below while
  * overlay.kind === 'component-menu'.
  */
+import { ILLUSTRATIVE_DATA_NOTE } from '../data/mockData'
 import ComponentMenu from '../components/composer/ComponentMenu'
 import Composer from '../components/composer/Composer'
 import SessionMode from '../components/composer/SessionMode'
@@ -152,6 +153,11 @@ export default function NewSessionPage() {
       )}
 
       <Composer />
+
+      {/* AC46 — the single visible illustrative-data marker for this page. */}
+      <p className="kx-illustrative-note" data-testid="illustrative-data-note">
+        {ILLUSTRATIVE_DATA_NOTE}
+      </p>
     </section>
   )
 }

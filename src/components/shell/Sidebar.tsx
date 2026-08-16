@@ -13,7 +13,7 @@
  * link exists anywhere here (AC14).
  */
 import { useState } from 'react'
-import { RECENT_SESSIONS, WORKSPACE } from '../../data/mockData'
+import { ILLUSTRATIVE_DATA_NOTE, RECENT_SESSIONS, WORKSPACE } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 import { useOverlayLifecycle } from './OverlayLifecycle'
 
@@ -248,6 +248,11 @@ export default function Sidebar() {
           </span>
         </button>
       </div>
+
+      {/* AC46 — the single visible illustrative-data marker (sidebar footer). */}
+      <p className="kx-illustrative-note kx-sidebar__note" data-testid="illustrative-data-note">
+        {ILLUSTRATIVE_DATA_NOTE}
+      </p>
     </nav>
   )
 }

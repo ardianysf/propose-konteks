@@ -8,7 +8,7 @@ import AppShell from '../components/shell/AppShell'
 import App from '../App'
 import { MockupContext, useMockup } from '../state/MockupContext'
 import { initialState, mockupReducer, type MockupState } from '../state/mockupReducer'
-import { SESSION_HISTORY } from '../data/mockData'
+import { ILLUSTRATIVE_DATA_NOTE, SESSION_HISTORY } from '../data/mockData'
 
 // ---------------------------------------------------------------------------
 // Harness — the page under the real reducer via the mockup context, with a
@@ -371,6 +371,14 @@ describe('SessionHistoryPage — semantics and hygiene', () => {
     for (const button of screen.getAllByRole('button')) {
       expect(button).toHaveAccessibleName()
     }
+  })
+
+  it('renders the visible illustrative-data marker from the shared constant (AC46)', () => {
+    renderSessionHistoryPage()
+    const notes = screen.getAllByTestId('illustrative-data-note')
+    expect(notes).toHaveLength(1)
+    expect(notes[0]).toHaveClass('kx-illustrative-note')
+    expect(notes[0]).toHaveTextContent(ILLUSTRATIVE_DATA_NOTE)
   })
 
   it('performs no fetch — every row renders from SESSION_HISTORY data', () => {
