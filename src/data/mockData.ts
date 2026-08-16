@@ -9,6 +9,12 @@ export const ILLUSTRATIVE_DATA_NOTE = 'Illustrative data'
 export type SessionMode = 'engineering' | 'planning'
 export type Readiness = 'ready' | 'needs-setup'
 
+export interface VcsConnector {
+  id: string
+  name: string
+  hint: string
+}
+
 export interface Workspace {
   name: string
   plan: string
@@ -188,6 +194,15 @@ export const REPOSITORIES: Repository[] = [
   { id: 'online-store/storefront', name: 'online-store/storefront', systemId: 'online-store', vcs: 'GitHub', updatedAt: '2026-08-13' },
   { id: 'online-store/checkout-api', name: 'online-store/checkout-api', systemId: 'online-store', vcs: 'GitLab', updatedAt: '2026-08-12' },
   { id: 'personal/blogspot-theme', name: 'personal/blogspot-theme', systemId: 'personal-blogspot', vcs: 'GitHub', updatedAt: '2026-08-05' },
+]
+
+// VCS connectors offered by the manual repository form (spec §8.2, AC29) —
+// names are illustrative placeholders like everything else here (AC46).
+export const VCS_CONNECTORS: VcsConnector[] = [
+  { id: 'github', name: 'GitHub', hint: 'github.com and GitHub Enterprise' },
+  { id: 'gitlab', name: 'GitLab', hint: 'gitlab.com and self-hosted GitLab' },
+  { id: 'bitbucket', name: 'Bitbucket', hint: 'Bitbucket Cloud' },
+  { id: 'gitea', name: 'Gitea', hint: 'Self-hosted Gitea' },
 ]
 
 // ---------------------------------------------------------------------------

@@ -1442,3 +1442,989 @@
   color: var(--kx-muted);
   font-weight: var(--kx-font-bold);
 }
+
+/* ── Repository selector modal (Task 7 Part A, spec §8.1 — AC25–AC28) ──
+ * The system-scoped work repository picker: a centered 720×570 modal
+ * frame over the shared backdrop primitive. "Add new system" sits at
+ * the top of the system list, above the single search that filters
+ * system and repository names together (AC27). System groups scroll in
+ * the only scrolling region — exactly one active group renders enabled
+ * checkboxes plus the contextual "Add repository manually" action,
+ * while every other system renders its repositories disabled (AC25/28).
+ * The footer is a single row: status left, Cancel/Done right (AC28).
+ * Loading/empty variants swap the group region only (AC43). */
+
+.kx-repo-modal {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto; /* head / body / one-line footer */
+  width: min(720px, calc(100vw - 48px));
+  height: min(570px, calc(100vh - 48px));
+  overflow: hidden;
+}
+
+/* Header — title + subtitle, dismiss control at the right edge. */
+
+.kx-repo-modal__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-repo-modal__head-copy {
+  min-width: 0;
+}
+
+.kx-repo-modal__title {
+  margin: 0;
+  font-size: var(--kx-text-xl);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-repo-modal__subtitle {
+  margin: 2px 0 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted);
+}
+
+.kx-repo-modal__close {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Body — add-system toolbar, single search, then the scrolling groups. */
+
+.kx-repo-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  padding: 14px 18px 0;
+}
+
+.kx-repo-modal__toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.kx-repo-modal__add-system {
+  padding: 7px 12px;
+  border-radius: 9px;
+  font-size: var(--kx-text-sm);
+}
+
+.kx-repo-modal__search {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+/* The only scrolling region — head/toolbar/search/footer stay fixed. */
+
+.kx-repo-modal__groups {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border-top: 1px solid var(--kx-border);
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-repo-modal__groups::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kx-repo-modal__groups::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 999px;
+}
+
+/* System groups — exactly one active, radio-marked group (AC25). */
+
+.kx-repo-modal__system {
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-repo-modal__system-head {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 8px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-repo-modal__system-head:hover,
+.kx-repo-modal__system-head:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-repo-modal__system--active > .kx-repo-modal__system-head {
+  background: var(--kx-pale);
+}
+
+.kx-repo-modal__system-radio {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--kx-border);
+  border-radius: 50%;
+}
+
+.kx-repo-modal__system--active .kx-repo-modal__system-radio {
+  border-color: var(--kx-accent-strong);
+  background: radial-gradient(circle, var(--kx-accent) 0 4.5px, transparent 5px);
+}
+
+.kx-repo-modal__system-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-repo-modal__system-name {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-repo-modal__system-desc {
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-repo-modal__system-count {
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted);
+}
+
+/* Repository rows — checkable only inside the active system; every
+ * other system renders visibly disabled (AC25/AC43). */
+
+.kx-repo-modal__repos {
+  display: grid;
+  padding: 0 6px 10px 36px;
+}
+
+.kx-repo-modal__repo {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  border-top: 1px solid var(--kx-border);
+  cursor: pointer;
+}
+
+.kx-repo-modal__repo:first-child {
+  border-top: none;
+}
+
+.kx-repo-modal__repo:hover {
+  background: var(--kx-pale);
+}
+
+.kx-repo-modal__repo--disabled {
+  cursor: default;
+}
+
+.kx-repo-modal__repo--disabled:hover {
+  background: transparent;
+}
+
+.kx-repo-modal__repo--disabled .kx-repo-modal__repo-name,
+.kx-repo-modal__repo--disabled .kx-repo-modal__repo-meta,
+.kx-repo-modal__repo--disabled .kx-repo-modal__repo-vcs {
+  opacity: 0.55; /* visibly disabled — reduced contrast (AC43) */
+}
+
+.kx-repo-modal__repo-check:disabled {
+  cursor: not-allowed;
+}
+
+.kx-repo-modal__repo-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kx-repo-modal__repo-name {
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-repo-modal__repo-meta {
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted);
+}
+
+.kx-repo-modal__repo-vcs {
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted);
+}
+
+/* Contextual manual add — only inside the expanded active group (AC28). */
+
+.kx-repo-modal__add-repo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  justify-self: start;
+  margin-top: 6px;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-strong);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-repo-modal__add-repo:hover,
+.kx-repo-modal__add-repo:focus-visible {
+  background: var(--kx-pale);
+}
+
+/* Single-row footer — status left, actions right (AC28). */
+
+.kx-repo-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--kx-border);
+  background: var(--kx-raised);
+}
+
+.kx-repo-modal__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.kx-repo-modal__status-system {
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-repo-modal__status-divider {
+  color: var(--kx-border);
+}
+
+.kx-repo-modal__status-count {
+  color: var(--kx-muted);
+}
+
+.kx-repo-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.kx-repo-modal__actions .kx-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+/* Designed loading + empty states (AC43) — the group region swaps only;
+ * frame, toolbar, search, and footer persist. */
+
+.kx-repo-modal__loading {
+  display: grid;
+  gap: 10px;
+  padding: 16px 8px;
+}
+
+.kx-repo-modal__skeleton {
+  height: 46px;
+  border-radius: 10px;
+  background: var(--kx-pale);
+  animation: kx-repo-modal-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes kx-repo-modal-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.kx-repo-modal__empty {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding: 28px 16px;
+  text-align: center;
+}
+
+.kx-repo-modal__empty-title {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-repo-modal__empty-hint {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted);
+}
+
+/* ── Manual repository modal (Task 7 Part B, spec §8.2 — AC29) ────────
+ * The "Add repository manually" form: a centered 560px modal frame
+ * over the shared backdrop primitive. VCS Connector and Execution are
+ * required labeled selects; the repository itself arrives through the
+ * searchable active-system picker (result count + Previous/Next pager)
+ * or the "Enter URL manually" http(s) escape hatch. Selections accu-
+ * mulate as removable chips with an "Add another repository" queue
+ * action, "Require private network" is an optional toggle, and the
+ * single-row footer keeps Cancel/Connect right with Connect visibly
+ * disabled while required fields are missing or invalid (AC29/AC43).
+ * Loading/empty variants swap the picker region only (AC43). */
+
+.kx-manual-modal {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto; /* head / body / one-line footer */
+  width: min(560px, calc(100vw - 48px));
+  max-height: min(620px, calc(100vh - 48px));
+  overflow: hidden;
+}
+
+/* Header — title + subtitle, dismiss control at the right edge. */
+
+.kx-manual-modal__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-manual-modal__head-copy {
+  min-width: 0;
+}
+
+.kx-manual-modal__title {
+  margin: 0;
+  font-size: var(--kx-text-xl);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-manual-modal__subtitle {
+  margin: 2px 0 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted);
+}
+
+.kx-manual-modal__close {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Body — the only scrolling region; stacked labeled fields. */
+
+.kx-manual-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  padding: 14px 18px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-manual-modal__body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kx-manual-modal__body::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 999px;
+}
+
+.kx-manual-modal__field {
+  display: grid;
+  gap: 6px;
+}
+
+.kx-manual-modal__label {
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-secondary);
+}
+
+.kx-manual-modal__field-hint {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted);
+}
+
+.kx-manual-modal__field-error {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-strong);
+}
+
+.kx-manual-modal__select,
+.kx-manual-modal__search {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+/* Picker head — field label with the URL escape hatch at the right. */
+
+.kx-manual-modal__picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.kx-manual-modal__swap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-strong);
+  cursor: pointer;
+  justify-self: start;
+  transition: background-color 0.15s ease;
+}
+
+.kx-manual-modal__swap:hover,
+.kx-manual-modal__swap:focus-visible {
+  background: var(--kx-pale);
+}
+
+/* URL escape hatch — input + Add URL in one row; Add URL is visibly
+ * disabled until the value is a full http(s) URL (AC43). */
+
+.kx-manual-modal__url-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.kx-manual-modal__url {
+  font-size: var(--kx-text-sm);
+}
+
+.kx-manual-modal__add-url {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+/* Result rows — accessible names begin with the repository id. */
+
+.kx-manual-modal__results {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--kx-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.kx-manual-modal__result {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-top: 1px solid var(--kx-border);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-manual-modal__results li:first-child .kx-manual-modal__result {
+  border-top: none;
+}
+
+.kx-manual-modal__result:hover:not(:disabled),
+.kx-manual-modal__result:focus-visible:not(:disabled) {
+  background: var(--kx-pale);
+}
+
+.kx-manual-modal__result:disabled {
+  cursor: not-allowed;
+}
+
+.kx-manual-modal__result:disabled .kx-manual-modal__result-name,
+.kx-manual-modal__result:disabled .kx-manual-modal__result-meta {
+  opacity: 0.55; /* visibly disabled — reduced contrast (AC43) */
+}
+
+.kx-manual-modal__result-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kx-manual-modal__result-name {
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-manual-modal__result-meta {
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted);
+}
+
+.kx-manual-modal__result-flag {
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-strong);
+  white-space: nowrap;
+}
+
+/* Picker footer — result count left, page indicator + pager right. */
+
+.kx-manual-modal__picker-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.kx-manual-modal__count {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted);
+  white-space: nowrap;
+}
+
+.kx-manual-modal__pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kx-manual-modal__page-indicator {
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted);
+  white-space: nowrap;
+}
+
+.kx-manual-modal__page-btn {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: var(--kx-text-2xs);
+}
+
+/* Selection — removable chips plus the queue-another action. */
+
+.kx-manual-modal__selection {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--kx-border);
+  border-radius: 10px;
+  background: var(--kx-pale);
+}
+
+.kx-manual-modal__selection-label {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-secondary);
+}
+
+.kx-manual-modal__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kx-manual-modal__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.kx-manual-modal__chip-name {
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-manual-modal__chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--kx-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.kx-manual-modal__chip-remove:hover,
+.kx-manual-modal__chip-remove:focus-visible {
+  background: var(--kx-raised);
+  color: var(--kx-primary);
+}
+
+.kx-manual-modal__add-another {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-strong);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-manual-modal__add-another:hover,
+.kx-manual-modal__add-another:focus-visible {
+  background: var(--kx-raised);
+}
+
+/* Require private network — optional checkbox toggle. */
+
+.kx-manual-modal__network {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--kx-border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.kx-manual-modal__network:hover {
+  border-color: var(--kx-secondary);
+}
+
+.kx-manual-modal__network-check {
+  margin-top: 2px;
+  accent-color: var(--kx-accent-strong);
+  cursor: pointer;
+}
+
+.kx-manual-modal__network-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.kx-manual-modal__network-label {
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-manual-modal__network-hint {
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted);
+}
+
+/* Single-row footer — note left, Cancel/Connect right (AC29). */
+
+.kx-manual-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--kx-border);
+  background: var(--kx-raised);
+}
+
+.kx-manual-modal__footer-note {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-manual-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.kx-manual-modal__actions .kx-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+/* Designed loading + empty states (AC43) — the picker region swaps
+ * only; frame, fields, and footer persist. */
+
+.kx-manual-modal__loading {
+  display: grid;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.kx-manual-modal__skeleton {
+  height: 44px;
+  border-radius: 10px;
+  background: var(--kx-pale);
+  animation: kx-manual-modal-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes kx-manual-modal-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.kx-manual-modal__empty {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding: 20px 16px;
+  border: 1px dashed var(--kx-border);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.kx-manual-modal__empty-title {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-manual-modal__empty-hint {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted);
+}
+
+/* ── Create System modal (Task 7 Part C, spec §8.3 — AC33) ────────────
+ * The smallest of the Task 7 modals: a centered 460px frame over the
+ * shared backdrop primitive. One required field — Name, with the
+ * required cue visible in the label itself — one optional Description
+ * textarea, and a one-sentence helper explaining that systems group
+ * repositories and components. The single-row footer keeps Cancel and
+ * Create right, with Create visibly disabled while the name is blank
+ * or whitespace (AC43). No loading state: the create commit is a pure
+ * reducer transition with no network involved. */
+
+.kx-create-modal {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr); /* head / form (body + footer) */
+  width: min(460px, calc(100vw - 48px));
+  max-height: min(440px, calc(100vh - 48px));
+  overflow: hidden;
+}
+
+/* Header — title + subtitle, dismiss control at the right edge. */
+
+.kx-create-modal__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-create-modal__head-copy {
+  min-width: 0;
+}
+
+.kx-create-modal__title {
+  margin: 0;
+  font-size: var(--kx-text-xl);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-create-modal__subtitle {
+  margin: 2px 0 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted);
+}
+
+.kx-create-modal__close {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Form shell — the body scrolls, the footer never does. */
+
+.kx-create-modal__form {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+}
+
+.kx-create-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+  padding: 14px 18px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-create-modal__body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kx-create-modal__body::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 999px;
+}
+
+/* Helper — one concise sentence above the fields (AC33). */
+
+.kx-create-modal__helper {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--kx-pale);
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted);
+}
+
+/* Fields — label with the required/optional cue inside the label text. */
+
+.kx-create-modal__field {
+  display: grid;
+  gap: 6px;
+}
+
+.kx-create-modal__label {
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-secondary);
+}
+
+.kx-create-modal__req {
+  color: var(--kx-accent-strong);
+}
+
+.kx-create-modal__opt {
+  color: var(--kx-muted);
+  font-weight: var(--kx-font-normal);
+}
+
+.kx-create-modal__name,
+.kx-create-modal__description {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+.kx-create-modal__description {
+  resize: vertical;
+  min-height: 64px;
+  font-family: inherit;
+}
+
+/* Single-row footer — note left, Cancel/Create right (AC33). */
+
+.kx-create-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--kx-border);
+  background: var(--kx-raised);
+}
+
+.kx-create-modal__footer-note {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-create-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.kx-create-modal__actions .kx-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}

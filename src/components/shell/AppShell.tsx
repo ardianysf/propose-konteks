@@ -12,6 +12,9 @@
 import Sidebar from './Sidebar'
 import SystemMenu from './SystemMenu'
 import WorkspaceMenu from './WorkspaceMenu'
+import CreateSystemModal from '../context/CreateSystemModal'
+import ManualRepositoryModal from '../context/ManualRepositoryModal'
+import RepositorySelectorModal from '../context/RepositorySelectorModal'
 import NewSessionPage from '../../pages/NewSessionPage'
 import { useMockup } from '../../state/MockupContext'
 
@@ -34,10 +37,15 @@ export default function AppShell() {
           </section>
         )}
       </main>
-      {/* Overlay union slot — exactly one overlay at a time; the workspace
-          and system menus are the wired kinds. Later tasks add the others. */}
+      {/* Overlay union slot — exactly one overlay at a time; the anchored
+          menus and the Task 7 context modals (repo selector, manual repo
+          form, Create System) are the wired kinds. Later tasks add the
+          rest. */}
       {state.overlay.kind === 'workspace-menu' && <WorkspaceMenu />}
       {state.overlay.kind === 'system-menu' && <SystemMenu />}
+      {state.overlay.kind === 'repository-modal' && <RepositorySelectorModal />}
+      {state.overlay.kind === 'manual-repo-modal' && <ManualRepositoryModal />}
+      {state.overlay.kind === 'create-system-modal' && <CreateSystemModal />}
     </div>
   )
 }
