@@ -880,3 +880,306 @@
   font-size: var(--kx-text-md);
   color: var(--kx-muted);
 }
+
+/* ── New session page (Task 5, spec §7) ────────────────────────────── */
+
+/* Visually hidden — keeps landmarks/headings accessible without visual
+ * noise (the page's h1 names the route for AT and the App smoke test). */
+.kx-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Page frame — centers the mode control, setup row, and composer;
+ * fill/stretch between the ideal-width extremes (§5.1). */
+.kx-new-session {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: clamp(48px, 9vh, 96px) 32px 48px;
+}
+
+/* Dominant mode hierarchy (AC15) — the segmented control scaled up so
+ * it reads as the primary switch above the setup controls and composer. */
+.kx-session-mode--dominant {
+  padding: 5px;
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(36, 48, 37, 0.08);
+}
+
+.kx-session-mode--dominant .kx-segmented__btn {
+  padding: 11px 34px;
+  border-radius: 13px;
+  font-size: var(--kx-text-xl);
+}
+
+/* Engineering-only setup row (AC17) — hidden entirely in Planning
+ * (the page removes it from the tree, AC16). */
+.kx-setup-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.kx-setup-row__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 14px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.kx-setup-row__trigger:hover {
+  background: var(--kx-pale);
+  border-color: var(--kx-accent);
+}
+
+.kx-setup-row__trigger-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-strong);
+}
+
+.kx-setup-row__trigger-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-setup-row__trigger-caption {
+  font-size: var(--kx-text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kx-muted);
+}
+
+.kx-setup-row__trigger-value {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-setup-row__chevron {
+  flex-shrink: 0;
+  color: var(--kx-muted);
+}
+
+/* ── Composer (Task 5, spec §7.2 — AC18–AC21) ─────────────────────── */
+
+/* Soft-matcha outer container (pale wash + hairline) wrapping the white
+ * input — the contrast between the two stays clearly visible (AC18). */
+.kx-composer {
+  width: 100%;
+  padding: 12px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-radius: var(--kx-radius-main);
+}
+
+.kx-composer__input {
+  display: block;
+  width: 100%;
+  min-height: 118px;
+  padding: 14px 16px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 14px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+}
+
+.kx-composer__input::placeholder {
+  color: var(--kx-muted);
+}
+
+.kx-composer__input:focus {
+  outline: none;
+  border-color: var(--kx-accent-strong);
+  box-shadow: 0 0 0 3px rgba(143, 191, 106, 0.25);
+}
+
+/* Toolbar — unboxed icon tools with the shared hover affordance (AC19);
+ * the Execution Profile control sits bottom-left, immediately after the
+ * text/document tool (AC21); send hugs the right edge. */
+.kx-composer__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.kx-composer__profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-left: 6px;
+  padding: 3px 12px 3px 4px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.kx-composer__profile:hover {
+  background: var(--kx-pale);
+  border-color: var(--kx-accent-strong);
+}
+
+.kx-composer__profile-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 999px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-strong);
+}
+
+.kx-composer__profile-copy {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  text-align: left;
+}
+
+.kx-composer__profile-caption {
+  font-size: var(--kx-text-2xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--kx-muted);
+}
+
+.kx-composer__profile-name {
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  line-height: 1.2;
+  color: var(--kx-primary);
+}
+
+.kx-composer__profile-chevron {
+  flex-shrink: 0;
+  color: var(--kx-muted);
+}
+
+/* Soft-accent send element (AC19) — disabled carries reduced contrast
+ * and a not-allowed cursor (AC43). Doubles as the "Start planning" CTA
+ * in Planning mode (AC16). */
+.kx-composer__send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 8px 18px;
+  background: rgba(143, 191, 106, 0.22);
+  border: 1px solid var(--kx-accent);
+  border-radius: 999px;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-strong);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.kx-composer__send:hover:not(:disabled) {
+  background: rgba(143, 191, 106, 0.4);
+  border-color: var(--kx-accent-strong);
+  color: var(--kx-primary);
+}
+
+.kx-composer__send:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* Footer — disclaimer left, "Reviews waiting" + round count badge right
+ * (AC20); the badge is a fixed-height pill so 1- and 2-digit counts stay
+ * round. */
+.kx-composer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 0 4px;
+}
+
+.kx-composer__disclaimer {
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted);
+}
+
+.kx-composer__reviews {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-strong);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.kx-composer__reviews:hover {
+  color: var(--kx-accent);
+  text-decoration: underline;
+}
+
+.kx-composer__badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--kx-accent-strong);
+  border-radius: 999px;
+  color: var(--kx-raised);
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+}
