@@ -1,10 +1,12 @@
 import { useEffect, useReducer } from 'react'
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import Sidebar from './Sidebar'
 import { OverlayLifecycleProvider } from './OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
 import { initialState, mockupReducer, type MockupState } from '../../state/mockupReducer'
-import { ILLUSTRATIVE_DATA_NOTE, RECENT_SESSIONS, SYSTEMS, WORKSPACE } from '../../data/mockData'
+import { RECENT_SESSIONS, SYSTEMS, WORKSPACE } from '../../data/mockData'
 
 // ---------------------------------------------------------------------------
 // Harness — Sidebar under the real reducer via the mockup context, with a
@@ -21,11 +23,11 @@ function StateProbe({ bucket }: { bucket: StateBucket }) {
   return null
 }
 
-function renderSidebar() {
+function renderSidebar(initial?: Partial<MockupState>) {
   const bucket: StateBucket = { current: null }
 
   function Harness() {
-    const [state, dispatch] = useReducer(mockupReducer, initialState())
+    const [state, dispatch] = useReducer(mockupReducer, { ...initialState(), ...initial })
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
@@ -41,6 +43,10 @@ function renderSidebar() {
 }
 
 const getSidebarNav = () => screen.getByRole('navigation', { name: 'Sidebar' })
+
+// jsdom does not load stylesheets, so rail treatment is verified against
+// the shipped CSS directly (tokens.test.ts convention).
+const css = readFileSync(join(process.cwd(), 'src/styles/components.css'), 'utf8')
 
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u
 
@@ -96,6 +102,72 @@ describe('Sidebar', () => {
     expect(bucket.current?.overlay).toEqual({ kind: 'system-menu' })
   })
 
+  it('workspace and system controls toggle their own overlay on a second click and expose aria-expanded', async () => {
+    const { bucket } = renderSidebar()
+    const workspaceBtn = screen.getByRole('button', { name: /refactory/i })
+    const systemBtn = screen.getByRole('button', { name: /bsi - hris/i })
+
+    // aria-expanded tracks the open state of each control's own menu.
+    expect(workspaceBtn).toHaveAttribute('aria-expanded', 'false')
+    expect(systemBtn).toHaveAttribute('aria-expanded', 'false')
+
+    // Second click on the same trigger dismisses its own overlay through
+    // the lifecycle and restores focus to the trigger.
+    fireEvent.click(workspaceBtn)
+    expect(bucket.current?.overlay).toEqual({ kind: 'workspace-menu' })
+    expect(workspaceBtn).toHaveAttribute('aria-expanded', 'true')
+    fireEvent.click(workspaceBtn)
+    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
+    expect(workspaceBtn).toHaveAttribute('aria-expanded', 'false')
+    await waitFor(() => expect(workspaceBtn).toHaveFocus())
+
+    fireEvent.click(systemBtn)
+    expect(bucket.current?.overlay).toEqual({ kind: 'system-menu' })
+    expect(systemBtn).toHaveAttribute('aria-expanded', 'true')
+    expect(workspaceBtn).toHaveAttribute('aria-expanded', 'false')
+    fireEvent.click(systemBtn)
+    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
+    expect(systemBtn).toHaveAttribute('aria-expanded', 'false')
+    await waitFor(() => expect(systemBtn).toHaveFocus())
+  })
+
+  it('account control toggles its own overlay on a second click and exposes aria-expanded', async () => {
+    const { bucket } = renderSidebar()
+    const accountBtn = screen.getByTestId('account-trigger')
+
+    expect(accountBtn).toHaveAttribute('aria-expanded', 'false')
+
+    fireEvent.click(accountBtn)
+    expect(bucket.current?.overlay).toEqual({ kind: 'account-menu' })
+    expect(accountBtn).toHaveAttribute('aria-expanded', 'true')
+
+    // Second click on the same trigger dismisses through the lifecycle
+    // and restores focus to the trigger.
+    fireEvent.click(accountBtn)
+    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
+    expect(accountBtn).toHaveAttribute('aria-expanded', 'false')
+    await waitFor(() => expect(accountBtn).toHaveFocus())
+
+    // Reopening after the toggle still works.
+    fireEvent.click(accountBtn)
+    expect(bucket.current?.overlay).toEqual({ kind: 'account-menu' })
+    expect(accountBtn).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('cross-trigger clicks still replace the open overlay instead of toggling', () => {
+    const { bucket } = renderSidebar()
+    fireEvent.click(screen.getByRole('button', { name: /refactory/i }))
+    expect(bucket.current?.overlay).toEqual({ kind: 'workspace-menu' })
+
+    // A different trigger replaces the open overlay — replacement
+    // behavior is preserved; only the same trigger toggles.
+    fireEvent.click(screen.getByRole('button', { name: /bsi - hris/i }))
+    expect(bucket.current?.overlay).toEqual({ kind: 'system-menu' })
+
+    fireEvent.click(screen.getByRole('button', { name: /refactory/i }))
+    expect(bucket.current?.overlay).toEqual({ kind: 'workspace-menu' })
+  })
+
   it('workspace control dispatches OPEN_OVERLAY workspace-menu (AC7)', () => {
     const { bucket } = renderSidebar()
     fireEvent.click(screen.getByRole('button', { name: /refactory/i }))
@@ -120,14 +192,102 @@ describe('Sidebar', () => {
     expect(rows.at(-1)).toHaveTextContent('Validate delivery evidence')
   })
 
-  it('View all navigates to session history while the sidebar element stays byte-identical (AC11)', () => {
+  it('View all navigates to session history while the sidebar element stays byte-identical apart from the nav-active state (AC11)', () => {
     const { bucket } = renderSidebar()
     const nav = getSidebarNav()
+    // The only allowed DOM delta is the New session control's
+    // aria-current="page" route state — the sidebar never remounts.
+    const stripNavState = (html: string) =>
+      html.replace(' aria-current="page"', '').replace(' kx-sidebar__new-session--active', '')
     const before = nav.outerHTML
     fireEvent.click(screen.getByRole('button', { name: /view all/i }))
     expect(bucket.current?.route).toBe('session-history')
     expect(screen.getByTestId('route')).toHaveTextContent('session-history')
-    expect(nav.outerHTML).toBe(before)
+    expect(nav.outerHTML).toBe(stripNavState(before))
+    expect(screen.getByTestId('new-session-trigger')).not.toHaveAttribute('aria-current')
+  })
+
+  // -------------------------------------------------------------------------
+  // New session route control (between the system control and Recent
+  // sessions)
+  // -------------------------------------------------------------------------
+
+  it('renders the New session control between the system control and Recent sessions with a decorative icon', () => {
+    renderSidebar()
+    const nav = getSidebarNav()
+    const button = screen.getByTestId('new-session-trigger')
+    expect(button).toHaveAccessibleName('New session')
+    expect(button).toHaveTextContent('New session')
+
+    // A square/plus session icon, decorative like the other shell icons.
+    const icon = button.querySelector('svg[data-icon="new-session"]')
+    expect(icon).not.toBeNull()
+    expect(icon).toHaveAttribute('aria-hidden', 'true')
+
+    // Document order: workspace box → system control → New session →
+    // Recent sessions.
+    const system = screen.getByRole('button', { name: /bsi - hris/i })
+    const recent = nav.querySelector('.kx-sidebar__recent')!
+    const follows = (a: Element, b: Element) =>
+      (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0
+    expect(follows(system, button)).toBe(true)
+    expect(follows(button, recent)).toBe(true)
+  })
+
+  it('New session dispatches NAVIGATE new-session and marks itself aria-current=page as a semantics-only active state (no resting background)', () => {
+    const { bucket } = renderSidebar({ route: 'session-history' })
+    const button = screen.getByTestId('new-session-trigger')
+    expect(button).not.toHaveAttribute('aria-current')
+    expect(button).not.toHaveClass('kx-sidebar__new-session--active')
+
+    fireEvent.click(button)
+    expect(bucket.current?.route).toBe('new-session')
+    expect(screen.getByTestId('route')).toHaveTextContent('new-session')
+    expect(button).toHaveAttribute('aria-current', 'page')
+    expect(button).toHaveClass('kx-sidebar__new-session', 'kx-sidebar__new-session--active')
+
+    // CSS convention: the resting control paints NOTHING — base and
+    // active-route backgrounds stay transparent; only the hover/focus
+    // hover affordance may fill pale. The icon chip stays semantic
+    // (accent glyph color) but paints no resting background either.
+    expect(css).toMatch(/\.kx-sidebar__new-session\s*\{[^}]*background: transparent/)
+    expect(css).toMatch(
+      /\.kx-sidebar__new-session:hover,\s*\.kx-sidebar__new-session:focus-visible\s*\{[^}]*background: var\(--kx-pale\)/,
+    )
+    expect(css).not.toMatch(/\.kx-sidebar__new-session--active[^{]*\{[^}]*background/)
+    expect(css).toMatch(/\.kx-sidebar__new-session-icon\s*\{[^}]*background: transparent/)
+    expect(css).not.toMatch(/\.kx-sidebar__new-session-icon\s*\{[^}]*background: var\(--kx-pale\)/)
+  })
+
+  it('New session closes an open overlay through the lifecycle so the route is clean and focus stays safe', async () => {
+    const { bucket } = renderSidebar()
+    const systemBtn = screen.getByRole('button', { name: /bsi - hris/i })
+    fireEvent.click(systemBtn)
+    expect(bucket.current?.overlay).toEqual({ kind: 'system-menu' })
+
+    fireEvent.click(screen.getByTestId('new-session-trigger'))
+    expect(bucket.current?.route).toBe('new-session')
+    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
+    // Focus safety: the lifecycle restores focus to the overlay's origin
+    // trigger — it is never dropped onto a removed overlay element.
+    await waitFor(() => expect(systemBtn).toHaveFocus())
+  })
+
+  it('keeps the New session control visible in the manual rail — only the label hides (CSS convention)', () => {
+    const { bucket } = renderSidebar()
+    const button = screen.getByTestId('new-session-trigger')
+    fireEvent.click(screen.getByRole('button', { name: /collapse sidebar/i }))
+    expect(bucket.current?.sidebarCollapsed).toBe(true)
+
+    // The control survives the rail with its accessible name intact.
+    expect(screen.getByTestId('new-session-trigger')).toBe(button)
+    expect(button).toHaveAccessibleName('New session')
+    expect(button.querySelector('.kx-sidebar__new-session-label')).not.toBeNull()
+
+    // The rail CSS keeps the button/icon and hides only the label.
+    expect(css).toMatch(/\.kx-sidebar--rail \.kx-sidebar__new-session\s*\{[^}]*justify-content: center/)
+    expect(css).toMatch(/\.kx-sidebar--rail \.kx-sidebar__new-session-label\s*\{[^}]*display: none/)
+    expect(css).not.toMatch(/\.kx-sidebar--rail \.kx-sidebar__new-session\s*\{[^}]*display: none/)
   })
 
   it('collapse toggles the rail-width class through TOGGLE_SIDEBAR and restores 240px (AC12)', () => {
@@ -174,13 +334,13 @@ describe('Sidebar', () => {
     expect(getSidebarNav().textContent).not.toMatch(EMOJI)
   })
 
-  it('renders the single illustrative-data marker in the sidebar footer from the shared constant (AC46)', () => {
+  it('renders no illustrative-data marker — the sidebar carries no marker', () => {
     renderSidebar()
-    const notes = screen.getAllByTestId('illustrative-data-note')
-    expect(notes).toHaveLength(1)
-    expect(notes[0]).toHaveClass('kx-illustrative-note', 'kx-sidebar__note')
-    expect(notes[0]).toHaveTextContent(ILLUSTRATIVE_DATA_NOTE)
-    expect(ILLUSTRATIVE_DATA_NOTE).toBe('Illustrative data')
+    expect(screen.queryByTestId('illustrative-data-note')).not.toBeInTheDocument()
+    expect(getSidebarNav().querySelectorAll('.kx-illustrative-note')).toHaveLength(0)
+    expect(getSidebarNav().textContent).not.toContain('Illustrative data')
+    // The shared CSS note style survives for the page-level markers.
+    expect(css).not.toContain('.kx-sidebar__note')
   })
 
   it('contains no All Systems page or link — navigation stays inside the sidebar (AC14)', () => {

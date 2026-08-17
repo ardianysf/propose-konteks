@@ -28,11 +28,16 @@ it('frames the AppShell — one .kx-app grid with a single sidebar and one main 
 
 it('keeps the sidebar untouched while the route placeholder switches (AC11)', () => {
   const { container } = render(<App />)
-  const before = container.querySelector('.kx-sidebar')!.outerHTML
+  // The only allowed DOM delta is the New session control's
+  // aria-current="page" route state — the sidebar never remounts.
+  const stripNavState = (html: string) =>
+    html.replace(' aria-current="page"', '').replace(' kx-sidebar__new-session--active', '')
+  const before = stripNavState(container.querySelector('.kx-sidebar')!.outerHTML)
   fireEvent.click(screen.getByRole('button', { name: /view all/i }))
   expect(screen.getByRole('heading', { name: /session history/i })).toBeInTheDocument()
   expect(container.querySelectorAll('.kx-sidebar')).toHaveLength(1)
-  expect(container.querySelector('.kx-sidebar')!.outerHTML).toBe(before)
+  expect(stripNavState(container.querySelector('.kx-sidebar')!.outerHTML)).toBe(before)
+  expect(screen.getByTestId('new-session-trigger')).not.toHaveAttribute('aria-current')
 })
 
 it('mounts the system menu overlay slot only after the system control opens it', () => {
@@ -103,7 +108,9 @@ describe('Task 7 modal overlays', () => {
   const getCreateDialog = () => screen.getByRole('dialog', { name: 'Create a new system' })
   const getManualDialog = () => screen.getByRole('dialog', { name: 'Add repository manually' })
 
-  /** Exactly one overlay surface: one dialog, one backdrop, no menus. */
+  /** Exactly one overlay surface: one dialog, one backdrop, no menus.
+   *  The repository→create nesting below is the one intentional
+   *  exception — two stacked frames with one accessible active dialog. */
   const expectSingleOverlay = () => {
     expect(screen.getAllByRole('dialog')).toHaveLength(1)
     expect(document.querySelectorAll('.kx-modal-backdrop')).toHaveLength(1)
@@ -160,13 +167,73 @@ describe('Task 7 modal overlays', () => {
     expect(screen.getByTestId('repository-trigger')).toHaveTextContent('BSI - HRIS')
   })
 
-  it("swaps the selector for the Create modal through the selector's Add new system — exactly one overlay", () => {
+  it("nests the Create modal above the suspended selector through the selector's Add new system — two stacked frames, one accessible active dialog", () => {
     render(<App />)
     fireEvent.click(screen.getByTestId('repository-trigger'))
+
+    // Seed a live draft selection before nesting, so the return path can
+    // prove the draft survives the whole suspended round trip.
+    fireEvent.click(within(getRepoDialog()).getByRole('checkbox', { name: 'bsi/hris-frontend-shared' }))
     fireEvent.click(within(getRepoDialog()).getByRole('button', { name: 'Add new system' }))
+
+    // The repository modal does NOT unmount — it stays rendered behind the
+    // nested Create modal as a suspended frame: two dialog DOM nodes and
+    // two stacked backdrops, with only the Create dialog accessible.
+    expect(getCreateDialog()).toHaveClass('kx-modal', 'kx-create-modal', 'kx-create-modal--nested')
+    const suspendedRepo = document.querySelector('.kx-repo-modal')!
+    expect(suspendedRepo).toHaveAttribute('aria-hidden', 'true')
+    expect(suspendedRepo).toHaveClass('kx-repo-modal--suspended')
+    expect(screen.getAllByRole('dialog')).toHaveLength(1)
     expect(screen.queryByRole('dialog', { name: 'Choose work repositories' })).not.toBeInTheDocument()
+    const backdrops = document.querySelectorAll('.kx-modal-backdrop')
+    expect(backdrops).toHaveLength(2)
+    expect(backdrops[0]).toHaveClass('kx-modal-backdrop--suspended')
+    expect(backdrops[1]).toHaveClass('kx-modal-backdrop--nested')
+
+    // Cancel returns directly to the repository modal — the draft survives
+    // and nothing commits to the session context.
+    fireEvent.click(within(getCreateDialog()).getByRole('button', { name: 'Cancel' }))
+    expect(screen.queryByRole('dialog', { name: 'Create a new system' })).not.toBeInTheDocument()
+    expect(getRepoDialog()).toBeInTheDocument()
+    expect(document.querySelectorAll('.kx-modal-backdrop')).toHaveLength(1)
+    expect(
+      within(getRepoDialog()).getByRole('checkbox', { name: 'bsi/hris-frontend-shared' }),
+    ).toBeChecked()
+    expect(within(getRepoDialog()).getByText(/1 repository selected/i)).toBeInTheDocument()
+    expect(screen.getByTestId('repository-trigger')).toHaveTextContent('Choose system / repositories')
+
+    // Escape from the nested dialog returns the same way — never a
+    // full-chain dismissal, never a commit.
+    fireEvent.click(within(getRepoDialog()).getByRole('button', { name: 'Add new system' }))
     expect(getCreateDialog()).toBeInTheDocument()
-    expectSingleOverlay()
+    fireEvent.keyDown(getCreateDialog(), { key: 'Escape' })
+    expect(screen.queryByRole('dialog', { name: 'Create a new system' })).not.toBeInTheDocument()
+    expect(getRepoDialog()).toBeInTheDocument()
+    expect(
+      within(getRepoDialog()).getByRole('checkbox', { name: 'bsi/hris-frontend-shared' }),
+    ).toBeChecked()
+    expect(screen.getByTestId('repository-trigger')).toHaveTextContent('Choose system / repositories')
+
+    // Create returns to the repository modal with the new system selected
+    // in the draft (empty repository scope) — still no session commit.
+    fireEvent.click(within(getRepoDialog()).getByRole('button', { name: 'Add new system' }))
+    fireEvent.change(within(getCreateDialog()).getByRole('textbox', { name: /^name/i }), {
+      target: { value: 'QA Platform' },
+    })
+    fireEvent.click(within(getCreateDialog()).getByRole('button', { name: 'Create' }))
+    expect(screen.queryByRole('dialog', { name: 'Create a new system' })).not.toBeInTheDocument()
+    expect(getRepoDialog()).toBeInTheDocument()
+    expect(getRepoDialog().querySelector('.kx-repo-modal__system--active')).toHaveTextContent(
+      /QA Platform/i,
+    )
+    expect(within(getRepoDialog()).getByText(/0 repositories selected/i)).toBeInTheDocument()
+    expect(screen.getByTestId('repository-trigger')).toHaveTextContent('Choose system / repositories')
+
+    // Done is the only commit — it closes the chain and updates the pill.
+    fireEvent.click(within(getRepoDialog()).getByRole('button', { name: 'Done' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
+    expect(screen.getByTestId('repository-trigger')).toHaveTextContent('QA Platform')
   })
 
   it("swaps the selector for the manual repo form through the selector's Add repository manually — exactly one overlay (AC28)", () => {

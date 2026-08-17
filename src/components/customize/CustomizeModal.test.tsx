@@ -462,10 +462,12 @@ describe('CustomizeModal — Agents tab (AC36)', () => {
 // ---------------------------------------------------------------------------
 
 describe('CustomizeModal — Context tab (AC37)', () => {
+  const getRegions = () => within(getTabPanel()).getAllByRole('region')
+
   it('presents exactly three labelled sections in order — Files, Skills, Repositories — each with a compact status/count', () => {
     renderCustomizeModal({ kind: 'customize', tab: 'context' })
 
-    const regions = within(getTabPanel()).getAllByRole('region')
+    const regions = getRegions()
     expect(regions.map((region) => region.getAttribute('aria-labelledby'))).toHaveLength(3)
 
     const [files, skills, repositories] = regions
@@ -475,19 +477,97 @@ describe('CustomizeModal — Context tab (AC37)', () => {
     expect(follows(files, skills)).toBe(true)
     expect(follows(skills, repositories)).toBe(true)
 
+    // With nothing selected, the repositories count reports zero — the
+    // Files and Skills counts are unaffected by the session scope.
     const enabledSkills = PRESERVED_SKILLS.filter((skill) => skill.enabled)
     expect(files.textContent).toContain(`${CONTEXT_FILES.length} files`)
     expect(skills.textContent).toContain(
       `${enabledSkills.length} of ${PRESERVED_SKILLS.length} enabled`,
     )
     expect(repositories.textContent).toContain(
-      `${REPOSITORIES.length} repositories · ${SYSTEMS.length} systems`,
+      `0 repositories · ${SYSTEMS.length} systems`,
     )
   })
 
-  it('each section carries representative illustrative content from the data sources — no backend calls', () => {
+  it('repositories — nothing selected: count 0, the concise `No repositories selected` note, and no repository rows', () => {
     renderCustomizeModal({ kind: 'customize', tab: 'context' })
-    const [files, skills, repositories] = within(getTabPanel()).getAllByRole('region')
+    const [, , repositories] = getRegions()
+
+    expect(repositories.textContent).toContain(`0 repositories · ${SYSTEMS.length} systems`)
+    expect(repositories.textContent).toContain('No repositories selected')
+
+    // The only row is the designed empty note — never a fake list.
+    const items = repositories.querySelectorAll('.kx-context__item')
+    expect(items).toHaveLength(1)
+    expect(items[0]).toHaveClass('kx-context__item--empty')
+    for (const repository of REPOSITORIES) {
+      expect(repositories.textContent).not.toContain(repository.name)
+    }
+  })
+
+  it('repositories — a global selected subset renders only those rows and their count', () => {
+    renderCustomizeModal(
+      { kind: 'customize', tab: 'context' },
+      { selectedRepoIds: ['bsi/hris-frontend-shared', 'bsi/canteen-cms'] },
+    )
+    const [, , repositories] = getRegions()
+
+    expect(repositories.textContent).toContain(`2 repositories · ${SYSTEMS.length} systems`)
+    expect(within(repositories).getByText('bsi/hris-frontend-shared')).toBeInTheDocument()
+    expect(within(repositories).getByText('bsi/canteen-cms')).toBeInTheDocument()
+    // Each row carries its VCS and updated metadata.
+    expect(repositories.textContent).toContain('GitHub')
+    expect(repositories.textContent).toContain('GitLab')
+    expect(repositories.textContent).toContain('updated 2026-08-15')
+
+    // Unrelated repositories never render — no other registry rows leak in.
+    for (const repository of REPOSITORIES) {
+      const selected =
+        repository.id === 'bsi/hris-frontend-shared' || repository.id === 'bsi/canteen-cms'
+      if (!selected) {
+        expect(within(repositories).queryByText(repository.name)).not.toBeInTheDocument()
+      }
+    }
+    expect(repositories.textContent).not.toContain('No repositories selected')
+  })
+
+  it('repositories — a committed sessionContext repoIds takes precedence over the global selection', () => {
+    renderCustomizeModal(
+      { kind: 'customize', tab: 'context' },
+      {
+        selectedRepoIds: ['bsi/hris-frontend-shared', 'bsi/hris-frontend-promotion'],
+        sessionContext: { systemId: 'bsi-canteen', repoIds: ['bsi/canteen-backend'] },
+      },
+    )
+    const [, , repositories] = getRegions()
+
+    // Only the committed session scope renders — the global selection does
+    // not leak into the rows or the count.
+    expect(repositories.textContent).toContain(`1 repositories · ${SYSTEMS.length} systems`)
+    expect(within(repositories).getByText('bsi/canteen-backend')).toBeInTheDocument()
+    expect(within(repositories).queryByText('bsi/hris-frontend-shared')).not.toBeInTheDocument()
+    expect(within(repositories).queryByText('bsi/hris-frontend-promotion')).not.toBeInTheDocument()
+  })
+
+  it('repositories — unknown ids outside the registry drop out instead of rendering broken rows', () => {
+    renderCustomizeModal(
+      { kind: 'customize', tab: 'context' },
+      { selectedRepoIds: ['bsi/hris-frontend-shared', 'ghost/not-in-registry'] },
+    )
+    const [, , repositories] = getRegions()
+
+    expect(repositories.textContent).toContain(`1 repositories · ${SYSTEMS.length} systems`)
+    expect(within(repositories).getByText('bsi/hris-frontend-shared')).toBeInTheDocument()
+    expect(repositories.textContent).not.toContain('ghost/not-in-registry')
+    expect(repositories.querySelectorAll('.kx-context__item')).toHaveLength(1)
+  })
+
+  it('each section carries representative illustrative content — files and skills from the data sources, repositories from the session scope', () => {
+    renderCustomizeModal(
+      { kind: 'customize', tab: 'context' },
+      { selectedRepoIds: REPOSITORIES.slice(0, 2).map((repository) => repository.id) },
+    )
+    const [files, skills, repositories] = getRegions()
 
     for (const file of CONTEXT_FILES) {
       expect(files.textContent).toContain(file.path)
@@ -496,13 +576,11 @@ describe('CustomizeModal — Context tab (AC37)', () => {
       expect(skills.textContent).toContain(skill.name)
       expect(skills.textContent).toContain(skill.scope)
     }
-    for (const repository of REPOSITORIES.slice(0, 3)) {
+    for (const repository of REPOSITORIES.slice(0, 2)) {
       expect(repositories.textContent).toContain(repository.name)
       expect(repositories.textContent).toContain(repository.vcs)
+      expect(repositories.textContent).toContain(`updated ${repository.updatedAt}`)
     }
-    expect(repositories.textContent).toContain(
-      `${REPOSITORIES.length - 3} more`,
-    )
   })
 })
 

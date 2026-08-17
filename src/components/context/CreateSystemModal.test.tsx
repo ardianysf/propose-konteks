@@ -241,7 +241,7 @@ describe('CreateSystemModal — submit (AC33)', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('confirms the new system as the committed session context when opened from the repository modal', () => {
+  it('returns to the repository modal with the new system selected in the draft when created from the repository source — the session context is not committed', () => {
     const { bucket } = renderCreateSystemModal(
       { kind: 'create-system-modal', source: 'repository-modal' },
       { selectedRepoIds: ['bsi/hris-frontend-shared'] },
@@ -252,10 +252,13 @@ describe('CreateSystemModal — submit (AC33)', () => {
     const state = bucket.current!
     const created = state.systems[state.systems.length - 1]
     expect(created.name).toBe('QA Platform')
-    expect(state.sessionContext).toEqual({ systemId: created.id, repoIds: [] })
+    // The draft chooses the new system with an empty repository scope…
+    expect(state.sessionContextDraft).toEqual({ systemId: created.id, repoIds: [] })
+    // …and the modal returns to the repository selector instead of closing.
+    expect(state.overlay).toEqual({ kind: 'repository-modal' })
+    // The committed session context is untouched — it lands only after Done.
+    expect(state.sessionContext).toBeNull()
     expect(state.activeSystemId).toBe(created.id)
-    expect(state.sessionContextDraft).toBeNull()
-    expect(state.overlay).toEqual({ kind: 'none' })
   })
 
   it('omits the description when blank — CREATE_SYSTEM lands without one', () => {
@@ -302,6 +305,79 @@ describe('CreateSystemModal — submit (AC33)', () => {
       expect(fetchSpy).not.toHaveBeenCalled()
       vi.unstubAllGlobals()
     }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Nested repository source — stacking, escape interception, and the
+// return-to-selector contract (repository-sourced Create System)
+// ---------------------------------------------------------------------------
+
+describe('CreateSystemModal — nested repository source', () => {
+  it('renders the nested stacking classes above the repository modal layers — backdrop 60 / dialog 61 over 50/51', () => {
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'repository-modal' })
+    const dialog = getDialog()
+    expect(dialog).toHaveClass('kx-create-modal--nested')
+
+    const backdrops = document.querySelectorAll('.kx-modal-backdrop')
+    expect(backdrops).toHaveLength(1)
+    expect(backdrops[0]).toHaveClass('kx-modal-backdrop--nested')
+
+    // The dedicated layers ship in components.css, strictly above the
+    // repository modal's shared 50/51 layers.
+    expect(css).toMatch(/\.kx-modal-backdrop\s*\{[^}]*z-index:\s*50/s)
+    expect(css).toMatch(/\.kx-modal\s*\{[^}]*z-index:\s*51/s)
+    expect(css).toMatch(/\.kx-modal-backdrop--nested\s*\{[^}]*z-index:\s*60/s)
+    expect(css).toMatch(/\.kx-create-modal--nested\s*\{[^}]*z-index:\s*61/s)
+  })
+
+  it('keeps the single-modal frame when opened from the system menu — no nested classes, shared 50/51 layers', () => {
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
+    const dialog = getDialog()
+    expect(dialog).not.toHaveClass('kx-create-modal--nested')
+    expect(document.querySelector('.kx-modal-backdrop')).not.toHaveClass(
+      'kx-modal-backdrop--nested',
+    )
+  })
+
+  it('Cancel returns directly to the repository modal — the chain is not dismissed and nothing commits', () => {
+    const { bucket } = renderCreateSystemModal(
+      { kind: 'create-system-modal', source: 'repository-modal' },
+      { selectedRepoIds: ['bsi/hris-frontend-shared'] },
+    )
+    fireEvent.click(within(getDialog()).getByRole('button', { name: 'Cancel' }))
+
+    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
+    // No system was created and no session context was committed.
+    expect(bucket.current?.systems).toHaveLength(SYSTEMS.length)
+    expect(bucket.current?.sessionContext).toBeNull()
+  })
+
+  it('the header Close control returns to the repository modal the same way', () => {
+    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal', source: 'repository-modal' })
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
+  })
+
+  it('intercepts Escape inside the dialog — it returns to the repository modal and never triggers the provider full dismissal', () => {
+    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal', source: 'repository-modal' })
+    const dialog = getDialog()
+    expect(dialog).toHaveFocus()
+
+    // Escape originates on the focused element inside the dialog.
+    fireEvent.keyDown(dialog, { key: 'Escape' })
+
+    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
+    // The return is not a commit — no system was created either.
+    expect(bucket.current?.sessionContext).toBeNull()
+    expect(bucket.current?.systems).toHaveLength(SYSTEMS.length)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('keeps the provider-owned full dismissal for the system-menu source — Escape still closes everything', () => {
+    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
   })
 })
 

@@ -206,13 +206,138 @@ test.describe('shell', () => {
     await expect(rows.nth(4)).toContainText('Validate delivery evidence')
   })
 
-  test('View all opens Session History while the sidebar stays byte-identical (AC11)', async ({ page }) => {
+  test('View all opens Session History while the sidebar stays byte-identical apart from the nav-active state (AC11)', async ({ page }) => {
     await goto(page)
-    const before = await sidebar(page).evaluate((el) => el.outerHTML)
+    // The only allowed DOM delta is the New session control's
+    // aria-current="page" route state — the sidebar never remounts.
+    const stripNavState = (html: string) =>
+      html.replace(' aria-current="page"', '').replace(' kx-sidebar__new-session--active', '')
+    const before = stripNavState(await sidebar(page).evaluate((el) => el.outerHTML))
     await page.getByRole('button', { name: 'View all' }).click()
     await expect(page.getByRole('heading', { name: 'Session history' })).toBeVisible()
-    const after = await sidebar(page).evaluate((el) => el.outerHTML)
+    const after = stripNavState(await sidebar(page).evaluate((el) => el.outerHTML))
     expect(after).toBe(before)
+    await expect(page.getByTestId('new-session-trigger')).not.toHaveAttribute('aria-current')
+  })
+
+  test('workspace, system, and account triggers toggle their own menu closed on a second click; other triggers replace', async ({ page }) => {
+    await goto(page)
+
+    // Workspace: same-trigger second click dismisses and restores focus.
+    const workspace = page.getByRole('button', { name: /workspace$/i })
+    await workspace.click()
+    const wsMenu = page.getByRole('menu', { name: 'Workspace' })
+    await expect(wsMenu).toBeVisible()
+    await expect(workspace).toHaveAttribute('aria-expanded', 'true')
+    await workspace.click()
+    await expect(wsMenu).toHaveCount(0)
+    await expect(workspace).toHaveAttribute('aria-expanded', 'false')
+    await expect(workspace).toBeFocused()
+
+    // Cross-trigger replacement still holds: a different trigger swaps
+    // the open overlay instead of toggling.
+    await workspace.click()
+    await expect(wsMenu).toBeVisible()
+    const system = page.getByRole('button', { name: /open system menu/i })
+    await system.click()
+    await expect(wsMenu).toHaveCount(0)
+    await expect(page.getByRole('menu', { name: 'Systems' })).toBeVisible()
+
+    // System: same-trigger toggle.
+    await system.click()
+    await expect(page.getByRole('menu', { name: 'Systems' })).toHaveCount(0)
+    await expect(system).toHaveAttribute('aria-expanded', 'false')
+    await expect(system).toBeFocused()
+
+    // Account: same-trigger toggle.
+    const account = page.getByTestId('account-trigger')
+    await account.click()
+    const acctMenu = page.getByRole('menu', { name: 'Account' })
+    await expect(acctMenu).toBeVisible()
+    await expect(account).toHaveAttribute('aria-expanded', 'true')
+    await account.click()
+    await expect(acctMenu).toHaveCount(0)
+    await expect(account).toHaveAttribute('aria-expanded', 'false')
+    await expect(account).toBeFocused()
+  })
+
+  test('New session navigates from Session History and leaves no overlay rendered', async ({ page }) => {
+    await goto(page)
+    await page.getByRole('button', { name: 'View all' }).click()
+    await expect(page.getByRole('region', { name: 'Session history' })).toBeVisible()
+
+    // Navigate with an overlay open — New session must close it through
+    // the lifecycle so the route lands clean.
+    await openSystemMenu(page)
+    await expect(page.getByRole('menu', { name: 'Systems' })).toBeVisible()
+
+    const newSession = page.getByTestId('new-session-trigger')
+    await newSession.click()
+    await expect(page.getByRole('heading', { name: 'New session', level: 1 })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Session history' })).toHaveCount(0)
+    await expect(page.getByRole('menu')).toHaveCount(0)
+    await expect(page.locator('.kx-modal-backdrop')).toHaveCount(0)
+    await expect(newSession).toHaveAttribute('aria-current', 'page')
+
+    // A second click with no overlay open navigates directly (no-op route
+    // change, still clean).
+    await newSession.click()
+    await expect(page.getByRole('heading', { name: 'New session', level: 1 })).toBeVisible()
+    await expect(page.getByRole('menu')).toHaveCount(0)
+  })
+
+  test('New session stays visible and navigates from the forced ≤1280 rail', async ({ page }) => {
+    // Reach Session History while the sidebar is still expanded — the
+    // forced rail hides View all (display:none), so navigation must
+    // start from the default viewport.
+    await goto(page)
+    await page.getByRole('button', { name: 'View all' }).click()
+    await expect(page.getByRole('region', { name: 'Session history' })).toBeVisible()
+
+    // Shrink into the forced rail.
+    await page.setViewportSize({ width: 1200, height: 720 })
+    await expect.poll(() => sidebarWidth(page)).toBe(64)
+
+    const newSession = page.getByTestId('new-session-trigger')
+    await expect(newSession).toBeVisible()
+    await expect(newSession).toBeEnabled()
+    // Focusable in the forced rail — keyboard users reach it.
+    await newSession.focus()
+    await expect(newSession).toBeFocused()
+    // The rail icon stays visible — only the label hides, and the
+    // accessible name survives via aria-label.
+    await expect(newSession.locator('svg[data-icon="new-session"]')).toBeVisible()
+    await expect(newSession).toHaveAccessibleName('New session')
+    await expect(newSession.locator('.kx-sidebar__new-session-label')).toBeHidden()
+
+    // Navigation from Session History works through the rail control.
+    await newSession.click()
+    await expect(page.getByRole('heading', { name: 'New session', level: 1 })).toBeVisible()
+    await expect(newSession).toHaveAttribute('aria-current', 'page')
+  })
+
+  test('New session paints no resting background — hover alone is the visual affordance', async ({ page }) => {
+    await goto(page)
+    // The default route is new-session, so the control carries
+    // aria-current="page" — and still computes a transparent background.
+    const newSession = page.getByTestId('new-session-trigger')
+    await expect(newSession).toHaveAttribute('aria-current', 'page')
+    await page.mouse.move(0, 0) // move the pointer off the control
+    expect(
+      await newSession.evaluate((el) => getComputedStyle(el).backgroundColor),
+    ).toBe('rgba(0, 0, 0, 0)')
+    // The icon chip paints nothing at rest either — a semantic glyph only.
+    expect(
+      await newSession
+        .locator('.kx-sidebar__new-session-icon')
+        .evaluate((el) => getComputedStyle(el).backgroundColor),
+    ).toBe('rgba(0, 0, 0, 0)')
+    // Hover is the only resting-route visual: the pale fill appears (the
+    // 0.15s transition means the computed style is polled).
+    await newSession.hover()
+    await expect
+      .poll(() => newSession.evaluate((el) => getComputedStyle(el).backgroundColor))
+      .toBe('rgb(244, 248, 238)') // --kx-pale #F4F8EE
   })
 
   test('sidebar collapses to the icon rail and expands back to 240px (AC12)', async ({ page }) => {
@@ -247,22 +372,19 @@ test.describe('shell', () => {
     await expect(page.getByRole('link', { name: /all systems/i })).toHaveCount(0)
   })
 
-  test('visible Illustrative data marker renders in the sidebar only on New Session; both on Session History (AC46)', async ({ page }) => {
+  test('no Illustrative data marker on New Session; Session History carries only its page marker (AC46)', async ({ page }) => {
     await goto(page)
-    let notes = page.getByTestId('illustrative-data-note')
-    await expect(notes).toHaveCount(1)
-    await expect(notes).toBeVisible()
-    await expect(notes).toHaveText('Illustrative data')
-    await expect(notes).toHaveClass(/kx-sidebar__note/)
+    // The sidebar footer no longer carries a marker and the New Session
+    // page never had one — the route renders zero notes.
+    await expect(page.getByTestId('illustrative-data-note')).toHaveCount(0)
 
     await page.getByRole('button', { name: 'View all' }).click()
     await expect(page.getByRole('heading', { name: 'Session history' })).toBeVisible()
-    notes = page.getByTestId('illustrative-data-note')
-    await expect(notes).toHaveCount(2)
-    await expect(notes.nth(0)).toBeVisible()
-    await expect(notes.nth(0)).toHaveText('Illustrative data')
-    await expect(notes.nth(1)).toBeVisible()
-    await expect(notes.nth(1)).toHaveText('Illustrative data')
+    const notes = page.getByTestId('illustrative-data-note')
+    await expect(notes).toHaveCount(1)
+    await expect(notes).toBeVisible()
+    await expect(notes).toHaveText('Illustrative data')
+    await expect(notes).toHaveClass(/kx-illustrative-note/)
   })
 
   test('Escape closes the system menu and returns focus to its trigger (AC45)', async ({ page }) => {
@@ -404,11 +526,19 @@ test.describe('composer layout correction surfaces', () => {
     await expect(page.getByTestId('repository-trigger')).toBeFocused()
   })
 
-  test('component trigger opens and operates the component menu (modal regression)', async ({ page }) => {
+  test('component trigger opens above its trigger and operates the menu (modal regression)', async ({ page }) => {
     await goto(page)
-    await page.getByTestId('component-trigger').click()
+    const trigger = page.getByTestId('component-trigger')
+    await trigger.click()
     const menu = page.getByTestId('component-menu')
     await expect(menu).toBeVisible()
+
+    // Anchored above the trigger, flush with its left edge: the menu's
+    // bottom never reaches past the trigger's top.
+    const triggerBox = await trigger.boundingBox()
+    const menuBox = await menu.boundingBox()
+    expect(Math.abs(menuBox!.x - triggerBox!.x)).toBeLessThan(2)
+    expect(menuBox!.y + menuBox!.height).toBeLessThanOrEqual(triggerBox!.y)
 
     // The menu operates: a search narrows the rows and Clear resets them.
     const search = menu.getByRole('searchbox', { name: 'Search components or repositories' })
@@ -421,6 +551,22 @@ test.describe('composer layout correction surfaces', () => {
     await pressEscape(page)
     await expect(menu).toHaveCount(0)
     await expect(page.getByTestId('component-trigger')).toBeFocused()
+  })
+
+  test('component trigger toggles its menu closed on a second click', async ({ page }) => {
+    await goto(page)
+    const trigger = page.getByTestId('component-trigger')
+    await trigger.click()
+    const menu = page.getByTestId('component-menu')
+    await expect(menu).toBeVisible()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+
+    // The same trigger's second click dismisses the menu and restores
+    // focus instead of re-opening it.
+    await trigger.click()
+    await expect(menu).toHaveCount(0)
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    await expect(trigger).toBeFocused()
   })
 })
 

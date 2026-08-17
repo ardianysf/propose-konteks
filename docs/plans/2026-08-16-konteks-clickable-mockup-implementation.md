@@ -18,7 +18,7 @@
 - **No push:** origin is configured and a root commit exists, but no task pushes. Commits stay local on the feature branch.
 - **Never commit reference media:** `Konteks.mp4`, `Konteks2.mp4`, `Ask-Devin.mp4`, root `Screenshot*.png`, `untitled folder/`, `.superpowers/`, `.pi/` are already gitignored — Preflight re-verifies.
 - **Component boundaries:** no component exceeds one screen-region responsibility. `Composer` owns input + toolbar only (profile/component menus are separate anchored components); `CustomizeModal` owns only the fixed 790×580 frame, header, and tab nav — tab content lives in per-tab components; `Sidebar` owns navigation chrome only; `AppShell` owns grid + overlay slots. Unit tests assert behavior/classes; pixel-exact layout (19.5px corners, 790×580 modal, 450px drawer) is asserted in Playwright because jsdom does not compute real layout.
-- **Demo states:** loading/empty variants are reachable via URL query `?mock=loading|empty`, consumed once at reducer init (§15, AC43). The visible **"Illustrative data"** marker (§2, AC46) renders in the sidebar footer and both pages from a single `mockData.ts` constant.
+- **Demo states:** loading/empty variants are reachable via URL query `?mock=loading|empty`, consumed once at reducer init (§15, AC43). The visible **"Illustrative data"** marker (§2, AC46) comes from a single `mockData.ts` constant. **User override:** it no longer renders in the sidebar footer or on New Session — it renders as the Session History page-level notice plus the Settings section notices.
 - **Test-selection convention:** interactive elements that specs/E2E need carry stable `data-testid` values (e.g. `workspace-control`, `system-menu`, `execution-profile-menu`, `component-menu`, `customize-modal`, `learned-drawer`).
 
 ## Preflight (verified 2026-08-16 — re-run before Task 1)
@@ -445,7 +445,7 @@
    - `account-settings.spec.ts`: AC42 (menu actions, Billing sub-navigation exact entries).
 2. `accessibility.spec.ts` using `AxeBuilder` from `@axe-core/playwright`: run axe on `/`, session history, and each overlay state (system menu, customize modal, learned drawer, repository modal); expect **zero violations** (tag `wcag2aa`) (AC45, §16).
 3. `visual.spec.ts`: for each viewport `1440×900` and `1200×720` capture `page.screenshot()` to `artifacts/screenshots/<view>-<w>x<h>.png` (gitignored) for: new session (Engineering), planning mode, system menu open, execution profile menu + sidecar, repository modal, component menu, customize (Agents + one integration tab), learned drawer, session history, settings. Also assert at 1200×720: `document.documentElement.scrollWidth <= 1200` (no horizontal page scroll, AC44) and customize modal fully within viewport.
-4. Also assert the visible `Illustrative data` marker renders (AC46) and demo variants load via `?mock=loading` / `?mock=empty` (AC43).
+4. Also assert the visible `Illustrative data` marker renders (AC46 — per the user override it appears only on Session History and in the Settings notices; the sidebar and New Session render none) and demo variants load via `?mock=loading` / `?mock=empty` (AC43).
 5. Run the full gate in order — expected results:
    ```bash
    npm install            # exit 0, up-to-date
@@ -490,7 +490,7 @@ git status --porcelain                 # clean working tree
 git log --oneline                      # 14 task commits on feat/konteks-clickable-mockup (no push)
 ```
 
-Confirm: all 46 ACs covered per the matrix; no `fetch`/XHR in `src/` (`grep -rn "fetch(" src/` → empty); reference videos/screenshots absent from history; "Illustrative data" marker visible in the running mockup.
+Confirm: all 46 ACs covered per the matrix; no `fetch`/XHR in `src/` (`grep -rn "fetch(" src/` → empty); reference videos/screenshots absent from history; "Illustrative data" marker visible in the running mockup (Session History page notice + Settings section notices only, per the user override).
 
 ## Execution handoff options
 

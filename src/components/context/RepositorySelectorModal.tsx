@@ -15,6 +15,15 @@
  * region only (AC43). The manual repository form and Create System
  * modals arrive in later Task 7 parts; this modal only dispatches their
  * overlay kinds. AppShell integration is likewise a later part.
+ *
+ * Nested Create System: while the repository-sourced Create System modal
+ * stacks above this one, AppShell keeps this modal mounted with
+ * `suspended` — the dialog stays visually rendered behind the nested
+ * stack but is removed from the accessibility tree (aria-hidden), inert
+ * to pointers, and its shared focus containment stands down. When the
+ * nested modal returns (cancel/escape/create), containment reactivates
+ * and restores focus to this dialog. Draft/search state is entirely
+ * reducer-backed, so suspending never loses it.
  */
 import { useId, useRef } from 'react'
 import { REPOSITORIES } from '../../data/mockData'
@@ -74,15 +83,27 @@ interface VisibleGroup {
   repos: Repository[]
 }
 
-export default function RepositorySelectorModal() {
+export interface RepositorySelectorModalProps {
+  /** True while a nested overlay (the repository-sourced Create System
+   *  modal) stacks above this one: keep rendering, but stand down from
+   *  the accessibility tree, pointers, and focus containment until this
+   *  dialog becomes the active modal again. */
+  suspended?: boolean
+}
+
+export default function RepositorySelectorModal({
+  suspended = false,
+}: RepositorySelectorModalProps) {
   const { state, dispatch } = useMockup()
   const { dismissOverlay } = useOverlayLifecycle()
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
 
   // Shared focus containment replaces the component-local initial-focus
-  // and Escape effects (Task 13).
-  useFocusContainment(dialogRef)
+  // and Escape effects (Task 13). While suspended under the nested
+  // Create System modal, containment installs nothing; reactivation
+  // re-runs the effect and restores focus to this dialog.
+  useFocusContainment(dialogRef, { active: !suspended })
 
   const close = () => dismissOverlay()
 
@@ -118,14 +139,24 @@ export default function RepositorySelectorModal() {
 
   return (
     <>
-      <div className="kx-modal-backdrop" aria-hidden="true" />
+      <div
+        aria-hidden="true"
+        className={
+          suspended ? 'kx-modal-backdrop kx-modal-backdrop--suspended' : 'kx-modal-backdrop'
+        }
+      />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        aria-hidden={suspended ? 'true' : undefined}
         tabIndex={-1}
-        className="kx-modal kx-repo-modal"
+        className={
+          suspended
+            ? 'kx-modal kx-repo-modal kx-repo-modal--suspended'
+            : 'kx-modal kx-repo-modal'
+        }
       >
         <header className="kx-repo-modal__head">
           <div className="kx-repo-modal__head-copy">

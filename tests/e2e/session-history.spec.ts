@@ -4,12 +4,23 @@ import { goto, sidebar } from './helpers'
 test.describe('session history', () => {
   test('is a dedicated page with an unchanged sidebar, chronological rows, and hover-only actions (AC40)', async ({ page }) => {
     await goto(page)
-    const sidebarBefore = await sidebar(page).evaluate((el) => el.outerHTML)
+    // The only allowed DOM delta is the New session control's
+    // aria-current="page" route state — the sidebar never remounts.
+    const stripNavState = (html: string) =>
+      html.replace(' aria-current="page"', '').replace(' kx-sidebar__new-session--active', '')
+    const sidebarBefore = stripNavState(await sidebar(page).evaluate((el) => el.outerHTML))
 
     await page.getByRole('button', { name: 'View all' }).click()
     await expect(page.getByRole('region', { name: 'Session history' })).toBeVisible()
-    const sidebarAfter = await sidebar(page).evaluate((el) => el.outerHTML)
+    const sidebarAfter = stripNavState(await sidebar(page).evaluate((el) => el.outerHTML))
     expect(sidebarAfter).toBe(sidebarBefore)
+
+    // The page carries exactly its own visible marker — the sidebar
+    // contributes none (its footer note was removed).
+    const notes = page.getByTestId('illustrative-data-note')
+    await expect(notes).toHaveCount(1)
+    await expect(notes).toBeVisible()
+    await expect(notes).toHaveText('Illustrative data')
 
     const rows = page.getByRole('list', { name: 'Session history' }).getByRole('listitem')
     await expect(rows).toHaveCount(9)

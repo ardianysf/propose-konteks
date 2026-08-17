@@ -180,6 +180,31 @@
   box-shadow: 0 24px 64px rgba(36, 48, 37, 0.24);
 }
 
+/* ── Nested modal stacking (repository-sourced Create System) ─────── */
+
+/* A repository-sourced Create System dialog stacks above the suspended
+ * repository modal on dedicated layers — backdrop 60 / dialog 61 over the
+ * repository's 50/51 — so the two frames never interleave or swap paint
+ * order. The nested backdrop keeps the shared scrim color and simply
+ * darkens the suspended one beneath it. */
+
+.kx-modal-backdrop--nested {
+  z-index: 60;
+}
+
+.kx-create-modal--nested {
+  z-index: 61;
+}
+
+/* The suspended underlying repository modal stays visually rendered but
+ * stands down from pointer interaction entirely — the nested dialog above
+ * owns every click, hover, and focus attempt until it returns. */
+
+.kx-modal-backdrop--suspended,
+.kx-repo-modal--suspended {
+  pointer-events: none;
+}
+
 /* ── Right drawer (Konteks Learned, 450px — §12) ───────────────────── */
 
 .kx-drawer {
@@ -279,10 +304,12 @@
   color: var(--kx-primary);
 }
 
+/* Active segment — exact matcha #95A547 fill with dark primary text
+ * (white fails contrast on this fill); hover keeps the same fill. */
 .kx-segmented__btn--active,
 .kx-segmented__btn--active:hover {
-  background: var(--kx-primary);
-  color: var(--kx-raised);
+  background: var(--kx-accent-segment-aa);
+  color: var(--kx-primary);
 }
 
 /* Session Mode cluster — uppercase caption above the segmented control,
@@ -433,6 +460,57 @@
   border-radius: 8px;
   background: var(--kx-pale);
   color: var(--kx-accent-text-aa);
+}
+
+/* New session — the persistent route control between the system control
+ * and Recent sessions. Unboxed like the other controls (AC6 single-box
+ * rule); aria-current="page" carries the semantic text/icon state. The
+ * resting control paints NOTHING — base and active-route backgrounds
+ * stay transparent; only hover/focus-hover may fill pale. */
+
+.kx-sidebar__new-session {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+/* Only the interactive affordance paints — hover and keyboard focus
+ * hover get the pale fill; the active-route resting state stays
+ * transparent (no resting background). */
+.kx-sidebar__new-session:hover,
+.kx-sidebar__new-session:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-sidebar__new-session-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-sidebar__new-session-label {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Recent sessions (AC10) + View all (AC11) */
@@ -594,11 +672,19 @@
   padding: 8px 0;
 }
 
+/* The rail keeps the New session button/icon visible and centered — only
+ * the label hides; the aria-label preserves the accessible name. */
+.kx-sidebar--rail .kx-sidebar__new-session {
+  justify-content: center;
+  gap: 0;
+  padding: 8px 0;
+}
+
 .kx-sidebar--rail .kx-sidebar__control-copy,
 .kx-sidebar--rail .kx-sidebar__chevron,
 .kx-sidebar--rail .kx-sidebar__recent,
 .kx-sidebar--rail .kx-sidebar__user-name,
-.kx-sidebar--rail .kx-sidebar__note {
+.kx-sidebar--rail .kx-sidebar__new-session-label {
   display: none;
 }
 
@@ -2626,7 +2712,7 @@
  * no modal, no backdrop, no header (AC30). */
 
 /* Anchor wrapper around the Component trigger — the menu floats from
- * here, dropping below the trigger flush with its left edge (AC30). */
+ * here, dropping above the trigger flush with its left edge (AC30). */
 .kx-setup-row__component-anchor {
   position: relative;
   display: inline-flex;
@@ -2637,7 +2723,8 @@
 .kx-component-menu {
   --kx-component-menu-w: 320px;
 
-  top: calc(100% + 8px); /* opens under the Component button (AC30) */
+  bottom: calc(100% + 8px); /* opens above the Component button */
+  top: auto;
   left: 0; /* flush with the trigger's left edge (AC30) */
   display: flex;
   flex-direction: column;
@@ -4170,20 +4257,13 @@
   color: var(--kx-muted-text-aa);
 }
 
-/* Visible illustrative marker (AC46) — one shared subtle note rendered in
- * the sidebar footer and at the foot of both pages from the single
- * mockData.ILLUSTRATIVE_DATA_NOTE constant (never duplicated). */
+/* Visible illustrative marker (AC46) — one shared subtle note rendered
+ * at the foot of the pages from the single mockData.ILLUSTRATIVE_DATA_NOTE
+ * constant (never duplicated). The sidebar no longer carries a marker. */
 .kx-illustrative-note {
   margin: 0;
   font-size: var(--kx-text-xs);
   color: var(--kx-muted-text-aa);
-}
-
-/* Sidebar footer variant — slightly tighter so the collapsed rail hides it
- * cleanly (see the rail + ≤1280px rules). */
-.kx-sidebar__note {
-  padding: 0 6px 2px;
-  font-size: var(--kx-text-2xs);
 }
 
 /* ── Responsive rail + viewport hardening (Task 13, AC12/AC43/AC44) ──
@@ -4226,14 +4306,19 @@
     padding: 8px 0;
   }
 
+  /* The New session control stays visible in the forced rail — icon
+   * centered, label hidden, accessible name kept via aria-label. */
+  .kx-sidebar__new-session {
+    justify-content: center;
+    gap: 0;
+    padding: 8px 0;
+  }
+
   .kx-sidebar__control-copy,
   .kx-sidebar__chevron,
   .kx-sidebar__recent,
-  .kx-sidebar__user-name {
-    display: none;
-  }
-
-  .kx-sidebar__note {
+  .kx-sidebar__user-name,
+  .kx-sidebar__new-session-label {
     display: none;
   }
 

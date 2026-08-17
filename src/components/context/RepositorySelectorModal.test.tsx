@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import RepositorySelectorModal from './RepositorySelectorModal'
+import CreateSystemModal from './CreateSystemModal'
 import { OverlayLifecycleProvider } from '../shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
 import {
@@ -401,6 +402,170 @@ describe('RepositorySelectorModal — demo variants (AC43)', () => {
     expect(dialog.querySelectorAll('.kx-repo-modal__system')).toHaveLength(0)
     expect(within(dialog).queryByRole('checkbox')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Add new system' })).toBeInTheDocument()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Suspended — nested Create System keeps this modal mounted behind the
+// nested dialog (repository-sourced flow)
+// ---------------------------------------------------------------------------
+
+describe('RepositorySelectorModal — suspended under the nested Create System modal', () => {
+  /** Mirrors the AppShell nesting: the selector stays mounted (suspended)
+   *  while the repository-sourced create-system overlay is active, exactly
+   *  as the real shell mounts it. */
+  function renderNestedStack(initial?: Partial<MockupState>) {
+    const bucket: StateBucket = { current: null }
+
+    function Harness() {
+      const [state, dispatch] = useReducer(mockupReducer, {
+        ...initialState(),
+        ...initial,
+        overlay: { kind: 'create-system-modal', source: 'repository-modal' },
+      })
+      const suspended =
+        state.overlay.kind === 'create-system-modal' && state.overlay.source === 'repository-modal'
+      return (
+        <MockupContext.Provider value={{ state, dispatch }}>
+          <StateProbe bucket={bucket} />
+          <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+            {(state.overlay.kind === 'repository-modal' || suspended) && (
+              <RepositorySelectorModal suspended={suspended} />
+            )}
+            {state.overlay.kind === 'create-system-modal' && <CreateSystemModal />}
+          </OverlayLifecycleProvider>
+        </MockupContext.Provider>
+      )
+    }
+
+    return { ...render(<Harness />), bucket }
+  }
+
+  const getRepoDialogElement = () => document.querySelector('.kx-repo-modal') as HTMLElement
+  const getCreateDialog = () => screen.getByRole('dialog', { name: 'Create a new system' })
+
+  it('stays visually mounted but suspended — aria-hidden, pointer-inert classes, below the nested dialog in DOM order', () => {
+    renderNestedStack()
+
+    // The suspended dialog is out of the accessibility tree: only the
+    // nested create dialog is an accessible dialog.
+    expect(screen.getAllByRole('dialog')).toHaveLength(1)
+    expect(
+      screen.queryByRole('dialog', { name: 'Choose work repositories' }),
+    ).not.toBeInTheDocument()
+
+    const repoDialog = getRepoDialogElement()
+    expect(repoDialog).toHaveAttribute('aria-hidden', 'true')
+    expect(repoDialog).toHaveClass('kx-repo-modal--suspended')
+
+    // Two stacked backdrops — suspended repository first, nested create on
+    // top in document order.
+    const backdrops = document.querySelectorAll('.kx-modal-backdrop')
+    expect(backdrops).toHaveLength(2)
+    expect(backdrops[0]).toHaveClass('kx-modal-backdrop--suspended')
+    expect(backdrops[1]).toHaveClass('kx-modal-backdrop--nested')
+    expect(follows(repoDialog, getCreateDialog())).toBe(true)
+
+    // Pointer inertness ships in components.css.
+    expect(css).toMatch(
+      /\.kx-modal-backdrop--suspended,\s*\.kx-repo-modal--suspended\s*\{[^}]*pointer-events:\s*none/s,
+    )
+  })
+
+  it('stands down from focus containment while suspended — the nested dialog owns focus', () => {
+    renderNestedStack()
+    expect(getCreateDialog()).toHaveFocus()
+    expect(getRepoDialogElement()).not.toHaveFocus()
+  })
+
+  it('keeps its reducer-backed search and draft state across the suspension', () => {
+    const { bucket } = renderNestedStack({
+      search: { systems: '', repositories: 'canteen', components: '', sessions: '' },
+      sessionContextDraft: { systemId: 'bsi-canteen', repoIds: ['bsi/canteen-backend'] },
+    })
+
+    // The suspended frame still renders the reducer-backed values: the
+    // search input keeps its query and the draft selection survives. The
+    // dialog is aria-hidden, so role queries cannot see it — read the
+    // rendered input nodes directly instead.
+    const repoDialog = getRepoDialogElement()
+    const search = repoDialog.querySelector('.kx-repo-modal__search') as HTMLInputElement
+    expect(search.value).toBe('canteen')
+    const canteenCheck = repoDialog.querySelector(
+      'input[aria-label="bsi/canteen-backend"]',
+    ) as HTMLInputElement
+    expect(canteenCheck.checked).toBe(true)
+
+    // Canceling the nested create returns here without losing them.
+    fireEvent.click(within(getCreateDialog()).getByRole('button', { name: 'Cancel' }))
+    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
+    expect(
+      (getRepoDialogElement().querySelector('.kx-repo-modal__search') as HTMLInputElement).value,
+    ).toBe('canteen')
+    // Re-exposed to the accessibility tree, the same draft is queryable again.
+    expect(screen.getByRole('checkbox', { name: 'bsi/canteen-backend' })).toBeChecked()
+    expect(bucket.current?.sessionContextDraft).toEqual({
+      systemId: 'bsi-canteen',
+      repoIds: ['bsi/canteen-backend'],
+    })
+    // Nothing committed while the create was nested above.
+    expect(bucket.current?.sessionContext).toBeNull()
+  })
+
+  it('reactivates when the nested create closes — the repository dialog is exposed again and focus containment restores focus to it', () => {
+    const { bucket } = renderNestedStack()
+
+    fireEvent.click(within(getCreateDialog()).getByRole('button', { name: 'Cancel' }))
+    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
+
+    const repoDialog = getRepoDialogElement()
+    expect(repoDialog).not.toHaveAttribute('aria-hidden')
+    expect(repoDialog).not.toHaveClass('kx-repo-modal--suspended')
+    expect(screen.getByRole('dialog', { name: 'Choose work repositories' })).toBeInTheDocument()
+    expect(repoDialog).toHaveFocus()
+    expect(document.querySelectorAll('.kx-modal-backdrop')).toHaveLength(1)
+  })
+
+  it('a successful nested create returns here with the new system selected in the draft and no repositories checked', () => {
+    const { bucket } = renderNestedStack()
+
+    fireEvent.change(
+      within(getCreateDialog()).getByRole('textbox', { name: /^name/i }),
+      { target: { value: 'QA Platform' } },
+    )
+    fireEvent.click(within(getCreateDialog()).getByRole('button', { name: 'Create' }))
+
+    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
+    const created = bucket.current!.systems[bucket.current!.systems.length - 1]
+    expect(created.name).toBe('QA Platform')
+    expect(bucket.current?.sessionContextDraft).toEqual({ systemId: created.id, repoIds: [] })
+
+    // The reactivated selector shows the new system as the active group…
+    const repoDialog = getRepoDialogElement()
+    const activeHead = repoDialog.querySelector('.kx-repo-modal__system-head[aria-current="true"]')
+    expect(activeHead).not.toBeNull()
+    expect(activeHead!).toHaveTextContent(/QA Platform/i)
+    // …with an empty repository scope: no repo rows inside the new
+    // system's group, and every other system's rows present but disabled.
+    const activeGroup = repoDialog.querySelector('.kx-repo-modal__system--active') as HTMLElement
+    expect(activeGroup.querySelectorAll('.kx-repo-modal__repo')).toHaveLength(0)
+    const checks = within(repoDialog).getAllByRole('checkbox')
+    expect(checks.length).toBeGreaterThan(0)
+    for (const check of checks) {
+      expect(check).toBeDisabled()
+    }
+    // The status reports the empty scope and nothing has committed yet.
+    expect(within(repoDialog).getByText(/0 repositories selected/i)).toBeInTheDocument()
+    expect(bucket.current?.sessionContext).toBeNull()
+
+    // Done is the only commit — it lands the draft as the session
+    // context, clears the draft, and closes the whole chain.
+    fireEvent.click(within(repoDialog).getByRole('button', { name: 'Done' }))
+    expect(bucket.current?.sessionContext).toEqual({ systemId: created.id, repoIds: [] })
+    expect(bucket.current?.sessionContextDraft).toBeNull()
+    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
   })
 })
 

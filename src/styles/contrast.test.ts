@@ -3,8 +3,8 @@
  *
  * jsdom does not apply real CSS, so these are source-string assertions
  * against the committed stylesheets (same convention as responsive.test.ts).
- * The file embeds the complete 114-consumer inventory — 67 muted-token
- * consumers and 47 accent-strong consumers — and proves three things:
+ * The file embeds the complete 115-consumer inventory — 67 muted-token
+ * consumers and 48 accent-strong consumers — and proves three things:
  *
  *   1. The three AA semantics are defined in tokens.css and every candidate
  *      pair clears 4.5:1 against white/canvas/pale.
@@ -142,6 +142,7 @@ const mutedU = [
 
 const accentA = [
   '.kx-sidebar__system-icon',
+  '.kx-sidebar__new-session-icon',
   '.kx-sidebar__view-all',
   '.kx-sidebar__user-avatar',
   '.kx-system-menu__all',
@@ -267,6 +268,10 @@ describe('AA token definitions (tokens.css)', () => {
     expect(tokens).toContain('--kx-accent-solid-aa: #4f7044')
   })
 
+  it('defines --kx-accent-segment-aa as #95a547', () => {
+    expect(tokens).toContain('--kx-accent-segment-aa: #95a547')
+  })
+
   it('keeps the original mixed-purpose tokens intact for U consumers', () => {
     expect(tokens).toContain('--kx-muted: #778c78')
     expect(tokens).toContain('--kx-accent-strong: #5f8d4e')
@@ -292,6 +297,11 @@ describe('candidate ratios against white/canvas/pale (AC9)', () => {
     expect(contrast('#ffffff', '#4f7044')).toBeGreaterThanOrEqual(4.5)
   })
 
+  it('--kx-accent-segment-aa #95a547 clears 4.5:1 under dark --kx-primary text (white fails)', () => {
+    expect(contrast('#243025', '#95a547')).toBeGreaterThanOrEqual(4.5)
+    expect(contrast('#ffffff', '#95a547')).toBeLessThan(4.5)
+  })
+
   it('reports the exact approved ratios for the durable appendix', () => {
     expect(contrast('#607260', '#ffffff')).toBeCloseTo(5.156, 3)
     expect(contrast('#607260', '#faf8ef')).toBeCloseTo(4.846, 3)
@@ -299,6 +309,8 @@ describe('candidate ratios against white/canvas/pale (AC9)', () => {
     expect(contrast('#4f7044', '#ffffff')).toBeCloseTo(5.625, 3)
     expect(contrast('#4f7044', '#faf8ef')).toBeCloseTo(5.287, 3)
     expect(contrast('#4f7044', '#f4f8ee')).toBeCloseTo(5.225, 3)
+    expect(contrast('#243025', '#95a547')).toBeCloseTo(5.084, 3)
+    expect(contrast('#ffffff', '#95a547')).toBeCloseTo(2.709, 3)
   })
 })
 
@@ -306,15 +318,15 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = [...extractUsages(components, COMPONENTS), ...extractUsages(global, GLOBAL)]
 
-  it('covers exactly 114 consumers — 67 muted and 47 accent-strong', () => {
-    expect(inventory).toHaveLength(114)
+  it('covers exactly 115 consumers — 67 muted and 48 accent-strong', () => {
+    expect(inventory).toHaveLength(115)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(67)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(47)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(48)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
     expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(63)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(25)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(26)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(2)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(24)
   })

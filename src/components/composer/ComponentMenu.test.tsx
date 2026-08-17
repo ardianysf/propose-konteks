@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react'
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import NewSessionPage from '../../pages/NewSessionPage'
@@ -95,7 +95,7 @@ describe('ComponentMenu — anchoring (AC30)', () => {
     expect(screen.getByTestId('execution-profile-menu')).toBeInTheDocument()
   })
 
-  it('is a floating .kx-menu aligned under/left of the trigger — no modal, no backdrop, no header (AC30)', () => {
+  it('is a floating .kx-menu aligned above/left of the trigger — no modal, no backdrop, no header (AC30)', () => {
     renderPage()
     const menu = openMenu()
     expect(menu).toHaveClass('kx-menu', 'kx-component-menu')
@@ -104,11 +104,30 @@ describe('ComponentMenu — anchoring (AC30)', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(menu.querySelectorAll('h1,h2,h3,h4,h5,h6,header')).toHaveLength(0)
 
-    // Under/left anchoring ships in CSS (jsdom convention): the menu
-    // drops below the trigger, flush with its left edge.
+    // Above/left anchoring ships in CSS (jsdom convention): the menu
+    // drops above the trigger, flush with its left edge.
     expect(css).toContain('.kx-setup-row__component-anchor')
-    expect(css).toMatch(/\.kx-component-menu\s*\{[^}]*top:\s*calc\(100%\s*\+\s*8px\)/)
+    expect(css).toMatch(/\.kx-component-menu\s*\{[^}]*bottom:\s*calc\(100%\s*\+\s*8px\)/)
+    expect(css).toMatch(/\.kx-component-menu\s*\{[^}]*top:\s*auto/)
     expect(css).toMatch(/\.kx-component-menu\s*\{[^}]*left:\s*0/)
+  })
+
+  it('toggles closed on a second click of the same Component trigger', async () => {
+    const { bucket } = renderPage()
+    const trigger = getTrigger()
+
+    fireEvent.click(trigger)
+    expect(screen.getByTestId('component-menu')).toBeInTheDocument()
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    expect(bucket.current?.overlay).toEqual({ kind: 'component-menu' })
+
+    // The second click dismisses through the lifecycle — focus returns
+    // to the trigger — instead of re-opening.
+    fireEvent.click(trigger)
+    expect(screen.queryByTestId('component-menu')).toBeNull()
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
+    await waitFor(() => expect(trigger).toHaveFocus())
   })
 
   it('unmounts and reopens cleanly through the trigger — selection survives the cycle', () => {
@@ -119,7 +138,7 @@ describe('ComponentMenu — anchoring (AC30)', () => {
     )
     expect(bucket.current?.selectedComponentIds).toEqual(['comp-canteen-api'])
 
-    // Close via Escape (the trigger opens — it does not toggle).
+    // Close via Escape (the trigger also toggles — see above).
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.queryByTestId('component-menu')).toBeNull()
     expect(getTrigger()).toHaveAttribute('aria-expanded', 'false')

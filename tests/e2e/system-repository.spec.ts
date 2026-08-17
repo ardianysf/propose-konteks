@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Locator } from '@playwright/test'
 import { goto, openRepositoryModal, openSystemMenu } from './helpers'
 
 test.describe('system / repository flow', () => {
@@ -228,22 +228,124 @@ test.describe('session context draft (composer correction)', () => {
     await expect(page.getByTestId('repository-trigger')).toHaveText('BSI Canteen')
   })
 
-  test('repository-sourced Create commits the new system as the session context', async ({ page }) => {
+  test('repository-sourced Create nests above the suspended selector — Create returns to it, Done commits (session context draft)', async ({ page }) => {
     await goto(page)
     await openRepositoryModal(page)
-    await page
-      .getByRole('dialog', { name: 'Choose work repositories' })
-      .getByRole('button', { name: /Add new system/ })
-      .click()
+    const repoDialog = page.getByRole('dialog', { name: 'Choose work repositories' })
 
-    const dialog = page.getByRole('dialog', { name: 'Create a new system' })
-    await dialog.getByLabel(/Name/).fill('QA Platform')
-    await dialog.getByRole('button', { name: 'Create' }).click()
-    await expect(dialog).toHaveCount(0)
+    // Seed a draft selection before nesting so the return path proves the
+    // draft survives the suspended round trip.
+    await repoDialog.getByRole('checkbox', { name: 'bsi/hris-frontend-shared' }).check()
+    await repoDialog.getByRole('button', { name: /Add new system/ }).click()
 
-    // Repository-sourced create confirms the new system in the session pill.
+    const create = page.getByRole('dialog', { name: 'Create a new system' })
+    await expect(create).toBeVisible()
+
+    // The repository modal stays mounted behind the nested Create modal:
+    // two stacked backdrops, and the suspended selector is aria-hidden —
+    // only the Create dialog is accessible and active.
+    const suspended = page.locator('.kx-repo-modal--suspended')
+    await expect(suspended).toHaveCount(1)
+    await expect(suspended).toHaveAttribute('aria-hidden', 'true')
+    await expect(page.locator('.kx-modal-backdrop')).toHaveCount(2)
+    await expect(page.getByRole('dialog')).toHaveCount(1)
+
+    // Create returns straight to the repository selector with the new
+    // system active in the draft — the session context is not committed.
+    await create.getByLabel(/Name/).fill('QA Platform')
+    await create.getByRole('button', { name: 'Create' }).click()
+    await expect(create).toHaveCount(0)
+    await expect(repoDialog).toBeVisible()
+    await expect(page.locator('.kx-modal-backdrop')).toHaveCount(1)
+    await expect(repoDialog.locator('.kx-repo-modal__system--active')).toContainText('QA Platform')
+    await expect(repoDialog.getByText(/0 repositories selected/)).toBeVisible()
+
+    // The composer pill still shows the fresh placeholder — uncommitted.
+    await expect(page.getByTestId('repository-trigger')).toHaveText('Choose system / repositories')
+
+    // Done is the only commit: it closes the chain and the pill picks up
+    // the new system name.
+    await repoDialog.getByRole('button', { name: 'Done' }).click()
+    await expect(repoDialog).toHaveCount(0)
     await expect(page.getByTestId('repository-trigger')).toHaveText('QA Platform')
-    await expect(page.getByRole('button', { name: /QA Platform — open system menu/ })).toBeVisible()
+  })
+
+  test('nested Cancel and Escape return to the repository selector with the draft intact — no commit', async ({ page }) => {
+    await goto(page)
+    await openRepositoryModal(page)
+    const repoDialog = page.getByRole('dialog', { name: 'Choose work repositories' })
+    const check = repoDialog.getByRole('checkbox', { name: 'bsi/hris-frontend-shared' })
+    await check.check()
+
+    // Cancel — returns to the selector, the draft survives, nothing commits.
+    await repoDialog.getByRole('button', { name: /Add new system/ }).click()
+    const create = page.getByRole('dialog', { name: 'Create a new system' })
+    await expect(create).toBeVisible()
+    await create.getByRole('button', { name: 'Cancel' }).click()
+    await expect(create).toHaveCount(0)
+    await expect(repoDialog).toBeVisible()
+    await expect(check).toBeChecked()
+    await expect(repoDialog.getByText(/1 repository selected/)).toBeVisible()
+    await expect(page.getByTestId('repository-trigger')).toHaveText('Choose system / repositories')
+
+    // Escape from the nested dialog — the same return contract, never a
+    // full-chain dismissal and never a commit.
+    await repoDialog.getByRole('button', { name: /Add new system/ }).click()
+    await expect(create).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(create).toHaveCount(0)
+    await expect(repoDialog).toBeVisible()
+    await expect(check).toBeChecked()
+    await expect(page.getByTestId('repository-trigger')).toHaveText('Choose system / repositories')
+
+    // The surviving draft is still live: Done commits it.
+    await repoDialog.getByRole('button', { name: 'Done' }).click()
+    await expect(repoDialog).toHaveCount(0)
+    await expect(page.getByTestId('repository-trigger')).toHaveText('BSI - HRIS')
+  })
+
+  test('nested Create stacks above the suspended selector and fits both viewports without form/footer overlap', async ({ page }) => {
+    const zIndex = (locator: Locator) =>
+      locator.evaluate((element) => Number(getComputedStyle(element).zIndex))
+
+    for (const viewport of [
+      { width: 1440, height: 900 },
+      { width: 1200, height: 720 },
+    ]) {
+      await page.setViewportSize(viewport)
+      await goto(page)
+      await openRepositoryModal(page)
+      await page
+        .getByRole('dialog', { name: 'Choose work repositories' })
+        .getByRole('button', { name: /Add new system/ })
+        .click()
+
+      const create = page.getByRole('dialog', { name: 'Create a new system' })
+      await expect(create).toBeVisible()
+      const suspended = page.locator('.kx-repo-modal--suspended')
+      await expect(suspended).toHaveCount(1)
+
+      // Dedicated stacking layers: the nested Create dialog (61) and its
+      // backdrop (60) sit strictly above the suspended repository modal (51).
+      const createZ = await zIndex(create)
+      const suspendedZ = await zIndex(suspended)
+      const backdropZ = await zIndex(page.locator('.kx-modal-backdrop--nested'))
+      expect(createZ).toBeGreaterThan(suspendedZ)
+      expect(backdropZ).toBeGreaterThan(suspendedZ)
+
+      // The top dialog is fully inside the viewport on both axes.
+      const box = await create.boundingBox()
+      expect(box, `create dialog renders at ${viewport.width}x${viewport.height}`).not.toBeNull()
+      expect(box!.x).toBeGreaterThanOrEqual(0)
+      expect(box!.y).toBeGreaterThanOrEqual(0)
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width)
+      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height)
+
+      // The scrolling form body never overlaps the pinned footer.
+      const bodyBox = await create.locator('.kx-create-modal__body').boundingBox()
+      const footerBox = await create.locator('.kx-create-modal__footer').boundingBox()
+      expect(bodyBox!.y + bodyBox!.height).toBeLessThanOrEqual(footerBox!.y + 1)
+    }
   })
 
   test('system-menu Create activates the sidebar system but leaves the committed session pill unchanged', async ({ page }) => {

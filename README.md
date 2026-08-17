@@ -10,7 +10,8 @@ visual revamp** design specification.
 
 > **All content is illustrative.** Every timestamp, count, session name, system name, repository name, and
 > model name shown in the mockup is placeholder data, not production fact. A visible **"Illustrative data"**
-> marker renders in the sidebar footer and on both pages (spec §2, AC46).
+> marker renders on the Session History page and inside the Settings modal; the sidebar and the New Session
+> page carry no marker (spec §2, AC46).
 
 ## Commands
 

@@ -117,6 +117,29 @@ describe('Account — sidebar trigger wiring', () => {
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(trigger).toHaveAttribute('aria-expanded', 'false')
   })
+
+  it('toggles the account menu closed on a second click of the same trigger', async () => {
+    const { bucket } = renderShell()
+    const trigger = screen.getByTestId('account-trigger')
+
+    fireEvent.click(trigger)
+    expect(getMenu()).toBeInTheDocument()
+    expect(bucket.current?.overlay).toEqual({ kind: 'account-menu' })
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+
+    // The second click dismisses through the lifecycle — the menu
+    // unmounts and focus returns to the trigger.
+    fireEvent.click(trigger)
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    await waitFor(() => expect(trigger).toHaveFocus())
+
+    // A third click reopens — the toggle never wedges the menu shut.
+    fireEvent.click(trigger)
+    expect(getMenu()).toBeInTheDocument()
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  })
 })
 
 // ---------------------------------------------------------------------------

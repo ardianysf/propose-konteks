@@ -2,6 +2,28 @@ import { expect, test } from '@playwright/test'
 import { goto, openExecutionProfileMenu } from './helpers'
 
 test.describe('execution profile menu', () => {
+  test('the trigger toggles the menu closed on a second click (AC22)', async ({ page }) => {
+    await goto(page)
+    const trigger = page.getByTestId('execution-profile-trigger')
+    await trigger.click()
+    const menu = page.getByTestId('execution-profile-menu')
+    await expect(menu).toBeVisible()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+
+    // Same-click toggle: the second click dismisses the menu (focus is
+    // restored to the trigger through the lifecycle) instead of
+    // re-opening it.
+    await trigger.click()
+    await expect(menu).toHaveCount(0)
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    await expect(trigger).toBeFocused()
+
+    // The trigger keeps working after a toggle — it re-opens.
+    await trigger.click()
+    await expect(page.getByTestId('execution-profile-menu')).toBeVisible()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  })
+
   test('opens anchored (no backdrop, no header) with a flat list and Manage entry (AC22)', async ({ page }) => {
     await goto(page)
     await openExecutionProfileMenu(page)

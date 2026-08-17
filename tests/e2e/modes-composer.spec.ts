@@ -46,7 +46,7 @@ test.describe('modes + composer', () => {
     expect(modeBox!.x).toBeGreaterThan(repoBox!.x + repoBox!.width)
   })
 
-  test('SESSION MODE label sits above the selector and the active segment computes primary-on-white (AC15)', async ({ page }) => {
+  test('SESSION MODE label sits above the selector and the active segment computes the exact matcha fill with dark text (AC15)', async ({ page }) => {
     await goto(page)
 
     const label = page.getByText('SESSION MODE', { exact: true })
@@ -63,8 +63,9 @@ test.describe('modes + composer', () => {
     expect(groupBox).not.toBeNull()
     expect(labelBox!.y + labelBox!.height).toBeLessThanOrEqual(groupBox!.y)
 
-    // The active radio renders as a primary (#243025) pill with white text.
-    // The transition (0.15s) means the computed style must be polled.
+    // The active radio renders as the exact matcha #95A547 pill with dark
+    // primary text (white fails contrast on this fill). The transition
+    // (0.15s) means the computed style must be polled.
     const active = page.getByRole('radio', { name: 'Engineering' })
     await expect(active).toBeChecked()
     await expect
@@ -74,7 +75,7 @@ test.describe('modes + composer', () => {
           return `${s.backgroundColor} ${s.color}`
         }),
       )
-      .toBe('rgb(36, 48, 37) rgb(255, 255, 255)') // --kx-primary / --kx-raised
+      .toBe('rgb(149, 165, 71) rgb(36, 48, 37)') // --kx-accent-segment-aa #95A547 / --kx-primary
 
     // Switching moves the active styling to Planning.
     await page.getByRole('radio', { name: 'Planning' }).click()
@@ -86,7 +87,7 @@ test.describe('modes + composer', () => {
           return `${s.backgroundColor} ${s.color}`
         }),
       )
-      .toBe('rgb(36, 48, 37) rgb(255, 255, 255)')
+      .toBe('rgb(149, 165, 71) rgb(36, 48, 37)')
   })
 
   test('setup pills render as compact fully-rounded pills (999px radius, 12px side padding)', async ({ page }) => {
