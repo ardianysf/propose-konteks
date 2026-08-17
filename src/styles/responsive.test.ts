@@ -72,7 +72,8 @@ describe('responsive rail at max-width 1280px (AC12/AC44)', () => {
     // The collapse toggle now lives in the New Session page header and
     // stands down in the forced rail alongside the sidebar rule.
     expect(block).toContain('.kx-new-session__sidebar-toggle { display: none; }')
-    expect(block).toContain('.kx-sidebar__user { justify-content: center; gap: 10px;')
+    // The user area stacks vertically with Customize on top (user-directed).
+    expect(block).toContain('.kx-sidebar__user { flex-direction: column; justify-content: center;')
     expect(block).toContain('.kx-sidebar__logo { width: 100%; justify-content: center;')
     expect(block).toContain('.kx-sidebar__logo-img { height: 32px; width: 32px;')
   })
