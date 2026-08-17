@@ -278,15 +278,15 @@ describe('ComponentMenu — multi-select + footer (AC32)', () => {
     const trigger = getTrigger()
 
     expect(within(menu).getByText('0 selected')).toBeInTheDocument()
-    expect(trigger).toHaveTextContent('All components')
+    expect(trigger).toHaveTextContent('Choose component')
 
     fireEvent.click(within(menu).getByRole('menuitemcheckbox', { name: /canteen-api/ }))
     expect(within(menu).getByText('1 selected')).toBeInTheDocument()
-    expect(trigger).toHaveTextContent('1 components selected')
+    expect(trigger).toHaveTextContent('canteen-api')
 
     fireEvent.click(within(menu).getByRole('menuitemcheckbox', { name: /canteen-cms/ }))
     expect(within(menu).getByText('2 selected')).toBeInTheDocument()
-    expect(trigger).toHaveTextContent('2 components selected')
+    expect(trigger).toHaveTextContent('2 components')
   })
 
   it('Clear dispatches CLEAR_COMPONENTS, empties every checkbox, and disables while nothing is selected (AC43 disabled)', () => {
@@ -306,7 +306,7 @@ describe('ComponentMenu — multi-select + footer (AC32)', () => {
     expect(
       within(menu).getByRole('menuitemcheckbox', { name: /canteen-api/, checked: false }),
     ).toBeInTheDocument()
-    expect(getTrigger()).toHaveTextContent('All components')
+    expect(getTrigger()).toHaveTextContent('Choose component')
     expect(clear).toBeDisabled()
   })
 })

@@ -65,6 +65,9 @@ const VIEWS: CaptureView[] = [
       await goto(page)
       await expect(page.getByRole('radio', { name: 'Engineering' })).toBeChecked()
       await expect(page.getByTestId('composer')).toBeVisible()
+      await expect(page.getByRole('button', { name: 'Choose system / repositories' })).toBeVisible()
+      await expect(page.getByRole('button', { name: 'Choose component' })).toBeVisible()
+      await expect(page.getByTestId('composer-input-box')).toBeVisible()
     },
   },
   {
@@ -73,7 +76,10 @@ const VIEWS: CaptureView[] = [
       await goto(page)
       await page.getByRole('radio', { name: 'Planning' }).click()
       await expect(page.getByRole('button', { name: 'Start planning' })).toBeVisible()
-      await expect(page.locator('.kx-setup-row')).toHaveCount(0)
+      // Planning keeps the system trigger but drops only the component pill.
+      await expect(page.getByRole('button', { name: 'Choose system' })).toBeVisible()
+      await expect(page.getByTestId('component-trigger')).toHaveCount(0)
+      await expect(page.getByTestId('composer-input-box')).toBeVisible()
     },
   },
   {

@@ -17,6 +17,11 @@ export type CustomizeTab = 'agents' | 'context' | 'mcp' | 'connectors' | 'vcs' |
 export type LearnedTab = 'pending' | 'audit'
 export type SettingsSection = 'general' | 'billing' | 'team'
 
+/** Where a Create System modal was opened from — the SystemMenu footer
+ * (global create) or the repository selector's Add new system affordance
+ * (session-context create). */
+export type CreateSystemSource = 'system-menu' | 'repository-modal'
+
 export type MockupOverlay =
   | { kind: 'none' }
   | { kind: 'workspace-menu' }
@@ -25,13 +30,13 @@ export type MockupOverlay =
   | { kind: 'component-menu' }
   | { kind: 'repository-modal' }
   | { kind: 'manual-repo-modal' }
-  | { kind: 'create-system-modal' }
+  | { kind: 'create-system-modal'; source: CreateSystemSource }
   | { kind: 'customize'; tab: CustomizeTab }
   | { kind: 'learned'; tab: LearnedTab }
   | { kind: 'account-menu' }
   | { kind: 'settings'; section: SettingsSection }
 
-/** Payload for OPEN_OVERLAY; tab/section default when omitted. */
+/** Payload for OPEN_OVERLAY; tab/section/source default when omitted. */
 export type OpenOverlayPayload =
   | { kind: 'workspace-menu' }
   | { kind: 'system-menu' }
@@ -39,7 +44,7 @@ export type OpenOverlayPayload =
   | { kind: 'component-menu' }
   | { kind: 'repository-modal' }
   | { kind: 'manual-repo-modal' }
-  | { kind: 'create-system-modal' }
+  | { kind: 'create-system-modal'; source?: CreateSystemSource }
   | { kind: 'customize'; tab?: CustomizeTab }
   | { kind: 'learned'; tab?: LearnedTab }
   | { kind: 'account-menu' }
@@ -65,6 +70,13 @@ export interface MockupSearchState {
   sessions: string
 }
 
+/** The committed session scope — a system plus its selected repositories.
+ * `null` means a fresh session has no committed context yet. */
+export interface SessionContext {
+  systemId: string
+  repoIds: string[]
+}
+
 export interface MockupState {
   route: MockupRoute
   sidebarCollapsed: boolean
@@ -73,6 +85,8 @@ export interface MockupState {
   activeSystemId: string
   selectedRepoIds: string[]
   selectedComponentIds: string[]
+  sessionContext: SessionContext | null
+  sessionContextDraft: SessionContext | null
   activeProfileId: string
   overlay: MockupOverlay
   search: MockupSearchState
@@ -89,6 +103,11 @@ export type MockupAction =
   | { type: 'SET_MODE'; mode: SessionMode }
   | { type: 'TOGGLE_COMPONENT'; componentId: string }
   | { type: 'CLEAR_COMPONENTS' }
+  | { type: 'BEGIN_SESSION_CONTEXT_DRAFT' }
+  | { type: 'SET_SESSION_DRAFT_SYSTEM'; systemId: string }
+  | { type: 'TOGGLE_SESSION_DRAFT_REPO'; repoId: string }
+  | { type: 'COMMIT_SESSION_CONTEXT_DRAFT' }
+  | { type: 'CONFIRM_SESSION_CONTEXT'; systemId: string; repoIds?: string[] }
   | { type: 'SET_CUSTOMIZE_TAB'; tab: CustomizeTab }
   | { type: 'SET_ACTIVE_PROFILE'; profileId: string }
   | { type: 'TOGGLE_SIDEBAR' }
@@ -113,6 +132,8 @@ export function initialState(search: string = ''): MockupState {
     activeSystemId: DEFAULT_ACTIVE_SYSTEM_ID,
     selectedRepoIds: [],
     selectedComponentIds: [],
+    sessionContext: null,
+    sessionContextDraft: null,
     activeProfileId: DEFAULT_ACTIVE_PROFILE_ID,
     overlay: { kind: 'none' },
     search: { systems: '', repositories: '', components: '', sessions: '' },
@@ -128,7 +149,10 @@ function slugify(name: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
-function uniqueSystemId(existing: readonly System[], name: string): string {
+/** Deterministic, collision-free system id for a new system name. Exported
+ * so the repository-sourced Create System flow can compute the id it will
+ * confirm without duplicating the slugging rules. */
+export function nextSystemId(existing: readonly System[], name: string): string {
   const base = slugify(name) || 'system'
   let candidate = base
   let counter = 2
@@ -137,6 +161,17 @@ function uniqueSystemId(existing: readonly System[], name: string): string {
     counter += 1
   }
   return candidate
+}
+
+/** The effective draft value BEGIN_SESSION_CONTEXT_DRAFT seeds: the
+ * committed session context when its system still exists, otherwise the
+ * global active-system/repository selection. */
+export function resolveSessionContextDraft(state: MockupState): SessionContext {
+  const committed = state.sessionContext
+  if (committed && state.systems.some((system) => system.id === committed.systemId)) {
+    return { systemId: committed.systemId, repoIds: [...committed.repoIds] }
+  }
+  return { systemId: state.activeSystemId, repoIds: [...state.selectedRepoIds] }
 }
 
 // ---------------------------------------------------------------------------
@@ -169,7 +204,7 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
       const name = action.name.trim()
       if (!name) return state
       const system: System = {
-        id: uniqueSystemId(state.systems, name),
+        id: nextSystemId(state.systems, name),
         name,
         description: action.description?.trim() || undefined,
         repoIds: [],
@@ -209,6 +244,64 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
       return { ...state, selectedComponentIds: [] }
     }
 
+    // ------------------------------------------------------------------
+    // Session context draft — the modal edits only the transient draft;
+    // the committed sessionContext + global active/repo state stay frozen
+    // until COMMIT/CONFIRM. BEGIN reseeds the draft from committed or
+    // global state, so any stale draft from a cancelled open is reset.
+    // ------------------------------------------------------------------
+
+    case 'BEGIN_SESSION_CONTEXT_DRAFT': {
+      return { ...state, sessionContextDraft: resolveSessionContextDraft(state) }
+    }
+
+    case 'SET_SESSION_DRAFT_SYSTEM': {
+      const base = state.sessionContextDraft
+        ? state
+        : { ...state, sessionContextDraft: resolveSessionContextDraft(state) }
+      const draft = base.sessionContextDraft!
+      if (!base.systems.some((system) => system.id === action.systemId)) return base
+      if (action.systemId === draft.systemId) return base
+      return { ...base, sessionContextDraft: { systemId: action.systemId, repoIds: [] } }
+    }
+
+    case 'TOGGLE_SESSION_DRAFT_REPO': {
+      const base = state.sessionContextDraft
+        ? state
+        : { ...state, sessionContextDraft: resolveSessionContextDraft(state) }
+      const draft = base.sessionContextDraft!
+      const system = base.systems.find((entry) => entry.id === draft.systemId)
+      if (!system?.repoIds.includes(action.repoId)) return base
+      const repoIds = draft.repoIds.includes(action.repoId)
+        ? draft.repoIds.filter((id) => id !== action.repoId)
+        : [...draft.repoIds, action.repoId]
+      return { ...base, sessionContextDraft: { ...draft, repoIds } }
+    }
+
+    case 'COMMIT_SESSION_CONTEXT_DRAFT': {
+      if (!state.sessionContextDraft) return state
+      const draft = state.sessionContextDraft
+      return {
+        ...state,
+        sessionContext: { systemId: draft.systemId, repoIds: [...draft.repoIds] },
+        activeSystemId: draft.systemId,
+        selectedRepoIds: [...draft.repoIds],
+        sessionContextDraft: null,
+      }
+    }
+
+    case 'CONFIRM_SESSION_CONTEXT': {
+      if (!state.systems.some((system) => system.id === action.systemId)) return state
+      const repoIds = action.repoIds ?? []
+      return {
+        ...state,
+        sessionContext: { systemId: action.systemId, repoIds: [...repoIds] },
+        activeSystemId: action.systemId,
+        selectedRepoIds: [...repoIds],
+        sessionContextDraft: null,
+      }
+    }
+
     case 'SET_CUSTOMIZE_TAB': {
       if (state.overlay.kind !== 'customize') return state
       return { ...state, overlay: { kind: 'customize', tab: action.tab } }
@@ -243,8 +336,9 @@ function resolveOverlay(payload: OpenOverlayPayload): MockupOverlay {
     case 'component-menu':
     case 'repository-modal':
     case 'manual-repo-modal':
-    case 'create-system-modal':
     case 'account-menu':
       return { kind: payload.kind }
+    case 'create-system-modal':
+      return { kind: 'create-system-modal', source: payload.source ?? 'system-menu' }
   }
 }

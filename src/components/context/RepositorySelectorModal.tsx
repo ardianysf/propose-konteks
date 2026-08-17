@@ -20,6 +20,7 @@ import { useId, useRef } from 'react'
 import { REPOSITORIES } from '../../data/mockData'
 import type { Repository, System } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import { resolveSessionContextDraft } from '../../state/mockupReducer'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import { useFocusContainment } from '../shell/useFocusContainment'
 
@@ -85,6 +86,14 @@ export default function RepositorySelectorModal() {
 
   const close = () => dismissOverlay()
 
+  // The modal edits only the transient draft. It reads the effective draft
+  // (committed/global fallback when BEGIN has not run) and never touches
+  // activeSystemId/selectedRepoIds until Done commits.
+  const draft = state.sessionContextDraft ?? resolveSessionContextDraft(state)
+  const activeSystem =
+    state.systems.find((system) => system.id === draft.systemId) ?? state.systems[0]
+  const selectedCount = draft.repoIds.length
+
   // One shared query filters system names and repository names together:
   // a system survives when its own name matches or any of its
   // repositories matches, and the query narrows the repositories inside
@@ -106,10 +115,6 @@ export default function RepositorySelectorModal() {
       return { system, repos: nameMatches && matching.length === 0 ? repos : matching }
     })
     .filter((group): group is VisibleGroup => group !== null)
-
-  const activeSystem =
-    state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
-  const selectedCount = state.selectedRepoIds.length
 
   return (
     <>
@@ -148,7 +153,10 @@ export default function RepositorySelectorModal() {
               type="button"
               className="kx-btn kx-btn--primary kx-repo-modal__add-system"
               onClick={() =>
-                dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'create-system-modal' } })
+                dispatch({
+                  type: 'OPEN_OVERLAY',
+                  overlay: { kind: 'create-system-modal', source: 'repository-modal' },
+                })
               }
             >
               <PlusIcon />
@@ -213,7 +221,7 @@ export default function RepositorySelectorModal() {
                       className="kx-repo-modal__system-head"
                       aria-current={active ? 'true' : undefined}
                       onClick={() =>
-                        dispatch({ type: 'SET_ACTIVE_SYSTEM', systemId: system.id })
+                        dispatch({ type: 'SET_SESSION_DRAFT_SYSTEM', systemId: system.id })
                       }
                     >
                       <span className="kx-repo-modal__system-radio" aria-hidden="true" />
@@ -244,9 +252,11 @@ export default function RepositorySelectorModal() {
                             type="checkbox"
                             className="kx-repo-modal__repo-check"
                             aria-label={repo.name}
-                            checked={state.selectedRepoIds.includes(repo.id)}
+                            checked={draft.repoIds.includes(repo.id)}
                             disabled={!active}
-                            onChange={() => dispatch({ type: 'TOGGLE_REPO', repoId: repo.id })}
+                            onChange={() =>
+                              dispatch({ type: 'TOGGLE_SESSION_DRAFT_REPO', repoId: repo.id })
+                            }
                           />
                           <span className="kx-repo-modal__repo-copy">
                             <span className="kx-repo-modal__repo-name">{repo.name}</span>
@@ -308,7 +318,10 @@ export default function RepositorySelectorModal() {
             <button
               type="button"
               className="kx-btn kx-btn--primary kx-repo-modal__done"
-              onClick={close}
+              onClick={() => {
+                dispatch({ type: 'COMMIT_SESSION_CONTEXT_DRAFT' })
+                dismissOverlay()
+              }}
             >
               Done
             </button>

@@ -108,7 +108,7 @@ describe('CustomizeModal — frame', () => {
     expect(closed.container.querySelector('.kx-customize')).toBeNull()
     closed.unmount()
 
-    const other = renderCustomizeModal({ kind: 'create-system-modal' })
+    const other = renderCustomizeModal({ kind: 'create-system-modal', source: 'system-menu' })
     expect(other.container.querySelector('.kx-customize')).toBeNull()
     other.unmount()
 
