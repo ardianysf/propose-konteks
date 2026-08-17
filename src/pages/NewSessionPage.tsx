@@ -12,6 +12,7 @@
  */
 import { PENDING_REVIEWS } from '../data/mockData'
 import Composer from '../components/composer/Composer'
+import CollapseIcon from '../components/shell/CollapseIcon'
 import { useOverlayLifecycle } from '../components/shell/OverlayLifecycle'
 import { useMockup } from '../state/MockupContext'
 
@@ -26,12 +27,23 @@ export default function NewSessionPage() {
   const { beginOverlayChain } = useOverlayLifecycle()
   const engineering = state.sessionMode === 'engineering'
   const pendingCount = PENDING_REVIEWS.length
+  const collapsed = state.sidebarCollapsed
 
   return (
     <section className="kx-new-session" aria-label="New session">
-      {/* Page header — full-width band: the single visible h1, subtitle,
-          approval indicator. */}
+      {/* Page header — full-width band: the sidebar minimize/maximize
+          control at the far left (user-directed), the single visible h1 +
+          subtitle, approval indicator right. */}
       <header className="kx-new-session__header" data-testid="new-session-header">
+        <button
+          type="button"
+          className="kx-icon-btn kx-new-session__sidebar-toggle"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          data-testid="sidebar-toggle"
+          onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
+        >
+          <CollapseIcon collapsed={collapsed} />
+        </button>
         <div className="kx-new-session__header-copy">
           <h1 className="kx-new-session__title">New session</h1>
           <p className="kx-new-session__subtitle">

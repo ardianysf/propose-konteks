@@ -364,12 +364,12 @@
   padding: 14px 8px 10px;
 }
 
-/* Brand + collapse toggle */
+/* Brand lockup — the collapse toggle lives in the New Session page
+ * header, not the sidebar (user-directed). */
 
 .kx-sidebar__top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 6px;
   padding: 0 2px 2px;
 }
@@ -601,6 +601,9 @@
   color: var(--kx-muted-text-aa);
 }
 
+/* Recent-session rows — the timestamp rides the meta line's right edge
+ * (margin-left:auto) so times align down the column while the system
+ * chip keeps its natural width on the left. */
 .kx-sidebar__session-system {
   max-width: 120px;
   padding: 2px 6px;
@@ -610,6 +613,11 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.kx-sidebar__session-time {
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 /* User row + sliders → Customize (AC9) */
@@ -661,7 +669,6 @@
 /* Rail (collapsed) mode — icons only; the workspace box persists */
 
 .kx-sidebar--rail .kx-sidebar__top {
-  flex-direction: column;
   gap: 6px;
 }
 
@@ -682,7 +689,7 @@
 }
 
 /* The rail keeps the New session button/icon visible and centered — only
- * the label hides; the aria-label preserves the accessible name. */
+ * the label hides. */
 .kx-sidebar--rail .kx-sidebar__new-session {
   justify-content: center;
   gap: 0;
@@ -1019,15 +1026,20 @@
 .kx-new-session {
   display: flex;
   flex-direction: column;
-  gap: clamp(24px, 4vh, 40px);
+  gap: 24px;
   width: 100%;
   max-width: none;
   min-width: 0;
   margin: 0 auto;
-  padding: clamp(24px, 4vh, 48px) 32px 40px;
+  /* Fixed px (no vh) so browser zoom keeps the exact same rhythm —
+   * zoom only scales px uniformly, while vh units re-resolve against
+   * the grown CSS-px viewport and inflate the padding at e.g. 90%. */
+  padding: 28px 32px 40px;
 }
 
-/* Header — the single visible h1 + subtitle left, approval right. */
+/* Header — the sidebar minimize/maximize control sits at the far LEFT
+ * of the header band beside the title block (user-directed); approval
+ * rides the right edge. */
 .kx-new-session__header {
   display: flex;
   flex-wrap: wrap;
@@ -1039,28 +1051,37 @@
   min-width: 0;
 }
 
+.kx-new-session__sidebar-toggle {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
 .kx-new-session__header-copy {
   display: grid;
   gap: 4px;
   min-width: 0;
 }
 
+/* Uniform header line — title/subtitle/approval share one tight scale
+ * (user-directed): 14px bold title, 13px subtitle, 12px approval.
+ * Hierarchy comes from weight + one gentle size step, not a jump. */
 .kx-new-session__title {
-  font-size: var(--kx-text-3xl);
+  font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-bold);
-  line-height: 1.15;
+  line-height: 1.4;
   color: var(--kx-primary);
 }
 
 .kx-new-session__subtitle {
   font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-normal);
   color: var(--kx-muted-text-aa);
 }
 
 .kx-new-session__approval {
   flex-shrink: 0;
   margin-left: auto;
-  margin-top: 2px;
+  margin-top: 0;
   font-size: var(--kx-text-xs);
   font-weight: var(--kx-font-medium);
   color: var(--kx-muted-text-aa);
@@ -1074,7 +1095,7 @@
   gap: 12px;
   width: 100%;
   min-width: 0;
-  margin: 0 auto clamp(40px, 7vh, 72px);
+  margin: 0 auto 48px;
   text-align: center;
 }
 
@@ -1099,11 +1120,17 @@
 }
 
 /* Bounded content region — intro, reviews pill, composer, and disclaimer
- * stacked in one centered column below the full-width header band. */
+ * stacked in one centered column below the full-width header band. The
+ * region flexes to fill the remaining viewport height and pins the
+ * reviews/composer/disclaimer group to the bottom via the auto top margin
+ * on __reviews, so the composer's distance to the page bottom stays
+ * constant at every zoom level and viewport height. */
 .kx-new-session__content {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  flex: 1;
+  min-height: 0;
   width: min(920px, 100%);
   min-width: 0;
   margin: 0 auto;
@@ -1351,6 +1378,9 @@
 .kx-new-session__reviews {
   display: flex;
   justify-content: flex-end;
+  /* auto absorbs all free viewport height above this group, pinning the
+   * reviews + composer + disclaimer to the page bottom consistently. */
+  margin-top: auto;
   margin-bottom: 12px;
   min-width: 0;
 }
@@ -1367,7 +1397,10 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  padding: 6px 12px;
+  /* Matches the system/component pill height (38px) while keeping the
+   * smaller font and badge sizes untouched, per the user's direction. */
+  min-height: 38px;
+  padding: 7px 12px;
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
   border-radius: 999px;
@@ -1379,7 +1412,6 @@
     color 0.15s ease,
     border-color 0.15s ease;
 }
-
 .kx-composer__reviews:hover {
   color: var(--kx-accent);
   border-color: var(--kx-accent);
@@ -1404,7 +1436,8 @@
  * overflow. The ≤1280px sidebar rail rules further below are untouched. */
 @media (max-width: 760px) {
   .kx-new-session {
-    padding: clamp(24px, 4vh, 48px) 16px 32px;
+    /* Fixed px — zoom-invariant like the base rhythm. */
+    padding: 24px 16px 32px;
   }
 
   .kx-new-session__header {
@@ -4305,7 +4338,6 @@
   }
 
   .kx-sidebar__top {
-    flex-direction: column;
     gap: 6px;
   }
 
@@ -4351,6 +4383,12 @@
   }
 
   .kx-sidebar__collapse {
+    display: none;
+  }
+
+  /* The page-header sidebar toggle also stands down in the forced rail —
+   * expansion is unavailable at ≤1280px. */
+  .kx-new-session__sidebar-toggle {
     display: none;
   }
 
