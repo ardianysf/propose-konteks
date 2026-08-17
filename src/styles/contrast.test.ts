@@ -297,8 +297,10 @@ describe('candidate ratios against white/canvas/pale (AC9)', () => {
     expect(contrast('#ffffff', '#4f7044')).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('--kx-accent-segment-aa #95a547 clears 4.5:1 under dark --kx-primary text (white fails)', () => {
-    expect(contrast('#243025', '#95a547')).toBeGreaterThanOrEqual(4.5)
+  it('records the active segment as a user-directed white-on-#95a547 exception (2.709:1)', () => {
+    // The user explicitly chose white text on the #95A547 active segment
+    // for this clickable mockup. The pairing is recorded honestly — it is
+    // below 4.5:1 and is NOT an AA claim, only a directed brand exception.
     expect(contrast('#ffffff', '#95a547')).toBeLessThan(4.5)
   })
 
@@ -310,7 +312,7 @@ describe('candidate ratios against white/canvas/pale (AC9)', () => {
     expect(contrast('#4f7044', '#faf8ef')).toBeCloseTo(5.287, 3)
     expect(contrast('#4f7044', '#f4f8ee')).toBeCloseTo(5.225, 3)
     expect(contrast('#243025', '#95a547')).toBeCloseTo(5.084, 3)
-    expect(contrast('#ffffff', '#95a547')).toBeCloseTo(2.709, 3)
+    expect(contrast('#ffffff', '#95a547')).toBeCloseTo(2.709, 3) // applied (user-directed)
   })
 })
 

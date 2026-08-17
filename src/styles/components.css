@@ -185,11 +185,14 @@
 /* A repository-sourced Create System dialog stacks above the suspended
  * repository modal on dedicated layers — backdrop 60 / dialog 61 over the
  * repository's 50/51 — so the two frames never interleave or swap paint
- * order. The nested backdrop keeps the shared scrim color and simply
- * darkens the suspended one beneath it. */
+ * order. The nested backdrop stays nearly transparent: the base scrim at
+ * z-50 already darkens the page once, and a second full-strength scrim
+ * would compound to ~68% black and read as mud. A faint extra tint is
+ * enough to separate the two layers. */
 
 .kx-modal-backdrop--nested {
   z-index: 60;
+  background: rgba(36, 48, 37, 0.14);
 }
 
 .kx-create-modal--nested {
@@ -198,11 +201,17 @@
 
 /* The suspended underlying repository modal stays visually rendered but
  * stands down from pointer interaction entirely — the nested dialog above
- * owns every click, hover, and focus attempt until it returns. */
+ * owns every click, hover, and focus attempt until it returns. It is also
+ * dimmed and blurred a touch so the stacking hierarchy reads instantly
+ * instead of two equally-crisp competing frames. */
+.kx-modal-backdrop--suspended {
+  pointer-events: none;
+}
 
-.kx-modal-backdrop--suspended,
 .kx-repo-modal--suspended {
   pointer-events: none;
+  filter: blur(2px) saturate(0.85);
+  opacity: 0.92;
 }
 
 /* ── Right drawer (Konteks Learned, 450px — §12) ───────────────────── */
@@ -309,7 +318,7 @@
 .kx-segmented__btn--active,
 .kx-segmented__btn--active:hover {
   background: var(--kx-accent-segment-aa);
-  color: var(--kx-primary);
+  color: var(--kx-raised);
 }
 
 /* Session Mode cluster — uppercase caption above the segmented control,
@@ -2560,25 +2569,27 @@
  * reducer transition with no network involved. */
 
 .kx-create-modal {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr); /* head / form (body + footer) */
-  width: min(460px, calc(100vw - 48px));
-  max-height: min(440px, calc(100vh - 48px));
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: min(500px, calc(100vw - 48px));
+  max-height: min(560px, calc(100vh - 48px));
 }
 
 /* Header — title + subtitle, dismiss control at the right edge. */
 
 .kx-create-modal__head {
+  flex-shrink: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  padding: 14px 18px;
+  padding: 20px 22px 16px;
   border-bottom: 1px solid var(--kx-border);
 }
 
 .kx-create-modal__head-copy {
   min-width: 0;
+  display: grid;
+  gap: 4px;
 }
 
 .kx-create-modal__title {
@@ -2599,20 +2610,23 @@
   margin-left: auto;
 }
 
-/* Form shell — the body scrolls, the footer never does. */
+/* Form shell — flex column: the body takes all remaining space and is
+ * the only scroller; the pinned footer never competes with it. */
 
 .kx-create-modal__form {
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
+  flex: 1;
 }
 
 .kx-create-modal__body {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  min-height: 0;
-  padding: 14px 18px;
+  gap: 18px;
+  padding: 20px 22px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--kx-border) transparent;
@@ -2631,10 +2645,11 @@
 
 .kx-create-modal__helper {
   margin: 0;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: 10px;
   background: var(--kx-pale);
   font-size: var(--kx-text-xs);
+  line-height: 1.5;
   color: var(--kx-muted-text-aa);
 }
 
@@ -2642,7 +2657,7 @@
 
 .kx-create-modal__field {
   display: grid;
-  gap: 6px;
+  gap: 7px;
 }
 
 .kx-create-modal__label {
@@ -2662,27 +2677,31 @@
 
 .kx-create-modal__name,
 .kx-create-modal__description {
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: 10px;
   font-size: var(--kx-text-sm);
 }
 
 .kx-create-modal__description {
   resize: vertical;
-  min-height: 64px;
+  min-height: 72px;
+  max-height: 180px;
+  line-height: 1.5;
   font-family: inherit;
 }
 
 /* Single-row footer — note left, Cancel/Create right (AC33). */
 
 .kx-create-modal__footer {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 12px 18px;
+  padding: 14px 22px;
   border-top: 1px solid var(--kx-border);
   background: var(--kx-raised);
+  border-radius: 0 0 var(--kx-radius-main) var(--kx-radius-main);
 }
 
 .kx-create-modal__footer-note {
@@ -2702,7 +2721,7 @@
 }
 
 .kx-create-modal__actions .kx-btn {
-  padding: 8px 16px;
+  padding: 9px 18px;
   border-radius: 10px;
   font-size: var(--kx-text-sm);
 }

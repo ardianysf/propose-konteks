@@ -466,10 +466,11 @@ describe('RepositorySelectorModal — suspended under the nested Create System m
     expect(backdrops[1]).toHaveClass('kx-modal-backdrop--nested')
     expect(follows(repoDialog, getCreateDialog())).toBe(true)
 
-    // Pointer inertness ships in components.css.
-    expect(css).toMatch(
-      /\.kx-modal-backdrop--suspended,\s*\.kx-repo-modal--suspended\s*\{[^}]*pointer-events:\s*none/s,
-    )
+    // Pointer inertness + dimming ship in components.css — the grouped
+    // selector was split so the suspended dialog also gets the dim/blur
+    // treatment the backdrop alone can't provide.
+    expect(css).toMatch(/\.kx-modal-backdrop--suspended\s*\{[^}]*pointer-events:\s*none/s)
+    expect(css).toMatch(/\.kx-repo-modal--suspended\s*\{[^}]*pointer-events:\s*none[^}]*filter:\s*blur/s)
   })
 
   it('stands down from focus containment while suspended — the nested dialog owns focus', () => {
