@@ -128,7 +128,12 @@ export default function SystemMenu() {
           type="button"
           role="menuitem"
           className="kx-system-menu__create"
-          onClick={() => dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'create-system-modal' } })}
+          onClick={() =>
+            dispatch({
+              type: 'OPEN_OVERLAY',
+              overlay: { kind: 'create-system-modal', source: 'system-menu' },
+            })
+          }
         >
           <PlusIcon />
           <span className="kx-system-menu__create-label">Create new system</span>

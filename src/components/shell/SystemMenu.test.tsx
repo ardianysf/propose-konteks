@@ -66,7 +66,7 @@ describe('SystemMenu', () => {
     expect(closed.container.querySelector('.kx-system-menu')).toBeNull()
     closed.unmount()
 
-    const other = renderSystemMenu({ kind: 'create-system-modal' })
+    const other = renderSystemMenu({ kind: 'create-system-modal', source: 'system-menu' })
     expect(other.container.querySelector('.kx-system-menu')).toBeNull()
     other.unmount()
 
@@ -166,7 +166,7 @@ describe('SystemMenu', () => {
     expect(within(menu).getByRole('menuitem', { name: /create new system/i })).toBeInTheDocument()
 
     fireEvent.click(within(menu).getByRole('menuitem', { name: /create new system/i }))
-    expect(bucket.current?.overlay).toEqual({ kind: 'create-system-modal' })
+    expect(bucket.current?.overlay).toEqual({ kind: 'create-system-modal', source: 'system-menu' })
     // Scroll + sticky styling ship in components.css — the list is the only
     // region that scrolls; the footer stays pinned below it.
     expect(css).toContain('.kx-system-menu__list')

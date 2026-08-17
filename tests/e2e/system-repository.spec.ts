@@ -162,3 +162,109 @@ test.describe('system / repository flow', () => {
     await expect(page.getByText('No systems yet')).toBeVisible()
   })
 })
+
+test.describe('session context draft (composer correction)', () => {
+  test('fresh New Session shows the system placeholder, not the sidebar active system', async ({ page }) => {
+    await goto(page)
+    const trigger = page.getByTestId('repository-trigger')
+    await expect(trigger).toBeVisible()
+    await expect(trigger).toHaveText('Choose system / repositories')
+    await expect(trigger).not.toHaveText('BSI - HRIS')
+  })
+
+  test('Cancel discards the draft without committing or leaking global state', async ({ page }) => {
+    await goto(page)
+    await openRepositoryModal(page)
+    const dialog = page.getByRole('dialog', { name: 'Choose work repositories' })
+
+    // Switch to BSI Canteen and pick its repository in the draft only.
+    await dialog.getByRole('button', { name: /BSI Canteen/ }).click()
+    const check = dialog.getByRole('checkbox', { name: 'bsi/canteen-backend' })
+    await check.check()
+    await expect(check).toBeChecked()
+
+    await dialog.getByRole('button', { name: 'Cancel' }).click()
+    await expect(dialog).toHaveCount(0)
+
+    // No commit: the pill stays on the fresh placeholder.
+    await expect(page.getByTestId('repository-trigger')).toHaveText('Choose system / repositories')
+    // No global leak: the sidebar still shows the default system.
+    await expect(page.getByRole('button', { name: /BSI - HRIS — open system menu/ })).toBeVisible()
+
+    // Reopening reseeds a fresh draft from global, not the cancelled edit.
+    await openRepositoryModal(page)
+    const reopened = page.getByRole('dialog', { name: 'Choose work repositories' })
+    await expect(reopened.locator('.kx-repo-modal__system--active')).toContainText('BSI - HRIS')
+  })
+
+  test('Done commits the selected system and labels the session pill with it', async ({ page }) => {
+    await goto(page)
+    await openRepositoryModal(page)
+    const dialog = page.getByRole('dialog', { name: 'Choose work repositories' })
+
+    await dialog.getByRole('button', { name: /BSI Canteen/ }).click()
+    await dialog.getByRole('checkbox', { name: 'bsi/canteen-backend' }).check()
+    await dialog.getByRole('button', { name: 'Done' }).click()
+    await expect(dialog).toHaveCount(0)
+
+    await expect(page.getByTestId('repository-trigger')).toHaveText('BSI Canteen')
+  })
+
+  test('sidebar system changes after commit do not alter the committed session pill', async ({ page }) => {
+    await goto(page)
+    await openRepositoryModal(page)
+    const dialog = page.getByRole('dialog', { name: 'Choose work repositories' })
+    await dialog.getByRole('button', { name: /BSI Canteen/ }).click()
+    await dialog.getByRole('button', { name: 'Done' }).click()
+    await expect(page.getByTestId('repository-trigger')).toHaveText('BSI Canteen')
+
+    // Change the sidebar system to Kookree — the session pill stays committed.
+    await openSystemMenu(page)
+    await page
+      .getByRole('menu', { name: 'Systems' })
+      .getByRole('menuitem', { name: /Kookree/ })
+      .click()
+    await expect(page.getByRole('button', { name: /Kookree — open system menu/ })).toBeVisible()
+    await expect(page.getByTestId('repository-trigger')).toHaveText('BSI Canteen')
+  })
+
+  test('repository-sourced Create commits the new system as the session context', async ({ page }) => {
+    await goto(page)
+    await openRepositoryModal(page)
+    await page
+      .getByRole('dialog', { name: 'Choose work repositories' })
+      .getByRole('button', { name: /Add new system/ })
+      .click()
+
+    const dialog = page.getByRole('dialog', { name: 'Create a new system' })
+    await dialog.getByLabel(/Name/).fill('QA Platform')
+    await dialog.getByRole('button', { name: 'Create' }).click()
+    await expect(dialog).toHaveCount(0)
+
+    // Repository-sourced create confirms the new system in the session pill.
+    await expect(page.getByTestId('repository-trigger')).toHaveText('QA Platform')
+    await expect(page.getByRole('button', { name: /QA Platform — open system menu/ })).toBeVisible()
+  })
+
+  test('system-menu Create activates the sidebar system but leaves the committed session pill unchanged', async ({ page }) => {
+    await goto(page)
+    await openRepositoryModal(page)
+    const repoDialog = page.getByRole('dialog', { name: 'Choose work repositories' })
+    await repoDialog.getByRole('button', { name: /BSI Canteen/ }).click()
+    await repoDialog.getByRole('button', { name: 'Done' }).click()
+    await expect(page.getByTestId('repository-trigger')).toHaveText('BSI Canteen')
+
+    await openSystemMenu(page)
+    await page
+      .getByRole('menu', { name: 'Systems' })
+      .getByRole('menuitem', { name: /Create new system/ })
+      .click()
+    const createDialog = page.getByRole('dialog', { name: 'Create a new system' })
+    await createDialog.getByLabel(/Name/).fill('QA Platform')
+    await createDialog.getByRole('button', { name: 'Create' }).click()
+    await expect(createDialog).toHaveCount(0)
+
+    await expect(page.getByRole('button', { name: /QA Platform — open system menu/ })).toBeVisible()
+    await expect(page.getByTestId('repository-trigger')).toHaveText('BSI Canteen')
+  })
+})

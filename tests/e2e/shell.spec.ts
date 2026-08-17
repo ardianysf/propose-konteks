@@ -247,20 +247,20 @@ test.describe('shell', () => {
     await expect(page.getByRole('link', { name: /all systems/i })).toHaveCount(0)
   })
 
-  test('visible Illustrative data marker renders on home and Session History (AC46)', async ({ page }) => {
+  test('visible Illustrative data marker renders in the sidebar only on New Session; both on Session History (AC46)', async ({ page }) => {
     await goto(page)
     let notes = page.getByTestId('illustrative-data-note')
-    await expect(notes).toHaveCount(2)
-    await expect(notes.nth(0)).toBeVisible()
-    await expect(notes.nth(0)).toHaveText('Illustrative data')
-    await expect(notes.nth(1)).toBeVisible()
-    await expect(notes.nth(1)).toHaveText('Illustrative data')
+    await expect(notes).toHaveCount(1)
+    await expect(notes).toBeVisible()
+    await expect(notes).toHaveText('Illustrative data')
+    await expect(notes).toHaveClass(/kx-sidebar__note/)
 
     await page.getByRole('button', { name: 'View all' }).click()
     await expect(page.getByRole('heading', { name: 'Session history' })).toBeVisible()
     notes = page.getByTestId('illustrative-data-note')
     await expect(notes).toHaveCount(2)
     await expect(notes.nth(0)).toBeVisible()
+    await expect(notes.nth(0)).toHaveText('Illustrative data')
     await expect(notes.nth(1)).toBeVisible()
     await expect(notes.nth(1)).toHaveText('Illustrative data')
   })
@@ -319,6 +319,33 @@ test.describe('shell', () => {
   })
 })
 
+test.describe('composer layout correction surfaces', () => {
+  test('renders exactly one h1 and a decorative intro image (empty alt, aria-hidden)', async ({ page }) => {
+    await goto(page)
+    await expect(page.locator('h1')).toHaveCount(1)
+    await expect(page.getByRole('heading', { name: 'New session', level: 1 })).toBeVisible()
+
+    const introImg = page.locator('.kx-new-session__intro-img')
+    await expect(introImg).toHaveCount(1)
+    await expect(introImg).toHaveAttribute('alt', '')
+    await expect(introImg).toHaveAttribute('aria-hidden', 'true')
+    await expect(introImg).toHaveAttribute('src', '/assets/konteks/empty-sessions.png')
+  })
+
+  test('external footer carries the exact disclaimer and the Reviews waiting pill', async ({ page }) => {
+    await goto(page)
+    const footer = page.getByTestId('external-footer')
+    await expect(footer).toBeVisible()
+    await expect(footer.locator('.kx-composer__disclaimer')).toHaveText(
+      'Konteks can make mistakes. Verify important information.',
+    )
+    const reviews = footer.getByTestId('reviews-waiting')
+    await expect(reviews).toBeVisible()
+    await expect(reviews).toContainText('Reviews waiting')
+    await expect(reviews.locator('.kx-composer__badge')).toHaveText('3')
+  })
+})
+
 test.describe('responsive regressions (Task 13)', () => {
   test('crossing 1280px forces the rail; crossing back restores the stored expanded state', async ({ page }) => {
     await goto(page)
@@ -362,5 +389,25 @@ test.describe('responsive regressions (Task 13)', () => {
     expect(modalBox!.y).toBeGreaterThanOrEqual(0)
     expect(modalBox!.x + modalBox!.width).toBeLessThanOrEqual(1200)
     expect(modalBox!.y + modalBox!.height).toBeLessThanOrEqual(720)
+  })
+
+  test('keeps the composer and external footer fully visible with no horizontal overflow at both required viewports', async ({ page }) => {
+    for (const { width, height } of [
+      { width: 1440, height: 900 },
+      { width: 1200, height: 720 },
+    ]) {
+      await page.setViewportSize({ width, height })
+      await goto(page)
+
+      const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth)
+      expect(scrollWidth, `document must not overflow ${width}px horizontally`).toBeLessThanOrEqual(width)
+
+      for (const testId of ['composer', 'composer-input-box', 'external-footer']) {
+        const box = await page.getByTestId(testId).boundingBox()
+        expect(box, `${testId} should be visible at ${width}x${height}`).not.toBeNull()
+        expect(box!.x).toBeGreaterThanOrEqual(0)
+        expect(box!.x + box!.width).toBeLessThanOrEqual(width)
+      }
+    }
   })
 })

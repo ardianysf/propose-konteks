@@ -262,7 +262,7 @@
 }
 
 .kx-segmented__btn {
-  padding: 8px 20px;
+  padding: 8px 16px;
   border: none;
   border-radius: 10px;
   background: transparent;
@@ -899,8 +899,8 @@
   white-space: nowrap;
 }
 
-/* Page frame — centers the mode control, setup row, and composer;
- * fill/stretch between the ideal-width extremes (§5.1). */
+/* Page frame — header, centered intro, unified composer panel, and the
+ * page-level footer stack in one centered column (§6). */
 .kx-new-session {
   display: flex;
   flex-direction: column;
@@ -909,39 +909,129 @@
   width: 100%;
   max-width: 780px;
   margin: 0 auto;
-  padding: clamp(48px, 9vh, 96px) 32px 48px;
+  padding: clamp(40px, 8vh, 80px) 32px 40px;
 }
 
-/* Dominant mode hierarchy (AC15) — the segmented control scaled up so
- * it reads as the primary switch above the setup controls and composer. */
-.kx-session-mode--dominant {
-  padding: 5px;
-  border-radius: 18px;
-  box-shadow: 0 6px 24px rgba(36, 48, 37, 0.08);
-}
-
-.kx-session-mode--dominant .kx-segmented__btn {
-  padding: 11px 34px;
-  border-radius: 13px;
-  font-size: var(--kx-text-xl);
-}
-
-/* Engineering-only setup row (AC17) — hidden entirely in Planning
- * (the page removes it from the tree, AC16). */
-.kx-setup-row {
+/* Header — the single visible h1 + subtitle left, approval right. */
+.kx-new-session__header {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.kx-new-session__header-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.kx-new-session__title {
+  font-size: var(--kx-text-3xl);
+  font-weight: var(--kx-font-bold);
+  line-height: 1.15;
+  color: var(--kx-primary);
+}
+
+.kx-new-session__subtitle {
+  font-size: var(--kx-text-md);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-new-session__approval {
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-muted-text-aa);
+}
+
+/* Centered intro — decorative illustration + mode-specific copy (§6). */
+.kx-new-session__intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 12px;
   width: 100%;
+  min-width: 0;
+  text-align: center;
 }
 
-.kx-setup-row__trigger {
+.kx-new-session__intro-img {
+  max-height: 140px;
+  width: auto;
+  object-fit: contain;
+}
+
+.kx-new-session__intro-heading {
+  font-size: var(--kx-text-2xl);
+  font-weight: var(--kx-font-bold);
+  line-height: 1.2;
+  color: var(--kx-primary);
+}
+
+.kx-new-session__intro-body {
+  max-width: 560px;
+  font-size: var(--kx-text-md);
+  color: var(--kx-muted-text-aa);
+}
+
+/* ── Unified composer panel (Task 5 correction, §7.2) ──────────────── */
+
+/* The unified panel stacks its top row above the nested input box. */
+.kx-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Soft-matcha outer container (pale wash + hairline) — the single
+ * unified surface hosting the top row and the nested white input box
+ * (AC18). */
+.kx-composer {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-radius: var(--kx-radius-main);
+}
+
+/* Top row — setup pills left, Session Mode right (§6). */
+.kx-panel__top-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.kx-panel__setup-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.kx-panel__mode-cluster {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Icon pill — the mode-specific setup triggers (§6). */
+.kx-panel__pill {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   min-width: 0;
-  padding: 8px 14px;
+  max-width: 100%;
+  padding: 8px 12px;
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
   border-radius: 12px;
@@ -952,12 +1042,12 @@
     border-color 0.15s ease;
 }
 
-.kx-setup-row__trigger:hover {
+.kx-panel__pill:hover {
   background: var(--kx-pale);
   border-color: var(--kx-accent);
 }
 
-.kx-setup-row__trigger-icon {
+.kx-panel__pill-icon {
   display: grid;
   place-items: center;
   width: 26px;
@@ -968,20 +1058,8 @@
   color: var(--kx-accent-text-aa);
 }
 
-.kx-setup-row__trigger-copy {
-  display: grid;
-  gap: 1px;
+.kx-panel__pill-label {
   min-width: 0;
-}
-
-.kx-setup-row__trigger-caption {
-  font-size: var(--kx-text-2xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-setup-row__trigger-value {
   font-size: var(--kx-text-md);
   font-weight: var(--kx-font-medium);
   color: var(--kx-primary);
@@ -990,31 +1068,33 @@
   text-overflow: ellipsis;
 }
 
-.kx-setup-row__chevron {
+.kx-panel__pill-chevron {
   flex-shrink: 0;
   color: var(--kx-muted);
 }
 
-/* ── Composer (Task 5, spec §7.2 — AC18–AC21) ─────────────────────── */
-
-/* Soft-matcha outer container (pale wash + hairline) wrapping the white
- * input — the contrast between the two stays clearly visible (AC18). */
-.kx-composer {
+/* Nested white text-input box — the textarea and the input toolbar all
+ * sit inside this raised surface (AC8/AC9). */
+.kx-panel__input-box {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  padding: 12px;
-  background: var(--kx-pale);
+  min-width: 0;
+  background: var(--kx-raised);
   border: 1px solid var(--kx-border);
-  border-radius: var(--kx-radius-main);
+  border-radius: 14px;
 }
 
+/* The prompt textarea fills the white box; its focus ring is drawn as an
+ * inner outline so it never clips inside the rounded box. */
 .kx-composer__input {
   display: block;
   width: 100%;
   min-height: 118px;
   padding: 14px 16px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 14px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   resize: vertical;
   font-family: inherit;
   font-size: var(--kx-text-md);
@@ -1027,18 +1107,29 @@
 
 .kx-composer__input:focus {
   outline: none;
-  border-color: var(--kx-accent-strong);
-  box-shadow: 0 0 0 3px rgba(143, 191, 106, 0.25);
+  box-shadow: inset 0 0 0 2px var(--kx-accent-strong);
 }
 
-/* Toolbar — unboxed icon tools with the shared hover affordance (AC19);
- * the Execution Profile control sits bottom-left, immediately after the
- * text/document tool (AC21); send hugs the right edge. */
-.kx-composer__toolbar {
+/* Input toolbar — left group (attach / text document / Execution
+ * Profile) and right group (voice / send), hugging the bottom of the
+ * white input box (§6, AC9). */
+.kx-panel__toolbar {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--kx-border);
+}
+
+.kx-panel__toolbar-left,
+.kx-panel__toolbar-right {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  margin-top: 10px;
+  min-width: 0;
 }
 
 /* Anchor wrapper around the profile control — the menu cluster (Task 6)
@@ -1118,7 +1209,6 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-left: auto;
   padding: 8px 18px;
   background: rgba(143, 191, 106, 0.22);
   border: 1px solid var(--kx-accent);
@@ -1144,15 +1234,16 @@
   opacity: 0.45;
 }
 
-/* Footer — disclaimer left, "Reviews waiting" + round count badge right
- * (AC20); the badge is a fixed-height pill so 1- and 2-digit counts stay
- * round. */
-.kx-composer__footer {
+/* Page-level footer — disclaimer left, "Reviews waiting" pill right
+ * (AC10/AC11); the badge is a fixed-height pill so 1- and 2-digit
+ * counts stay round. */
+.kx-panel__external-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 10px;
+  width: 100%;
+  min-width: 0;
   padding: 0 4px;
 }
 
@@ -1166,20 +1257,22 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  padding: 2px 4px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
+  padding: 6px 12px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
   font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-bold);
   color: var(--kx-accent-text-aa);
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .kx-composer__reviews:hover {
   color: var(--kx-accent);
-  text-decoration: underline;
+  border-color: var(--kx-accent);
 }
 
 .kx-composer__badge {

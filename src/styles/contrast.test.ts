@@ -3,7 +3,7 @@
  *
  * jsdom does not apply real CSS, so these are source-string assertions
  * against the committed stylesheets (same convention as responsive.test.ts).
- * The file embeds the complete 115-consumer inventory — 66 muted-token
+ * The file embeds the complete 117-consumer inventory — 68 muted-token
  * consumers and 49 accent-strong consumers — and proves three things:
  *
  *   1. The three AA semantics are defined in tokens.css and every candidate
@@ -51,7 +51,7 @@ function contrast(a: string, b: string): number {
 }
 
 // ---------------------------------------------------------------------------
-// Complete 114-consumer inventory.
+// Complete 117-consumer inventory.
 // cls: M = enabled muted text/placeholder, A = enabled accent text/glyph,
 //      S = white-text solid background, U = unchanged (decorative/disabled).
 // token is the ORIGINAL token each consumer started from.
@@ -76,7 +76,9 @@ const mutedM = [
   '.kx-system-menu__item-count',
   '.kx-workspace-menu__item-plan',
   '.kx-page-placeholder p',
-  '.kx-setup-row__trigger-caption',
+  '.kx-new-session__subtitle',
+  '.kx-new-session__approval',
+  '.kx-new-session__intro-body',
   '.kx-composer__input::placeholder',
   '.kx-composer__profile-caption',
   '.kx-composer__disclaimer',
@@ -134,7 +136,7 @@ const mutedM = [
 
 const mutedU = [
   '.kx-sidebar__chevron',
-  '.kx-setup-row__chevron',
+  '.kx-panel__pill-chevron',
   '.kx-composer__profile-chevron',
   '.kx-history__open:disabled',
 ]
@@ -147,7 +149,7 @@ const accentA = [
   '.kx-system-menu__all-icon',
   '.kx-system-menu__item-icon',
   '.kx-system-menu__create',
-  '.kx-setup-row__trigger-icon',
+  '.kx-panel__pill-icon',
   '.kx-composer__profile-icon',
   '.kx-composer__send',
   '.kx-composer__reviews',
@@ -175,7 +177,7 @@ const accentU: Array<[string, string]> = [
   ['.kx-sidebar__workspace-avatar', 'background'],
   ['.kx-system-menu__create:hover', 'border-color'],
   ['.kx-workspace-menu__item-avatar', 'background'],
-  ['.kx-composer__input:focus', 'border-color'],
+  ['.kx-composer__input:focus', 'box-shadow'],
   ['.kx-composer__profile:hover', 'border-color'],
   ['.kx-composer__send:hover:not(:disabled)', 'border-color'],
   ['.kx-profile-menu__manage:focus-visible', 'border-color'],
@@ -307,14 +309,14 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = [...extractUsages(components, COMPONENTS), ...extractUsages(global, GLOBAL)]
 
-  it('covers exactly 115 consumers — 66 muted and 49 accent-strong', () => {
-    expect(inventory).toHaveLength(115)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(66)
+  it('covers exactly 117 consumers — 68 muted and 49 accent-strong', () => {
+    expect(inventory).toHaveLength(117)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(68)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(49)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(62)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(64)
     expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(26)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(2)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(25)

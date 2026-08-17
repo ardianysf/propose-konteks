@@ -132,3 +132,64 @@ describe('focus, tooltip, and glow hooks', () => {
     expect(flat(components)).toContain('.kx-main > * { position: relative; z-index: 1;')
   })
 })
+
+describe('New Session semantic layout (composer correction)', () => {
+  it('splits the header into copy left and the approval indicator right', () => {
+    const css = flat(components)
+    expect(css).toContain(
+      '.kx-new-session__header { display: flex; align-items: flex-start; justify-content: space-between;',
+    )
+    expect(css).toContain('.kx-new-session__title { font-size: var(--kx-text-3xl);')
+    expect(css).toContain('.kx-new-session__subtitle { font-size: var(--kx-text-md);')
+    expect(css).toContain('.kx-new-session__approval { flex-shrink: 0;')
+  })
+
+  it('centers the intro with a constrained decorative image and a 2xl heading', () => {
+    const css = flat(components)
+    expect(css).toContain('.kx-new-session__intro { display: flex; flex-direction: column; align-items: center;')
+    expect(css).toContain('.kx-new-session__intro-img { max-height: 140px;')
+    expect(css).toContain('.kx-new-session__intro-heading { font-size: var(--kx-text-2xl);')
+  })
+
+  it('keeps the setup pills and Session Mode on one wrap-safe top row', () => {
+    const css = flat(components)
+    expect(css).toContain(
+      '.kx-panel__top-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;',
+    )
+    expect(css).toContain('.kx-panel__setup-cluster { display: flex; flex-wrap: wrap;')
+    expect(css).toContain('.kx-panel__mode-cluster { display: flex; align-items: center;')
+  })
+
+  it('nests the textarea and input toolbar inside a raised input box', () => {
+    const css = flat(components)
+    expect(css).toContain('.kx-panel__input-box { display: flex; flex-direction: column;')
+    expect(css).toContain('background: var(--kx-raised);')
+    expect(css).toContain('border-radius: 14px;')
+    expect(css).toContain('.kx-composer__input { display: block; width: 100%;')
+  })
+
+  it('separates the toolbar into left and right groups with wrap safety', () => {
+    const css = flat(components)
+    expect(css).toContain(
+      '.kx-panel__toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;',
+    )
+    expect(css).toContain('.kx-panel__toolbar-left, .kx-panel__toolbar-right { display: flex; flex-wrap: wrap;')
+  })
+
+  it('places the disclaimer and Reviews pill in a page-level space-between footer', () => {
+    const css = flat(components)
+    expect(css).toContain(
+      '.kx-panel__external-footer { display: flex; align-items: center; justify-content: space-between;',
+    )
+    expect(css).toContain('.kx-composer__reviews { display: inline-flex;')
+  })
+
+  it('keeps pill labels truncated without horizontal overflow', () => {
+    const css = flat(components)
+    expect(css).toContain('.kx-panel__pill { display: inline-flex;')
+    expect(css).toContain('min-width: 0;')
+    expect(css).toContain('.kx-panel__pill-label { min-width: 0;')
+    expect(css).toContain('white-space: nowrap; overflow: hidden; text-overflow: ellipsis;')
+    expect(css).toContain('.kx-composer { width: 100%; min-width: 0;')
+  })
+})

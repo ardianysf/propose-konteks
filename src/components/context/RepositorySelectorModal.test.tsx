@@ -78,7 +78,7 @@ describe('RepositorySelectorModal — frame', () => {
     expect(closed.container.querySelector('.kx-repo-modal')).toBeNull()
     closed.unmount()
 
-    const other = renderRepositorySelectorModal({ kind: 'create-system-modal' })
+    const other = renderRepositorySelectorModal({ kind: 'create-system-modal', source: 'system-menu' })
     expect(other.container.querySelector('.kx-repo-modal')).toBeNull()
     other.unmount()
 
@@ -145,7 +145,7 @@ describe('RepositorySelectorModal — Add new system (AC27)', () => {
     expect(addSystem.closest('.kx-repo-modal__groups')).toBeNull()
 
     fireEvent.click(addSystem)
-    expect(bucket.current?.overlay).toEqual({ kind: 'create-system-modal' })
+    expect(bucket.current?.overlay).toEqual({ kind: 'create-system-modal', source: 'repository-modal' })
   })
 
   it('stays mounted while the search filters every group away', () => {
@@ -204,17 +204,20 @@ describe('RepositorySelectorModal — one active system (AC25)', () => {
     )
   })
 
-  it('checks active-system repositories through the store (TOGGLE_REPO)', () => {
+  it('checks active-system repositories through the draft (TOGGLE_SESSION_DRAFT_REPO)', () => {
     const { bucket } = renderRepositorySelectorModal({ kind: 'repository-modal' })
     const shared = screen.getByRole('checkbox', { name: 'bsi/hris-frontend-shared' })
     expect(shared).not.toBeChecked()
 
     fireEvent.click(shared)
-    expect(bucket.current?.selectedRepoIds).toEqual(['bsi/hris-frontend-shared'])
+    expect(bucket.current?.sessionContextDraft).toEqual({
+      systemId: 'bsi-hris',
+      repoIds: ['bsi/hris-frontend-shared'],
+    })
     expect(shared).toBeChecked()
 
     fireEvent.click(shared)
-    expect(bucket.current?.selectedRepoIds).toEqual([])
+    expect(bucket.current?.sessionContextDraft).toEqual({ systemId: 'bsi-hris', repoIds: [] })
     expect(shared).not.toBeChecked()
   })
 })
@@ -224,14 +227,13 @@ describe('RepositorySelectorModal — one active system (AC25)', () => {
 // ---------------------------------------------------------------------------
 
 describe('RepositorySelectorModal — switching systems (AC26)', () => {
-  it('dispatches SET_ACTIVE_SYSTEM, moves the active group and enabled checkboxes, and clears the selection', () => {
+  it('switches the draft system, moves the active group, and clears the draft selection', () => {
     const { bucket } = renderRepositorySelectorModal({ kind: 'repository-modal' })
     fireEvent.click(screen.getByRole('checkbox', { name: 'bsi/hris-frontend-shared' }))
-    expect(bucket.current?.selectedRepoIds).toHaveLength(1)
+    expect(bucket.current?.sessionContextDraft?.repoIds).toHaveLength(1)
 
     fireEvent.click(screen.getByRole('button', { name: /BSI Canteen/i }))
-    expect(bucket.current?.activeSystemId).toBe('bsi-canteen')
-    expect(bucket.current?.selectedRepoIds).toEqual([]) // AC26 via the real reducer
+    expect(bucket.current?.sessionContextDraft).toEqual({ systemId: 'bsi-canteen', repoIds: [] })
 
     expect(screen.getByRole('checkbox', { name: 'bsi/canteen-backend' })).toBeEnabled()
     expect(screen.getByRole('checkbox', { name: 'bsi/hris-frontend-shared' })).toBeDisabled()

@@ -82,12 +82,12 @@ describe('CreateSystemModal — frame', () => {
     expect(other.container.querySelector('.kx-create-modal')).toBeNull()
     other.unmount()
 
-    renderCreateSystemModal({ kind: 'create-system-modal' })
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     expect(getDialog()).toBeInTheDocument()
   })
 
   it('is a centered modal dialog over the shared backdrop — role=dialog, aria-modal, labelled by its title', () => {
-    renderCreateSystemModal({ kind: 'create-system-modal' })
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     const dialog = getDialog()
     expect(dialog).toHaveClass('kx-modal', 'kx-create-modal')
     expect(dialog).toHaveAttribute('aria-modal', 'true')
@@ -109,19 +109,19 @@ describe('CreateSystemModal — frame', () => {
   })
 
   it('moves focus to the dialog on mount', () => {
-    renderCreateSystemModal({ kind: 'create-system-modal' })
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     expect(getDialog()).toHaveFocus()
   })
 
   it('Escape dispatches CLOSE_OVERLAY and unmounts the dialog', () => {
-    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal' })
+    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(bucket.current?.overlay).toEqual({ kind: 'none' })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('closes from the header dismiss control too', () => {
-    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal' })
+    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     expect(bucket.current?.overlay).toEqual({ kind: 'none' })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -129,7 +129,7 @@ describe('CreateSystemModal — frame', () => {
 
   it('Cancel closes without touching systems or the current selection', () => {
     const { bucket } = renderCreateSystemModal(
-      { kind: 'create-system-modal' },
+      { kind: 'create-system-modal', source: 'system-menu' },
       { selectedRepoIds: ['bsi/hris-frontend-shared'] },
     )
     fireEvent.click(within(getDialog()).getByRole('button', { name: 'Cancel' }))
@@ -146,7 +146,7 @@ describe('CreateSystemModal — frame', () => {
 
 describe('CreateSystemModal — fields', () => {
   it('labels Name with a visible required cue', () => {
-    renderCreateSystemModal({ kind: 'create-system-modal' })
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     const name = getNameInput()
     expect(name).toHaveAccessibleName(/name/i)
     expect(name.tagName).toBe('INPUT')
@@ -159,7 +159,7 @@ describe('CreateSystemModal — fields', () => {
   })
 
   it('labels Description as optional — a multi-line input, never required', () => {
-    renderCreateSystemModal({ kind: 'create-system-modal' })
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     const description = getDescriptionInput()
     expect(description.tagName).toBe('TEXTAREA')
     expect(description).not.toHaveAttribute('required')
@@ -170,7 +170,7 @@ describe('CreateSystemModal — fields', () => {
   })
 
   it('carries a concise helper explaining that systems group repositories and components', () => {
-    renderCreateSystemModal({ kind: 'create-system-modal' })
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     const helper = getDialog().querySelector('.kx-create-modal__helper')
     expect(helper).not.toBeNull()
     expect(helper!).toHaveTextContent(/group repositories and components/i)
@@ -185,12 +185,12 @@ describe('CreateSystemModal — fields', () => {
 
 describe('CreateSystemModal — Create gating (AC43)', () => {
   it('starts disabled while the name is blank', () => {
-    renderCreateSystemModal({ kind: 'create-system-modal' })
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     expect(getCreate()).toBeDisabled()
   })
 
   it('stays disabled for whitespace-only names', () => {
-    renderCreateSystemModal({ kind: 'create-system-modal' })
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     fireEvent.change(getNameInput(), { target: { value: '   ' } })
     expect(getCreate()).toBeDisabled()
 
@@ -199,7 +199,7 @@ describe('CreateSystemModal — Create gating (AC43)', () => {
   })
 
   it('enables once the name has visible characters — surrounding whitespace is fine', () => {
-    renderCreateSystemModal({ kind: 'create-system-modal' })
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     fireEvent.change(getNameInput(), { target: { value: 'QA Platform' } })
     expect(getCreate()).toBeEnabled()
 
@@ -219,7 +219,7 @@ describe('CreateSystemModal — Create gating (AC43)', () => {
 describe('CreateSystemModal — submit (AC33)', () => {
   it('dispatches CREATE_SYSTEM with name + description then CLOSE_OVERLAY — the new system becomes active and the repo selection clears', () => {
     const { bucket } = renderCreateSystemModal(
-      { kind: 'create-system-modal' },
+      { kind: 'create-system-modal', source: 'system-menu' },
       { selectedRepoIds: ['bsi/hris-frontend-shared'] },
     )
     fireEvent.change(getNameInput(), { target: { value: 'QA Platform' } })
@@ -241,8 +241,25 @@ describe('CreateSystemModal — submit (AC33)', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  it('confirms the new system as the committed session context when opened from the repository modal', () => {
+    const { bucket } = renderCreateSystemModal(
+      { kind: 'create-system-modal', source: 'repository-modal' },
+      { selectedRepoIds: ['bsi/hris-frontend-shared'] },
+    )
+    fireEvent.change(getNameInput(), { target: { value: 'QA Platform' } })
+    fireEvent.click(getCreate())
+
+    const state = bucket.current!
+    const created = state.systems[state.systems.length - 1]
+    expect(created.name).toBe('QA Platform')
+    expect(state.sessionContext).toEqual({ systemId: created.id, repoIds: [] })
+    expect(state.activeSystemId).toBe(created.id)
+    expect(state.sessionContextDraft).toBeNull()
+    expect(state.overlay).toEqual({ kind: 'none' })
+  })
+
   it('omits the description when blank — CREATE_SYSTEM lands without one', () => {
-    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal' })
+    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     fireEvent.change(getNameInput(), { target: { value: 'QA Platform' } })
     fireEvent.click(getCreate())
 
@@ -251,7 +268,7 @@ describe('CreateSystemModal — submit (AC33)', () => {
   })
 
   it('trims the name and description before committing', () => {
-    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal' })
+    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     fireEvent.change(getNameInput(), { target: { value: '  QA Platform  ' } })
     fireEvent.change(getDescriptionInput(), { target: { value: '  Quality automation  ' } })
     fireEvent.click(getCreate())
@@ -262,14 +279,14 @@ describe('CreateSystemModal — submit (AC33)', () => {
   })
 
   it('never dispatches CREATE_SYSTEM for a whitespace-only name — even through form submit', () => {
-    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal' })
+    const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     fireEvent.change(getNameInput(), { target: { value: '   ' } })
     const form = getDialog().querySelector('form')
     expect(form).not.toBeNull()
     fireEvent.submit(form!)
 
     expect(bucket.current?.systems).toHaveLength(SYSTEMS.length)
-    expect(bucket.current?.overlay).toEqual({ kind: 'create-system-modal' })
+    expect(bucket.current?.overlay).toEqual({ kind: 'create-system-modal', source: 'system-menu' })
     expect(getDialog()).toBeInTheDocument()
   })
 
@@ -277,7 +294,7 @@ describe('CreateSystemModal — submit (AC33)', () => {
     const fetchSpy = vi.fn()
     vi.stubGlobal('fetch', fetchSpy)
     try {
-      const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal' })
+      const { bucket } = renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
       fireEvent.change(getNameInput(), { target: { value: 'QA Platform' } })
       fireEvent.click(getCreate())
       expect(bucket.current?.systems).toHaveLength(SYSTEMS.length + 1)
@@ -294,7 +311,7 @@ describe('CreateSystemModal — submit (AC33)', () => {
 
 describe('CreateSystemModal — hygiene', () => {
   it('labels every control semantically and uses no emoji anywhere in the dialog', () => {
-    renderCreateSystemModal({ kind: 'create-system-modal' })
+    renderCreateSystemModal({ kind: 'create-system-modal', source: 'system-menu' })
     const dialog = getDialog()
     expect(dialog.textContent).not.toMatch(EMOJI)
 

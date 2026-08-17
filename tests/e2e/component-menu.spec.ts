@@ -27,6 +27,24 @@ test.describe('component menu', () => {
     await expect(menu.locator('.kx-component-menu__row .kx-chip')).toHaveCount(0)
   })
 
+  test('component pill reflects placeholder → one name → multiple count → cleared placeholder (AC32)', async ({ page }) => {
+    await goto(page)
+    const trigger = page.getByTestId('component-trigger')
+    await expect(trigger).toHaveText('Choose component')
+
+    await trigger.click()
+    const menu = page.getByTestId('component-menu')
+
+    await menu.getByRole('menuitemcheckbox', { name: /canteen-api/ }).check()
+    await expect(trigger).toHaveText('canteen-api')
+
+    await menu.getByRole('menuitemcheckbox', { name: /canteen-cms/ }).check()
+    await expect(trigger).toHaveText('2 components')
+
+    await menu.getByRole('menuitem', { name: 'Clear' }).click()
+    await expect(trigger).toHaveText('Choose component')
+  })
+
   test('searches by component or repository and supports multi-select count + Clear (AC32)', async ({ page }) => {
     await goto(page)
     await page.getByTestId('component-trigger').click()

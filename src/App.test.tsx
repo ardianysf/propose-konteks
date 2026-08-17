@@ -140,7 +140,7 @@ describe('Task 7 modal overlays', () => {
     fireEvent.click(within(getRepoDialog()).getByRole('checkbox', { name: 'bsi/hris-frontend-shared' }))
     fireEvent.click(within(getRepoDialog()).getByRole('button', { name: 'Done' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(screen.getByTestId('repository-trigger')).toHaveTextContent(/1 of 3 repositories/i)
+    expect(screen.getByTestId('repository-trigger')).toHaveTextContent('BSI - HRIS')
 
     // SystemMenu → Create new system → Create modal → create.
     fireEvent.click(screen.getByRole('button', { name: /open system menu/i }))
@@ -155,9 +155,9 @@ describe('Task 7 modal overlays', () => {
     expect(screen.queryByRole('menu')).not.toBeInTheDocument()
     expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
     expect(screen.getByRole('button', { name: /qa platform.*open system menu/i })).toBeInTheDocument()
-    expect(screen.getByTestId('repository-trigger')).toHaveTextContent(
-      /qa platform.*select repositories/i,
-    )
+    // A system-menu Create never touches the committed session context, so
+    // the composer's system pill stays on the committed BSI - HRIS scope.
+    expect(screen.getByTestId('repository-trigger')).toHaveTextContent('BSI - HRIS')
   })
 
   it("swaps the selector for the Create modal through the selector's Add new system — exactly one overlay", () => {

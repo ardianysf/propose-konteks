@@ -113,9 +113,9 @@ describe('ordered tabbable accessible-name fixture', () => {
 
 describe('new-session main-content tab order (AC45)', () => {
   const ENGINEERING_EMPTY = [
+    'Choose system / repositories',
+    'Choose component',
     'Engineering',
-    'System / repositories BSI - HRIS · Select repositories',
-    'Component All components',
     'Engineering prompt',
     'Attach file',
     'Add text document',
@@ -125,9 +125,9 @@ describe('new-session main-content tab order (AC45)', () => {
   ]
 
   const ENGINEERING_NON_EMPTY = [
+    'Choose system / repositories',
+    'Choose component',
     'Engineering',
-    'System / repositories BSI - HRIS · Select repositories',
-    'Component All components',
     'Engineering prompt',
     'Attach file',
     'Add text document',
@@ -138,6 +138,7 @@ describe('new-session main-content tab order (AC45)', () => {
   ]
 
   const PLANNING_NON_EMPTY = [
+    'Choose system',
     'Planning',
     'Planning prompt',
     'Attach file',
@@ -148,7 +149,7 @@ describe('new-session main-content tab order (AC45)', () => {
     'Reviews waiting 3',
   ]
 
-  it('Engineering empty: selected mode → setup triggers → composer → toolbar → Reviews waiting; disabled Send is skipped', () => {
+  it('Engineering empty: selected mode → setup pills → composer → toolbar → Reviews waiting; disabled Send is skipped', () => {
     renderShell()
     expect(tabbableNames(getMain())).toEqual(ENGINEERING_EMPTY)
   })
@@ -161,7 +162,7 @@ describe('new-session main-content tab order (AC45)', () => {
     expect(tabbableNames(getMain())).toEqual(ENGINEERING_NON_EMPTY)
   })
 
-  it('Planning non-empty: omits repository/component triggers and uses Start planning in the enabled slot', () => {
+  it('Planning non-empty: omits the component trigger, keeps the system pill, and uses Start planning in the enabled slot', () => {
     renderShell()
     fireEvent.click(screen.getByRole('radio', { name: 'Planning' }))
     fireEvent.change(screen.getByRole('textbox', { name: 'Planning prompt' }), {

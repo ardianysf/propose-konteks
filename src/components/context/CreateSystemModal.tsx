@@ -15,6 +15,7 @@
  */
 import { useId, useRef, useState } from 'react'
 import { useMockup } from '../../state/MockupContext'
+import { nextSystemId } from '../../state/mockupReducer'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import { useFocusContainment } from '../shell/useFocusContainment'
 
@@ -41,13 +42,18 @@ function CloseIcon() {
 }
 
 export default function CreateSystemModal() {
-  const { dispatch } = useMockup()
+  const { state, dispatch } = useMockup()
   const { dismissOverlay } = useOverlayLifecycle()
   const titleId = useId()
   const nameId = useId()
   const descriptionId = useId()
   const formId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
+
+  // Which affordance opened this modal — global (SystemMenu) or the
+  // repository selector's session-context flow.
+  const source =
+    state.overlay.kind === 'create-system-modal' ? state.overlay.source : 'system-menu'
 
   // Form state — name + optional description, all local: Create is the
   // only commit, and it goes through the pure reducer, never the network.
@@ -64,8 +70,10 @@ export default function CreateSystemModal() {
   const canCreate = trimmedName !== ''
 
   // CREATE_SYSTEM appends the system, makes it the active one, and
-  // clears the previous repository selection (reducer-proven, AC33);
-  // the overlay then closes. No network call happens anywhere.
+  // clears the previous repository selection (reducer-proven, AC33).
+  // The repository-sourced flow additionally confirms the new system as
+  // the committed session context with an empty repository scope; the
+  // SystemMenu flow never touches sessionContext. The overlay then closes.
   const create = () => {
     if (!canCreate) return
     dispatch({
@@ -73,6 +81,13 @@ export default function CreateSystemModal() {
       name: trimmedName,
       description: description.trim() || undefined,
     })
+    if (source === 'repository-modal') {
+      dispatch({
+        type: 'CONFIRM_SESSION_CONTEXT',
+        systemId: nextSystemId(state.systems, trimmedName),
+        repoIds: [],
+      })
+    }
     dismissOverlay()
   }
 

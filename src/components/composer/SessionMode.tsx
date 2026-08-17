@@ -36,7 +36,7 @@ export default function SessionMode() {
 
   return (
     <div
-      className="kx-segmented kx-session-mode kx-session-mode--dominant"
+      className="kx-segmented kx-session-mode"
       role="radiogroup"
       aria-label="Session mode"
       data-testid="session-mode"

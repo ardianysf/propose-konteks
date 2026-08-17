@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import {
   initialState,
   mockupReducer,
+  resolveSessionContextDraft,
   DEFAULT_CUSTOMIZE_TAB,
   type MockupAction,
   type MockupState,
@@ -324,6 +325,229 @@ describe('TOGGLE_COMPONENT / CLEAR_COMPONENTS', () => {
 })
 
 // ---------------------------------------------------------------------------
+// Session context — sessionContext/sessionContextDraft (composer layout
+// correction). The repository modal edits only the transient draft; the
+// committed sessionContext + global active/repo state stay frozen until
+// COMMIT/CONFIRM. BEGIN reseeds the draft from committed or global state.
+// ---------------------------------------------------------------------------
+
+describe('session context initial state', () => {
+  it('starts with no committed context and no open draft', () => {
+    const state = freshState()
+    expect(state.sessionContext).toBeNull()
+    expect(state.sessionContextDraft).toBeNull()
+  })
+})
+
+describe('BEGIN_SESSION_CONTEXT_DRAFT', () => {
+  it('seeds the draft from the global active system and repo selection when nothing is committed', () => {
+    let state = stateWithRepoSelection()
+    state = mockupReducer(state, { type: 'BEGIN_SESSION_CONTEXT_DRAFT' })
+
+    expect(state.sessionContextDraft).toEqual({
+      systemId: DEFAULT_ACTIVE_SYSTEM_ID,
+      repoIds: [ACTIVE_SYSTEM_REPO, ACTIVE_SYSTEM_REPO_2],
+    })
+    // The global slices stay exactly as they were.
+    expect(state.sessionContext).toBeNull()
+    expect(state.activeSystemId).toBe(DEFAULT_ACTIVE_SYSTEM_ID)
+    expect(state.selectedRepoIds).toEqual([ACTIVE_SYSTEM_REPO, ACTIVE_SYSTEM_REPO_2])
+  })
+
+  it('reseeds the draft from the committed context when its system still exists', () => {
+    let state = freshState()
+    state = mockupReducer(state, {
+      type: 'CONFIRM_SESSION_CONTEXT',
+      systemId: 'bsi-canteen',
+      repoIds: ['bsi/canteen-backend'],
+    })
+    // Open a draft and steer it away so a stale draft would differ.
+    state = mockupReducer(state, { type: 'BEGIN_SESSION_CONTEXT_DRAFT' })
+    state = mockupReducer(state, { type: 'SET_SESSION_DRAFT_SYSTEM', systemId: DEFAULT_ACTIVE_SYSTEM_ID })
+    state = mockupReducer(state, { type: 'TOGGLE_SESSION_DRAFT_REPO', repoId: ACTIVE_SYSTEM_REPO })
+    expect(state.sessionContextDraft).not.toEqual(state.sessionContext)
+
+    state = mockupReducer(state, { type: 'BEGIN_SESSION_CONTEXT_DRAFT' })
+    expect(state.sessionContextDraft).toEqual({ systemId: 'bsi-canteen', repoIds: ['bsi/canteen-backend'] })
+  })
+})
+
+describe('resolveSessionContextDraft', () => {
+  it('falls back to the global selection when the committed system no longer exists', () => {
+    let state = freshState()
+    state = { ...state, sessionContext: { systemId: 'ghost-system', repoIds: ['ghost/repo'] } }
+    state = mockupReducer(state, { type: 'TOGGLE_REPO', repoId: ACTIVE_SYSTEM_REPO })
+
+    expect(resolveSessionContextDraft(state)).toEqual({
+      systemId: DEFAULT_ACTIVE_SYSTEM_ID,
+      repoIds: [ACTIVE_SYSTEM_REPO],
+    })
+  })
+})
+
+describe('SET_SESSION_DRAFT_SYSTEM', () => {
+  it('switches the draft system and clears draft repos without leaking to global state', () => {
+    let state = stateWithRepoSelection()
+    state = mockupReducer(state, { type: 'BEGIN_SESSION_CONTEXT_DRAFT' })
+    state = mockupReducer(state, { type: 'SET_SESSION_DRAFT_SYSTEM', systemId: 'bsi-canteen' })
+
+    expect(state.sessionContextDraft).toEqual({ systemId: 'bsi-canteen', repoIds: [] })
+    // Global active system + repo selection remain frozen.
+    expect(state.activeSystemId).toBe(DEFAULT_ACTIVE_SYSTEM_ID)
+    expect(state.selectedRepoIds).toEqual([ACTIVE_SYSTEM_REPO, ACTIVE_SYSTEM_REPO_2])
+    expect(state.sessionContext).toBeNull()
+  })
+
+  it('implicitly seeds a draft from global when none is open', () => {
+    let state = stateWithRepoSelection()
+    state = mockupReducer(state, { type: 'SET_SESSION_DRAFT_SYSTEM', systemId: 'bsi-canteen' })
+
+    expect(state.sessionContextDraft).toEqual({ systemId: 'bsi-canteen', repoIds: [] })
+    expect(state.activeSystemId).toBe(DEFAULT_ACTIVE_SYSTEM_ID)
+    expect(state.selectedRepoIds).toEqual([ACTIVE_SYSTEM_REPO, ACTIVE_SYSTEM_REPO_2])
+  })
+
+  it('is a no-op for the same system and for unknown systems', () => {
+    let state = stateWithRepoSelection()
+    state = mockupReducer(state, { type: 'BEGIN_SESSION_CONTEXT_DRAFT' })
+
+    const sameSystem = mockupReducer(state, {
+      type: 'SET_SESSION_DRAFT_SYSTEM',
+      systemId: DEFAULT_ACTIVE_SYSTEM_ID,
+    })
+    expect(sameSystem).toBe(state)
+
+    const unknown = mockupReducer(state, { type: 'SET_SESSION_DRAFT_SYSTEM', systemId: 'nope' })
+    expect(unknown).toBe(state)
+  })
+})
+
+describe('TOGGLE_SESSION_DRAFT_REPO', () => {
+  it('toggles repos inside the draft only and never leaks to global state', () => {
+    let state = stateWithRepoSelection()
+    state = mockupReducer(state, { type: 'BEGIN_SESSION_CONTEXT_DRAFT' })
+    state = mockupReducer(state, { type: 'TOGGLE_SESSION_DRAFT_REPO', repoId: ACTIVE_SYSTEM_REPO })
+
+    expect(state.sessionContextDraft).toEqual({
+      systemId: DEFAULT_ACTIVE_SYSTEM_ID,
+      repoIds: [ACTIVE_SYSTEM_REPO_2],
+    })
+    expect(state.selectedRepoIds).toEqual([ACTIVE_SYSTEM_REPO, ACTIVE_SYSTEM_REPO_2])
+    expect(state.sessionContext).toBeNull()
+  })
+
+  it('implicitly seeds from global when no draft is open', () => {
+    let state = freshState()
+    state = mockupReducer(state, { type: 'TOGGLE_SESSION_DRAFT_REPO', repoId: ACTIVE_SYSTEM_REPO })
+
+    expect(state.sessionContextDraft).toEqual({
+      systemId: DEFAULT_ACTIVE_SYSTEM_ID,
+      repoIds: [ACTIVE_SYSTEM_REPO],
+    })
+    expect(state.selectedRepoIds).toEqual([])
+  })
+
+  it('ignores repositories that do not belong to the draft system', () => {
+    let state = stateWithRepoSelection()
+    state = mockupReducer(state, { type: 'BEGIN_SESSION_CONTEXT_DRAFT' })
+    const next = mockupReducer(state, { type: 'TOGGLE_SESSION_DRAFT_REPO', repoId: OTHER_SYSTEM_REPO })
+    expect(next).toBe(state)
+  })
+})
+
+describe('COMMIT_SESSION_CONTEXT_DRAFT', () => {
+  it('atomically syncs committed context, active system, and repo selection, then clears the draft', () => {
+    let state = stateWithRepoSelection()
+    state = mockupReducer(state, { type: 'BEGIN_SESSION_CONTEXT_DRAFT' })
+    state = mockupReducer(state, { type: 'SET_SESSION_DRAFT_SYSTEM', systemId: 'bsi-canteen' })
+    state = mockupReducer(state, { type: 'TOGGLE_SESSION_DRAFT_REPO', repoId: 'bsi/canteen-backend' })
+    state = mockupReducer(state, { type: 'COMMIT_SESSION_CONTEXT_DRAFT' })
+
+    expect(state.sessionContext).toEqual({ systemId: 'bsi-canteen', repoIds: ['bsi/canteen-backend'] })
+    expect(state.activeSystemId).toBe('bsi-canteen')
+    expect(state.selectedRepoIds).toEqual(['bsi/canteen-backend'])
+    expect(state.sessionContextDraft).toBeNull()
+  })
+
+  it('is a no-op when no draft is open', () => {
+    const state = freshState()
+    expect(mockupReducer(state, { type: 'COMMIT_SESSION_CONTEXT_DRAFT' })).toBe(state)
+  })
+})
+
+describe('CONFIRM_SESSION_CONTEXT', () => {
+  it('commits an explicit system with an empty repo scope by default', () => {
+    let state = stateWithRepoSelection()
+    state = mockupReducer(state, { type: 'CONFIRM_SESSION_CONTEXT', systemId: 'bsi-canteen' })
+
+    expect(state.sessionContext).toEqual({ systemId: 'bsi-canteen', repoIds: [] })
+    expect(state.activeSystemId).toBe('bsi-canteen')
+    expect(state.selectedRepoIds).toEqual([])
+    expect(state.sessionContextDraft).toBeNull()
+  })
+
+  it('commits the provided repo scope when given', () => {
+    let state = freshState()
+    state = mockupReducer(state, {
+      type: 'CONFIRM_SESSION_CONTEXT',
+      systemId: 'bsi-canteen',
+      repoIds: ['bsi/canteen-cms'],
+    })
+
+    expect(state.sessionContext).toEqual({ systemId: 'bsi-canteen', repoIds: ['bsi/canteen-cms'] })
+    expect(state.selectedRepoIds).toEqual(['bsi/canteen-cms'])
+  })
+
+  it('ignores unknown systems and leaves the previous state untouched', () => {
+    const state = stateWithRepoSelection()
+    expect(mockupReducer(state, { type: 'CONFIRM_SESSION_CONTEXT', systemId: 'nope' })).toBe(state)
+  })
+})
+
+describe('committed session context isolation', () => {
+  it('keeps the committed context frozen when the sidebar switches the active system', () => {
+    let state = freshState()
+    state = mockupReducer(state, {
+      type: 'CONFIRM_SESSION_CONTEXT',
+      systemId: 'bsi-canteen',
+      repoIds: ['bsi/canteen-backend'],
+    })
+    state = mockupReducer(state, { type: 'SET_ACTIVE_SYSTEM', systemId: DEFAULT_ACTIVE_SYSTEM_ID })
+
+    expect(state.activeSystemId).toBe(DEFAULT_ACTIVE_SYSTEM_ID)
+    expect(state.selectedRepoIds).toEqual([])
+    expect(state.sessionContext).toEqual({ systemId: 'bsi-canteen', repoIds: ['bsi/canteen-backend'] })
+  })
+
+  it('keeps the committed context frozen when global repo selection changes', () => {
+    let state = freshState()
+    state = mockupReducer(state, {
+      type: 'CONFIRM_SESSION_CONTEXT',
+      systemId: DEFAULT_ACTIVE_SYSTEM_ID,
+      repoIds: [],
+    })
+    state = mockupReducer(state, { type: 'TOGGLE_REPO', repoId: ACTIVE_SYSTEM_REPO })
+
+    expect(state.selectedRepoIds).toEqual([ACTIVE_SYSTEM_REPO])
+    expect(state.sessionContext).toEqual({ systemId: DEFAULT_ACTIVE_SYSTEM_ID, repoIds: [] })
+  })
+
+  it('BEGIN after a sidebar change still reseeds from the committed context, not the global selection', () => {
+    let state = freshState()
+    state = mockupReducer(state, {
+      type: 'CONFIRM_SESSION_CONTEXT',
+      systemId: 'bsi-canteen',
+      repoIds: ['bsi/canteen-backend'],
+    })
+    state = mockupReducer(state, { type: 'SET_ACTIVE_SYSTEM', systemId: DEFAULT_ACTIVE_SYSTEM_ID })
+    state = mockupReducer(state, { type: 'TOGGLE_REPO', repoId: ACTIVE_SYSTEM_REPO })
+    state = mockupReducer(state, { type: 'BEGIN_SESSION_CONTEXT_DRAFT' })
+
+    expect(state.sessionContextDraft).toEqual({ systemId: 'bsi-canteen', repoIds: ['bsi/canteen-backend'] })
+  })
+})
+
+// ---------------------------------------------------------------------------
 // SET_ACTIVE_PROFILE, TOGGLE_SIDEBAR, SET_SEARCH
 // ---------------------------------------------------------------------------
 
@@ -388,6 +612,14 @@ describe('immutability', () => {
       { type: 'SET_ACTIVE_PROFILE', profileId: 'profile-commerce-platform' },
       { type: 'TOGGLE_SIDEBAR' },
       { type: 'SET_SEARCH', list: 'sessions', value: 'edp' },
+      // Session-context draft actions (composer correction) — the transient
+      // draft edits and commits must also return new objects without mutating
+      // the frozen previous state.
+      { type: 'BEGIN_SESSION_CONTEXT_DRAFT' },
+      { type: 'SET_SESSION_DRAFT_SYSTEM', systemId: 'richapp' },
+      { type: 'TOGGLE_SESSION_DRAFT_REPO', repoId: 'richapp/fe-richapp' },
+      { type: 'COMMIT_SESSION_CONTEXT_DRAFT' },
+      { type: 'CONFIRM_SESSION_CONTEXT', systemId: 'bsi-canteen', repoIds: ['bsi/canteen-backend'] },
     ]
     let state: MockupState = deepFreeze(freshState())
     for (const action of actions) {

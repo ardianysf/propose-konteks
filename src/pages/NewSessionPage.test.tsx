@@ -5,7 +5,7 @@ import AppShell from '../components/shell/AppShell'
 import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../state/MockupContext'
 import { initialState, mockupReducer, type MockupState } from '../state/mockupReducer'
-import { ILLUSTRATIVE_DATA_NOTE, PENDING_REVIEWS } from '../data/mockData'
+import { PENDING_REVIEWS } from '../data/mockData'
 
 // ---------------------------------------------------------------------------
 // Harness — the page under the real reducer via the mockup context, with a
@@ -22,11 +22,11 @@ function StateProbe({ bucket }: { bucket: StateBucket }) {
   return null
 }
 
-function renderNewSessionPage() {
+function renderNewSessionPage(initial?: Partial<MockupState>) {
   const bucket: StateBucket = { current: null }
 
   function Harness() {
-    const [state, dispatch] = useReducer(mockupReducer, initialState())
+    const [state, dispatch] = useReducer(mockupReducer, { ...initialState(), ...initial })
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
@@ -40,11 +40,11 @@ function renderNewSessionPage() {
   return { ...render(<Harness />), bucket }
 }
 
-function renderAppShell() {
+function renderAppShell(initial?: Partial<MockupState>) {
   const bucket: StateBucket = { current: null }
 
   function Harness() {
-    const [state, dispatch] = useReducer(mockupReducer, initialState())
+    const [state, dispatch] = useReducer(mockupReducer, { ...initialState(), ...initial })
     return (
       <MockupContext.Provider value={{ state, dispatch }}>
         <StateProbe bucket={bucket} />
@@ -60,39 +60,354 @@ function renderAppShell() {
 const follows = (earlier: Element, later: Element) =>
   (earlier.compareDocumentPosition(later) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0
 
+const modeGroup = () => screen.getByRole('radiogroup', { name: 'Session mode' })
+
 const switchToPlanning = () =>
-  fireEvent.click(within(screen.getByRole('radiogroup', { name: 'Session mode' })).getByRole('radio', { name: 'Planning' }))
+  fireEvent.click(within(modeGroup()).getByRole('radio', { name: 'Planning' }))
 
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u
 
+const ENGINEERING_HEADING = 'What would you like to build?'
+const ENGINEERING_BODY =
+  'Engineering sessions analyze, propose, and deliver software changes. You approve every proposal before work proceeds.'
+const PLANNING_HEADING = 'Start planning'
+const PLANNING_BODY =
+  'Draft a PRD, then break it into a roadmap, milestones, sprints, and tickets that drive Engineering delivery.'
+const DISCLAIMER = 'Konteks can make mistakes. Verify important information.'
+
 // ---------------------------------------------------------------------------
-// Mode hierarchy (Task 5, spec §7.1 — AC15)
+// Header + intro (AC1–AC3)
 // ---------------------------------------------------------------------------
 
-describe('NewSessionPage — mode hierarchy (AC15)', () => {
-  it('renders the Engineering/Planning segmented control above the setup row and composer in DOM order, with the dominant-hierarchy class', () => {
-    const { container } = renderNewSessionPage()
-    const page = screen.getByRole('region', { name: /new session/i })
-    expect(page).toHaveClass('kx-new-session')
+describe('NewSessionPage — header + intro', () => {
+  it('renders the single visible h1 "New session", its subtitle, and the approval indicator', () => {
+    renderNewSessionPage()
+    const h1 = screen.getByRole('heading', { name: 'New session', level: 1 })
+    expect(h1).toHaveClass('kx-new-session__title')
+    expect(screen.getByText('Start governed work with the right mode and context.')).toBeInTheDocument()
+    expect(screen.getByText('Human approval required for proposals')).toBeInTheDocument()
 
-    const mode = screen.getByRole('radiogroup', { name: 'Session mode' })
-    expect(mode).toHaveClass('kx-segmented', 'kx-session-mode', 'kx-session-mode--dominant')
-
-    const setupRow = container.querySelector('.kx-setup-row')
-    expect(setupRow).not.toBeNull()
-    const composer = container.querySelector('.kx-composer')
-    expect(composer).not.toBeNull()
-
-    expect(follows(mode, setupRow!)).toBe(true)
-    expect(follows(setupRow!, composer!)).toBe(true)
-
-    // Page semantics: a heading names the route without visual noise.
-    expect(screen.getByRole('heading', { name: /new session/i })).toBeInTheDocument()
+    // Exactly one h1 — the intro heading is a subordinate h2.
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
   })
 
-  it('offers Engineering and Planning as radios, Engineering checked by default, and switches modes through the reducer (SET_MODE)', () => {
+  it('renders the decorative intro image with empty alt text', () => {
+    const { container } = renderNewSessionPage()
+    const img = container.querySelector('.kx-new-session__intro-img')
+    expect(img).not.toBeNull()
+    expect(img).toHaveAttribute('alt', '')
+    expect(img).toHaveAttribute('aria-hidden', 'true')
+    expect(img).toHaveAttribute('src', '/assets/konteks/empty-sessions.png')
+  })
+
+  it('shows the Engineering intro heading and body by default', () => {
+    renderNewSessionPage()
+    expect(screen.getByRole('heading', { name: ENGINEERING_HEADING, level: 2 })).toBeInTheDocument()
+    expect(screen.getByText(ENGINEERING_BODY)).toBeInTheDocument()
+  })
+
+  it('shows the Planning intro heading and body in Planning mode', () => {
+    renderNewSessionPage()
+    switchToPlanning()
+    expect(screen.getByRole('heading', { name: PLANNING_HEADING, level: 2 })).toBeInTheDocument()
+    expect(screen.getByText(PLANNING_BODY)).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: ENGINEERING_HEADING })).not.toBeInTheDocument()
+  })
+
+  it('orders header → intro → composer → footer in the DOM', () => {
+    const { container } = renderNewSessionPage()
+    const header = screen.getByTestId('new-session-header')
+    const intro = screen.getByTestId('new-session-intro')
+    const composer = screen.getByTestId('composer')
+    const footer = screen.getByTestId('external-footer')
+
+    expect(follows(header, intro)).toBe(true)
+    expect(follows(intro, composer)).toBe(true)
+    expect(follows(composer, footer)).toBe(true)
+
+    // The intro sits above the composer and the footer sits below it.
+    expect(container.querySelector('.kx-new-session')).toBeInTheDocument()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Unified composer panel (AC4–AC7)
+// ---------------------------------------------------------------------------
+
+describe('NewSessionPage — unified composer panel', () => {
+  it('renders exactly one composer container with no separate mode/setup regions outside it', () => {
+    const { container } = renderNewSessionPage()
+    expect(container.querySelectorAll('.kx-composer')).toHaveLength(1)
+    expect(container.querySelectorAll('.kx-setup-row')).toHaveLength(0)
+    expect(container.querySelectorAll('.kx-session-mode--dominant')).toHaveLength(0)
+
+    // The mode group lives inside the composer, not above it.
+    const composer = container.querySelector('.kx-composer')!
+    expect(composer.contains(modeGroup())).toBe(true)
+  })
+
+  it('lays out the setup cluster left and the Session Mode group right on the same top row', () => {
+    const { container } = renderNewSessionPage()
+    const setupCluster = container.querySelector('.kx-panel__setup-cluster')
+    const modeCluster = container.querySelector('.kx-panel__mode-cluster')
+    expect(setupCluster).not.toBeNull()
+    expect(modeCluster).not.toBeNull()
+    expect(follows(setupCluster!, modeCluster!)).toBe(true)
+    expect(modeCluster!.contains(modeGroup())).toBe(true)
+  })
+
+  it('renders the two Engineering pills with their fresh placeholders', () => {
+    renderNewSessionPage()
+    const repoPill = screen.getByRole('button', { name: 'Choose system / repositories' })
+    const componentPill = screen.getByRole('button', { name: 'Choose component' })
+    expect(repoPill).toHaveClass('kx-panel__pill')
+    expect(componentPill).toHaveClass('kx-panel__pill')
+    expect(repoPill).toHaveAttribute('aria-haspopup', 'dialog')
+    expect(componentPill).toHaveAttribute('aria-haspopup', 'menu')
+  })
+
+  it('keeps the setup pill placeholders independent of the sidebar active system on a fresh session', () => {
+    renderNewSessionPage()
+    // The sidebar's default active system is "BSI - HRIS"; the fresh
+    // New Session pill must still read the literal placeholder.
+    expect(screen.getByRole('button', { name: 'Choose system / repositories' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'BSI - HRIS' })).not.toBeInTheDocument()
+  })
+
+  it('keeps a single Choose system pill in Planning and removes only the Component pill', () => {
+    renderNewSessionPage()
+    switchToPlanning()
+
+    expect(screen.getByRole('button', { name: 'Choose system' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Choose component' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('component-trigger')).not.toBeInTheDocument()
+
+    // The mode group remains, right-aligned in the top row.
+    expect(modeGroup()).toBeInTheDocument()
+  })
+
+  it('Planning Choose system pill opens the same system + repositories modal (not a system-only modal)', () => {
     const { bucket } = renderNewSessionPage()
-    const group = screen.getByRole('radiogroup', { name: 'Session mode' })
+    switchToPlanning()
+    fireEvent.click(screen.getByRole('button', { name: 'Choose system' }))
+    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Setup pill selection labels (AC6)
+// ---------------------------------------------------------------------------
+
+describe('NewSessionPage — setup pill selection labels', () => {
+  it('component pill shows the selected component name for one and a count for many', () => {
+    renderNewSessionPage()
+    fireEvent.click(screen.getByTestId('component-trigger'))
+    const menu = screen.getByTestId('component-menu')
+
+    fireEvent.click(within(menu).getByRole('menuitemcheckbox', { name: /canteen-api/ }))
+    expect(screen.getByTestId('component-trigger')).toHaveTextContent('canteen-api')
+
+    fireEvent.click(within(menu).getByRole('menuitemcheckbox', { name: /canteen-cms/ }))
+    expect(screen.getByTestId('component-trigger')).toHaveTextContent('2 components')
+  })
+
+  it('system pill shows the committed system name after Done in the repository modal', () => {
+    const { bucket } = renderAppShell()
+    fireEvent.click(screen.getByTestId('repository-trigger'))
+
+    const dialog = screen.getByRole('dialog', { name: 'Choose work repositories' })
+    fireEvent.click(within(dialog).getByRole('button', { name: /BSI Canteen/i }))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Done' }))
+
+    expect(bucket.current?.sessionContext).toEqual({ systemId: 'bsi-canteen', repoIds: [] })
+    expect(screen.getByTestId('repository-trigger')).toHaveTextContent('BSI Canteen')
+  })
+
+  it('component trigger opens the anchored component menu and reflects its aria-expanded state', () => {
+    const { bucket } = renderNewSessionPage()
+    const trigger = screen.getByTestId('component-trigger')
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+    fireEvent.click(trigger)
+    expect(bucket.current?.overlay).toEqual({ kind: 'component-menu' })
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByTestId('component-menu')).toBeInTheDocument()
+
+    // The menu anchors inside the trigger's wrapper, not a page slot.
+    expect(trigger.closest('.kx-setup-row__component-anchor')).toContainElement(
+      screen.getByTestId('component-menu'),
+    )
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Nested input box + toolbar (AC8–AC9)
+// ---------------------------------------------------------------------------
+
+describe('NewSessionPage — nested input box + toolbar', () => {
+  it('renders the textarea inside a nested white input box visually inside the composer', () => {
+    const { container } = renderNewSessionPage()
+    const inputBox = screen.getByTestId('composer-input-box')
+    expect(inputBox).toHaveClass('kx-composer__input-box', 'kx-panel__input-box')
+
+    const textarea = screen.getByRole('textbox', { name: 'Engineering prompt' })
+    expect(inputBox.contains(textarea)).toBe(true)
+
+    const composer = container.querySelector('.kx-composer')!
+    expect(composer.contains(inputBox)).toBe(true)
+  })
+
+  it('places the input toolbar at the bottom of the input box, after the textarea', () => {
+    renderNewSessionPage()
+    const inputBox = screen.getByTestId('composer-input-box')
+    const textarea = screen.getByRole('textbox', { name: 'Engineering prompt' })
+    const toolbar = screen.getByTestId('composer-toolbar')
+
+    expect(inputBox.contains(toolbar)).toBe(true)
+    expect(follows(textarea, toolbar)).toBe(true)
+    expect(toolbar).toHaveClass('kx-panel__toolbar')
+  })
+
+  it('groups Attach file, Add text document, and Execution Profile left; Voice input and Send right', () => {
+    renderNewSessionPage()
+    const attach = screen.getByRole('button', { name: 'Attach file' })
+    const document_ = screen.getByRole('button', { name: 'Add text document' })
+    const profile = screen.getByRole('button', { name: /execution profile/i })
+    const mic = screen.getByRole('button', { name: 'Voice input' })
+    const send = screen.getByRole('button', { name: 'Send' })
+
+    const left = screen.getByTestId('toolbar-left')
+    const right = screen.getByTestId('toolbar-right')
+
+    expect(left.contains(attach)).toBe(true)
+    expect(left.contains(document_)).toBe(true)
+    expect(left.contains(profile)).toBe(true)
+    expect(right.contains(mic)).toBe(true)
+    expect(right.contains(send)).toBe(true)
+
+    // Toolbar internal order: attach → document → profile → voice → send.
+    expect(follows(attach, document_)).toBe(true)
+    expect(follows(document_, profile)).toBe(true)
+    expect(follows(profile, mic)).toBe(true)
+    expect(follows(mic, send)).toBe(true)
+  })
+
+  it('keeps every toolbar control visually inside the input box', () => {
+    renderNewSessionPage()
+    const inputBox = screen.getByTestId('composer-input-box')
+    for (const name of ['Attach file', 'Add text document', 'Voice input']) {
+      expect(inputBox.contains(screen.getByRole('button', { name }))).toBe(true)
+    }
+    expect(inputBox.contains(screen.getByRole('button', { name: /execution profile/i }))).toBe(true)
+    expect(inputBox.contains(screen.getByRole('button', { name: 'Send' }))).toBe(true)
+  })
+
+  it('opens the anchored Execution Profile menu from its control', () => {
+    const { bucket } = renderNewSessionPage()
+    const profile = screen.getByRole('button', { name: /execution profile/i })
+    expect(profile).toHaveAttribute('aria-haspopup', 'menu')
+    expect(profile).toHaveAttribute('aria-expanded', 'false')
+    expect(profile).toHaveTextContent('Default')
+
+    fireEvent.click(profile)
+    expect(bucket.current?.overlay).toEqual({ kind: 'execution-profile-menu' })
+    expect(profile).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByTestId('execution-profile-menu')).toBeInTheDocument()
+    expect(profile.closest('.kx-composer__profile-anchor')).toContainElement(
+      screen.getByTestId('execution-profile-menu'),
+    )
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Send / Start planning gating (AC16)
+// ---------------------------------------------------------------------------
+
+describe('NewSessionPage — send gating', () => {
+  it('disables Send while the input is empty or whitespace and enables it once text exists', () => {
+    renderNewSessionPage()
+    const input = screen.getByRole('textbox', { name: 'Engineering prompt' })
+    const send = screen.getByRole('button', { name: 'Send' })
+    expect(send).toBeDisabled()
+
+    fireEvent.change(input, { target: { value: 'Fix the EDP integration' } })
+    expect(send).toBeEnabled()
+
+    fireEvent.change(input, { target: { value: '   ' } })
+    expect(send).toBeDisabled()
+  })
+
+  it('keeps the same disabled-when-empty contract for the Start planning CTA', () => {
+    renderNewSessionPage()
+    switchToPlanning()
+    const cta = screen.getByRole('button', { name: 'Start planning' })
+    expect(cta).toBeDisabled()
+    fireEvent.change(screen.getByRole('textbox', { name: 'Planning prompt' }), {
+      target: { value: 'Plan the vendor portal revamp' },
+    })
+    expect(cta).toBeEnabled()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Footer (AC10–AC11)
+// ---------------------------------------------------------------------------
+
+describe('NewSessionPage — page-level footer', () => {
+  it('renders the exact disclaimer left and the Reviews waiting pill right, outside the composer', () => {
+    const { container } = renderNewSessionPage()
+    const footer = screen.getByTestId('external-footer')
+    expect(footer).toHaveClass('kx-panel__external-footer')
+
+    const disclaimer = footer.querySelector('.kx-composer__disclaimer')
+    expect(disclaimer).not.toBeNull()
+    expect(disclaimer).toHaveTextContent(DISCLAIMER)
+
+    const reviews = screen.getByRole('button', { name: /reviews waiting/i })
+    expect(reviews).toHaveClass('kx-composer__reviews')
+    expect(follows(disclaimer!, reviews)).toBe(true)
+
+    // The footer sits outside the composer container.
+    expect(container.querySelector('.kx-composer')!.contains(footer)).toBe(false)
+
+    const badge = reviews.querySelector('.kx-composer__badge')
+    expect(badge).not.toBeNull()
+    expect(badge).toHaveTextContent(String(PENDING_REVIEWS.length))
+  })
+
+  it('opens the Konteks Learned drawer on the Pending tab from Reviews waiting', () => {
+    const { bucket } = renderNewSessionPage()
+    fireEvent.click(screen.getByRole('button', { name: /reviews waiting/i }))
+    expect(bucket.current?.overlay).toEqual({ kind: 'learned', tab: 'pending' })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Illustrative-data marker (AC12)
+// ---------------------------------------------------------------------------
+
+describe('NewSessionPage — illustrative-data marker', () => {
+  it('removes the page-level marker while the sidebar keeps its own', () => {
+    // Page-only render has no marker.
+    renderNewSessionPage()
+    expect(screen.queryByTestId('illustrative-data-note')).not.toBeInTheDocument()
+
+    // Full shell still shows exactly the sidebar marker.
+    const shell = renderAppShell()
+    const notes = shell.container.querySelectorAll('[data-testid="illustrative-data-note"]')
+    expect(notes).toHaveLength(1)
+    expect(notes[0]).toHaveTextContent('Illustrative data')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Mode semantics + arrow switching (AC13)
+// ---------------------------------------------------------------------------
+
+describe('NewSessionPage — mode semantics', () => {
+  it('defaults to Engineering and switches modes through the reducer', () => {
+    const { bucket } = renderNewSessionPage()
+    const group = modeGroup()
     const engineering = within(group).getByRole('radio', { name: 'Engineering' })
     const planning = within(group).getByRole('radio', { name: 'Planning' })
 
@@ -102,16 +417,14 @@ describe('NewSessionPage — mode hierarchy (AC15)', () => {
     fireEvent.click(planning)
     expect(bucket.current?.sessionMode).toBe('planning')
     expect(planning).toHaveAttribute('aria-checked', 'true')
-    expect(engineering).toHaveAttribute('aria-checked', 'false')
 
     fireEvent.click(engineering)
     expect(bucket.current?.sessionMode).toBe('engineering')
-    expect(engineering).toHaveAttribute('aria-checked', 'true')
   })
 
-  it('supports switching modes with arrow keys from the segmented control', () => {
+  it('supports arrow-key switching on the radiogroup', () => {
     const { bucket } = renderNewSessionPage()
-    const group = screen.getByRole('radiogroup', { name: 'Session mode' })
+    const group = modeGroup()
     fireEvent.keyDown(group, { key: 'ArrowRight' })
     expect(bucket.current?.sessionMode).toBe('planning')
     fireEvent.keyDown(group, { key: 'ArrowLeft' })
@@ -120,319 +433,47 @@ describe('NewSessionPage — mode hierarchy (AC15)', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Planning mode (spec §7.1 — AC16)
-// ---------------------------------------------------------------------------
-
-describe('NewSessionPage — Planning mode (AC16)', () => {
-  it('hides the repository/component setup row entirely', () => {
-    const { container } = renderNewSessionPage()
-    switchToPlanning()
-    expect(container.querySelector('.kx-setup-row')).toBeNull()
-    expect(screen.queryByRole('button', { name: /system \/ repositories/i })).not.toBeInTheDocument()
-    expect(screen.queryByTestId('component-trigger')).not.toBeInTheDocument()
-  })
-
-  it('shows the Start planning CTA and the exact planning placeholder', () => {
-    renderNewSessionPage()
-    switchToPlanning()
-    const input = screen.getByRole('textbox', { name: /prompt/i })
-    expect(input).toHaveAttribute('placeholder', 'Describe the product outcome you want to plan…')
-    const cta = screen.getByRole('button', { name: /start planning/i })
-    expect(cta).toHaveClass('kx-composer__send')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Engineering mode (spec §7.1 — AC17)
-// ---------------------------------------------------------------------------
-
-describe('NewSessionPage — Engineering mode (AC17)', () => {
-  it('shows the system/repository trigger and the component trigger alongside the composer', () => {
-    const { container } = renderNewSessionPage()
-    const repoTrigger = screen.getByRole('button', { name: /system \/ repositories/i })
-    expect(repoTrigger).toHaveTextContent('BSI - HRIS')
-    expect(screen.getByTestId('component-trigger')).toBeInTheDocument()
-    expect(container.querySelector('.kx-composer')).not.toBeNull()
-  })
-
-  it('repository trigger dispatches OPEN_OVERLAY repository-modal (modal arrives in Task 7)', () => {
-    const { bucket } = renderNewSessionPage()
-    fireEvent.click(screen.getByRole('button', { name: /system \/ repositories/i }))
-    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
-  })
-
-  it('component trigger opens the component-menu overlay and the anchored menu mounts from its trigger (Task 8)', () => {
-    const { bucket } = renderNewSessionPage()
-    fireEvent.click(screen.getByTestId('component-trigger'))
-    expect(bucket.current?.overlay).toEqual({ kind: 'component-menu' })
-    expect(screen.getByTestId('component-menu')).toBeInTheDocument()
-  })
-
-  // ---------------------------------------------------------------------------
-  // Component trigger anchoring (Task 8, spec §7.4 — AC30)
-  // ---------------------------------------------------------------------------
-
-  describe('NewSessionPage — Component menu anchoring (Task 8, AC30)', () => {
-    it('wraps the Component trigger in an anchor wrapper that hosts the menu as the trigger’s sibling', () => {
-      renderNewSessionPage()
-      const trigger = screen.getByTestId('component-trigger')
-      expect(trigger).toHaveAttribute('aria-haspopup', 'menu')
-      expect(trigger).toHaveAttribute('aria-expanded', 'false')
-      expect(screen.queryByTestId('component-menu')).not.toBeInTheDocument()
-
-      fireEvent.click(trigger)
-      const menu = screen.getByTestId('component-menu')
-      expect(trigger).toHaveAttribute('aria-expanded', 'true')
-
-      // Anchor DOM relation: the menu mounts inside the trigger's
-      // anchor wrapper, not a page-level overlay slot (AC30).
-      const anchor = trigger.closest('.kx-setup-row__component-anchor')
-      expect(anchor).not.toBeNull()
-      expect(menu.closest('.kx-setup-row__component-anchor')).toBe(anchor)
-    })
-
-    it('unmounts on Escape and reopens cleanly with the committed selection intact', () => {
-      const { bucket } = renderNewSessionPage()
-      const trigger = screen.getByTestId('component-trigger')
-      fireEvent.click(trigger)
-      const menu = screen.getByTestId('component-menu')
-      fireEvent.click(within(menu).getByRole('menuitemcheckbox', { name: /canteen-api/ }))
-      expect(bucket.current?.selectedComponentIds).toEqual(['comp-canteen-api'])
-
-      fireEvent.keyDown(document, { key: 'Escape' })
-      expect(bucket.current?.overlay).toEqual({ kind: 'none' })
-      expect(screen.queryByTestId('component-menu')).not.toBeInTheDocument()
-      expect(trigger).toHaveAttribute('aria-expanded', 'false')
-
-      fireEvent.click(trigger)
-      const reopened = screen.getByTestId('component-menu')
-      expect(
-        within(reopened).getByRole('menuitemcheckbox', { name: /canteen-api/, checked: true }),
-      ).toBeInTheDocument()
-      expect(within(reopened).getByText('1 selected')).toBeInTheDocument()
-    })
-
-    it('switching overlays unmounts the component menu — exactly one overlay at a time', () => {
-      const { bucket } = renderNewSessionPage()
-      fireEvent.click(screen.getByTestId('component-trigger'))
-      expect(screen.getByTestId('component-menu')).toBeInTheDocument()
-
-      fireEvent.click(screen.getByRole('button', { name: /system \/ repositories/i }))
-      expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
-      expect(screen.queryByTestId('component-menu')).not.toBeInTheDocument()
-    })
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Composer visual hierarchy (spec §7.2 — AC18/AC19/AC43 disabled)
-// ---------------------------------------------------------------------------
-
-describe('Composer — hierarchy (AC18/AC19/AC43 disabled)', () => {
-  it('renders the soft-matcha outer container class wrapping the white input class', () => {
-    const { container } = renderNewSessionPage()
-    const outer = container.querySelector('.kx-composer')
-    expect(outer).not.toBeNull()
-    const inputs = outer!.querySelectorAll('textarea.kx-composer__input')
-    expect(inputs).toHaveLength(1)
-    expect(outer!.querySelectorAll('textarea')).toHaveLength(1)
-  })
-
-  it('toolbar attachment/text-document/mic icons are unboxed icon buttons with the hover-affordance class, using inline SVGs', () => {
-    renderNewSessionPage()
-    const cases: [name: string, icon: string][] = [
-      ['Attach file', 'attachment'],
-      ['Add text document', 'text-document'],
-      ['Voice input', 'mic'],
-    ]
-    for (const [name, icon] of cases) {
-      const button = screen.getByRole('button', { name })
-      expect(button).toHaveClass('kx-icon-btn')
-      expect(button).not.toHaveClass('kx-btn')
-      const svg = button.querySelector(`svg[data-icon="${icon}"]`)
-      expect(svg).not.toBeNull()
-      expect(svg).toHaveAttribute('aria-hidden', 'true')
-    }
-  })
-
-  it('send button carries the soft-accent class and a send icon in Engineering mode', () => {
-    renderNewSessionPage()
-    const send = screen.getByRole('button', { name: 'Send' })
-    expect(send).toHaveClass('kx-composer__send')
-    expect(send.querySelector('svg[data-icon="send"]')).not.toBeNull()
-  })
-
-  it('send is disabled while the input is empty (or whitespace) and enabled once text exists; input stays local (AC43)', () => {
-    const { bucket } = renderNewSessionPage()
-    const input = screen.getByRole('textbox', { name: /prompt/i })
-    const send = screen.getByRole('button', { name: 'Send' })
-    expect(send).toBeDisabled()
-
-    fireEvent.change(input, { target: { value: 'Fix the EDP integration' } })
-    expect(input).toHaveValue('Fix the EDP integration')
-    expect(send).toBeEnabled()
-
-    fireEvent.change(input, { target: { value: '   ' } })
-    expect(send).toBeDisabled()
-
-    // Composer input state is local — it never leaks into the store.
-    expect(bucket.current?.search.components).toBe('')
-  })
-
-  it('the Start planning CTA follows the same disabled-when-empty contract in Planning mode (AC43)', () => {
-    renderNewSessionPage()
-    switchToPlanning()
-    const cta = screen.getByRole('button', { name: /start planning/i })
-    expect(cta).toBeDisabled()
-    fireEvent.change(screen.getByRole('textbox', { name: /prompt/i }), {
-      target: { value: 'Plan the vendor portal revamp' },
-    })
-    expect(cta).toBeEnabled()
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Execution Profile placement (spec §7.2 — AC21)
-// ---------------------------------------------------------------------------
-
-describe('Composer — Execution Profile control (AC21)', () => {
-  it('sits in the toolbar immediately after the text/document control, before mic and send, bottom-left of the toolbar', () => {
-    renderNewSessionPage()
-    const attach = screen.getByRole('button', { name: 'Attach file' })
-    const document_ = screen.getByRole('button', { name: 'Add text document' })
-    const profile = screen.getByRole('button', { name: /execution profile/i })
-    const mic = screen.getByRole('button', { name: 'Voice input' })
-    const send = screen.getByRole('button', { name: 'Send' })
-
-    expect(follows(attach, document_)).toBe(true)
-    expect(follows(document_, profile)).toBe(true)
-    expect(follows(profile, mic)).toBe(true)
-    expect(follows(mic, send)).toBe(true)
-
-    expect(profile).toHaveAttribute('aria-haspopup', 'menu')
-    expect(profile).toHaveTextContent('Default')
-    expect(profile.closest('.kx-composer__toolbar')).not.toBeNull()
-  })
-
-  it('opens the execution-profile-menu overlay kind — the anchored menu mounts with Task 6', () => {
-    const { bucket } = renderNewSessionPage()
-    fireEvent.click(screen.getByRole('button', { name: /execution profile/i }))
-    expect(bucket.current?.overlay).toEqual({ kind: 'execution-profile-menu' })
-    expect(screen.getByTestId('execution-profile-menu')).toBeInTheDocument()
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Composer footer (spec §7.2 — AC20 placement)
-// ---------------------------------------------------------------------------
-
-describe('Composer — footer placement (AC20)', () => {
-  it('disclaimer sits left below the input; Reviews waiting with a round count badge sits right (DOM order)', () => {
-    const { container } = renderNewSessionPage()
-    const footer = container.querySelector('.kx-composer__footer')
-    expect(footer).not.toBeNull()
-
-    const disclaimer = footer!.querySelector('.kx-composer__disclaimer')
-    expect(disclaimer).not.toBeNull()
-    expect(disclaimer!.textContent).not.toBe('')
-
-    const reviews = screen.getByRole('button', { name: /reviews waiting/i })
-    expect(reviews).toHaveClass('kx-composer__reviews')
-    expect(follows(disclaimer!, reviews)).toBe(true)
-
-    const badge = reviews.querySelector('.kx-composer__badge')
-    expect(badge).not.toBeNull()
-    expect(badge).toHaveTextContent(String(PENDING_REVIEWS.length))
-  })
-
-  it('clicking Reviews waiting opens the Learned overlay on the pending tab (drawer arrives in Task 10)', () => {
-    const { bucket } = renderNewSessionPage()
-    fireEvent.click(screen.getByRole('button', { name: /reviews waiting/i }))
-    expect(bucket.current?.overlay).toEqual({ kind: 'learned', tab: 'pending' })
-  })
-})
-
-// ---------------------------------------------------------------------------
 // AppShell integration + hygiene
 // ---------------------------------------------------------------------------
 
-describe('NewSessionPage — AppShell integration', () => {
+describe('NewSessionPage — AppShell integration + hygiene', () => {
   it('renders inside the main region on the new-session route', () => {
     renderAppShell()
     const main = screen.getByRole('main')
     expect(within(main).getByRole('radiogroup', { name: 'Session mode' })).toBeInTheDocument()
-    expect(within(main).getByRole('textbox', { name: /prompt/i })).toBeInTheDocument()
+    expect(within(main).getByRole('textbox', { name: 'Engineering prompt' })).toBeInTheDocument()
   })
 
-  it('unmounts when navigating away; the Task 6 profile menu and the Task 7 repository modal mount from their triggers', () => {
+  it('unmounts the page and its anchored menus when navigating away', () => {
     const { bucket } = renderAppShell()
     const main = screen.getByRole('main')
 
-    // Task 6: the anchored Execution Profile menu mounts from the composer.
     fireEvent.click(within(main).getByRole('button', { name: /execution profile/i }))
     expect(bucket.current?.overlay).toEqual({ kind: 'execution-profile-menu' })
     expect(screen.getByTestId('execution-profile-menu')).toBeInTheDocument()
 
-    // Task 7: the repository trigger sets state and mounts the real
-    // selector modal — exactly one dialog replaces the anchored menu.
-    fireEvent.click(within(main).getByTestId('repository-trigger'))
-    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
-    expect(screen.queryByTestId('execution-profile-menu')).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog', { name: 'Choose work repositories' })).toBeInTheDocument()
-    fireEvent.keyDown(document, { key: 'Escape' })
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-
-    // Navigating away unmounts the page, the composer, and its anchored menu.
     fireEvent.click(screen.getByRole('button', { name: /view all/i }))
     expect(screen.queryByTestId('execution-profile-menu')).not.toBeInTheDocument()
     expect(within(main).queryByRole('radiogroup', { name: 'Session mode' })).not.toBeInTheDocument()
     expect(within(main).getByRole('heading', { name: /session history/i })).toBeInTheDocument()
   })
 
-  it('unmounts when navigating away; the Task 8 component menu mounts from the setup row anchor and swaps with other overlays', () => {
-    const { bucket } = renderAppShell()
-    const main = screen.getByRole('main')
-
-    // Task 8: the anchored Component menu mounts from the page's setup
-    // row anchor — inside main, not the AppShell overlay slot (AC30).
-    fireEvent.click(within(main).getByTestId('component-trigger'))
-    expect(bucket.current?.overlay).toEqual({ kind: 'component-menu' })
-    const componentMenu = screen.getByTestId('component-menu')
-    expect(componentMenu.closest('main')).toBe(main)
-    expect(
-      within(componentMenu).getByRole('menuitemcheckbox', { name: /mytok-mobile/ }),
-    ).toBeInTheDocument()
-
-    // Exactly one overlay: the Task 7 repository modal replaces the
-    // anchored component menu.
-    fireEvent.click(within(main).getByTestId('repository-trigger'))
-    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
-    expect(screen.queryByTestId('component-menu')).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog', { name: 'Choose work repositories' })).toBeInTheDocument()
-    fireEvent.keyDown(document, { key: 'Escape' })
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-
-    // Navigating away unmounts the page and its anchored menus.
-    fireEvent.click(screen.getByRole('button', { name: /view all/i }))
-    expect(screen.queryByTestId('component-menu')).not.toBeInTheDocument()
-    expect(within(main).queryByRole('radiogroup', { name: 'Session mode' })).not.toBeInTheDocument()
-    expect(within(main).getByRole('heading', { name: /session history/i })).toBeInTheDocument()
-  })
-
-  it('uses semantic controls with accessibility labels and no emoji anywhere on the page', () => {
+  it('uses semantic controls with accessible names and no emoji anywhere on the page', () => {
     renderNewSessionPage()
-    const page = screen.getByRole('region', { name: /new session/i })
+    const page = screen.getByRole('region', { name: 'New session' })
     expect(page.textContent).not.toMatch(EMOJI)
     for (const button of screen.getAllByRole('button')) {
       expect(button).toHaveAccessibleName()
     }
   })
 
-  it('renders the visible illustrative-data marker from the shared constant (AC46)', () => {
+  it('keeps the Session Mode radio semantics — labeled group, roving tabindex, aria-checked', () => {
     renderNewSessionPage()
-    const notes = screen.getAllByTestId('illustrative-data-note')
-    expect(notes).toHaveLength(1)
-    expect(notes[0]).toHaveClass('kx-illustrative-note')
-    expect(notes[0]).toHaveTextContent(ILLUSTRATIVE_DATA_NOTE)
+    const group = modeGroup()
+    expect(group).toHaveAttribute('aria-label', 'Session mode')
+    const engineering = within(group).getByRole('radio', { name: 'Engineering' })
+    const planning = within(group).getByRole('radio', { name: 'Planning' })
+    expect(engineering).toHaveAttribute('tabindex', '0')
+    expect(planning).toHaveAttribute('tabindex', '-1')
   })
 })
