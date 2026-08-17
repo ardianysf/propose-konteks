@@ -3,10 +3,11 @@
  * (Task 5, spec §7.1, AC15).
  *
  * Reducer-bound: radios commit SET_MODE to the shared store; the page
- * (NewSessionPage) reads the mode and swaps its regions. Rendered above
- * the setup row and composer, scaled up so it reads as the primary
- * hierarchy element of the main area (AC15). Semantic radiogroup with
- * roving tabindex + arrow-key switching (§16 keyboard operability).
+ * (NewSessionPage) reads the mode and swaps its regions. Rendered with a
+ * visible uppercase "SESSION MODE" label above the segmented control,
+ * right-aligned in the composer's setup/mode top row (AC15). Semantic
+ * radiogroup with roving tabindex + arrow-key switching (§16 keyboard
+ * operability).
  */
 import type { KeyboardEvent } from 'react'
 import { useMockup } from '../../state/MockupContext'
@@ -35,33 +36,36 @@ export default function SessionMode() {
   }
 
   return (
-    <div
-      className="kx-segmented kx-session-mode"
-      role="radiogroup"
-      aria-label="Session mode"
-      data-testid="session-mode"
-      onKeyDown={handleKeyDown}
-    >
-      {MODES.map((mode) => {
-        const active = state.sessionMode === mode.id
-        return (
-          <button
-            key={mode.id}
-            type="button"
-            role="radio"
-            aria-checked={active}
-            tabIndex={active ? 0 : -1}
-            className={
-              active
-                ? 'kx-segmented__btn kx-segmented__btn--active'
-                : 'kx-segmented__btn'
-            }
-            onClick={() => dispatch({ type: 'SET_MODE', mode: mode.id })}
-          >
-            {mode.label}
-          </button>
-        )
-      })}
+    <div className="kx-session-mode" data-testid="session-mode">
+      {/* Visible uppercase caption — sits above the radio group. */}
+      <span className="kx-session-mode__label">SESSION MODE</span>
+      <div
+        className="kx-segmented kx-session-mode__group"
+        role="radiogroup"
+        aria-label="Session mode"
+        onKeyDown={handleKeyDown}
+      >
+        {MODES.map((mode) => {
+          const active = state.sessionMode === mode.id
+          return (
+            <button
+              key={mode.id}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              tabIndex={active ? 0 : -1}
+              className={
+                active
+                  ? 'kx-segmented__btn kx-segmented__btn--active'
+                  : 'kx-segmented__btn'
+              }
+              onClick={() => dispatch({ type: 'SET_MODE', mode: mode.id })}
+            >
+              {mode.label}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

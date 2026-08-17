@@ -279,9 +279,29 @@
   color: var(--kx-primary);
 }
 
-.kx-segmented__btn--active {
-  background: var(--kx-pale);
-  color: var(--kx-primary);
+.kx-segmented__btn--active,
+.kx-segmented__btn--active:hover {
+  background: var(--kx-primary);
+  color: var(--kx-raised);
+}
+
+/* Session Mode cluster — uppercase caption above the segmented control,
+ * right-aligned in the composer top row (§7.1, AC15). */
+.kx-session-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+
+.kx-session-mode__label {
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--kx-secondary);
 }
 
 /* ── Sidebar (Task 4, spec §6.1) ──────────────────────────────────────
@@ -904,21 +924,23 @@
 .kx-new-session {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 20px;
+  gap: clamp(24px, 4vh, 40px);
   width: 100%;
-  max-width: 780px;
+  max-width: none;
+  min-width: 0;
   margin: 0 auto;
-  padding: clamp(40px, 8vh, 80px) 32px 40px;
+  padding: clamp(24px, 4vh, 48px) 32px 40px;
 }
 
 /* Header — the single visible h1 + subtitle left, approval right. */
 .kx-new-session__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  width: 100%;
+  width: min(1200px, 100%);
+  margin: 0 auto;
   min-width: 0;
 }
 
@@ -942,6 +964,7 @@
 
 .kx-new-session__approval {
   flex-shrink: 0;
+  margin-left: auto;
   margin-top: 2px;
   font-size: var(--kx-text-xs);
   font-weight: var(--kx-font-medium);
@@ -956,11 +979,13 @@
   gap: 12px;
   width: 100%;
   min-width: 0;
+  margin: 0 auto clamp(40px, 7vh, 72px);
   text-align: center;
 }
 
 .kx-new-session__intro-img {
   max-height: 140px;
+  max-width: 100%;
   width: auto;
   object-fit: contain;
 }
@@ -976,6 +1001,17 @@
   max-width: 560px;
   font-size: var(--kx-text-md);
   color: var(--kx-muted-text-aa);
+}
+
+/* Bounded content region — intro, reviews pill, composer, and disclaimer
+ * stacked in one centered column below the full-width header band. */
+.kx-new-session__content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: min(920px, 100%);
+  min-width: 0;
+  margin: 0 auto;
 }
 
 /* ── Unified composer panel (Task 5 correction, §7.2) ──────────────── */
@@ -1031,10 +1067,11 @@
   gap: 10px;
   min-width: 0;
   max-width: 100%;
-  padding: 8px 12px;
+  min-height: 38px;
+  padding: 7px 12px;
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
-  border-radius: 12px;
+  border-radius: 999px;
   cursor: pointer;
   text-align: left;
   transition:
@@ -1060,7 +1097,7 @@
 
 .kx-panel__pill-label {
   min-width: 0;
-  font-size: var(--kx-text-md);
+  font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-medium);
   color: var(--kx-primary);
   white-space: nowrap;
@@ -1146,54 +1183,33 @@
 .kx-composer__profile {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
-  padding: 3px 12px 3px 4px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 999px;
+  min-height: 32px;
+  padding: 4px 2px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 4px;
+  color: var(--kx-secondary);
   cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
+  transition: color 0.15s ease;
 }
 
 .kx-composer__profile:hover {
-  background: var(--kx-pale);
-  border-color: var(--kx-accent-strong);
-}
-
-.kx-composer__profile-icon {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  min-width: 26px;
-  border-radius: 999px;
-  background: var(--kx-pale);
-  color: var(--kx-accent-text-aa);
-}
-
-.kx-composer__profile-copy {
-  display: grid;
-  gap: 0;
-  min-width: 0;
-  text-align: left;
-}
-
-.kx-composer__profile-caption {
-  font-size: var(--kx-text-2xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  line-height: 1.2;
-  color: var(--kx-muted-text-aa);
+  color: var(--kx-primary);
+  background: transparent;
 }
 
 .kx-composer__profile-name {
+  min-width: 0;
   font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-bold);
   line-height: 1.2;
-  color: var(--kx-primary);
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .kx-composer__profile-chevron {
@@ -1234,21 +1250,20 @@
   opacity: 0.45;
 }
 
-/* Page-level footer — disclaimer left, "Reviews waiting" pill right
- * (AC10/AC11); the badge is a fixed-height pill so 1- and 2-digit
- * counts stay round. */
-.kx-panel__external-footer {
+/* Standalone reviews wrapper — right-aligned above the composer — and
+ * the centered disclaimer below it (AC10/AC11); the badge stays a
+ * fixed-height pill so 1- and 2-digit counts stay round. */
+.kx-new-session__reviews {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
+  justify-content: flex-end;
+  margin-bottom: 12px;
   min-width: 0;
-  padding: 0 4px;
 }
 
-.kx-composer__disclaimer {
-  font-size: var(--kx-text-xs);
+.kx-new-session__disclaimer {
+  margin-top: 16px;
+  text-align: center;
+  font-size: var(--kx-text-sm);
   color: var(--kx-muted-text-aa);
 }
 
@@ -1286,6 +1301,89 @@
   color: var(--kx-raised);
   font-size: var(--kx-text-2xs);
   font-weight: var(--kx-font-bold);
+}
+
+/* ── Narrow-viewport composition (≤760px) ─────────────────────────────
+ * The header band stacks with a full-width approval, the content column
+ * goes edge-to-edge, and the composer's top-row groups wrap without
+ * overflow. The ≤1280px sidebar rail rules further below are untouched. */
+@media (max-width: 760px) {
+  .kx-new-session {
+    padding: clamp(24px, 4vh, 48px) 16px 32px;
+  }
+
+  .kx-new-session__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .kx-new-session__approval {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .kx-new-session__content {
+    width: 100%;
+  }
+
+  .kx-panel__top-row,
+  .kx-panel__setup-cluster,
+  .kx-panel__mode-cluster {
+    flex-wrap: wrap;
+  }
+
+  .kx-session-mode {
+    align-items: flex-start;
+  }
+}
+
+/* ── Desktop short-height compaction (AC44, 1200×720-class) ──────────
+ * Wide-but-short desktop windows: the New Session column keeps its
+ * full hierarchy — header, intro, reviews pill, composer, centered
+ * disclaimer — with a tighter vertical rhythm so every region stays
+ * visible without scrolling the canvas. The min-width guard keeps the
+ * ≤760px narrow-viewport rules authoritative on tablets/phones; only
+ * vertical metrics change here — no horizontal geometry is touched and
+ * nothing is hidden. */
+@media (max-height: 760px) and (min-width: 761px) {
+  .kx-new-session {
+    gap: 24px;
+    padding: 24px 32px 32px;
+  }
+
+  .kx-new-session__intro {
+    gap: 10px;
+    margin: 0 auto 32px;
+  }
+
+  .kx-new-session__intro-img {
+    max-height: 124px;
+  }
+
+  .kx-new-session__reviews {
+    margin-bottom: 10px;
+  }
+
+  .kx-panel {
+    gap: 10px;
+  }
+
+  .kx-composer {
+    padding: 10px;
+  }
+
+  .kx-composer__input {
+    min-height: 104px;
+  }
+
+  .kx-panel__toolbar {
+    padding: 6px 10px;
+  }
+
+  .kx-new-session__disclaimer {
+    margin-top: 12px;
+  }
 }
 
 /* ── Execution Profile anchored menu (Task 6, spec §7.3 — AC22–AC24) ── */

@@ -86,23 +86,6 @@ function SendIcon() {
   )
 }
 
-/** Gauge — the Execution Profile glyph (AC21). */
-function GaugeIcon() {
-  return (
-    <svg data-icon="gauge" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">
-      <path
-        d="M4 14a8 8 0 1 1 16 0 M12 14l4.5-4.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="14" r="1.6" fill="currentColor" />
-    </svg>
-  )
-}
-
 /** Chevron-down — the profile menu opens anchored below its control. */
 function ChevronDown() {
   return (
@@ -310,12 +293,15 @@ export default function Composer() {
             </button>
 
             {/* Execution Profile — inside the input box's left toolbar
-                group, after Add text document. The anchor wrapper hosts
-                the anchored menu (Task 6). */}
+                group, after Add text document. The visible content is the
+                active profile name + chevron; the caption and gauge icon
+                live only in the explicit accessible label. The anchor
+                wrapper hosts the anchored menu (Task 6). */}
             <div className="kx-composer__profile-anchor">
               <button
                 type="button"
                 className="kx-composer__profile"
+                aria-label={`Execution Profile · ${activeProfile.name}`}
                 aria-haspopup="menu"
                 aria-expanded={state.overlay.kind === 'execution-profile-menu'}
                 data-testid="execution-profile-trigger"
@@ -324,13 +310,7 @@ export default function Composer() {
                   dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'execution-profile-menu' } })
                 }}
               >
-                <span className="kx-composer__profile-icon" aria-hidden="true">
-                  <GaugeIcon />
-                </span>
-                <span className="kx-composer__profile-copy">
-                  <span className="kx-composer__profile-caption">Execution Profile</span>
-                  <span className="kx-composer__profile-name">{activeProfile.name}</span>
-                </span>
+                <span className="kx-composer__profile-name">{activeProfile.name}</span>
                 <ChevronDown />
               </button>
               {state.overlay.kind === 'execution-profile-menu' && <ExecutionProfileMenu />}

@@ -332,17 +332,95 @@ test.describe('composer layout correction surfaces', () => {
     await expect(introImg).toHaveAttribute('src', '/assets/konteks/empty-sessions.png')
   })
 
-  test('external footer carries the exact disclaimer and the Reviews waiting pill', async ({ page }) => {
+  test('header spans full width independent of the composer; the bounded content column sits below it', async ({ page }) => {
     await goto(page)
-    const footer = page.getByTestId('external-footer')
-    await expect(footer).toBeVisible()
-    await expect(footer.locator('.kx-composer__disclaimer')).toHaveText(
-      'Konteks can make mistakes. Verify important information.',
-    )
-    const reviews = footer.getByTestId('reviews-waiting')
+
+    const headerBox = await page.getByTestId('new-session-header').boundingBox()
+    const contentBox = await page.getByTestId('new-session-content').boundingBox()
+    const composerBox = await page.getByTestId('composer').boundingBox()
+    expect(headerBox).not.toBeNull()
+    expect(contentBox).not.toBeNull()
+    expect(composerBox).not.toBeNull()
+
+    // The header band is wider than the bounded composer/content column.
+    expect(headerBox!.width).toBeGreaterThan(contentBox!.width)
+    expect(headerBox!.width).toBeGreaterThan(composerBox!.width)
+
+    // The header sits above the content region; both are centered in the
+    // page column, so the bounded column is inset inside the header band.
+    expect(headerBox!.y + headerBox!.height).toBeLessThanOrEqual(contentBox!.y)
+    expect(contentBox!.x).toBeGreaterThanOrEqual(headerBox!.x)
+    const headerCenter = headerBox!.x + headerBox!.width / 2
+    const contentCenter = contentBox!.x + contentBox!.width / 2
+    expect(Math.abs(headerCenter - contentCenter)).toBeLessThanOrEqual(2)
+  })
+
+  test('reviews pill and disclaimer carry the exact copy in their standalone wrappers', async ({ page }) => {
+    await goto(page)
+
+    const wrapper = page.getByTestId('reviews-wrapper')
+    await expect(wrapper).toBeVisible()
+    await expect(wrapper).toHaveClass(/kx-new-session__reviews/)
+
+    const reviews = wrapper.getByTestId('reviews-waiting')
     await expect(reviews).toBeVisible()
     await expect(reviews).toContainText('Reviews waiting')
     await expect(reviews.locator('.kx-composer__badge')).toHaveText('3')
+
+    const disclaimer = page.getByTestId('disclaimer')
+    await expect(disclaimer).toBeVisible()
+    await expect(disclaimer).toHaveClass(/kx-new-session__disclaimer/)
+    await expect(disclaimer).toHaveText('Konteks can make mistakes. Verify important information.')
+  })
+
+  test('intro keeps a clear gap above the reviews pill and the composer', async ({ page }) => {
+    await goto(page)
+
+    const introBox = await page.getByTestId('new-session-intro').boundingBox()
+    const reviewsBox = await page.getByTestId('reviews-wrapper').boundingBox()
+    const composerBox = await page.getByTestId('composer').boundingBox()
+    expect(introBox).not.toBeNull()
+    expect(reviewsBox).not.toBeNull()
+    expect(composerBox).not.toBeNull()
+
+    // The intro's bottom margin (clamp(40px, 7vh, 72px)) separates it
+    // from the reviews pill, which sits 12px above the composer.
+    const introToReviews = reviewsBox!.y - (introBox!.y + introBox!.height)
+    expect(introToReviews).toBeGreaterThanOrEqual(40)
+    const reviewsToComposer = composerBox!.y - (reviewsBox!.y + reviewsBox!.height)
+    expect(reviewsToComposer).toBeGreaterThanOrEqual(12)
+  })
+
+  test('repository trigger opens the repository modal over the shell (modal regression)', async ({ page }) => {
+    await goto(page)
+    await page.getByTestId('repository-trigger').click()
+    const dialog = page.getByRole('dialog', { name: 'Choose work repositories' })
+    await expect(dialog).toBeVisible()
+    await expect(dialog).toBeFocused()
+
+    // The modal operates: Cancel closes it and returns focus to the trigger.
+    await dialog.getByRole('button', { name: 'Cancel' }).click()
+    await expect(dialog).toHaveCount(0)
+    await expect(page.getByTestId('repository-trigger')).toBeFocused()
+  })
+
+  test('component trigger opens and operates the component menu (modal regression)', async ({ page }) => {
+    await goto(page)
+    await page.getByTestId('component-trigger').click()
+    const menu = page.getByTestId('component-menu')
+    await expect(menu).toBeVisible()
+
+    // The menu operates: a search narrows the rows and Clear resets them.
+    const search = menu.getByRole('searchbox', { name: 'Search components or repositories' })
+    await search.fill('mytok')
+    await expect(menu.locator('.kx-component-menu__row')).toHaveCount(1)
+    await menu.getByRole('menuitemcheckbox', { name: /mytok-mobile/ }).check()
+    await menu.getByRole('menuitem', { name: 'Clear' }).click()
+    await expect(page.getByTestId('component-trigger')).toHaveText('Choose component')
+
+    await pressEscape(page)
+    await expect(menu).toHaveCount(0)
+    await expect(page.getByTestId('component-trigger')).toBeFocused()
   })
 })
 
@@ -391,7 +469,7 @@ test.describe('responsive regressions (Task 13)', () => {
     expect(modalBox!.y + modalBox!.height).toBeLessThanOrEqual(720)
   })
 
-  test('keeps the composer and external footer fully visible with no horizontal overflow at both required viewports', async ({ page }) => {
+  test('keeps the header, intro, reviews pill, composer/input box, and disclaimer fully inside both required viewports', async ({ page }) => {
     for (const { width, height } of [
       { width: 1440, height: 900 },
       { width: 1200, height: 720 },
@@ -402,12 +480,33 @@ test.describe('responsive regressions (Task 13)', () => {
       const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth)
       expect(scrollWidth, `document must not overflow ${width}px horizontally`).toBeLessThanOrEqual(width)
 
-      for (const testId of ['composer', 'composer-input-box', 'external-footer']) {
+      // Both axes: every required New Session region must sit fully inside
+      // the viewport — x AND y bounds — at 1440×900 and the compact-height
+      // 1200×720 regression viewport (AC44).
+      for (const testId of [
+        'new-session-header',
+        'new-session-content',
+        'new-session-intro',
+        'composer',
+        'composer-input-box',
+        'reviews-wrapper',
+        'disclaimer',
+      ]) {
         const box = await page.getByTestId(testId).boundingBox()
         expect(box, `${testId} should be visible at ${width}x${height}`).not.toBeNull()
-        expect(box!.x).toBeGreaterThanOrEqual(0)
-        expect(box!.x + box!.width).toBeLessThanOrEqual(width)
+        expect(box!.x, `${testId} left edge at ${width}x${height}`).toBeGreaterThanOrEqual(0)
+        expect(box!.x + box!.width, `${testId} right edge at ${width}x${height}`).toBeLessThanOrEqual(width)
+        expect(box!.y, `${testId} top edge at ${width}x${height}`).toBeGreaterThanOrEqual(0)
+        expect(box!.y + box!.height, `${testId} bottom edge at ${width}x${height}`).toBeLessThanOrEqual(height)
       }
+
+      // Full-width header stays wider than the bounded composer column at
+      // both viewports — the header never collapses to the content width.
+      const headerBox = await page.getByTestId('new-session-header').boundingBox()
+      const composerBox = await page.getByTestId('composer').boundingBox()
+      expect(headerBox!.width, `header wider than composer at ${width}x${height}`).toBeGreaterThan(
+        composerBox!.width,
+      )
     }
   })
 })
