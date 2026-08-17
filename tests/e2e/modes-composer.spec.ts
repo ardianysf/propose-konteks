@@ -75,7 +75,7 @@ test.describe('modes + composer', () => {
           return `${s.backgroundColor} ${s.color}`
         }),
       )
-      .toBe('rgb(149, 165, 71) rgb(36, 48, 37)') // --kx-accent-segment-aa #95A547 / --kx-primary
+      .toBe('rgb(149, 165, 71) rgb(255, 255, 255)') // --kx-accent-segment-aa #95A547 / white (user-directed)
 
     // Switching moves the active styling to Planning.
     await page.getByRole('radio', { name: 'Planning' }).click()
@@ -87,7 +87,7 @@ test.describe('modes + composer', () => {
           return `${s.backgroundColor} ${s.color}`
         }),
       )
-      .toBe('rgb(149, 165, 71) rgb(36, 48, 37)')
+      .toBe('rgb(149, 165, 71) rgb(255, 255, 255)')
   })
 
   test('setup pills render as compact fully-rounded pills (999px radius, 12px side padding)', async ({ page }) => {

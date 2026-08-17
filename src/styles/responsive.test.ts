@@ -228,13 +228,13 @@ describe('New Session semantic layout (composer correction)', () => {
     )
   })
 
-  it('renders the active segment as the exact #95A547 fill with dark primary text', () => {
+  it('renders the active segment as the exact #95A547 fill with white text (user-directed pairing)', () => {
     const css = flat(components)
     expect(css).toContain(
-      '.kx-segmented__btn--active, .kx-segmented__btn--active:hover { background: var(--kx-accent-segment-aa); color: var(--kx-primary); }',
+      '.kx-segmented__btn--active, .kx-segmented__btn--active:hover { background: var(--kx-accent-segment-aa); color: var(--kx-raised); }',
     )
-    // The fill token resolves to the exact matcha value (white text would
-    // fail contrast, so the text flips to dark --kx-primary).
+    // White on #95A547 is the user's explicit visual choice for this
+    // mockup (2.709:1) — recorded as a directed exception, not an AA claim.
     expect(tokens).toContain('--kx-accent-segment-aa: #95a547')
   })
 
