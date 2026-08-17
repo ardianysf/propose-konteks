@@ -112,49 +112,51 @@ describe('ordered tabbable accessible-name fixture', () => {
 // ---------------------------------------------------------------------------
 
 describe('new-session main-content tab order (AC45)', () => {
+  // Reviews waiting now sits in its own wrapper immediately before the
+  // composer, so it is the first tabbable stop of the main content.
   const ENGINEERING_EMPTY = [
+    'Reviews waiting 3',
     'Choose system / repositories',
     'Choose component',
     'Engineering',
     'Engineering prompt',
     'Attach file',
     'Add text document',
-    'Execution Profile Default',
+    'Execution Profile · Default',
     'Voice input',
-    'Reviews waiting 3',
   ]
 
   const ENGINEERING_NON_EMPTY = [
+    'Reviews waiting 3',
     'Choose system / repositories',
     'Choose component',
     'Engineering',
     'Engineering prompt',
     'Attach file',
     'Add text document',
-    'Execution Profile Default',
+    'Execution Profile · Default',
     'Voice input',
     'Send',
-    'Reviews waiting 3',
   ]
 
   const PLANNING_NON_EMPTY = [
+    'Reviews waiting 3',
     'Choose system',
     'Planning',
     'Planning prompt',
     'Attach file',
     'Add text document',
-    'Execution Profile Default',
+    'Execution Profile · Default',
     'Voice input',
     'Start planning',
-    'Reviews waiting 3',
   ]
 
-  it('Engineering empty: selected mode → setup pills → composer → toolbar → Reviews waiting; disabled Send is skipped', () => {
+  it('Engineering empty: Reviews waiting → selected mode → setup pills → composer → toolbar; disabled Send is skipped', () => {
     renderShell()
     expect(tabbableNames(getMain())).toEqual(ENGINEERING_EMPTY)
   })
 
-  it('Engineering non-empty: enabled Send appears between Voice input and Reviews waiting', () => {
+  it('Engineering non-empty: enabled Send appears after Voice input, still inside the composer toolbar', () => {
     renderShell()
     fireEvent.change(screen.getByRole('textbox', { name: 'Engineering prompt' }), {
       target: { value: 'Fix the EDP integration' },

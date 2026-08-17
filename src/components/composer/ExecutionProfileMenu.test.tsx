@@ -111,6 +111,33 @@ describe('ExecutionProfileMenu — anchoring (AC22)', () => {
   })
 })
 
+describe('ExecutionProfileMenu — trigger presentation', () => {
+  it('trigger shows only the active profile name + chevron; its accessible name stays Execution Profile + current profile', () => {
+    renderComposer()
+    const trigger = getTrigger()
+
+    expect(trigger).toHaveAccessibleName('Execution Profile · Default')
+    expect(trigger).toHaveTextContent('Default')
+    expect(trigger.textContent).not.toMatch(/execution profile/i)
+
+    // No gauge icon, no caption/copy markup — one aria-hidden chevron.
+    expect(trigger.querySelector('svg[data-icon="gauge"]')).toBeNull()
+    expect(trigger.querySelector('.kx-composer__profile-icon')).toBeNull()
+    expect(trigger.querySelector('.kx-composer__profile-caption')).toBeNull()
+    const chevron = trigger.querySelector('svg[data-icon="chevron-down"]')
+    expect(chevron).not.toBeNull()
+    expect(chevron).toHaveAttribute('aria-hidden', 'true')
+    expect(trigger.querySelectorAll('svg')).toHaveLength(1)
+
+    // Selecting another profile keeps the contract: visible name swaps,
+    // accessible name follows.
+    const menu = openMenu()
+    fireEvent.click(within(menu).getByRole('menuitem', { name: /core banking/i }))
+    expect(trigger).toHaveTextContent('Core Banking')
+    expect(trigger).toHaveAccessibleName('Execution Profile · Core Banking')
+  })
+})
+
 describe('ExecutionProfileMenu — flat profile list (AC22)', () => {
   it('lists every profile flat with a single check + aria-current on the active one', () => {
     renderComposer()

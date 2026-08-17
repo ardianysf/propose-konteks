@@ -114,19 +114,35 @@ describe('NewSessionPage — header + intro', () => {
     expect(screen.queryByRole('heading', { name: ENGINEERING_HEADING })).not.toBeInTheDocument()
   })
 
-  it('orders header → intro → composer → footer in the DOM', () => {
+  it('places the full-width header outside and before the bounded content region', () => {
     const { container } = renderNewSessionPage()
     const header = screen.getByTestId('new-session-header')
+    const content = screen.getByTestId('new-session-content')
+
+    expect(content).toHaveClass('kx-new-session__content')
+    expect(container.querySelector('.kx-new-session')).toContainElement(content)
+
+    // The header is a full-width sibling: it precedes the content region
+    // and never sits inside it.
+    expect(follows(header, content)).toBe(true)
+    expect(content.contains(header)).toBe(false)
+  })
+
+  it('orders intro → reviews → composer → disclaimer inside the content region', () => {
+    renderNewSessionPage()
+    const content = screen.getByTestId('new-session-content')
     const intro = screen.getByTestId('new-session-intro')
+    const reviewsWrapper = screen.getByTestId('reviews-wrapper')
     const composer = screen.getByTestId('composer')
-    const footer = screen.getByTestId('external-footer')
+    const disclaimer = screen.getByTestId('disclaimer')
 
-    expect(follows(header, intro)).toBe(true)
-    expect(follows(intro, composer)).toBe(true)
-    expect(follows(composer, footer)).toBe(true)
+    for (const child of [intro, reviewsWrapper, composer, disclaimer]) {
+      expect(content.contains(child)).toBe(true)
+    }
 
-    // The intro sits above the composer and the footer sits below it.
-    expect(container.querySelector('.kx-new-session')).toBeInTheDocument()
+    expect(follows(intro, reviewsWrapper)).toBe(true)
+    expect(follows(reviewsWrapper, composer)).toBe(true)
+    expect(follows(composer, disclaimer)).toBe(true)
   })
 })
 
@@ -144,6 +160,22 @@ describe('NewSessionPage — unified composer panel', () => {
     // The mode group lives inside the composer, not above it.
     const composer = container.querySelector('.kx-composer')!
     expect(composer.contains(modeGroup())).toBe(true)
+  })
+
+  it('shows the visible uppercase SESSION MODE label above the radiogroup inside the mode cluster', () => {
+    const { container } = renderNewSessionPage()
+    const label = screen.getByText('SESSION MODE')
+    expect(label).toHaveClass('kx-session-mode__label')
+
+    const wrapper = container.querySelector('.kx-session-mode') as HTMLElement
+    expect(wrapper).not.toBeNull()
+    expect(wrapper).toHaveAttribute('data-testid', 'session-mode')
+    expect(wrapper.contains(label)).toBe(true)
+
+    // The label precedes the radio group in document order.
+    const group = modeGroup()
+    expect(wrapper.contains(group)).toBe(true)
+    expect(follows(label, group)).toBe(true)
   })
 
   it('lays out the setup cluster left and the Session Mode group right on the same top row', () => {
@@ -302,6 +334,30 @@ describe('NewSessionPage — nested input box + toolbar', () => {
     expect(inputBox.contains(screen.getByRole('button', { name: 'Send' }))).toBe(true)
   })
 
+  it('renders the Execution Profile trigger as the active profile name + chevron only — no icon, no caption text', () => {
+    renderNewSessionPage()
+    const trigger = screen.getByTestId('execution-profile-trigger')
+
+    // Visible content is just the active profile name.
+    expect(trigger).toHaveTextContent('Default')
+    expect(trigger.textContent).not.toMatch(/execution profile/i)
+    expect(within(trigger).queryByText('Execution Profile')).not.toBeInTheDocument()
+
+    // The gauge icon and caption markup are gone; the single remaining
+    // glyph is the (aria-hidden) chevron.
+    expect(trigger.querySelector('svg[data-icon="gauge"]')).toBeNull()
+    expect(trigger.querySelector('.kx-composer__profile-icon')).toBeNull()
+    expect(trigger.querySelector('.kx-composer__profile-copy')).toBeNull()
+    expect(trigger.querySelector('.kx-composer__profile-caption')).toBeNull()
+    const chevron = trigger.querySelector('svg[data-icon="chevron-down"]')
+    expect(chevron).not.toBeNull()
+    expect(chevron).toHaveAttribute('aria-hidden', 'true')
+    expect(trigger.querySelectorAll('svg')).toHaveLength(1)
+
+    // The accessible name carries the full label + active profile.
+    expect(trigger).toHaveAccessibleName('Execution Profile · Default')
+  })
+
   it('opens the anchored Execution Profile menu from its control', () => {
     const { bucket } = renderNewSessionPage()
     const profile = screen.getByRole('button', { name: /execution profile/i })
@@ -353,32 +409,53 @@ describe('NewSessionPage — send gating', () => {
 // Footer (AC10–AC11)
 // ---------------------------------------------------------------------------
 
-describe('NewSessionPage — page-level footer', () => {
-  it('renders the exact disclaimer left and the Reviews waiting pill right, outside the composer', () => {
+describe('NewSessionPage — reviews pill + disclaimer', () => {
+  it('renders the Reviews waiting pill in a standalone right-aligned wrapper immediately before the composer', () => {
     const { container } = renderNewSessionPage()
-    const footer = screen.getByTestId('external-footer')
-    expect(footer).toHaveClass('kx-panel__external-footer')
+    const wrapper = screen.getByTestId('reviews-wrapper')
+    expect(wrapper).toHaveClass('kx-new-session__reviews')
 
-    const disclaimer = footer.querySelector('.kx-composer__disclaimer')
-    expect(disclaimer).not.toBeNull()
-    expect(disclaimer).toHaveTextContent(DISCLAIMER)
+    // The wrapper is a content child sitting just before the composer.
+    const composer = screen.getByTestId('composer')
+    expect(follows(wrapper, composer)).toBe(true)
+    expect(composer.previousElementSibling).toBe(wrapper)
 
-    const reviews = screen.getByRole('button', { name: /reviews waiting/i })
+    // The button keeps its original classes, testid, and badge.
+    const reviews = within(wrapper).getByRole('button', { name: /reviews waiting/i })
     expect(reviews).toHaveClass('kx-composer__reviews')
-    expect(follows(disclaimer!, reviews)).toBe(true)
-
-    // The footer sits outside the composer container.
-    expect(container.querySelector('.kx-composer')!.contains(footer)).toBe(false)
+    expect(reviews).toHaveAttribute('data-testid', 'reviews-waiting')
+    expect(reviews).toHaveAttribute('type', 'button')
 
     const badge = reviews.querySelector('.kx-composer__badge')
     expect(badge).not.toBeNull()
     expect(badge).toHaveTextContent(String(PENDING_REVIEWS.length))
+
+    // Both sit outside the composer container.
+    const composerContainer = container.querySelector('.kx-composer')!
+    expect(composerContainer.contains(wrapper)).toBe(false)
   })
 
   it('opens the Konteks Learned drawer on the Pending tab from Reviews waiting', () => {
     const { bucket } = renderNewSessionPage()
     fireEvent.click(screen.getByRole('button', { name: /reviews waiting/i }))
     expect(bucket.current?.overlay).toEqual({ kind: 'learned', tab: 'pending' })
+  })
+
+  it('renders the exact disclaimer in a standalone centered wrapper after the composer', () => {
+    const { container } = renderNewSessionPage()
+    const disclaimer = screen.getByTestId('disclaimer')
+    expect(disclaimer).toHaveClass('kx-new-session__disclaimer')
+    expect(disclaimer.textContent).toBe(DISCLAIMER)
+
+    // It follows the composer and sits outside it.
+    const composer = screen.getByTestId('composer')
+    expect(follows(composer, disclaimer)).toBe(true)
+    expect(container.querySelector('.kx-composer')!.contains(disclaimer)).toBe(false)
+
+    // The old combined external footer wrapper is gone.
+    expect(screen.queryByTestId('external-footer')).not.toBeInTheDocument()
+    expect(container.querySelector('.kx-panel__external-footer')).toBeNull()
+    expect(container.querySelectorAll('.kx-composer__disclaimer')).toHaveLength(0)
   })
 })
 

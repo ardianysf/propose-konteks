@@ -46,6 +46,68 @@ test.describe('modes + composer', () => {
     expect(modeBox!.x).toBeGreaterThan(repoBox!.x + repoBox!.width)
   })
 
+  test('SESSION MODE label sits above the selector and the active segment computes primary-on-white (AC15)', async ({ page }) => {
+    await goto(page)
+
+    const label = page.getByText('SESSION MODE', { exact: true })
+    await expect(label).toBeVisible()
+    await expect(label).toHaveClass(/kx-session-mode__label/)
+
+    // The label lives inside the session-mode cluster, above the radio group.
+    const cluster = page.getByTestId('session-mode')
+    const group = cluster.locator('.kx-session-mode__group')
+    await expect(cluster).toContainText('SESSION MODE')
+    const labelBox = await label.boundingBox()
+    const groupBox = await group.boundingBox()
+    expect(labelBox).not.toBeNull()
+    expect(groupBox).not.toBeNull()
+    expect(labelBox!.y + labelBox!.height).toBeLessThanOrEqual(groupBox!.y)
+
+    // The active radio renders as a primary (#243025) pill with white text.
+    // The transition (0.15s) means the computed style must be polled.
+    const active = page.getByRole('radio', { name: 'Engineering' })
+    await expect(active).toBeChecked()
+    await expect
+      .poll(async () =>
+        active.evaluate((el) => {
+          const s = getComputedStyle(el)
+          return `${s.backgroundColor} ${s.color}`
+        }),
+      )
+      .toBe('rgb(36, 48, 37) rgb(255, 255, 255)') // --kx-primary / --kx-raised
+
+    // Switching moves the active styling to Planning.
+    await page.getByRole('radio', { name: 'Planning' }).click()
+    const planning = page.getByRole('radio', { name: 'Planning' })
+    await expect
+      .poll(async () =>
+        planning.evaluate((el) => {
+          const s = getComputedStyle(el)
+          return `${s.backgroundColor} ${s.color}`
+        }),
+      )
+      .toBe('rgb(36, 48, 37) rgb(255, 255, 255)')
+  })
+
+  test('setup pills render as compact fully-rounded pills (999px radius, 12px side padding)', async ({ page }) => {
+    await goto(page)
+
+    for (const name of ['Choose system / repositories', 'Choose component']) {
+      const pill = page.getByRole('button', { name })
+      const style = await pill.evaluate((el) => {
+        const s = getComputedStyle(el)
+        return {
+          radius: s.borderRadius,
+          paddingInline: s.paddingInline,
+          minHeight: s.minHeight,
+        }
+      })
+      expect(style.radius, `${name} radius`).toBe('999px')
+      expect(style.paddingInline, `${name} padding`).toBe('12px')
+      expect(style.minHeight, `${name} height`).toBe('38px')
+    }
+  })
+
   test('Planning shows system-only setup and the Start planning copy (AC16)', async ({ page }) => {
     await goto(page)
     await page.getByRole('radio', { name: 'Planning' }).click()
@@ -106,25 +168,53 @@ test.describe('modes + composer', () => {
     await expect(inputBox.getByRole('button', { name: /execution profile/i })).toBeVisible()
   })
 
-  test('page footer renders the exact disclaimer left and Reviews waiting with a round badge right, outside the composer (AC20)', async ({ page }) => {
+  test('Reviews waiting sits geometrically and in the DOM above the composer; the centered disclaimer follows it (AC10/AC11)', async ({ page }) => {
     await goto(page)
 
-    const footer = page.getByTestId('external-footer')
-    await expect(footer).toBeVisible()
-    await expect(
-      footer.getByText('Konteks can make mistakes. Verify important information.', { exact: true }),
-    ).toBeVisible()
-
-    const reviews = footer.getByTestId('reviews-waiting')
+    const reviews = page.getByTestId('reviews-waiting')
     await expect(reviews).toBeVisible()
     await expect(reviews).toContainText('Reviews waiting')
 
-    // The footer sits below the nested input box, not inside the composer.
-    const inputBox = await page.getByTestId('composer-input-box').boundingBox()
-    const footerBox = await footer.boundingBox()
-    expect(inputBox).not.toBeNull()
-    expect(footerBox).not.toBeNull()
-    expect(footerBox!.y).toBeGreaterThan(inputBox!.y)
+    const disclaimer = page.getByTestId('disclaimer')
+    await expect(disclaimer).toBeVisible()
+    await expect(disclaimer).toHaveText('Konteks can make mistakes. Verify important information.')
+
+    // DOM order: the reviews wrapper precedes the composer, the disclaimer
+    // follows it — the old combined external footer wrapper is gone.
+    const order = await page.evaluate(() => {
+      const reviewsWrapper = document.querySelector('[data-testid="reviews-wrapper"]')
+      const composer = document.querySelector('[data-testid="composer"]')
+      const disclaimerEl = document.querySelector('[data-testid="disclaimer"]')
+      const externalFooter = document.querySelector('[data-testid="external-footer"]')
+      if (!reviewsWrapper || !composer || !disclaimerEl) return null
+      return {
+        reviewsBeforeComposer: !!(composer.compareDocumentPosition(reviewsWrapper) & Node.DOCUMENT_POSITION_PRECEDING),
+        disclaimerAfterComposer: !!(composer.compareDocumentPosition(disclaimerEl) & Node.DOCUMENT_POSITION_FOLLOWING),
+        externalFooterCount: externalFooter ? 1 : 0,
+      }
+    })
+    expect(order).not.toBeNull()
+    expect(order!.reviewsBeforeComposer).toBe(true)
+    expect(order!.disclaimerAfterComposer).toBe(true)
+    expect(order!.externalFooterCount).toBe(0)
+
+    // Geometry: the whole reviews pill sits above the composer panel, and
+    // the disclaimer starts below the composer's bottom edge.
+    const reviewsBox = await reviews.boundingBox()
+    const composerBox = await page.getByTestId('composer').boundingBox()
+    const disclaimerBox = await disclaimer.boundingBox()
+    expect(reviewsBox).not.toBeNull()
+    expect(composerBox).not.toBeNull()
+    expect(disclaimerBox).not.toBeNull()
+    expect(reviewsBox!.y + reviewsBox!.height).toBeLessThanOrEqual(composerBox!.y)
+    expect(disclaimerBox!.y).toBeGreaterThanOrEqual(composerBox!.y + composerBox!.height)
+
+    // Centered disclaimer: its midpoint matches the bounded content column's.
+    const contentBox = await page.getByTestId('new-session-content').boundingBox()
+    expect(contentBox).not.toBeNull()
+    const disclaimerCenter = disclaimerBox!.x + disclaimerBox!.width / 2
+    const contentCenter = contentBox!.x + contentBox!.width / 2
+    expect(Math.abs(disclaimerCenter - contentCenter)).toBeLessThanOrEqual(2)
 
     const badge = reviews.locator('.kx-composer__badge')
     await expect(badge).toHaveText('3')
@@ -144,6 +234,46 @@ test.describe('modes + composer', () => {
       .getByTestId('execution-profile-trigger')
       .evaluate((el) => el.closest('.kx-panel__toolbar') !== null)
     expect(inToolbar).toBe(true)
+  })
+
+  test('Execution Profile trigger shows only the profile name + chevron as a plain borderless control while its accessible name keeps working', async ({ page }) => {
+    await goto(page)
+    const trigger = page.getByTestId('execution-profile-trigger')
+
+    // The explicit accessible name carries the full label + active profile.
+    await expect(trigger).toHaveAccessibleName('Execution Profile · Default')
+    await expect(
+      page.getByRole('button', { name: 'Execution Profile · Default' }),
+    ).toBeVisible()
+
+    // Visible content is just the active profile name + one chevron glyph.
+    await expect(trigger).toHaveText('Default')
+    await expect(trigger.locator('svg')).toHaveCount(1)
+    await expect(trigger.locator('svg[data-icon="chevron-down"]')).toBeAttached()
+    await expect(trigger.locator('svg[data-icon="chevron-down"]')).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    )
+
+    // No visible caption, no gauge icon, no legacy icon/copy wrappers.
+    await expect(trigger.locator('.kx-composer__profile-icon')).toHaveCount(0)
+    await expect(trigger.locator('.kx-composer__profile-copy')).toHaveCount(0)
+    await expect(trigger.locator('.kx-composer__profile-caption')).toHaveCount(0)
+    await expect(trigger.locator('svg[data-icon="gauge"]')).toHaveCount(0)
+    await expect(trigger).not.toContainText('Execution Profile')
+
+    // Plain: no border, no background of its own.
+    const style = await trigger.evaluate((el) => {
+      const s = getComputedStyle(el)
+      return {
+        borderWidth: s.borderTopWidth,
+        background: s.backgroundColor,
+        boxShadow: s.boxShadow,
+      }
+    })
+    expect(style.borderWidth).toBe('0px')
+    expect(style.background).toBe('rgba(0, 0, 0, 0)')
+    expect(style.boxShadow).toBe('none')
   })
 
   test('send stays disabled while the input is empty and enables once text exists (AC43)', async ({ page }) => {

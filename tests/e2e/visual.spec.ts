@@ -49,6 +49,31 @@ async function assertNoHorizontalOverflow(page: Page, width: number) {
   expect(scrollWidth, `document must not overflow ${width}px horizontally`).toBeLessThanOrEqual(width)
 }
 
+/** Both axes (AC44): a region is fully inside the capture viewport —
+ * x AND y bounds — including the compact-height 1200×720 window. */
+async function assertFullyInViewport(page: Page, testId: string, width: number, height: number) {
+  const box = await page.getByTestId(testId).boundingBox()
+  expect(box, `${testId} should render at ${width}x${height}`).not.toBeNull()
+  expect(box!.x, `${testId} left edge at ${width}x${height}`).toBeGreaterThanOrEqual(0)
+  expect(box!.x + box!.width, `${testId} right edge at ${width}x${height}`).toBeLessThanOrEqual(width)
+  expect(box!.y, `${testId} top edge at ${width}x${height}`).toBeGreaterThanOrEqual(0)
+  expect(box!.y + box!.height, `${testId} bottom edge at ${width}x${height}`).toBeLessThanOrEqual(height)
+  return box!
+}
+
+/** The centered disclaimer must stay visible below the composer. */
+async function assertDisclaimerVisibleAndCentered(page: Page, width: number, height: number) {
+  const disclaimerBox = await assertFullyInViewport(page, 'disclaimer', width, height)
+  const composerBox = await page.getByTestId('composer').boundingBox()
+  expect(composerBox).not.toBeNull()
+  expect(disclaimerBox.y).toBeGreaterThanOrEqual(composerBox!.y + composerBox!.height)
+  const contentBox = await page.getByTestId('new-session-content').boundingBox()
+  expect(contentBox).not.toBeNull()
+  const disclaimerCenter = disclaimerBox.x + disclaimerBox.width / 2
+  const contentCenter = contentBox!.x + contentBox!.width / 2
+  expect(Math.abs(disclaimerCenter - contentCenter), `disclaimer centered at ${width}x${height}`).toBeLessThanOrEqual(2)
+}
+
 async function assertCustomizeFullyInViewport(page: Page, width: number, height: number) {
   const box = await page.getByTestId('customize-modal').boundingBox()
   expect(box).not.toBeNull()
@@ -61,18 +86,42 @@ async function assertCustomizeFullyInViewport(page: Page, width: number, height:
 const VIEWS: CaptureView[] = [
   {
     name: 'engineering',
-    prepare: async (page) => {
+    prepare: async (page, width, height) => {
       await goto(page)
       await expect(page.getByRole('radio', { name: 'Engineering' })).toBeChecked()
       await expect(page.getByTestId('composer')).toBeVisible()
       await expect(page.getByRole('button', { name: 'Choose system / repositories' })).toBeVisible()
       await expect(page.getByRole('button', { name: 'Choose component' })).toBeVisible()
       await expect(page.getByTestId('composer-input-box')).toBeVisible()
+
+      // Composer-refinement geometry holds at the capture viewport too:
+      // full-width header wider than the bounded composer column, reviews
+      // pill above the composer, centered disclaimer below it — and every
+      // required region fully inside the viewport on BOTH axes (AC44).
+      for (const testId of [
+        'new-session-header',
+        'new-session-content',
+        'new-session-intro',
+        'composer',
+        'composer-input-box',
+        'reviews-wrapper',
+        'disclaimer',
+      ]) {
+        await assertFullyInViewport(page, testId, width, height)
+      }
+      const headerBox = await page.getByTestId('new-session-header').boundingBox()
+      const contentBox = await page.getByTestId('new-session-content').boundingBox()
+      const composerBox = await page.getByTestId('composer').boundingBox()
+      const reviewsBox = await page.getByTestId('reviews-wrapper').boundingBox()
+      expect(headerBox!.width, `header wider than content at ${width}`).toBeGreaterThan(contentBox!.width)
+      expect(headerBox!.width, `header wider than composer at ${width}`).toBeGreaterThan(composerBox!.width)
+      expect(reviewsBox!.y + reviewsBox!.height).toBeLessThanOrEqual(composerBox!.y)
+      await assertDisclaimerVisibleAndCentered(page, width, height)
     },
   },
   {
     name: 'planning',
-    prepare: async (page) => {
+    prepare: async (page, width, height) => {
       await goto(page)
       await page.getByRole('radio', { name: 'Planning' }).click()
       await expect(page.getByRole('button', { name: 'Start planning' })).toBeVisible()
@@ -80,6 +129,20 @@ const VIEWS: CaptureView[] = [
       await expect(page.getByRole('button', { name: 'Choose system' })).toBeVisible()
       await expect(page.getByTestId('component-trigger')).toHaveCount(0)
       await expect(page.getByTestId('composer-input-box')).toBeVisible()
+      // The SESSION MODE label + segmented group survive the mode swap.
+      await expect(page.getByText('SESSION MODE', { exact: true })).toBeVisible()
+      // Planning keeps the same in-viewport guarantee as Engineering at the
+      // capture viewport — including the centered disclaimer (AC44).
+      for (const testId of [
+        'new-session-header',
+        'new-session-intro',
+        'composer',
+        'composer-input-box',
+        'reviews-wrapper',
+      ]) {
+        await assertFullyInViewport(page, testId, width, height)
+      }
+      await assertDisclaimerVisibleAndCentered(page, width, height)
     },
   },
   {
@@ -185,11 +248,11 @@ test.describe('visual capture checks (deterministic, no snapshot baseline)', () 
         await page.setViewportSize({ width, height })
         await view.prepare(page, width, height)
 
-        if (width === 1200) {
-          await assertNoHorizontalOverflow(page, width)
-          if (view.name.startsWith('customize-')) {
-            await assertCustomizeFullyInViewport(page, width, height)
-          }
+        // The full page stays horizontally contained at BOTH the ideal
+        // 1440×900 and the compact 1200×720 regression viewport (AC44).
+        await assertNoHorizontalOverflow(page, width)
+        if (width === 1200 && view.name.startsWith('customize-')) {
+          await assertCustomizeFullyInViewport(page, width, height)
         }
 
         const filename = await capture(page, view.name, width, height)
