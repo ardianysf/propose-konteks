@@ -23,6 +23,8 @@ function StateProbe({ bucket }: { bucket: StateBucket }) {
   return null
 }
 
+import NewSessionPage from '../../pages/NewSessionPage'
+
 function renderSidebar(initial?: Partial<MockupState>) {
   const bucket: StateBucket = { current: null }
 
@@ -33,6 +35,7 @@ function renderSidebar(initial?: Partial<MockupState>) {
         <StateProbe bucket={bucket} />
         <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
           <Sidebar />
+          {state.route === 'new-session' ? <NewSessionPage /> : null}
           <main data-testid="route">{state.route}</main>
         </OverlayLifecycleProvider>
       </MockupContext.Provider>

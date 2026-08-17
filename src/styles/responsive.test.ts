@@ -68,7 +68,10 @@ describe('responsive rail at max-width 1280px (AC12/AC44)', () => {
   it('centers icon/control spacing like the manual rail', () => {
     const block = flat(responsiveBlock())
     expect(block).toContain('.kx-sidebar__control { justify-content: center; gap: 0; padding: 8px 0;')
-    expect(block).toContain('.kx-sidebar__top { flex-direction: column; gap: 6px;')
+    expect(block).toContain('.kx-sidebar__top { gap: 6px; }')
+    // The collapse toggle now lives in the New Session page header and
+    // stands down in the forced rail alongside the sidebar rule.
+    expect(block).toContain('.kx-new-session__sidebar-toggle { display: none; }')
     expect(block).toContain('.kx-sidebar__user { justify-content: center; gap: 10px;')
     expect(block).toContain('.kx-sidebar__logo { width: 100%; justify-content: center;')
     expect(block).toContain('.kx-sidebar__logo-img { height: 32px; width: 32px;')
@@ -184,11 +187,14 @@ describe('New Session semantic layout (composer correction)', () => {
   it('spans the page full width and bounds the content region below the header', () => {
     const css = flat(components)
     expect(css).toContain(
-      '.kx-new-session { display: flex; flex-direction: column; gap: clamp(24px, 4vh, 40px); width: 100%; max-width: none;',
+      '.kx-new-session { display: flex; flex-direction: column; gap: 24px; width: 100%; max-width: none;',
     )
     expect(css).toContain(
-      '.kx-new-session__content { display: flex; flex-direction: column; align-items: stretch; width: min(920px, 100%);',
+      '.kx-new-session__content { display: flex; flex-direction: column; align-items: stretch; flex: 1; min-height: 0; width: min(920px, 100%);',
     )
+    // Fixed-px rhythm (no vh units) so browser zoom keeps identical spacing.
+    expect(css).toContain('padding: 28px 32px 40px;')
+    expect(css).not.toContain('clamp(24px, 4vh')
   })
 
   it('splits the full-width header into copy left and the approval indicator right', () => {
@@ -196,7 +202,9 @@ describe('New Session semantic layout (composer correction)', () => {
     expect(css).toContain(
       '.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; width: min(1200px, 100%);',
     )
-    expect(css).toContain('.kx-new-session__title { font-size: var(--kx-text-3xl);')
+    // Uniform header type: title/subtitle/approval share --kx-text-xs;
+    // hierarchy comes from weight alone (user-directed).
+    expect(css).toContain('.kx-new-session__title { font-size: var(--kx-text-sm);')
     expect(css).toContain('.kx-new-session__subtitle { font-size: var(--kx-text-md);')
     expect(css).toContain('.kx-new-session__approval { flex-shrink: 0; margin-left: auto;')
   })
@@ -204,9 +212,12 @@ describe('New Session semantic layout (composer correction)', () => {
   it('centers the intro with a constrained decorative image and a 2xl heading', () => {
     const css = flat(components)
     expect(css).toContain('.kx-new-session__intro { display: flex; flex-direction: column; align-items: center;')
-    expect(css).toContain('margin: 0 auto clamp(40px, 7vh, 72px);')
+    // Fixed 48px intro→composer spacing (zoom-invariant) and the bottom
+    // group pinned via the reviews wrapper's margin-top:auto.
+    expect(css).toContain('margin: 0 auto 48px;')
     expect(css).toContain('.kx-new-session__intro-img { max-height: 140px;')
     expect(css).toContain('.kx-new-session__intro-heading { font-size: var(--kx-text-2xl);')
+    expect(css).toContain('margin-top: auto;')
   })
 
   it('keeps the setup pills and Session Mode on one wrap-safe top row', () => {
@@ -266,8 +277,9 @@ describe('New Session semantic layout (composer correction)', () => {
   it('places the Reviews pill right-aligned above the composer and centers the disclaimer below it', () => {
     const css = flat(components)
     expect(css).toContain(
-      '.kx-new-session__reviews { display: flex; justify-content: flex-end; margin-bottom: 12px;',
+      '.kx-new-session__reviews { display: flex; justify-content: flex-end;',
     )
+    expect(css).toContain('margin-top: auto; margin-bottom: 12px;')
     expect(css).toContain(
       '.kx-new-session__disclaimer { margin-top: 16px; text-align: center;',
     )

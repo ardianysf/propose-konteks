@@ -112,9 +112,12 @@ describe('ordered tabbable accessible-name fixture', () => {
 // ---------------------------------------------------------------------------
 
 describe('new-session main-content tab order (AC45)', () => {
-  // Reviews waiting now sits in its own wrapper immediately before the
-  // composer, so it is the first tabbable stop of the main content.
+  // The sidebar minimize/maximize control lives in the page header
+  // (user-directed), so it is the first tabbable stop of the main
+  // content, followed by Reviews waiting in its own wrapper immediately
+  // before the composer.
   const ENGINEERING_EMPTY = [
+    'Collapse sidebar',
     'Reviews waiting 3',
     'Choose system / repositories',
     'Choose component',
@@ -127,6 +130,7 @@ describe('new-session main-content tab order (AC45)', () => {
   ]
 
   const ENGINEERING_NON_EMPTY = [
+    'Collapse sidebar',
     'Reviews waiting 3',
     'Choose system / repositories',
     'Choose component',
@@ -140,6 +144,7 @@ describe('new-session main-content tab order (AC45)', () => {
   ]
 
   const PLANNING_NON_EMPTY = [
+    'Collapse sidebar',
     'Reviews waiting 3',
     'Choose system',
     'Planning',

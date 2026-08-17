@@ -51,28 +51,8 @@ function ChevronRight() {
   )
 }
 
-/** Double chevron pointing the direction the sidebar will move (AC12). */
-function CollapseIcon({ collapsed }: { collapsed: boolean }) {
-  return (
-    <svg
-      data-icon={collapsed ? 'expand-sidebar' : 'collapse-sidebar'}
-      viewBox="0 0 16 16"
-      width="14"
-      height="14"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d={collapsed ? 'M7 3.5 11.5 8 7 12.5M3.5 3.5 8 8l-4.5 4.5' : 'M9 3.5 4.5 8 9 12.5M12.5 3.5 8 8l4.5 4.5'}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
+/** Double chevron lives in the shared CollapseIcon module (used by the
+ * New Session page header). */
 
 /** Square + plus — the New session route control's icon. */
 function NewSessionIcon() {
@@ -166,14 +146,6 @@ export default function Sidebar() {
             height={collapsed ? 32 : 26}
           />
         </div>
-        <button
-          type="button"
-          className="kx-icon-btn kx-sidebar__collapse"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
-        >
-          <CollapseIcon collapsed={collapsed} />
-        </button>
       </div>
 
       {/* The workspace box — the ONLY persistent boxed container in the
@@ -231,6 +203,14 @@ export default function Sidebar() {
           route is clean), carries aria-current="page" while active, and
           collapses to a centered icon in the manual/forced rail with the
           label hidden but the accessible name kept via aria-label. */}
+      {/* New session — the persistent route control between the system
+          control and Recent sessions. It navigates to the new-session
+          route (closing any open overlay through the lifecycle so the
+          route is clean), carries aria-current="page" while active, and
+          collapses to a centered icon in the manual/forced rail with the
+          label hidden but the accessible name kept via aria-label. The
+          sidebar minimize/maximize control moved to the New Session page
+          header (user-directed). */}
       <button
         type="button"
         className={
