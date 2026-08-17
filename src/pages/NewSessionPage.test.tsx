@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react'
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import NewSessionPage from './NewSessionPage'
 import AppShell from '../components/shell/AppShell'
 import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
@@ -373,6 +373,33 @@ describe('NewSessionPage — nested input box + toolbar', () => {
       screen.getByTestId('execution-profile-menu'),
     )
   })
+
+  it('toggles the anchored Execution Profile menu closed on a second click of its trigger', async () => {
+    const { bucket } = renderNewSessionPage()
+    const profile = screen.getByRole('button', { name: /execution profile/i })
+    fireEvent.click(profile)
+    expect(bucket.current?.overlay).toEqual({ kind: 'execution-profile-menu' })
+    expect(profile).toHaveAttribute('aria-expanded', 'true')
+
+    // Second click on the same trigger dismisses through the lifecycle —
+    // focus is restored to the trigger instead of re-opening the menu.
+    fireEvent.click(profile)
+    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
+    expect(profile).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByTestId('execution-profile-menu')).not.toBeInTheDocument()
+    await waitFor(() => expect(profile).toHaveFocus())
+
+    // The trigger keeps working after a toggle — a third click re-opens.
+    fireEvent.click(profile)
+    expect(bucket.current?.overlay).toEqual({ kind: 'execution-profile-menu' })
+    expect(screen.getByTestId('execution-profile-menu')).toBeInTheDocument()
+
+    // Cross-overlay replacement is preserved: another trigger's control
+    // swaps its own overlay in rather than toggling.
+    fireEvent.click(screen.getByTestId('component-trigger'))
+    expect(bucket.current?.overlay).toEqual({ kind: 'component-menu' })
+    expect(screen.queryByTestId('execution-profile-menu')).not.toBeInTheDocument()
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -464,16 +491,18 @@ describe('NewSessionPage — reviews pill + disclaimer', () => {
 // ---------------------------------------------------------------------------
 
 describe('NewSessionPage — illustrative-data marker', () => {
-  it('removes the page-level marker while the sidebar keeps its own', () => {
+  it('renders no illustrative-data marker — neither on the page nor in the shell sidebar', () => {
     // Page-only render has no marker.
     renderNewSessionPage()
     expect(screen.queryByTestId('illustrative-data-note')).not.toBeInTheDocument()
 
-    // Full shell still shows exactly the sidebar marker.
+    // Full shell shows no marker either — the sidebar carries none and
+    // the New Session page never had one (Session History/Settings keep
+    // their own page-level notices).
     const shell = renderAppShell()
     const notes = shell.container.querySelectorAll('[data-testid="illustrative-data-note"]')
-    expect(notes).toHaveLength(1)
-    expect(notes[0]).toHaveTextContent('Illustrative data')
+    expect(notes).toHaveLength(0)
+    expect(shell.container.querySelectorAll('.kx-illustrative-note')).toHaveLength(0)
   })
 })
 

@@ -17,6 +17,7 @@ const palette = [
   '#5F8D4E',
   '#607260',
   '#4F7044',
+  '#95A547',
 ]
 
 it.each(palette)('tokens.css defines %s', (hex) =>
@@ -39,4 +40,8 @@ it('defines the three Task 13 AA contrast semantics (AC9)', () => {
   expect(css).toContain('--kx-muted-text-aa: #607260')
   expect(css).toContain('--kx-accent-text-aa: #4f7044')
   expect(css).toContain('--kx-accent-solid-aa: #4f7044')
+})
+
+it('defines the Session Mode active segment fill — dark-text AA (white fails)', () => {
+  expect(css).toContain('--kx-accent-segment-aa: #95a547')
 })

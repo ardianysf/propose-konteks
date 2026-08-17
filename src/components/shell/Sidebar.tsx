@@ -6,14 +6,17 @@
  * controls with chevron-right affordances (AC7; the system floating menu
  * itself is Part B), recent sessions newest-first with system + time
  * (AC10), the "View all" control that navigates to session history while
- * the sidebar stays untouched (AC11), the collapse toggle to the 64px icon
- * rail (AC12), the user row that opens the account menu (Task 12, AC42),
- * and the sliders icon beside it that opens Customize on the agents tab
- * with a keyboard-focusable tooltip (AC9). No "All Systems" page or
- * link exists anywhere here (AC14).
+ * the sidebar stays untouched (AC11), the New session route control
+ * between the system control and Recent sessions, the collapse toggle to
+ * the 64px icon rail (AC12), the user row that opens the account menu
+ * (Task 12, AC42), and the sliders icon beside it that opens Customize on
+ * the agents tab with a keyboard-focusable tooltip (AC9). No "All Systems"
+ * page or link exists anywhere here (AC14). The workspace, system, and
+ * account triggers toggle their own overlay on a repeated click and
+ * replace any other open overlay (focus returns to the root trigger).
  */
-import { useState } from 'react'
-import { ILLUSTRATIVE_DATA_NOTE, RECENT_SESSIONS, WORKSPACE } from '../../data/mockData'
+import { useState, type MouseEvent } from 'react'
+import { RECENT_SESSIONS, WORKSPACE } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 import { useOverlayLifecycle } from './OverlayLifecycle'
 
@@ -71,6 +74,38 @@ function CollapseIcon({ collapsed }: { collapsed: boolean }) {
   )
 }
 
+/** Square + plus — the New session route control's icon. */
+function NewSessionIcon() {
+  return (
+    <svg
+      data-icon="new-session"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect
+        x="2.25"
+        y="2.25"
+        width="11.5"
+        height="11.5"
+        rx="3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M8 5.5v5M5.5 8h5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 /** Sliders — inline SVG, no emoji (AC9). */
 function SlidersIcon() {
   return (
@@ -98,11 +133,26 @@ function SlidersIcon() {
 
 export default function Sidebar() {
   const { state, dispatch } = useMockup()
-  const { beginOverlayChain } = useOverlayLifecycle()
+  const { beginOverlayChain, dismissOverlay } = useOverlayLifecycle()
   const collapsed = state.sidebarCollapsed
   const activeSystem =
     state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
   const [customizeTooltipShown, setCustomizeTooltipShown] = useState(false)
+
+  /** Toggle contract shared by the reducer-overlay menu triggers: a second
+   * click on the same trigger dismisses its own overlay (restoring focus to
+   * the trigger through the lifecycle); any other state opens/replaces. */
+  const openMenuOrToggle = (
+    event: MouseEvent<HTMLButtonElement>,
+    kind: 'workspace-menu' | 'system-menu' | 'account-menu',
+  ) => {
+    if (state.overlay.kind === kind) {
+      dismissOverlay()
+      return
+    }
+    beginOverlayChain(event.currentTarget)
+    dispatch({ type: 'OPEN_OVERLAY', overlay: { kind } })
+  }
 
   return (
     <nav aria-label="Sidebar" className={collapsed ? 'kx-sidebar kx-sidebar--rail' : 'kx-sidebar'}>
@@ -136,10 +186,8 @@ export default function Sidebar() {
           className="kx-sidebar__control"
           aria-label={`${WORKSPACE.name} workspace`}
           aria-haspopup="menu"
-          onClick={(event) => {
-            beginOverlayChain(event.currentTarget)
-            dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'workspace-menu' } })
-          }}
+          aria-expanded={state.overlay.kind === 'workspace-menu'}
+          onClick={(event) => openMenuOrToggle(event, 'workspace-menu')}
         >
           <span className="kx-sidebar__workspace-avatar" aria-hidden="true">
             {WORKSPACE.name[0]}
@@ -159,10 +207,8 @@ export default function Sidebar() {
         className="kx-sidebar__control kx-sidebar__system"
         aria-label={`${activeSystem.name} — open system menu`}
         aria-haspopup="menu"
-        onClick={(event) => {
-          beginOverlayChain(event.currentTarget)
-          dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'system-menu' } })
-        }}
+        aria-expanded={state.overlay.kind === 'system-menu'}
+        onClick={(event) => openMenuOrToggle(event, 'system-menu')}
       >
         <span className="kx-sidebar__system-icon">
           <svg data-icon="system" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
@@ -177,6 +223,33 @@ export default function Sidebar() {
           <span className="kx-sidebar__control-name">{activeSystem.name}</span>
         </span>
         <ChevronRight />
+      </button>
+
+      {/* New session — the persistent route control between the system
+          control and Recent sessions. It navigates to the new-session
+          route (closing any open overlay through the lifecycle so the
+          route is clean), carries aria-current="page" while active, and
+          collapses to a centered icon in the manual/forced rail with the
+          label hidden but the accessible name kept via aria-label. */}
+      <button
+        type="button"
+        className={
+          state.route === 'new-session'
+            ? 'kx-sidebar__new-session kx-sidebar__new-session--active'
+            : 'kx-sidebar__new-session'
+        }
+        aria-label="New session"
+        aria-current={state.route === 'new-session' ? 'page' : undefined}
+        data-testid="new-session-trigger"
+        onClick={() => {
+          if (state.overlay.kind !== 'none') dismissOverlay()
+          dispatch({ type: 'NAVIGATE', route: 'new-session' })
+        }}
+      >
+        <span className="kx-sidebar__new-session-icon" aria-hidden="true">
+          <NewSessionIcon />
+        </span>
+        <span className="kx-sidebar__new-session-label">New session</span>
       </button>
 
       <section className="kx-sidebar__recent">
@@ -219,10 +292,7 @@ export default function Sidebar() {
           aria-haspopup="menu"
           aria-expanded={state.overlay.kind === 'account-menu'}
           data-testid="account-trigger"
-          onClick={(event) => {
-            beginOverlayChain(event.currentTarget)
-            dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'account-menu' } })
-          }}
+          onClick={(event) => openMenuOrToggle(event, 'account-menu')}
         >
           <span className="kx-sidebar__user-avatar" aria-hidden="true">
             {USER_INITIALS}
@@ -248,11 +318,6 @@ export default function Sidebar() {
           </span>
         </button>
       </div>
-
-      {/* AC46 — the single visible illustrative-data marker (sidebar footer). */}
-      <p className="kx-illustrative-note kx-sidebar__note" data-testid="illustrative-data-note">
-        {ILLUSTRATIVE_DATA_NOTE}
-      </p>
     </nav>
   )
 }

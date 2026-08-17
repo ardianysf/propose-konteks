@@ -42,7 +42,7 @@ Everything else in the earlier spec remains in force. This correction does **not
 - No change to the Execution Profile anchored menu (contents, sidecar, workspace settings, Manage/Customize entry).
 - No change to the Konteks Learned drawer, Session History, Customize, Account, or Settings surfaces.
 - No change to the send-disabled-on-empty contract or the overlay focus/Escape lifecycle.
-- No removal of global AC46 illustrative-data coverage — the sidebar marker stays.
+- No removal of AC46 illustrative-data coverage on Session History and Settings — their visible notices stay. **User override (post-approval):** the sidebar no longer renders an `Illustrative data` marker; AC46 coverage is carried by the Session History page-level notice and the Settings section notices (spec review explicitly skipped by the user — no approval gate).
 - No mobile/tablet layouts; desktop-only responsive behavior as before.
 - No production code, test, or style changes in this task.
 
@@ -78,7 +78,7 @@ The New Session page region keeps its landmark name (`aria-label="New session"`)
 
 5. **Illustrative data marker**
    - The New Session page-level `Illustrative data` marker is removed; its position is replaced by the disclaimer in the page-level footer.
-   - The sidebar keeps its own `Illustrative data` marker, preserving global AC46 coverage.
+   - **User override (post-approval):** the sidebar no longer renders its `Illustrative data` marker either. Visible AC46 coverage is carried by the Session History page-level notice and the Settings section notices.
 
 ## 6. Styling intent
 
@@ -136,7 +136,7 @@ The New Session page region keeps its landmark name (`aria-label="New session"`)
 9. The input toolbar renders at the bottom of the text-input box: `Attach file`, `Add text document`, and the Execution Profile control left-aligned; `Voice input` and `Send` (Engineering) / `Start planning` (Planning) right-aligned; all five controls visually inside the text-input box.
 10. The exact disclaimer `Konteks can make mistakes. Verify important information.` renders at page level outside the composer container, left-aligned in the footer.
 11. `Reviews waiting` renders as a pill with a round count badge, right-aligned in the page-level footer, and still opens the Konteks Learned 450px drawer on the Pending tab.
-12. The New Session page no longer renders an `Illustrative data` marker; the sidebar retains its `Illustrative data` marker, preserving global AC46 coverage.
+12. The New Session page no longer renders an `Illustrative data` marker, and per the user override the sidebar renders none either; visible AC46 coverage is carried by the Session History page-level notice and the Settings section notices.
 13. Mode semantics and arrow-key switching are preserved (Engineering default, radio-group semantics, Planning placeholder and `Start planning` copy).
 14. The setup selectors preserve their existing overlay behavior (`Choose system / repositories` in Engineering and `Choose system` in Planning open the same system+repositories modal; `Choose component` in Engineering opens the anchored component menu).
 15. The Execution Profile control preserves anchored-menu behavior (no backdrop, flat list, sidecar, workspace settings section, Manage/Customize entry).
@@ -149,7 +149,7 @@ The New Session page region keeps its landmark name (`aria-label="New session"`)
 
 Implementation-phase test plan (this task is documentation only and introduces no code):
 
-- **Unit/component (Vitest + Testing Library):** assert DOM order header → intro → composer (top row → input box) → footer; assert the header title/subtitle and the right-aligned approval indicator; assert the mode-specific intro heading/body (Engineering: `What would you like to build?` + its body; Planning: `Start planning` + its body) and the decorative image `alt`; assert the setup pills' initial placeholder strings (`Choose system / repositories`, `Choose component`) on a fresh New Session and their post-selection labels (selected system name / component name/count); assert left/right grouping within the top row and input toolbar via `compareDocumentPosition`; assert Planning removes only the Component pill, keeps a single `Choose system` pill (which opens the same system+repositories modal), and keeps the mode group; assert Execution Profile is inside the input box's left group and follows `Add text document`; assert `Reviews waiting` is a pill in the page-level footer and the disclaimer is outside the composer container; assert the page-level `Illustrative data` marker is gone while the sidebar marker remains; keep existing regressions for mode/arrow switching, send-disabled-on-empty, profile-menu dispatch, and reviews-drawer dispatch.
+- **Unit/component (Vitest + Testing Library):** assert DOM order header → intro → composer (top row → input box) → footer; assert the header title/subtitle and the right-aligned approval indicator; assert the mode-specific intro heading/body (Engineering: `What would you like to build?` + its body; Planning: `Start planning` + its body) and the decorative image `alt`; assert the setup pills' initial placeholder strings (`Choose system / repositories`, `Choose component`) on a fresh New Session and their post-selection labels (selected system name / component name/count); assert left/right grouping within the top row and input toolbar via `compareDocumentPosition`; assert Planning removes only the Component pill, keeps a single `Choose system` pill (which opens the same system+repositories modal), and keeps the mode group; assert Execution Profile is inside the input box's left group and follows `Add text document`; assert `Reviews waiting` is a pill in the page-level footer and the disclaimer is outside the composer container; assert the page-level `Illustrative data` marker is gone on New Session and the sidebar renders none either (Session History and Settings carry the remaining AC46 notices); keep existing regressions for mode/arrow switching, send-disabled-on-empty, profile-menu dispatch, and reviews-drawer dispatch.
 - **E2E (Playwright):** geometry assertions — header above the intro; intro bounding box above the composer; setup pill cluster left of the mode group on the same row; the five toolbar controls contained within the white input box's bounding box; disclaimer left of `Reviews waiting` in the footer below the container. Assert no horizontal overflow at both 1440×900 and 1200×720, and capture screenshots of the New Session page at both viewports.
 - **Responsive:** extend the source-string CSS assertions for the new header/intro/top-row/input-toolbar/footer rules (flex, `space-between`, wrap safety), plus the 1200×720 viewport checks.
 - **Accessibility:** axe wcag2aa zero violations; keyboard-only traversal (Tab order, Escape, arrow keys on the radiogroup); visible focus indicators.

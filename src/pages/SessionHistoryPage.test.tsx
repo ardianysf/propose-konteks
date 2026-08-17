@@ -373,12 +373,18 @@ describe('SessionHistoryPage — semantics and hygiene', () => {
     }
   })
 
-  it('renders the visible illustrative-data marker from the shared constant (AC46)', () => {
+  it('renders the visible illustrative-data marker from the shared constant — the only one in the shell (AC46)', () => {
     renderSessionHistoryPage()
     const notes = screen.getAllByTestId('illustrative-data-note')
     expect(notes).toHaveLength(1)
     expect(notes[0]).toHaveClass('kx-illustrative-note')
     expect(notes[0]).toHaveTextContent(ILLUSTRATIVE_DATA_NOTE)
+
+    // Full shell: after View all, the page marker is the only one — the
+    // sidebar carries none (its footer note was removed).
+    const shell = renderAppShell()
+    fireEvent.click(screen.getByRole('button', { name: /view all/i }))
+    expect(shell.container.querySelectorAll('[data-testid="illustrative-data-note"]')).toHaveLength(1)
   })
 
   it('performs no fetch — every row renders from SESSION_HISTORY data', () => {
@@ -397,7 +403,11 @@ describe('SessionHistoryPage — AppShell integration', () => {
   it('renders inside main on the session-history route with the same persistent sidebar node (outerHTML survives View all)', () => {
     const { container } = renderAppShell()
     const sidebar = container.querySelector('.kx-sidebar') as HTMLElement
-    const sidebarHtml = sidebar.outerHTML
+    // The only allowed DOM delta is the New session control's
+    // aria-current="page" route state — the sidebar never remounts.
+    const stripNavState = (html: string) =>
+      html.replace(' aria-current="page"', '').replace(' kx-sidebar__new-session--active', '')
+    const sidebarHtml = stripNavState(sidebar.outerHTML)
     const main = screen.getByRole('main')
 
     expect(within(main).queryByRole('region', { name: 'Session history' })).not.toBeInTheDocument()
@@ -409,7 +419,7 @@ describe('SessionHistoryPage — AppShell integration', () => {
 
     // The persistent sidebar keeps its exact node and outerHTML (AC11).
     expect(container.querySelector('.kx-sidebar')).toBe(sidebar)
-    expect(sidebar.outerHTML).toBe(sidebarHtml)
+    expect(stripNavState(sidebar.outerHTML)).toBe(sidebarHtml)
   })
 
   it('wires the session-history route through the App provider', () => {

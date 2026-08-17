@@ -19,6 +19,7 @@
   --kx-muted-text-aa: #607260; /* Enabled muted text/placeholders (≥4.5:1 on white/canvas/pale) */
   --kx-accent-text-aa: #4f7044; /* Enabled accent text + text-like glyphs (≥4.5:1) */
   --kx-accent-solid-aa: #4f7044; /* White-text solid backgrounds (≥4.5:1) */
+  --kx-accent-segment-aa: #95a547; /* Active segment fill — dark --kx-primary text is AA (≥4.5:1), white is not */
   --kx-border: #e2e9d5; /* Dividers, input borders, hairlines */
   --kx-pale: #f4f8ee; /* Hover fills, selected states, subtle washes */
   --kx-accent: #8fbf6a; /* Primary action accent, highlights */

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { goto } from './helpers'
 
 test.describe('component menu', () => {
-  test('opens anchored to the Component button with no modal or backdrop (AC30)', async ({ page }) => {
+  test('opens anchored above the Component button with no modal or backdrop (AC30)', async ({ page }) => {
     await goto(page)
     const trigger = page.getByTestId('component-trigger')
     await trigger.click()
@@ -11,9 +11,12 @@ test.describe('component menu', () => {
     await expect(menu).toBeVisible()
     await expect(page.locator('.kx-modal-backdrop')).toHaveCount(0)
 
+    // Above/left anchoring: flush with the trigger's left edge and the
+    // menu's bottom never reaches past the trigger's top.
     const triggerBox = await trigger.boundingBox()
     const menuBox = await menu.boundingBox()
     expect(Math.abs(menuBox!.x - triggerBox!.x)).toBeLessThan(2)
+    expect(menuBox!.y + menuBox!.height).toBeLessThanOrEqual(triggerBox!.y)
   })
 
   test('renders flat rows with name + repository and no component-type chip (AC31)', async ({ page }) => {

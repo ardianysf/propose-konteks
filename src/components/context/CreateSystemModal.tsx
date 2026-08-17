@@ -12,8 +12,21 @@
  * previous repository selection (AC33, reducer-proven) — then closes.
  * There is nothing to load: no network is involved, so no loading state
  * exists either.
+ *
+ * Nested source: when the repository selector's "Add new system"
+ * affordance opened this modal, AppShell keeps the selector mounted and
+ * suspended behind it. This dialog then renders on dedicated nested
+ * stacking classes (backdrop 60 / dialog 61 above the repository's
+ * 50/51), Close/Cancel/Escape return directly to the repository modal
+ * instead of dismissing the whole chain, Escape is intercepted so the
+ * OverlayLifecycle provider never fires its full dismissal, and a
+ * successful Create dispatches CREATE_SYSTEM then
+ * SET_SESSION_DRAFT_SYSTEM(new id) and reopens the repository modal —
+ * the session context is committed only when the user presses Done
+ * there. The SystemMenu source keeps the single-modal Create → dismiss
+ * behavior and never touches the session draft/context.
  */
-import { useId, useRef, useState } from 'react'
+import { useId, useLayoutEffect, useRef, useState } from 'react'
 import { useMockup } from '../../state/MockupContext'
 import { nextSystemId } from '../../state/mockupReducer'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
@@ -54,6 +67,7 @@ export default function CreateSystemModal() {
   // repository selector's session-context flow.
   const source =
     state.overlay.kind === 'create-system-modal' ? state.overlay.source : 'system-menu'
+  const nested = source === 'repository-modal'
 
   // Form state — name + optional description, all local: Create is the
   // only commit, and it goes through the pure reducer, never the network.
@@ -61,46 +75,90 @@ export default function CreateSystemModal() {
   const [description, setDescription] = useState('')
 
   // Shared focus containment owns initial focus, Tab trapping, and the
-  // focusin safety net (Task 13); Escape is owned by OverlayLifecycle.
+  // focusin safety net (Task 13); Escape is owned by OverlayLifecycle —
+  // except in the nested flow, which intercepts it below.
   useFocusContainment(dialogRef)
 
-  const close = () => dismissOverlay()
+  // Nested Escape interception: the bubbling document-level Escape
+  // listener in OverlayLifecycle would CLOSE_OVERLAY the entire chain;
+  // the nested modal instead returns to the repository modal. The
+  // listener sits on the dialog root, so any Escape originating inside
+  // this dialog (the realistic path — focus is contained here) is
+  // stopped before it can bubble to the provider's document listener.
+  const returnToRepository = () => {
+    dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'repository-modal' } })
+  }
+
+  useLayoutEffect(() => {
+    if (!nested) return
+    const root = dialogRef.current
+    if (!root) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      if (event.defaultPrevented || event.isComposing) return
+      event.preventDefault()
+      event.stopPropagation()
+      returnToRepository()
+    }
+    root.addEventListener('keydown', onKeyDown)
+    return () => root.removeEventListener('keydown', onKeyDown)
+    // dispatch is stable across renders (useReducer); `nested` is the
+    // only meaningful dependency.
+  }, [nested, dispatch])
+
+  // Cancel/Close: the nested flow returns to the repository modal —
+  // never a full-chain dismissal, never a commit. The SystemMenu flow
+  // dismisses through the shared lifecycle.
+  const close = () => {
+    if (nested) returnToRepository()
+    else dismissOverlay()
+  }
 
   const trimmedName = name.trim()
   const canCreate = trimmedName !== ''
 
   // CREATE_SYSTEM appends the system, makes it the active one, and
   // clears the previous repository selection (reducer-proven, AC33).
-  // The repository-sourced flow additionally confirms the new system as
-  // the committed session context with an empty repository scope; the
-  // SystemMenu flow never touches sessionContext. The overlay then closes.
+  // The repository-sourced flow then selects the new system in the
+  // session-context draft (empty repositories) and reopens the
+  // repository modal — the user commits by pressing Done there, so the
+  // session pill changes only after Done. The SystemMenu flow simply
+  // dismisses and never touches sessionContext.
   const create = () => {
     if (!canCreate) return
+    const newSystemId = nextSystemId(state.systems, trimmedName)
     dispatch({
       type: 'CREATE_SYSTEM',
       name: trimmedName,
       description: description.trim() || undefined,
     })
-    if (source === 'repository-modal') {
-      dispatch({
-        type: 'CONFIRM_SESSION_CONTEXT',
-        systemId: nextSystemId(state.systems, trimmedName),
-        repoIds: [],
-      })
+    if (nested) {
+      dispatch({ type: 'SET_SESSION_DRAFT_SYSTEM', systemId: newSystemId })
+      dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'repository-modal' } })
+    } else {
+      dismissOverlay()
     }
-    dismissOverlay()
   }
 
   return (
     <>
-      <div className="kx-modal-backdrop" aria-hidden="true" />
+      <div
+        aria-hidden="true"
+        className={
+          nested ? 'kx-modal-backdrop kx-modal-backdrop--nested' : 'kx-modal-backdrop'
+        }
+      />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="kx-modal kx-create-modal"
+        className={
+          nested
+            ? 'kx-modal kx-create-modal kx-create-modal--nested'
+            : 'kx-modal kx-create-modal'
+        }
       >
         <header className="kx-create-modal__head">
           <div className="kx-create-modal__head-copy">

@@ -7,6 +7,14 @@
  * content from mockData (AGENTS.md-style context files, the preserved
  * skills, and the repository registry). Purely presentational: no
  * backend, no network — every value is illustrative (AC46).
+ *
+ * Repositories follow the session scope: the rows are only the
+ * repositories selected for the session — the committed
+ * `sessionContext.repoIds` when a context is committed, otherwise the
+ * current global `selectedRepoIds`. With nothing selected the section
+ * shows the concise "No repositories selected" message instead of a
+ * fake list, and the count reflects the selected visible rows. The
+ * Files and Skills sections are unchanged by this contract.
  */
 import { useId } from 'react'
 import {
@@ -15,16 +23,24 @@ import {
   REPOSITORIES,
   SYSTEMS,
 } from '../../data/mockData'
-
-/** Representative repositories shown in the compact row. */
-const SHOWN_REPOSITORIES = REPOSITORIES.slice(0, 3)
+import { useMockup } from '../../state/MockupContext'
 
 export default function ContextTab() {
+  const { state } = useMockup()
   const filesHeadingId = useId()
   const skillsHeadingId = useId()
   const repositoriesHeadingId = useId()
 
   const enabledSkills = PRESERVED_SKILLS.filter((skill) => skill.enabled)
+
+  // The session's selected repositories: the committed session context
+  // wins when one exists; otherwise the current global selection. Only
+  // repositories present in the registry render — registry order keeps
+  // the rows deterministic, and unknown ids simply drop out.
+  const selectedRepoIds = state.sessionContext?.repoIds ?? state.selectedRepoIds
+  const selectedRepositories = REPOSITORIES.filter((repository) =>
+    selectedRepoIds.includes(repository.id),
+  )
 
   return (
     <section className="kx-customize-tab kx-customize-tab--context">
@@ -76,23 +92,24 @@ export default function ContextTab() {
             Repositories
           </h4>
           <p className="kx-context__count">
-            {REPOSITORIES.length} repositories · {SYSTEMS.length} systems
+            {selectedRepositories.length} repositories · {SYSTEMS.length} systems
           </p>
         </header>
         <ul className="kx-context__list">
-          {SHOWN_REPOSITORIES.map((repository) => (
-            <li key={repository.id} className="kx-context__item">
-              <span className="kx-context__item-name">{repository.name}</span>
-              <span className="kx-context__item-note">
-                {repository.vcs} · updated {repository.updatedAt}
-              </span>
+          {selectedRepositories.length === 0 ? (
+            <li className="kx-context__item kx-context__item--empty">
+              <span className="kx-context__item-note">No repositories selected</span>
             </li>
-          ))}
-          <li className="kx-context__item">
-            <span className="kx-context__item-note">
-              and {REPOSITORIES.length - SHOWN_REPOSITORIES.length} more
-            </span>
-          </li>
+          ) : (
+            selectedRepositories.map((repository) => (
+              <li key={repository.id} className="kx-context__item">
+                <span className="kx-context__item-name">{repository.name}</span>
+                <span className="kx-context__item-note">
+                  {repository.vcs} · updated {repository.updatedAt}
+                </span>
+              </li>
+            ))
+          )}
         </ul>
       </section>
     </section>

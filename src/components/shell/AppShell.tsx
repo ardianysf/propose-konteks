@@ -27,6 +27,11 @@ import { useMockup } from '../../state/MockupContext'
 export default function AppShell() {
   const { state, dispatch } = useMockup()
 
+  // The repository-sourced Create System modal nests above the still-
+  // mounted (suspended) repository selector instead of replacing it.
+  const repositorySuspended =
+    state.overlay.kind === 'create-system-modal' && state.overlay.source === 'repository-modal'
+
   return (
     <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
       <div className={state.sidebarCollapsed ? 'kx-app kx-app--rail' : 'kx-app'}>
@@ -44,10 +49,15 @@ export default function AppShell() {
             menus, the Task 7 context modals (repo selector, manual repo
             form, Create System), the Task 9 Customize shell, and the Task 10
             Konteks Learned drawer are the wired kinds. Later tasks add the
-            rest. */}
+            rest. One nesting exception: while the repository-sourced Create
+            System modal is open, the repository selector stays mounted and
+            suspended behind it, so cancel/escape/create can return to it
+            without losing its reducer-backed draft/search state. */}
         {state.overlay.kind === 'workspace-menu' && <WorkspaceMenu />}
         {state.overlay.kind === 'system-menu' && <SystemMenu />}
-        {state.overlay.kind === 'repository-modal' && <RepositorySelectorModal />}
+        {(state.overlay.kind === 'repository-modal' || repositorySuspended) && (
+          <RepositorySelectorModal suspended={repositorySuspended} />
+        )}
         {state.overlay.kind === 'manual-repo-modal' && <ManualRepositoryModal />}
         {state.overlay.kind === 'create-system-modal' && <CreateSystemModal />}
         {state.overlay.kind === 'customize' && <CustomizeModal />}

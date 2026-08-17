@@ -169,7 +169,7 @@ function ComponentIcon() {
 
 export default function Composer() {
   const { state, dispatch } = useMockup()
-  const { beginOverlayChain } = useOverlayLifecycle()
+  const { beginOverlayChain, dismissOverlay } = useOverlayLifecycle()
   const [value, setValue] = useState('')
   const planning = state.sessionMode === 'planning'
   const canSubmit = value.trim().length > 0
@@ -225,7 +225,7 @@ export default function Composer() {
 
           {!planning && (
             /* Anchor wrapper around the Component trigger — the menu floats
-               from here, under the trigger's left edge (AC30). */
+               from here, above the trigger and flush with its left edge (AC30). */
             <div className="kx-setup-row__component-anchor">
               <button
                 type="button"
@@ -234,6 +234,13 @@ export default function Composer() {
                 aria-expanded={state.overlay.kind === 'component-menu'}
                 data-testid="component-trigger"
                 onClick={(event) => {
+                  // Same-trigger toggle: a second click dismisses the menu
+                  // (restoring focus here through the lifecycle); any other
+                  // state opens or replaces the overlay.
+                  if (state.overlay.kind === 'component-menu') {
+                    dismissOverlay()
+                    return
+                  }
                   beginOverlayChain(event.currentTarget)
                   dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'component-menu' } })
                 }}
@@ -306,6 +313,13 @@ export default function Composer() {
                 aria-expanded={state.overlay.kind === 'execution-profile-menu'}
                 data-testid="execution-profile-trigger"
                 onClick={(event) => {
+                  // Same-trigger toggle: a second click dismisses the menu
+                  // (restoring focus here through the lifecycle); any other
+                  // state opens or replaces the overlay.
+                  if (state.overlay.kind === 'execution-profile-menu') {
+                    dismissOverlay()
+                    return
+                  }
                   beginOverlayChain(event.currentTarget)
                   dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'execution-profile-menu' } })
                 }}

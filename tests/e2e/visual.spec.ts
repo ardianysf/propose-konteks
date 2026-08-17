@@ -174,6 +174,40 @@ const VIEWS: CaptureView[] = [
     },
   },
   {
+    name: 'nested-create-system',
+    prepare: async (page, width, height) => {
+      await goto(page)
+      await openRepositoryModal(page)
+      await page
+        .getByRole('dialog', { name: 'Choose work repositories' })
+        .getByRole('button', { name: /Add new system/ })
+        .click()
+
+      // The repository-sourced Create System modal nests above the
+      // suspended selector — assert the stacked precondition before the
+      // capture: two frames, one accessible dialog, dedicated layers.
+      const create = page.locator('.kx-create-modal--nested')
+      await expect(create).toBeVisible()
+      const suspended = page.locator('.kx-repo-modal--suspended')
+      await expect(suspended).toHaveCount(1)
+      await expect(suspended).toHaveAttribute('aria-hidden', 'true')
+      await expect(page.getByRole('dialog')).toHaveCount(1)
+      const createZ = await create.evaluate((element) => Number(getComputedStyle(element).zIndex))
+      const suspendedZ = await suspended.evaluate((element) =>
+        Number(getComputedStyle(element).zIndex),
+      )
+      expect(createZ).toBeGreaterThan(suspendedZ)
+
+      // The top dialog stays fully inside the viewport on BOTH axes (AC44).
+      const box = await create.boundingBox()
+      expect(box, `nested create renders at ${width}x${height}`).not.toBeNull()
+      expect(box!.x).toBeGreaterThanOrEqual(0)
+      expect(box!.y).toBeGreaterThanOrEqual(0)
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width)
+      expect(box!.y + box!.height).toBeLessThanOrEqual(height)
+    },
+  },
+  {
     name: 'component-menu',
     prepare: async (page) => {
       await goto(page)

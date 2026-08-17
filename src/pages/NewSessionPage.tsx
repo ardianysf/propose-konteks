@@ -6,9 +6,9 @@
  * holding, in order: the centered mode-specific intro (decorative
  * empty-sessions image + h2 + body), the standalone right-aligned Reviews
  * waiting pill, the unified composer panel (setup pills + Session Mode +
- * nested input box), and the centered disclaimer. The previous combined
- * page-level external footer wrapper is gone; the sidebar keeps its own
- * Illustrative data marker.
+ * nested input box), and the centered disclaimer. No `Illustrative data`
+ * marker renders here or in the sidebar — Session History and the
+ * Settings notices carry the visible AC46 coverage.
  */
 import { PENDING_REVIEWS } from '../data/mockData'
 import Composer from '../components/composer/Composer'

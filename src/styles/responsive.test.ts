@@ -7,6 +7,7 @@ import { join } from 'node:path'
 // verified against the committed stylesheets directly.
 const components = readFileSync(join(process.cwd(), 'src/styles/components.css'), 'utf8')
 const global = readFileSync(join(process.cwd(), 'src/styles/global.css'), 'utf8')
+const tokens = readFileSync(join(process.cwd(), 'src/styles/tokens.css'), 'utf8')
 
 /** Collapse runs of whitespace so multi-line rules match as single strings. */
 const flat = (css: string) => css.replace(/\s+/g, ' ')
@@ -54,11 +55,14 @@ describe('responsive rail at max-width 1280px (AC12/AC44)', () => {
     )
   })
 
-  it('hides expanded-only labels, captions, recent content, user name, and chevrons', () => {
+  it('hides expanded-only labels, captions, recent content, user name, chevrons, and the New session label', () => {
     const block = flat(responsiveBlock())
     expect(block).toContain(
-      '.kx-sidebar__control-copy, .kx-sidebar__chevron, .kx-sidebar__recent, .kx-sidebar__user-name { display: none;',
+      '.kx-sidebar__control-copy, .kx-sidebar__chevron, .kx-sidebar__recent, .kx-sidebar__user-name, .kx-sidebar__new-session-label { display: none;',
     )
+    // The New session control itself stays visible and centered in the
+    // forced rail.
+    expect(block).toContain('.kx-sidebar__new-session { justify-content: center; gap: 0; padding: 8px 0;')
   })
 
   it('centers icon/control spacing like the manual rail', () => {
@@ -224,11 +228,14 @@ describe('New Session semantic layout (composer correction)', () => {
     )
   })
 
-  it('renders the active segment as primary background with white text', () => {
+  it('renders the active segment as the exact #95A547 fill with dark primary text', () => {
     const css = flat(components)
     expect(css).toContain(
-      '.kx-segmented__btn--active, .kx-segmented__btn--active:hover { background: var(--kx-primary); color: var(--kx-raised); }',
+      '.kx-segmented__btn--active, .kx-segmented__btn--active:hover { background: var(--kx-accent-segment-aa); color: var(--kx-primary); }',
     )
+    // The fill token resolves to the exact matcha value (white text would
+    // fail contrast, so the text flips to dark --kx-primary).
+    expect(tokens).toContain('--kx-accent-segment-aa: #95a547')
   })
 
   it('nests the textarea and input toolbar inside a raised input box', () => {
