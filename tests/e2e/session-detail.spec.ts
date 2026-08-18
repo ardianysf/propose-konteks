@@ -39,10 +39,12 @@ test.describe('session detail', () => {
     expect(geometry.top).toBe('0px')
     expect(geometry.width).toBeGreaterThan(800)
 
-    // Title, status badge, share affordance only.
+    // Title, context line, share affordance only — the status badge has moved
+    // out of the header to the sticky composer area.
     await expect(header.getByRole('heading', { level: 1 })).toContainText(
       'Investigate and fix the error when get list approval exception that list not showing',
     )
+    await expect(header.getByTestId('session-status')).toHaveCount(0)
     await expect(page.getByTestId('session-status')).toHaveText(/Waiting Approval/)
     await expect(page.getByTestId('share-session')).toHaveAccessibleName('Share session')
 
@@ -80,12 +82,14 @@ test.describe('session detail', () => {
     const composer = page.getByTestId('session-composer')
     await expect(composer).toBeVisible()
 
-    // The composer area (tracker + composer) is sticky with a bottom offset
-    // so it never sits flush against the edge.
+    // The composer area (tracker + composer) is sticky and pinned to the
+    // bottom edge; a solid canvas backdrop strip fills the gap below it so no
+    // scrolled content shows through, while the composer keeps its bottom
+    // breathing room inside that solid region.
     const composerArea = page.getByTestId('session-composer-area')
     await expect.poll(() => composerArea.evaluate((el) => getComputedStyle(el).position)).toBe('sticky')
     const bottomOffset = await composerArea.evaluate((el) => parseFloat(getComputedStyle(el).bottom))
-    expect(bottomOffset).toBeGreaterThan(0)
+    expect(bottomOffset).toBe(0)
 
     // Exactly the main-page input box/toolbar primitives.
     const inputBox = page.getByTestId('session-composer-input-box')

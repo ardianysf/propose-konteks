@@ -3,7 +3,7 @@
  *
  * jsdom does not apply real CSS, so these are source-string assertions
  * against the committed stylesheets (same convention as responsive.test.ts).
- * The file embeds the complete 136-consumer inventory — 78 muted-token
+ * The file embeds the complete 137-consumer inventory — 79 muted-token
  * consumers and 58 accent-strong consumers — and proves three things:
  *
  *   1. The three AA semantics are defined in tokens.css and every candidate
@@ -51,7 +51,7 @@ function contrast(a: string, b: string): number {
 }
 
 // ---------------------------------------------------------------------------
-// Complete 136-consumer inventory.
+// Complete 137-consumer inventory.
 // cls: M = enabled muted text/placeholder, A = enabled accent text/glyph,
 //      S = white-text solid background, U = unchanged (decorative/disabled).
 // token is the ORIGINAL token each consumer started from.
@@ -82,6 +82,7 @@ const mutedM = [
   '.kx-composer__input::placeholder',
   '.kx-new-session__disclaimer',
   '.kx-badge--cancelled',
+  '.kx-session-detail__context',
   '.kx-session-detail__meta',
   '.kx-session-timeline__event-text',
   '.kx-session-timeline__card-meta',
@@ -344,14 +345,14 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = [...extractUsages(components, COMPONENTS), ...extractUsages(global, GLOBAL)]
 
-  it('covers exactly 136 consumers — 78 muted and 58 accent-strong', () => {
-    expect(inventory).toHaveLength(136)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(78)
+  it('covers exactly 137 consumers — 79 muted and 58 accent-strong', () => {
+    expect(inventory).toHaveLength(137)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(79)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(58)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(74)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(75)
     expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(32)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(4)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(26)
