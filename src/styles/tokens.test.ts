@@ -24,7 +24,7 @@ it.each(palette)('tokens.css defines %s', (hex) =>
   expect(css.toUpperCase()).toContain(hex.toUpperCase()),
 )
 
-it.each([24, 20, 18, 16, 13, 12, 11, 10])('type scale defines %spx', (px) =>
+it.each([19, 16, 14, 13, 10, 9, 8])('type scale defines %spx', (px) =>
   expect(css).toContain(`${px}px`),
 )
 
