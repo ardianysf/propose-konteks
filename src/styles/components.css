@@ -4516,8 +4516,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding-top: 12px;
-  border-top: 1px solid var(--kx-border);
   margin: 0;
   font-size: var(--kx-text-sm);
   color: var(--kx-muted-text-aa);
@@ -4541,72 +4539,66 @@
   /* Content arrives in part 2 */
 }
 
-/* ── Session Tracker — compact active stage + completed chips ───── */
+/* ── Session Tracker — minimal current-stage summary ──────────────
+ * Kicker text + a slightly larger active-stage pill; nothing else. */
 .kx-session-detail__tracker {
   display: grid;
-  gap: 10px;
-  padding: 14px 0;
-  border-top: 1px solid var(--kx-border);
-  border-bottom: 1px solid var(--kx-border);
+  padding: 4px 0;
 }
 
 .kx-session-detail__tracker-current {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-}
-
-.kx-session-detail__stage-icon {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  flex-shrink: 0;
-  color: var(--kx-secondary);
-}
-
-.kx-session-detail__stage-icon--active {
-  color: var(--kx-accent-text-aa);
+  gap: 6px 12px;
 }
 
 .kx-session-detail__tracker-kicker {
-  display: block;
-  font-size: var(--kx-text-2xs);
+  font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-medium);
   color: var(--kx-muted-text-aa);
 }
 
-.kx-session-detail__tracker-title {
-  display: block;
-  font-size: var(--kx-text-md);
-  color: var(--kx-primary);
-}
-
-.kx-session-detail__stage-status {
-  display: block;
-  font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-session-detail__completed {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.kx-session-detail__completed-chip {
+/* Current-stage pill — the single active-state emphasis on this page:
+ * solid AA accent fill at button scale (16px bold, generous padding, slight
+ * letter-spacing) with a lifted two-layer shadow and an inset light ring, so
+ * the current stage reads as the one prominent element among the quiet pale
+ * chips around it. */
+.kx-session-detail__stage-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 8px;
-  background: var(--kx-pale);
-  border: 1px solid var(--kx-border);
+  gap: 8px;
+  padding: 8px 18px;
+  background: var(--kx-accent-solid-aa);
   border-radius: 999px;
-  font-size: var(--kx-text-xs);
-  color: var(--kx-primary);
+  box-shadow:
+    0 2px 6px rgba(36, 48, 37, 0.22),
+    0 8px 20px rgba(79, 112, 68, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  color: var(--kx-raised);
 }
 
-.kx-session-detail__completed-chip svg {
+/* Count badge nested in the current-stage pill — a small raised disc with
+ * accent text so the actionable-item count reads as part of the same
+ * emphasized pill treatment without competing with it. */
+.kx-session-detail__stage-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  background: var(--kx-raised);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(36, 48, 37, 0.25);
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: normal;
+  line-height: 1;
   color: var(--kx-accent-text-aa);
 }
 
@@ -4616,7 +4608,7 @@
  * single .kx-session-detail__meta rule above; never re-declared). */
 
 /* ── Responsive: narrow viewport ≤760px ───────────────────────────
- * Header wraps; the tracker keeps its compact single-current-stage summary. */
+ * Header wraps; the tracker keeps its minimal single-current-stage summary. */
 @media (max-width: 760px) {
   /* Header keeps its own compact padding — it is independent from both the
      full-width page (no horizontal page padding) and the sticky composer. */
@@ -4624,10 +4616,6 @@
     padding: 12px 16px;
     flex-wrap: wrap;
     row-gap: 8px;
-  }
-
-  .kx-session-detail__stage-status {
-    max-width: none;
   }
 }
 
@@ -4942,57 +4930,92 @@
 }
 
 /* ── Quote Approval Card (Task 13 Part 2) ────────────────────────
- * Decision card above timeline when quote is pending approval. */
+ * Decision card above timeline when quote is pending approval.
+ * Collapsed state is a single quiet header row; expanding reveals the
+ * quote details and the smaller decision actions. */
+/* Quote approval card — quiet raised surface with a soft lift so the
+ * pending decision reads clearly without competing with the stage pill. */
 .kx-quote-approval-card {
   display: grid;
-  gap: 14px;
-  padding: 16px;
+  gap: 12px;
+  padding: 12px 14px;
   background: var(--kx-raised);
-  border: 1px solid var(--kx-accent);
+  border: 1px solid var(--kx-border);
   border-radius: 14px;
-  box-shadow: 0 4px 16px rgba(79, 112, 68, 0.16);
+  box-shadow: 0 2px 8px rgba(36, 48, 37, 0.06);
 }
 
-.kx-quote-approval-card__head {
-  border-bottom: 1px solid var(--kx-border);
-  padding-bottom: 10px;
+.kx-quote-approval-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.kx-quote-approval-card__header:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 3px;
 }
 
 .kx-quote-approval-card__title {
   margin: 0;
-  font-size: var(--kx-text-l);
+  font-size: var(--kx-text-md);
   font-weight: var(--kx-font-bold);
   color: var(--kx-primary);
 }
 
+.kx-quote-approval-card__quote-ref {
+  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-quote-approval-card__chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--kx-muted-text-aa);
+  transition: transform 0.15s ease;
+}
+
+.kx-quote-approval-card__chevron.is-expanded {
+  transform: rotate(180deg);
+}
+
 .kx-quote-approval-card__body {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .kx-quote-approval-card__quote-info {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .kx-quote-approval-card__quote-id {
   font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-bold);
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-medium);
   color: var(--kx-accent-text-aa);
 }
 
 .kx-quote-approval-card__scope {
   margin: 0;
-  font-size: var(--kx-text-md);
+  font-size: var(--kx-text-sm);
   color: var(--kx-primary);
   line-height: 1.4;
 }
 
 .kx-quote-approval-card__estimates {
   display: grid;
-  gap: 4px;
-  padding: 10px;
+  gap: 2px;
+  padding: 8px 10px;
   background: var(--kx-pale);
   border-radius: 10px;
 }
@@ -5014,33 +5037,41 @@
 .kx-quote-approval-card__actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
-  padding-top: 4px;
+}
+
+/* Smaller, less dominant decision actions. */
+.kx-quote-approval-card__action {
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
 }
 
 .kx-quote-approval-card__note {
   margin: 0;
   font-size: var(--kx-text-xs);
   color: var(--kx-muted-text-aa);
-  text-align: center;
 }
 
 /* ── Session Detail Composer (Task 13 Part 2) ─────────────────────
  * Sticky bottom message composer with textarea and toolbar. */
 /* Detail composer — sticky at the timeline bottom, but no outer card.
- * Only the exact main-page input box is visible. */
+ * Only the exact main-page input box is visible. Bottom offset keeps the
+ * box from sitting flush against the viewport edge. Negative inset + equal
+ * padding paint a solid canvas backdrop under and slightly around the
+ * composer, so scrolling content never shows through the bottom gap. */
 .kx-session-composer {
   position: sticky;
   bottom: 0;
   z-index: 10;
-  margin-top: 24px;
-  padding-top: 16px;
+  margin: 24px -16px 0;
+  padding: 12px 16px 16px;
   background: var(--kx-canvas);
 }
 
 .kx-session-composer--locked {
-  padding: 14px 16px;
-  background: var(--kx-pale);
   border: 1px solid var(--kx-border);
   border-radius: 14px;
   text-align: center;
@@ -5050,6 +5081,14 @@
   font-size: var(--kx-text-sm);
   color: var(--kx-muted-text-aa);
   font-style: italic;
+}
+
+/* Keep the composer's tool cluster (attachments, voice, send) pinned to the
+ * right edge of the input box so it stays visually grouped with the
+ * composer's right edge even when the toolbar wraps. */
+.kx-session-composer .kx-panel__toolbar-right {
+  margin-left: auto;
+  justify-content: flex-end;
 }
 
 /* ── Responsive: narrow viewport ≤760px ───────────────────────────
@@ -5073,17 +5112,14 @@
   }
 
   .kx-quote-approval-card {
-    padding: 14px;
-  }
-
-  .kx-quote-approval-card__title {
-    font-size: var(--kx-text-md);
+    padding: 10px 12px;
   }
 
   .kx-session-composer {
     position: sticky;
     bottom: 0;
-    margin-top: 16px;
+    margin: 16px -12px 0;
+    padding: 12px 12px 12px;
   }
 
   .kx-composer__input {

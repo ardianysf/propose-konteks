@@ -1,5 +1,6 @@
 import { useEffect, useReducer } from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import SessionDetailPage from './SessionDetailPage'
 import { MockupContext, useMockup } from '../state/MockupContext'
@@ -116,26 +117,46 @@ describe('SessionHeader — sticky title, status, and share', () => {
 })
 
 // ---------------------------------------------------------------------------
-// SessionTracker — compact active stage + completed chips
+// SessionTracker — minimal current-stage summary
 // ---------------------------------------------------------------------------
 
-describe('SessionTracker — compact workflow summary', () => {
-  it('renders the current active stage with cycle context', () => {
+describe('SessionTracker — minimal current-stage summary', () => {
+  it('renders the cycle context and the active stage pill only', () => {
     renderSessionDetailPage()
     const tracker = screen.getByTestId('session-tracker')
     expect(tracker).toHaveTextContent('Current stage · Cycle 2 of 3')
-    expect(tracker).toHaveTextContent('Quote')
-    expect(tracker).toHaveTextContent('Awaiting approval')
-    expect(tracker.querySelector('svg[data-icon="spinner"]')).not.toBeNull()
+
+    // Active stage pill exposes the stage label and its status.
+    const pill = tracker.querySelector('.kx-session-detail__stage-pill')
+    expect(pill).not.toBeNull()
+    expect(pill).toHaveTextContent('Quote')
+    expect(pill).toHaveTextContent('Awaiting approval')
+
+    // No extra visual noise: no icons, no completed-stage chips.
+    expect(tracker.querySelector('svg')).toBeNull()
+    expect(tracker.querySelectorAll('.kx-session-detail__completed-chip')).toHaveLength(0)
   })
 
-  it('renders only completed stages as compact chips below the active stage', () => {
-    const { container } = renderSessionDetailPage()
-    const chips = container.querySelectorAll('.kx-session-detail__completed-chip')
-    expect(chips).toHaveLength(1)
-    expect(chips[0]).toHaveTextContent('Ideation')
-    expect(chips[0].querySelector('svg[data-icon="check-circle-filled"]')).not.toBeNull()
-    expect(container.querySelectorAll('.kx-session-detail__tracker-item')).toHaveLength(0)
+  it('shows a badge on the Quote pill counting quotes still pending approval', () => {
+    renderSessionDetailPage()
+    const pill = screen.getByTestId('session-tracker').querySelector('.kx-session-detail__stage-pill')
+    const badge = pill?.querySelector('.kx-session-detail__stage-pill-badge')
+    // One quote (Q-102) is PENDING_APPROVAL in the illustrative dataset.
+    expect(badge).not.toBeNull()
+    expect(badge).toHaveTextContent('1')
+    expect(badge).toHaveAccessibleName('1 to action')
+  })
+
+  it('drops the badge once the pending quote is approved', () => {
+    const { bucket } = renderSessionDetailPage()
+    expect(bucket.current?.sessionDetail.quotes.filter((q) => q.status === 'PENDING_APPROVAL')).toHaveLength(1)
+
+    // Approve the pending quote through the quote card action.
+    fireEvent.click(screen.getByTestId('quote-approval-toggle'))
+    fireEvent.click(screen.getByRole('button', { name: /Approve quote Q-102/ }))
+
+    const badge = screen.getByTestId('session-tracker').querySelector('.kx-session-detail__stage-pill-badge')
+    expect(badge).toBeNull()
   })
 })
 
@@ -311,6 +332,12 @@ describe('SessionQuoteCard — quote approval card', () => {
     renderSessionDetailPage()
     const quoteCard = screen.getByTestId('quote-approval-card')
 
+    // Collapsed by default: expand through the keyboard-accessible toggle.
+    const toggle = screen.getByTestId('quote-approval-toggle')
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+
     const buttons = quoteCard.querySelectorAll('button')
     expect(buttons.length).toBeGreaterThanOrEqual(3)
 
@@ -322,6 +349,44 @@ describe('SessionQuoteCard — quote approval card', () => {
 
     // Request revision button has refresh icon
     expect(quoteCard.querySelector('svg[data-icon="refresh"]')).not.toBeNull()
+  })
+
+  it('keeps aria-controls off the toggle while the body is unmounted, adds it when expanded', () => {
+    renderSessionDetailPage()
+    const toggle = screen.getByTestId('quote-approval-toggle')
+
+    // Collapsed: body is unmounted, so aria-controls must not point at a
+    // non-existent element.
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle).not.toHaveAttribute('aria-controls')
+    expect(document.getElementById('kx-quote-approval-body')).toBeNull()
+
+    // Expanded: body mounts and aria-controls references it.
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(toggle).toHaveAttribute('aria-controls', 'kx-quote-approval-body')
+    expect(document.getElementById('kx-quote-approval-body')).not.toBeNull()
+
+    // Collapsing again returns to the clean no-target state.
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle).not.toHaveAttribute('aria-controls')
+    expect(document.getElementById('kx-quote-approval-body')).toBeNull()
+  })
+
+  it('toggles expanded state via keyboard (Enter and Space)', async () => {
+    const user = userEvent.setup()
+    renderSessionDetailPage()
+    const toggle = screen.getByTestId('quote-approval-toggle')
+    toggle.focus()
+
+    // Enter on the focused button triggers native keyboard activation (click).
+    await user.keyboard('{Enter}')
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+
+    // Space on the focused button activates it again, collapsing the body.
+    await user.keyboard(' ')
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
   })
 
   it('approve updates status to DELIVERING and hides card', () => {
@@ -346,6 +411,9 @@ describe('SessionQuoteCard — quote approval card', () => {
 
     // Initially card is visible
     expect(screen.getByTestId('quote-approval-card')).toBeInTheDocument()
+
+    // Expand the card to reveal the actions
+    fireEvent.click(screen.getByTestId('quote-approval-toggle'))
 
     // Find and click approve button (first button with check icon)
     const checkIconBtn = container.querySelector('svg[data-icon="check"]')?.closest('button')
@@ -387,6 +455,9 @@ describe('SessionQuoteCard — quote approval card', () => {
     // Initially card is visible
     expect(screen.getByTestId('quote-approval-card')).toBeInTheDocument()
 
+    // Expand the card to reveal the actions
+    fireEvent.click(screen.getByTestId('quote-approval-toggle'))
+
     // Find and click reject button (button with x icon)
     const xIconBtn = container.querySelector('svg[data-icon="x"]')?.closest('button')
     expect(xIconBtn).not.toBeNull()
@@ -422,6 +493,9 @@ describe('SessionQuoteCard — quote approval card', () => {
     }
 
     const { container } = render(<Harness />)
+
+    // Expand the card to reveal the actions
+    fireEvent.click(screen.getByTestId('quote-approval-toggle'))
 
     // Find and click request revision button (button with refresh icon)
     const refreshIconBtn = container.querySelector('svg[data-icon="refresh"]')?.closest('button')
