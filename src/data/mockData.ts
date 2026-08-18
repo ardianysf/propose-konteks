@@ -9,6 +9,96 @@ export const ILLUSTRATIVE_DATA_NOTE = 'Illustrative data'
 export type SessionMode = 'engineering' | 'planning'
 export type Readiness = 'ready' | 'needs-setup'
 
+// Session Detail types
+export type SessionDetailStatus =
+  | 'IN_PROGRESS'
+  | 'WAITING_APPROVAL'
+  | 'APPROVED'
+  | 'DELIVERING'
+  | 'PARTIALLY_COMPLETED'
+  | 'COMPLETED'
+  | 'BLOCKED'
+  | 'CANCELLED'
+
+export type DetailStageId = 'ideation' | 'quote' | 'plan' | 'delivery' | 'receipt' | 'lessons'
+
+export type StageStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'BLOCKED' | 'SKIPPED' | 'FAILED'
+
+export type DetailTimelineType =
+  | 'USER_MESSAGE'
+  | 'ASSISTANT_MESSAGE'
+  | 'SYSTEM_EVENT'
+  | 'QUOTE'
+  | 'APPROVAL'
+  | 'DELIVERY'
+  | 'ERROR'
+  | 'ARTIFACT'
+
+export interface SessionQuote {
+  id: string
+  version: number
+  estimatedStoryPoints: number
+  maxStoryPoints?: number
+  status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'SUPERSEDED'
+  createdAt: string
+  expiresAt?: string
+  approvedBy?: string
+  approvedAt?: string
+  rejectionReason?: string
+}
+
+export interface SessionArtifact {
+  type: 'PR' | 'COMMIT' | 'DOCUMENT' | 'TEST_REPORT' | 'RECEIPT' | 'LINK'
+  label: string
+  url: string
+}
+
+export interface DeliveryInfo {
+  id: string
+  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'PARTIALLY_COMPLETE' | 'COMPLETED' | 'FAILED'
+  deliveredStoryPoints?: number
+  progressPercentage?: number
+  summary?: string
+  knownLimitations?: string
+  artifacts: SessionArtifact[]
+}
+
+export interface DetailTimelineItem {
+  id: string
+  type: DetailTimelineType
+  content: string
+  actorType: 'USER' | 'ASSISTANT' | 'SYSTEM'
+  createdAt: string
+  quoteId?: string
+  deliveryId?: string
+  artifact?: SessionArtifact
+}
+
+export interface SessionStage {
+  id: DetailStageId
+  label: string
+  status: StageStatus
+}
+
+export interface SessionDetailData {
+  sessionId: string
+  title: string
+  status: SessionDetailStatus
+  repository: string
+  branch: string
+  issueRef: string
+  agent: string
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+  currentCycle: number
+  totalCycles: number
+  stages: SessionStage[]
+  quotes: SessionQuote[]
+  delivery: DeliveryInfo
+  timeline: DetailTimelineItem[]
+}
+
 export interface VcsConnector {
   id: string
   name: string
@@ -694,3 +784,188 @@ export const mockData: MockData = {
 
 export const DEFAULT_ACTIVE_SYSTEM_ID = 'bsi-hris'
 export const DEFAULT_ACTIVE_PROFILE_ID = 'profile-default'
+
+// ---------------------------------------------------------------------------
+// Session Detail — illustrative dataset for a multi-cycle session (AC46)
+// ---------------------------------------------------------------------------
+
+export const SESSION_DETAIL: SessionDetailData = {
+  sessionId: 'SES-2026-0042',
+  title: 'Investigate and fix the error when get list approval exception that list not showing',
+  status: 'WAITING_APPROVAL',
+  repository: 'bsi/hris-approval-service',
+  branch: 'fix/approval-list-exception',
+  issueRef: '#318',
+  agent: 'Konteks Engineering Agent',
+  createdBy: 'Refactory Admin',
+  createdAt: '2026-08-15T09:12:00Z',
+  updatedAt: '2026-08-16T14:40:00Z',
+  currentCycle: 2,
+  totalCycles: 3,
+  stages: [
+    { id: 'ideation', label: 'Ideation', status: 'COMPLETED' },
+    { id: 'quote', label: 'Quote', status: 'IN_PROGRESS' },
+    { id: 'plan', label: 'Plan', status: 'NOT_STARTED' },
+    { id: 'delivery', label: 'Delivery', status: 'NOT_STARTED' },
+    { id: 'receipt', label: 'Receipt', status: 'NOT_STARTED' },
+    { id: 'lessons', label: 'Lessons', status: 'NOT_STARTED' },
+  ],
+  quotes: [
+    {
+      id: 'Q-101',
+      version: 1,
+      estimatedStoryPoints: 5,
+      maxStoryPoints: 8,
+      status: 'APPROVED',
+      createdAt: '2026-08-15T09:15:00Z',
+      approvedBy: 'Refactory Admin',
+      approvedAt: '2026-08-15T09:20:00Z',
+    },
+    {
+      id: 'Q-102',
+      version: 2,
+      estimatedStoryPoints: 6,
+      maxStoryPoints: 9,
+      status: 'PENDING_APPROVAL',
+      createdAt: '2026-08-16T14:35:00Z',
+      expiresAt: '2026-08-17T14:40:00Z',
+    },
+  ],
+  delivery: {
+    id: 'D-057',
+    status: 'COMPLETED',
+    deliveredStoryPoints: 5,
+    progressPercentage: 100,
+    summary:
+      'Cycle 1 delivery completed: ApprovalListQuery null-safety fix with paginated edge case handling deferred.',
+    knownLimitations:
+      'Pagination edge case when navigating past an empty result set is deferred to Cycle 2.',
+    artifacts: [
+      { type: 'PR', label: 'PR #142', url: '#pr-142' },
+      { type: 'COMMIT', label: 'commit 9f3c2ab', url: '#commit-9f3c2ab' },
+      { type: 'TEST_REPORT', label: 'Test Report', url: '#test-report-142' },
+      { type: 'RECEIPT', label: 'Receipt R-0057', url: '#receipt-0057' },
+    ],
+  },
+  timeline: [
+    {
+      id: 'T-001',
+      type: 'USER_MESSAGE',
+      content: 'Investigate and fix the error when get list approval exception that list not showing',
+      actorType: 'USER',
+      createdAt: '2026-08-15T09:12:00Z',
+    },
+    {
+      id: 'T-002',
+      type: 'ARTIFACT',
+      content: 'Attached error log file',
+      actorType: 'USER',
+      createdAt: '2026-08-15T09:12:30Z',
+      artifact: { type: 'DOCUMENT', label: 'logs-approval-exception.txt', url: '#log-approval-exception' },
+    },
+    {
+      id: 'T-003',
+      type: 'ASSISTANT_MESSAGE',
+      content: 'Acknowledged. Investigating the approval list exception in bsi/hris-approval-service repository.',
+      actorType: 'ASSISTANT',
+      createdAt: '2026-08-15T09:13:00Z',
+    },
+    {
+      id: 'T-004',
+      type: 'SYSTEM_EVENT',
+      content: 'Session created — status: In Progress',
+      actorType: 'SYSTEM',
+      createdAt: '2026-08-15T09:13:00Z',
+    },
+    {
+      id: 'T-005',
+      type: 'ASSISTANT_MESSAGE',
+      content:
+        'Investigation findings: ApprovalListQuery throws NPE when paginating past an empty result set. Root cause in ApprovalListMapper line 142 where safe navigation operator is missing.',
+      actorType: 'ASSISTANT',
+      createdAt: '2026-08-15T09:25:00Z',
+    },
+    {
+      id: 'T-006',
+      type: 'ERROR',
+      content: 'Transient test-runner timeout during integration test suite. Retrying...',
+      actorType: 'SYSTEM',
+      createdAt: '2026-08-15T10:15:00Z',
+    },
+    {
+      id: 'T-007',
+      type: 'ASSISTANT_MESSAGE',
+      content: 'Test suite passed on retry. All 127 integration tests green.',
+      actorType: 'ASSISTANT',
+      createdAt: '2026-08-15T10:17:00Z',
+    },
+    {
+      id: 'T-008',
+      type: 'QUOTE',
+      content: 'Quote Q-101 v1: 5 story points (max 8) for ApprovalListQuery NPE fix.',
+      actorType: 'ASSISTANT',
+      createdAt: '2026-08-15T09:15:00Z',
+      quoteId: 'Q-101',
+    },
+    {
+      id: 'T-009',
+      type: 'APPROVAL',
+      content: 'Quote Q-101 approved by Refactory Admin',
+      actorType: 'USER',
+      createdAt: '2026-08-15T09:20:00Z',
+      quoteId: 'Q-101',
+    },
+    {
+      id: 'T-010',
+      type: 'SYSTEM_EVENT',
+      content: 'Delivery started',
+      actorType: 'SYSTEM',
+      createdAt: '2026-08-15T09:20:00Z',
+    },
+    {
+      id: 'T-011',
+      type: 'ASSISTANT_MESSAGE',
+      content: 'Implementing fix: adding null-safety checks to ApprovalListMapper and updating pagination logic.',
+      actorType: 'ASSISTANT',
+      createdAt: '2026-08-15T10:30:00Z',
+    },
+    {
+      id: 'T-012',
+      type: 'DELIVERY',
+      content: 'Cycle 1 completed: PR #142, commit 9f3c2ab, test report passed, receipt R-0057. Delivered 5 of 5 story points.',
+      actorType: 'ASSISTANT',
+      createdAt: '2026-08-15T14:00:00Z',
+      deliveryId: 'D-057',
+    },
+    {
+      id: 'T-013',
+      type: 'SYSTEM_EVENT',
+      content: 'Cycle 1 completed — 5 of 5 story points delivered',
+      actorType: 'SYSTEM',
+      createdAt: '2026-08-15T14:00:00Z',
+    },
+    {
+      id: 'T-014',
+      type: 'ASSISTANT_MESSAGE',
+      content:
+        'Cycle 1 delivered the core NPE fix. I recommend a follow-up cycle to address the pagination edge case (navigating past empty result sets) which was deferred to keep scope bounded. This would add ~6 story points.',
+      actorType: 'ASSISTANT',
+      createdAt: '2026-08-16T14:30:00Z',
+    },
+    {
+      id: 'T-015',
+      type: 'QUOTE',
+      content: 'Quote Q-102 v2: 6 story points (max 9) for pagination edge case fix.',
+      actorType: 'ASSISTANT',
+      createdAt: '2026-08-16T14:35:00Z',
+      quoteId: 'Q-102',
+    },
+    {
+      id: 'T-016',
+      type: 'SYSTEM_EVENT',
+      content: 'Status changed to Waiting Approval — quote Q-102 awaiting your response',
+      actorType: 'SYSTEM',
+      createdAt: '2026-08-16T14:40:00Z',
+    },
+  ],
+}

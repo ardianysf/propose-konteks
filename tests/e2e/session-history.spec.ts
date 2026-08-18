@@ -77,4 +77,31 @@ test.describe('session history', () => {
     await expect(page.getByTestId('history-empty')).toBeVisible()
     await expect(page.getByText('No sessions yet')).toBeVisible()
   })
+
+  test('row click navigates to session detail page; sidebar View all returns to history', async ({ page }) => {
+    await goto(page)
+    await page.getByRole('button', { name: 'View all' }).click()
+
+    // Click first history row
+    const firstRow = page.getByTestId('history-row').first()
+    await firstRow.click()
+
+    // Verify session detail page is visible
+    await expect(page.getByTestId('session-detail')).toBeVisible()
+
+    // Verify exact title
+    await expect(page.getByTestId('session-detail')).toContainText('Investigate and fix the error when get list approval exception that list not showing')
+
+    // Verify status badge shows 'Waiting Approval'
+    await expect(page.getByTestId('session-status')).toHaveText(/Waiting Approval/)
+
+    // The Session Detail layout has no Back to sessions control by design;
+    // the deterministic path back is the sidebar View all control.
+    await expect(page.getByTestId('back-to-sessions')).toHaveCount(0)
+    await page.getByRole('button', { name: 'View all' }).click()
+
+    // Verify back on session history
+    await expect(page.getByRole('region', { name: 'Session history' })).toBeVisible()
+    await expect(page.getByRole('list', { name: 'Session history' })).toBeVisible()
+  })
 })

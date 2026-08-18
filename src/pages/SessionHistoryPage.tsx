@@ -13,6 +13,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ILLUSTRATIVE_DATA_NOTE, SESSION_HISTORY, type SessionMode } from '../data/mockData'
 import { useMockup } from '../state/MockupContext'
+import type { MockupAction } from '../state/mockupReducer'
 
 const MODE_LABELS: Record<SessionMode, string> = {
   engineering: 'Engineering',
@@ -42,7 +43,7 @@ function MoreIcon() {
 }
 
 export default function SessionHistoryPage() {
-  const { state } = useMockup()
+  const { state, dispatch } = useMockup()
   const [query, setQuery] = useState('')
   const [modeFilter, setModeFilter] = useState<ModeFilter>('all')
   const [systemFilter, setSystemFilter] = useState('all')
@@ -184,13 +185,22 @@ export default function SessionHistoryPage() {
               const open = openMenuId === entry.id
               return (
                 <li key={entry.id} className="kx-history__row" data-testid={`history-row-${entry.id}`}>
-                  <div className="kx-history__row-main">
-                    <span className="kx-history__row-title">{entry.title}</span>
-                    <span className="kx-history__row-meta">
-                      {MODE_LABELS[entry.mode]} · {system ? system.name : entry.systemId} · {entry.componentName}
-                    </span>
-                  </div>
-                  <span className="kx-history__row-time">{entry.time}</span>
+                  <button
+                    type="button"
+                    className="kx-history__row-button"
+                    data-testid="history-row"
+                    onClick={() => {
+                      dispatch({ type: 'NAVIGATE', route: 'session-detail' } as MockupAction)
+                    }}
+                  >
+                    <div className="kx-history__row-main">
+                      <span className="kx-history__row-title">{entry.title}</span>
+                      <span className="kx-history__row-meta">
+                        {MODE_LABELS[entry.mode]} · {system ? system.name : entry.systemId} · {entry.componentName}
+                      </span>
+                    </div>
+                    <span className="kx-history__row-time">{entry.time}</span>
+                  </button>
                   <div className="kx-history__row-actions">
                     <button
                       ref={(element) => {
@@ -201,7 +211,10 @@ export default function SessionHistoryPage() {
                       aria-haspopup="menu"
                       aria-expanded={open}
                       aria-label={`Actions for ${entry.title}`}
-                      onClick={() => setOpenMenuId(open ? null : entry.id)}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        setOpenMenuId(open ? null : entry.id)
+                      }}
                     >
                       <MoreIcon />
                     </button>

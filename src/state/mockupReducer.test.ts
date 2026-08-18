@@ -12,6 +12,7 @@ import {
 import {
   ILLUSTRATIVE_DATA_NOTE,
   mockData,
+  SESSION_DETAIL,
   SYSTEMS,
   REPOSITORIES,
   EXECUTION_PROFILES,
@@ -201,6 +202,12 @@ describe('NAVIGATE', () => {
     state = mockupReducer(state, { type: 'NAVIGATE', route: 'new-session' })
     expect(state.route).toBe('new-session')
   })
+
+  it('navigates to session-detail route', () => {
+    let state = freshState()
+    state = mockupReducer(state, { type: 'NAVIGATE', route: 'session-detail' })
+    expect(state.route).toBe('session-detail')
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -336,6 +343,28 @@ describe('session context initial state', () => {
     const state = freshState()
     expect(state.sessionContext).toBeNull()
     expect(state.sessionContextDraft).toBeNull()
+  })
+
+  it('initializes sessionDetail from SESSION_DETAIL via deep clone', () => {
+    const state = freshState()
+    expect(state.sessionDetail).toEqual(SESSION_DETAIL)
+    expect(state.sessionDetail).not.toBe(SESSION_DETAIL)
+    expect(state.sessionDetail.quotes).not.toBe(SESSION_DETAIL.quotes)
+    expect(state.sessionDetail.timeline).not.toBe(SESSION_DETAIL.timeline)
+  })
+
+  it('mutating the state copy does not alter the SESSION_DETAIL constant', () => {
+    const state = freshState()
+    // Mutate the state copy
+    const mutatedState = {
+      ...state,
+      sessionDetail: {
+        ...state.sessionDetail,
+        status: 'CANCELLED' as const,
+      },
+    }
+    expect(mutatedState.sessionDetail.status).toBe('CANCELLED')
+    expect(SESSION_DETAIL.status).toBe('WAITING_APPROVAL')
   })
 })
 
@@ -585,6 +614,191 @@ describe('SET_SEARCH', () => {
 })
 
 // ---------------------------------------------------------------------------
+// SESSION_APPROVE_QUOTE — approves pending quote, transitions to DELIVERING
+// ---------------------------------------------------------------------------
+
+describe('SESSION_APPROVE_QUOTE', () => {
+  it('approves a pending quote and transitions session to DELIVERING', () => {
+    let state = freshState()
+    const beforeTimelineLength = state.sessionDetail.timeline.length
+    state = mockupReducer(state, { type: 'SESSION_APPROVE_QUOTE', quoteId: 'Q-102' })
+
+    const quote = state.sessionDetail.quotes.find((q) => q.id === 'Q-102')
+    expect(quote?.status).toBe('APPROVED')
+    expect(quote?.approvedBy).toBe('Refactory Admin')
+    expect(quote?.approvedAt).toBeDefined()
+
+    expect(state.sessionDetail.status).toBe('DELIVERING')
+    expect(state.sessionDetail.updatedAt).toBe(quote?.approvedAt)
+
+    const quoteStage = state.sessionDetail.stages.find((s) => s.id === 'quote')
+    const planStage = state.sessionDetail.stages.find((s) => s.id === 'plan')
+    expect(quoteStage?.status).toBe('COMPLETED')
+    expect(planStage?.status).toBe('IN_PROGRESS')
+
+    expect(state.sessionDetail.timeline).toHaveLength(beforeTimelineLength + 2)
+    const lastTwo = state.sessionDetail.timeline.slice(-2)
+    expect(lastTwo[0].type).toBe('APPROVAL')
+    expect(lastTwo[0].quoteId).toBe('Q-102')
+    expect(lastTwo[0].content).toContain('approved by Refactory Admin')
+    expect(lastTwo[1].type).toBe('SYSTEM_EVENT')
+    expect(lastTwo[1].content).toBe('Quote approved — delivery started')
+  })
+
+  it('is a no-op for non-pending quotes', () => {
+    const state = freshState()
+    const next = mockupReducer(state, { type: 'SESSION_APPROVE_QUOTE', quoteId: 'Q-101' })
+    expect(next).toBe(state)
+  })
+
+  it('is a no-op for unknown quote ids', () => {
+    const state = freshState()
+    const next = mockupReducer(state, { type: 'SESSION_APPROVE_QUOTE', quoteId: 'Q-999' })
+    expect(next).toBe(state)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// SESSION_REJECT_QUOTE — rejects pending quote, sets quote stage to BLOCKED
+// ---------------------------------------------------------------------------
+
+describe('SESSION_REJECT_QUOTE', () => {
+  it('rejects a pending quote and sets quote stage to BLOCKED', () => {
+    let state = freshState()
+    const beforeTimelineLength = state.sessionDetail.timeline.length
+    const reason = 'Scope too broad for current sprint'
+    state = mockupReducer(state, { type: 'SESSION_REJECT_QUOTE', quoteId: 'Q-102', reason })
+
+    const quote = state.sessionDetail.quotes.find((q) => q.id === 'Q-102')
+    expect(quote?.status).toBe('REJECTED')
+    expect(quote?.rejectionReason).toBe(reason)
+
+    expect(state.sessionDetail.status).toBe('WAITING_APPROVAL')
+
+    const quoteStage = state.sessionDetail.stages.find((s) => s.id === 'quote')
+    expect(quoteStage?.status).toBe('BLOCKED')
+
+    expect(state.sessionDetail.timeline).toHaveLength(beforeTimelineLength + 2)
+    const lastTwo = state.sessionDetail.timeline.slice(-2)
+    expect(lastTwo[0].type).toBe('APPROVAL')
+    expect(lastTwo[0].quoteId).toBe('Q-102')
+    expect(lastTwo[0].content).toContain('rejected')
+    expect(lastTwo[0].content).toContain(reason)
+    expect(lastTwo[1].type).toBe('ASSISTANT_MESSAGE')
+    expect(lastTwo[1].content).toContain('revised quote can be requested')
+  })
+
+  it('is a no-op for non-pending quotes', () => {
+    const state = freshState()
+    const next = mockupReducer(state, {
+      type: 'SESSION_REJECT_QUOTE',
+      quoteId: 'Q-101',
+      reason: 'test',
+    })
+    expect(next).toBe(state)
+  })
+
+  it('is a no-op for unknown quote ids', () => {
+    const state = freshState()
+    const next = mockupReducer(state, {
+      type: 'SESSION_REJECT_QUOTE',
+      quoteId: 'Q-999',
+      reason: 'test',
+    })
+    expect(next).toBe(state)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// SESSION_REQUEST_QUOTE_REVISION — superseded quote, new quote created
+// ---------------------------------------------------------------------------
+
+describe('SESSION_REQUEST_QUOTE_REVISION', () => {
+  it('supersedes current pending quote and creates a revised one', () => {
+    let state = freshState()
+    const beforeQuoteCount = state.sessionDetail.quotes.length
+    const beforeTimelineLength = state.sessionDetail.timeline.length
+
+    state = mockupReducer(state, { type: 'SESSION_REQUEST_QUOTE_REVISION', quoteId: 'Q-102' })
+
+    const oldQuote = state.sessionDetail.quotes.find((q) => q.id === 'Q-102')
+    expect(oldQuote?.status).toBe('SUPERSEDED')
+
+    expect(state.sessionDetail.quotes).toHaveLength(beforeQuoteCount + 1)
+    const newQuote = state.sessionDetail.quotes[beforeQuoteCount]
+    expect(newQuote.version).toBe(3)
+    expect(newQuote.status).toBe('PENDING_APPROVAL')
+    expect(newQuote.expiresAt).toBeDefined()
+    expect(newQuote.estimatedStoryPoints).toBe(6)
+    expect(newQuote.maxStoryPoints).toBe(9)
+
+    expect(state.sessionDetail.timeline).toHaveLength(beforeTimelineLength + 2)
+    const lastTwo = state.sessionDetail.timeline.slice(-2)
+    expect(lastTwo[0].type).toBe('SYSTEM_EVENT')
+    expect(lastTwo[0].content).toContain('superseded')
+    expect(lastTwo[0].content).toContain('revised quote')
+    expect(lastTwo[1].type).toBe('QUOTE')
+    expect(lastTwo[1].quoteId).toBe(newQuote.id)
+  })
+
+  it('is a no-op for non-pending quotes', () => {
+    const state = freshState()
+    const next = mockupReducer(state, {
+      type: 'SESSION_REQUEST_QUOTE_REVISION',
+      quoteId: 'Q-101',
+    })
+    expect(next).toBe(state)
+  })
+
+  it('is a no-op for unknown quote ids', () => {
+    const state = freshState()
+    const next = mockupReducer(state, {
+      type: 'SESSION_REQUEST_QUOTE_REVISION',
+      quoteId: 'Q-999',
+    })
+    expect(next).toBe(state)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// SESSION_SEND_DETAIL_MESSAGE — appends user message and assistant ack
+// ---------------------------------------------------------------------------
+
+describe('SESSION_SEND_DETAIL_MESSAGE', () => {
+  it('appends user message and assistant acknowledgment', () => {
+    let state = freshState()
+    const beforeTimelineLength = state.sessionDetail.timeline.length
+    const content = 'Please add unit tests for the pagination fix'
+
+    state = mockupReducer(state, { type: 'SESSION_SEND_DETAIL_MESSAGE', content })
+
+    expect(state.sessionDetail.timeline).toHaveLength(beforeTimelineLength + 2)
+    const lastTwo = state.sessionDetail.timeline.slice(-2)
+    expect(lastTwo[0].type).toBe('USER_MESSAGE')
+    expect(lastTwo[0].content).toBe(content)
+    expect(lastTwo[0].actorType).toBe('USER')
+    expect(lastTwo[1].type).toBe('ASSISTANT_MESSAGE')
+    expect(lastTwo[1].content).toContain('Noted — added to the working context')
+    expect(lastTwo[1].actorType).toBe('ASSISTANT')
+
+    expect(state.sessionDetail.updatedAt).toBeDefined()
+  })
+
+  it('messages appear with bumped timestamps', () => {
+    let state = freshState()
+    const lastTimestamp = state.sessionDetail.timeline[state.sessionDetail.timeline.length - 1].createdAt
+
+    state = mockupReducer(state, { type: 'SESSION_SEND_DETAIL_MESSAGE', content: 'test' })
+
+    const newItems = state.sessionDetail.timeline.slice(-2)
+    expect(new Date(newItems[0].createdAt).getTime()).toBeGreaterThanOrEqual(
+      new Date(lastTimestamp).getTime(),
+    )
+    expect(newItems[1].createdAt).toBe(newItems[0].createdAt)
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Immutability — the reducer never mutates the previous state
 // ---------------------------------------------------------------------------
 
@@ -620,6 +834,10 @@ describe('immutability', () => {
       { type: 'TOGGLE_SESSION_DRAFT_REPO', repoId: 'richapp/fe-richapp' },
       { type: 'COMMIT_SESSION_CONTEXT_DRAFT' },
       { type: 'CONFIRM_SESSION_CONTEXT', systemId: 'bsi-canteen', repoIds: ['bsi/canteen-backend'] },
+      // Session detail actions — Q-102 is PENDING_APPROVAL in initial state
+      { type: 'SESSION_SEND_DETAIL_MESSAGE', content: 'test message' },
+      { type: 'SESSION_REQUEST_QUOTE_REVISION', quoteId: 'Q-102' },
+      { type: 'SESSION_APPROVE_QUOTE', quoteId: 'Q-103' },
     ]
     let state: MockupState = deepFreeze(freshState())
     for (const action of actions) {
