@@ -5086,18 +5086,24 @@
 
 /* ── Session Detail Composer (Task 13 Part 2) ─────────────────────
  * Sticky bottom message composer with textarea and toolbar. */
-/* Detail composer — sticky at the timeline bottom, but no outer card.
- * Only the exact main-page input box is visible. Bottom offset keeps the
- * box from sitting flush against the viewport edge. Negative inset + equal
- * padding paint a solid canvas backdrop under and slightly around the
- * composer, so scrolling content never shows through the bottom gap. */
-.kx-session-composer {
+/* Composer area — sticky region pinning the tracker (current stage · cycle
+ * context + active-stage pill) directly above the sticky continuation
+ * composer, so the stage context scrolls with and stays attached to the
+ * composer input box. */
+.kx-session-detail__composer-area {
   position: sticky;
-  bottom: 0;
+  bottom: 16px;
   z-index: 10;
   margin: 24px -16px 0;
-  padding: 12px 16px 16px;
+  padding: 8px 16px 16px;
   background: var(--kx-canvas);
+}
+
+/* Detail composer — reuses the exact main-page input box with no outer card.
+ * Stickiness lives on the enclosing .kx-session-detail__composer-area so the
+ * tracker and composer travel as one unit. */
+.kx-session-composer {
+  position: relative;
 }
 
 .kx-session-composer--locked {
@@ -5144,11 +5150,10 @@
     padding: 10px 12px;
   }
 
-  .kx-session-composer {
-    position: sticky;
-    bottom: 0;
+  .kx-session-detail__composer-area {
+    bottom: 12px;
     margin: 16px -12px 0;
-    padding: 12px 12px 12px;
+    padding: 8px 12px 12px;
   }
 
   .kx-composer__input {

@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import SessionDetailPage from './SessionDetailPage'
@@ -212,19 +212,37 @@ describe('SessionDetailPage — metadata footer chips', () => {
 // ---------------------------------------------------------------------------
 
 describe('SessionDetailPage — content blocks container', () => {
-  it('groups quote, timeline, tracker, and metadata as large discrete blocks', () => {
+  it('groups quote, timeline, and metadata as large discrete blocks', () => {
     renderSessionDetailPage()
     const blocks = screen.getByTestId('session-detail-blocks')
     expect(blocks).toHaveClass('kx-session-detail__blocks')
 
     // Each block remains a flat sibling so it can later become clickable.
     expect(blocks.querySelector('[data-testid="session-timeline"]')).not.toBeNull()
-    expect(blocks.querySelector('[data-testid="session-tracker"]')).not.toBeNull()
     expect(blocks.querySelector('footer.kx-session-detail__meta')).not.toBeNull()
     expect(blocks.querySelector('[data-testid="quote-approval-card"]')).not.toBeNull()
 
-    // The sticky composer intentionally stays outside the blocks container.
+    // The tracker and sticky composer intentionally stay outside the blocks
+    // container — both live inside the sticky composer area.
+    expect(blocks.querySelector('[data-testid="session-tracker"]')).toBeNull()
     expect(blocks.querySelector('[data-testid="session-composer"]')).toBeNull()
+  })
+
+  it('pins the tracker directly above the composer input box inside the sticky composer area', () => {
+    renderSessionDetailPage()
+    const area = screen.getByTestId('session-composer-area')
+    expect(area).toHaveClass('kx-session-detail__composer-area')
+
+    // Tracker and composer are the two children of the sticky area, tracker first.
+    const tracker = screen.getByTestId('session-tracker')
+    const composer = screen.getByTestId('session-composer')
+    expect(area).toContainElement(tracker)
+    expect(area).toContainElement(composer)
+    expect(tracker.compareDocumentPosition(composer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+
+    // The tracker sits directly above the composer input box.
+    const inputBox = screen.getByTestId('session-composer-input-box')
+    expect(composer).toContainElement(inputBox)
   })
 })
 
@@ -689,12 +707,39 @@ describe('SessionDetailComposer — message composer', () => {
     expect(screen.getByTestId('session-composer')).toBeInTheDocument()
   })
 
-  it('has attachment and voice mock buttons', () => {
+  it('has attachment, text document, and voice mock buttons', () => {
     renderSessionDetailPage()
     const composer = screen.getByTestId('session-composer')
 
     expect(composer.querySelector('button[aria-label="Attach file"]')).toBeInTheDocument()
+    expect(composer.querySelector('button[aria-label="Add text document"]')).toBeInTheDocument()
     expect(composer.querySelector('button[aria-label="Voice input"]')).toBeInTheDocument()
+  })
+
+  it('matches the main-page toolbar order: attach + text document + profile left; voice + send right', () => {
+    renderSessionDetailPage()
+    const composer = screen.getByTestId('session-composer')
+
+    // Left group: Attach file → Add text document → Execution Profile.
+    const left = within(screen.getByTestId('toolbar-left'))
+    const leftButtons = left.getAllByRole('button')
+    expect(leftButtons).toHaveLength(3)
+    expect(leftButtons[0]).toHaveAccessibleName('Attach file')
+    expect(leftButtons[1]).toHaveAccessibleName('Add text document')
+    expect(leftButtons[2]).toHaveAccessibleName(/Execution Profile/)
+
+    // Right group: Voice input → Send message, and nothing else.
+    const right = within(screen.getByTestId('toolbar-right'))
+    const rightButtons = right.getAllByRole('button')
+    expect(rightButtons).toHaveLength(2)
+    expect(rightButtons[0]).toHaveAccessibleName('Voice input')
+    expect(rightButtons[1]).toHaveAccessibleName('Send message')
+
+    // No cross-contamination between the groups.
+    expect(left.queryByRole('button', { name: 'Voice input' })).toBeNull()
+    expect(right.queryByRole('button', { name: 'Attach file' })).toBeNull()
+    expect(right.queryByRole('button', { name: /Execution Profile/ })).toBeNull()
+    expect(composer.querySelectorAll('button[aria-label="Attach file"]')).toHaveLength(1)
   })
 })
 

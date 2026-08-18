@@ -3,10 +3,10 @@
  *
  * The sticky full-width header is intentionally outside the bounded reading
  * column. The content column groups the page into large discrete blocks
- * (quote, timeline, tracker, metadata, and the final sticky continuation
- * composer) so each unit can later become a clickable component without
- * restructuring the page — clickability itself is intentionally not
- * implemented yet.
+ * (quote, timeline, metadata) plus a final sticky region that pins the
+ * tracker (current stage · cycle) directly above the continuation composer,
+ * so each unit can later become a clickable component without restructuring
+ * the page — clickability itself is intentionally not implemented yet.
  */
 import { useMockup } from '../state/MockupContext'
 import SessionHeader from '../components/session/SessionHeader'
@@ -48,11 +48,12 @@ export default function SessionDetailPage() {
       <div className="kx-session-detail__content">
         {/* Large discrete content blocks — kept as flat siblings inside a
             dedicated container so each block can later become a clickable
-            component; no click behavior is attached yet. */}
+            component; no click behavior is attached yet. The tracker is no
+            longer part of this container: it now sits inside the sticky
+            composer region below. */}
         <div className="kx-session-detail__blocks" data-testid="session-detail-blocks">
           <SessionQuoteCard />
           <SessionTimeline />
-          <SessionTracker />
 
           <footer className="kx-session-detail__meta">
             <span className="kx-chip">
@@ -65,8 +66,13 @@ export default function SessionDetailPage() {
           </footer>
         </div>
 
-        {/* Final sticky session interaction — same inner input as main page. */}
-        <SessionDetailComposer />
+        {/* Final sticky session interaction — tracker (current stage · cycle
+            + stage pill) pinned directly above the same inner input as the
+            main page, so the stage context stays attached to the composer. */}
+        <div className="kx-session-detail__composer-area" data-testid="session-composer-area">
+          <SessionTracker />
+          <SessionDetailComposer />
+        </div>
       </div>
     </section>
   )
