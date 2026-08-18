@@ -99,7 +99,7 @@ describe('desktop short-height compaction (AC44, 1200×720)', () => {
   it('tightens the New Session page, intro, and reviews vertical rhythm', () => {
     const block = flat(compactHeightBlock())
     expect(block).toContain('.kx-new-session { gap: 24px; padding: 24px 32px 32px;')
-    expect(block).toContain('.kx-new-session__intro { gap: 10px; margin: 0 auto 32px;')
+    expect(block).toContain('.kx-new-session__intro { gap: 10px; margin: auto auto 32px;')
     expect(block).toContain('.kx-new-session__intro-img { max-height: 124px;')
     expect(block).toContain('.kx-new-session__reviews { margin-bottom: 10px;')
   })
@@ -210,9 +210,9 @@ describe('New Session semantic layout (composer correction)', () => {
       '.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; width: 100%;',
     )
     expect(css).not.toContain('.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; width: min(1200px, 100%);')
-    // Uniform header type: title/subtitle/approval share --kx-text-xs;
-    // hierarchy comes from weight alone (user-directed).
-    expect(css).toContain('.kx-new-session__title { font-size: var(--kx-text-sm);')
+    // Page-title hierarchy: the h1 steps up to the 24px page-title token
+    // while the subtitle/approval keep the shared body scale (user-directed).
+    expect(css).toContain('.kx-new-session__title { font-size: var(--kx-text-3xl);')
     expect(css).toContain('.kx-new-session__subtitle { font-size: var(--kx-text-md);')
     expect(css).toContain('.kx-new-session__approval { flex-shrink: 0; margin-left: auto;')
   })
@@ -220,9 +220,11 @@ describe('New Session semantic layout (composer correction)', () => {
   it('centers the intro with a constrained decorative image and a 2xl heading', () => {
     const css = flat(components)
     expect(css).toContain('.kx-new-session__intro { display: flex; flex-direction: column; align-items: center;')
-    // Fixed 48px intro→composer spacing (zoom-invariant) and the bottom
-    // group pinned via the reviews wrapper's margin-top:auto.
-    expect(css).toContain('margin: 0 auto 48px;')
+    // The intro's auto top margin drops the hero clear of the header so the
+    // page reads visually centered at any zoom; the fixed 48px intro→composer
+    // spacing stays zoom-invariant and the reviews wrapper's margin-top:auto
+    // pins the bottom group.
+    expect(css).toContain('margin: auto auto 48px;')
     expect(css).toContain('.kx-new-session__intro-img { max-height: 140px;')
     expect(css).toContain('.kx-new-session__intro-heading { font-size: var(--kx-text-2xl);')
     expect(css).toContain('margin-top: auto;')

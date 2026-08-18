@@ -65,11 +65,16 @@ const modeGroup = () => screen.getByRole('radiogroup', { name: 'Session mode' })
 const switchToPlanning = () =>
   fireEvent.click(within(modeGroup()).getByRole('radio', { name: 'Planning' }))
 
+const switchToQA = () => fireEvent.click(within(modeGroup()).getByRole('radio', { name: 'QA' }))
+
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u
 
 const ENGINEERING_HEADING = 'What would you like to build?'
 const ENGINEERING_BODY =
   'Engineering sessions analyze, propose, and deliver software changes. You approve every proposal before work proceeds.'
+const QA_HEADING = 'What would you like to test?'
+const QA_BODY =
+  'QA sessions design, run, and report tests for your systems. You approve every test plan before execution.'
 const PLANNING_HEADING = 'Start planning'
 const PLANNING_BODY =
   'Draft a PRD, then break it into a roadmap, milestones, sprints, and tickets that drive Engineering delivery.'
@@ -112,6 +117,15 @@ describe('NewSessionPage — header + intro', () => {
     expect(screen.getByRole('heading', { name: PLANNING_HEADING, level: 2 })).toBeInTheDocument()
     expect(screen.getByText(PLANNING_BODY)).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: ENGINEERING_HEADING })).not.toBeInTheDocument()
+  })
+
+  it('shows the QA intro heading and body in QA mode', () => {
+    renderNewSessionPage()
+    switchToQA()
+    expect(screen.getByRole('heading', { name: QA_HEADING, level: 2 })).toBeInTheDocument()
+    expect(screen.getByText(QA_BODY)).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: ENGINEERING_HEADING })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: PLANNING_HEADING })).not.toBeInTheDocument()
   })
 
   it('places the full-width header outside and before the bounded content region', () => {
@@ -216,6 +230,32 @@ describe('NewSessionPage — unified composer panel', () => {
 
     // The mode group remains, right-aligned in the top row.
     expect(modeGroup()).toBeInTheDocument()
+  })
+
+  it('keeps the full Engineering setup pills in QA with QA-specific placeholders', () => {
+    renderNewSessionPage()
+    switchToQA()
+
+    // QA mirrors the Engineering flow: both setup pills stay available.
+    const repoPill = screen.getByRole('button', { name: 'Choose system / repositories to test' })
+    const componentPill = screen.getByRole('button', { name: 'Choose component under test' })
+    expect(repoPill).toHaveClass('kx-panel__pill')
+    expect(componentPill).toHaveClass('kx-panel__pill')
+    expect(screen.getByTestId('component-trigger')).toBeInTheDocument()
+
+    // QA-specific prompt affordances.
+    expect(screen.getByRole('textbox', { name: 'QA prompt' })).toHaveAttribute(
+      'placeholder',
+      'Describe the QA task…',
+    )
+    expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument()
+  })
+
+  it('QA Choose system pill opens the same system + repositories modal', () => {
+    const { bucket } = renderNewSessionPage()
+    switchToQA()
+    fireEvent.click(screen.getByRole('button', { name: 'Choose system / repositories to test' }))
+    expect(bucket.current?.overlay).toEqual({ kind: 'repository-modal' })
   })
 
   it('Planning Choose system pill opens the same system + repositories modal (not a system-only modal)', () => {
@@ -430,6 +470,17 @@ describe('NewSessionPage — send gating', () => {
     })
     expect(cta).toBeEnabled()
   })
+
+  it('keeps the Send gating contract in QA mode', () => {
+    renderNewSessionPage()
+    switchToQA()
+    const send = screen.getByRole('button', { name: 'Send' })
+    expect(send).toBeDisabled()
+    fireEvent.change(screen.getByRole('textbox', { name: 'QA prompt' }), {
+      target: { value: 'Regression-test the checkout flow' },
+    })
+    expect(send).toBeEnabled()
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -515,9 +566,11 @@ describe('NewSessionPage — mode semantics', () => {
     const { bucket } = renderNewSessionPage()
     const group = modeGroup()
     const engineering = within(group).getByRole('radio', { name: 'Engineering' })
+    const qa = within(group).getByRole('radio', { name: 'QA' })
     const planning = within(group).getByRole('radio', { name: 'Planning' })
 
     expect(engineering).toHaveAttribute('aria-checked', 'true')
+    expect(qa).toHaveAttribute('aria-checked', 'false')
     expect(planning).toHaveAttribute('aria-checked', 'false')
 
     fireEvent.click(planning)
@@ -528,11 +581,31 @@ describe('NewSessionPage — mode semantics', () => {
     expect(bucket.current?.sessionMode).toBe('engineering')
   })
 
+  it('renders the segments in the Engineering → QA → Planning order with roving tabindex', () => {
+    renderNewSessionPage()
+    const group = modeGroup()
+    const radios = within(group).getAllByRole('radio')
+    expect(radios.map((radio) => radio.textContent)).toEqual(['Engineering', 'QA', 'Planning'])
+
+    // Roving tabindex: only the active segment is tabbable.
+    expect(radios[0]).toHaveAttribute('tabindex', '0')
+    expect(radios[1]).toHaveAttribute('tabindex', '-1')
+    expect(radios[2]).toHaveAttribute('tabindex', '-1')
+
+    fireEvent.click(radios[1])
+    expect(radios[0]).toHaveAttribute('tabindex', '-1')
+    expect(radios[1]).toHaveAttribute('tabindex', '0')
+  })
+
   it('supports arrow-key switching on the radiogroup', () => {
     const { bucket } = renderNewSessionPage()
     const group = modeGroup()
     fireEvent.keyDown(group, { key: 'ArrowRight' })
+    expect(bucket.current?.sessionMode).toBe('qa')
+    fireEvent.keyDown(group, { key: 'ArrowRight' })
     expect(bucket.current?.sessionMode).toBe('planning')
+    fireEvent.keyDown(group, { key: 'ArrowLeft' })
+    expect(bucket.current?.sessionMode).toBe('qa')
     fireEvent.keyDown(group, { key: 'ArrowLeft' })
     expect(bucket.current?.sessionMode).toBe('engineering')
   })

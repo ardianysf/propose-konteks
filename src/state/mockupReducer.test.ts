@@ -303,6 +303,14 @@ describe('SET_MODE', () => {
     state = mockupReducer(state, { type: 'SET_MODE', mode: 'engineering' })
     expect(state.sessionMode).toBe('engineering')
   })
+
+  it('sets qa mode between engineering and planning', () => {
+    let state = freshState()
+    state = mockupReducer(state, { type: 'SET_MODE', mode: 'qa' })
+    expect(state.sessionMode).toBe('qa')
+    state = mockupReducer(state, { type: 'SET_MODE', mode: 'planning' })
+    expect(state.sessionMode).toBe('planning')
+  })
 })
 
 describe('TOGGLE_COMPONENT / CLEAR_COMPONENTS', () => {
@@ -945,7 +953,7 @@ describe('mockData contract', () => {
     expect(mockData.sessionHistory.length).toBeGreaterThan(mockData.recentSessions.length)
     for (const row of mockData.sessionHistory) {
       expect(row.title.length).toBeGreaterThan(0)
-      expect(['engineering', 'planning']).toContain(row.mode)
+      expect(['engineering', 'qa', 'planning']).toContain(row.mode)
       expect(SYSTEMS.some((s) => s.id === row.systemId)).toBe(true)
       expect(row.componentName.length).toBeGreaterThan(0)
       expect(row.time.length).toBeGreaterThan(0)

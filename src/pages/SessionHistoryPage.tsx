@@ -17,6 +17,7 @@ import type { MockupAction } from '../state/mockupReducer'
 
 const MODE_LABELS: Record<SessionMode, string> = {
   engineering: 'Engineering',
+  qa: 'QA',
   planning: 'Planning',
 }
 
@@ -124,6 +125,7 @@ export default function SessionHistoryPage() {
             >
               <option value="all">All modes</option>
               <option value="engineering">Engineering</option>
+              <option value="qa">QA</option>
               <option value="planning">Planning</option>
             </select>
           </label>

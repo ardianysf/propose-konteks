@@ -18,6 +18,8 @@ import { useMockup } from '../state/MockupContext'
 
 const ENGINEERING_INTRO_BODY =
   'Engineering sessions analyze, propose, and deliver software changes. You approve every proposal before work proceeds.'
+const QA_INTRO_BODY =
+  'QA sessions design, run, and report tests for your systems. You approve every test plan before execution.'
 const PLANNING_INTRO_BODY =
   'Draft a PRD, then break it into a roadmap, milestones, sprints, and tickets that drive Engineering delivery.'
 const DISCLAIMER = 'Konteks can make mistakes. Verify important information.'
@@ -26,8 +28,15 @@ export default function NewSessionPage() {
   const { state, dispatch } = useMockup()
   const { beginOverlayChain } = useOverlayLifecycle()
   const engineering = state.sessionMode === 'engineering'
+  const qa = state.sessionMode === 'qa'
   const pendingCount = PENDING_REVIEWS.length
   const collapsed = state.sidebarCollapsed
+  const introHeading = engineering
+    ? 'What would you like to build?'
+    : qa
+      ? 'What would you like to test?'
+      : 'Start planning'
+  const introBody = engineering ? ENGINEERING_INTRO_BODY : qa ? QA_INTRO_BODY : PLANNING_INTRO_BODY
 
   return (
     <section className="kx-new-session" aria-label="New session">
@@ -64,10 +73,10 @@ export default function NewSessionPage() {
             aria-hidden="true"
           />
           <h2 className="kx-new-session__intro-heading">
-            {engineering ? 'What would you like to build?' : 'Start planning'}
+            {introHeading}
           </h2>
           <p className="kx-new-session__intro-body">
-            {engineering ? ENGINEERING_INTRO_BODY : PLANNING_INTRO_BODY}
+            {introBody}
           </p>
         </div>
 

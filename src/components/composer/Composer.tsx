@@ -21,6 +21,7 @@ import SessionMode from './SessionMode'
 
 const PLANNING_PLACEHOLDER = 'Describe the product outcome you want to plan…'
 const ENGINEERING_PLACEHOLDER = 'Describe the engineering task…'
+const QA_PLACEHOLDER = 'Describe the QA task…'
 
 /** Paperclip — the attachment trigger (AC19). */
 function AttachmentIcon() {
@@ -172,6 +173,7 @@ export default function Composer() {
   const { beginOverlayChain, dismissOverlay } = useOverlayLifecycle()
   const [value, setValue] = useState('')
   const planning = state.sessionMode === 'planning'
+  const qa = state.sessionMode === 'qa'
   const canSubmit = value.trim().length > 0
 
   const activeProfile =
@@ -188,12 +190,16 @@ export default function Composer() {
     ? committedSystem.name
     : planning
       ? 'Choose system'
-      : 'Choose system / repositories'
+      : qa
+        ? 'Choose system / repositories to test'
+        : 'Choose system / repositories'
 
   const componentCount = state.selectedComponentIds.length
   const componentLabel =
     componentCount === 0
-      ? 'Choose component'
+      ? qa
+        ? 'Choose component under test'
+        : 'Choose component'
       : componentCount === 1
         ? (COMPONENTS.find((component) => component.id === state.selectedComponentIds[0])?.name ??
           state.selectedComponentIds[0])
@@ -268,13 +274,13 @@ export default function Composer() {
         data-testid="composer-input-box"
       >
         <label htmlFor="kx-composer-input" className="kx-visually-hidden">
-          {planning ? 'Planning prompt' : 'Engineering prompt'}
+          {planning ? 'Planning prompt' : qa ? 'QA prompt' : 'Engineering prompt'}
         </label>
         <textarea
           id="kx-composer-input"
           className="kx-composer__input"
           data-testid="composer-input"
-          placeholder={planning ? PLANNING_PLACEHOLDER : ENGINEERING_PLACEHOLDER}
+          placeholder={planning ? PLANNING_PLACEHOLDER : qa ? QA_PLACEHOLDER : ENGINEERING_PLACEHOLDER}
           value={value}
           onChange={(event) => setValue(event.target.value)}
         />
