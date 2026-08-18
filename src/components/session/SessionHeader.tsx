@@ -83,15 +83,10 @@ export default function SessionHeader() {
 
   return (
     <header className="kx-session-detail__head" data-testid="session-detail-header">
+      {/* Header stack order: title row (title + share) → context line
+          (mode · system · component) → status badge at the bottom. */}
       <div className="kx-session-detail__head-main">
         <h1 className="kx-session-detail__title">{sessionDetail.title}</h1>
-        <span
-          className={`kx-badge kx-badge--${sessionDetail.status.toLowerCase()}`}
-          data-testid="session-status"
-        >
-          <StatusIcon status={sessionDetail.status} />
-          <span>{getStatusLabel(sessionDetail.status)}</span>
-        </span>
         <button
           type="button"
           className="kx-icon-btn kx-session-detail__share"
@@ -113,6 +108,15 @@ export default function SessionHeader() {
         <span aria-hidden="true">·</span>
         <span>{sessionDetail.componentName}</span>
       </p>
+      {/* Status badge sits at the bottom of the header stack — no longer
+          inline with the title row. */}
+      <span
+        className={`kx-badge kx-badge--${sessionDetail.status.toLowerCase()}`}
+        data-testid="session-status"
+      >
+        <StatusIcon status={sessionDetail.status} />
+        <span>{getStatusLabel(sessionDetail.status)}</span>
+      </span>
     </header>
   )
 }

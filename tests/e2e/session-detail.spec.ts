@@ -8,9 +8,10 @@ import { goto } from './helpers'
  *   - user bubbles right-aligned without sender identity or timestamps;
  *     assistant bubbles without identity chrome
  *   - sticky final composer reusing the exact main-page input-box/toolbar
- *     primitives (Execution Profile left; attach, text document, voice, send
+ *     primitives (attach, text document, Execution Profile left; voice, send
  *     right) without an outer composer panel, offset from the bottom edge
- *   - minimal tracker: cycle context text + a single active-stage pill
+ *   - minimal tracker: cycle context text + a single active-stage pill, pinned
+ *     directly above the composer input box inside the same sticky region
  */
 
 async function gotoSessionDetail(page: Parameters<typeof goto>[0]) {
@@ -79,9 +80,11 @@ test.describe('session detail', () => {
     const composer = page.getByTestId('session-composer')
     await expect(composer).toBeVisible()
 
-    // Sticky with a bottom offset so it never sits flush against the edge.
-    await expect.poll(() => composer.evaluate((el) => getComputedStyle(el).position)).toBe('sticky')
-    const bottomOffset = await composer.evaluate((el) => parseFloat(getComputedStyle(el).bottom))
+    // The composer area (tracker + composer) is sticky with a bottom offset
+    // so it never sits flush against the edge.
+    const composerArea = page.getByTestId('session-composer-area')
+    await expect.poll(() => composerArea.evaluate((el) => getComputedStyle(el).position)).toBe('sticky')
+    const bottomOffset = await composerArea.evaluate((el) => parseFloat(getComputedStyle(el).bottom))
     expect(bottomOffset).toBeGreaterThan(0)
 
     // Exactly the main-page input box/toolbar primitives.
@@ -101,14 +104,18 @@ test.describe('session detail', () => {
     await expect(composer.getByRole('button', { name: 'Voice input' })).toBeVisible()
     await expect(composer.getByRole('button', { name: 'Send message' })).toBeDisabled()
 
-    // Attachment triggers live in the right-aligned group, consistent with
-    // the composer layout; the left group keeps only the Execution Profile.
+    // Toolbar groups match the main page exactly: attach + text document +
+    // Execution Profile on the left; voice + send on the right.
     const leftGroup = composer.getByTestId('toolbar-left')
+    await expect(leftGroup.getByRole('button', { name: 'Attach file' })).toBeVisible()
+    await expect(leftGroup.getByRole('button', { name: 'Add text document' })).toBeVisible()
     await expect(leftGroup.getByRole('button', { name: /Execution Profile/i })).toBeVisible()
-    await expect(leftGroup.getByRole('button', { name: 'Attach file' })).toHaveCount(0)
+    await expect(leftGroup.getByRole('button', { name: 'Voice input' })).toHaveCount(0)
     const rightGroup = composer.getByTestId('toolbar-right')
-    await expect(rightGroup.getByRole('button', { name: 'Attach file' })).toBeVisible()
-    await expect(rightGroup.getByRole('button', { name: 'Add text document' })).toBeVisible()
+    await expect(rightGroup.getByRole('button', { name: 'Voice input' })).toBeVisible()
+    await expect(rightGroup.getByRole('button', { name: 'Send message' })).toBeVisible()
+    await expect(rightGroup.getByRole('button', { name: 'Attach file' })).toHaveCount(0)
+    await expect(rightGroup.getByRole('button', { name: /Execution Profile/i })).toHaveCount(0)
 
     // No outer composer panel (the main page's kx-composer kx-panel wrapper).
     await expect(composer.locator('.kx-composer.kx-panel')).toHaveCount(0)
@@ -171,5 +178,18 @@ test.describe('session detail', () => {
     await expect(tracker.locator('.kx-session-detail__completed-chip')).toHaveCount(0)
     await expect(tracker.locator('.kx-session-detail__tracker-item')).toHaveCount(0)
     await expect(tracker.locator('.kx-session-detail__tracker-list')).toHaveCount(0)
+
+    // The tracker is pinned directly above the composer input box inside the
+    // sticky composer area, no longer in the upper blocks container.
+    const area = page.getByTestId('session-composer-area')
+    await expect(area.locator('[data-testid="session-tracker"]')).toHaveCount(1)
+    await expect(page.getByTestId('session-detail-blocks').locator('[data-testid="session-tracker"]')).toHaveCount(0)
+    const [trackerBox, inputBoxBox] = await Promise.all([
+      tracker.boundingBox(),
+      page.getByTestId('session-composer-input-box').boundingBox(),
+    ])
+    expect(trackerBox).not.toBeNull()
+    expect(inputBoxBox).not.toBeNull()
+    expect(trackerBox!.y + trackerBox!.height).toBeLessThanOrEqual(inputBoxBox!.y + 1)
   })
 })

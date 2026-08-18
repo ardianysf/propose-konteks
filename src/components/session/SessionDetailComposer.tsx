@@ -99,6 +99,14 @@ export default function SessionDetailComposer() {
         />
         <div className="kx-composer__toolbar kx-panel__toolbar" data-testid="session-composer-toolbar">
           <div className="kx-panel__toolbar-left" data-testid="toolbar-left">
+            <button className="kx-icon-btn kx-composer__tool" type="button" aria-label="Attach file">
+              <AttachmentIcon />
+            </button>
+            <button className="kx-icon-btn kx-composer__tool" type="button" aria-label="Add text document">
+              <TextDocumentIcon />
+            </button>
+            {/* Execution Profile — after Add text document, exactly matching
+                the main-page composer toolbar order. */}
             <div className="kx-composer__profile-anchor">
               <button
                 type="button"
@@ -123,12 +131,6 @@ export default function SessionDetailComposer() {
             </div>
           </div>
           <div className="kx-panel__toolbar-right" data-testid="toolbar-right">
-            <button className="kx-icon-btn kx-composer__tool" type="button" aria-label="Attach file">
-              <AttachmentIcon />
-            </button>
-            <button className="kx-icon-btn kx-composer__tool" type="button" aria-label="Add text document">
-              <TextDocumentIcon />
-            </button>
             <button className="kx-icon-btn kx-composer__tool" type="button" aria-label="Voice input">
               <MicIcon />
             </button>
