@@ -2,9 +2,11 @@ import {
   DEFAULT_ACTIVE_PROFILE_ID,
   DEFAULT_ACTIVE_SYSTEM_ID,
   EXECUTION_PROFILES,
+  SESSION_DETAIL,
   SYSTEMS,
   type SessionMode,
   type System,
+  type SessionDetailData,
 } from '../data/mockData'
 
 export type { SessionMode } from '../data/mockData'
@@ -58,7 +60,7 @@ export const DEFAULT_SETTINGS_SECTION: SettingsSection = 'general'
 // State
 // ---------------------------------------------------------------------------
 
-export type MockupRoute = 'new-session' | 'session-history'
+export type MockupRoute = 'new-session' | 'session-history' | 'session-detail'
 export type DemoVariant = 'ready' | 'loading' | 'empty'
 
 export type SearchList = 'systems' | 'repositories' | 'components' | 'sessions'
@@ -91,6 +93,7 @@ export interface MockupState {
   overlay: MockupOverlay
   search: MockupSearchState
   demoVariant: DemoVariant
+  sessionDetail: SessionDetailData
 }
 
 export type MockupAction =
@@ -112,6 +115,10 @@ export type MockupAction =
   | { type: 'SET_ACTIVE_PROFILE'; profileId: string }
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'SET_SEARCH'; list: SearchList; value: string }
+  | { type: 'SESSION_APPROVE_QUOTE'; quoteId: string }
+  | { type: 'SESSION_REJECT_QUOTE'; quoteId: string; reason: string }
+  | { type: 'SESSION_REQUEST_QUOTE_REVISION'; quoteId: string }
+  | { type: 'SESSION_SEND_DETAIL_MESSAGE'; content: string }
 
 /**
  * Builds the initial mockup state. The `mock` query parameter
@@ -138,6 +145,7 @@ export function initialState(search: string = ''): MockupState {
     overlay: { kind: 'none' },
     search: { systems: '', repositories: '', components: '', sessions: '' },
     demoVariant,
+    sessionDetail: structuredClone(SESSION_DETAIL),
   }
 }
 
@@ -318,6 +326,188 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
 
     case 'SET_SEARCH': {
       return { ...state, search: { ...state.search, [action.list]: action.value } }
+    }
+
+    // ----------------------------------------------------------------------
+    // Session Detail actions — pure, immutable transitions on sessionDetail
+    // ----------------------------------------------------------------------
+
+    case 'SESSION_APPROVE_QUOTE': {
+      const quoteIndex = state.sessionDetail.quotes.findIndex(
+        (q) => q.id === action.quoteId && q.status === 'PENDING_APPROVAL',
+      )
+      if (quoteIndex === -1) return state
+
+      const approvedAt = new Date().toISOString()
+      const updatedQuotes = [...state.sessionDetail.quotes]
+      updatedQuotes[quoteIndex] = {
+        ...updatedQuotes[quoteIndex],
+        status: 'APPROVED' as const,
+        approvedBy: 'Refactory Admin',
+        approvedAt,
+      }
+
+      const updatedStages = state.sessionDetail.stages.map((stage) => {
+        if (stage.id === 'quote') return { ...stage, status: 'COMPLETED' as const }
+        if (stage.id === 'plan') return { ...stage, status: 'IN_PROGRESS' as const }
+        return stage
+      })
+
+      const approvalItem = {
+        id: `T-${Date.now()}-approval`,
+        type: 'APPROVAL' as const,
+        content: `Quote ${action.quoteId} approved by Refactory Admin`,
+        actorType: 'USER' as const,
+        createdAt: approvedAt,
+        quoteId: action.quoteId,
+      }
+
+      const deliveryStartedEvent = {
+        id: `T-${Date.now()}-delivery-started`,
+        type: 'SYSTEM_EVENT' as const,
+        content: 'Quote approved — delivery started',
+        actorType: 'SYSTEM' as const,
+        createdAt: approvedAt,
+      }
+
+      return {
+        ...state,
+        sessionDetail: {
+          ...state.sessionDetail,
+          status: 'DELIVERING',
+          updatedAt: approvedAt,
+          quotes: updatedQuotes,
+          stages: updatedStages,
+          timeline: [...state.sessionDetail.timeline, approvalItem, deliveryStartedEvent],
+        },
+      }
+    }
+
+    case 'SESSION_REJECT_QUOTE': {
+      const quoteIndex = state.sessionDetail.quotes.findIndex(
+        (q) => q.id === action.quoteId && q.status === 'PENDING_APPROVAL',
+      )
+      if (quoteIndex === -1) return state
+
+      const rejectedAt = new Date().toISOString()
+      const updatedQuotes = [...state.sessionDetail.quotes]
+      updatedQuotes[quoteIndex] = {
+        ...updatedQuotes[quoteIndex],
+        status: 'REJECTED' as const,
+        rejectionReason: action.reason,
+      }
+
+      const updatedStages = state.sessionDetail.stages.map((stage) =>
+        stage.id === 'quote' ? { ...stage, status: 'BLOCKED' as const } : stage,
+      )
+
+      const approvalItem = {
+        id: `T-${Date.now()}-rejection`,
+        type: 'APPROVAL' as const,
+        content: `Quote ${action.quoteId} rejected: ${action.reason}`,
+        actorType: 'USER' as const,
+        createdAt: rejectedAt,
+        quoteId: action.quoteId,
+      }
+
+      const assistantMessage = {
+        id: `T-${Date.now()}-ack`,
+        type: 'ASSISTANT_MESSAGE' as const,
+        content: 'Understood — a revised quote can be requested whenever you are ready.',
+        actorType: 'ASSISTANT' as const,
+        createdAt: rejectedAt,
+      }
+
+      return {
+        ...state,
+        sessionDetail: {
+          ...state.sessionDetail,
+          updatedAt: rejectedAt,
+          quotes: updatedQuotes,
+          stages: updatedStages,
+          timeline: [...state.sessionDetail.timeline, approvalItem, assistantMessage],
+        },
+      }
+    }
+
+    case 'SESSION_REQUEST_QUOTE_REVISION': {
+      const quoteIndex = state.sessionDetail.quotes.findIndex(
+        (q) => q.id === action.quoteId && q.status === 'PENDING_APPROVAL',
+      )
+      if (quoteIndex === -1) return state
+
+      const now = new Date().toISOString()
+      const currentQuote = state.sessionDetail.quotes[quoteIndex]
+      const newQuoteId = `Q-${100 + currentQuote.version + 1}`
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
+      const updatedQuotes = [...state.sessionDetail.quotes]
+      updatedQuotes[quoteIndex] = { ...currentQuote, status: 'SUPERSEDED' as const }
+
+      const newQuote = {
+        id: newQuoteId,
+        version: currentQuote.version + 1,
+        estimatedStoryPoints: currentQuote.estimatedStoryPoints,
+        maxStoryPoints: currentQuote.maxStoryPoints,
+        status: 'PENDING_APPROVAL' as const,
+        createdAt: now,
+        expiresAt,
+      }
+
+      const supersededEvent = {
+        id: `T-${Date.now()}-superseded`,
+        type: 'SYSTEM_EVENT' as const,
+        content: `Quote ${action.quoteId} superseded — revised quote ${newQuoteId} prepared`,
+        actorType: 'SYSTEM' as const,
+        createdAt: now,
+      }
+
+      const newQuoteItem = {
+        id: `T-${Date.now()}-quote`,
+        type: 'QUOTE' as const,
+        content: `Quote ${newQuoteId} v${newQuote.version}: ${newQuote.estimatedStoryPoints} story points (max ${newQuote.maxStoryPoints}) for revised scope.`,
+        actorType: 'ASSISTANT' as const,
+        createdAt: now,
+        quoteId: newQuoteId,
+      }
+
+      return {
+        ...state,
+        sessionDetail: {
+          ...state.sessionDetail,
+          updatedAt: now,
+          quotes: [...updatedQuotes, newQuote],
+          timeline: [...state.sessionDetail.timeline, supersededEvent, newQuoteItem],
+        },
+      }
+    }
+
+    case 'SESSION_SEND_DETAIL_MESSAGE': {
+      const now = new Date().toISOString()
+      const userMessage = {
+        id: `T-${Date.now()}-user`,
+        type: 'USER_MESSAGE' as const,
+        content: action.content,
+        actorType: 'USER' as const,
+        createdAt: now,
+      }
+
+      const assistantAck = {
+        id: `T-${Date.now()}-assistant`,
+        type: 'ASSISTANT_MESSAGE' as const,
+        content: 'Noted — added to the working context for this cycle.',
+        actorType: 'ASSISTANT' as const,
+        createdAt: now,
+      }
+
+      return {
+        ...state,
+        sessionDetail: {
+          ...state.sessionDetail,
+          updatedAt: now,
+          timeline: [...state.sessionDetail.timeline, userMessage, assistantAck],
+        },
+      }
     }
   }
 }

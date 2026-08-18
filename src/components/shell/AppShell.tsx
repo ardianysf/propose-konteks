@@ -22,6 +22,7 @@ import AccountMenu from '../account/AccountMenu'
 import SettingsModal from '../account/SettingsModal'
 import NewSessionPage from '../../pages/NewSessionPage'
 import SessionHistoryPage from '../../pages/SessionHistoryPage'
+import SessionDetailPage from '../../pages/SessionDetailPage'
 import { useMockup } from '../../state/MockupContext'
 
 export default function AppShell() {
@@ -37,10 +38,12 @@ export default function AppShell() {
       <div className={state.sidebarCollapsed ? 'kx-app kx-app--rail' : 'kx-app'}>
         <Sidebar />
         <main className="kx-main">
-          {/* Route switch — the new-session page (Task 5) and the dedicated
-              Session History page (Task 11). Overlays mount on top of this. */}
+          {/* Route switch — the new-session page (Task 5), the dedicated
+              Session History page (Task 11), and the Session Detail page (Task 13). Overlays mount on top of this. */}
           {state.route === 'new-session' ? (
             <NewSessionPage />
+          ) : state.route === 'session-detail' ? (
+            <SessionDetailPage />
           ) : (
             <SessionHistoryPage />
           )}

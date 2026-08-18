@@ -3901,9 +3901,33 @@
   border-bottom: 1px solid var(--kx-border);
 }
 
-.kx-history__row:hover,
-.kx-history__row:focus-within {
-  background: var(--kx-pale);
+/* History stays a flat, three-column row. The focusable navigation button
+ * is visually transparent and only occupies the original main+time cells;
+ * the trailing three-dot action stays unchanged as the final column. */
+.kx-history__row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.kx-history__row-button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kx-history__row-button:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: -2px;
+  border-radius: 8px;
 }
 
 .kx-history__row-main {
@@ -4356,6 +4380,257 @@
   color: var(--kx-muted-text-aa);
 }
 
+/* ── Session Detail page ───────────────────────────────────────────
+ * Full-width sticky header above a bounded conversation reading column. */
+.kx-session-detail {
+  width: 100%;
+  min-height: 100%;
+}
+
+.kx-session-detail__content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: min(840px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 24px 0 32px;
+}
+
+/* Sticky full-width header: title, status, share only. */
+.kx-session-detail__head {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 32px;
+  background: var(--kx-canvas);
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-session-detail__head-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.kx-session-detail__share {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.kx-session-detail__title {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  line-height: 1.3;
+  color: var(--kx-primary);
+}
+.kx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  /* Base badge — pale bg + primary text (merged; never re-declared). */
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+/* Waiting approval badge — accent-solid-aa bg + white text */
+.kx-badge--waiting_approval {
+  background: var(--kx-accent-solid-aa);
+  color: var(--kx-raised);
+}
+
+/* Completed badge — primary bg + raised text */
+.kx-badge--completed,
+.kx-badge--approved {
+  background: var(--kx-primary);
+  color: var(--kx-raised);
+}
+
+/* Blocked/Failed badge — pale bg + accent-text-aa text */
+.kx-badge--blocked,
+.kx-badge--failed {
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+}
+
+/* In-progress badge */
+.kx-badge--in_progress {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+/* Partially completed badge */
+.kx-badge--partially_completed {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+/* Cancelled badge */
+.kx-badge--cancelled {
+  background: var(--kx-pale);
+  color: var(--kx-muted-text-aa);
+}
+
+/* Action-needed indicator — prominent when WAITING_APPROVAL */
+.kx-session-detail__action-needed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--kx-pale);
+  border-radius: 999px;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+}
+
+/* Title — sticky header title, clamped so the status/share controls
+ * remain visible in a narrow timeline. */
+.kx-session-detail__title {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  line-height: 1.3;
+  color: var(--kx-primary);
+}
+
+/* Meta line + metadata footer — muted text (AA token), chip row below the
+ * timeline. Single merged rule; never re-declared. */
+.kx-session-detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--kx-border);
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+  line-height: 1.4;
+}
+
+/* Cycle pill */
+.kx-session-detail__cycle-pill {
+  padding: 4px 10px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+}
+
+/* Timeline placeholder for part 2 */
+.kx-session-detail__timeline-placeholder {
+  min-height: 80px;
+  /* Content arrives in part 2 */
+}
+
+/* ── Session Tracker — compact active stage + completed chips ───── */
+.kx-session-detail__tracker {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0;
+  border-top: 1px solid var(--kx-border);
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-session-detail__tracker-current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kx-session-detail__stage-icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--kx-secondary);
+}
+
+.kx-session-detail__stage-icon--active {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-session-detail__tracker-kicker {
+  display: block;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-session-detail__tracker-title {
+  display: block;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+}
+
+.kx-session-detail__stage-status {
+  display: block;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-session-detail__completed {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kx-session-detail__completed-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-primary);
+}
+
+.kx-session-detail__completed-chip svg {
+  color: var(--kx-accent-text-aa);
+}
+
+/* ── Metadata footer chips (Task 13 Part 1) ───────────────────────
+ * Chips: repository (with icon), branch, issue ref, agent. */
+/* Metadata footer chips — repo/branch/issue/agent (styles merged into the
+ * single .kx-session-detail__meta rule above; never re-declared). */
+
+/* ── Responsive: narrow viewport ≤760px ───────────────────────────
+ * Header wraps; the tracker keeps its compact single-current-stage summary. */
+@media (max-width: 760px) {
+  /* Header keeps its own compact padding — it is independent from both the
+     full-width page (no horizontal page padding) and the sticky composer. */
+  .kx-session-detail__head {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .kx-session-detail__stage-status {
+    max-width: none;
+  }
+}
+
 /* ── Responsive rail + viewport hardening (Task 13, AC12/AC43/AC44) ──
  * At ≤1280px the sidebar renders as the existing 64px icon rail regardless
  * of the stored collapse preference, reclaiming the extra 176px for the
@@ -4442,5 +4717,376 @@
   .kx-system-menu,
   .kx-account-menu {
     left: calc(var(--kx-sidebar-rail) + 12px);
+  }
+}
+
+/* ── Session Timeline (Task 13 Part 2) ────────────────────────────
+ * Chronological list of messages, events, quote/delivery cards. */
+/* Timeline — same full reading column as the composer. */
+.kx-session-detail__timeline {
+  list-style: none;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+/* Timeline items base */
+.kx-session-timeline__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* User message — right-aligned bubble */
+.kx-session-timeline__item--user {
+  align-items: flex-end;
+}
+
+.kx-session-timeline__bubble--user {
+  align-self: flex-end;
+  max-width: 78%;
+  padding: 12px 16px;
+  background: rgba(79, 112, 68, 0.12);
+  border-radius: 14px 14px 4px 14px;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  line-height: 1.5;
+}
+
+/* Assistant message — left aligned; identity chrome intentionally omitted. */
+.kx-session-timeline__item--assistant {
+  align-items: flex-start;
+}
+
+.kx-session-timeline__bubble--assistant {
+  align-self: flex-start;
+  max-width: 78%;
+  padding: 12px 16px;
+  background: var(--kx-pale);
+  border-radius: 14px 4px 14px 14px;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  line-height: 1.5;
+}
+
+/* System event — centered row */
+.kx-session-timeline__item--system {
+  align-items: center;
+  flex-direction: row;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid var(--kx-border);
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-session-timeline__event-text {
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+  font-weight: var(--kx-font-medium);
+}
+
+/* Quote and Delivery cards — raised surface */
+.kx-session-timeline__card {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+}
+
+.kx-session-timeline__card--quote,
+.kx-session-timeline__card--delivery {
+  box-shadow: 0 2px 8px rgba(36, 48, 37, 0.06);
+}
+
+.kx-session-timeline__card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.kx-session-timeline__card-title {
+  margin: 0;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-session-timeline__card-body {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  line-height: 1.4;
+}
+
+.kx-session-timeline__card-meta {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-session-timeline__card-summary {
+  margin: 4px 0 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  line-height: 1.4;
+}
+
+.kx-session-timeline__card-limitations {
+  margin: 4px 0 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+  font-style: italic;
+}
+
+/* Delivery artifacts as chips/links */
+.kx-session-timeline__artifacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.kx-session-timeline__artifact-link {
+  display: inline-block;
+  padding: 4px 10px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-radius: 6px;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-accent-text-aa);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.kx-session-timeline__artifact-link:hover {
+  background: var(--kx-accent-segment-aa);
+  border-color: var(--kx-accent);
+  color: var(--kx-primary);
+}
+
+/* Error card */
+.kx-session-timeline__card--error {
+  background: rgba(255, 200, 100, 0.12);
+  border-color: rgba(255, 180, 80, 0.4);
+}
+
+.kx-session-timeline__error-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.kx-session-timeline__error-title {
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+}
+
+/* Approval item */
+.kx-session-timeline__item--approval {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.kx-session-timeline__approval-text {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-secondary);
+}
+
+/* Artifact row */
+.kx-session-timeline__item--artifact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kx-session-timeline__artifact-label {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-secondary);
+}
+
+/* Loading skeleton */
+.kx-session-timeline__skeleton {
+  display: grid;
+  gap: 12px;
+}
+
+.kx-session-timeline__skeleton-row {
+  height: 48px;
+  border-radius: 12px;
+  background: var(--kx-pale);
+  animation: kx-timeline-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes kx-timeline-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ── Quote Approval Card (Task 13 Part 2) ────────────────────────
+ * Decision card above timeline when quote is pending approval. */
+.kx-quote-approval-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-accent);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(79, 112, 68, 0.16);
+}
+
+.kx-quote-approval-card__head {
+  border-bottom: 1px solid var(--kx-border);
+  padding-bottom: 10px;
+}
+
+.kx-quote-approval-card__title {
+  margin: 0;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-quote-approval-card__body {
+  display: grid;
+  gap: 12px;
+}
+
+.kx-quote-approval-card__quote-info {
+  display: grid;
+  gap: 6px;
+}
+
+.kx-quote-approval-card__quote-id {
+  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-quote-approval-card__scope {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  line-height: 1.4;
+}
+
+.kx-quote-approval-card__estimates {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  background: var(--kx-pale);
+  border-radius: 10px;
+}
+
+.kx-quote-approval-card__points,
+.kx-quote-approval-card__expiry {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-secondary);
+}
+
+.kx-quote-approval-card__history {
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+  font-style: italic;
+}
+
+.kx-quote-approval-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.kx-quote-approval-card__note {
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+  text-align: center;
+}
+
+/* ── Session Detail Composer (Task 13 Part 2) ─────────────────────
+ * Sticky bottom message composer with textarea and toolbar. */
+/* Detail composer — sticky at the timeline bottom, but no outer card.
+ * Only the exact main-page input box is visible. */
+.kx-session-composer {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  margin-top: 24px;
+  padding-top: 16px;
+  background: var(--kx-canvas);
+}
+
+.kx-session-composer--locked {
+  padding: 14px 16px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.kx-session-composer__locked-notice {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+  font-style: italic;
+}
+
+/* ── Responsive: narrow viewport ≤760px ───────────────────────────
+ * Timeline bubbles full-ish width, cards reduced padding, composer static. */
+@media (max-width: 760px) {
+  .kx-session-detail__timeline {
+    max-width: none;
+  }
+
+  .kx-session-timeline__bubble--user,
+  .kx-session-timeline__bubble--assistant {
+    max-width: 90%;
+  }
+
+  .kx-session-timeline__card {
+    padding: 12px 14px;
+  }
+
+  .kx-session-timeline__card-title {
+    font-size: var(--kx-text-md);
+  }
+
+  .kx-quote-approval-card {
+    padding: 14px;
+  }
+
+  .kx-quote-approval-card__title {
+    font-size: var(--kx-text-md);
+  }
+
+  .kx-session-composer {
+    position: sticky;
+    bottom: 0;
+    margin-top: 16px;
+  }
+
+  .kx-composer__input {
+    min-height: 60px;
   }
 }

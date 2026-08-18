@@ -81,6 +81,16 @@ const mutedM = [
   '.kx-new-session__intro-body',
   '.kx-composer__input::placeholder',
   '.kx-new-session__disclaimer',
+  '.kx-badge--cancelled',
+  '.kx-session-detail__meta',
+  '.kx-session-detail__stage-status',
+  '.kx-session-timeline__event-text',
+  '.kx-session-timeline__card-meta',
+  '.kx-session-timeline__card-limitations',
+  '.kx-session-detail__tracker-kicker',
+  '.kx-quote-approval-card__history',
+  '.kx-quote-approval-card__note',
+  '.kx-session-composer__locked-notice',
   '.kx-profile-menu__item-meta',
   '.kx-profile-menu__section-label',
   '.kx-profile-menu__setting-desc',
@@ -167,12 +177,20 @@ const accentA = [
   '.kx-integrations__status--connected',
   '.kx-preserved__status--enabled',
   '.kx-history__clear',
+  '.kx-badge--failed',
+  '.kx-session-detail__action-needed',
+  '.kx-session-timeline__artifact-link',
+  '.kx-session-timeline__error-title',
+  '.kx-quote-approval-card__quote-id',
+  '.kx-session-detail__stage-icon--active',
+  '.kx-session-detail__completed-chip svg',
 ]
 
-const accentS = ['.kx-btn--primary', '.kx-composer__badge']
+const accentS = ['.kx-btn--primary', '.kx-composer__badge', '.kx-badge--waiting_approval']
 
 const accentU: Array<[string, string]> = [
   ['.kx-input:focus', 'border-color'],
+  ['.kx-history__row-button:focus-visible', 'outline'],
   ['.kx-sidebar__workspace-avatar', 'background'],
   ['.kx-system-menu__create:hover', 'border-color'],
   ['.kx-workspace-menu__item-avatar', 'background'],
@@ -320,17 +338,17 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = [...extractUsages(components, COMPONENTS), ...extractUsages(global, GLOBAL)]
 
-  it('covers exactly 115 consumers — 67 muted and 48 accent-strong', () => {
-    expect(inventory).toHaveLength(115)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(67)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(48)
+  it('covers exactly 134 consumers — 77 muted and 57 accent-strong', () => {
+    expect(inventory).toHaveLength(134)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(77)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(57)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(63)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(26)
-    expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(2)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(24)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(73)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(33)
+    expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(3)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(25)
   })
 
   it('has no duplicate inventory selectors', () => {

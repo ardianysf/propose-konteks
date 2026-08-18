@@ -145,6 +145,69 @@ describe('SessionHistoryPage — list and row layout', () => {
 })
 
 // ---------------------------------------------------------------------------
+// Row navigation button
+// ---------------------------------------------------------------------------
+
+describe('SessionHistoryPage — row navigation button', () => {
+  it('renders each row as a clickable button with data-testid="history-row"', () => {
+    renderSessionHistoryPage()
+    const list = screen.getByRole('list', { name: 'Session history' })
+    const rows = within(list).getAllByRole('listitem')
+    expect(rows).toHaveLength(SESSION_HISTORY.length)
+
+    for (const row of rows) {
+      const rowButton = within(row).queryByTestId('history-row')
+      expect(rowButton).toBeInTheDocument()
+      expect(rowButton).toHaveAttribute('type', 'button')
+      expect(rowButton).toHaveClass('kx-history__row-button')
+    }
+  })
+
+  it('navigates to session-detail when clicking the row button', () => {
+    const { bucket } = renderSessionHistoryPage()
+    const list = screen.getByRole('list', { name: 'Session history' })
+    const firstRow = within(list).getAllByRole('listitem')[0]
+    const rowButton = within(firstRow).getByTestId('history-row')
+
+    expect(bucket.current?.route).toBe('new-session')
+    fireEvent.click(rowButton)
+    expect(bucket.current?.route).toBe('session-detail')
+  })
+
+  it('row button is keyboard focusable with visible focus styles', () => {
+    renderSessionHistoryPage()
+    const list = screen.getByRole('list', { name: 'Session history' })
+    const firstRow = within(list).getAllByRole('listitem')[0]
+    const rowButton = within(firstRow).getByTestId('history-row')
+
+    rowButton.focus()
+    expect(rowButton).toHaveFocus()
+  })
+
+  it('action button click opens menu without navigating to session-detail', () => {
+    const { bucket } = renderSessionHistoryPage()
+    const list = screen.getByRole('list', { name: 'Session history' })
+    const firstRow = within(list).getAllByRole('listitem')[0]
+    const actionButton = within(firstRow).getByRole('button', { name: /Actions for/ })
+
+    fireEvent.click(actionButton)
+    expect(bucket.current?.route).toBe('new-session') // Still on new-session, not navigated
+    expect(screen.getByRole('menu', { name: /Actions for/ })).toBeInTheDocument()
+  })
+
+  it('action button uses stopPropagation to prevent row navigation', () => {
+    const { bucket } = renderSessionHistoryPage()
+    const list = screen.getByRole('list', { name: 'Session history' })
+    const firstRow = within(list).getAllByRole('listitem')[0]
+    const actionButton = within(firstRow).getByRole('button', { name: /Actions for/ })
+
+    // Click the action button - should not navigate
+    fireEvent.click(actionButton)
+    expect(bucket.current?.route).toBe('new-session')
+  })
+})
+
+// ---------------------------------------------------------------------------
 // Three-dot action + local menu
 // ---------------------------------------------------------------------------
 
