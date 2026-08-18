@@ -4394,7 +4394,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  width: min(840px, calc(100% - 64px));
+  width: min(756px, calc(100% - 64px));
   margin: 0 auto;
   padding: 24px 0 32px;
 }
@@ -4661,14 +4661,14 @@
  * Groups the large discrete content units (quote, timeline, metadata) as
  * flat siblings so each can later become a clickable component. The blocks
  * column reads narrower than the composer below it: max-width is 70% of the
- * 840px content column (588px) and it is horizontally centered within the
+ * 756px content column (529px) and it is horizontally centered within the
  * content column (the composer area spans the full content width below it). */
 .kx-session-detail__blocks {
   display: flex;
   flex-direction: column;
   gap: 20px;
   width: 100%;
-  max-width: 588px;
+  max-width: 529px;
   min-width: 0;
   margin: 0 auto;
 }

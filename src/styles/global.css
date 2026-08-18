@@ -22,7 +22,7 @@ body {
 
 body {
   font-family: var(--kx-font-family);
-  font-size: var(--kx-text-md); /* MD 10 — normal-weight default body/UI text */
+  font-size: var(--kx-text-md); /* MD 12 — normal-weight default body/UI text */
   font-weight: var(--kx-font-normal);
   line-height: 1.5;
   color: var(--kx-primary);
