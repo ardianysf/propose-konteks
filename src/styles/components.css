@@ -1076,11 +1076,11 @@
   min-width: 0;
 }
 
-/* Page-title hierarchy — the h1 steps up to the 24px page-title token
- * (user-directed), with the subtitle/approval keeping the shared 13px
- * body scale beneath it. */
+/* Page-title hierarchy — the h1 uses the 20px section-title token so the
+ * header feels proportional to the composer-led page (user-directed), with
+ * the subtitle/approval keeping the shared 13px body scale beneath it. */
 .kx-new-session__title {
-  font-size: var(--kx-text-3xl);
+  font-size: var(--kx-text-2xl);
   font-weight: var(--kx-font-bold);
   line-height: 1.25;
   color: var(--kx-primary);
@@ -4424,6 +4424,20 @@
   margin-left: auto;
 }
 
+/* Session context line — mode · system · component read from sessionDetail
+ * (option B). Muted AA text, sits directly under the title row. */
+.kx-session-detail__context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-normal);
+  color: var(--kx-muted-text-aa);
+  line-height: 1.4;
+}
+
 .kx-session-detail__title {
   min-width: 0;
   margin: 0;
@@ -4620,6 +4634,18 @@
     flex-wrap: wrap;
     row-gap: 8px;
   }
+}
+
+/* ── Content blocks container ─────────────────────────────────────
+ * Groups the large discrete content units (quote, timeline, tracker,
+ * metadata) as flat siblings so each can later become a clickable
+ * component; layout intentionally matches the pre-existing gap rhythm. */
+.kx-session-detail__blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
 }
 
 /* ── Responsive rail + viewport hardening (Task 13, AC12/AC43/AC44) ──
