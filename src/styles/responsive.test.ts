@@ -145,9 +145,13 @@ describe('Customize viewport constraints (AC44)', () => {
 
   it('keeps the content region as the sole vertical scroller', () => {
     expect(flat(components)).toContain('.kx-customize__content { min-height: 0; overflow-y: auto;')
-    // Header/close/nav stay outside the scroll region via the grid rows.
+    // Settings-style layout (user-directed): head above a body row —
+    // left section nav + scrollable content beside it.
     expect(flat(components)).toContain(
-      '.kx-customize { display: grid; grid-template-rows: auto auto minmax(0, 1fr);',
+      '.kx-customize { display: grid; grid-template-rows: auto minmax(0, 1fr);',
+    )
+    expect(flat(components)).toContain(
+      '.kx-customize__body { display: grid; grid-template-columns: 180px minmax(0, 1fr);',
     )
   })
 })
@@ -200,9 +204,12 @@ describe('New Session semantic layout (composer correction)', () => {
 
   it('splits the full-width header into copy left and the approval indicator right', () => {
     const css = flat(components)
+    // Full width (never capped/centered): the band always sits exactly on
+    // the page's 32px side padding, sidebar state notwithstanding.
     expect(css).toContain(
-      '.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; width: min(1200px, 100%);',
+      '.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; width: 100%;',
     )
+    expect(css).not.toContain('.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; width: min(1200px, 100%);')
     // Uniform header type: title/subtitle/approval share --kx-text-xs;
     // hierarchy comes from weight alone (user-directed).
     expect(css).toContain('.kx-new-session__title { font-size: var(--kx-text-sm);')

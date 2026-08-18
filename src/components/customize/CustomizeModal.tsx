@@ -126,43 +126,45 @@ export default function CustomizeModal() {
           </button>
         </header>
 
-        {/* Fixed tab nav — the exact §11 order; switching happens in
-            place through SET_CUSTOMIZE_TAB, never by remounting the
-            frame (AC34). */}
-        <div role="tablist" aria-label="Customize tabs" className="kx-customize__nav">
-          {TABS.map((entry) => {
-            const selected = entry.id === tab
-            return (
-              <button
-                key={entry.id}
-                type="button"
-                role="tab"
-                id={tabButtonId(entry.id)}
-                aria-selected={selected}
-                aria-controls={panelId}
-                tabIndex={selected ? 0 : -1}
-                className={
-                  selected
-                    ? 'kx-customize__tab kx-customize__tab--active'
-                    : 'kx-customize__tab'
-                }
-                onClick={() => dispatch({ type: 'SET_CUSTOMIZE_TAB', tab: entry.id })}
-              >
-                {entry.label}
-              </button>
-            )
-          })}
-        </div>
+        {/* Fixed body — section nav on the LEFT (Settings-style,
+            user-directed) and the sole scrolling content region beside
+            it; switching happens in place through SET_CUSTOMIZE_TAB. */}
+        <div className="kx-customize__body">
+          <div role="tablist" aria-label="Customize tabs" aria-orientation="vertical" className="kx-customize__nav">
+            {TABS.map((entry) => {
+              const selected = entry.id === tab
+              return (
+                <button
+                  key={entry.id}
+                  type="button"
+                  role="tab"
+                  id={tabButtonId(entry.id)}
+                  aria-selected={selected}
+                  aria-controls={panelId}
+                  tabIndex={selected ? 0 : -1}
+                  className={
+                    selected
+                      ? 'kx-customize__tab kx-customize__tab--active'
+                      : 'kx-customize__tab'
+                  }
+                  onClick={() => dispatch({ type: 'SET_CUSTOMIZE_TAB', tab: entry.id })}
+                >
+                  {entry.label}
+                </button>
+              )
+            })}
+          </div>
 
-        {/* The sole scrolling region — only this area scrolls (AC35). */}
-        <div className="kx-customize__content">
-          <div
-            role="tabpanel"
-            id={panelId}
-            aria-labelledby={tabButtonId(tab)}
-            className="kx-customize__panel"
-          >
-            <TabPanelContent tab={tab} />
+          {/* The sole scrolling region — only this area scrolls (AC35). */}
+          <div className="kx-customize__content">
+            <div
+              role="tabpanel"
+              id={panelId}
+              aria-labelledby={tabButtonId(tab)}
+              className="kx-customize__panel"
+            >
+              <TabPanelContent tab={tab} />
+            </div>
           </div>
         </div>
       </div>

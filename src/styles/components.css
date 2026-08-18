@@ -704,13 +704,15 @@
   display: none;
 }
 
-/* Rail (collapsed) user area — Customize stacks ABOVE the avatar in a
- * vertical column (user-directed): the sliders trigger is visually first
- * even though it follows the account trigger in DOM/tab order. */
+/* Rail (collapsed) user area — pinned to the sidebar's bottom edge via
+ * margin-top:auto (Recent sessions are hidden in the rail, so nothing
+ * else fills the column), Customize stacks ABOVE the avatar in a
+ * vertical column (user-directed). */
 .kx-sidebar--rail .kx-sidebar__user {
   flex-direction: column;
   justify-content: center;
   gap: 10px;
+  margin-top: auto;
   padding: 10px 0 6px;
 }
 
@@ -1050,15 +1052,16 @@
 
 /* Header — the sidebar minimize/maximize control sits at the far LEFT
  * of the header band beside the title block (user-directed); approval
- * rides the right edge. */
+ * rides the right edge. Full width — never capped/centered, so the
+ * band's left/right edges always sit exactly on the page's 32px side
+ * padding whether the sidebar is expanded or minimized. */
 .kx-new-session__header {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  width: min(1200px, 100%);
-  margin: 0 auto;
+  width: 100%;
   min-width: 0;
 }
 
@@ -2983,13 +2986,14 @@
 /* ── Customize modal shell (Task 9 Part A, spec §11) ─────────────────
  * Fixed 790×580 frame on every tab (AC34): width/height come from the
  * --kx-customize-w/--kx-customize-h tokens and never resize when tabs
- * switch. The fixed header and tab nav sit outside the single
- * scrolling content region, so only tab content ever scrolls (AC35).
- * Tab contents live in the sections below (AC36–AC38). */
+ * switch. Settings-style layout (user-directed): the fixed header sits
+ * above a body row — vertical section nav on the left, the single
+ * scrolling content region beside it, so only tab content ever scrolls
+ * (AC35). Tab contents live in the sections below (AC36–AC38). */
 
 .kx-customize {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr); /* head / nav / scrollable content */
+  grid-template-rows: auto minmax(0, 1fr); /* head / body */
   width: var(--kx-customize-w);
   max-width: calc(100vw - 48px);
   height: var(--kx-customize-h);
@@ -2998,6 +3002,15 @@
   max-height: calc(100vh - 48px);
   max-height: calc(100dvh - 48px);
   overflow: hidden;
+}
+
+/* Body — section nav left (180px, mirroring the Settings modal),
+ * scrollable content right. */
+
+.kx-customize__body {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  min-height: 0;
 }
 
 /* Header — title + dismiss control, never scrolls (AC35). */
@@ -3025,18 +3038,26 @@
 /* Tab nav — pill buttons in the exact §11 order; switching happens in
  * place (SET_CUSTOMIZE_TAB), so nothing here remounts on tab change. */
 
+/* Section nav — vertical column on the left edge, mirroring the
+ * Settings modal's section list (user-directed). */
+
 .kx-customize__nav {
   display: flex;
-  gap: 4px;
-  padding: 10px 18px;
-  border-bottom: 1px solid var(--kx-border);
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 10px;
+  border-right: 1px solid var(--kx-border);
 }
 
 .kx-customize__tab {
-  padding: 7px 12px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 9px 12px;
   border: none;
-  border-radius: 999px;
+  border-radius: 9px;
   background: transparent;
+  text-align: left;
   font-family: inherit;
   font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-medium);
