@@ -7,6 +7,7 @@
  */
 import { useMockup } from '../../state/MockupContext'
 import type { StageStatus } from '../../data/mockData'
+import SessionStatusBadge from './SessionStatusBadge'
 
 function getStageStatusLabel(
   stageStatus: StageStatus,
@@ -52,6 +53,11 @@ export default function SessionTracker() {
           <span className="kx-visually-hidden"> — {activeLabel}</span>
         </span>
       </div>
+      {/* Session status badge — right-aligned with the composer box on the
+          same row as the tracker (via margin-left: auto). Stays visible
+          while scrolled because the tracker sits inside the sticky composer
+          area. */}
+      <SessionStatusBadge />
     </nav>
   )
 }

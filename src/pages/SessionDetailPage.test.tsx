@@ -78,12 +78,18 @@ describe('SessionDetailPage — page structure', () => {
 // ---------------------------------------------------------------------------
 
 describe('SessionHeader — sticky title, status, and share', () => {
-  it('renders the status badge with icon+text', () => {
+  it('renders the status badge with icon+text in the sticky composer area (not the header)', () => {
     renderSessionDetailPage()
     const badge = screen.getByTestId('session-status')
     expect(badge).toHaveClass('kx-badge', 'kx-badge--waiting_approval')
     expect(badge.textContent).toContain('Waiting Approval')
     expect(badge.querySelector('svg[data-icon="circle"]')).not.toBeNull()
+
+    // The badge has moved out of the header and now lives inside the sticky
+    // composer area (on the tracker row), right-aligned with the composer.
+    expect(screen.getByTestId('session-detail-header')).not.toContainElement(badge)
+    expect(screen.getByTestId('session-composer-area')).toContainElement(badge)
+    expect(screen.getByTestId('session-tracker')).toContainElement(badge)
   })
 
   it('renders the session context metadata (mode · system · component) from sessionDetail in the header', () => {
@@ -143,8 +149,11 @@ describe('SessionTracker — minimal current-stage summary', () => {
     expect(pill).toHaveTextContent('Quote')
     expect(pill).toHaveTextContent('Awaiting approval')
 
-    // No extra visual noise: no icons, no completed-stage chips.
-    expect(tracker.querySelector('svg')).toBeNull()
+    // No extra visual noise in the current-stage cluster itself: no icons,
+    // no completed-stage chips. (The session status badge's icon lives on the
+    // tracker row but outside the tracker-current summary.)
+    const current = tracker.querySelector('.kx-session-detail__tracker-current')
+    expect(current?.querySelector('svg')).toBeNull()
     expect(tracker.querySelectorAll('.kx-session-detail__completed-chip')).toHaveLength(0)
   })
 

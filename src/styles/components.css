@@ -4425,17 +4425,29 @@
 }
 
 /* Session context line — mode · system · component read from sessionDetail
- * (option B). Muted AA text, sits directly under the title row. */
+ * (option B) on the left, status badge aligned on the same horizontal line
+ * at the right edge. Muted AA text, sits directly under the title row. */
 .kx-session-detail__context {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 6px 12px;
   margin: 6px 0 0;
   font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-normal);
   color: var(--kx-muted-text-aa);
   line-height: 1.4;
+}
+
+/* Context items cluster (mode · system · component) — wraps as one unit
+ * when the viewport is too narrow for the badge to share the line. */
+.kx-session-detail__context-items {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
 
 .kx-session-detail__title {
@@ -4557,10 +4569,23 @@
 }
 
 /* ── Session Tracker — minimal current-stage summary ──────────────
- * Kicker text + a slightly larger active-stage pill; nothing else. */
+ * Kicker text + a slightly larger active-stage pill on the left, and the
+ * session status badge pushed to the right edge (aligned with the composer
+ * box). 12px top padding (vs 4px elsewhere) gives the current-stage line
+ * extra breathing room from whatever sits above it in the sticky region;
+ * 12px bottom padding keeps it clear of the composer box below. */
 .kx-session-detail__tracker {
-  display: grid;
-  padding: 4px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 12px 0;
+}
+
+/* The session status badge (see SessionStatusBadge) sits at the right edge
+ * of the tracker row, right-aligned with the composer box. */
+.kx-session-detail__tracker [data-testid="session-status"] {
+  margin-left: auto;
 }
 
 .kx-session-detail__tracker-current {
@@ -5087,15 +5112,39 @@
 /* ── Session Detail Composer (Task 13 Part 2) ─────────────────────
  * Sticky bottom message composer with textarea and toolbar. */
 /* Composer area — sticky region pinning the tracker (current stage · cycle
- * context + active-stage pill) directly above the sticky continuation
- * composer, so the stage context scrolls with and stays attached to the
- * composer input box. */
+ * context + active-stage pill + session status badge) directly above the
+ * sticky continuation composer, so the stage context scrolls with and stays
+ * attached to the composer input box.
+ *
+ * Bottom masking: the element sticks to `bottom: 0` and paints a solid
+ * canvas backdrop across the full content width via a ::before strip that
+ * extends below the element's own box. This blocks any scrolled content from
+ * showing through beneath the sticky region. The visual breathing room at
+ * the bottom lives *inside* the solid region (the ::before strip + the
+ * composer's own bottom offset), so the composer never sits flush against
+ * the viewport edge while nothing leaks through behind it. */
 .kx-session-detail__composer-area {
   position: sticky;
-  bottom: 16px;
+  bottom: 0;
   z-index: 10;
   margin: 24px -16px 0;
   padding: 8px 16px 16px;
+  background: var(--kx-canvas);
+}
+
+/* Solid blocking strip painted behind the sticky composer area, extending
+ * below its bottom edge (and across the full content width) so nothing shows
+ * through the bottom offset gap while scrolling. The strip reuses the canvas
+ * token and stretches past the element by the same bottom breathing room the
+ * layout already reserves. */
+.kx-session-detail__composer-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Extend below the element's own box to cover the gap between the sticky
+   * region and the viewport bottom edge. */
+  bottom: -16px;
+  z-index: -1;
   background: var(--kx-canvas);
 }
 
@@ -5151,9 +5200,13 @@
   }
 
   .kx-session-detail__composer-area {
-    bottom: 12px;
+    bottom: 0;
     margin: 16px -12px 0;
     padding: 8px 12px 12px;
+  }
+
+  .kx-session-detail__composer-area::before {
+    bottom: -12px;
   }
 
   .kx-composer__input {
