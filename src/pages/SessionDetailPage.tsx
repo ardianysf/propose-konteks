@@ -2,8 +2,11 @@
  * SessionDetailPage — session conversation/workflow detail.
  *
  * The sticky full-width header is intentionally outside the bounded reading
- * column. The content column contains the quote, timeline, compact workflow
- * summary, metadata, and the final sticky continuation composer.
+ * column. The content column groups the page into large discrete blocks
+ * (quote, timeline, tracker, metadata, and the final sticky continuation
+ * composer) so each unit can later become a clickable component without
+ * restructuring the page — clickability itself is intentionally not
+ * implemented yet.
  */
 import { useMockup } from '../state/MockupContext'
 import SessionHeader from '../components/session/SessionHeader'
@@ -43,19 +46,24 @@ export default function SessionDetailPage() {
       <SessionHeader />
 
       <div className="kx-session-detail__content">
-        <SessionQuoteCard />
-        <SessionTimeline />
-        <SessionTracker />
+        {/* Large discrete content blocks — kept as flat siblings inside a
+            dedicated container so each block can later become a clickable
+            component; no click behavior is attached yet. */}
+        <div className="kx-session-detail__blocks" data-testid="session-detail-blocks">
+          <SessionQuoteCard />
+          <SessionTimeline />
+          <SessionTracker />
 
-        <footer className="kx-session-detail__meta">
-          <span className="kx-chip">
-            <RepoIcon />
-            <span>{sessionDetail.repository}</span>
-          </span>
-          <span className="kx-chip">{sessionDetail.branch}</span>
-          <span className="kx-chip">{sessionDetail.issueRef}</span>
-          <span className="kx-chip">{sessionDetail.agent}</span>
-        </footer>
+          <footer className="kx-session-detail__meta">
+            <span className="kx-chip">
+              <RepoIcon />
+              <span>{sessionDetail.repository}</span>
+            </span>
+            <span className="kx-chip">{sessionDetail.branch}</span>
+            <span className="kx-chip">{sessionDetail.issueRef}</span>
+            <span className="kx-chip">{sessionDetail.agent}</span>
+          </footer>
+        </div>
 
         {/* Final sticky session interaction — same inner input as main page. */}
         <SessionDetailComposer />

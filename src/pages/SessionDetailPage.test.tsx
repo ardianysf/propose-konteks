@@ -86,6 +86,17 @@ describe('SessionHeader — sticky title, status, and share', () => {
     expect(badge.querySelector('svg[data-icon="circle"]')).not.toBeNull()
   })
 
+  it('renders the session context metadata (mode · system · component) from sessionDetail in the header', () => {
+    renderSessionDetailPage()
+    const header = screen.getByTestId('session-detail-header')
+    const context = screen.getByTestId('session-context')
+    expect(header).toContainElement(context)
+    expect(context).toHaveClass('kx-session-detail__context')
+    expect(context.textContent).toContain('Engineering')
+    expect(context.textContent).toContain('BSI - HRIS')
+    expect(context.textContent).toContain('hris-web')
+  })
+
   it('renders the title as a single h1 in the sticky header', () => {
     renderSessionDetailPage()
     const h1s = screen.getAllByRole('heading', { level: 1 })
@@ -185,6 +196,35 @@ describe('SessionDetailPage — metadata footer chips', () => {
 
     // Agent chip
     expect(chips?.[3].textContent).toContain('Konteks Engineering Agent')
+  })
+
+  it('keeps mode/system/component context metadata in the header, not the footer', () => {
+    renderSessionDetailPage()
+    const footer = document.querySelector('footer.kx-session-detail__meta')
+    expect(footer?.querySelector('[data-testid="session-context"]')).toBeNull()
+    expect(footer?.textContent).not.toContain('BSI - HRIS')
+    expect(footer?.textContent).not.toContain('hris-web')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Content blocks container
+// ---------------------------------------------------------------------------
+
+describe('SessionDetailPage — content blocks container', () => {
+  it('groups quote, timeline, tracker, and metadata as large discrete blocks', () => {
+    renderSessionDetailPage()
+    const blocks = screen.getByTestId('session-detail-blocks')
+    expect(blocks).toHaveClass('kx-session-detail__blocks')
+
+    // Each block remains a flat sibling so it can later become clickable.
+    expect(blocks.querySelector('[data-testid="session-timeline"]')).not.toBeNull()
+    expect(blocks.querySelector('[data-testid="session-tracker"]')).not.toBeNull()
+    expect(blocks.querySelector('footer.kx-session-detail__meta')).not.toBeNull()
+    expect(blocks.querySelector('[data-testid="quote-approval-card"]')).not.toBeNull()
+
+    // The sticky composer intentionally stays outside the blocks container.
+    expect(blocks.querySelector('[data-testid="session-composer"]')).toBeNull()
   })
 })
 

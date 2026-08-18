@@ -361,6 +361,14 @@ describe('session context initial state', () => {
     expect(state.sessionDetail.timeline).not.toBe(SESSION_DETAIL.timeline)
   })
 
+  it('stores mode/system/component context metadata on sessionDetail itself (option B)', () => {
+    const state = freshState()
+    expect(state.sessionDetail.mode).toBe('engineering')
+    expect(state.sessionDetail.systemId).toBe('bsi-hris')
+    expect(state.sessionDetail.systemName).toBe('BSI - HRIS')
+    expect(state.sessionDetail.componentName).toBe('hris-web')
+  })
+
   it('mutating the state copy does not alter the SESSION_DETAIL constant', () => {
     const state = freshState()
     // Mutate the state copy

@@ -210,9 +210,9 @@ describe('New Session semantic layout (composer correction)', () => {
       '.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; width: 100%;',
     )
     expect(css).not.toContain('.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; width: min(1200px, 100%);')
-    // Page-title hierarchy: the h1 steps up to the 24px page-title token
+    // Section-title hierarchy: the h1 uses the 20px section-title token
     // while the subtitle/approval keep the shared body scale (user-directed).
-    expect(css).toContain('.kx-new-session__title { font-size: var(--kx-text-3xl);')
+    expect(css).toContain('.kx-new-session__title { font-size: var(--kx-text-2xl);')
     expect(css).toContain('.kx-new-session__subtitle { font-size: var(--kx-text-md);')
     expect(css).toContain('.kx-new-session__approval { flex-shrink: 0; margin-left: auto;')
   })

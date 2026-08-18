@@ -84,6 +84,13 @@ export interface SessionDetailData {
   sessionId: string
   title: string
   status: SessionDetailStatus
+  // Session context metadata stored on the detail record itself (option B):
+  // the session's mode, owning system, and target component travel with
+  // sessionDetail instead of being read from transient current selection.
+  mode: SessionMode
+  systemId: string
+  systemName: string
+  componentName: string
   repository: string
   branch: string
   issueRef: string
@@ -793,6 +800,10 @@ export const SESSION_DETAIL: SessionDetailData = {
   sessionId: 'SES-2026-0042',
   title: 'Investigate and fix the error when get list approval exception that list not showing',
   status: 'WAITING_APPROVAL',
+  mode: 'engineering',
+  systemId: 'bsi-hris',
+  systemName: 'BSI - HRIS',
+  componentName: 'hris-web',
   repository: 'bsi/hris-approval-service',
   branch: 'fix/approval-list-exception',
   issueRef: '#318',

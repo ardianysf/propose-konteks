@@ -1,10 +1,12 @@
 /*
  * SessionHeader — compact sticky header for the Session Detail timeline.
- * Shows only the session title, status, and a share affordance; supporting
- * metadata belongs to the session metadata section below the timeline.
+ * Shows the session title, status, share affordance, and the session context
+ * metadata (mode · system · component) stored on `sessionDetail` itself.
+ * Supporting metadata (repo/branch/issue/agent) belongs to the session
+ * metadata section below the timeline.
  */
 import { useMockup } from '../../state/MockupContext'
-import type { SessionDetailStatus } from '../../data/mockData'
+import type { SessionDetailStatus, SessionMode } from '../../data/mockData'
 
 function getStatusLabel(status: SessionDetailStatus): string {
   switch (status) {
@@ -53,6 +55,17 @@ function StatusIcon({ status }: { status: SessionDetailStatus }) {
   )
 }
 
+function getModeLabel(mode: SessionMode): string {
+  switch (mode) {
+    case 'engineering':
+      return 'Engineering'
+    case 'qa':
+      return 'QA'
+    case 'planning':
+      return 'Planning'
+  }
+}
+
 function ShareIcon() {
   return (
     <svg data-icon="share" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
@@ -91,6 +104,15 @@ export default function SessionHeader() {
           <ShareIcon />
         </button>
       </div>
+      {/* Session context metadata — stored on sessionDetail (option B):
+          mode · system · component, read-only for now. */}
+      <p className="kx-session-detail__context" data-testid="session-context">
+        <span>{getModeLabel(sessionDetail.mode)}</span>
+        <span aria-hidden="true">·</span>
+        <span>{sessionDetail.systemName}</span>
+        <span aria-hidden="true">·</span>
+        <span>{sessionDetail.componentName}</span>
+      </p>
     </header>
   )
 }
