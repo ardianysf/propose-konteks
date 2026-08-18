@@ -4420,22 +4420,27 @@
   min-width: 0;
 }
 
+/* Share button — scoped compact override: the global .kx-icon-btn is a
+ * 36×36px control which inflates the title row to ~36px; 28px keeps a
+ * comfortable touch target and tightens the title → context visual gap. */
 .kx-session-detail__share {
   flex-shrink: 0;
   margin-left: auto;
+  width: 28px;
+  height: 28px;
 }
 
 /* Session context line — mode · system · component read from sessionDetail
  * (option B) on the left, status badge aligned on the same horizontal line
  * at the right edge. Muted AA text, sits directly under the title row with
- * a tight 4px gap so the header reads as one compact unit. */
+ * a tight 2px gap so the header reads as one compact unit. */
 .kx-session-detail__context {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 6px 12px;
-  margin: 4px 0 0;
+  margin: 2px 0 0;
   font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-normal);
   color: var(--kx-muted-text-aa);
@@ -4452,6 +4457,9 @@
   min-width: 0;
 }
 
+/* Title — sticky header title, clamped so the status/share controls
+ * remain visible in a narrow timeline. Single merged rule; never
+ * re-declared. */
 .kx-session-detail__title {
   min-width: 0;
   margin: 0;
@@ -4460,7 +4468,7 @@
   white-space: nowrap;
   font-size: var(--kx-text-l);
   font-weight: var(--kx-font-bold);
-  line-height: 1.3;
+  line-height: 1.2;
   color: var(--kx-primary);
 }
 .kx-badge {
@@ -4525,20 +4533,6 @@
   font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-bold);
   color: var(--kx-accent-text-aa);
-}
-
-/* Title — sticky header title, clamped so the status/share controls
- * remain visible in a narrow timeline. */
-.kx-session-detail__title {
-  min-width: 0;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--kx-text-l);
-  font-weight: var(--kx-font-bold);
-  line-height: 1.3;
-  color: var(--kx-primary);
 }
 
 /* Meta line + metadata footer — muted text (AA token), chip row below the
@@ -4667,8 +4661,8 @@
  * Groups the large discrete content units (quote, timeline, metadata) as
  * flat siblings so each can later become a clickable component. The blocks
  * column reads narrower than the composer below it: max-width is 70% of the
- * 840px content column (588px) and it is aligned to the composer's left
- * edge (the composer area spans the full content width below it). */
+ * 840px content column (588px) and it is horizontally centered within the
+ * content column (the composer area spans the full content width below it). */
 .kx-session-detail__blocks {
   display: flex;
   flex-direction: column;
@@ -4676,6 +4670,7 @@
   width: 100%;
   max-width: 588px;
   min-width: 0;
+  margin: 0 auto;
 }
 
 /* ── Responsive rail + viewport hardening (Task 13, AC12/AC43/AC44) ──
