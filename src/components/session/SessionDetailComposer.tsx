@@ -98,13 +98,7 @@ export default function SessionDetailComposer() {
           aria-label="Message input"
         />
         <div className="kx-composer__toolbar kx-panel__toolbar" data-testid="session-composer-toolbar">
-          <div className="kx-panel__toolbar-left">
-            <button className="kx-icon-btn kx-composer__tool" type="button" aria-label="Attach file">
-              <AttachmentIcon />
-            </button>
-            <button className="kx-icon-btn kx-composer__tool" type="button" aria-label="Add text document">
-              <TextDocumentIcon />
-            </button>
+          <div className="kx-panel__toolbar-left" data-testid="toolbar-left">
             <div className="kx-composer__profile-anchor">
               <button
                 type="button"
@@ -128,7 +122,13 @@ export default function SessionDetailComposer() {
               {state.overlay.kind === 'execution-profile-menu' && <ExecutionProfileMenu />}
             </div>
           </div>
-          <div className="kx-panel__toolbar-right">
+          <div className="kx-panel__toolbar-right" data-testid="toolbar-right">
+            <button className="kx-icon-btn kx-composer__tool" type="button" aria-label="Attach file">
+              <AttachmentIcon />
+            </button>
+            <button className="kx-icon-btn kx-composer__tool" type="button" aria-label="Add text document">
+              <TextDocumentIcon />
+            </button>
             <button className="kx-icon-btn kx-composer__tool" type="button" aria-label="Voice input">
               <MicIcon />
             </button>

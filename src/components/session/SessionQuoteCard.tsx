@@ -2,8 +2,11 @@
  * SessionQuoteCard — quote approval decision card (Task 13 Part 2).
  *
  * Renders above timeline when active quote is PENDING_APPROVAL and session
- * status is WAITING_APPROVAL. Shows Approve, Reject, Request revision CTAs.
+ * status is WAITING_APPROVAL. Collapsed by default to a compact header row;
+ * expanding reveals the quote details and Approve / Reject / Request
+ * revision actions.
  */
+import { useState } from 'react'
 import { useMockup } from '../../state/MockupContext'
 import { formatTime } from './formatTime'
 
@@ -85,6 +88,7 @@ function RevisionIcon() {
 export default function SessionQuoteCard() {
   const { state, dispatch } = useMockup()
   const { sessionDetail } = state
+  const [isExpanded, setIsExpanded] = useState(false)
 
   // Find the active pending approval quote
   const activeQuote = sessionDetail.quotes.find(
@@ -124,73 +128,105 @@ export default function SessionQuoteCard() {
       className="kx-quote-approval-card"
       data-testid="quote-approval-card"
     >
-      <div className="kx-quote-approval-card__head">
+      <button
+        type="button"
+        className="kx-quote-approval-card__header"
+        aria-expanded={isExpanded}
+        // The collapsible body is only mounted while expanded, so
+        // aria-controls is attached only when the target element exists.
+        {...(isExpanded ? { 'aria-controls': 'kx-quote-approval-body' } : {})}
+        data-testid="quote-approval-toggle"
+        onClick={() => setIsExpanded((expanded) => !expanded)}
+      >
         <h2 className="kx-quote-approval-card__title">
           Quote awaiting your approval
         </h2>
-      </div>
+        <span className="kx-quote-approval-card__quote-ref">
+          {activeQuote.id} · v{activeQuote.version}
+        </span>
+        <svg
+          className={`kx-quote-approval-card__chevron${isExpanded ? ' is-expanded' : ''}`}
+          data-icon="chevron-down"
+          viewBox="0 0 16 16"
+          width="14"
+          height="14"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            d="M3.5 6l4.5 4 4.5-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
 
-      <div className="kx-quote-approval-card__body">
-        <div className="kx-quote-approval-card__quote-info">
-          <div className="kx-quote-approval-card__quote-id">
-            {activeQuote.id} · v{activeQuote.version}
+      {isExpanded && (
+        <div className="kx-quote-approval-card__body" id="kx-quote-approval-body">
+          <div className="kx-quote-approval-card__quote-info">
+            <div className="kx-quote-approval-card__quote-id">
+              {activeQuote.id} · v{activeQuote.version}
+            </div>
+            <p className="kx-quote-approval-card__scope">
+              {sessionDetail.title}
+            </p>
           </div>
-          <p className="kx-quote-approval-card__scope">
-            {sessionDetail.title}
+
+          <div className="kx-quote-approval-card__estimates">
+            <p className="kx-quote-approval-card__points">
+              Estimated {activeQuote.estimatedStoryPoints} story points · Max {activeQuote.maxStoryPoints}
+            </p>
+            <p className="kx-quote-approval-card__expiry">
+              Valid until {activeQuote.expiresAt ? formatTime(activeQuote.expiresAt) : 'Not set'}
+            </p>
+          </div>
+
+          {supersededQuote && (
+            <p className="kx-quote-approval-card__history">
+              Supersedes {supersededQuote.id} (approved, fulfilled in cycle {supersededQuote.version})
+            </p>
+          )}
+
+          <div className="kx-quote-approval-card__actions">
+            <button
+              className="kx-btn kx-btn--primary kx-quote-approval-card__action"
+              type="button"
+              onClick={handleApprove}
+              aria-label={`Approve quote ${activeQuote.id}`}
+            >
+              <ApproveIcon />
+              Approve quote
+            </button>
+
+            <button
+              className="kx-btn kx-btn--ghost kx-quote-approval-card__action"
+              type="button"
+              onClick={handleReject}
+              aria-label={`Reject quote ${activeQuote.id}`}
+            >
+              <RejectIcon />
+              Reject quote
+            </button>
+
+            <button
+              className="kx-btn kx-btn--ghost kx-quote-approval-card__action"
+              type="button"
+              onClick={handleRequestRevision}
+              aria-label={`Request revision for quote ${activeQuote.id}`}
+            >
+              <RevisionIcon />
+              Request revision
+            </button>
+          </div>
+
+          <p className="kx-quote-approval-card__note">
+            Delivery starts only after approval.
           </p>
         </div>
-
-        <div className="kx-quote-approval-card__estimates">
-          <p className="kx-quote-approval-card__points">
-            Estimated {activeQuote.estimatedStoryPoints} story points · Max {activeQuote.maxStoryPoints}
-          </p>
-          <p className="kx-quote-approval-card__expiry">
-            Valid until {activeQuote.expiresAt ? formatTime(activeQuote.expiresAt) : 'Not set'}
-          </p>
-        </div>
-
-        {supersededQuote && (
-          <p className="kx-quote-approval-card__history">
-            Supersedes {supersededQuote.id} (approved, fulfilled in cycle {supersededQuote.version})
-          </p>
-        )}
-
-        <div className="kx-quote-approval-card__actions">
-          <button
-            className="kx-btn kx-btn--primary"
-            type="button"
-            onClick={handleApprove}
-            aria-label={`Approve quote ${activeQuote.id}`}
-          >
-            <ApproveIcon />
-            Approve quote
-          </button>
-
-          <button
-            className="kx-btn kx-btn--ghost"
-            type="button"
-            onClick={handleReject}
-            aria-label={`Reject quote ${activeQuote.id}`}
-          >
-            <RejectIcon />
-            Reject quote
-          </button>
-
-          <button
-            className="kx-btn kx-btn--ghost"
-            type="button"
-            onClick={handleRequestRevision}
-            aria-label={`Request revision for quote ${activeQuote.id}`}
-          >
-            <RevisionIcon />
-            Request revision
-          </button>
-        </div>
-
-        <p className="kx-quote-approval-card__note">
-          Delivery starts only after approval.
-        </p>
-      </div>
+      )}
     </div>
   )
 }

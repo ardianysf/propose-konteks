@@ -1,0 +1,175 @@
+import { expect, test } from '@playwright/test'
+import { goto } from './helpers'
+
+/**
+ * Session Detail E2E — the final conversation layout:
+ *   - sticky full-width header with title, status, and share only
+ *   - no Back to sessions control anywhere
+ *   - user bubbles right-aligned without sender identity or timestamps;
+ *     assistant bubbles without identity chrome
+ *   - sticky final composer reusing the exact main-page input-box/toolbar
+ *     primitives (Execution Profile left; attach, text document, voice, send
+ *     right) without an outer composer panel, offset from the bottom edge
+ *   - minimal tracker: cycle context text + a single active-stage pill
+ */
+
+async function gotoSessionDetail(page: Parameters<typeof goto>[0]) {
+  await goto(page)
+  await page.getByRole('button', { name: 'View all' }).click()
+  await expect(page.getByRole('region', { name: 'Session history' })).toBeVisible()
+  await page.getByTestId('history-row').first().click()
+  await expect(page.getByTestId('session-detail')).toBeVisible()
+}
+
+test.describe('session detail', () => {
+  test('sticky full-width header carries title, status, and share — and no back control', async ({ page }) => {
+    await gotoSessionDetail(page)
+
+    const header = page.getByTestId('session-detail-header')
+    await expect(header).toBeVisible()
+
+    // Sticky + full-width: spans the main canvas and sticks to the top.
+    const geometry = await header.evaluate((el) => {
+      const style = getComputedStyle(el)
+      const rect = el.getBoundingClientRect()
+      return { position: style.position, top: style.top, width: rect.width, viewport: window.innerWidth }
+    })
+    expect(geometry.position).toBe('sticky')
+    expect(geometry.top).toBe('0px')
+    expect(geometry.width).toBeGreaterThan(800)
+
+    // Title, status badge, share affordance only.
+    await expect(header.getByRole('heading', { level: 1 })).toContainText(
+      'Investigate and fix the error when get list approval exception that list not showing',
+    )
+    await expect(page.getByTestId('session-status')).toHaveText(/Waiting Approval/)
+    await expect(page.getByTestId('share-session')).toHaveAccessibleName('Share session')
+
+    // Metadata stays out of the sticky header.
+    await expect(header.locator('.kx-session-detail__meta')).toHaveCount(0)
+
+    // No Back to sessions control anywhere on the page.
+    await expect(page.getByTestId('back-to-sessions')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /back to sessions/i })).toHaveCount(0)
+    await expect(page.getByRole('link', { name: /back to sessions/i })).toHaveCount(0)
+  })
+
+  test('header padding is independent from the composer and content column', async ({ page }) => {
+    await gotoSessionDetail(page)
+
+    const headPad = await page.getByTestId('session-detail-header').evaluate((el) => {
+      const style = getComputedStyle(el)
+      return { left: style.paddingLeft, right: style.paddingRight }
+    })
+    expect(headPad.left).toBe('32px')
+    expect(headPad.right).toBe('32px')
+
+    // The composer is bound to the reading column while the header spans the
+    // full width — their paddings never couple.
+    const composerBox = await page.getByTestId('session-composer-input-box').boundingBox()
+    const headerBox = await page.getByTestId('session-detail-header').boundingBox()
+    expect(composerBox).not.toBeNull()
+    expect(headerBox).not.toBeNull()
+    expect(headerBox!.width).toBeGreaterThan(composerBox!.width)
+  })
+
+  test('sticky final composer reuses the main-page input-box and toolbar primitives without an outer panel', async ({ page }) => {
+    await gotoSessionDetail(page)
+
+    const composer = page.getByTestId('session-composer')
+    await expect(composer).toBeVisible()
+
+    // Sticky with a bottom offset so it never sits flush against the edge.
+    await expect.poll(() => composer.evaluate((el) => getComputedStyle(el).position)).toBe('sticky')
+    const bottomOffset = await composer.evaluate((el) => parseFloat(getComputedStyle(el).bottom))
+    expect(bottomOffset).toBeGreaterThan(0)
+
+    // Exactly the main-page input box/toolbar primitives.
+    const inputBox = page.getByTestId('session-composer-input-box')
+    await expect(inputBox).toHaveClass(/kx-composer__input-box/)
+    await expect(page.getByTestId('session-composer-input')).toHaveAttribute(
+      'placeholder',
+      'Describe the outcome you need…',
+    )
+    await expect(page.getByTestId('session-composer-toolbar')).toHaveClass(/kx-composer__toolbar/)
+
+    await expect(composer.getByRole('button', { name: 'Attach file' })).toBeVisible()
+    await expect(composer.getByRole('button', { name: 'Add text document' })).toBeVisible()
+    await expect(
+      composer.getByRole('button', { name: /Execution Profile · Default/i }),
+    ).toBeVisible()
+    await expect(composer.getByRole('button', { name: 'Voice input' })).toBeVisible()
+    await expect(composer.getByRole('button', { name: 'Send message' })).toBeDisabled()
+
+    // Attachment triggers live in the right-aligned group, consistent with
+    // the composer layout; the left group keeps only the Execution Profile.
+    const leftGroup = composer.getByTestId('toolbar-left')
+    await expect(leftGroup.getByRole('button', { name: /Execution Profile/i })).toBeVisible()
+    await expect(leftGroup.getByRole('button', { name: 'Attach file' })).toHaveCount(0)
+    const rightGroup = composer.getByTestId('toolbar-right')
+    await expect(rightGroup.getByRole('button', { name: 'Attach file' })).toBeVisible()
+    await expect(rightGroup.getByRole('button', { name: 'Add text document' })).toBeVisible()
+
+    // No outer composer panel (the main page's kx-composer kx-panel wrapper).
+    await expect(composer.locator('.kx-composer.kx-panel')).toHaveCount(0)
+    await expect(composer.locator('[data-testid="composer"]')).toHaveCount(0)
+
+    // Typing enables send; Enter sends and the message lands as a user bubble.
+    const bubblesBefore = await page.locator('.kx-session-timeline__bubble--user').count()
+    await page.getByTestId('session-composer-input').fill('Please rerun the failing checks')
+    await expect(composer.getByRole('button', { name: 'Send message' })).toBeEnabled()
+    await page.getByTestId('session-composer-input').press('Enter')
+    await expect(page.locator('.kx-session-timeline__bubble--user')).toHaveCount(bubblesBefore + 1)
+    await expect(page.locator('.kx-session-timeline__bubble--user').last()).toContainText(
+      'Please rerun the failing checks',
+    )
+  })
+
+  test('timeline bubbles carry no sender identity or timestamps, with user bubbles right-aligned', async ({ page }) => {
+    await gotoSessionDetail(page)
+
+    const userBubble = page.locator('.kx-session-timeline__bubble--user').first()
+    await expect(userBubble).toBeVisible()
+    const userItem = page.locator('.kx-session-timeline__item--user').first()
+
+    // Right-aligned: the user bubble ends at the right edge of its row.
+    const [itemBox, bubbleBox] = await Promise.all([userItem.boundingBox(), userBubble.boundingBox()])
+    expect(itemBox).not.toBeNull()
+    expect(bubbleBox).not.toBeNull()
+    expect(Math.abs(itemBox!.x + itemBox!.width - (bubbleBox!.x + bubbleBox!.width))).toBeLessThan(2)
+    expect(bubbleBox!.x).toBeGreaterThan(itemBox!.x)
+
+    // No sender identity ("You") and no timestamps anywhere in the timeline.
+    await expect(userItem).not.toContainText('You')
+    await expect(page.locator('.kx-session-timeline__timestamp')).toHaveCount(0)
+    await expect(page.locator('.kx-session-timeline__agent-label')).toHaveCount(0)
+    await expect(page.locator('.kx-session-timeline__agent-header')).toHaveCount(0)
+
+    const assistantItem = page.locator('.kx-session-timeline__item--assistant').first()
+    await expect(assistantItem).toBeVisible()
+    const assistantBubble = page.locator('.kx-session-timeline__bubble--assistant').first()
+    const [aItemBox, aBubbleBox] = await Promise.all([assistantItem.boundingBox(), assistantBubble.boundingBox()])
+    // Left-aligned: the assistant bubble starts at the left edge of its row.
+    expect(Math.abs(aItemBox!.x - aBubbleBox!.x)).toBeLessThan(2)
+  })
+
+  test('tracker shows the cycle context and a single active-stage pill', async ({ page }) => {
+    await gotoSessionDetail(page)
+
+    const tracker = page.getByTestId('session-tracker')
+    await expect(tracker).toBeVisible()
+    await expect(tracker).toContainText('Current stage · Cycle 2 of 3')
+
+    // Exactly one current-stage summary with a single active-stage pill.
+    await expect(tracker.locator('.kx-session-detail__tracker-current')).toHaveCount(1)
+    const pill = tracker.locator('.kx-session-detail__stage-pill')
+    await expect(pill).toHaveCount(1)
+    await expect(pill).toContainText('Quote')
+    await expect(pill).toContainText('Awaiting approval')
+
+    // No completed-stage chips or legacy per-stage tracker lists.
+    await expect(tracker.locator('.kx-session-detail__completed-chip')).toHaveCount(0)
+    await expect(tracker.locator('.kx-session-detail__tracker-item')).toHaveCount(0)
+    await expect(tracker.locator('.kx-session-detail__tracker-list')).toHaveCount(0)
+  })
+})
