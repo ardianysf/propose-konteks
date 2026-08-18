@@ -91,7 +91,7 @@ test.describe('shell', () => {
     expect(canvasBg).toBe('rgb(250, 248, 239)')
   })
 
-  test('typography scale tokens resolve to the exact DM Sans 19→8 scale (AC5, 80% density)', async ({ page }) => {
+  test('typography scale tokens resolve to the exact DM Sans 22→9 scale (AC5, 90% density)', async ({ page }) => {
     await goto(page)
     const scale = await page.evaluate(() => {
       const styles = getComputedStyle(document.documentElement)
@@ -110,15 +110,15 @@ test.describe('shell', () => {
     })
 
     expect(scale).toEqual({
-      threeXl: '19px',
-      twoXl: '16px',
-      xl: '14px',
-      l: '13px',
-      md: '10px',
-      sm: '10px',
-      xs: '9px',
-      twoXs: '8px',
-      body: '10px',
+      threeXl: '22px',
+      twoXl: '18px',
+      xl: '16px',
+      l: '14px',
+      md: '12px',
+      sm: '11px',
+      xs: '10px',
+      twoXs: '9px',
+      body: '12px',
     })
   })
 

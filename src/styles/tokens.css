@@ -25,18 +25,18 @@
   --kx-accent: #8fbf6a; /* Primary action accent, highlights */
   --kx-accent-strong: #5f8d4e; /* Emphasized actions, active indicators */
 
-  /* ── Typography — DM Sans (AC5). Spec §5.2 scale at 80% density, ────
+  /* ── Typography — DM Sans (AC5). Spec §5.2 scale at 90% density, ────
    * rounded to whole px. Token names and semantic hierarchy unchanged. ── */
-  /* NOTE: MD (10px) is the normal-weight default body/UI text size. */
+  /* NOTE: MD (12px) is the normal-weight default body/UI text size. */
   --kx-font-family: 'DM Sans', sans-serif;
-  --kx-text-3xl: 19px; /* Page titles (was 24px) */
-  --kx-text-2xl: 16px; /* Section titles, modal headers (was 20px) */
-  --kx-text-xl: 14px; /* Subsection titles (was 18px) */
-  --kx-text-l: 13px; /* Body emphasis, buttons (was 16px) */
-  --kx-text-md: 10px; /* Normal body/UI text (default, was 13px) */
-  --kx-text-sm: 10px; /* Captions, meta text (was 12px) */
-  --kx-text-xs: 9px; /* Micro labels (was 11px) */
-  --kx-text-2xs: 8px; /* Badges, fine print (was 10px) */
+  --kx-text-3xl: 22px; /* Page titles (90% of 24px) */
+  --kx-text-2xl: 18px; /* Section titles, modal headers (90% of 20px) */
+  --kx-text-xl: 16px; /* Subsection titles (90% of 18px) */
+  --kx-text-l: 14px; /* Body emphasis, buttons (90% of 16px) */
+  --kx-text-md: 12px; /* Normal body/UI text (default, 90% of 13px) */
+  --kx-text-sm: 11px; /* Captions, meta text (90% of 12px) */
+  --kx-text-xs: 10px; /* Micro labels (90% of 11px) */
+  --kx-text-2xs: 9px; /* Badges, fine print (90% of 10px) */
   --kx-font-normal: 400;
   --kx-font-medium: 500;
   --kx-font-bold: 700;
