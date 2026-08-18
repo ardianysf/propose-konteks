@@ -1067,22 +1067,22 @@
 
 .kx-new-session__sidebar-toggle {
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 4px;
 }
 
 .kx-new-session__header-copy {
   display: grid;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
 }
 
-/* Uniform header line — title/subtitle/approval share one tight scale
- * (user-directed): 14px bold title, 13px subtitle, 12px approval.
- * Hierarchy comes from weight + one gentle size step, not a jump. */
+/* Page-title hierarchy — the h1 steps up to the 24px page-title token
+ * (user-directed), with the subtitle/approval keeping the shared 13px
+ * body scale beneath it. */
 .kx-new-session__title {
-  font-size: var(--kx-text-sm);
+  font-size: var(--kx-text-3xl);
   font-weight: var(--kx-font-bold);
-  line-height: 1.4;
+  line-height: 1.25;
   color: var(--kx-primary);
 }
 
@@ -1101,7 +1101,10 @@
   color: var(--kx-muted-text-aa);
 }
 
-/* Centered intro — decorative illustration + mode-specific copy (§6). */
+/* Centered intro — decorative illustration + mode-specific copy (§6).
+ * The top auto margin shares the content region's leftover space with
+ * the reviews wrapper's auto margin below, so the hero block drops clear
+ * of the header and the page reads visually centered at any zoom. */
 .kx-new-session__intro {
   display: flex;
   flex-direction: column;
@@ -1109,7 +1112,7 @@
   gap: 12px;
   width: 100%;
   min-width: 0;
-  margin: 0 auto 48px;
+  margin: auto auto 48px;
   text-align: center;
 }
 
@@ -1502,7 +1505,7 @@
 
   .kx-new-session__intro {
     gap: 10px;
-    margin: 0 auto 32px;
+    margin: auto auto 32px;
   }
 
   .kx-new-session__intro-img {

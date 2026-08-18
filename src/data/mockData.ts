@@ -6,7 +6,7 @@ export const ILLUSTRATIVE_DATA_NOTE = 'Illustrative data'
 // Domain types
 // ---------------------------------------------------------------------------
 
-export type SessionMode = 'engineering' | 'planning'
+export type SessionMode = 'engineering' | 'qa' | 'planning'
 export type Readiness = 'ready' | 'needs-setup'
 
 // Session Detail types
@@ -459,7 +459,7 @@ export const SESSION_HISTORY: SessionHistoryEntry[] = [
   {
     id: 'hist-delivery-evidence',
     title: 'Validate delivery evidence',
-    mode: 'planning',
+    mode: 'qa',
     systemId: 'online-store',
     componentName: 'checkout-api',
     time: 'Aug 14 · 14:32',

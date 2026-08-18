@@ -77,7 +77,18 @@ test.describe('modes + composer', () => {
       )
       .toBe('rgb(149, 165, 71) rgb(255, 255, 255)') // --kx-accent-segment-aa #95A547 / white (user-directed)
 
-    // Switching moves the active styling to Planning.
+    // Switching moves the active styling to QA, then Planning.
+    await page.getByRole('radio', { name: 'QA' }).click()
+    const qa = page.getByRole('radio', { name: 'QA' })
+    await expect
+      .poll(async () =>
+        qa.evaluate((el) => {
+          const s = getComputedStyle(el)
+          return `${s.backgroundColor} ${s.color}`
+        }),
+      )
+      .toBe('rgb(149, 165, 71) rgb(255, 255, 255)')
+
     await page.getByRole('radio', { name: 'Planning' }).click()
     const planning = page.getByRole('radio', { name: 'Planning' })
     await expect
@@ -107,6 +118,40 @@ test.describe('modes + composer', () => {
       expect(style.paddingInline, `${name} padding`).toBe('12px')
       expect(style.minHeight, `${name} height`).toBe('38px')
     }
+  })
+
+  test('session mode segments render in the Engineering → QA → Planning order', async ({ page }) => {
+    await goto(page)
+
+    const group = page.getByRole('radiogroup', { name: 'Session mode' })
+    await expect(group.getByRole('radio')).toHaveText(['Engineering', 'QA', 'Planning'])
+    await expect(page.getByRole('radio', { name: 'Engineering' })).toBeChecked()
+  })
+
+  test('QA shows the full Engineering-style setup with QA-specific copy', async ({ page }) => {
+    await goto(page)
+    await page.getByRole('radio', { name: 'QA' }).click()
+
+    // QA mirrors Engineering: both setup pills stay, with QA placeholders.
+    await expect(
+      page.getByRole('button', { name: 'Choose system / repositories to test' }),
+    ).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Choose component under test' })).toBeVisible()
+
+    await expect(page.getByTestId('composer-input')).toHaveAttribute(
+      'placeholder',
+      'Describe the QA task…',
+    )
+    await expect(page.getByRole('button', { name: 'Send' })).toBeVisible()
+
+    await expect(
+      page.getByRole('heading', { name: 'What would you like to test?', level: 2 }),
+    ).toBeVisible()
+    await expect(
+      page.getByText(
+        'QA sessions design, run, and report tests for your systems. You approve every test plan before execution.',
+      ),
+    ).toBeVisible()
   })
 
   test('Planning shows system-only setup and the Start planning copy (AC16)', async ({ page }) => {

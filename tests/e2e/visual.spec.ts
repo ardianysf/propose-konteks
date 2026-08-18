@@ -120,6 +120,35 @@ const VIEWS: CaptureView[] = [
     },
   },
   {
+    name: 'qa',
+    prepare: async (page, width, height) => {
+      await goto(page)
+      await page.getByRole('radio', { name: 'QA' }).click()
+      await expect(page.getByRole('radio', { name: 'QA' })).toBeChecked()
+      // QA mirrors the Engineering flow: both setup pills, QA placeholders.
+      await expect(
+        page.getByRole('button', { name: 'Choose system / repositories to test' }),
+      ).toBeVisible()
+      await expect(page.getByRole('button', { name: 'Choose component under test' })).toBeVisible()
+      await expect(page.getByRole('button', { name: 'Send' })).toBeVisible()
+      await expect(page.getByTestId('composer-input-box')).toBeVisible()
+      // The SESSION MODE label + segmented group survive the mode swap.
+      await expect(page.getByText('SESSION MODE', { exact: true })).toBeVisible()
+      // QA keeps the same in-viewport guarantee as Engineering at the
+      // capture viewport — including the centered disclaimer (AC44).
+      for (const testId of [
+        'new-session-header',
+        'new-session-intro',
+        'composer',
+        'composer-input-box',
+        'reviews-wrapper',
+      ]) {
+        await assertFullyInViewport(page, testId, width, height)
+      }
+      await assertDisclaimerVisibleAndCentered(page, width, height)
+    },
+  },
+  {
     name: 'planning',
     prepare: async (page, width, height) => {
       await goto(page)

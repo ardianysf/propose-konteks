@@ -1,6 +1,6 @@
 /*
- * SessionMode — the dominant Engineering/Planning segmented control
- * (Task 5, spec §7.1, AC15).
+ * SessionMode — the dominant Engineering/QA/Planning segmented control
+ * (Task 5, spec §7.1, AC15; QA added between Engineering and Planning).
  *
  * Reducer-bound: radios commit SET_MODE to the shared store; the page
  * (NewSessionPage) reads the mode and swaps its regions. Rendered with a
@@ -15,6 +15,7 @@ import type { SessionMode as Mode } from '../../state/mockupReducer'
 
 const MODES: { id: Mode; label: string }[] = [
   { id: 'engineering', label: 'Engineering' },
+  { id: 'qa', label: 'QA' },
   { id: 'planning', label: 'Planning' },
 ]
 

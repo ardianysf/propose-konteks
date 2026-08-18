@@ -90,6 +90,7 @@ describe('SessionHistoryPage — header and filters', () => {
     expect(within(mode).getAllByRole('option').map((option) => option.textContent)).toEqual([
       'All modes',
       'Engineering',
+      'QA',
       'Planning',
     ])
 
@@ -350,6 +351,22 @@ describe('SessionHistoryPage — search and combined filters', () => {
     expect(items.map((row) => textOf(row.querySelector('.kx-history__row-title')))).toEqual(expectedTitles)
   })
 
+  it('filters by QA mode with its own label', () => {
+    renderSessionHistoryPage()
+    fireEvent.change(screen.getByRole('combobox', { name: 'Mode' }), { target: { value: 'qa' } })
+
+    const items = rows()
+    expect(items.length).toBeGreaterThan(0)
+    for (const row of items) {
+      expect(textOf(row.querySelector('.kx-history__row-meta'))).toContain('QA')
+    }
+
+    const expectedTitles = SESSION_HISTORY.filter((entry) => entry.mode === 'qa')
+      .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+      .map((entry) => entry.title)
+    expect(items.map((row) => textOf(row.querySelector('.kx-history__row-title')))).toEqual(expectedTitles)
+  })
+
   it('filters by system', () => {
     renderSessionHistoryPage()
     fireEvent.change(screen.getByRole('combobox', { name: 'System' }), { target: { value: 'mpm-mytok' } })
@@ -360,7 +377,7 @@ describe('SessionHistoryPage — search and combined filters', () => {
 
   it('combines mode and system filters to an intersection', () => {
     renderSessionHistoryPage()
-    fireEvent.change(screen.getByRole('combobox', { name: 'Mode' }), { target: { value: 'planning' } })
+    fireEvent.change(screen.getByRole('combobox', { name: 'Mode' }), { target: { value: 'qa' } })
     fireEvent.change(screen.getByRole('combobox', { name: 'System' }), { target: { value: 'online-store' } })
 
     expect(rows()).toHaveLength(1)
