@@ -5,7 +5,7 @@
  * main page's outer setup/mode composer panel. Enter sends; Shift+Enter
  * retains a newline. Terminal sessions render a compact locked notice.
  */
-import { useState, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { EXECUTION_PROFILES } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 import ExecutionProfileMenu from '../composer/ExecutionProfileMenu'
@@ -56,6 +56,15 @@ export default function SessionDetailComposer() {
   const { beginOverlayChain, dismissOverlay } = useOverlayLifecycle()
   const { sessionDetail } = state
   const [message, setMessage] = useState('')
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  // Auto-grow: collapse to one line, then expand to fit content (capped by CSS max-height).
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [message])
   const activeProfile = EXECUTION_PROFILES.find((profile) => profile.id === state.activeProfileId) ?? EXECUTION_PROFILES[0]
   const isTerminal = sessionDetail.status === 'CANCELLED' || sessionDetail.status === 'COMPLETED'
   const trimmedMessage = message.trim()
@@ -89,8 +98,10 @@ export default function SessionDetailComposer() {
         <label htmlFor="kx-session-detail-input" className="kx-visually-hidden">Message input</label>
         <textarea
           id="kx-session-detail-input"
-          className="kx-composer__input"
+          className="kx-composer__input kx-session-composer__input"
           data-testid="session-composer-input"
+          rows={1}
+          ref={inputRef}
           placeholder="Describe the outcome you need…"
           value={message}
           onChange={(event) => setMessage(event.target.value)}
