@@ -342,12 +342,61 @@ test.describe('shell', () => {
 
   test('sidebar collapses to the icon rail and expands back to 240px (AC12)', async ({ page }) => {
     await goto(page)
-    await page.getByRole('button', { name: 'Collapse sidebar' }).click()
+    // The collapse control lives in the sidebar's own brand row (top-right).
+    const collapseToggle = page.getByRole('button', { name: 'Collapse sidebar' })
+    await expect(collapseToggle).toHaveAttribute('data-testid', 'sidebar-toggle')
+    await expect(collapseToggle).toHaveClass(/kx-sidebar__toggle/)
+    await collapseToggle.click()
     await expect(sidebar(page)).toHaveClass(/kx-sidebar--rail/)
     await expect.poll(() => sidebarWidth(page)).toBe(64)
-    await page.getByRole('button', { name: 'Expand sidebar' }).click()
+    // In the rail the top-right toggle stands down; the logo area is the
+    // maximize control. Hover swaps the Konteks icon for the expand
+    // chevron; clicking expands back to 240px.
+    const expandToggle = page.getByRole('button', { name: 'Expand sidebar' })
+    await expect(expandToggle).toHaveClass(/kx-sidebar__logo--expand/)
+    await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toHaveCount(0)
+    await expect(expandToggle.locator('img.kx-sidebar__logo-img')).toBeVisible()
+    await expect(expandToggle.locator('.kx-sidebar__logo-expand-icon')).toBeHidden()
+    await expandToggle.hover()
+    await expect(expandToggle.locator('.kx-sidebar__logo-expand-icon')).toBeVisible()
+    await expect(
+      expandToggle.locator('.kx-sidebar__logo-expand-icon svg[data-icon="expand-sidebar"]'),
+    ).toBeVisible()
+    await page.mouse.move(0, 400) // off the logo — the icon returns at rest
+    await expect(expandToggle.locator('.kx-sidebar__logo-expand-icon')).toBeHidden()
+    await expect(expandToggle.locator('img.kx-sidebar__logo-img')).toBeVisible()
+    await expandToggle.click()
     await expect(sidebar(page)).not.toHaveClass(/kx-sidebar--rail/)
     await expect.poll(() => sidebarWidth(page)).toBe(240)
+    await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeVisible()
+  })
+
+  test('sidebar toggle lives in the sidebar on every page — session detail and history included', async ({ page }) => {
+    await goto(page)
+    // Session detail: the toggle is in the persistent sidebar, the page has none.
+    await page.getByRole('button', { name: 'View all' }).click()
+    await page.getByTestId('history-row').first().click()
+    await expect(page.getByTestId('session-detail')).toBeVisible()
+    await expect(sidebar(page).getByTestId('sidebar-toggle')).toBeVisible()
+    await sidebar(page).getByTestId('sidebar-toggle').click()
+    await expect(sidebar(page)).toHaveClass(/kx-sidebar--rail/)
+    await expect.poll(() => sidebarWidth(page)).toBe(64)
+    // The rail logo expand control works on the session detail page too.
+    await sidebar(page).getByRole('button', { name: 'Expand sidebar' }).click()
+    await expect(sidebar(page)).not.toHaveClass(/kx-sidebar--rail/)
+    await expect.poll(() => sidebarWidth(page)).toBe(240)
+
+    // Session history: same persistent control.
+    await page.getByRole('button', { name: 'View all' }).click()
+    await expect(page.getByRole('heading', { name: 'Session history' })).toBeVisible()
+    await expect(sidebar(page).getByTestId('sidebar-toggle')).toBeVisible()
+
+    // The New Session page header carries no toggle of its own.
+    await page.getByTestId('new-session-trigger').click()
+    await expect(page.getByRole('heading', { name: 'New session', level: 1 })).toBeVisible()
+    await expect(
+      page.getByTestId('new-session-header').locator('[data-testid="sidebar-toggle"]'),
+    ).toHaveCount(0)
   })
 
   test('Create new system stays sticky while the system list scrolls (AC13)', async ({ page }) => {
@@ -571,15 +620,22 @@ test.describe('composer layout correction surfaces', () => {
 })
 
 test.describe('responsive regressions (Task 13)', () => {
-  test('crossing 1280px forces the rail; crossing back restores the stored expanded state', async ({ page }) => {
+  test('crossing 1280px forces the rail and stands the in-sidebar toggle down; crossing back restores the stored expanded state', async ({ page }) => {
     await goto(page)
     await expect.poll(() => sidebarWidth(page)).toBe(240)
+    await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeVisible()
 
     await page.setViewportSize({ width: 1280, height: 900 })
     await expect.poll(() => sidebarWidth(page)).toBe(64)
+    // Expansion is unavailable in the forced rail: the stored preference is
+    // still expanded, so the DOM toggle is the top-right collapse control —
+    // it is display:none here, standing down exactly like the old
+    // page-header toggle did.
+    await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeHidden()
 
     await page.setViewportSize({ width: 1281, height: 900 })
     await expect.poll(() => sidebarWidth(page)).toBe(240)
+    await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeVisible()
   })
 
   test('a stored rail preference survives the 1280→1281 round trip', async ({ page }) => {

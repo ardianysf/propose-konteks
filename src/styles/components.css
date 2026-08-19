@@ -364,12 +364,14 @@
   padding: 14px 8px 10px;
 }
 
-/* Brand lockup — the collapse toggle lives in the New Session page
- * header, not the sidebar (user-directed). */
+/* Brand lockup — logo left, the sidebar minimize/maximize control at the
+ * top-right (AC12). In the rail the top-right toggle stands down and the
+ * logo area itself becomes the maximize control. */
 
 .kx-sidebar__top {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
   padding: 0 2px 2px;
 }
@@ -383,6 +385,49 @@
 .kx-sidebar__logo-img {
   height: 26px;
   width: auto;
+}
+
+/* Sidebar minimize control — top-right of the brand row, visible only
+ * while the sidebar is expanded (the rail swaps to the logo maximize
+ * affordance below). The shared .kx-icon-btn geometry applies. */
+.kx-sidebar__toggle {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Rail maximize affordance — the logo area is a real button (accessible
+ * name "Expand sidebar"). At rest it shows the Konteks rail icon; on
+ * hover/focus an absolutely-positioned expand-chevron layer fades in over
+ * the icon (the img stays in flow, so there is no layout shift), and on
+ * mouse-leave it fades back to the logo. */
+.kx-sidebar__logo--expand {
+  position: relative;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--kx-secondary);
+  cursor: pointer;
+}
+
+.kx-sidebar__logo-expand-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--kx-raised); /* covers the rail icon beneath */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.kx-sidebar__logo--expand:hover .kx-sidebar__logo-expand-icon,
+.kx-sidebar__logo--expand:focus-visible .kx-sidebar__logo-expand-icon,
+.kx-sidebar__logo--expand:focus-within .kx-sidebar__logo-expand-icon {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* The single persistent boxed container — workspace only (AC6) */
@@ -1050,24 +1095,19 @@
   padding: 28px 32px 40px;
 }
 
-/* Header — the sidebar minimize/maximize control sits at the far LEFT
- * of the header band beside the title block (user-directed); approval
- * rides the right edge. Full width — never capped/centered, so the
+/* Header — title block left, approval indicator right, both vertically
+ * centered in the band. Full width — never capped/centered, so the
  * band's left/right edges always sit exactly on the page's 32px side
- * padding whether the sidebar is expanded or minimized. */
+ * padding whether the sidebar is expanded or minimized. The sidebar
+ * minimize/maximize control lives in the shell sidebar, not the header. */
 .kx-new-session__header {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   width: 100%;
   min-width: 0;
-}
-
-.kx-new-session__sidebar-toggle {
-  flex-shrink: 0;
-  margin-top: 4px;
 }
 
 .kx-new-session__header-copy {
@@ -4394,7 +4434,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  width: min(756px, calc(100% - 64px));
+  width: min(740px, calc(100% - 64px));
   margin: 0 auto;
   padding: 24px 0 32px;
 }
@@ -4660,15 +4700,14 @@
 /* ── Content blocks container ─────────────────────────────────────
  * Groups the large discrete content units (quote, timeline, metadata) as
  * flat siblings so each can later become a clickable component. The blocks
- * column reads narrower than the composer below it: max-width is 70% of the
- * 756px content column (529px) and it is horizontally centered within the
- * content column (the composer area spans the full content width below it). */
+ * column is 680px max, horizontally centered within the content column
+ * (the composer area spans the full content width below it). */
 .kx-session-detail__blocks {
   display: flex;
   flex-direction: column;
   gap: 20px;
   width: 100%;
-  max-width: 529px;
+  max-width: 680px;
   min-width: 0;
   margin: 0 auto;
 }
@@ -4747,9 +4786,10 @@
     display: none;
   }
 
-  /* The page-header sidebar toggle also stands down in the forced rail —
-   * expansion is unavailable at ≤1280px. */
-  .kx-new-session__sidebar-toggle {
+  /* The in-sidebar top-right toggle stands down in the forced rail —
+   * expansion is unavailable at ≤1280px (same treatment the old
+   * page-header toggle had). */
+  .kx-sidebar__toggle {
     display: none;
   }
 
