@@ -69,9 +69,9 @@ describe('responsive rail at max-width 1280px (AC12/AC44)', () => {
     const block = flat(responsiveBlock())
     expect(block).toContain('.kx-sidebar__control { justify-content: center; gap: 0; padding: 8px 0;')
     expect(block).toContain('.kx-sidebar__top { gap: 6px; }')
-    // The collapse toggle now lives in the New Session page header and
-    // stands down in the forced rail alongside the sidebar rule.
-    expect(block).toContain('.kx-new-session__sidebar-toggle { display: none; }')
+    // The collapse toggle lives in the sidebar's own brand row and stands
+    // down in the forced rail (expansion is unavailable at ≤1280px).
+    expect(block).toContain('.kx-sidebar__toggle { display: none; }')
     // The user area stacks vertically with Customize on top (user-directed).
     expect(block).toContain('.kx-sidebar__user { flex-direction: column; justify-content: center;')
     expect(block).toContain('.kx-sidebar__logo { width: 100%; justify-content: center;')
@@ -207,9 +207,9 @@ describe('New Session semantic layout (composer correction)', () => {
     // Full width (never capped/centered): the band always sits exactly on
     // the page's 32px side padding, sidebar state notwithstanding.
     expect(css).toContain(
-      '.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; width: 100%;',
+      '.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; width: 100%;',
     )
-    expect(css).not.toContain('.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; width: min(1200px, 100%);')
+    expect(css).not.toContain('.kx-new-session__header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; width: min(1200px, 100%);')
     // Section-title hierarchy: the h1 uses the 20px section-title token
     // while the subtitle/approval keep the shared body scale (user-directed).
     expect(css).toContain('.kx-new-session__title { font-size: var(--kx-text-2xl);')

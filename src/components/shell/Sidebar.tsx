@@ -18,6 +18,7 @@
 import { useState, type MouseEvent } from 'react'
 import { RECENT_SESSIONS, WORKSPACE } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import CollapseIcon from './CollapseIcon'
 import { useOverlayLifecycle } from './OverlayLifecycle'
 
 const LOGO_EXPANDED_SRC = '/assets/konteks/logo-text-main.png'
@@ -51,8 +52,8 @@ function ChevronRight() {
   )
 }
 
-/** Double chevron lives in the shared CollapseIcon module (used by the
- * New Session page header). */
+/** Double chevron — the shared minimize/maximize glyph (AC12) lives in
+ * the shared CollapseIcon module, used by the sidebar's own toggle. */
 
 /** Square + plus — the New session route control's icon. */
 function NewSessionIcon() {
@@ -137,15 +138,51 @@ export default function Sidebar() {
   return (
     <nav aria-label="Sidebar" className={collapsed ? 'kx-sidebar kx-sidebar--rail' : 'kx-sidebar'}>
       <div className="kx-sidebar__top">
-        <div className="kx-sidebar__logo">
-          <img
-            className="kx-sidebar__logo-img"
-            src={collapsed ? LOGO_RAIL_SRC : LOGO_EXPANDED_SRC}
-            alt="Konteks"
-            width={collapsed ? 32 : 118}
-            height={collapsed ? 32 : 26}
-          />
-        </div>
+        {/* Brand row — logo left, sidebar minimize control right (AC12).
+            In the rail the top-right toggle stands down and the logo area
+            itself becomes the maximize control: hover/focus swaps the
+            Konteks icon for the expand chevron, click expands (see CSS). */}
+        {collapsed ? (
+          <button
+            type="button"
+            className="kx-sidebar__logo kx-sidebar__logo--expand"
+            aria-label="Expand sidebar"
+            data-testid="sidebar-toggle"
+            onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
+          >
+            <img
+              className="kx-sidebar__logo-img"
+              src={LOGO_RAIL_SRC}
+              alt=""
+              width={32}
+              height={32}
+            />
+            <span className="kx-sidebar__logo-expand-icon" aria-hidden="true">
+              <CollapseIcon collapsed />
+            </span>
+          </button>
+        ) : (
+          <div className="kx-sidebar__logo">
+            <img
+              className="kx-sidebar__logo-img"
+              src={LOGO_EXPANDED_SRC}
+              alt="Konteks"
+              width={118}
+              height={26}
+            />
+          </div>
+        )}
+        {!collapsed && (
+          <button
+            type="button"
+            className="kx-icon-btn kx-sidebar__toggle"
+            aria-label="Collapse sidebar"
+            data-testid="sidebar-toggle"
+            onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
+          >
+            <CollapseIcon collapsed={false} />
+          </button>
+        )}
       </div>
 
       {/* The workspace box — the ONLY persistent boxed container in the
@@ -209,8 +246,8 @@ export default function Sidebar() {
           route is clean), carries aria-current="page" while active, and
           collapses to a centered icon in the manual/forced rail with the
           label hidden but the accessible name kept via aria-label. The
-          sidebar minimize/maximize control moved to the New Session page
-          header (user-directed). */}
+          sidebar minimize/maximize control lives in the sidebar's own
+          brand row (top-right expanded; logo hover/focus in the rail). */}
       <button
         type="button"
         className={

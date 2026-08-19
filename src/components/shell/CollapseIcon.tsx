@@ -1,8 +1,9 @@
 /*
  * CollapseIcon — the shared double-chevron glyph for the sidebar
- * minimize/maximize control (AC12). Rendered inside the New Session
- * page header beside the title block (user-directed placement); the
- * direction points where the sidebar will move on the next toggle.
+ * minimize/maximize control (AC12). Rendered inside the shell sidebar's
+ * brand row (top-right while expanded; inside the rail logo maximize
+ * affordance while collapsed); the direction points where the sidebar
+ * will move on the next toggle.
  */
 
 /** Double chevron pointing the direction the sidebar will move (AC12). */

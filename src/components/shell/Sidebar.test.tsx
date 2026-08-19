@@ -68,14 +68,67 @@ describe('Sidebar', () => {
     expect(screen.getByRole('button', { name: /collapse sidebar/i })).toBeInTheDocument()
   })
 
+  it('renders the sidebar minimize/maximize control in its own brand row — not the page header (AC12)', () => {
+    renderSidebar()
+    const nav = getSidebarNav()
+    const toggle = screen.getByRole('button', { name: /collapse sidebar/i })
+    expect(nav.contains(toggle)).toBe(true)
+    expect(toggle).toHaveAttribute('data-testid', 'sidebar-toggle')
+    // The New Session page header no longer carries the toggle.
+    const header = screen.getByTestId('new-session-header')
+    expect(header.querySelector('[data-testid="sidebar-toggle"]')).toBeNull()
+    expect(within(header).queryByRole('button', { name: /sidebar/i })).toBeNull()
+  })
+
   it('uses the real Konteks logo assets — expanded logo by default, rail icon when collapsed', () => {
     renderSidebar()
     const logo = screen.getByRole('img', { name: 'Konteks' })
     expect(logo).toHaveAttribute('src', '/assets/konteks/logo-text-main.png')
     fireEvent.click(screen.getByRole('button', { name: /collapse sidebar/i }))
-    expect(logo).toHaveAttribute('src', '/assets/konteks/web-topbar-icon-128.png')
-    fireEvent.click(screen.getByRole('button', { name: /expand sidebar/i }))
-    expect(logo).toHaveAttribute('src', '/assets/konteks/logo-text-main.png')
+    // In the rail the logo area becomes the expand button; the rail icon
+    // is decorative inside it (the button carries the accessible name).
+    const expandBtn = screen.getByRole('button', { name: /expand sidebar/i })
+    const railImg = expandBtn.querySelector('img.kx-sidebar__logo-img')
+    expect(railImg).not.toBeNull()
+    expect(railImg).toHaveAttribute('src', '/assets/konteks/web-topbar-icon-128.png')
+    fireEvent.click(expandBtn)
+    expect(screen.getByRole('img', { name: 'Konteks' })).toHaveAttribute(
+      'src',
+      '/assets/konteks/logo-text-main.png',
+    )
+  })
+
+  it('rail logo area is the maximize control — hover/focus swaps the icon for the expand chevron', () => {
+    const { bucket } = renderSidebar()
+    fireEvent.click(screen.getByRole('button', { name: /collapse sidebar/i }))
+    expect(bucket.current?.sidebarCollapsed).toBe(true)
+
+    // In the rail the top-right toggle stands down; the only sidebar
+    // toggle left is the logo-area expand button with the rail icon at rest.
+    expect(screen.queryByRole('button', { name: /collapse sidebar/i })).toBeNull()
+    const expandBtn = screen.getByRole('button', { name: /expand sidebar/i })
+    expect(expandBtn).toHaveClass('kx-sidebar__logo--expand')
+    expect(expandBtn).toHaveAttribute('data-testid', 'sidebar-toggle')
+    expect(expandBtn.querySelector('img.kx-sidebar__logo-img')).not.toBeNull()
+
+    // The hover/focus expand-chevron layer exists, aria-hidden, and the CSS
+    // reveals it on hover/focus while the resting img prevents layout shift.
+    const layer = expandBtn.querySelector('.kx-sidebar__logo-expand-icon')
+    expect(layer).not.toBeNull()
+    expect(layer).toHaveAttribute('aria-hidden', 'true')
+    expect(layer!.querySelector('svg[data-icon="expand-sidebar"]')).not.toBeNull()
+    expect(css).toMatch(/\.kx-sidebar__logo-expand-icon\s*\{[^}]*opacity: 0/)
+    expect(css).toMatch(
+      /\.kx-sidebar__logo--expand:hover \.kx-sidebar__logo-expand-icon[^{]*\{[^}]*opacity: 1/,
+    )
+    expect(css).toMatch(
+      /\.kx-sidebar__logo--expand:focus-visible \.kx-sidebar__logo-expand-icon[^{]*\{[^}]*opacity: 1/,
+    )
+
+    // Clicking the logo area expands the sidebar through TOGGLE_SIDEBAR.
+    fireEvent.click(expandBtn)
+    expect(bucket.current?.sidebarCollapsed).toBe(false)
+    expect(screen.getByRole('button', { name: /collapse sidebar/i })).toBeInTheDocument()
   })
 
   it('marks exactly one persistent boxed container — the workspace box (AC6)', () => {
@@ -304,6 +357,14 @@ describe('Sidebar', () => {
     fireEvent.click(screen.getByRole('button', { name: /expand sidebar/i }))
     expect(bucket.current?.sidebarCollapsed).toBe(false)
     expect(nav).not.toHaveClass('kx-sidebar--rail')
+  })
+
+  it('forced-rail CSS stands the in-sidebar top-right toggle down (AC12/AC44)', () => {
+    const start = css.indexOf('@media (max-width: 1280px)')
+    expect(start).toBeGreaterThanOrEqual(0)
+    const block = css.slice(start).replace(/\s+/g, ' ')
+    expect(block).toContain('.kx-sidebar__toggle { display: none; }')
+    expect(block).not.toContain('.kx-new-session__sidebar-toggle')
   })
 
   it('user row carries an inline sliders icon whose Customize tooltip shows on keyboard focus and whose click opens Customize on agents (AC9)', () => {

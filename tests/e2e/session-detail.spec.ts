@@ -76,6 +76,50 @@ test.describe('session detail', () => {
     expect(headerBox!.width).toBeGreaterThan(composerBox!.width)
   })
 
+  test('reading column resolves to 740px with 680px centered blocks at 1440px', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await gotoSessionDetail(page)
+
+    // The content column is min(740px, 100% - 64px); at 1440 it resolves to
+    // 740px and the blocks column caps at 680px, centered within it.
+    const content = page.locator('.kx-session-detail__content')
+    const blocks = page.getByTestId('session-detail-blocks')
+    const contentBox = await content.boundingBox()
+    const blocksBox = await blocks.boundingBox()
+    expect(contentBox).not.toBeNull()
+    expect(blocksBox).not.toBeNull()
+    expect(Math.round(contentBox!.width)).toBe(740)
+    expect(Math.round(blocksBox!.width)).toBe(680)
+    const leftInset = blocksBox!.x - contentBox!.x
+    const rightInset = contentBox!.x + contentBox!.width - (blocksBox!.x + blocksBox!.width)
+    expect(Math.abs(leftInset - rightInset)).toBeLessThanOrEqual(2)
+
+    // The composer area spans the full content width (it bleeds 16px past
+    // each edge through negative margins for its sticky backdrop).
+    const composerAreaBox = await page.getByTestId('session-composer-area').boundingBox()
+    expect(Math.round(composerAreaBox!.width)).toBe(740 + 32)
+  })
+
+  test('share button and context row stay vertically centered in the sticky header', async ({ page }) => {
+    await gotoSessionDetail(page)
+    const headMain = page.locator('.kx-session-detail__head-main')
+    expect(await headMain.evaluate((el) => getComputedStyle(el).alignItems)).toBe('center')
+
+    // The share button visually centers against the title row.
+    const titleBox = await page.locator('.kx-session-detail__title').boundingBox()
+    const shareBox = await page.getByTestId('share-session').boundingBox()
+    expect(titleBox).not.toBeNull()
+    expect(shareBox).not.toBeNull()
+    const titleCenter = titleBox!.y + titleBox!.height / 2
+    const shareCenter = shareBox!.y + shareBox!.height / 2
+    expect(Math.abs(titleCenter - shareCenter)).toBeLessThanOrEqual(4)
+
+    // The context row sits directly under the title row, vertically centered
+    // internally (no top-aligned control in the header).
+    const context = page.getByTestId('session-context')
+    expect(await context.evaluate((el) => getComputedStyle(el).alignItems)).toBe('center')
+  })
+
   test('sticky final composer reuses the main-page input-box and toolbar primitives without an outer panel', async ({ page }) => {
     await gotoSessionDetail(page)
 
