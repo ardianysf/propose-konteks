@@ -601,6 +601,14 @@ describe('SessionDetailComposer — message composer', () => {
     expect(sendButton).toBeInTheDocument()
   })
 
+  it('textarea carries the auto-grow modifier class and starts one line tall', () => {
+    renderSessionDetailPage()
+    const textarea = screen.getByTestId('session-composer-input')
+    expect(textarea).toHaveClass('kx-composer__input')
+    expect(textarea).toHaveClass('kx-session-composer__input')
+    expect(textarea).toHaveAttribute('rows', '1')
+  })
+
   it('send button is disabled when textarea is empty', () => {
     renderSessionDetailPage()
     const sendButton = screen.getByRole('button', { name: /send message/i })

@@ -5207,6 +5207,17 @@
   font-style: italic;
 }
 
+/* Auto-grow session-detail composer input: one line tall (40px incl. padding),
+ * grows with content via inline height, capped at ~5 lines (144px). Overrides
+ * the shared .kx-composer__input min-height (118px) only within this composer. */
+.kx-session-composer__input {
+  min-height: 40px;
+  max-height: 144px;
+  resize: none;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
 /* Keep the composer's tool cluster (attachments, voice, send) pinned to the
  * right edge of the input box so it stays visually grouped with the
  * composer's right edge even when the toolbar wraps. */
@@ -5251,5 +5262,12 @@
 
   .kx-composer__input {
     min-height: 60px;
+  }
+
+  /* Session composer keeps its one-line auto-grow floor on mobile — the
+     shared 60px mobile rule above is later in source order, so restate the
+     session-specific min-height here. */
+  .kx-session-composer__input {
+    min-height: 40px;
   }
 }
