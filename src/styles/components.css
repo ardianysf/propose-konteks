@@ -1205,57 +1205,6 @@
  * inline SVG diagram of rounded-rect subsystem nodes + edges, all strokes
  * and fills theme-token driven. */
 
-.kx-system-map {
-  width: min(720px, calc(100vw - 48px));
-  display: flex;
-  flex-direction: column;
-}
-
-.kx-system-map__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 20px 12px;
-  border-bottom: 1px solid var(--kx-border);
-}
-
-.kx-system-map__title {
-  margin: 0;
-  font-size: var(--kx-text-l);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-system-map__canvas {
-  padding: 16px 20px 20px;
-  overflow: auto;
-}
-
-.kx-system-map__canvas svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.kx-system-map__edge {
-  stroke: var(--kx-border);
-  stroke-width: 1.6;
-}
-
-.kx-system-map__node rect {
-  fill: var(--kx-raised);
-  stroke: var(--kx-accent-strong);
-  stroke-width: 1.6;
-}
-
-.kx-system-map__node text {
-  fill: var(--kx-secondary);
-  font-size: var(--kx-text-md);
-  text-anchor: middle;
-  dominant-baseline: central;
-}
-
 /* Sticky footer — pinned below the scrolling list; never scrolls away
  * (AC13) */
 
@@ -1403,82 +1352,21 @@
 
 /* Page frame — header, centered intro, unified composer panel, and the
  * page-level footer stack in one centered column (§6). */
-.kx-new-session {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  width: 100%;
-  max-width: none;
-  min-width: 0;
-  min-height: 100%;
-  box-sizing: border-box;
-  margin: 0 auto;
-  /* Fixed px (no vh) so browser zoom keeps the exact same rhythm —
-   * zoom only scales px uniformly, while vh units re-resolve against
-   * the grown CSS-px viewport and inflate the padding at e.g. 90%. */
-  padding: 28px 32px 40px;
-}
 
 /* Header — title block left, approval indicator right, both vertically
  * centered in the band. Full width — never capped/centered, so the
  * band's left/right edges always sit exactly on the page's 32px side
  * padding whether the sidebar is expanded or minimized. The sidebar
  * minimize/maximize control lives in the shell sidebar, not the header. */
-.kx-new-session__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  width: 100%;
-  min-width: 0;
-}
-
-.kx-new-session__header-copy {
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-}
 
 /* Page-title hierarchy — the h1 uses the 20px section-title token so the
  * header feels proportional to the composer-led page (user-directed), with
  * the subtitle/approval keeping the shared 13px body scale beneath it. */
-.kx-new-session__title {
-  font-size: var(--kx-text-2xl);
-  font-weight: var(--kx-font-bold);
-  line-height: 1.25;
-  color: var(--kx-primary);
-}
-
-.kx-new-session__subtitle {
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-normal);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-new-session__approval {
-  flex-shrink: 0;
-  margin-left: auto;
-  margin-top: 0;
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-muted-text-aa);
-}
 
 /* Centered intro — decorative illustration + mode-specific copy (§6).
  * The top auto margin shares the content region's leftover space with
  * the reviews wrapper's auto margin below, so the hero block drops clear
  * of the header and the page reads visually centered at any zoom. */
-.kx-new-session__intro {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-width: 0;
-  margin: auto auto 48px;
-  text-align: center;
-}
 
 /* The intro's bottom margin is the static headroom; the content column
  * pushes the whole reviews+composer+disclaimer group toward the page
@@ -1486,42 +1374,12 @@
  * from the disclaimer to the page bottom stays exactly the page's
  * 40px bottom padding at every zoom level and viewport height. */
 
-.kx-new-session__intro-img {
-  max-height: 140px;
-  max-width: 100%;
-  width: auto;
-  object-fit: contain;
-}
-
-.kx-new-session__intro-heading {
-  font-size: var(--kx-text-2xl);
-  font-weight: var(--kx-font-bold);
-  line-height: 1.2;
-  color: var(--kx-primary);
-}
-
-.kx-new-session__intro-body {
-  max-width: 560px;
-  font-size: var(--kx-text-md);
-  color: var(--kx-muted-text-aa);
-}
-
 /* Bounded content region — intro, reviews pill, composer, and disclaimer
  * stacked in one centered column below the full-width header band. The
  * region flexes to fill the remaining viewport height and pins the
  * reviews/composer/disclaimer group to the bottom via the auto top margin
  * on __reviews, so the composer's distance to the page bottom stays
  * constant at every zoom level and viewport height. */
-.kx-new-session__content {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  flex: 1;
-  min-height: 0;
-  width: min(920px, 100%);
-  min-width: 0;
-  margin: 0 auto;
-}
 
 /* ── Unified composer panel (Task 5 correction, §7.2) ──────────────── */
 
@@ -1555,52 +1413,11 @@
 /* Standalone reviews wrapper — right-aligned above the composer — and
  * the centered disclaimer below it (AC10/AC11); the badge stays a
  * fixed-height pill so 1- and 2-digit counts stay round. */
-.kx-new-session__reviews {
-  display: flex;
-  justify-content: flex-end;
-  /* auto absorbs all free viewport height above this group, pinning the
-   * reviews + composer + disclaimer to the page bottom consistently. */
-  margin-top: auto;
-  margin-bottom: 12px;
-  min-width: 0;
-}
-
-.kx-new-session__disclaimer {
-  margin-top: 16px;
-  text-align: center;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-}
 
 /* ── Narrow-viewport composition (≤760px) ─────────────────────────────
  * The header band stacks with a full-width approval, the content column
  * goes edge-to-edge, and the composer's top-row groups wrap without
  * overflow. The ≤1280px sidebar rail rules further below are untouched. */
-@media (max-width: 760px) {
-  .kx-new-session {
-    /* Fixed px — zoom-invariant like the base rhythm. */
-    padding: 24px 16px 32px;
-  }
-
-  .kx-new-session__header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .kx-new-session__approval {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .kx-new-session__content {
-    width: 100%;
-  }
-
-  
-
-  
-}
 
 /* ── Desktop short-height compaction (AC44, 1200×720-class) ──────────
  * Wide-but-short desktop windows: the New Session column keeps its
@@ -1610,37 +1427,6 @@
  * ≤760px narrow-viewport rules authoritative on tablets/phones; only
  * vertical metrics change here — no horizontal geometry is touched and
  * nothing is hidden. */
-@media (max-height: 760px) and (min-width: 761px) {
-  .kx-new-session {
-    gap: 24px;
-    padding: 24px 32px 32px;
-  }
-
-  .kx-new-session__intro {
-    gap: 10px;
-    margin: auto auto 32px;
-  }
-
-  .kx-new-session__intro-img {
-    max-height: 124px;
-  }
-
-  .kx-new-session__reviews {
-    margin-bottom: 10px;
-  }
-
-  
-
-  
-
-  
-
-  
-
-  .kx-new-session__disclaimer {
-    margin-top: 12px;
-  }
-}
 
 /* ── Execution Profile anchored menu (Task 6, spec §7.3 — AC22–AC24) ── */
 

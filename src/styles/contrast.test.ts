@@ -499,6 +499,16 @@ const KNOWN_INERT_DUPLICATE_SELECTORS = new Set([
   '.kx-quote-approval-card__header:focus-visible',
   // session/SessionDetailComposer.css
   '.kx-session-composer__locked-notice',
+  // pages/NewSessionPage.css (T5c batch: page namespace moved to
+  // src/pages/*.css per addendum §8.3; same fold as above)
+  '.kx-new-session__subtitle',
+  '.kx-new-session__approval',
+  '.kx-new-session__intro-body',
+  '.kx-new-session__disclaimer',
+  // system/SystemMapModal.css (T5c batch: diagram stroke moved out of
+  // components.css by the removal tool; the fold maps the surviving
+  // domain-file hit back to the components.css inventory entry)
+  '.kx-system-map__node rect',
   // NOTE: the .kx-preserved__* selectors are deliberately ABSENT. They
   // were never a components.css↔domain-file transitional duplicate (their
   // only home is customize/shared.css since the T5b dedup), so masking

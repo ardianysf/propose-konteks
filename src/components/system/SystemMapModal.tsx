@@ -15,6 +15,7 @@ import { useId, useRef } from 'react'
 import { useMockup } from '../../state/MockupContext'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import { useFocusContainment } from '../shell/useFocusContainment'
+import './SystemMapModal.css'
 /** Close — the header dismiss control (same glyph as the other modals). */
 function CloseIcon() {
   return (

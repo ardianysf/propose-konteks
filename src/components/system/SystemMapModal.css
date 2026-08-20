@@ -1,0 +1,57 @@
+/* ── System map modal (sidebar SystemMenu map action) ───────────────
+ * Migrated from src/styles/components.css (T5c, addendum §8).
+ * Centered dialog over the shared backdrop; the body is a deterministic
+ * inline SVG diagram of rounded-rect subsystem nodes + edges, all strokes
+ * and fills theme-token driven. The .kx-modal frame, .kx-modal-backdrop,
+ * and .kx-icon-btn primitives stay global in components.css. */
+
+.kx-system-map {
+  width: min(720px, calc(100vw - 48px));
+  display: flex;
+  flex-direction: column;
+}
+
+.kx-system-map__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-system-map__title {
+  margin: 0;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-system-map__canvas {
+  padding: 16px 20px 20px;
+  overflow: auto;
+}
+
+.kx-system-map__canvas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.kx-system-map__edge {
+  stroke: var(--kx-border);
+  stroke-width: 1.6;
+}
+
+.kx-system-map__node rect {
+  fill: var(--kx-raised);
+  stroke: var(--kx-accent-strong);
+  stroke-width: 1.6;
+}
+
+.kx-system-map__node text {
+  fill: var(--kx-secondary);
+  font-size: var(--kx-text-md);
+  text-anchor: middle;
+  dominant-baseline: central;
+}

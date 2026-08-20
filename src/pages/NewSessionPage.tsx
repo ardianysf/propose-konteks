@@ -14,6 +14,7 @@ import { PENDING_REVIEWS } from '../data/mockData'
 import Composer from '../components/composer/Composer'
 import { useOverlayLifecycle } from '../components/shell/OverlayLifecycle'
 import { useMockup } from '../state/MockupContext'
+import './NewSessionPage.css'
 
 const ENGINEERING_INTRO_BODY =
   'Engineering sessions analyze, propose, and deliver software changes. You approve every proposal before work proceeds.'
