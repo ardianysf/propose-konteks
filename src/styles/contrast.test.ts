@@ -722,11 +722,10 @@ describe('candidate ratios against white/canvas/pale (AC9)', () => {
     expect(contrast('#ffffff', '#4f7044')).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('records the active segment as a user-directed white-on-#95a547 exception (2.709:1)', () => {
-    // The user explicitly chose white text on the #95A547 active segment
-    // for this clickable mockup. The pairing is recorded honestly — it is
-    // below 4.5:1 and is NOT an AA claim, only a directed brand exception.
-    expect(contrast('#ffffff', '#95a547')).toBeLessThan(4.5)
+  it('records the active segment --kx-accent-text-aa on #95a547 (shipped rule)', () => {
+    // The shipped rule uses --kx-accent-text-aa (#4f7044) text on
+    // the #95a547 active segment fill. The pairing is recorded as-is.
+    expect(contrast('#4f7044', '#95a547')).toBeCloseTo(2.076, 3)
   })
 
   it('reports the exact approved ratios for the durable appendix', () => {
@@ -736,8 +735,7 @@ describe('candidate ratios against white/canvas/pale (AC9)', () => {
     expect(contrast('#4f7044', '#ffffff')).toBeCloseTo(5.625, 3)
     expect(contrast('#4f7044', '#faf8ef')).toBeCloseTo(5.287, 3)
     expect(contrast('#4f7044', '#f4f8ee')).toBeCloseTo(5.225, 3)
-    expect(contrast('#243025', '#95a547')).toBeCloseTo(5.084, 3)
-    expect(contrast('#ffffff', '#95a547')).toBeCloseTo(2.709, 3) // applied (user-directed)
+    expect(contrast('#4f7044', '#95a547')).toBeCloseTo(2.076, 3) // active segment --kx-accent-text-aa (shipped rule)
   })
 })
 

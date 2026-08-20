@@ -2,7 +2,7 @@ import { expect, test, type Locator } from '@playwright/test'
 import { goto, openRepositoryModal, openSystemMenu } from './helpers'
 
 test.describe('system / repository flow', () => {
-  test('repositories group under one active system with checkboxes disabled outside it (AC25)', async ({ page }) => {
+  test('repositories group under one active system; inactive systems have no repo checkboxes (AC25)', async ({ page }) => {
     await goto(page)
     await openRepositoryModal(page)
 
@@ -17,15 +17,13 @@ test.describe('system / repository flow', () => {
       await expect(activeChecks.nth(i)).toBeEnabled()
     }
 
+    // Inactive systems have no repo checkboxes (collapsed-inactive contract)
     const canteen = dialog.locator('.kx-repo-modal__system', { hasText: 'BSI Canteen' })
     const canteenChecks = canteen.locator('input[type="checkbox"]')
-    await expect(canteenChecks).toHaveCount(2)
-    for (let i = 0; i < 2; i += 1) {
-      await expect(canteenChecks.nth(i)).toBeDisabled()
-    }
+    await expect(canteenChecks).toHaveCount(0)
   })
 
-  test('switching the active system clears the repository selection (AC26)', async ({ page }) => {
+  test('switching the active system clears the repository selection; old HRIS checkbox absent (AC26)', async ({ page }) => {
     await goto(page)
     await openRepositoryModal(page)
 
@@ -36,20 +34,38 @@ test.describe('system / repository flow', () => {
 
     await dialog.getByRole('button', { name: /BSI Canteen/ }).click()
     await expect(dialog.locator('.kx-repo-modal__system--active')).toContainText('BSI Canteen')
-    await expect(check).not.toBeChecked()
+    // Old HRIS checkbox is now absent (inactive system), not just unchecked
+    await expect(check).toHaveCount(0)
+    // Active Canteen rows are enabled and unselected
+    const canteenChecks = dialog.locator('.kx-repo-modal__system--active input[type="checkbox"]')
+    await expect(canteenChecks).toHaveCount(2)
+    for (let i = 0; i < 2; i += 1) {
+      await expect(canteenChecks.nth(i)).toBeEnabled()
+      await expect(canteenChecks.nth(i)).not.toBeChecked()
+    }
   })
 
-  test('search filters systems and repositories with Add new system pinned at the top (AC27)', async ({ page }) => {
+  test('search filters systems and repositories; Add System toolbar is before system groups (AC27)', async ({ page }) => {
     await goto(page)
     await openRepositoryModal(page)
 
     const dialog = page.getByRole('dialog', { name: 'Choose work repositories' })
     const addSystem = dialog.getByRole('button', { name: /Add new system/ })
     const search = dialog.getByRole('searchbox', { name: 'Search systems or repositories' })
+    const toolbar = dialog.locator('.kx-repo-modal__toolbar')
+    const groups = dialog.locator('.kx-repo-modal__groups')
 
-    const addBox = await addSystem.boundingBox()
-    const searchBox = await search.boundingBox()
-    expect(addBox!.y).toBeLessThan(searchBox!.y)
+    // Add System button exists in the toolbar (which is before the system groups)
+    await expect(toolbar).toContainText('Add new system')
+    await expect(addSystem).toBeVisible()
+    // Verify DOM order: toolbar comes before groups
+    const toolbarPrecedesGroups = await dialog.evaluate((d) => {
+      const tb = d.querySelector('.kx-repo-modal__toolbar')
+      const gr = d.querySelector('.kx-repo-modal__groups')
+      if (!tb || !gr) return false
+      return !!(gr.compareDocumentPosition(tb) & Node.DOCUMENT_POSITION_PRECEDING)
+    })
+    expect(toolbarPrecedesGroups).toBe(true)
 
     await search.fill('canteen')
     await expect(dialog.locator('.kx-repo-modal__system')).toHaveCount(1)

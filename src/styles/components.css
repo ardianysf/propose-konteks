@@ -6,7 +6,7 @@
  */
 
 /* ── App shell ────────────────────────────────────────────────────────
- * Grid: 312px white sidebar | matcha main canvas, full viewport height. */
+ * Grid: 320px white sidebar | matcha main canvas, full viewport height. */
 
 /* Main canvas: 19.5px curved corners on the top-left and bottom-left
  * edges meeting the sidebar (§5.1, AC2). */
@@ -448,7 +448,7 @@
  * right-aligned in the composer top row (§7.1, AC15). */
 
 /* ── Sidebar (Task 4, spec §6.1) ──────────────────────────────────────
- * 312px expanded white rail → 64px icon rail when collapsed (AC12).
+ * 320px expanded white rail → 64px icon rail when collapsed (AC12).
  * The workspace box (.kx-sidebar-box) is the ONLY persistent boxed
  * container in the sidebar (AC6); everything else stays unboxed until
  * hover. Colors/dimensions come exclusively from tokens.css. */
@@ -500,7 +500,7 @@
 
 /* Full-title tooltip — reveals with the row on hover/focus-within via the
  * shared .kx-tooltip-host mechanism. Pins to the row's left edge and wraps
- * inside the 312px sidebar (row width ≈ 262px), staying readable when the
+ * inside the 320px sidebar (row width ≈ 190px), staying readable when the
  * title is long enough to truncate. Colors inherit the base .kx-tooltip
  * ink/raised pairing, which stays dark-theme safe in both modes. */
 
@@ -526,7 +526,7 @@
  * Shared horizontal anchoring for every sidebar-anchored floating menu
  * (workspace, system): they open to the right of the sidebar — never
  * behind a modal backdrop (AC7) — token-aware for both sidebar widths:
- * expanded (312px) and collapsed rail (64px). Each menu keeps its own
+ * expanded (320px) and collapsed rail (64px). Each menu keeps its own
  * vertical alignment under its control below. */
 
 /* ── System floating menu (Task 4 Part B, spec §6.2) ─────────────────

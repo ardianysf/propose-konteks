@@ -1,5 +1,5 @@
 /*
- * Sidebar — the persistent 312px white shell sidebar (Task 4 Part A, spec §6.1).
+ * Sidebar — the persistent 320px white shell sidebar (Task 4 Part A, spec §6.1).
  *
  * Chrome only: brand logo (real Konteks assets), the workspace box — the
  * single persistent boxed container (AC6) —, the workspace and system

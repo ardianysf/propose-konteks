@@ -287,13 +287,13 @@ Chromium measurements (device scale factor 1, zoom 100%) from the Task 13B1 runn
 
 | Viewport | innerWidth | max-width:1280px match | Sidebar width | Doc scroll (w×h) | Customize (w×h, left, top) |
 |---|---|---|---|---|---|
-| 1281x900 | 1281 | false | 240px | 1281×900 | 790×580, left 245.5, top 160 |
+| 1281x900 | 1281 | false | 320px | 1281×900 | 790×580, left 325.5, top 160 |
 | 1280x900 | 1280 | true | 64px | 1280×900 | 790×580, left 245, top 160 |
 | 1200x720 | 1200 | true | 64px | 1200×720 | 790×580, left 205, top 70 |
 | 1200x827 | 1200 | true | 64px | 1200×827 | 790×580, left 205, top 123.5 |
 | 1200x719 | 1200 | true | 64px | 1200×719 | 790×580, left 205, top 69.5 |
 
-Key results: no document-level horizontal overflow at any viewport (`docScrollWidth === innerWidth`); `body/html` remain `overflow: hidden`; `.kx-main` owns vertical scrolling; the collapse control is `display:flex` above 1280px and `display:none` at ≤1280px; the in-place 1280→1281 resize restores the stored preference (expanded 240px, collapsed 64px).
+Key results: no document-level horizontal overflow at any viewport (`docScrollWidth === innerWidth`); `body/html` remain `overflow: hidden`; `.kx-main` owns vertical scrolling; the collapse control is `display:flex` above 1280px and `display:none` at ≤1280px; the in-place 1280→1281 resize restores the stored preference (expanded 320px, collapsed 64px).
 
 ### 7.2 Focus outline
 

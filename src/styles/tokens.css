@@ -58,7 +58,7 @@
 
   /* ── Fixed dimensions (AC2, AC34, AC39, §5.1, §11, §12) ─────────── */
   --kx-radius-main: 19.5px; /* Main canvas corners, top-left/bottom-left */
-  --kx-sidebar-w: 312px; /* Expanded white sidebar (~30% wider) */
+  --kx-sidebar-w: 320px; /* Expanded white sidebar (spec §6.1, AC12) */
   --kx-sidebar-rail: 64px; /* Collapsed sidebar icon rail */
   --kx-customize-w: 790px; /* Customize modal width — fixed on every tab */
   --kx-customize-h: 580px; /* Customize modal height — fixed on every tab */
