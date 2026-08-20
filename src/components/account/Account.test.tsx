@@ -13,6 +13,50 @@ import {
   type MockupState,
 } from '../../state/mockupReducer'
 import { ACCOUNT_ACTIONS } from '../../data/mockData'
+import { STORAGE_KEY } from '../../theme'
+
+// ---------------------------------------------------------------------------
+// jsdom lacks window.matchMedia, which src/theme.ts needs for 'system'
+// resolution. One shared stub MQL per file (theme.test.ts convention): the
+// theme runtime never unwires listeners, so per-test stubs would strand them.
+// ---------------------------------------------------------------------------
+
+type ThemeChangeHandler = (event: { matches: boolean }) => void
+
+function createMatchMediaStub(initialMatches: boolean) {
+  let matches = initialMatches
+  const listeners = new Set<ThemeChangeHandler>()
+  const mql = {
+    get matches() {
+      return matches
+    },
+    media: '(prefers-color-scheme: dark)',
+    addEventListener: (_type: string, handler: unknown) => {
+      listeners.add(handler as ThemeChangeHandler)
+    },
+    removeEventListener: (_type: string, handler: unknown) => {
+      listeners.delete(handler as ThemeChangeHandler)
+    },
+    addListener: (handler: unknown) => listeners.add(handler as ThemeChangeHandler),
+    removeListener: (handler: unknown) => listeners.delete(handler as ThemeChangeHandler),
+  } as unknown as MediaQueryList
+  return { mql, stub: vi.fn(() => mql), listeners }
+}
+
+const accountMedia = createMatchMediaStub(false)
+const realMatchMedia = window.matchMedia
+window.matchMedia = accountMedia.stub as unknown as typeof window.matchMedia
+
+afterAll(() => {
+  window.matchMedia = realMatchMedia
+})
+
+afterEach(() => {
+  // Theme is real persisted state outside MockupState — scrub it so the
+  // surrounding account/settings tests stay hermetic.
+  window.localStorage.clear()
+  delete document.documentElement.dataset.theme
+})
 
 // ---------------------------------------------------------------------------
 // Harness — the Sidebar + account overlay slot mounted the way AppShell
@@ -155,10 +199,15 @@ describe('Account — menu contents and keyboard operation', () => {
     expect(items.map((item) => item.textContent)).toEqual(ACCOUNT_ACTIONS.map((a) => a.label))
   })
 
-  it('moves focus into the first menuitem on open and roves focus with arrow keys', () => {
+  it('moves focus into the first menu item on open and roves focus with arrow keys across the whole menu', () => {
     renderShell()
     openAccountMenu()
-    const items = within(getMenu()).getAllByRole('menuitem')
+    // Theme radios lead the menu; the action menuitems follow. Arrow-key
+    // roving covers both roles as one continuous sequence.
+    const items = [
+      ...within(getMenu()).getAllByRole('menuitemradio'),
+      ...within(getMenu()).getAllByRole('menuitem'),
+    ]
     expect(items[0]).toHaveFocus()
 
     fireEvent.keyDown(items[0], { key: 'ArrowDown' })
@@ -212,7 +261,10 @@ describe('Account — menu contents and keyboard operation', () => {
     renderShell()
     const trigger = screen.getByTestId('account-trigger')
     openAccountMenu()
-    expect(within(getMenu()).getAllByRole('menuitem')[0]).toHaveFocus()
+    // The Theme radios (menuitemradio) precede the action items — the
+    // first menu item in DOM order is the "Light" theme radio.
+    const menuItems = getMenu().querySelectorAll('[role="menuitem"], [role="menuitemradio"]')
+    expect(menuItems[0]).toHaveFocus()
 
     fireEvent.keyDown(document, { key: 'Escape' })
     await waitFor(() => expect(trigger).toHaveFocus())
@@ -369,6 +421,73 @@ describe('Account — Settings dialog accessibility and dismissal', () => {
     // Shift+Tab from the first stop wraps to the last (Usage).
     fireEvent.keyDown(close, { key: 'Tab', shiftKey: true })
     expect(usageTab).toHaveFocus()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Theme section — real persisted preference (src/theme.ts), AC42
+// ---------------------------------------------------------------------------
+
+describe('Account — theme preference section', () => {
+  const getThemeRadio = (name: string) =>
+    within(getMenu()).getByRole('menuitemradio', { name })
+
+  it('shows a labelled Theme group with Light/Dark/System radios, aria-checked on the active stored preference (default system)', () => {
+    renderShell()
+    openAccountMenu()
+
+    const group = within(getMenu()).getByRole('group', { name: 'Theme' })
+    const radios = within(group).getAllByRole('menuitemradio')
+    expect(radios.map((radio) => radio.textContent)).toEqual(['Light', 'Dark', 'System'])
+
+    // No stored preference → 'system' is the active radio.
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull()
+    expect(getThemeRadio('System')).toHaveAttribute('aria-checked', 'true')
+    expect(getThemeRadio('Light')).toHaveAttribute('aria-checked', 'false')
+    expect(getThemeRadio('Dark')).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('marks the stored preference radio as active when the menu opens', () => {
+    window.localStorage.setItem(STORAGE_KEY, 'dark')
+    renderShell()
+    openAccountMenu()
+    expect(getThemeRadio('Dark')).toHaveAttribute('aria-checked', 'true')
+    expect(getThemeRadio('System')).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it("clicking 'Dark' stamps <html data-theme='dark'>, persists the raw 'dark' preference, and moves aria-checked to the Dark radio", () => {
+    renderShell()
+    openAccountMenu()
+    fireEvent.click(getThemeRadio('Dark'))
+
+    expect(document.documentElement.dataset.theme).toBe('dark')
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('dark')
+    expect(getThemeRadio('Dark')).toHaveAttribute('aria-checked', 'true')
+    expect(getThemeRadio('System')).toHaveAttribute('aria-checked', 'false')
+    // The menu stays open for instant visual feedback.
+    expect(getMenu()).toBeInTheDocument()
+  })
+
+  it("clicking 'Light' stamps <html data-theme='light'>, persists the raw 'light' preference, and moves aria-checked to the Light radio", () => {
+    renderShell()
+    openAccountMenu()
+    fireEvent.click(getThemeRadio('Light'))
+
+    expect(document.documentElement.dataset.theme).toBe('light')
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('light')
+    expect(getThemeRadio('Light')).toHaveAttribute('aria-checked', 'true')
+    expect(getThemeRadio('System')).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it("clicking 'System' resolves through prefers-color-scheme but persists the raw 'system' preference", () => {
+    renderShell()
+    openAccountMenu()
+    fireEvent.click(getThemeRadio('System'))
+
+    // The shared stub starts light → system resolves to light.
+    expect(document.documentElement.dataset.theme).toBe('light')
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('system')
+    expect(getThemeRadio('System')).toHaveAttribute('aria-checked', 'true')
   })
 })
 

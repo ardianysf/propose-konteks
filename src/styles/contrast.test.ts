@@ -143,6 +143,7 @@ const mutedM = [
   '.kx-history__empty-hint',
   '.kx-settings__note',
   '.kx-illustrative-note',
+  '.kx-account-menu__section-label',
 ]
 
 const mutedU = [
@@ -166,6 +167,7 @@ const accentA = [
   '.kx-composer__reviews',
   '.kx-profile-menu__check',
   '.kx-profile-menu__manage',
+  '.kx-account-menu__theme-check',
   '.kx-profile-menu__readiness--ready',
   '.kx-repo-modal__add-repo',
   '.kx-repo-modal__status-system',
@@ -225,6 +227,12 @@ function entries(): Entry[] {
     ...accentA.map((selector) => ({ file: COMPONENTS, selector, property: 'color', token: ACCENT_STRONG, cls: 'A' as Class })),
     ...accentS.map((selector) => ({ file: COMPONENTS, selector, property: 'background', token: ACCENT_STRONG, cls: 'S' as Class })),
     ...accentU.map(([selector, property]) => ({ file: COMPONENTS, selector, property, token: ACCENT_STRONG, cls: 'U' as Class })),
+    // Dark-theme ink pin: the active segment's text uses --kx-accent-text-aa
+    // in light mode (its dark #4f7044 resolves AA on the #95a547 fill) and
+    // a [data-theme='dark'] override switches it to dark --kx-raised ink on
+    // the #a8c883 fill. Property is 'color' — the extractor keys each
+    // selector to its single tracked-token line.
+    { file: COMPONENTS, selector: '.kx-segmented__btn--active:hover', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
     { file: GLOBAL, selector: ':focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
   ]
 }
@@ -341,19 +349,120 @@ describe('candidate ratios against white/canvas/pale (AC9)', () => {
   })
 })
 
+// ---------------------------------------------------------------------------
+// Dark theme — konteks.io dark palette (ink-900 bg, matcha accents).
+// ---------------------------------------------------------------------------
+
+describe('dark theme token definitions (tokens.css)', () => {
+  const darkBlock = tokens.slice(tokens.indexOf("[data-theme='dark']"))
+
+  it('defines the dark block with color-scheme: dark', () => {
+    expect(tokens).toContain("[data-theme='dark']")
+    expect(darkBlock).toContain('color-scheme: dark')
+  })
+
+  it('overrides the palette with the konteks.io dark values', () => {
+    expect(darkBlock).toContain('--kx-canvas: #0f1510')
+    expect(darkBlock).toContain('--kx-raised: #1a231b')
+    expect(darkBlock).toContain('--kx-sidebar-bg: #152618')
+    expect(darkBlock).toContain('--kx-primary: #e8ede8')
+    expect(darkBlock).toContain('--kx-secondary: #c5cfc6')
+    expect(darkBlock).toContain('--kx-muted: #9ead9f')
+    expect(darkBlock).toContain('--kx-muted-text-aa: #9ead9f')
+    expect(darkBlock).toContain('--kx-accent-text-aa: #c5d9a6')
+    expect(darkBlock).toContain('--kx-accent-segment-aa: #a8c883')
+    expect(darkBlock).toContain('--kx-border: #35502c')
+    expect(darkBlock).toContain('--kx-pale: #152618')
+  })
+
+  it('keeps --kx-accent-solid-aa at #4f7044 — white text stays AA in both themes', () => {
+    expect(darkBlock).toContain('--kx-accent-solid-aa: #4f7044')
+  })
+})
+
+describe('dark theme ratios against canvas/raised (AA)', () => {
+  const dark = { canvas: '#0f1510', raised: '#1a231b', pale: '#152618' }
+
+  it('dark --kx-primary #e8ede8 clears 4.5:1 on every dark surface', () => {
+    for (const bg of Object.values(dark)) {
+      expect(contrast('#e8ede8', bg)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('dark --kx-muted-text-aa #9ead9f clears 4.5:1 on every dark surface', () => {
+    for (const bg of Object.values(dark)) {
+      expect(contrast('#9ead9f', bg)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('dark --kx-accent-text-aa #c5d9a6 clears 4.5:1 on every dark surface', () => {
+    for (const bg of Object.values(dark)) {
+      expect(contrast('#c5d9a6', bg)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('white text on unchanged --kx-accent-solid-aa #4f7044 stays AA in dark', () => {
+    expect(contrast('#ffffff', '#4f7044')).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('dark text on dark segment fill — the active segment pins dark ink in both themes', () => {
+    // The active segment uses --kx-accent-segment-aa text (light) or a dark
+    // ink (dark — --kx-raised resolves to #1a231b there); both are AA on
+    // their respective fills.
+    expect(contrast('#243025', '#95a547')).toBeGreaterThanOrEqual(4.5)
+    expect(contrast('#243025', '#a8c883')).toBeGreaterThanOrEqual(4.5)
+    expect(contrast('#1a231b', '#a8c883')).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('reports the exact approved dark ratios for the durable appendix', () => {
+    expect(contrast('#e8ede8', '#0f1510')).toBeCloseTo(15.603, 3)
+    expect(contrast('#9ead9f', '#0f1510')).toBeCloseTo(7.869, 3)
+    expect(contrast('#c5d9a6', '#0f1510')).toBeCloseTo(12.202, 3)
+    expect(contrast('#e8ede8', '#1a231b')).toBeCloseTo(13.621, 3)
+  })
+})
+
+describe('ink-rgb shadow/backdrop tokenization', () => {
+  it('defines --kx-ink-rgb in :root (#243025) and the dark block (#35502C)', () => {
+    expect(tokens).toContain('--kx-ink-rgb: 36 48 37;')
+    const darkBlock = tokens.slice(tokens.indexOf("[data-theme='dark']"))
+    expect(darkBlock).toContain('--kx-ink-rgb: 53 80 44;')
+  })
+
+
+
+  it('defines theme-aware --kx-scrim-* tokens (ink-based in light, black-based in dark)', () => {
+    expect(tokens).toContain('--kx-scrim-base: rgb(36 48 37 / 0.44);')
+    expect(tokens).toContain('--kx-scrim-nested: rgb(36 48 37 / 0.14);')
+    const darkBlock = tokens.slice(tokens.indexOf("[data-theme='dark']"))
+    // Dark scrims must be black-based: the dark canvas is near-black
+    // (#0F1510), so an ink-tinted scrim would brighten instead of dim.
+    expect(darkBlock).toContain('--kx-scrim-base: rgb(0 0 0 / 0.55);')
+    expect(darkBlock).toContain('--kx-scrim-nested: rgb(0 0 0 / 0.3);')
+  })
+
+  it('modal backdrops consume the --kx-scrim-* tokens, not raw ink composition', () => {
+    const base = components.match(/\.kx-modal-backdrop\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(base).toContain('background: var(--kx-scrim-base);')
+    const nested = components.match(/\.kx-modal-backdrop--nested\s*\{[^}]*\}/)?.[0] ?? ''
+    expect(nested).toContain('background: var(--kx-scrim-nested);')
+  })
+})
+
 describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = [...extractUsages(components, COMPONENTS), ...extractUsages(global, GLOBAL)]
 
-  it('covers exactly 137 consumers — 79 muted and 58 accent-strong', () => {
-    expect(inventory).toHaveLength(137)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(79)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(58)
+  it('covers exactly 140 consumers — 80 muted, 59 accent-strong, 1 accent-text-aa pin', () => {
+    expect(inventory).toHaveLength(140)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(80)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(59)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(1)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(75)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(32)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(76)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(34)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(4)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(26)
   })
@@ -413,10 +522,19 @@ describe('M/A/S assignments and U unchanged (AC9)', () => {
   )
 
   it('migrated consumers no longer read the original mixed-purpose token', () => {
-    const migrated = entries().filter((e) => e.cls === 'M' || e.cls === 'A' || e.cls === 'S')
+    // Migration means moving OFF the mixed-purpose --kx-muted /
+    // --kx-accent-strong pair: M → muted-text-aa, A → accent-text-aa,
+    // S → accent-solid-aa. The dark-theme ink pin (token ACCENT_AA, cls A)
+    // already reads accent-text-aa, so it is excluded from the comparison —
+    // asserting token inequality against itself would be vacuously false.
+    const migrated = entries().filter(
+      (e) => (e.cls === 'M' || e.cls === 'A' || e.cls === 'S') && e.token !== expectedToken(e),
+    )
+    expect(migrated.length).toBeGreaterThan(0)
     for (const entry of migrated) {
       const usage = usageByKey.get(`${entry.file}::${entry.selector}`)!
       expect(usage.token).not.toBe(entry.token)
+      expect(usage.token).toBe(expectedToken(entry))
     }
   })
 

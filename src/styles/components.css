@@ -156,7 +156,7 @@
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
   border-radius: 14px;
-  box-shadow: 0 12px 32px rgba(36, 48, 37, 0.14);
+  box-shadow: 0 12px 32px rgb(var(--kx-ink-rgb) / 0.14);
 }
 
 /* ── Modal + backdrop ──────────────────────────────────────────────── */
@@ -165,7 +165,7 @@
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(36, 48, 37, 0.44);
+  background: var(--kx-scrim-base);
 }
 
 .kx-modal {
@@ -177,7 +177,7 @@
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
   border-radius: var(--kx-radius-main);
-  box-shadow: 0 24px 64px rgba(36, 48, 37, 0.24);
+  box-shadow: 0 24px 64px rgb(var(--kx-ink-rgb) / 0.24);
 }
 
 /* ── Nested modal stacking (repository-sourced Create System) ─────── */
@@ -188,11 +188,13 @@
  * order. The nested backdrop stays nearly transparent: the base scrim at
  * z-50 already darkens the page once, and a second full-strength scrim
  * would compound to ~68% black and read as mud. A faint extra tint is
- * enough to separate the two layers. */
+ * enough to separate the two layers. Both scrim colors come from the
+ * theme-aware --kx-scrim-* tokens (ink-tinted in light, black-based in dark
+ * so the scrim still dims the near-black canvas). */
 
 .kx-modal-backdrop--nested {
   z-index: 60;
-  background: rgba(36, 48, 37, 0.14);
+  background: var(--kx-scrim-nested);
 }
 
 .kx-create-modal--nested {
@@ -225,7 +227,7 @@
   width: var(--kx-drawer-w);
   background: var(--kx-raised);
   border-left: 1px solid var(--kx-border);
-  box-shadow: -16px 0 48px rgba(36, 48, 37, 0.18);
+  box-shadow: -16px 0 48px rgb(var(--kx-ink-rgb) / 0.18);
 }
 
 /* ── Tooltip — visible on hover AND keyboard focus (§16, AC45) ─────── */
@@ -313,12 +315,20 @@
   color: var(--kx-primary);
 }
 
-/* Active segment — exact matcha #95A547 fill with dark primary text
- * (white fails contrast on this fill); hover keeps the same fill. */
+/* Active segment — light matcha fill with dark text (white fails contrast
+ * on this fill); hover keeps the same fill. Text pins the LIGHT-theme dark
+ * values in both themes: --kx-accent-text-aa resolves to #4f7044 (light) /
+ * #1a231b (dark, via --kx-raised) — both AA on their #95a547 / #a8c883
+ * fills, while --kx-primary would flip to a near-white in dark mode. */
 .kx-segmented__btn--active,
 .kx-segmented__btn--active:hover {
   background: var(--kx-accent-segment-aa);
-  color: var(--kx-raised);
+  color: var(--kx-accent-text-aa);
+}
+
+[data-theme='dark'] .kx-segmented__btn--active,
+[data-theme='dark'] .kx-segmented__btn--active:hover {
+  color: var(--kx-raised); /* dark ink #1a231b — AA on the #a8c883 fill */
 }
 
 /* Session Mode cluster — uppercase caption above the segmented control,
@@ -1781,7 +1791,7 @@
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
   border-radius: 14px;
-  box-shadow: 0 12px 32px rgba(36, 48, 37, 0.14);
+  box-shadow: 0 12px 32px rgb(var(--kx-ink-rgb) / 0.14);
 }
 
 .kx-profile-menu__sidecar-title {
@@ -4044,7 +4054,7 @@
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
   border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(36, 48, 37, 0.14);
+  box-shadow: 0 12px 32px rgb(var(--kx-ink-rgb) / 0.14);
 }
 
 .kx-history__menuitem {
@@ -4222,6 +4232,41 @@
 .kx-account-menu__item:hover,
 .kx-account-menu__item:focus-visible {
   background: var(--kx-pale);
+}
+
+/* Theme group (dark theme preference) — grouped section before the actions
+ * list, same divider + uppercase section-label pattern as the profile
+ * menu's workspace section (AC24). Items are menuitemradio with an accent
+ * check marking the active preference (mirrors the profile menu check). */
+.kx-account-menu__theme {
+  margin-bottom: 6px;
+  padding: 2px 2px 8px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-account-menu__section-label {
+  margin: 0 2px 6px;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-account-menu__theme-item {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.kx-account-menu__theme-item-label {
+  flex: 1 1 auto;
+}
+
+.kx-account-menu__theme-check {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--kx-accent-text-aa);
 }
 
 /* ── Settings modal (Task 12, spec §14 — AC42) ─────────────────────
@@ -4872,7 +4917,7 @@
 
 .kx-session-timeline__card--quote,
 .kx-session-timeline__card--delivery {
-  box-shadow: 0 2px 8px rgba(36, 48, 37, 0.06);
+  box-shadow: 0 2px 8px rgb(var(--kx-ink-rgb) / 0.06);
 }
 
 .kx-session-timeline__card-head {
@@ -5026,7 +5071,7 @@
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(36, 48, 37, 0.06);
+  box-shadow: 0 2px 8px rgb(var(--kx-ink-rgb) / 0.06);
 }
 
 .kx-quote-approval-card__header {

@@ -5,6 +5,26 @@
     <link rel="icon" href="/assets/konteks/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Konteks</title>
+    <script>
+      // Stamp the stored theme before module load so dark mode never flashes
+      // light on reload (mirrors src/theme.ts — keep STORAGE_KEY + validation
+      // in sync with getStoredPreference()/resolveTheme()).
+      ;(function () {
+        try {
+          var raw = window.localStorage.getItem('konteks-theme')
+          var pref = raw === 'light' || raw === 'dark' || raw === 'system' ? raw : 'system'
+          var resolved =
+            pref === 'system'
+              ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light'
+              : pref
+          document.documentElement.dataset.theme = resolved
+        } catch (e) {
+          /* storage unavailable — default light :root tokens apply */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
