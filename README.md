@@ -19,11 +19,22 @@ visual revamp** design specification.
 |---|---|
 | `npm install` | Install dependencies (exit 0 when up-to-date) |
 | `npm test` | Run Vitest unit/component suites (`src/**/*.{test,spec}.{ts,tsx}`) |
-| `npm run build` | Type-check (`tsc -b`) and emit a production build to `dist/` |
+| `npm run build` | Type-check (`tsc -b`), copy manifest/ai-adoption docs, and emit production builds to `dist/` |
+| `npm run preview` | Preview production builds from `dist/` | 
 | `npm run test:e2e` | Run Playwright core-flow + visual + axe checks against the dev server |
 | `npm run verify:assets` | Verify the 5 first-party Konteks PNG assets (existence, size, PNG magic, SHA-256) |
+| `npm run verify:manifest` | Validate `src/catalog/components.json` against repo and registry | 
 | `npm run typecheck` | Type-check only (`tsc -b`) |
-| `npm run dev` | Start the Vite dev server at `http://localhost:5173` |
+| `npm run dev` | Start the Vite dev server |
+
+## Dev server URLs
+
+| Output | URL (dev) | URL (preview) |
+|--------|-----------|---------------|
+| **Main mockup** | `http://localhost:5173` | `http://localhost:4173` |
+| **Design system catalog** | `http://localhost:5173/catalog.html` | `http://localhost:4173/catalog.html` |
+
+Run `npm run dev` for the dev server, or `npm run build && npm run preview` for the production preview.
 
 ## Demo states
 
@@ -43,6 +54,22 @@ First-party production Konteks assets live in [`public/assets/konteks/`](public/
 `npm run verify:assets` runs [`scripts/verify-assets.mjs`](scripts/verify-assets.mjs), which asserts for each of
 the five required PNGs: file exists, size > 1 KiB, valid PNG magic bytes, and a SHA-256 digest matching the
 `ASSETS.md` table. Success output is `OK: 5/5 Konteks assets verified` (exit 0).
+
+## Build artifacts
+
+The `npm run build` command produces the following files in `dist/`:
+
+| Artifact | Source | Purpose |
+|----------|--------|---------|
+| `dist/index.html` | `index.html` + Vite | Main clickable mockup entry point |
+| `dist/catalog.html` | `catalog.html` + Vite | Design system catalog entry point |
+| `dist/components.json` | `src/catalog/components.json` | Canonical component manifest (copied verbatim) |
+| `dist/ai-adoption.md` | `docs/ai-adoption.md` | AI adoption guide for component reuse (copied verbatim) |
+| `dist/assets/*.css` | Vite | Bundled CSS (both outputs) |
+| `dist/assets/*.js` | Vite | Bundled JavaScript (both outputs) |
+| `dist/manifest.json` | Vite | Build manifest for asset references |
+
+The copy step is handled by `scripts/copy-dist-assets.mjs` (see below), which runs after Vite to ensure `components.json` and `ai-adoption.md` are always present in `dist/`.
 
 ## Visual screenshot output
 
@@ -84,6 +111,20 @@ also asserts no horizontal document overflow and that the 790×580 Customize mod
 | AC21 | §7.3 | AC44 | §16 |
 | AC22 | §7.3 | AC45 | §16 |
 | AC23 | §7.3 | AC46 | §2 |
+
+## AI adoption guide
+
+For AI-assisted component discovery and adoption, see [`docs/ai-adoption.md`](docs/ai-adoption.md). This guide covers:
+
+- How to locate the catalog and component manifest
+- Component classifications (`adoptable`, `mockup-coupled`, `internal`, `utility`)
+- Copy-layout convention (relative imports, not npm)
+- What to copy: `.tsx`, `.css`, dependencies, providers, tokens
+- Token contract and CSS custom properties
+- `MockupFixtureProvider` and `OverlayLifecycle` caveats
+- Using the manifest for programmatic discovery
+- Verification commands (`npm run verify:manifest`, `typecheck`, `build`)
+- Quick-start examples for both `adoptable` and `mockup-coupled` components
 
 ## Chromium scope & known evidence limits
 
