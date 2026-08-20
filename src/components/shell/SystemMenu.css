@@ -1,0 +1,228 @@
+/* ── System floating menu (Task 4 Part B, spec §6.2) ─────────────────
+ * Anchored right of the sidebar's system control — no backdrop, no
+ * header (AC7/AC13). */
+
+.kx-system-menu {
+  top: 118px; /* aligned under the sidebar's system control */
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  max-height: min(420px, calc(100vh - 148px));
+  overflow: hidden; /* the list is the only scrolling region */
+  padding: 8px;
+}
+
+/* Labeled search region (§6.2) */
+
+.kx-system-menu__search {
+  padding: 2px 2px 8px;
+}
+
+.kx-system-menu__search-input {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+/* Pinned "All systems" scope row — stays above the list in every state */
+
+.kx-system-menu__all {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 2px 6px;
+  padding: 8px 8px;
+  border-radius: 10px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-system-menu__all-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: var(--kx-raised);
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-system-menu__all-label {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+/* Scrolling system list — the only region that scrolls (max-height via
+ * the flex menu; custom scrollbar, §6.2) */
+
+.kx-system-menu__list {
+  flex: 1;
+  min-height: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  display: grid;
+  gap: 2px;
+  align-content: start;
+  padding: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-system-menu__list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kx-system-menu__list::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 999px;
+}
+
+.kx-system-menu__empty {
+  padding: 16px 10px;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+  text-align: center;
+}
+
+/* System rows — inline neutral SVG + name + repository count, no avatar
+ * imagery (AC8). Each row wraps the menuitem button + its map action in a
+ * flex container so the two stay siblings, never nested interactives. */
+
+.kx-system-menu__item-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.kx-system-menu__item-wrap .kx-system-menu__item {
+  flex: 1;
+}
+
+/* Per-row map action — quiet icon button beside the row; revealed on row
+ * hover/focus-within, AA accent + pale fill on hover. */
+.kx-system-menu__map-btn {
+  flex-shrink: 0;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--kx-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.kx-system-menu__item-wrap:hover .kx-system-menu__map-btn,
+.kx-system-menu__item-wrap:focus-within .kx-system-menu__map-btn {
+  opacity: 1;
+}
+
+.kx-system-menu__map-btn:hover {
+  color: var(--kx-accent-text-aa);
+  background: var(--kx-pale);
+}
+
+.kx-system-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 7px 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-system-menu__item:hover {
+  background: var(--kx-pale);
+}
+
+.kx-system-menu__item--active {
+  background: var(--kx-pale);
+}
+
+.kx-system-menu__item-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-system-menu__item--active .kx-system-menu__item-icon {
+  background: var(--kx-raised);
+}
+
+.kx-system-menu__item-copy {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-system-menu__item-name {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-system-menu__item-count {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
+/* ── System map modal (sidebar SystemMenu map action) ───────────────
+ * Centered dialog over the shared backdrop; the body is a deterministic
+ * inline SVG diagram of rounded-rect subsystem nodes + edges, all strokes
+ * and fills theme-token driven. */
+
+/* Sticky footer — pinned below the scrolling list; never scrolls away
+ * (AC13) */
+
+.kx-system-menu__footer {
+  position: sticky;
+  bottom: 0;
+  padding: 8px 2px 2px;
+  border-top: 1px solid var(--kx-border);
+  background: var(--kx-raised);
+}
+
+.kx-system-menu__create {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px dashed var(--kx-accent);
+  border-radius: 10px;
+  background: transparent;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.kx-system-menu__create:hover {
+  background: var(--kx-pale);
+  border-color: var(--kx-accent-strong);
+}

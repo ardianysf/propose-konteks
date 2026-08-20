@@ -25,6 +25,7 @@ import NewSessionPage from '../../pages/NewSessionPage'
 import SessionHistoryPage from '../../pages/SessionHistoryPage'
 import SessionDetailPage from '../../pages/SessionDetailPage'
 import { useMockup } from '../../state/MockupContext'
+import './AppShell.css'
 
 export default function AppShell() {
   const { state, dispatch } = useMockup()

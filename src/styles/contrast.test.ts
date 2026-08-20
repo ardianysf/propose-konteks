@@ -36,6 +36,18 @@ const CUSTOMIZE_SHARED = 'src/components/customize/shared.css'
 // SessionStatusBadge.css; never in components.css, so — like
 // CUSTOMIZE_SHARED — the inventory points at the real file).
 const SESSION_BADGES = 'src/components/session/sessionBadges.css'
+// shell/{Sidebar,SystemMenu,WorkspaceMenu}.css — the single surviving
+// homes of the shell-namespace rules since the T5d shell batch (moved
+// out of components.css by the removal tool; they are NOT transitional
+// duplicates). Like CUSTOMIZE_SHARED/SESSION_BADGES above, their
+// inventory entries point at their REAL file instead of a COMPONENTS
+// stand-in, so KNOWN_INERT_DUPLICATE_SELECTORS does not mask them — a
+// re-introduced second copy in any shell stylesheet surfaces as an
+// unclassified / duplicate selector. shell/shared.css carries only
+// geometry (no tracked-token rules), so it holds no inventory entries.
+const SIDEBAR = 'src/components/shell/Sidebar.css'
+const SYSTEM_MENU = 'src/components/shell/SystemMenu.css'
+const WORKSPACE_MENU = 'src/components/shell/WorkspaceMenu.css'
 
 const MUTED = '--kx-muted'
 const MUTED_AA = '--kx-muted-text-aa'
@@ -82,12 +94,6 @@ interface Entry {
 
 const mutedM = [
   '.kx-input::placeholder',
-  '.kx-sidebar__control-caption',
-  '.kx-sidebar__label',
-  '.kx-sidebar__session-meta',
-  '.kx-system-menu__empty',
-  '.kx-system-menu__item-count',
-  '.kx-workspace-menu__item-plan',
   '.kx-page-placeholder p',
   '.kx-new-session__subtitle',
   '.kx-new-session__approval',
@@ -155,21 +161,12 @@ const mutedM = [
 ]
 
 const mutedU = [
-  '.kx-sidebar__chevron',
   '.kx-panel__pill-chevron',
   '.kx-composer__profile-chevron',
   '.kx-history__open:disabled',
 ]
 
 const accentA = [
-  '.kx-sidebar__system-icon',
-  '.kx-sidebar__new-session-icon',
-  '.kx-sidebar__view-all',
-  '.kx-sidebar__user-avatar',
-  '.kx-system-menu__all',
-  '.kx-system-menu__all-icon',
-  '.kx-system-menu__item-icon',
-  '.kx-system-menu__create',
   '.kx-panel__pill-icon',
   '.kx-composer__send',
   '.kx-composer__reviews',
@@ -206,9 +203,6 @@ const accentS = [
 const accentU: Array<[string, string]> = [
   ['.kx-input:focus', 'border-color'],
   ['.kx-history__row-button:focus-visible', 'outline'],
-  ['.kx-sidebar__workspace-avatar', 'background'],
-  ['.kx-system-menu__create:hover', 'border-color'],
-  ['.kx-workspace-menu__item-avatar', 'background'],
   ['.kx-composer__input:focus', 'box-shadow'],
   ['.kx-quote-approval-card__header:focus-visible', 'outline'],
   ['.kx-composer__send:hover:not(:disabled)', 'border-color'],
@@ -225,6 +219,48 @@ const accentU: Array<[string, string]> = [
   ['.kx-history__clear:focus-visible', 'border-color'],
 ]
 
+function shellEntries(): Entry[] {
+  return [
+    // muted M — sidebar/workspace/system-menu captions & counts
+    ...[
+      '.kx-sidebar__control-caption',
+      '.kx-sidebar__label',
+      '.kx-sidebar__session-meta',
+    ].map((selector) => ({ file: SIDEBAR, selector, property: 'color', token: MUTED, cls: 'M' as Class })),
+    { file: SYSTEM_MENU, selector: '.kx-system-menu__empty', property: 'color', token: MUTED, cls: 'M' },
+    { file: SYSTEM_MENU, selector: '.kx-system-menu__item-count', property: 'color', token: MUTED, cls: 'M' },
+    { file: WORKSPACE_MENU, selector: '.kx-workspace-menu__item-plan', property: 'color', token: MUTED, cls: 'M' },
+    // muted U — decorative chevron at rest
+    { file: SIDEBAR, selector: '.kx-sidebar__chevron', property: 'color', token: MUTED, cls: 'U' },
+    // accent A — sidebar/menu glyphs & actions
+    ...[
+      '.kx-sidebar__system-icon',
+      '.kx-sidebar__new-session-icon',
+      '.kx-sidebar__view-all',
+      '.kx-sidebar__user-avatar',
+    ].map((selector) => ({ file: SIDEBAR, selector, property: 'color', token: ACCENT_STRONG, cls: 'A' as Class })),
+    ...[
+      '.kx-system-menu__all',
+      '.kx-system-menu__all-icon',
+      '.kx-system-menu__item-icon',
+      '.kx-system-menu__create',
+    ].map((selector) => ({ file: SYSTEM_MENU, selector, property: 'color', token: ACCENT_STRONG, cls: 'A' as Class })),
+    // accent U — decorative avatars / hover border
+    { file: SIDEBAR, selector: '.kx-sidebar__workspace-avatar', property: 'background', token: ACCENT_STRONG, cls: 'U' },
+    { file: SYSTEM_MENU, selector: '.kx-system-menu__create:hover', property: 'border-color', token: ACCENT_STRONG, cls: 'U' },
+    { file: WORKSPACE_MENU, selector: '.kx-workspace-menu__item-avatar', property: 'background', token: ACCENT_STRONG, cls: 'U' },
+    // Sidebar-v2 hover-reveal icon actions (real-file attribution — see
+    // the identical pattern in the components.css batch below): the REST
+    // state reads the decorative muted token (U — hidden until hover),
+    // while their revealed states (pinned, hovered map button) read the
+    // AA accent token.
+    { file: SIDEBAR, selector: '.kx-sidebar__session-pin', property: 'color', token: MUTED, cls: 'U' },
+    { file: SIDEBAR, selector: ".kx-sidebar__session-pin[aria-pressed='true']", property: 'color', token: ACCENT_AA, cls: 'A' },
+    { file: SYSTEM_MENU, selector: '.kx-system-menu__map-btn', property: 'color', token: MUTED, cls: 'U' },
+    { file: SYSTEM_MENU, selector: '.kx-system-menu__map-btn:hover', property: 'color', token: ACCENT_AA, cls: 'A' },
+  ]
+}
+
 function entries(): Entry[] {
   return [
     ...mutedM.map((selector) => ({ file: COMPONENTS, selector, property: 'color', token: MUTED, cls: 'M' as Class })),
@@ -232,6 +268,7 @@ function entries(): Entry[] {
     ...accentA.map((selector) => ({ file: COMPONENTS, selector, property: 'color', token: ACCENT_STRONG, cls: 'A' as Class })),
     ...accentS.map((selector) => ({ file: COMPONENTS, selector, property: 'background', token: ACCENT_STRONG, cls: 'S' as Class })),
     ...accentU.map(([selector, property]) => ({ file: COMPONENTS, selector, property, token: ACCENT_STRONG, cls: 'U' as Class })),
+    ...shellEntries(),
     // Preserved Skills/Tools rows (customize/shared.css — T5b dedup: the
     // rules were duplicated verbatim in SkillsTab.css + ToolsTab.css and
     // collapsed to a single shared.css copy; components.css never carried
@@ -266,15 +303,9 @@ function entries(): Entry[] {
     // the #a8c883 fill. Property is 'color' — the extractor keys each
     // selector to its single tracked-token line.
     { file: COMPONENTS, selector: '.kx-segmented__btn--active:hover', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
-    // Sidebar-v2 hover-reveal icon actions: the REST state reads the
-    // decorative muted token (U — hidden until hover), while their revealed
-    // states (pinned, hovered map button) read the AA accent token. The
-    // account menu's theme segmented buttons follow the same pattern —
-    // muted icon at rest (U), AA accent on hover and while active.
-    { file: COMPONENTS, selector: '.kx-sidebar__session-pin', property: 'color', token: MUTED, cls: 'U' as Class },
-    { file: COMPONENTS, selector: '.kx-sidebar__session-pin[aria-pressed=\'true\']', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
-    { file: COMPONENTS, selector: '.kx-system-menu__map-btn', property: 'color', token: MUTED, cls: 'U' as Class },
-    { file: COMPONENTS, selector: '.kx-system-menu__map-btn:hover', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
+    // Account menu theme segmented buttons follow the sidebar-v2
+    // hover-reveal pattern (see the shell batch above): muted icon at
+    // rest (U), AA accent on hover and while active.
     { file: COMPONENTS, selector: '.kx-account-menu__theme-seg-btn', property: 'color', token: MUTED, cls: 'U' as Class },
     // System map diagram strokes — decorative SVG geometry, not text.
     { file: COMPONENTS, selector: '.kx-system-map__node rect', property: 'stroke', token: ACCENT_STRONG, cls: 'U' as Class },

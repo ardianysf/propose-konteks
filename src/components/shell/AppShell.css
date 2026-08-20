@@ -1,0 +1,52 @@
+/* ── App shell ────────────────────────────────────────────────────────
+ * Grid: 312px white sidebar | matcha main canvas, full viewport height. */
+.kx-app {
+  position: relative; /* floating anchored menus (system menu, §6.2) anchor here */
+  display: grid;
+  grid-template-columns: var(--kx-sidebar-w) 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.kx-app--rail {
+  grid-template-columns: var(--kx-sidebar-rail) 1fr;
+}
+
+/* Main canvas: 19.5px curved corners on the top-left and bottom-left
+ * edges meeting the sidebar (§5.1, AC2). */
+.kx-main {
+  position: relative;
+  min-width: 0;
+  overflow-y: auto;
+  background: var(--kx-canvas);
+  border-radius: var(--kx-radius-main) 0 0 var(--kx-radius-main);
+}
+
+/* Radial matcha glow — ambient, accent-tinted, low opacity, and strictly
+ * non-interactive so it never obscures or reduces legibility (§5.1, AC3). */
+.kx-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 65% 55% at 18% 0%,
+    rgba(143, 191, 106, 0.16),
+    transparent 62%
+  );
+  border-radius: inherit;
+}
+
+.kx-main > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Forced-rail app grid track (the shell half of the ≤1280px responsive
+ * rail contract — see shell/shared.css for the sidebar/menu halves). */
+@media (max-width: 1280px) {
+  .kx-app {
+    grid-template-columns: var(--kx-sidebar-rail) 1fr;
+  }
+}

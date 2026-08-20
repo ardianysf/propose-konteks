@@ -11,6 +11,8 @@
  */
 import { useMockup } from '../../state/MockupContext'
 import { useOverlayLifecycle } from './OverlayLifecycle'
+import './shared.css'
+import './SystemMenu.css'
 
 /** Grid-of-four — the same neutral system glyph the sidebar control uses. */
 function SystemIcon() {

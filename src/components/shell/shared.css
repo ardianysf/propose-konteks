@@ -1,0 +1,29 @@
+/* ── Anchored menu geometry (Task 4, spec §6.1/§6.2) ──────────────────
+ * Shared horizontal anchoring for every sidebar-anchored floating menu
+ * (workspace, system): they open to the right of the sidebar — never
+ * behind a modal backdrop (AC7) — token-aware for both sidebar widths:
+ * expanded (312px) and collapsed rail (64px). Each menu keeps its own
+ * vertical alignment under its control below. */
+
+.kx-workspace-menu,
+.kx-system-menu {
+  left: calc(var(--kx-sidebar-w) + 12px);
+}
+
+.kx-app--rail .kx-workspace-menu,
+.kx-app--rail .kx-system-menu {
+  left: calc(var(--kx-sidebar-rail) + 12px);
+}
+
+/* Forced-rail half of the anchoring contract: at ≤1280px the sidebar is
+ * the 64px icon rail (see Sidebar.css), so the menus anchor from the
+ * effective rail width, never the stored expanded width. (The account
+ * menu carries its own copy in AccountMenu.css.) */
+@media (max-width: 1280px) {
+  /* Anchored menus open from the effective rail width, never the stored
+   * expanded width. (account-menu lives in AccountMenu.css now.) */
+  .kx-workspace-menu,
+  .kx-system-menu {
+    left: calc(var(--kx-sidebar-rail) + 12px);
+  }
+}

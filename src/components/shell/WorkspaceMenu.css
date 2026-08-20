@@ -1,0 +1,73 @@
+/* ── Workspace floating menu (Task 4, spec §6.1/AC7) ──────────────────
+ * Anchored right of the sidebar's workspace control via the shared
+ * geometry above. Minimal scope: only the current workspace as a
+ * selected illustrative row — no workspace management. It is a
+ * transient overlay, not a persistent sidebar box, so AC6's single-box
+ * rule is untouched. */
+
+.kx-workspace-menu {
+  top: 62px; /* aligned under the sidebar's workspace control */
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+  padding: 8px;
+}
+
+.kx-workspace-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-workspace-menu__item:hover {
+  background: var(--kx-pale);
+}
+
+/* The current workspace row — selected */
+
+.kx-workspace-menu__item--current {
+  background: var(--kx-pale);
+}
+
+.kx-workspace-menu__item-avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--kx-accent), var(--kx-accent-strong));
+  color: var(--kx-raised);
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+}
+
+.kx-workspace-menu__item-copy {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-workspace-menu__item-name {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-workspace-menu__item-plan {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
