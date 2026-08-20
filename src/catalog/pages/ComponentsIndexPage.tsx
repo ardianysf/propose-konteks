@@ -1,22 +1,17 @@
 /*
  * Components index — daftar semua entri manifest, dikelompokkan per domain
- * (urut abjad; entri di dalam domain ikut urutan manifest). Entri dengan
- * preview tersedia (sampel T4) menjadi link ke halaman detail; sisanya
- * disabled dengan keterangan "detail page menyusul (T6)" (spec §2 + AC6).
+ * (urut abjad; entri di dalam domain ikut urutan manifest). Sejak T6,
+ * SETIAP entri komponen (adoptable + mockup-coupled) punya halaman detail
+ * dan ditautkan; entri internal (AppShell) dan utility (.ts helper)
+ * dicantumkan dengan alasannya tanpa link (spec §2/§4 + AC4/AC6).
  */
 import { manifestEntries, type ManifestEntry } from '../manifest'
-import { registry } from '../registry'
 
-/** IDs whose registry entry provides a live preview (and therefore a
- *  working detail page). Derived from the registry, not hardcoded. */
-const PREVIEWABLE_IDS = new Set(
-  registry.filter((entry) => entry.preview !== undefined).map((entry) => entry.id),
-)
-
-/** Detail pages exist for every *component* entry; utility modules have no
- *  visual preview so they are listed manifest-only (manifest entry only). */
 function isLinkable(entry: ManifestEntry): boolean {
-  return PREVIEWABLE_IDS.has(entry.id)
+  return (
+    entry.classification === 'adoptable' ||
+    entry.classification === 'mockup-coupled'
+  )
 }
 
 interface DomainGroup {
@@ -60,7 +55,11 @@ function EntryRow({ entry }: { entry: ManifestEntry }) {
           live preview tersedia
         </span>
       ) : (
-        <span className="kx-cat-index-note">detail page menyusul (T6)</span>
+        <span className="kx-cat-index-note">
+          {entry.classification === 'internal'
+            ? 'internal — orkestrator route/page, tanpa detail adopsi'
+            : 'utility — manifest entry only, tanpa preview visual'}
+        </span>
       )}
     </li>
   )
@@ -85,8 +84,9 @@ export function ComponentsIndexPage() {
       <p className="kx-cat-lede">
         {manifestEntries.length} entri dari manifest{' '}
         <code>src/catalog/components.json</code>, dikelompokkan per domain.
-        Dua entri sampel sudah punya live preview &amp; halaman detail;
-        sisanya menyusul (T6).
+        Semua {componentEntries.length} komponen (adoptable + mockup-coupled)
+        punya halaman detail dengan live preview; entri internal dan utility
+        dicantumkan dengan alasannya.
       </p>
 
       {groupByDomain(componentEntries).map((group) => (
