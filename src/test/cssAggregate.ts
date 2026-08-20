@@ -3,15 +3,17 @@
  *
  * Spec: docs/plans/2026-08-20-konteks-dual-output-pivot.md §8 (addendum,
  * T5a escalation). While the T5 CSS migration moves rules out of
- * src/styles/components.css into per-domain src/components/**\/*.css files,
- * tests must assert against the AGGREGATE of all shipped stylesheets
+ * src/styles/components.css into per-domain src/components/**\/*.css and
+ * per-page src/pages/*.css files (addendum §8.3: page namespaces move to
+ * src/pages/*.css in T5b), tests must assert against the AGGREGATE of all
  * instead of components.css alone. The aggregate is a superset of
  * components.css, so existing presence assertions keep their intent; after
  * pass 2 deletes migrated rules from components.css the aggregate keeps
  * them findable at their new location.
  *
  * Deterministic order: tokens.css, global.css, components.css, then every
- * src/components/**\/*.css sorted by path (localeCompare).
+ * src/components/**\/*.css and src/pages/*.css sorted by path
+ * (localeCompare).
  */
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
@@ -21,6 +23,7 @@ import { join } from 'node:path'
 const ROOT = process.cwd()
 const STYLES_DIR = join(ROOT, 'src/styles')
 const COMPONENTS_DIR = join(ROOT, 'src/components')
+const PAGES_DIR = join(ROOT, 'src/pages')
 
 function listComponentCssFiles(dir: string): string[] {
   const files: string[] = []
@@ -54,8 +57,10 @@ export function getAggregatedCssParts(): Array<{ file: string; css: string }> {
     { file: 'src/styles/global.css', css: readFileSync(join(STYLES_DIR, 'global.css'), 'utf8') },
     { file: 'src/styles/components.css', css: readFileSync(join(STYLES_DIR, 'components.css'), 'utf8') },
   ]
-  const componentFiles = listComponentCssFiles(COMPONENTS_DIR).sort((a, b) => a.localeCompare(b))
-  for (const file of componentFiles) {
+  const componentFiles = listComponentCssFiles(COMPONENTS_DIR)
+  const pageFiles = listComponentCssFiles(PAGES_DIR)
+  const extraFiles = [...componentFiles, ...pageFiles].sort((a, b) => a.localeCompare(b))
+  for (const file of extraFiles) {
     parts.push({ file: file.slice(ROOT.length + 1), css: readFileSync(file, 'utf8') })
   }
   return parts
