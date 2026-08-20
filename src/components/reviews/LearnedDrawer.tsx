@@ -23,6 +23,7 @@ import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import { useFocusContainment } from '../shell/useFocusContainment'
 import { DEFAULT_LEARNED_TAB, type LearnedTab } from '../../state/mockupReducer'
 import { AUDIT_HISTORY, PENDING_REVIEWS, SYSTEMS } from '../../data/mockData'
+import './LearnedDrawer.css'
 
 /** Close — the header dismiss control. */
 function CloseIcon() {

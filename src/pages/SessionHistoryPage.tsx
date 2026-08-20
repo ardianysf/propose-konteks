@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ILLUSTRATIVE_DATA_NOTE, SESSION_HISTORY, type SessionMode } from '../data/mockData'
 import { useMockup } from '../state/MockupContext'
 import type { MockupAction } from '../state/mockupReducer'
+import './SessionHistoryPage.css'
 
 const MODE_LABELS: Record<SessionMode, string> = {
   engineering: 'Engineering',

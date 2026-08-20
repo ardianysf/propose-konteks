@@ -1,0 +1,308 @@
+/* ── Session History page (Task 11, spec §13) ────────────────────────
+ * Dedicated history route: a header with labelled search/mode/system
+ * filters above a flat, newest-first list. Rows are deliberately flat —
+ * no boxed cards — with the title and Mode · System · Component metadata
+ * in the main column, the relative time in its own next column, and a
+ * hover-only inline three-dot action menu in the trailing column.
+ * Input/button primitives (.kx-input/.kx-btn) stay global. */
+
+.kx-history {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 32px 48px;
+}
+
+.kx-history__head {
+  display: grid;
+  gap: 14px;
+}
+
+.kx-history__title {
+  margin: 0;
+  font-size: var(--kx-text-3xl);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-history__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.kx-history__field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.kx-history__field-label {
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-history__search {
+  width: 240px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+.kx-history__select {
+  width: 160px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+/* List region — flat rows or designed states (AC43). */
+
+.kx-history__list {
+  list-style: none;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--kx-border);
+}
+
+.kx-history__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+/* History stays a flat, three-column row. The focusable navigation button
+ * is visually transparent and only occupies the original main+time cells;
+ * the trailing three-dot action stays unchanged as the final column. */
+.kx-history__row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.kx-history__row-button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kx-history__row-button:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: -2px;
+  border-radius: 8px;
+}
+
+.kx-history__row-main {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.kx-history__row-title {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-history__row-meta {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-history__row-time {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-secondary);
+  white-space: nowrap;
+}
+
+/* Hover-only three-dot action (spec §13): hidden in the resting row,
+ * revealed only when the row is hovered or has keyboard focus. */
+.kx-history__row-actions {
+  position: relative;
+  display: inline-flex;
+  justify-content: flex-end;
+}
+
+.kx-history__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--kx-secondary);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.12s ease;
+}
+
+.kx-history__row:hover .kx-history__action,
+.kx-history__row:focus-within .kx-history__action {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.kx-history__action:hover,
+.kx-history__action:focus-visible {
+  background: var(--kx-raised);
+  color: var(--kx-primary);
+}
+
+/* Local action menu — floats from the trailing action cell. */
+.kx-history__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 40;
+  display: grid;
+  min-width: 150px;
+  padding: 6px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgb(var(--kx-ink-rgb) / 0.14);
+}
+
+.kx-history__menuitem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-history__menuitem:hover,
+.kx-history__menuitem:focus-visible {
+  background: var(--kx-pale);
+}
+
+/* Designed loading + empty + no-results states (AC43). */
+
+.kx-history__loading {
+  display: grid;
+  gap: 10px;
+}
+
+.kx-history__skeleton {
+  height: 56px;
+  border-radius: 10px;
+  background: var(--kx-pale);
+  animation: kx-history-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes kx-history-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.kx-history__empty {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding: 48px 16px;
+  border-top: 1px solid var(--kx-border);
+  text-align: center;
+}
+
+.kx-history__empty-title {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-history__empty-hint {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-history__empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.kx-history__open {
+  padding: 6px 12px;
+  border: 1px solid var(--kx-border);
+  border-radius: 8px;
+  background: transparent;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  cursor: not-allowed;
+}
+
+.kx-history__open:disabled {
+  opacity: 0.55;
+  background: var(--kx-pale);
+  color: var(--kx-muted);
+  border-color: var(--kx-border);
+}
+
+.kx-history__clear {
+  padding: 6px 12px;
+  border: 1px solid var(--kx-border);
+  border-radius: 8px;
+  background: transparent;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.kx-history__clear:hover,
+.kx-history__clear:focus-visible {
+  background: var(--kx-pale);
+  border-color: var(--kx-accent-strong);
+}

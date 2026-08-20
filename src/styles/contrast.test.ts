@@ -321,17 +321,32 @@ function extractUsages(css: string, file: string): Usage[] {
  * Pass-1 wrinkle: the selectors listed below were migrated into the inert
  * per-domain files while their components.css copy still exists (dedup is
  * pass 2). Their extra tracked-token hits are duplicates of EXISTING
- * inventory entries, so usages from src/components/** whose (selector,
- * property, token) triple matches the components.css read are folded onto
- * the entry they duplicate — they do not require their own classification
- * (which would break the established M/A/S/U tallies and the
- * no-duplicate-usage rule). The fold only ever maps a domain-file hit to
- * an already-classified entry, and only when that entry itself is present
- * in the read — any genuinely unclassified use still surfaces. After
- * pass 2 deletes the components.css copies the same fold maps the
- * surviving domain-file hit to the same entry, so the test keeps passing
- * unchanged. KNOWN_INERT_DUPLICATE_SELECTORS below IS the pass-1
- * components.css ↔ domain-file duplicate report for the handoff.
+ * inventory entries, so the compatibility fold in collectUsages() maps a
+ * domain-file hit onto the entry it duplicates — it does not require its
+ * own classification (which would break the established M/A/S/U tallies
+ * and the no-duplicate-usage rule). After pass 2 deletes the
+ * components.css copies the same fold maps the surviving domain-file hit
+ * to the same entry, so the test keeps passing unchanged.
+ * KNOWN_INERT_DUPLICATE_SELECTORS below IS the pass-1 components.css ↔
+ * domain-file duplicate report for the handoff.
+ *
+ * The fold is SOURCE-FILE aware (it tracks provenance per
+ * selector::property::token key, not just the recorded entry) and admits
+ * exactly two transition shapes — anything else stays in the output and
+ * fails the completeness/no-duplicate assertions:
+ *
+ *   (a) components.css + exactly ONE domain/page file  → the domain hit
+ *       is skipped (pass 1: the original still exists and owns the entry);
+ *   (b) exactly ONE domain/page file and NO components.css hit → the hit
+ *       is re-attributed to COMPONENTS as the synthetic inventory stand-in
+ *       (pass 2: the original is gone, the survivor keeps the legacy
+ *       inventory addressable).
+ *
+ * A SECOND non-components hit for the same key — even in the SAME domain
+ * file that already supplied the fold — is never folded: it is pushed
+ * under its real file, where the 'no duplicate usage' / 'no missing
+ * classification' assertions see it as a brand-new cross-file
+ * re-duplication.
  */
 const KNOWN_INERT_DUPLICATE_SELECTORS = new Set([
   // account/AccountMenu.css
@@ -422,6 +437,23 @@ const KNOWN_INERT_DUPLICATE_SELECTORS = new Set([
   '.kx-integrations__status--connected',
   '.kx-integrations__status--setup',
   '.kx-integrations__empty-text',
+  // reviews/LearnedDrawer.css (T5b batch: rules moved out of
+  // components.css by the removal tool; the fold maps the surviving
+  // domain-file hit back to the components.css inventory entry)
+  '.kx-learned-item__meta',
+  '.kx-learned-timeline__meta',
+  '.kx-learned__empty-hint',
+  '.kx-learned__tab:focus-visible',
+  '.kx-learned-timeline__item::before',
+  // pages/SessionHistoryPage.css (T5b batch: page namespace moved to
+  // src/pages/*.css per addendum §8.3; same fold as above)
+  '.kx-history__field-label',
+  '.kx-history__row-meta',
+  '.kx-history__empty-hint',
+  '.kx-history__open:disabled',
+  '.kx-history__clear',
+  '.kx-history__row-button:focus-visible',
+  '.kx-history__clear:focus-visible',
   // NOTE: the .kx-preserved__* selectors are deliberately ABSENT. They
   // were never a components.css↔domain-file transitional duplicate (their
   // only home is customize/shared.css since the T5b dedup), so masking
@@ -429,8 +461,69 @@ const KNOWN_INERT_DUPLICATE_SELECTORS = new Set([
   // inventory entries point at customize/shared.css directly.
 ])
 
-function collectUsages(): Usage[] {
+const usageKey = (u: Pick<Usage, 'selector' | 'property' | 'token'>): string =>
+  `${u.selector}::${u.property}::${u.token}`
+
+/**
+ * Provenance-aware fold for the pass-1 transitional duplicates (see the
+ * KNOWN_INERT_DUPLICATE_SELECTORS contract above). `partUsages` must be
+ * ordered components.css-first (getAggregatedCssParts guarantees it), so
+ * `sources` accumulates the REAL source files of every raw hit per key:
+ *
+ *   - components.css hit                → recorded as-is, sources track it;
+ *   - the FIRST non-components hit      → the one allowed fold: skipped
+ *                                         when components.css already owns
+ *                                         the key (pass-1 pair, shape (a)),
+ *                                         otherwise re-attributed to
+ *                                         COMPONENTS as the pass-2 stand-in
+ *                                         (shape (b)); its real file is
+ *                                         remembered either way;
+ *   - ANY further non-components hit    → pushed under its REAL file —
+ *                                         never folded — so the duplicate /
+ *                                         completeness assertions fail,
+ *                                         whether or not a components.css
+ *                                         copy exists, and even when the
+ *                                         repeat is in the SAME domain file.
+ *
+ * Exported so the regression suite below can drive the fold with
+ * synthetic provenance sequences without touching the real stylesheets.
+ */
+export function foldTransitionalDuplicateUsages(partUsages: Usage[]): Usage[] {
   const out: Usage[] = []
+  const sources = new Map<string, Set<string>>()
+  for (const raw of partUsages) {
+    if (!KNOWN_INERT_DUPLICATE_SELECTORS.has(raw.selector)) {
+      out.push(raw)
+      continue
+    }
+    const key = usageKey(raw)
+    const seen = sources.get(key) ?? new Set<string>()
+    sources.set(key, seen)
+    if (raw.file === COMPONENTS) {
+      seen.add(COMPONENTS)
+      out.push(raw)
+      continue
+    }
+    const nonComponentsSeen = seen.size - (seen.has(COMPONENTS) ? 1 : 0)
+    if (nonComponentsSeen === 0) {
+      // The single allowed transition fold for this key.
+      seen.add(raw.file)
+      if (seen.has(COMPONENTS)) continue // pass-1 pair: components.css owns the entry
+      // Pass 2: the components.css original is gone — the lone surviving
+      // domain-file hit stands in for the legacy inventory entry.
+      out.push({ ...raw, file: COMPONENTS })
+      continue
+    }
+    // Second (or later) non-components occurrence: the key already used its
+    // one allowed fold, so keep this hit under its real file where the
+    // no-duplicate-usage / completeness assertions surface it.
+    seen.add(raw.file)
+    out.push(raw)
+  }
+  return out
+}
+
+function collectUsages(): Usage[] {
   // The aggregate read uses the same convention as the pre-migration
   // components.css read (the walk assumes the tracked-token lines are not
   // the file's first line); global.css — whose :focus-visible rule opens
@@ -438,24 +531,68 @@ function collectUsages(): Usage[] {
   // attribution (getAggregatedCssParts), so a rule that opens a file stays
   // attributed to its own file instead of the aggregate's first part.
   const partUsages = getAggregatedCssParts().flatMap((p) => extractUsages(p.css, p.file))
-  for (const raw of partUsages) {
-    if (!KNOWN_INERT_DUPLICATE_SELECTORS.has(raw.selector)) {
-      out.push(raw)
-      continue
-    }
-    const primary = `${raw.selector}::${raw.property}::${raw.token}`
-    const fromComponents = out.some((u) => `${u.selector}::${u.property}::${u.token}` === primary)
-    if (fromComponents) continue // duplicate of an already-recorded entry
-    // No components.css copy in this read (pass 2 already deleted it):
-    // the surviving domain-file hit stands in for the inventory entry.
-    out.push({ ...raw, file: COMPONENTS })
-  }
-  return out
+  return foldTransitionalDuplicateUsages(partUsages)
 }
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
+
+describe('foldTransitionalDuplicateUsages provenance contract (T5b)', () => {
+  // A selector that IS in KNOWN_INERT_DUPLICATE_SELECTORS (its only home
+  // today is the per-domain file; the fold contract is what is under test).
+  const KNOWN = '.kx-learned__empty-hint'
+  const DOMAIN_A = 'src/components/reviews/LearnedDrawer.css'
+  const DOMAIN_B = 'src/pages/SessionHistoryPage.css'
+  const hit = (file: string): Usage => ({
+    file,
+    selector: KNOWN,
+    property: 'color',
+    token: MUTED_AA,
+  })
+
+  it('(a) allows the components.css + single domain-file transition pair', () => {
+    const out = foldTransitionalDuplicateUsages([hit(COMPONENTS), hit(DOMAIN_A)])
+    expect(out).toEqual([hit(COMPONENTS)]) // domain hit folded onto the entry
+  })
+
+  it('(b) re-attributes a single migrated domain hit to COMPONENTS', () => {
+    const out = foldTransitionalDuplicateUsages([hit(DOMAIN_A)])
+    expect(out).toEqual([{ ...hit(DOMAIN_A), file: COMPONENTS }])
+  })
+
+  it('(c) keeps a SECOND domain source visible (cross-file re-duplication fails)', () => {
+    // Pass 1 shape: components + two different domain files.
+    const out = foldTransitionalDuplicateUsages([
+      hit(COMPONENTS),
+      hit(DOMAIN_A),
+      hit(DOMAIN_B),
+    ])
+    expect(out).toEqual([hit(COMPONENTS), hit(DOMAIN_B)])
+
+    // Pass 2 shape: no components.css original, two domain files — the
+    // second hit must NOT fold into the synthetic COMPONENTS stand-in.
+    const out2 = foldTransitionalDuplicateUsages([hit(DOMAIN_A), hit(DOMAIN_B)])
+    expect(out2).toEqual([{ ...hit(DOMAIN_A), file: COMPONENTS }, hit(DOMAIN_B)])
+
+    // Even a second hit in the SAME domain file stays visible.
+    const out3 = foldTransitionalDuplicateUsages([hit(DOMAIN_A), hit(DOMAIN_A)])
+    expect(out3).toEqual([{ ...hit(DOMAIN_A), file: COMPONENTS }, hit(DOMAIN_A)])
+  })
+
+  it('scopes the fold to selector::property::token, not selector alone', () => {
+    const other: Usage = { file: DOMAIN_B, selector: KNOWN, property: 'outline', token: ACCENT_STRONG }
+    const out = foldTransitionalDuplicateUsages([hit(DOMAIN_A), other])
+    // Different property+token key: no fold relationship, both recorded.
+    expect(out).toEqual([{ ...hit(DOMAIN_A), file: COMPONENTS }, { ...other, file: COMPONENTS }])
+  })
+
+  it('never folds selectors outside KNOWN_INERT_DUPLICATE_SELECTORS', () => {
+    const unknown: Usage = { file: DOMAIN_A, selector: '.kx-preserved__note', property: 'color', token: MUTED_AA }
+    const out = foldTransitionalDuplicateUsages([unknown, { ...unknown, file: DOMAIN_B }])
+    expect(out).toEqual([unknown, { ...unknown, file: DOMAIN_B }])
+  })
+})
 
 describe('AA token definitions (tokens.css)', () => {
   it('defines --kx-muted-text-aa as #607260', () => {

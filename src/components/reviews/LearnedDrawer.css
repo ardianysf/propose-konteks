@@ -1,0 +1,249 @@
+/* ── Konteks Learned drawer (Task 10, spec §12 — AC20/AC39/AC43) ──────
+ * The 450px right drawer interior. Geometry lives in the shared
+ * .kx-drawer primitive (kept global in src/styles/components.css) —
+ * fixed to the right edge, full height, --kx-drawer-w wide, above the
+ * shared backdrop — so stacking never touches the persistent sidebar.
+ * The frame is a head / tab nav / content grid: head and nav never
+ * scroll, only the tab panel region does. Tabs switch in place through
+ * OPEN_OVERLAY learned + tab (the overlay kind never leaves 'learned'),
+ * so the frame never remounts. */
+
+.kx-learned {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr); /* head / nav / scrollable content */
+  overflow: hidden;
+}
+
+/* Header — title + dismiss control, never scrolls. */
+
+.kx-learned__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-learned__title {
+  margin: 0;
+  font-size: var(--kx-text-xl);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-learned__close {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Tab nav — pill buttons, Pending (primary/default) then Audit
+ * History; switching happens in place, never by remounting the frame. */
+
+.kx-learned__nav {
+  display: flex;
+  gap: 4px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-learned__tab {
+  padding: 7px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.kx-learned__tab:hover {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-learned__tab:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-learned__tab[aria-selected='true'] {
+  background: var(--kx-primary);
+  color: var(--kx-raised);
+}
+
+/* Content — the sole scrolling region of the drawer. */
+
+.kx-learned__content {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-learned__content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kx-learned__content::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 999px;
+}
+
+.kx-learned__panel {
+  min-width: 0;
+}
+
+/* Pending tab — the actionable waiting-review list (AC20/AC39): one
+ * boxed row per review (title, system · time, summary) with its local-
+ * only Approve/Reject pair. */
+
+.kx-learned__list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kx-learned-item {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+}
+
+.kx-learned-item__copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.kx-learned-item__title {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-learned-item__meta {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-learned-item__summary {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-secondary);
+}
+
+.kx-learned-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kx-learned-item__actions .kx-btn {
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+/* Audit History tab — the flat timeline (AC39): a border-left spine
+ * running down the list with a round dot marking each event; entries
+ * carry NO boxed-card chrome (that treatment belongs to Pending rows). */
+
+.kx-learned-timeline {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 4px 0 4px 18px;
+  list-style: none;
+  border-left: 2px solid var(--kx-border);
+}
+
+.kx-learned-timeline__item {
+  position: relative;
+}
+
+.kx-learned-timeline__item::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: -24px; /* centers the dot on the spine */
+  width: 10px;
+  height: 10px;
+  background: var(--kx-raised);
+  border: 2px solid var(--kx-accent-strong);
+  border-radius: 50%;
+}
+
+.kx-learned-timeline__meta {
+  margin: 0 0 2px;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-learned-timeline__action {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+}
+
+/* Designed loading + empty states (AC43) — the panel region swaps only;
+ * frame, header, and tab nav persist across both tabs. */
+
+.kx-learned__loading {
+  display: grid;
+  gap: 10px;
+}
+
+.kx-learned__skeleton {
+  height: 96px;
+  border-radius: 12px;
+  background: var(--kx-pale);
+  animation: kx-learned-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes kx-learned-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.kx-learned__empty {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding: 40px 16px;
+  text-align: center;
+}
+
+.kx-learned__empty-title {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-learned__empty-hint {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
