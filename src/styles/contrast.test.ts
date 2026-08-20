@@ -233,6 +233,11 @@ function entries(): Entry[] {
     // the #a8c883 fill. Property is 'color' — the extractor keys each
     // selector to its single tracked-token line.
     { file: COMPONENTS, selector: '.kx-segmented__btn--active:hover', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
+    // Sidebar-v2 hover-reveal icon actions: the REST state reads the
+    // decorative muted token (U — hidden until hover), while their revealed
+    // states (pinned, hovered map button) read the AA accent token.
+    { file: COMPONENTS, selector: '.kx-sidebar__session-pin', property: 'color', token: MUTED, cls: 'U' as Class },
+    { file: COMPONENTS, selector: '.kx-sidebar__session-pin[aria-pressed=\'true\']', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
     { file: GLOBAL, selector: ':focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
   ]
 }
@@ -453,18 +458,18 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = [...extractUsages(components, COMPONENTS), ...extractUsages(global, GLOBAL)]
 
-  it('covers exactly 140 consumers — 80 muted, 59 accent-strong, 1 accent-text-aa pin', () => {
-    expect(inventory).toHaveLength(140)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(80)
+  it('covers exactly 142 consumers — 81 muted, 59 accent-strong, 2 accent-text-aa', () => {
+    expect(inventory).toHaveLength(142)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(81)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(59)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(1)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(2)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
     expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(76)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(34)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(35)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(4)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(26)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(27)
   })
 
   it('has no duplicate inventory selectors', () => {

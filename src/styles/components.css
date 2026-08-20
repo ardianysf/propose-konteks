@@ -6,7 +6,7 @@
  */
 
 /* ── App shell ────────────────────────────────────────────────────────
- * Grid: 240px white sidebar | matcha main canvas, full viewport height. */
+ * Grid: 312px white sidebar | matcha main canvas, full viewport height. */
 .kx-app {
   position: relative; /* floating anchored menus (system menu, §6.2) anchor here */
   display: grid;
@@ -351,7 +351,7 @@
 }
 
 /* ── Sidebar (Task 4, spec §6.1) ──────────────────────────────────────
- * 240px expanded white rail → 64px icon rail when collapsed (AC12).
+ * 312px expanded white rail → 64px icon rail when collapsed (AC12).
  * The workspace box (.kx-sidebar-box) is the ONLY persistent boxed
  * container in the sidebar (AC6); everything else stays unboxed until
  * hover. Colors/dimensions come exclusively from tokens.css. */
@@ -625,21 +625,31 @@
   min-height: 0;
   overflow-y: auto;
   display: grid;
-  gap: 2px;
+  gap: 1px;
   align-content: start;
 }
 
 .kx-sidebar__session {
-  padding: 8px;
+  position: relative; /* tooltip anchor */
+  padding: 5px 8px;
   border-radius: 10px;
+  transition: background-color 0.15s ease;
 }
 
 .kx-sidebar__session:hover {
   background: var(--kx-pale);
 }
 
+.kx-sidebar__session-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .kx-sidebar__session-title {
   display: block;
+  flex: 1;
+  min-width: 0;
   font-size: var(--kx-text-md);
   color: var(--kx-primary);
   white-space: nowrap;
@@ -647,13 +657,85 @@
   text-overflow: ellipsis;
 }
 
+/* Pin-to-top control — hidden at rest, revealed on row hover/focus-within
+ * and kept visible while pinned (aria-pressed=true), so a pinned row reads
+ * pinned without requiring hover. Filled glyph when pinned via the React
+ * icon swap; color follows the AA accent on hover/pressed. */
+.kx-sidebar__session-pin {
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--kx-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.kx-sidebar__session:hover .kx-sidebar__session-pin,
+.kx-sidebar__session:focus-within .kx-sidebar__session-pin,
+.kx-sidebar__session-pin[aria-pressed='true'] {
+  opacity: 1;
+}
+
+.kx-sidebar__session-pin:hover,
+.kx-sidebar__session-pin[aria-pressed='true'] {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-sidebar__session-pin:hover {
+  background: var(--kx-pale);
+}
+
+/* Hover-reveal expand — the meta line starts collapsed (0fr) and grows
+ * open on hover/focus-within via the grid-template-rows transition, the
+ * CSS-only smooth expand/collapse pattern. The inner wrapper carries
+ * min-height:0 + overflow:hidden so the 0fr row actually clips. */
+.kx-sidebar__session-expand {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.18s ease;
+}
+
+.kx-sidebar__session-expand-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.kx-sidebar__session:hover .kx-sidebar__session-expand,
+.kx-sidebar__session:focus-within .kx-sidebar__session-expand {
+  grid-template-rows: 1fr;
+}
+
 .kx-sidebar__session-meta {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 4px;
+  margin-top: 3px;
   font-size: var(--kx-text-sm);
   color: var(--kx-muted-text-aa);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.kx-sidebar__session:hover .kx-sidebar__session-meta,
+.kx-sidebar__session:focus-within .kx-sidebar__session-meta {
+  opacity: 1;
+}
+
+/* Full-title tooltip — reveals with the row on hover/focus-within via the
+ * shared .kx-tooltip-host mechanism. Pins to the row's left edge and wraps
+ * inside the 312px sidebar (row width ≈ 262px), staying readable when the
+ * title is long enough to truncate. Colors inherit the base .kx-tooltip
+ * ink/raised pairing, which stays dark-theme safe in both modes. */
+.kx-sidebar__session-tooltip {
+  left: 0;
+  transform: none;
+  max-width: 260px;
+  white-space: normal;
+  text-align: left;
 }
 
 /* Recent-session rows — the timestamp rides the meta line's right edge
@@ -779,7 +861,7 @@
  * Shared horizontal anchoring for every sidebar-anchored floating menu
  * (workspace, system): they open to the right of the sidebar — never
  * behind a modal backdrop (AC7) — token-aware for both sidebar widths:
- * expanded (240px) and collapsed rail (64px). Each menu keeps its own
+ * expanded (312px) and collapsed rail (64px). Each menu keeps its own
  * vertical alignment under its control below. */
 
 .kx-workspace-menu,
