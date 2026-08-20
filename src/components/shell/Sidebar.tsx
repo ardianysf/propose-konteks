@@ -339,6 +339,12 @@ export default function Sidebar() {
                     onClick={(event) => {
                       event.stopPropagation()
                       togglePinned(session.id)
+                      // Mouse clicks (detail > 0) must not leave focus on the
+                      // pin — :focus-within would freeze the row expanded even
+                      // after the mouse leaves. Keyboard activation
+                      // (detail === 0) keeps focus so keyboard users retain
+                      // the focus-within expansion.
+                      if (event.detail > 0) event.currentTarget.blur()
                     }}
                   >
                     <PinIcon pinned={pinned} />

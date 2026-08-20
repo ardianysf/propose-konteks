@@ -379,6 +379,43 @@ describe('Sidebar', () => {
     )
   })
 
+  it('pin click regression: a mouse click blurs the pin so :focus-within never freezes the row expanded; keyboard activation keeps focus', () => {
+    renderSidebar()
+    const list = screen.getByRole('list', { name: 'Recent sessions' })
+    const row = within(list).getAllByRole('listitem')[0]
+    const pin = within(row).getByRole('button', { name: 'Pin session' })
+
+    // Mouse path — fireEvent.click defaults to detail 0 (keyboard-like), so
+    // simulate a real mouse click with detail: 1. The handler must blur the
+    // pin: otherwise :focus-within would keep the meta line expanded forever
+    // after the mouse leaves (verified browser bug).
+    fireEvent.click(pin, { detail: 1 })
+    expect(pin).toHaveAttribute('aria-pressed', 'true')
+    expect(document.activeElement).not.toBe(pin)
+    expect(document.activeElement).toBe(document.body)
+    expect(row.matches(':focus-within')).toBe(false)
+
+    // Same on unpin — focus must not strand on the pin either way.
+    const unpin = within(row).getByRole('button', { name: 'Unpin session' })
+    fireEvent.click(unpin, { detail: 1 })
+    expect(document.activeElement).not.toBe(unpin)
+    expect(row.matches(':focus-within')).toBe(false)
+
+    // Keyboard path — detail 0 (the fireEvent.click default) keeps focus on
+    // the pin so keyboard users retain the focus-within row expansion.
+    // fireEvent does not move focus, so focus the button the way real
+    // keyboard activation arrives, then activate.
+    pin.focus()
+    fireEvent.click(pin)
+    expect(pin).toHaveAttribute('aria-pressed', 'true')
+    expect(document.activeElement).toBe(pin)
+    // jsdom does not implement :focus-within state matching — the focused
+    // pin inside the row IS the browser :focus-within condition, and the
+    // keyboard-retained focus is what keeps the row expanded (CSS rule
+    // asserted in the pin-to-top test above).
+    expect(row.contains(document.activeElement)).toBe(true)
+  })
+
   it('View all navigates to session history while the sidebar element stays byte-identical apart from the nav-active state (AC11)', () => {
     const { bucket } = renderSidebar()
     const nav = getSidebarNav()
