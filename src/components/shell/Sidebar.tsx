@@ -1,5 +1,5 @@
 /*
- * Sidebar — the persistent 240px white shell sidebar (Task 4 Part A, spec §6.1).
+ * Sidebar — the persistent 312px white shell sidebar (Task 4 Part A, spec §6.1).
  *
  * Chrome only: brand logo (real Konteks assets), the workspace box — the
  * single persistent boxed container (AC6) —, the workspace and system
@@ -20,6 +20,28 @@ import { RECENT_SESSIONS, WORKSPACE } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 import CollapseIcon from './CollapseIcon'
 import { useOverlayLifecycle } from './OverlayLifecycle'
+
+/** Pin — outline (unpinned) / filled (pinned) glyph, 14×14 currentColor. */
+function PinIcon({ pinned }: { pinned: boolean }) {
+  return (
+    <svg
+      data-icon="pin"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M9.5 2.5 13.5 6.5 12 8l-.75-.75-2.19 2.19.44 2.56-1.5 1.5-2.5-2.5-2.75 2.75-.75-.75L5 11.25 2.5 8.75 4 7.25l2.56.44L8.75 5.5 8 4.75l1.5-2.25Z"
+        fill={pinned ? 'currentColor' : 'none'}
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
 
 const LOGO_EXPANDED_SRC = '/assets/konteks/logo-text-main.png'
 const LOGO_RAIL_SRC = '/assets/konteks/web-topbar-icon-128.png'
@@ -119,6 +141,21 @@ export default function Sidebar() {
   const activeSystem =
     state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
   const [customizeTooltipShown, setCustomizeTooltipShown] = useState(false)
+  // Pinned recent sessions — local UI state: pinned rows float to the top
+  // of the list (keeping their relative order), unpinned follow unchanged.
+  const [pinnedIds, setPinnedIds] = useState<ReadonlySet<string>>(new Set())
+  const togglePinned = (sessionId: string) => {
+    setPinnedIds((previous) => {
+      const next = new Set(previous)
+      if (next.has(sessionId)) next.delete(sessionId)
+      else next.add(sessionId)
+      return next
+    })
+  }
+  const orderedSessions = [
+    ...RECENT_SESSIONS.filter((session) => pinnedIds.has(session.id)),
+    ...RECENT_SESSIONS.filter((session) => !pinnedIds.has(session.id)),
+  ]
 
   /** Toggle contract shared by the reducer-overlay menu triggers: a second
    * click on the same trigger dismisses its own overlay (restoring focus to
@@ -281,17 +318,44 @@ export default function Sidebar() {
           </button>
         </div>
         <ul className="kx-sidebar__session-list" aria-label="Recent sessions">
-          {RECENT_SESSIONS.map((session) => {
+          {orderedSessions.map((session) => {
             const system = state.systems.find((entry) => entry.id === session.systemId)
+            const pinned = pinnedIds.has(session.id)
             return (
-              <li key={session.id} className="kx-sidebar__session">
-                <span className="kx-sidebar__session-title">{session.title}</span>
-                <span className="kx-sidebar__session-meta">
-                  <span className="kx-sidebar__session-system">
-                    {system ? system.name : session.systemId}
-                  </span>
-                  <span className="kx-sidebar__session-time">{session.time}</span>
+              <li key={session.id} className="kx-sidebar__session kx-tooltip-host">
+                {/* Full-title tooltip — CSS reveals it on hover/focus-within;
+                    aria-hidden so screen readers hear the row text only once. */}
+                <span className="kx-tooltip kx-sidebar__session-tooltip" aria-hidden="true">
+                  {session.title}
                 </span>
+                <div className="kx-sidebar__session-title-row">
+                  <span className="kx-sidebar__session-title">{session.title}</span>
+                  <button
+                    type="button"
+                    className="kx-sidebar__session-pin"
+                    aria-pressed={pinned}
+                    aria-label={pinned ? 'Unpin session' : 'Pin session'}
+                    title={pinned ? 'Unpin session' : 'Pin session'}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      togglePinned(session.id)
+                    }}
+                  >
+                    <PinIcon pinned={pinned} />
+                  </button>
+                </div>
+                {/* Collapsed by default; expands on hover/focus-within via the
+                    grid-template-rows 0fr→1fr transition (CSS-only). */}
+                <div className="kx-sidebar__session-expand">
+                  <div className="kx-sidebar__session-expand-inner">
+                    <span className="kx-sidebar__session-meta">
+                      <span className="kx-sidebar__session-system">
+                        {system ? system.name : session.systemId}
+                      </span>
+                      <span className="kx-sidebar__session-time">{session.time}</span>
+                    </span>
+                  </div>
+                </div>
               </li>
             )
           })}

@@ -248,6 +248,137 @@ describe('Sidebar', () => {
     expect(rows.at(-1)).toHaveTextContent('Validate delivery evidence')
   })
 
+  it('hover-reveal rows: full-title tooltip (aria-hidden) + expand wrapper carrying system chip and time', () => {
+    renderSidebar()
+    const list = screen.getByRole('list', { name: 'Recent sessions' })
+    const rows = within(list).getAllByRole('listitem')
+    expect(rows).toHaveLength(RECENT_SESSIONS.length)
+    RECENT_SESSIONS.forEach((session, index) => {
+      const system = SYSTEMS.find((entry) => entry.id === session.systemId)!
+      const row = rows[index]
+
+      // Tooltip host wiring — the shared CSS-only hover/focus-within reveal.
+      expect(row).toHaveClass('kx-sidebar__session', 'kx-tooltip-host')
+
+      // The tooltip repeats the FULL (untruncated) title, aria-hidden so
+      // screen readers hear the row text only once. It sits outside the
+      // expandable region so it never gets clipped by the 0fr collapse.
+      const tooltip = row.querySelector('.kx-tooltip.kx-sidebar__session-tooltip')
+      expect(tooltip).not.toBeNull()
+      expect(tooltip).toHaveAttribute('aria-hidden', 'true')
+      expect(tooltip!.textContent).toBe(session.title)
+
+      // The one-line resting title lives inside the title row, beside the
+      // pin control.
+      const title = row.querySelector(
+        ':scope > .kx-sidebar__session-title-row > .kx-sidebar__session-title',
+      )
+      expect(title).not.toBeNull()
+      expect(title!.textContent).toBe(session.title)
+
+      // Every row carries its pin-to-top toggle inside the title row.
+      const pin = row.querySelector(
+        ':scope > .kx-sidebar__session-title-row > .kx-sidebar__session-pin',
+      )
+      expect(pin).not.toBeNull()
+      expect(pin).toHaveAttribute('aria-pressed', 'false')
+
+      // The meta line lives inside the two-level expand wrapper.
+      const expand = row.querySelector(':scope > .kx-sidebar__session-expand')
+      expect(expand).not.toBeNull()
+      const inner = expand!.querySelector(':scope > .kx-sidebar__session-expand-inner')
+      expect(inner).not.toBeNull()
+      const meta = inner!.querySelector(':scope > .kx-sidebar__session-meta')
+      expect(meta).not.toBeNull()
+      expect(meta!.querySelector('.kx-sidebar__session-system')).toHaveTextContent(system.name)
+      expect(meta!.querySelector('.kx-sidebar__session-time')).toHaveTextContent(session.time)
+    })
+  })
+
+  it('ships the CSS-only smooth expand: 0fr collapsed by default, 1fr + meta fade on hover and focus-within', () => {
+    // jsdom applies no styles, so the motion contract is asserted against
+    // the committed stylesheet (same source-string convention as the rail
+    // and tooltip assertions above).
+
+    // Collapsed by default, with the grid-template-rows transition driving
+    // the enterprise-grade smooth open/close.
+    expect(css).toMatch(
+      /\.kx-sidebar__session-expand\s*\{[^}]*display: grid;[^}]*grid-template-rows: 0fr;[^}]*transition: grid-template-rows 0\.18s ease/,
+    )
+    // The inner wrapper clips the 0fr row so the collapsed state hides fully.
+    expect(css).toMatch(
+      /\.kx-sidebar__session-expand-inner\s*\{[^}]*min-height: 0;[^}]*overflow: hidden/,
+    )
+    // Hover AND keyboard focus-within both open the row (AC45 convention).
+    expect(css).toMatch(
+      /\.kx-sidebar__session:hover \.kx-sidebar__session-expand,\s*\.kx-sidebar__session:focus-within \.kx-sidebar__session-expand\s*\{[^}]*grid-template-rows: 1fr/,
+    )
+    // The meta line fades in alongside the expansion.
+    expect(css).toMatch(/\.kx-sidebar__session-meta\s*\{[^}]*opacity: 0;[^}]*transition: opacity 0\.15s ease/)
+    expect(css).toMatch(
+      /\.kx-sidebar__session:hover \.kx-sidebar__session-meta,\s*\.kx-sidebar__session:focus-within \.kx-sidebar__session-meta\s*\{[^}]*opacity: 1/,
+    )
+    // The full-title tooltip uses the shared host mechanism and stays
+    // inside the 312px sidebar: left-pinned, wrapping, max-width 260px,
+    // inheriting the base tooltip's dark-theme-safe ink/raised pairing.
+    expect(css).toMatch(
+      /\.kx-sidebar__session-tooltip\s*\{[^}]*left: 0;[^}]*transform: none;[^}]*max-width: 260px;[^}]*white-space: normal;[^}]*text-align: left/,
+    )
+    // Tighter resting rows than the old two-line layout.
+    expect(css).toMatch(/\.kx-sidebar__session-list\s*\{[^}]*gap: 1px/)
+    expect(css).toMatch(/\.kx-sidebar__session\s*\{[^}]*padding: 5px 8px/)
+  })
+
+  it('pin-to-top: clicking a row pin moves it to the top of the list, toggles aria-pressed, and stays visible without hover', () => {
+    renderSidebar()
+    const list = screen.getByRole('list', { name: 'Recent sessions' })
+    const rows = () => within(list).getAllByRole('listitem')
+    const titleOf = (row: HTMLElement) =>
+      row.querySelector('.kx-sidebar__session-title')!.textContent
+
+    // Resting order: newest-first, nothing pinned.
+    expect(titleOf(rows()[0])).toBe('EDP Integration Fix - Mobile')
+    expect(titleOf(rows().at(-1)!)).toBe('Validate delivery evidence')
+
+    // Pin the last session — it floats to the top; the rest keep order.
+    const lastPin = within(rows().at(-1)!).getByRole('button', { name: 'Pin session' })
+    expect(lastPin).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(lastPin)
+    expect(titleOf(rows()[0])).toBe('Validate delivery evidence')
+    expect(titleOf(rows()[1])).toBe('EDP Integration Fix - Mobile')
+    expect(titleOf(rows().at(-1)!)).toBe('Map frontend dependencies')
+
+    // aria-pressed + label flip on the pinned row; the pin glyph is decorative.
+    const pinnedRow = rows()[0]
+    const pinnedPin = within(pinnedRow).getByRole('button', { name: 'Unpin session' })
+    expect(pinnedPin).toHaveAttribute('aria-pressed', 'true')
+    expect(pinnedPin).toHaveAttribute('title', 'Unpin session')
+    const pinSvg = pinnedPin.querySelector('svg[data-icon="pin"]')
+    expect(pinSvg).not.toBeNull()
+    expect(pinSvg).toHaveAttribute('aria-hidden', 'true')
+
+    // Pinning a second row adds it to the pinned group, which keeps the
+    // original list order — the older pin stays above the newer one.
+    fireEvent.click(within(rows()[2]).getByRole('button', { name: 'Pin session' }))
+    expect(titleOf(rows()[0])).toBe('Review attendance integration')
+    expect(titleOf(rows()[1])).toBe('Validate delivery evidence')
+
+    // Unpinning returns the row to its original position.
+    fireEvent.click(within(rows()[1]).getByRole('button', { name: 'Unpin session' }))
+    expect(titleOf(rows()[0])).toBe('Review attendance integration')
+    expect(titleOf(rows().at(-1)!)).toBe('Validate delivery evidence')
+
+    // CSS contract: the pin hides at rest, reveals on row hover/focus-within,
+    // and stays visible (accent color) while aria-pressed=true.
+    expect(css).toMatch(/\.kx-sidebar__session-pin\s*\{[^}]*opacity: 0;/)
+    expect(css).toMatch(
+      /\.kx-sidebar__session:hover \.kx-sidebar__session-pin,\s*\.kx-sidebar__session:focus-within \.kx-sidebar__session-pin,\s*\.kx-sidebar__session-pin\[aria-pressed='true'\]\s*\{[^}]*opacity: 1/,
+    )
+    expect(css).toMatch(
+      /\.kx-sidebar__session-pin\[aria-pressed='true'\][^{]*\{[^}]*color: var\(--kx-accent-text-aa\)/,
+    )
+  })
+
   it('View all navigates to session history while the sidebar element stays byte-identical apart from the nav-active state (AC11)', () => {
     const { bucket } = renderSidebar()
     const nav = getSidebarNav()
@@ -346,7 +477,7 @@ describe('Sidebar', () => {
     expect(css).not.toMatch(/\.kx-sidebar--rail \.kx-sidebar__new-session\s*\{[^}]*display: none/)
   })
 
-  it('collapse toggles the rail-width class through TOGGLE_SIDEBAR and restores 240px (AC12)', () => {
+  it('collapse toggles the rail-width class through TOGGLE_SIDEBAR and restores 312px (AC12)', () => {
     const { bucket } = renderSidebar()
     const nav = getSidebarNav()
     expect(nav).toHaveClass('kx-sidebar')

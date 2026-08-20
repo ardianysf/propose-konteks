@@ -28,9 +28,9 @@ it.each([22, 18, 16, 14, 12, 11, 10, 9])('type scale defines %spx', (px) =>
   expect(css).toContain(`${px}px`),
 )
 
-it('defines fixed dimensions (19.5px corners, 240px sidebar, 790x580 customize, 450px drawer)', () => {
+it('defines fixed dimensions (19.5px corners, 312px sidebar, 790x580 customize, 450px drawer)', () => {
   expect(css).toContain('19.5px')
-  expect(css).toContain('240px')
+  expect(css).toContain('312px')
   expect(css).toContain('790px')
   expect(css).toContain('580px')
   expect(css).toContain('450px')
