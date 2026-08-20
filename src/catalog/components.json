@@ -521,8 +521,13 @@
         "src/styles/components.css"
       ],
       "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "variants": [
+        "in_progress",
+        "waiting_approval",
+        "delivering",
+        "completed"
+      ],
+      "fixtureRef": "MockupFixtureProvider overrides={ sessionDetail: { status } } (satu provider per status)",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -743,16 +748,19 @@
       "sourcePath": "src/components/shell/WorkspaceMenu.tsx",
       "exportName": "default",
       "classification": "adoptable",
-      "description": "Workspace floating menu anchored right of the sidebar workspace control showing only the current workspace as a selected row; deliberately no workspace management.",
+      "description": "Workspace floating menu anchored right of the sidebar workspace control showing only the current workspace as a selected row; deliberately no workspace management. Tanpa MockupContext, tapi memakai useOverlayLifecycle() — butuh OverlayLifecycleProvider di atasnya (kontrak: props overlay + dispatch).",
       "propDocs": null,
       "contextContract": null,
       "cssFiles": [
         "src/styles/components.css"
       ],
       "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
-      "adoptionNotes": "Presentation-only, tidak butuh MockupContext."
+      "variants": [
+        "default",
+        "dengan overlay terbuka"
+      ],
+      "fixtureRef": "MockupFixtureProvider overlay=workspace-menu (atau OverlayLifecycleProvider minimal — lihat adoptionNotes)",
+      "adoptionNotes": "Adoptable dengan provider contract: butuh OverlayLifecycleProvider (props overlay + dispatch; komponen memanggil useOverlayLifecycle untuk Escape/dismiss → CLOSE_OVERLAY); tanpa MockupContext — contextContract tetap null."
     },
     {
       "id": "system-map-modal",
