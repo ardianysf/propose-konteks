@@ -1,0 +1,81 @@
+/* Session badge primitive — shared by SessionStatusBadge and SessionTimeline
+ * (T5b session batch; moved out of SessionStatusBadge.css so both consumers
+ * own their dependency instead of the timeline implicitly relying on the
+ * badge component's stylesheet).
+ *
+ * Consumers and the modifier classes they emit (source of truth):
+ *
+ *   SessionStatusBadge.tsx  — sessionDetail.status (SessionDetailStatus):
+ *     waiting_approval, in_progress, delivering, approved,
+ *     partially_completed, completed, blocked, cancelled
+ *   SessionTimeline.tsx     — quote.status (SessionQuote['status']):
+ *       pending_approval, approved, rejected, superseded
+ *                             delivery.status (DeliveryInfo['status']):
+ *       not_started, in_progress, partially_complete, completed, failed
+ *
+ * Explicitly styled modifiers: waiting_approval, pending_approval,
+ * in_progress, partially_completed, completed, approved, blocked, failed,
+ * cancelled.
+ *
+ * Deliberate base fallback (no dedicated modifier — these render as the
+ * base pale/primary pill): delivering, rejected, superseded, not_started,
+ * partially_complete. There is also no `pending` rule: QuoteItem only emits
+ * `kx-badge--pending` in the unreachable missing-quote guard (a DELIVERY
+ * timeline item always renders the shared single delivery record), so no
+ * rule is invented for it.
+ */
+.kx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  /* Base badge — pale bg + primary text (merged; never re-declared). */
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-badge--waiting_approval {
+  background: var(--kx-accent-solid-aa);
+  color: var(--kx-raised);
+}
+
+/* Same S styling as --waiting_approval (kept as its own rule: the contrast
+ * inventory and its selector walk key single-line selectors). */
+.kx-badge--pending_approval {
+  background: var(--kx-accent-solid-aa);
+  color: var(--kx-raised);
+}
+
+.kx-badge--completed,
+.kx-badge--approved {
+  background: var(--kx-primary);
+  color: var(--kx-raised);
+}
+
+.kx-badge--blocked {
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-badge--failed {
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-badge--in_progress {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-badge--partially_completed {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-badge--cancelled {
+  background: var(--kx-pale);
+  color: var(--kx-muted-text-aa);
+}

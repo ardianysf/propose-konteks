@@ -1,0 +1,45 @@
+/* Session Detail Composer — session-composer shell, locked state, toolbar
+ * pin, and the scoped auto-grow input override (specificity preserved:
+ * .kx-session-composer .kx-session-composer__input wins over Composer.css
+ * regardless of stylesheet order).
+ * Migrated from src/styles/components.css (T5b session batch). */
+
+.kx-session-composer {
+  position: relative;
+}
+
+.kx-session-composer--locked {
+  border: 1px solid var(--kx-border);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.kx-session-composer__locked-notice {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+  font-style: italic;
+}
+
+.kx-session-composer .kx-session-composer__input {
+  min-height: 40px;
+  max-height: 144px;
+  resize: none;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+.kx-session-composer .kx-panel__toolbar-right {
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  /* Session composer keeps its one-line auto-grow floor on mobile. The
+     shared 60px mobile rule in Composer.css (.kx-composer__input, 0-1-0)
+     applies too, so the override is scoped to .kx-session-composer (0-2-0)
+     and wins regardless of stylesheet order — same pattern as the base
+     override above. */
+.kx-session-composer .kx-session-composer__input {
+    min-height: 40px;
+  }
+}

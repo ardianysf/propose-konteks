@@ -8,6 +8,7 @@
  */
 import { useMockup } from '../../state/MockupContext'
 import type { SessionDetailStatus } from '../../data/mockData'
+import './sessionBadges.css'
 
 function getStatusLabel(status: SessionDetailStatus): string {
   switch (status) {

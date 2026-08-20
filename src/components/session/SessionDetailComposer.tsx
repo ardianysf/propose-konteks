@@ -10,6 +10,7 @@ import { EXECUTION_PROFILES } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 import ExecutionProfileMenu from '../composer/ExecutionProfileMenu'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
+import './SessionDetailComposer.css'
 
 function AttachmentIcon() {
   return (

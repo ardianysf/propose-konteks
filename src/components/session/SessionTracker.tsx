@@ -8,6 +8,7 @@
 import { useMockup } from '../../state/MockupContext'
 import type { StageStatus } from '../../data/mockData'
 import SessionStatusBadge from './SessionStatusBadge'
+import './SessionTracker.css'
 
 function getStageStatusLabel(
   stageStatus: StageStatus,

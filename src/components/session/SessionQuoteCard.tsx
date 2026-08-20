@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { useMockup } from '../../state/MockupContext'
 import { formatTime } from './formatTime'
+import './SessionQuoteCard.css'
 
 /** Check icon for approve button */
 function ApproveIcon() {

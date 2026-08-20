@@ -1,0 +1,75 @@
+/* Session Tracker — minimal current-stage summary row, stage pill and
+ * action-needed indicator.
+ * Migrated from src/styles/components.css (T5b session batch). */
+
+.kx-session-detail__tracker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 12px 0;
+}
+
+.kx-session-detail__tracker [data-testid="session-status"] {
+  margin-left: auto;
+}
+
+.kx-session-detail__tracker-current {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.kx-session-detail__tracker-kicker {
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-session-detail__stage-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: var(--kx-accent-solid-aa);
+  border-radius: 999px;
+  box-shadow:
+    0 2px 6px rgb(var(--kx-ink-rgb) / 0.22),
+    0 8px 20px rgba(79, 112, 68, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  color: var(--kx-raised);
+}
+
+.kx-session-detail__stage-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--kx-raised);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgb(var(--kx-ink-rgb) / 0.25);
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: normal;
+  line-height: 1;
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-session-detail__action-needed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--kx-pale);
+  border-radius: 999px;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+}
