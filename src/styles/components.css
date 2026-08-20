@@ -1887,18 +1887,26 @@
   padding: 14px 18px 0;
 }
 
+/* One toolbar row — search left, add-system button right, space between. */
+
 .kx-repo-modal__toolbar {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .kx-repo-modal__add-system {
+  flex-shrink: 0;
   padding: 7px 12px;
   border-radius: 9px;
   font-size: var(--kx-text-sm);
 }
 
 .kx-repo-modal__search {
+  flex: 0 1 340px;
+  max-width: 340px;
+  min-width: 0;
   padding: 8px 10px;
   border-radius: 10px;
   font-size: var(--kx-text-sm);
@@ -1993,8 +2001,8 @@
   color: var(--kx-muted-text-aa);
 }
 
-/* Repository rows — checkable only inside the active system; every
- * other system renders visibly disabled (AC25/AC43). */
+/* Repository rows — rendered only for the active system; inactive
+ * systems stay collapsed to their selector row (AC25/AC43). */
 
 .kx-repo-modal__repos {
   display: grid;
@@ -2017,24 +2025,6 @@
 
 .kx-repo-modal__repo:hover {
   background: var(--kx-pale);
-}
-
-.kx-repo-modal__repo--disabled {
-  cursor: default;
-}
-
-.kx-repo-modal__repo--disabled:hover {
-  background: transparent;
-}
-
-.kx-repo-modal__repo--disabled .kx-repo-modal__repo-name,
-.kx-repo-modal__repo--disabled .kx-repo-modal__repo-meta,
-.kx-repo-modal__repo--disabled .kx-repo-modal__repo-vcs {
-  opacity: 0.55; /* visibly disabled — reduced contrast (AC43) */
-}
-
-.kx-repo-modal__repo-check:disabled {
-  cursor: not-allowed;
 }
 
 .kx-repo-modal__repo-copy {
