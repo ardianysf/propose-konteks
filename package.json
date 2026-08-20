@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "typecheck": "tsc -b",
+    "capture:mockup": "node scripts/capture-mockup.mjs",
     "verify:assets": "node scripts/verify-assets.mjs",
     "verify:manifest": "node scripts/verify-manifest.mjs"
   },

@@ -1,32 +1,33 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { getAggregatedCss, extractMediaBlocks } from '../test/cssAggregate'
 
 // jsdom rewrites import.meta.url to an http origin, so resolve from cwd instead
 // (same convention as tokens.test.ts). These are source-string assertions:
 // jsdom does not load real CSS, so the responsive/focus/glow contracts are
-// verified against the committed stylesheets directly.
-const components = readFileSync(join(process.cwd(), 'src/styles/components.css'), 'utf8')
+// verified against the committed stylesheets directly. Per spec addendum §8
+// the component rules are read from the aggregate (components.css plus the
+// inert per-domain files); tokens.css/global.css stay direct reads.
+const components = getAggregatedCss()
 const global = readFileSync(join(process.cwd(), 'src/styles/global.css'), 'utf8')
 const tokens = readFileSync(join(process.cwd(), 'src/styles/tokens.css'), 'utf8')
 
 /** Collapse runs of whitespace so multi-line rules match as single strings. */
 const flat = (css: string) => css.replace(/\s+/g, ' ')
 
-/** The responsive media-query block onward (it is the final section). */
+/** All matching max-width 1280px blocks across the aggregate, combined. */
 function responsiveBlock(): string {
-  const start = components.indexOf('@media (max-width: 1280px)')
-  expect(start).toBeGreaterThanOrEqual(0)
-  return components.slice(start)
+  const block = extractMediaBlocks(components, '(max-width: 1280px)')
+  expect(block.length).toBeGreaterThan(0)
+  return block
 }
 
-/** The desktop short-height compaction block (1200×720-class, AC44):
- * inner rules close indented, so the first column-0 brace ends it. */
+/** All matching desktop short-height compaction blocks (1200×720-class,
+ * AC44) across the aggregate, combined. */
 function compactHeightBlock(): string {
-  const start = components.indexOf('@media (max-height: 760px) and (min-width: 761px)')
-  expect(start).toBeGreaterThanOrEqual(0)
-  const end = components.indexOf('\n}', start)
-  expect(end).toBeGreaterThan(start)
-  return components.slice(start, end + 2)
+  const block = extractMediaBlocks(components, '(max-height: 760px) and (min-width: 761px)')
+  expect(block.length).toBeGreaterThan(0)
+  return block
 }
 
 /** The single .kx-customize rule body (open brace → first closing brace). */
@@ -85,9 +86,14 @@ describe('responsive rail at max-width 1280px (AC12/AC44)', () => {
 
   it('anchors sidebar floating menus from the effective rail width', () => {
     const block = flat(responsiveBlock())
+    // Combined rule in the shared rail media block covers the shell-owned
+    // menus (T5b will migrate them); the account-menu rule now lives in
+    // AccountMenu.css's own rail media block — asserted below via the
+    // aggregate, which collects every matching @media block.
     expect(block).toContain(
-      '.kx-workspace-menu, .kx-system-menu, .kx-account-menu { left: calc(var(--kx-sidebar-rail) + 12px);',
+      '.kx-workspace-menu, .kx-system-menu { left: calc(var(--kx-sidebar-rail) + 12px);',
     )
+    expect(block).toContain('.kx-account-menu { left: calc(var(--kx-sidebar-rail) + 12px);')
   })
 })
 

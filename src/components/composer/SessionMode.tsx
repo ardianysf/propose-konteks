@@ -12,6 +12,7 @@
 import type { KeyboardEvent } from 'react'
 import { useMockup } from '../../state/MockupContext'
 import type { SessionMode as Mode } from '../../state/mockupReducer'
+import './SessionMode.css'
 
 const MODES: { id: Mode; label: string }[] = [
   { id: 'engineering', label: 'Engineering' },

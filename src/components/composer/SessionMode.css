@@ -1,0 +1,26 @@
+/* Session Mode cluster — uppercase caption above the segmented control,
+ * right-aligned in the composer top row (§7.1, AC15). */
+
+.kx-session-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+
+.kx-session-mode__label {
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--kx-secondary);
+}
+
+@media (max-width: 760px) {
+
+.kx-session-mode {
+  align-items: flex-start;
+}
+}

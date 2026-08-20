@@ -32,6 +32,7 @@ import { useMockup } from '../../state/MockupContext'
 import { resolveSessionContextDraft } from '../../state/mockupReducer'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import { useFocusContainment } from '../shell/useFocusContainment'
+import './RepositorySelectorModal.css'
 
 /** Plus — marks the create/add affordances (AC27/AC28). */
 function PlusIcon() {

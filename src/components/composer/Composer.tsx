@@ -18,6 +18,7 @@ import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import ComponentMenu from './ComponentMenu'
 import ExecutionProfileMenu from './ExecutionProfileMenu'
 import SessionMode from './SessionMode'
+import './Composer.css'
 
 const PLANNING_PLACEHOLDER = 'Describe the product outcome you want to plan…'
 const ENGINEERING_PLACEHOLDER = 'Describe the engineering task…'
