@@ -5,6 +5,8 @@
  */
 
 :root {
+  color-scheme: light;
+
   /* ── Palette — Warm Enterprise (AC4) ─────────────────────────────── */
   --kx-canvas: #faf8ef; /* Main content background (matcha paper) */
   --kx-raised: #fff; /* Cards, inputs, modals, popover surfaces */
@@ -24,6 +26,19 @@
   --kx-pale: #f4f8ee; /* Hover fills, selected states, subtle washes */
   --kx-accent: #8fbf6a; /* Primary action accent, highlights */
   --kx-accent-strong: #5f8d4e; /* Emphasized actions, active indicators */
+  /* Ink as an RGB triplet so shadows/backdrops can compose it with
+   * per-use alpha: rgb(var(--kx-ink-rgb) / 0.14). Equals #243025.
+   * The triplet MUST stay space-separated (no commas): it substitutes
+   * inside rgb(var(--kx-ink-rgb) / α), and CSS Color 4 forbids mixing
+   * legacy commas with the modern slash alpha — browsers drop the whole
+   * declaration when the two forms are mixed. */
+  --kx-ink-rgb: 36 48 37;
+
+  /* Modal scrims. The base scrim darkens the page behind a modal; here it
+   * is ink-based (#243025 at 0.44) over the light canvas. The nested scrim
+   * is a faint extra tint for stacked dialogs. */
+  --kx-scrim-base: rgb(36 48 37 / 0.44);
+  --kx-scrim-nested: rgb(36 48 37 / 0.14);
 
   /* ── Typography — DM Sans (AC5). Spec §5.2 scale at 90% density, ────
    * rounded to whole px. Token names and semantic hierarchy unchanged. ── */
@@ -48,4 +63,38 @@
   --kx-customize-w: 790px; /* Customize modal width — fixed on every tab */
   --kx-customize-h: 580px; /* Customize modal height — fixed on every tab */
   --kx-drawer-w: 450px; /* Konteks Learned right drawer */
+}
+
+/* ── Dark theme — konteks.io dark palette (ink-900 background, matcha ──
+ * accents), extracted from the live konteks.io stylesheet. Only palette
+ * tokens are overridden; typography/dimension tokens stay shared.
+ * Applied via [data-theme='dark'] on <html> (see src/theme.ts).
+ * Dark --kx-muted-text-aa is #9ead9f (6.9:1 on canvas — AA ok);
+ * --kx-accent-solid-aa keeps #4f7044: its consumers are white-text solid
+ * fills, and white on #4f7044 stays AA (5.6:1) in both themes. */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --kx-canvas: #0f1510; /* Main content background (ink-900) */
+  --kx-raised: #1a231b; /* Cards, inputs, modals, popover surfaces */
+  --kx-sidebar-bg: #152618; /* Expanded sidebar */
+  --kx-primary: #e8ede8; /* Primary text, headings (15.4:1 on canvas) */
+  --kx-secondary: #c5cfc6; /* Secondary text, subdued labels */
+  --kx-muted: #9ead9f; /* Tertiary/muted text, placeholders */
+  --kx-muted-text-aa: #9ead9f; /* Enabled muted text/placeholders (6.9:1 on canvas) */
+  --kx-accent-text-aa: #c5d9a6; /* Enabled accent text + glyphs (9.9:1 on canvas) */
+  --kx-accent-solid-aa: #4f7044; /* Unchanged — white text stays AA (5.6:1) in dark too */
+  --kx-accent-segment-aa: #a8c883; /* Active segment fill — dark --kx-primary text stays AA */
+  --kx-border: #35502c; /* Dividers, input borders, hairlines */
+  --kx-pale: #152618; /* Hover fills, selected states, subtle washes */
+  /* --kx-accent #8fbf6a and --kx-accent-strong #5f8d4e are unchanged. */
+  /* konteks.io uses #35502C for shadows on dark surfaces. */
+  --kx-ink-rgb: 53 80 44;
+
+  /* Dark scrims must be black-based: the canvas is already near-black
+   * (#0F1510), so an ink-tinted scrim would blend LIGHTER/greener than the
+   * canvas and the backdrop would brighten instead of dim (overlay "hilang").
+   * Black at 0.55 / 0.3 always darkens regardless of the underlying color. */
+  --kx-scrim-base: rgb(0 0 0 / 0.55);
+  --kx-scrim-nested: rgb(0 0 0 / 0.3);
 }

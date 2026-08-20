@@ -213,10 +213,13 @@ describe('reducer overlay menus — untrapped vs open-focus', () => {
     expect(screen.getByRole('menu', { name: 'Systems' })).toBeInTheDocument()
   })
 
-  it('AccountMenu moves focus to its first menuitem on open (open-focus)', () => {
+  it('AccountMenu moves focus to its first menu item on open (open-focus)', () => {
     renderOverlay('account-menu')
     const menu = screen.getByRole('menu', { name: 'Account' })
-    expect(within(menu).getAllByRole('menuitem')[0]).toHaveFocus()
+    // The Theme radios (menuitemradio) precede the action items — the
+    // first menu item in DOM order is the "Light" theme radio.
+    const menuItems = menu.querySelectorAll('[role="menuitem"], [role="menuitemradio"]')
+    expect(menuItems[0]).toHaveFocus()
   })
 
   it('WorkspaceMenu does not force open-focus — its menuitem is not focused on open', () => {

@@ -6,7 +6,12 @@ import '@fontsource/dm-sans/700.css'
 import './styles/tokens.css'
 import './styles/global.css'
 import './styles/components.css'
+import { initTheme } from './theme'
 import App from './App'
+
+// Resolve + stamp the stored theme before first paint (index.html's inline
+// script already set data-theme; this persists/attaches the system listener).
+initTheme()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
