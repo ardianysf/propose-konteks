@@ -3,8 +3,8 @@
  *
  * jsdom does not apply real CSS, so these are source-string assertions
  * against the committed stylesheets (same convention as responsive.test.ts).
- * The file embeds the complete 137-consumer inventory — 79 muted-token
- * consumers and 58 accent-strong consumers — and proves three things:
+ * The file embeds the complete consumer inventory (see the tally test for
+ * the current count) and proves three things:
  *
  *   1. The three AA semantics are defined in tokens.css and every candidate
  *      pair clears 4.5:1 against white/canvas/pale.
@@ -144,6 +144,7 @@ const mutedM = [
   '.kx-settings__note',
   '.kx-illustrative-note',
   '.kx-account-menu__section-label',
+  '.kx-account-menu__theme-value',
 ]
 
 const mutedU = [
@@ -167,7 +168,9 @@ const accentA = [
   '.kx-composer__reviews',
   '.kx-profile-menu__check',
   '.kx-profile-menu__manage',
-  '.kx-account-menu__theme-check',
+  '.kx-account-menu__theme-seg-btn:hover',
+  '.kx-account-menu__theme-seg-btn--active',
+  '.kx-account-menu__theme-seg-btn--active:hover',
   '.kx-profile-menu__readiness--ready',
   '.kx-repo-modal__add-repo',
   '.kx-repo-modal__status-system',
@@ -235,11 +238,14 @@ function entries(): Entry[] {
     { file: COMPONENTS, selector: '.kx-segmented__btn--active:hover', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
     // Sidebar-v2 hover-reveal icon actions: the REST state reads the
     // decorative muted token (U — hidden until hover), while their revealed
-    // states (pinned, hovered map button) read the AA accent token.
+    // states (pinned, hovered map button) read the AA accent token. The
+    // account menu's theme segmented buttons follow the same pattern —
+    // muted icon at rest (U), AA accent on hover and while active.
     { file: COMPONENTS, selector: '.kx-sidebar__session-pin', property: 'color', token: MUTED, cls: 'U' as Class },
     { file: COMPONENTS, selector: '.kx-sidebar__session-pin[aria-pressed=\'true\']', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
     { file: COMPONENTS, selector: '.kx-system-menu__map-btn', property: 'color', token: MUTED, cls: 'U' as Class },
     { file: COMPONENTS, selector: '.kx-system-menu__map-btn:hover', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
+    { file: COMPONENTS, selector: '.kx-account-menu__theme-seg-btn', property: 'color', token: MUTED, cls: 'U' as Class },
     // System map diagram strokes — decorative SVG geometry, not text.
     { file: COMPONENTS, selector: '.kx-system-map__node rect', property: 'stroke', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: GLOBAL, selector: ':focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
@@ -469,18 +475,18 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = [...extractUsages(components, COMPONENTS), ...extractUsages(global, GLOBAL)]
 
-  it('covers exactly 145 consumers — 82 muted, 60 accent-strong, 3 accent-text-aa', () => {
-    expect(inventory).toHaveLength(145)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(82)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(60)
+  it('covers exactly 149 consumers — 84 muted, 62 accent-strong, 3 accent-text-aa', () => {
+    expect(inventory).toHaveLength(149)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(84)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(62)
     expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(3)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(76)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(36)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(77)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(38)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(4)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(29)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(30)
   })
 
   it('has no duplicate inventory selectors', () => {

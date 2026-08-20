@@ -14,7 +14,10 @@
  *
  * A Theme group (Light / Dark / System — role=menuitemradio, aria-checked)
  * sits in a labelled, divided section before the actions list, mirroring
- * the profile menu's section-label pattern. Theme is a real persisted
+ * the profile menu's section-label pattern. The section head pairs the
+ * label with the active preference name; below it a compact horizontal
+ * icon segmented control (sun / moon / monitor, icon-only buttons with
+ * accessible names) carries the radios. Theme is a real persisted
  * preference (src/theme.ts, localStorage 'konteks-theme') and lives
  * outside MockupState — no reducer changes.
  */
@@ -35,20 +38,66 @@ const THEME_LABELS: Record<ThemePreference, string> = {
   system: 'System',
 }
 
-/** Check — marks the active theme preference row (mirrors ExecutionProfileMenu). */
-function CheckIcon() {
+/** Sun — the Light theme preference glyph, 16×16 currentColor. */
+function SunIcon() {
   return (
-    <svg data-icon="check" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+    <svg data-icon="sun" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+      <circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" strokeWidth="1.5" />
       <path
-        d="M3 8.5 6.5 12 13 4.5"
+        d="M8 1.75v1.5M8 12.75v1.5M1.75 8h1.5M12.75 8h1.5M3.6 3.6l1.05 1.05M11.35 11.35l1.05 1.05M3.6 12.4l1.05-1.05M11.35 4.65l1.05-1.05"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="1.5"
         strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+/** Moon — the Dark theme preference glyph, 16×16 currentColor. */
+function MoonIcon() {
+  return (
+    <svg data-icon="moon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+      <path
+        d="M13.5 9.5A5.75 5.75 0 0 1 6.5 2.5a5.75 5.75 0 1 0 7 7Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
         strokeLinejoin="round"
       />
     </svg>
   )
+}
+
+/** Monitor — the System theme preference glyph, 16×16 currentColor. */
+function MonitorIcon() {
+  return (
+    <svg data-icon="monitor" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+      <rect
+        x="2"
+        y="3"
+        width="12"
+        height="8.5"
+        rx="1.75"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M5.75 14h4.5M8 11.5V14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+const THEME_ICONS: Record<ThemePreference, () => React.JSX.Element> = {
+  light: SunIcon,
+  dark: MoonIcon,
+  system: MonitorIcon,
 }
 
 export default function AccountMenu() {
@@ -109,36 +158,43 @@ export default function AccountMenu() {
       }}
     >
       {/* Theme preference — grouped section before the actions list, same
-          divider + section-label pattern as the profile menu (AC24). Theme
-          is a real localStorage-backed preference outside MockupState. */}
+          divider + section-label pattern as the profile menu (AC24). The
+          head row pairs the section label with the active preference name;
+          below it a compact icon segmented control carries the three
+          menuitemradio options (sun / moon / monitor, icon-only with the
+          accessible name on each button). Theme is a real
+          localStorage-backed preference outside MockupState. */}
       <div className="kx-account-menu__theme" role="group" aria-label="Theme">
-        <p className="kx-account-menu__section-label" id="kx-account-menu-theme-label">
-          Theme
-        </p>
-        {THEME_PREFERENCES.map((pref) => {
-          const active = themePref === pref
-          return (
-            <button
-              key={pref}
-              type="button"
-              role="menuitemradio"
-              aria-checked={active}
-              className={
-                active
-                  ? 'kx-account-menu__item kx-account-menu__theme-item kx-account-menu__theme-item--active'
-                  : 'kx-account-menu__item kx-account-menu__theme-item'
-              }
-              onClick={() => handleTheme(pref)}
-            >
-              <span className="kx-account-menu__theme-item-label">{THEME_LABELS[pref]}</span>
-              {active && (
-                <span className="kx-account-menu__theme-check" aria-hidden="true">
-                  <CheckIcon />
-                </span>
-              )}
-            </button>
-          )
-        })}
+        <div className="kx-account-menu__theme-head">
+          <span className="kx-account-menu__section-label" id="kx-account-menu-theme-label">
+            Theme
+          </span>
+          <span className="kx-account-menu__theme-value">{THEME_LABELS[themePref]}</span>
+        </div>
+        <div className="kx-account-menu__theme-seg">
+          {THEME_PREFERENCES.map((pref) => {
+            const active = themePref === pref
+            const Icon = THEME_ICONS[pref]
+            return (
+              <button
+                key={pref}
+                type="button"
+                role="menuitemradio"
+                aria-checked={active}
+                aria-label={THEME_LABELS[pref]}
+                title={THEME_LABELS[pref]}
+                className={
+                  active
+                    ? 'kx-account-menu__theme-seg-btn kx-account-menu__theme-seg-btn--active'
+                    : 'kx-account-menu__theme-seg-btn'
+                }
+                onClick={() => handleTheme(pref)}
+              >
+                <Icon />
+              </button>
+            )
+          })}
+        </div>
       </div>
       {ACCOUNT_ACTIONS.map((action) => (
         <button
