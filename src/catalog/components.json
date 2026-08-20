@@ -705,11 +705,35 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/composer/Composer.css",
+        "src/components/composer/ExecutionProfileMenu.css",
+        "src/components/session/SessionDetailComposer.css"
       ],
-      "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "tokenDeps": [
+        "--kx-accent",
+        "--kx-accent-solid-aa",
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-radius-main",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-md",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "aktif (in_progress)",
+        "terminal (completed — locked)"
+      ],
+      "fixtureRef": "MockupFixtureProvider overrides={{ sessionDetail: { ...baseDetail, status } }} (variant grid)",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -728,12 +752,22 @@
         "dispatches": []
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/session/SessionHeader.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-border",
+        "--kx-canvas",
+        "--kx-font-bold",
+        "--kx-font-normal",
+        "--kx-muted-text-aa",
+        "--kx-primary",
+        "--kx-text-l",
+        "--kx-text-sm"
+      ],
       "variants": [],
-      "fixtureRef": null,
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "fixtureRef": "MockupFixtureProvider",
+      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
     },
     {
       "id": "session-quote-card",
@@ -755,11 +789,27 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/session/SessionQuoteCard.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-ink-rgb",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -778,17 +828,27 @@
         "dispatches": []
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/session/sessionBadges.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent-solid-aa",
+        "--kx-accent-text-aa",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-text-sm"
+      ],
       "variants": [
         "in_progress",
         "waiting_approval",
         "delivering",
         "completed"
       ],
-      "fixtureRef": "MockupFixtureProvider overrides={ sessionDetail: { status } } (satu provider per status)",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "fixtureRef": "MockupFixtureProvider overrides={{ sessionDetail: { ...baseDetail, status } }} (satu provider per status)",
+      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
     },
     {
       "id": "session-timeline",
@@ -807,11 +867,31 @@
         "dispatches": []
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/session/SessionTimeline.css",
+        "src/components/session/sessionBadges.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent",
+        "--kx-accent-segment-aa",
+        "--kx-accent-solid-aa",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-ink-rgb",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-l",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider",
       "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -830,11 +910,24 @@
         "dispatches": []
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/session/SessionTracker.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent-solid-aa",
+        "--kx-accent-text-aa",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-ink-rgb",
+        "--kx-muted-text-aa",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-text-2xs",
+        "--kx-text-md",
+        "--kx-text-sm"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider",
       "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
     },
     {
