@@ -1,0 +1,180 @@
+/* ── Settings modal (Task 12, spec §14 — AC42) ─────────────────────
+ * Centered raised modal preserving General / Billing / Team sections and
+ * Billing's six sub-sections. Section nav + billing subnav are static;
+ * the content area is the sole scroll region. */
+
+.kx-settings {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(680px, calc(100vw - 48px));
+  height: min(520px, calc(100vh - 48px));
+  overflow: hidden;
+}
+
+.kx-settings__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-settings__title {
+  margin: 0;
+  font-size: var(--kx-text-xl);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-settings__close {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.kx-settings__body {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  min-height: 0;
+}
+
+.kx-settings__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 10px;
+  border-right: 1px solid var(--kx-border);
+}
+
+.kx-settings__section {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.kx-settings__section:hover {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-settings__section[aria-selected='true'] {
+  background: var(--kx-primary);
+  color: var(--kx-raised);
+}
+
+.kx-settings__panel {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-settings__panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kx-settings__panel::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 999px;
+}
+
+.kx-settings__panel-title {
+  margin: 0;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-settings__subtabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-settings__subtab {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.kx-settings__subtab:hover {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-settings__subtab[aria-selected='true'] {
+  background: var(--kx-primary);
+  color: var(--kx-raised);
+}
+
+.kx-settings__content {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.kx-settings__list {
+  display: grid;
+  margin: 0;
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--kx-raised);
+}
+
+.kx-settings__field {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--kx-border);
+}
+
+.kx-settings__field:first-child {
+  border-top: none;
+}
+
+.kx-settings__field-term {
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-secondary);
+}
+
+.kx-settings__field-value {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+}
+
+.kx-settings__note {
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}

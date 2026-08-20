@@ -1,0 +1,251 @@
+.kx-profile-menu {
+  position: relative; /* overrides .kx-menu absolute — the cluster anchors */
+  display: flex;
+  flex-direction: column;
+  width: var(--kx-profile-menu-w, 300px);
+  max-height: min(420px, calc(100vh - 220px));
+  overflow: hidden; /* the list is the only scrolling region */
+  padding: 8px;
+}
+
+/* Flat profile list (AC22) — rows preview their sidecar on hover AND
+ * keyboard focus (AC23); the active row carries a check (AC22). */
+
+.kx-profile-menu__list {
+  display: grid;
+  gap: 2px;
+  align-content: start;
+  padding: 2px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-profile-menu__list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kx-profile-menu__list::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 999px;
+}
+
+.kx-profile-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 7px 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-profile-menu__item:hover,
+.kx-profile-menu__item:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-profile-menu__item--active {
+  background: var(--kx-pale);
+}
+
+.kx-profile-menu__item-copy {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-profile-menu__item-name {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-profile-menu__item-meta {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-profile-menu__check {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--kx-accent-text-aa);
+}
+
+/* Manage entry (AC22) — swaps the menu for Customize on Agents. */
+
+.kx-profile-menu__footer {
+  padding: 6px 2px 2px;
+}
+
+.kx-profile-menu__manage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px dashed var(--kx-accent);
+  border-radius: 10px;
+  background: transparent;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.kx-profile-menu__manage:hover,
+.kx-profile-menu__manage:focus-visible {
+  background: var(--kx-pale);
+  border-color: var(--kx-accent-strong);
+}
+
+/* Workspace settings (AC24) — workspace-level entries under a divider +
+ * section label, visually separated from the flat profile list. */
+
+.kx-profile-menu__workspace {
+  margin-top: 6px;
+  padding: 8px 2px 2px;
+  border-top: 1px solid var(--kx-border);
+}
+
+.kx-profile-menu__section-label {
+  margin: 0 2px 6px;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-profile-menu__setting {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.kx-profile-menu__setting-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--kx-accent-strong);
+}
+
+.kx-profile-menu__setting-dot--off {
+  background: var(--kx-border);
+}
+
+.kx-profile-menu__setting-copy {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-profile-menu__setting-name {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+.kx-profile-menu__setting-desc {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-profile-menu__setting-state {
+  flex-shrink: 0;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-muted-text-aa);
+}
+
+/* Hover/focus sidecar (AC23) — raised panel beside the flat menu showing
+ * the previewed (or active) profile's facts. */
+
+.kx-profile-menu__sidecar {
+  width: 250px;
+  padding: 12px 14px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgb(var(--kx-ink-rgb) / 0.14);
+}
+
+.kx-profile-menu__sidecar-title {
+  margin: 0 0 8px;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-profile-menu__sidecar-facts {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.kx-profile-menu__sidecar-fact {
+  display: grid;
+  gap: 1px;
+}
+
+.kx-profile-menu__sidecar-term {
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-profile-menu__sidecar-value {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+}
+
+.kx-profile-menu__readiness--ready {
+  color: var(--kx-accent-text-aa);
+  font-weight: var(--kx-font-bold);
+}
+
+.kx-profile-menu__readiness--setup {
+  color: var(--kx-muted-text-aa);
+  font-weight: var(--kx-font-bold);
+}
+
+/* The cluster opens upward from the bottom-left toolbar control: the
+ * flat menu plus its hover sidecar side by side (AC22/AC23) — never
+ * behind a modal backdrop. Used by Composer and SessionDetailComposer
+ * (session imports ExecutionProfileMenu, so this CSS travels with it). */
+.kx-profile-menu-cluster {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 40;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}

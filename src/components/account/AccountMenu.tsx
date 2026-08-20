@@ -31,6 +31,7 @@ import {
   THEME_PREFERENCES,
   type ThemePreference,
 } from '../../theme'
+import './AccountMenu.css'
 
 const THEME_LABELS: Record<ThemePreference, string> = {
   light: 'Light',

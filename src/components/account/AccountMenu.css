@@ -1,0 +1,117 @@
+/* ── Account menu (Task 12, spec §14 — AC42) ────────────────────────
+ * Anchored floating menu from the sidebar user row — opens right of the
+ * sidebar near its bottom (the user row), raised surface, DM Sans. */
+
+.kx-account-menu {
+  bottom: 16px;
+  left: calc(var(--kx-sidebar-w) + 12px);
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+  padding: 6px;
+}
+
+.kx-app--rail .kx-account-menu {
+  left: calc(var(--kx-sidebar-rail) + 12px);
+}
+
+.kx-account-menu__item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-account-menu__item:hover,
+.kx-account-menu__item:focus-visible {
+  background: var(--kx-pale);
+}
+
+/* Theme group (dark theme preference) — grouped section before the actions
+ * list, same divider + uppercase section-label pattern as the profile
+ * menu's workspace section (AC24). The head row pairs the section label
+ * with the active preference name; below it a compact horizontal icon
+ * segmented control carries the three menuitemradio options (sun / moon /
+ * monitor, icon-only with the accessible name on each button). */
+
+.kx-account-menu__theme {
+  margin-bottom: 6px;
+  padding: 2px 2px 8px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-account-menu__theme-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 2px 6px;
+}
+
+.kx-account-menu__section-label {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-account-menu__theme-value {
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-account-menu__theme-seg {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--kx-pale);
+  border-radius: 10px;
+}
+
+.kx-account-menu__theme-seg-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--kx-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.kx-account-menu__theme-seg-btn:hover {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-account-menu__theme-seg-btn--active {
+  background: var(--kx-raised);
+  color: var(--kx-accent-text-aa);
+  box-shadow: 0 1px 2px rgb(var(--kx-ink-rgb) / 0.08);
+}
+
+.kx-account-menu__theme-seg-btn--active:hover {
+  color: var(--kx-accent-text-aa);
+}
+
+@media (max-width: 1280px) {
+
+.kx-account-menu {
+  left: calc(var(--kx-sidebar-rail) + 12px);
+}
+}

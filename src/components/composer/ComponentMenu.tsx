@@ -18,6 +18,7 @@
 import { COMPONENTS, REPOSITORIES } from '../../data/mockData'
 import type { ComponentEntry } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import './ComponentMenu.css'
 
 export default function ComponentMenu() {
   const { state, dispatch } = useMockup()

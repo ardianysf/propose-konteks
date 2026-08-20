@@ -21,6 +21,7 @@ import { EXECUTION_PROFILES, REPOSITORIES, VCS_CONNECTORS } from '../../data/moc
 import { useMockup } from '../../state/MockupContext'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import { useFocusContainment } from '../shell/useFocusContainment'
+import './ManualRepositoryModal.css'
 
 /** Results per picker page — keeps pagination observable in the mockup. */
 const PAGE_SIZE = 2

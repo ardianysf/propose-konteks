@@ -18,6 +18,7 @@ import { EXECUTION_PROFILES, WORKSPACE_SETTINGS } from '../../data/mockData'
 import type { ExecutionProfile, Readiness } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
+import './ExecutionProfileMenu.css'
 
 const READINESS_LABELS: Record<Readiness, string> = {
   ready: 'Ready',

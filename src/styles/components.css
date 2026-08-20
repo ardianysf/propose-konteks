@@ -144,6 +144,160 @@
   border-color: var(--kx-secondary);
 }
 
+/* ── Composer panel primitives (cross-domain — shared by Composer and
+ * SessionDetailComposer; spec addendum §8) ──────────────────────────
+ * The unified panel stacks its top row above the nested input box. */
+
+.kx-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Top row — setup pills left, Session Mode right (§6). */
+
+.kx-panel__top-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.kx-panel__setup-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.kx-panel__mode-cluster {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Icon pill — the mode-specific setup triggers (§6). */
+
+.kx-panel__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 38px;
+  padding: 7px 12px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.kx-panel__pill:hover {
+  background: var(--kx-pale);
+  border-color: var(--kx-accent);
+}
+
+.kx-panel__pill-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-panel__pill-label {
+  min-width: 0;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-panel__pill-chevron {
+  flex-shrink: 0;
+  color: var(--kx-muted);
+}
+
+/* Nested white text-input box — the textarea and the input toolbar all
+ * sit inside this raised surface (AC8/AC9). */
+
+.kx-panel__input-box {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 14px;
+}
+
+/* Input toolbar — left group (attach / text document / Execution
+ * Profile) and right group (voice / send), hugging the bottom of the
+ * white input box (§6, AC9). */
+
+.kx-panel__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--kx-border);
+}
+
+.kx-panel__toolbar-left,
+.kx-panel__toolbar-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+
+.kx-panel__top-row,
+
+.kx-panel__setup-cluster,
+
+.kx-panel__mode-cluster {
+  flex-wrap: wrap;
+}
+}
+
+@media (max-height: 760px) and (min-width: 761px) {
+
+.kx-panel {
+  gap: 10px;
+}
+
+.kx-panel__toolbar {
+  padding: 6px 10px;
+}
+}
+
+/* Keep the composer's tool cluster (attachments, voice, send) pinned to the
+ * right edge of the input box so it stays visually grouped with the
+ * composer's right edge even when the toolbar wraps. */
+
+.kx-session-composer .kx-panel__toolbar-right {
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
 /* ── Floating anchored menu ────────────────────────────────────────── */
 
 .kx-menu {
@@ -333,22 +487,6 @@
 
 /* Session Mode cluster — uppercase caption above the segmented control,
  * right-aligned in the composer top row (§7.1, AC15). */
-.kx-session-mode {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  min-width: 0;
-}
-
-.kx-session-mode__label {
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  line-height: 1.2;
-  color: var(--kx-secondary);
-}
 
 /* ── Sidebar (Task 4, spec §6.1) ──────────────────────────────────────
  * 312px expanded white rail → 64px icon rail when collapsed (AC12).
@@ -1393,238 +1531,31 @@
 /* ── Unified composer panel (Task 5 correction, §7.2) ──────────────── */
 
 /* The unified panel stacks its top row above the nested input box. */
-.kx-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
 
 /* Soft-matcha outer container (pale wash + hairline) — the single
  * unified surface hosting the top row and the nested white input box
  * (AC18). */
-.kx-composer {
-  width: 100%;
-  min-width: 0;
-  padding: 12px;
-  background: var(--kx-pale);
-  border: 1px solid var(--kx-border);
-  border-radius: var(--kx-radius-main);
-}
 
 /* Top row — setup pills left, Session Mode right (§6). */
-.kx-panel__top-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-  min-width: 0;
-}
-
-.kx-panel__setup-cluster {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.kx-panel__mode-cluster {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-}
 
 /* Icon pill — the mode-specific setup triggers (§6). */
-.kx-panel__pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  max-width: 100%;
-  min-height: 38px;
-  padding: 7px 12px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 999px;
-  cursor: pointer;
-  text-align: left;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
-}
-
-.kx-panel__pill:hover {
-  background: var(--kx-pale);
-  border-color: var(--kx-accent);
-}
-
-.kx-panel__pill-icon {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  min-width: 26px;
-  border-radius: 8px;
-  background: var(--kx-pale);
-  color: var(--kx-accent-text-aa);
-}
-
-.kx-panel__pill-label {
-  min-width: 0;
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-panel__pill-chevron {
-  flex-shrink: 0;
-  color: var(--kx-muted);
-}
 
 /* Nested white text-input box — the textarea and the input toolbar all
  * sit inside this raised surface (AC8/AC9). */
-.kx-panel__input-box {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-width: 0;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 14px;
-}
 
 /* The prompt textarea fills the white box; its focus ring is drawn as an
  * inner outline so it never clips inside the rounded box. */
-.kx-composer__input {
-  display: block;
-  width: 100%;
-  min-height: 118px;
-  padding: 14px 16px;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  resize: vertical;
-  font-family: inherit;
-  font-size: var(--kx-text-md);
-  color: var(--kx-primary);
-}
-
-.kx-composer__input::placeholder {
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-composer__input:focus {
-  outline: none;
-  box-shadow: inset 0 0 0 2px var(--kx-accent-strong);
-}
 
 /* Input toolbar — left group (attach / text document / Execution
  * Profile) and right group (voice / send), hugging the bottom of the
  * white input box (§6, AC9). */
-.kx-panel__toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 10px;
-  border-top: 1px solid var(--kx-border);
-}
-
-.kx-panel__toolbar-left,
-.kx-panel__toolbar-right {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
 
 /* Anchor wrapper around the profile control — the menu cluster (Task 6)
  * floats from here, adjacent to the control (AC22). */
-.kx-composer__profile-anchor {
-  --kx-profile-menu-w: 300px;
-
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  margin-left: 6px;
-}
-
-.kx-composer__profile {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  min-height: 32px;
-  padding: 4px 2px;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  border-radius: 4px;
-  color: var(--kx-secondary);
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.kx-composer__profile:hover {
-  color: var(--kx-primary);
-  background: transparent;
-}
-
-.kx-composer__profile-name {
-  min-width: 0;
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-bold);
-  line-height: 1.2;
-  color: inherit;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-composer__profile-chevron {
-  flex-shrink: 0;
-  color: var(--kx-muted);
-}
 
 /* Soft-accent send element (AC19) — disabled carries reduced contrast
  * and a not-allowed cursor (AC43). Doubles as the "Start planning" CTA
  * in Planning mode (AC16). */
-.kx-composer__send {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px 18px;
-  background: rgba(143, 191, 106, 0.22);
-  border: 1px solid var(--kx-accent);
-  border-radius: 999px;
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.kx-composer__send:hover:not(:disabled) {
-  background: rgba(143, 191, 106, 0.4);
-  border-color: var(--kx-accent-strong);
-  color: var(--kx-primary);
-}
-
-.kx-composer__send:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
 
 /* Standalone reviews wrapper — right-aligned above the composer — and
  * the centered disclaimer below it (AC10/AC11); the badge stays a
@@ -1644,44 +1575,6 @@
   text-align: center;
   font-size: var(--kx-text-sm);
   color: var(--kx-muted-text-aa);
-}
-
-.kx-composer__reviews {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  /* Matches the system/component pill height (38px) while keeping the
-   * smaller font and badge sizes untouched, per the user's direction. */
-  min-height: 38px;
-  padding: 7px 12px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 999px;
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  cursor: pointer;
-  transition:
-    color 0.15s ease,
-    border-color 0.15s ease;
-}
-.kx-composer__reviews:hover {
-  color: var(--kx-accent);
-  border-color: var(--kx-accent);
-}
-
-.kx-composer__badge {
-  display: inline-grid;
-  place-items: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  background: var(--kx-accent-solid-aa);
-  border-radius: 999px;
-  color: var(--kx-raised);
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
 }
 
 /* ── Narrow-viewport composition (≤760px) ─────────────────────────────
@@ -1709,15 +1602,9 @@
     width: 100%;
   }
 
-  .kx-panel__top-row,
-  .kx-panel__setup-cluster,
-  .kx-panel__mode-cluster {
-    flex-wrap: wrap;
-  }
+  
 
-  .kx-session-mode {
-    align-items: flex-start;
-  }
+  
 }
 
 /* ── Desktop short-height compaction (AC44, 1200×720-class) ──────────
@@ -1747,21 +1634,13 @@
     margin-bottom: 10px;
   }
 
-  .kx-panel {
-    gap: 10px;
-  }
+  
 
-  .kx-composer {
-    padding: 10px;
-  }
+  
 
-  .kx-composer__input {
-    min-height: 104px;
-  }
+  
 
-  .kx-panel__toolbar {
-    padding: 6px 10px;
-  }
+  
 
   .kx-new-session__disclaimer {
     margin-top: 12px;
@@ -1770,252 +1649,16 @@
 
 /* ── Execution Profile anchored menu (Task 6, spec §7.3 — AC22–AC24) ── */
 
-/* The cluster opens upward from the bottom-left toolbar control: the
- * flat menu plus its hover sidecar side by side (AC22/AC23) — never
- * behind a modal backdrop. */
-.kx-profile-menu-cluster {
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 0;
-  z-index: 40;
-  display: flex;
-  align-items: stretch;
-  gap: 10px;
-}
-
-.kx-profile-menu {
-  position: relative; /* overrides .kx-menu absolute — the cluster anchors */
-  display: flex;
-  flex-direction: column;
-  width: var(--kx-profile-menu-w, 300px);
-  max-height: min(420px, calc(100vh - 220px));
-  overflow: hidden; /* the list is the only scrolling region */
-  padding: 8px;
-}
-
 /* Flat profile list (AC22) — rows preview their sidecar on hover AND
  * keyboard focus (AC23); the active row carries a check (AC22). */
-.kx-profile-menu__list {
-  display: grid;
-  gap: 2px;
-  align-content: start;
-  padding: 2px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--kx-border) transparent;
-}
-
-.kx-profile-menu__list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.kx-profile-menu__list::-webkit-scrollbar-thumb {
-  background: var(--kx-border);
-  border-radius: 999px;
-}
-
-.kx-profile-menu__item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-width: 0;
-  padding: 7px 8px;
-  border: none;
-  border-radius: 10px;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.kx-profile-menu__item:hover,
-.kx-profile-menu__item:focus-visible {
-  background: var(--kx-pale);
-}
-
-.kx-profile-menu__item--active {
-  background: var(--kx-pale);
-}
-
-.kx-profile-menu__item-copy {
-  display: grid;
-  flex: 1;
-  gap: 1px;
-  min-width: 0;
-}
-
-.kx-profile-menu__item-name {
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-profile-menu__item-meta {
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-profile-menu__check {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  color: var(--kx-accent-text-aa);
-}
 
 /* Manage entry (AC22) — swaps the menu for Customize on Agents. */
-.kx-profile-menu__footer {
-  padding: 6px 2px 2px;
-}
-
-.kx-profile-menu__manage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px dashed var(--kx-accent);
-  border-radius: 10px;
-  background: transparent;
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
-}
-
-.kx-profile-menu__manage:hover,
-.kx-profile-menu__manage:focus-visible {
-  background: var(--kx-pale);
-  border-color: var(--kx-accent-strong);
-}
 
 /* Workspace settings (AC24) — workspace-level entries under a divider +
  * section label, visually separated from the flat profile list. */
-.kx-profile-menu__workspace {
-  margin-top: 6px;
-  padding: 8px 2px 2px;
-  border-top: 1px solid var(--kx-border);
-}
-
-.kx-profile-menu__section-label {
-  margin: 0 2px 6px;
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-profile-menu__setting {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
-  border-radius: 10px;
-}
-
-.kx-profile-menu__setting-dot {
-  flex-shrink: 0;
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--kx-accent-strong);
-}
-
-.kx-profile-menu__setting-dot--off {
-  background: var(--kx-border);
-}
-
-.kx-profile-menu__setting-copy {
-  display: grid;
-  flex: 1;
-  gap: 1px;
-  min-width: 0;
-}
-
-.kx-profile-menu__setting-name {
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-primary);
-}
-
-.kx-profile-menu__setting-desc {
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-profile-menu__setting-state {
-  flex-shrink: 0;
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-muted-text-aa);
-}
 
 /* Hover/focus sidecar (AC23) — raised panel beside the flat menu showing
  * the previewed (or active) profile's facts. */
-.kx-profile-menu__sidecar {
-  width: 250px;
-  padding: 12px 14px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 14px;
-  box-shadow: 0 12px 32px rgb(var(--kx-ink-rgb) / 0.14);
-}
-
-.kx-profile-menu__sidecar-title {
-  margin: 0 0 8px;
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-profile-menu__sidecar-facts {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-}
-
-.kx-profile-menu__sidecar-fact {
-  display: grid;
-  gap: 1px;
-}
-
-.kx-profile-menu__sidecar-term {
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-profile-menu__sidecar-value {
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-primary);
-}
-
-.kx-profile-menu__readiness--ready {
-  color: var(--kx-accent-text-aa);
-  font-weight: var(--kx-font-bold);
-}
-
-.kx-profile-menu__readiness--setup {
-  color: var(--kx-muted-text-aa);
-  font-weight: var(--kx-font-bold);
-}
 
 /* ── Repository selector modal (Task 7 Part A, spec §8.1 — AC25–AC28) ──
  * The system-scoped work repository picker: a centered 720×570 modal
@@ -2028,344 +1671,25 @@
  * The footer is a single row: status left, Cancel/Done right (AC28).
  * Loading/empty variants swap the group region only (AC43). */
 
-.kx-repo-modal {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto; /* head / body / one-line footer */
-  width: min(720px, calc(100vw - 48px));
-  height: min(570px, calc(100vh - 48px));
-  overflow: hidden;
-}
-
 /* Header — title + subtitle, dismiss control at the right edge. */
-
-.kx-repo-modal__head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--kx-border);
-}
-
-.kx-repo-modal__head-copy {
-  min-width: 0;
-}
-
-.kx-repo-modal__title {
-  margin: 0;
-  font-size: var(--kx-text-xl);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-repo-modal__subtitle {
-  margin: 2px 0 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-repo-modal__close {
-  flex-shrink: 0;
-  margin-left: auto;
-}
 
 /* Body — add-system toolbar, single search, then the scrolling groups. */
 
-.kx-repo-modal__body {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-height: 0;
-  padding: 14px 18px 0;
-}
-
 /* One toolbar row — search left, add-system button right, space between. */
-
-.kx-repo-modal__toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.kx-repo-modal__add-system {
-  flex-shrink: 0;
-  padding: 7px 12px;
-  border-radius: 9px;
-  font-size: var(--kx-text-sm);
-}
-
-.kx-repo-modal__search {
-  flex: 0 1 340px;
-  max-width: 340px;
-  min-width: 0;
-  padding: 8px 10px;
-  border-radius: 10px;
-  font-size: var(--kx-text-sm);
-}
 
 /* The only scrolling region — head/toolbar/search/footer stay fixed. */
 
-.kx-repo-modal__groups {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  border-top: 1px solid var(--kx-border);
-  scrollbar-width: thin;
-  scrollbar-color: var(--kx-border) transparent;
-}
-
-.kx-repo-modal__groups::-webkit-scrollbar {
-  width: 8px;
-}
-
-.kx-repo-modal__groups::-webkit-scrollbar-thumb {
-  background: var(--kx-border);
-  border-radius: 999px;
-}
-
 /* System groups — exactly one active, radio-marked group (AC25). */
-
-.kx-repo-modal__system {
-  border-bottom: 1px solid var(--kx-border);
-}
-
-.kx-repo-modal__system-head {
-  display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 8px;
-  border: none;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.kx-repo-modal__system-head:hover,
-.kx-repo-modal__system-head:focus-visible {
-  background: var(--kx-pale);
-}
-
-.kx-repo-modal__system--active > .kx-repo-modal__system-head {
-  background: var(--kx-pale);
-}
-
-.kx-repo-modal__system-radio {
-  width: 16px;
-  height: 16px;
-  border: 1.5px solid var(--kx-border);
-  border-radius: 50%;
-}
-
-.kx-repo-modal__system--active .kx-repo-modal__system-radio {
-  border-color: var(--kx-accent-strong);
-  background: radial-gradient(circle, var(--kx-accent) 0 4.5px, transparent 5px);
-}
-
-.kx-repo-modal__system-copy {
-  display: grid;
-  gap: 1px;
-  min-width: 0;
-}
-
-.kx-repo-modal__system-name {
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-repo-modal__system-desc {
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-repo-modal__system-count {
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-}
 
 /* Repository rows — rendered only for the active system; inactive
  * systems stay collapsed to their selector row (AC25/AC43). */
 
-.kx-repo-modal__repos {
-  display: grid;
-  padding: 0 6px 10px 36px;
-}
-
-.kx-repo-modal__repo {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-  min-height: 48px;
-  border-top: 1px solid var(--kx-border);
-  cursor: pointer;
-}
-
-.kx-repo-modal__repo:first-child {
-  border-top: none;
-}
-
-.kx-repo-modal__repo:hover {
-  background: var(--kx-pale);
-}
-
-.kx-repo-modal__repo-copy {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.kx-repo-modal__repo-name {
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-repo-modal__repo-meta {
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-repo-modal__repo-vcs {
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-}
-
 /* Contextual manual add — only inside the expanded active group (AC28). */
-
-.kx-repo-modal__add-repo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  justify-self: start;
-  margin-top: 6px;
-  padding: 7px 10px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.kx-repo-modal__add-repo:hover,
-.kx-repo-modal__add-repo:focus-visible {
-  background: var(--kx-pale);
-}
 
 /* Single-row footer — status left, actions right (AC28). */
 
-.kx-repo-modal__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 12px 18px;
-  border-top: 1px solid var(--kx-border);
-  background: var(--kx-raised);
-}
-
-.kx-repo-modal__status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.kx-repo-modal__status-system {
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-repo-modal__status-divider {
-  color: var(--kx-border);
-}
-
-.kx-repo-modal__status-count {
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-repo-modal__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.kx-repo-modal__actions .kx-btn {
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-size: var(--kx-text-sm);
-}
-
 /* Designed loading + empty states (AC43) — the group region swaps only;
  * frame, toolbar, search, and footer persist. */
-
-.kx-repo-modal__loading {
-  display: grid;
-  gap: 10px;
-  padding: 16px 8px;
-}
-
-.kx-repo-modal__skeleton {
-  height: 46px;
-  border-radius: 10px;
-  background: var(--kx-pale);
-  animation: kx-repo-modal-skeleton-pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes kx-repo-modal-skeleton-pulse {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
-.kx-repo-modal__empty {
-  display: grid;
-  gap: 4px;
-  justify-items: center;
-  padding: 28px 16px;
-  text-align: center;
-}
-
-.kx-repo-modal__empty-title {
-  margin: 0;
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-repo-modal__empty-hint {
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-}
 
 /* ── Manual repository modal (Task 7 Part B, spec §8.2 — AC29) ────────
  * The "Add repository manually" form: a centered 560px modal frame
@@ -2379,461 +1703,27 @@
  * disabled while required fields are missing or invalid (AC29/AC43).
  * Loading/empty variants swap the picker region only (AC43). */
 
-.kx-manual-modal {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto; /* head / body / one-line footer */
-  width: min(560px, calc(100vw - 48px));
-  max-height: min(620px, calc(100vh - 48px));
-  overflow: hidden;
-}
-
 /* Header — title + subtitle, dismiss control at the right edge. */
-
-.kx-manual-modal__head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--kx-border);
-}
-
-.kx-manual-modal__head-copy {
-  min-width: 0;
-}
-
-.kx-manual-modal__title {
-  margin: 0;
-  font-size: var(--kx-text-xl);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-manual-modal__subtitle {
-  margin: 2px 0 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-manual-modal__close {
-  flex-shrink: 0;
-  margin-left: auto;
-}
 
 /* Body — the only scrolling region; stacked labeled fields. */
 
-.kx-manual-modal__body {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  min-height: 0;
-  padding: 14px 18px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--kx-border) transparent;
-}
-
-.kx-manual-modal__body::-webkit-scrollbar {
-  width: 8px;
-}
-
-.kx-manual-modal__body::-webkit-scrollbar-thumb {
-  background: var(--kx-border);
-  border-radius: 999px;
-}
-
-.kx-manual-modal__field {
-  display: grid;
-  gap: 6px;
-}
-
-.kx-manual-modal__label {
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-secondary);
-}
-
-.kx-manual-modal__field-hint {
-  margin: 0;
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-manual-modal__field-error {
-  margin: 0;
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-}
-
-.kx-manual-modal__select,
-.kx-manual-modal__search {
-  padding: 8px 10px;
-  border-radius: 10px;
-  font-size: var(--kx-text-sm);
-}
-
 /* Picker head — field label with the URL escape hatch at the right. */
-
-.kx-manual-modal__picker-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.kx-manual-modal__swap {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 6px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  cursor: pointer;
-  justify-self: start;
-  transition: background-color 0.15s ease;
-}
-
-.kx-manual-modal__swap:hover,
-.kx-manual-modal__swap:focus-visible {
-  background: var(--kx-pale);
-}
 
 /* URL escape hatch — input + Add URL in one row; Add URL is visibly
  * disabled until the value is a full http(s) URL (AC43). */
 
-.kx-manual-modal__url-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
-}
-
-.kx-manual-modal__url {
-  font-size: var(--kx-text-sm);
-}
-
-.kx-manual-modal__add-url {
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-size: var(--kx-text-sm);
-}
-
 /* Result rows — accessible names begin with the repository id. */
-
-.kx-manual-modal__results {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border: 1px solid var(--kx-border);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.kx-manual-modal__result {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 8px 10px;
-  border: none;
-  border-top: 1px solid var(--kx-border);
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.kx-manual-modal__results li:first-child .kx-manual-modal__result {
-  border-top: none;
-}
-
-.kx-manual-modal__result:hover:not(:disabled),
-.kx-manual-modal__result:focus-visible:not(:disabled) {
-  background: var(--kx-pale);
-}
-
-.kx-manual-modal__result:disabled {
-  cursor: not-allowed;
-}
-
-.kx-manual-modal__result:disabled .kx-manual-modal__result-name,
-.kx-manual-modal__result:disabled .kx-manual-modal__result-meta {
-  opacity: 0.55; /* visibly disabled — reduced contrast (AC43) */
-}
-
-.kx-manual-modal__result-copy {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.kx-manual-modal__result-name {
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-manual-modal__result-meta {
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-manual-modal__result-flag {
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  white-space: nowrap;
-}
 
 /* Picker footer — result count left, page indicator + pager right. */
 
-.kx-manual-modal__picker-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.kx-manual-modal__count {
-  margin: 0;
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-  white-space: nowrap;
-}
-
-.kx-manual-modal__pager {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.kx-manual-modal__page-indicator {
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-  white-space: nowrap;
-}
-
-.kx-manual-modal__page-btn {
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: var(--kx-text-2xs);
-}
-
 /* Selection — removable chips plus the queue-another action. */
-
-.kx-manual-modal__selection {
-  display: grid;
-  gap: 8px;
-  padding: 10px;
-  border: 1px solid var(--kx-border);
-  border-radius: 10px;
-  background: var(--kx-pale);
-}
-
-.kx-manual-modal__selection-label {
-  margin: 0;
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-secondary);
-}
-
-.kx-manual-modal__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.kx-manual-modal__chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  max-width: 100%;
-}
-
-.kx-manual-modal__chip-name {
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-manual-modal__chip-remove {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--kx-secondary);
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.kx-manual-modal__chip-remove:hover,
-.kx-manual-modal__chip-remove:focus-visible {
-  background: var(--kx-raised);
-  color: var(--kx-primary);
-}
-
-.kx-manual-modal__add-another {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  justify-self: start;
-  padding: 6px 10px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.kx-manual-modal__add-another:hover,
-.kx-manual-modal__add-another:focus-visible {
-  background: var(--kx-raised);
-}
 
 /* Require private network — optional checkbox toggle. */
 
-.kx-manual-modal__network {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
-  gap: 8px;
-  padding: 10px;
-  border: 1px solid var(--kx-border);
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.kx-manual-modal__network:hover {
-  border-color: var(--kx-secondary);
-}
-
-.kx-manual-modal__network-check {
-  margin-top: 2px;
-  accent-color: var(--kx-accent-strong);
-  cursor: pointer;
-}
-
-.kx-manual-modal__network-copy {
-  display: grid;
-  gap: 2px;
-}
-
-.kx-manual-modal__network-label {
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-manual-modal__network-hint {
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-}
-
 /* Single-row footer — note left, Cancel/Connect right (AC29). */
-
-.kx-manual-modal__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 12px 18px;
-  border-top: 1px solid var(--kx-border);
-  background: var(--kx-raised);
-}
-
-.kx-manual-modal__footer-note {
-  margin: 0;
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-manual-modal__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.kx-manual-modal__actions .kx-btn {
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-size: var(--kx-text-sm);
-}
 
 /* Designed loading + empty states (AC43) — the picker region swaps
  * only; frame, fields, and footer persist. */
-
-.kx-manual-modal__loading {
-  display: grid;
-  gap: 8px;
-  padding: 4px 0;
-}
-
-.kx-manual-modal__skeleton {
-  height: 44px;
-  border-radius: 10px;
-  background: var(--kx-pale);
-  animation: kx-manual-modal-skeleton-pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes kx-manual-modal-skeleton-pulse {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
-.kx-manual-modal__empty {
-  display: grid;
-  gap: 4px;
-  justify-items: center;
-  padding: 20px 16px;
-  border: 1px dashed var(--kx-border);
-  border-radius: 10px;
-  text-align: center;
-}
-
-.kx-manual-modal__empty-title {
-  margin: 0;
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-manual-modal__empty-hint {
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-}
 
 /* ── Create System modal (Task 7 Part C, spec §8.3 — AC33) ────────────
  * The smallest of the Task 7 modals: a centered 460px frame over the
@@ -2845,163 +1735,16 @@
  * or whitespace (AC43). No loading state: the create commit is a pure
  * reducer transition with no network involved. */
 
-.kx-create-modal {
-  display: flex;
-  flex-direction: column;
-  width: min(500px, calc(100vw - 48px));
-  max-height: min(560px, calc(100vh - 48px));
-}
-
 /* Header — title + subtitle, dismiss control at the right edge. */
-
-.kx-create-modal__head {
-  flex-shrink: 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 20px 22px 16px;
-  border-bottom: 1px solid var(--kx-border);
-}
-
-.kx-create-modal__head-copy {
-  min-width: 0;
-  display: grid;
-  gap: 4px;
-}
-
-.kx-create-modal__title {
-  margin: 0;
-  font-size: var(--kx-text-xl);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-create-modal__subtitle {
-  margin: 2px 0 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-create-modal__close {
-  flex-shrink: 0;
-  margin-left: auto;
-}
 
 /* Form shell — flex column: the body takes all remaining space and is
  * the only scroller; the pinned footer never competes with it. */
 
-.kx-create-modal__form {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  flex: 1;
-}
-
-.kx-create-modal__body {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 20px 22px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--kx-border) transparent;
-}
-
-.kx-create-modal__body::-webkit-scrollbar {
-  width: 8px;
-}
-
-.kx-create-modal__body::-webkit-scrollbar-thumb {
-  background: var(--kx-border);
-  border-radius: 999px;
-}
-
 /* Helper — one concise sentence above the fields (AC33). */
-
-.kx-create-modal__helper {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--kx-pale);
-  font-size: var(--kx-text-xs);
-  line-height: 1.5;
-  color: var(--kx-muted-text-aa);
-}
 
 /* Fields — label with the required/optional cue inside the label text. */
 
-.kx-create-modal__field {
-  display: grid;
-  gap: 7px;
-}
-
-.kx-create-modal__label {
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-secondary);
-}
-
-.kx-create-modal__req {
-  color: var(--kx-accent-text-aa);
-}
-
-.kx-create-modal__opt {
-  color: var(--kx-muted-text-aa);
-  font-weight: var(--kx-font-normal);
-}
-
-.kx-create-modal__name,
-.kx-create-modal__description {
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-size: var(--kx-text-sm);
-}
-
-.kx-create-modal__description {
-  resize: vertical;
-  min-height: 72px;
-  max-height: 180px;
-  line-height: 1.5;
-  font-family: inherit;
-}
-
 /* Single-row footer — note left, Cancel/Create right (AC33). */
-
-.kx-create-modal__footer {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 14px 22px;
-  border-top: 1px solid var(--kx-border);
-  background: var(--kx-raised);
-  border-radius: 0 0 var(--kx-radius-main) var(--kx-radius-main);
-}
-
-.kx-create-modal__footer-note {
-  margin: 0;
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-create-modal__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.kx-create-modal__actions .kx-btn {
-  padding: 9px 18px;
-  border-radius: 10px;
-  font-size: var(--kx-text-sm);
-}
 
 /* ── Component anchored menu (Task 8, spec §7.4 — AC30–AC32) ──────────
  * A floating .kx-menu anchored to the setup row's Component trigger —
@@ -3009,203 +1752,20 @@
 
 /* Anchor wrapper around the Component trigger — the menu floats from
  * here, dropping above the trigger flush with its left edge (AC30). */
-.kx-setup-row__component-anchor {
-  position: relative;
-  display: inline-flex;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.kx-component-menu {
-  --kx-component-menu-w: 320px;
-
-  bottom: calc(100% + 8px); /* opens above the Component button */
-  top: auto;
-  left: 0; /* flush with the trigger's left edge (AC30) */
-  display: flex;
-  flex-direction: column;
-  width: var(--kx-component-menu-w, 320px);
-  max-height: min(380px, calc(100vh - 260px));
-  overflow: hidden; /* the list is the only scrolling region */
-  padding: 0;
-}
 
 /* Labeled search region — component OR repository names (AC31). */
 
-.kx-component-menu__search {
-  padding: 8px;
-  border-bottom: 1px solid var(--kx-border);
-}
-
-.kx-component-menu__search-input {
-  padding: 8px 10px;
-  border-radius: 10px;
-  font-size: var(--kx-text-sm);
-}
-
 /* The only scrolling region — flat rows or designed states (AC43). */
-
-.kx-component-menu__list {
-  display: grid;
-  gap: 2px;
-  align-content: start;
-  padding: 6px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--kx-border) transparent;
-}
-
-.kx-component-menu__list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.kx-component-menu__list::-webkit-scrollbar-thumb {
-  background: var(--kx-border);
-  border-radius: 999px;
-}
 
 /* Flat component rows (AC31) — the name with its repository underneath
  * on the same row; no type chip, no group headers, just the check. */
-.kx-component-menu__row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 7px 8px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.kx-component-menu__row:hover,
-.kx-component-menu__row:focus-within {
-  background: var(--kx-pale);
-}
-
-.kx-component-menu__row--selected {
-  background: var(--kx-pale);
-}
-
-.kx-component-menu__check {
-  flex-shrink: 0;
-  margin: 3px 0 0;
-  width: 15px;
-  height: 15px;
-  accent-color: var(--kx-accent-strong);
-  cursor: pointer;
-}
-
-.kx-component-menu__row-copy {
-  display: grid;
-  gap: 1px;
-  min-width: 0;
-}
-
-.kx-component-menu__row-name {
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.kx-component-menu__row-repo {
-  font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 /* Single-row footer — selection count left, Clear right (AC32). */
 
-.kx-component-menu__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 10px;
-  border-top: 1px solid var(--kx-border);
-}
-
-.kx-component-menu__count {
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-component-menu__clear {
-  flex-shrink: 0;
-  padding: 3px 8px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.kx-component-menu__clear:hover:not(:disabled),
-.kx-component-menu__clear:focus-visible:not(:disabled) {
-  background: var(--kx-pale);
-  text-decoration: underline;
-}
-
 /* Nothing to clear — visibly disabled, reduced contrast (AC43). */
-.kx-component-menu__clear:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
 
 /* Designed loading + empty states (AC43) — the list region swaps only;
  * frame, search, and footer persist. */
-
-.kx-component-menu__loading {
-  display: grid;
-  gap: 8px;
-  padding: 10px 2px;
-}
-
-.kx-component-menu__skeleton {
-  height: 44px;
-  border-radius: 10px;
-  background: var(--kx-pale);
-  animation: kx-component-menu-skeleton-pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes kx-component-menu-skeleton-pulse {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
-.kx-component-menu__empty {
-  display: grid;
-  gap: 4px;
-  justify-items: center;
-  padding: 24px 14px;
-  text-align: center;
-}
-
-.kx-component-menu__empty-title {
-  margin: 0;
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-component-menu__empty-hint {
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-}
 
 /* ── Customize modal shell (Task 9 Part A, spec §11) ─────────────────
  * Fixed 790×580 frame on every tab (AC34): width/height come from the
@@ -4381,39 +2941,6 @@
 /* ── Account menu (Task 12, spec §14 — AC42) ────────────────────────
  * Anchored floating menu from the sidebar user row — opens right of the
  * sidebar near its bottom (the user row), raised surface, DM Sans. */
-.kx-account-menu {
-  bottom: 16px;
-  left: calc(var(--kx-sidebar-w) + 12px);
-  display: flex;
-  flex-direction: column;
-  width: 220px;
-  padding: 6px;
-}
-
-.kx-app--rail .kx-account-menu {
-  left: calc(var(--kx-sidebar-rail) + 12px);
-}
-
-.kx-account-menu__item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 8px 10px;
-  border: none;
-  border-radius: 9px;
-  background: transparent;
-  text-align: left;
-  font-family: inherit;
-  font-size: var(--kx-text-md);
-  color: var(--kx-primary);
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.kx-account-menu__item:hover,
-.kx-account-menu__item:focus-visible {
-  background: var(--kx-pale);
-}
 
 /* Theme group (dark theme preference) — grouped section before the actions
  * list, same divider + uppercase section-label pattern as the profile
@@ -4421,251 +2948,11 @@
  * with the active preference name; below it a compact horizontal icon
  * segmented control carries the three menuitemradio options (sun / moon /
  * monitor, icon-only with the accessible name on each button). */
-.kx-account-menu__theme {
-  margin-bottom: 6px;
-  padding: 2px 2px 8px;
-  border-bottom: 1px solid var(--kx-border);
-}
-
-.kx-account-menu__theme-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 0 2px 6px;
-}
-
-.kx-account-menu__section-label {
-  margin: 0;
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-account-menu__theme-value {
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-account-menu__theme-seg {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: var(--kx-pale);
-  border-radius: 10px;
-}
-
-.kx-account-menu__theme-seg-btn {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--kx-muted);
-  cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.kx-account-menu__theme-seg-btn:hover {
-  color: var(--kx-accent-text-aa);
-}
-
-.kx-account-menu__theme-seg-btn--active {
-  background: var(--kx-raised);
-  color: var(--kx-accent-text-aa);
-  box-shadow: 0 1px 2px rgb(var(--kx-ink-rgb) / 0.08);
-}
-
-.kx-account-menu__theme-seg-btn--active:hover {
-  color: var(--kx-accent-text-aa);
-}
 
 /* ── Settings modal (Task 12, spec §14 — AC42) ─────────────────────
  * Centered raised modal preserving General / Billing / Team sections and
  * Billing's six sub-sections. Section nav + billing subnav are static;
  * the content area is the sole scroll region. */
-.kx-settings {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  width: min(680px, calc(100vw - 48px));
-  height: min(520px, calc(100vh - 48px));
-  overflow: hidden;
-}
-
-.kx-settings__head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--kx-border);
-}
-
-.kx-settings__title {
-  margin: 0;
-  font-size: var(--kx-text-xl);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-settings__close {
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.kx-settings__body {
-  display: grid;
-  grid-template-columns: 180px minmax(0, 1fr);
-  min-height: 0;
-}
-
-.kx-settings__sections {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 12px 10px;
-  border-right: 1px solid var(--kx-border);
-}
-
-.kx-settings__section {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 9px 12px;
-  border: none;
-  border-radius: 9px;
-  background: transparent;
-  text-align: left;
-  font-family: inherit;
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-secondary);
-  cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.kx-settings__section:hover {
-  background: var(--kx-pale);
-  color: var(--kx-primary);
-}
-
-.kx-settings__section[aria-selected='true'] {
-  background: var(--kx-primary);
-  color: var(--kx-raised);
-}
-
-.kx-settings__panel {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px 18px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--kx-border) transparent;
-}
-
-.kx-settings__panel::-webkit-scrollbar {
-  width: 8px;
-}
-
-.kx-settings__panel::-webkit-scrollbar-thumb {
-  background: var(--kx-border);
-  border-radius: 999px;
-}
-
-.kx-settings__panel-title {
-  margin: 0;
-  font-size: var(--kx-text-l);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-settings__subtabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--kx-border);
-}
-
-.kx-settings__subtab {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
-  font-family: inherit;
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-secondary);
-  cursor: pointer;
-  transition:
-    background-color 0.12s ease,
-    color 0.12s ease;
-}
-
-.kx-settings__subtab:hover {
-  background: var(--kx-pale);
-  color: var(--kx-primary);
-}
-
-.kx-settings__subtab[aria-selected='true'] {
-  background: var(--kx-primary);
-  color: var(--kx-raised);
-}
-
-.kx-settings__content {
-  display: grid;
-  gap: 14px;
-  align-content: start;
-}
-
-.kx-settings__list {
-  display: grid;
-  margin: 0;
-  border: 1px solid var(--kx-border);
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--kx-raised);
-}
-
-.kx-settings__field {
-  display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
-  gap: 12px;
-  padding: 10px 12px;
-  border-top: 1px solid var(--kx-border);
-}
-
-.kx-settings__field:first-child {
-  border-top: none;
-}
-
-.kx-settings__field-term {
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-secondary);
-}
-
-.kx-settings__field-value {
-  margin: 0;
-  font-size: var(--kx-text-md);
-  color: var(--kx-primary);
-}
-
-.kx-settings__note {
-  margin: 0;
-  font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
-}
 
 /* Visible illustrative marker (AC46) — one shared subtle note rendered
  * at the foot of the pages from the single mockData.ILLUSTRATIVE_DATA_NOTE
@@ -5048,10 +3335,9 @@
   }
 
   /* Anchored menus open from the effective rail width, never the stored
-   * expanded width. */
+   * expanded width. (account-menu lives in AccountMenu.css now.) */
   .kx-workspace-menu,
-  .kx-system-menu,
-  .kx-account-menu {
+  .kx-system-menu {
     left: calc(var(--kx-sidebar-rail) + 12px);
   }
 }
@@ -5463,8 +3749,11 @@
 
 /* Auto-grow session-detail composer input: one line tall (40px incl. padding),
  * grows with content via inline height, capped at ~5 lines (144px). Overrides
- * the shared .kx-composer__input min-height (118px) only within this composer. */
-.kx-session-composer__input {
+ * the shared .kx-composer__input min-height (118px) only within this composer.
+ * Scoped to .kx-session-composer (0-2-0) so it wins over Composer.css's
+ * .kx-composer__input regardless of stylesheet order (spec §8: cross-file
+ * overrides must not rely on source order). */
+.kx-session-composer .kx-session-composer__input {
   min-height: 40px;
   max-height: 144px;
   resize: none;
@@ -5475,10 +3764,6 @@
 /* Keep the composer's tool cluster (attachments, voice, send) pinned to the
  * right edge of the input box so it stays visually grouped with the
  * composer's right edge even when the toolbar wraps. */
-.kx-session-composer .kx-panel__toolbar-right {
-  margin-left: auto;
-  justify-content: flex-end;
-}
 
 /* ── Responsive: narrow viewport ≤760px ───────────────────────────
  * Timeline bubbles full-ish width, cards reduced padding, composer static. */
@@ -5514,9 +3799,7 @@
     bottom: -12px;
   }
 
-  .kx-composer__input {
-    min-height: 60px;
-  }
+  
 
   /* Session composer keeps its one-line auto-grow floor on mobile — the
      shared 60px mobile rule above is later in source order, so restate the

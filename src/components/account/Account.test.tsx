@@ -2,6 +2,7 @@ import { useEffect, useReducer } from 'react'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { getAggregatedCss } from '../../test/cssAggregate'
 import AccountMenu from './AccountMenu'
 import SettingsModal from './SettingsModal'
 import Sidebar from '../shell/Sidebar'
@@ -109,7 +110,9 @@ const getBillingTab = (name: string) => within(getBillingTablist()).getByRole('t
 // jsdom does not load stylesheets, so Warm Enterprise styling hooks are
 // verified against the shipped CSS/tokens directly (CustomizeModal.test
 // convention).
-const css = readFileSync(join(process.cwd(), 'src/styles/components.css'), 'utf8')
+// Style-contract source: aggregated stylesheets (spec addendum §8) —
+// components.css + the inert per-domain files; tokens.css stays direct.
+const css = getAggregatedCss()
 const tokens = readFileSync(join(process.cwd(), 'src/styles/tokens.css'), 'utf8')
 
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u

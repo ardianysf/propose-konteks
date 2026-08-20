@@ -1,0 +1,193 @@
+/* Anchor wrapper around the Component trigger — the menu floats from
+ * here, dropping above the trigger flush with its left edge (AC30). */
+
+.kx-setup-row__component-anchor {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.kx-component-menu {
+  --kx-component-menu-w: 320px;
+
+  bottom: calc(100% + 8px); /* opens above the Component button */
+  top: auto;
+  left: 0; /* flush with the trigger's left edge (AC30) */
+  display: flex;
+  flex-direction: column;
+  width: var(--kx-component-menu-w, 320px);
+  max-height: min(380px, calc(100vh - 260px));
+  overflow: hidden; /* the list is the only scrolling region */
+  padding: 0;
+}
+
+.kx-component-menu__search {
+  padding: 8px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-component-menu__search-input {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+.kx-component-menu__list {
+  display: grid;
+  gap: 2px;
+  align-content: start;
+  padding: 6px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-component-menu__list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kx-component-menu__list::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 999px;
+}
+
+/* Flat component rows (AC31) — the name with its repository underneath
+ * on the same row; no type chip, no group headers, just the check. */
+
+.kx-component-menu__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-component-menu__row:hover,
+.kx-component-menu__row:focus-within {
+  background: var(--kx-pale);
+}
+
+.kx-component-menu__row--selected {
+  background: var(--kx-pale);
+}
+
+.kx-component-menu__check {
+  flex-shrink: 0;
+  margin: 3px 0 0;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--kx-accent-strong);
+  cursor: pointer;
+}
+
+.kx-component-menu__row-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-component-menu__row-name {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-component-menu__row-repo {
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-component-menu__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--kx-border);
+}
+
+.kx-component-menu__count {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-component-menu__clear {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-component-menu__clear:hover:not(:disabled),
+.kx-component-menu__clear:focus-visible:not(:disabled) {
+  background: var(--kx-pale);
+  text-decoration: underline;
+}
+
+/* Nothing to clear — visibly disabled, reduced contrast (AC43). */
+
+.kx-component-menu__clear:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.kx-component-menu__loading {
+  display: grid;
+  gap: 8px;
+  padding: 10px 2px;
+}
+
+.kx-component-menu__skeleton {
+  height: 44px;
+  border-radius: 10px;
+  background: var(--kx-pale);
+  animation: kx-component-menu-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes kx-component-menu-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.kx-component-menu__empty {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding: 24px 14px;
+  text-align: center;
+}
+
+.kx-component-menu__empty-title {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-component-menu__empty-hint {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}

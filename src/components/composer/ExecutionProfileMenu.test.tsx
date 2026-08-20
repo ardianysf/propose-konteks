@@ -1,7 +1,6 @@
 import { useEffect, useReducer } from 'react'
 import { fireEvent, render, screen, within } from '@testing-library/react'
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { getAggregatedCss } from '../../test/cssAggregate'
 import Composer from './Composer'
 import { OverlayLifecycleProvider } from '../shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
@@ -60,7 +59,8 @@ const getSidecar = () => screen.getByTestId('execution-profile-sidecar')
 
 // jsdom does not load stylesheets, so anchoring/divider styling is
 // verified against the shipped CSS directly (tokens.test.ts convention).
-const css = readFileSync(join(process.cwd(), 'src/styles/components.css'), 'utf8')
+// Style-contract source: aggregated stylesheets (spec addendum §8).
+const css = getAggregatedCss()
 
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u
 

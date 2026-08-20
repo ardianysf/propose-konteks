@@ -25,6 +25,7 @@ import { useMockup } from '../../state/MockupContext'
 import { DEFAULT_SETTINGS_SECTION, type SettingsSection } from '../../state/mockupReducer'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import { useFocusContainment } from '../shell/useFocusContainment'
+import './SettingsModal.css'
 
 /** Close — the header dismiss control. */
 function CloseIcon() {

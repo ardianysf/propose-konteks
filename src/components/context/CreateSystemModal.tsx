@@ -31,6 +31,7 @@ import { useMockup } from '../../state/MockupContext'
 import { nextSystemId } from '../../state/mockupReducer'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import { useFocusContainment } from '../shell/useFocusContainment'
+import './CreateSystemModal.css'
 
 /** Close — the header dismiss control. */
 function CloseIcon() {
