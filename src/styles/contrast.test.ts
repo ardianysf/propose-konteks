@@ -238,6 +238,10 @@ function entries(): Entry[] {
     // states (pinned, hovered map button) read the AA accent token.
     { file: COMPONENTS, selector: '.kx-sidebar__session-pin', property: 'color', token: MUTED, cls: 'U' as Class },
     { file: COMPONENTS, selector: '.kx-sidebar__session-pin[aria-pressed=\'true\']', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
+    { file: COMPONENTS, selector: '.kx-system-menu__map-btn', property: 'color', token: MUTED, cls: 'U' as Class },
+    { file: COMPONENTS, selector: '.kx-system-menu__map-btn:hover', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
+    // System map diagram strokes — decorative SVG geometry, not text.
+    { file: COMPONENTS, selector: '.kx-system-map__node rect', property: 'stroke', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: GLOBAL, selector: ':focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
   ]
 }
@@ -434,7 +438,14 @@ describe('ink-rgb shadow/backdrop tokenization', () => {
     expect(darkBlock).toContain('--kx-ink-rgb: 53 80 44;')
   })
 
+  it('leaves no rgba(36, 48, 37, …) literals in components.css', () => {
+    expect(components).not.toContain('rgba(36, 48, 37')
+  })
 
+  it('every former ink literal now composes rgb(var(--kx-ink-rgb) / α)', () => {
+    const usages = components.match(/rgb\(var\(--kx-ink-rgb\) \/ [0-9.]+\)/g) ?? []
+    expect(usages.length).toBeGreaterThanOrEqual(9)
+  })
 
   it('defines theme-aware --kx-scrim-* tokens (ink-based in light, black-based in dark)', () => {
     expect(tokens).toContain('--kx-scrim-base: rgb(36 48 37 / 0.44);')
@@ -458,18 +469,18 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = [...extractUsages(components, COMPONENTS), ...extractUsages(global, GLOBAL)]
 
-  it('covers exactly 142 consumers — 81 muted, 59 accent-strong, 2 accent-text-aa', () => {
-    expect(inventory).toHaveLength(142)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(81)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(59)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(2)
+  it('covers exactly 145 consumers — 82 muted, 60 accent-strong, 3 accent-text-aa', () => {
+    expect(inventory).toHaveLength(145)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(82)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(60)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(3)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
     expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(76)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(35)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(36)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(4)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(27)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(29)
   })
 
   it('has no duplicate inventory selectors', () => {

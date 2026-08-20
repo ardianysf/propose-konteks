@@ -16,6 +16,7 @@ import { OverlayLifecycleProvider } from './OverlayLifecycle'
 import CreateSystemModal from '../context/CreateSystemModal'
 import ManualRepositoryModal from '../context/ManualRepositoryModal'
 import RepositorySelectorModal from '../context/RepositorySelectorModal'
+import SystemMapModal from '../system/SystemMapModal'
 import CustomizeModal from '../customize/CustomizeModal'
 import LearnedDrawer from '../reviews/LearnedDrawer'
 import AccountMenu from '../account/AccountMenu'
@@ -63,6 +64,7 @@ export default function AppShell() {
         )}
         {state.overlay.kind === 'manual-repo-modal' && <ManualRepositoryModal />}
         {state.overlay.kind === 'create-system-modal' && <CreateSystemModal />}
+        {state.overlay.kind === 'system-map' && <SystemMapModal />}
         {state.overlay.kind === 'customize' && <CustomizeModal />}
         {state.overlay.kind === 'learned' && <LearnedDrawer />}
         {state.overlay.kind === 'account-menu' && <AccountMenu />}

@@ -963,7 +963,46 @@
 }
 
 /* System rows — inline neutral SVG + name + repository count, no avatar
- * imagery (AC8) */
+ * imagery (AC8). Each row wraps the menuitem button + its map action in a
+ * flex container so the two stay siblings, never nested interactives. */
+
+.kx-system-menu__item-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.kx-system-menu__item-wrap .kx-system-menu__item {
+  flex: 1;
+}
+
+/* Per-row map action — quiet icon button beside the row; revealed on row
+ * hover/focus-within, AA accent + pale fill on hover. */
+.kx-system-menu__map-btn {
+  flex-shrink: 0;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--kx-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.kx-system-menu__item-wrap:hover .kx-system-menu__map-btn,
+.kx-system-menu__item-wrap:focus-within .kx-system-menu__map-btn {
+  opacity: 1;
+}
+
+.kx-system-menu__map-btn:hover {
+  color: var(--kx-accent-text-aa);
+  background: var(--kx-pale);
+}
 
 .kx-system-menu__item {
   display: flex;
@@ -1022,6 +1061,62 @@
 .kx-system-menu__item-count {
   font-size: var(--kx-text-sm);
   color: var(--kx-muted-text-aa);
+}
+
+/* ── System map modal (sidebar SystemMenu map action) ───────────────
+ * Centered dialog over the shared backdrop; the body is a deterministic
+ * inline SVG diagram of rounded-rect subsystem nodes + edges, all strokes
+ * and fills theme-token driven. */
+
+.kx-system-map {
+  width: min(720px, calc(100vw - 48px));
+  display: flex;
+  flex-direction: column;
+}
+
+.kx-system-map__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-system-map__title {
+  margin: 0;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-system-map__canvas {
+  padding: 16px 20px 20px;
+  overflow: auto;
+}
+
+.kx-system-map__canvas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.kx-system-map__edge {
+  stroke: var(--kx-border);
+  stroke-width: 1.6;
+}
+
+.kx-system-map__node rect {
+  fill: var(--kx-raised);
+  stroke: var(--kx-accent-strong);
+  stroke-width: 1.6;
+}
+
+.kx-system-map__node text {
+  fill: var(--kx-secondary);
+  font-size: var(--kx-text-md);
+  text-anchor: middle;
+  dominant-baseline: central;
 }
 
 /* Sticky footer — pinned below the scrolling list; never scrolls away
@@ -4755,22 +4850,22 @@
 }
 
 /* Current-stage pill — the single active-state emphasis on this page:
- * solid AA accent fill at button scale (16px bold, generous padding, slight
- * letter-spacing) with a lifted two-layer shadow and an inset light ring, so
- * the current stage reads as the one prominent element among the quiet pale
- * chips around it. */
+ * solid AA accent fill at compact chip scale (12px bold, tight padding,
+ * slight letter-spacing) with a lifted two-layer shadow and an inset light
+ * ring, so the current stage reads as the one prominent element among the
+ * quiet pale chips around it. */
 .kx-session-detail__stage-pill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 18px;
+  gap: 6px;
+  padding: 4px 12px;
   background: var(--kx-accent-solid-aa);
   border-radius: 999px;
   box-shadow:
-    0 2px 6px rgba(36, 48, 37, 0.22),
+    0 2px 6px rgb(var(--kx-ink-rgb) / 0.22),
     0 8px 20px rgba(79, 112, 68, 0.28),
     inset 0 0 0 1px rgba(255, 255, 255, 0.22);
-  font-size: var(--kx-text-l);
+  font-size: var(--kx-text-md);
   font-weight: var(--kx-font-bold);
   letter-spacing: 0.01em;
   line-height: 1.2;
@@ -4779,18 +4874,19 @@
 
 /* Count badge nested in the current-stage pill — a small raised disc with
  * accent text so the actionable-item count reads as part of the same
- * emphasized pill treatment without competing with it. */
+ * emphasized pill treatment without competing with it. Sized down with the
+ * pill (18px disc, 2xs count). */
 .kx-session-detail__stage-pill-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 22px;
+  min-width: 18px;
+  height: 18px;
   padding: 0 6px;
   background: var(--kx-raised);
   border-radius: 999px;
-  box-shadow: 0 1px 3px rgba(36, 48, 37, 0.25);
-  font-size: var(--kx-text-xs);
+  box-shadow: 0 1px 3px rgb(var(--kx-ink-rgb) / 0.25);
+  font-size: var(--kx-text-2xs);
   font-weight: var(--kx-font-bold);
   letter-spacing: normal;
   line-height: 1;

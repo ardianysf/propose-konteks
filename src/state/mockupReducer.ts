@@ -33,6 +33,7 @@ export type MockupOverlay =
   | { kind: 'repository-modal' }
   | { kind: 'manual-repo-modal' }
   | { kind: 'create-system-modal'; source: CreateSystemSource }
+  | { kind: 'system-map'; systemId: string }
   | { kind: 'customize'; tab: CustomizeTab }
   | { kind: 'learned'; tab: LearnedTab }
   | { kind: 'account-menu' }
@@ -47,6 +48,7 @@ export type OpenOverlayPayload =
   | { kind: 'repository-modal' }
   | { kind: 'manual-repo-modal' }
   | { kind: 'create-system-modal'; source?: CreateSystemSource }
+  | { kind: 'system-map'; systemId: string }
   | { kind: 'customize'; tab?: CustomizeTab }
   | { kind: 'learned'; tab?: LearnedTab }
   | { kind: 'account-menu' }
@@ -530,5 +532,7 @@ function resolveOverlay(payload: OpenOverlayPayload): MockupOverlay {
       return { kind: payload.kind }
     case 'create-system-modal':
       return { kind: 'create-system-modal', source: payload.source ?? 'system-menu' }
+    case 'system-map':
+      return { kind: 'system-map', systemId: payload.systemId }
   }
 }

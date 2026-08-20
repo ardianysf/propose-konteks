@@ -222,6 +222,7 @@ const everyOverlayOpen: OpenOverlayPayload[] = [
   { kind: 'repository-modal' },
   { kind: 'manual-repo-modal' },
   { kind: 'create-system-modal' },
+  { kind: 'system-map', systemId: 'bsi-hris' },
   { kind: 'customize' },
   { kind: 'learned' },
   { kind: 'account-menu' },
