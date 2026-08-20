@@ -133,9 +133,37 @@ describe('SystemMenu', () => {
       const count = system.repoIds.length
       expect(row).toHaveTextContent(system.name)
       expect(row).toHaveTextContent(`${count} ${count === 1 ? 'repository' : 'repositories'}`)
+
+      // The row sits in a wrap with a sibling map action (plain button,
+      // decorative diagram glyph) — never a nested interactive.
+      const wrap = row.closest('.kx-system-menu__item-wrap')
+      expect(wrap).not.toBeNull()
+      const mapBtn = within(wrap as HTMLElement).getByRole('button', {
+        name: `System map for ${system.name}`,
+      })
+      expect(mapBtn).not.toHaveAttribute('role', 'menuitem')
+      const mapIcon = mapBtn.querySelector('svg[data-icon="system-map"]')
+      expect(mapIcon).not.toBeNull()
+      expect(mapIcon).toHaveAttribute('aria-hidden', 'true')
     }
     expect(menu.querySelectorAll('img')).toHaveLength(0)
     expect(within(menu).queryByRole('img')).not.toBeInTheDocument()
+  })
+
+  it('opens the system-map modal from the row map action, carrying the system id', () => {
+    const { bucket } = renderSystemMenu({ kind: 'system-menu' })
+    const menu = getMenu()
+    for (const system of SYSTEMS) {
+      expect(
+        within(menu).getByRole('button', { name: `System map for ${system.name}` }),
+      ).toBeInTheDocument()
+    }
+    fireEvent.click(
+      within(menu).getByRole('button', { name: `System map for ${SYSTEMS[1].name}` }),
+    )
+    expect(bucket.current?.overlay).toEqual({ kind: 'system-map', systemId: SYSTEMS[1].id })
+    // Opening the map replaces the menu overlay (single-overlay union).
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
   })
 
   it('marks the active system and switches systems through the store, closing itself', () => {

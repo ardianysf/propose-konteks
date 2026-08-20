@@ -31,6 +31,31 @@ function SystemIcon() {
   )
 }
 
+/** Map/diagram — opens the per-system architecture map modal. */
+function SystemMapIcon() {
+  return (
+    <svg
+      data-icon="system-map"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="1.75" y="1.75" width="4.5" height="4.5" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <rect x="9.75" y="1.75" width="4.5" height="4.5" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <rect x="5.75" y="9.75" width="4.5" height="4.5" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <path
+        d="M6.25 4h3.5M4 6.25 6.5 9.75M12 6.25 9.5 9.75"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 /** Plus — marks the create affordance in the sticky footer (AC13). */
 function PlusIcon() {
   return (
@@ -94,29 +119,47 @@ export default function SystemMenu() {
             const active = system.id === state.activeSystemId
             const count = system.repoIds.length
             return (
-              <button
-                key={system.id}
-                type="button"
-                role="menuitem"
-                className={
-                  active ? 'kx-system-menu__item kx-system-menu__item--active' : 'kx-system-menu__item'
-                }
-                aria-current={active ? 'true' : undefined}
-                onClick={() => {
-                  dispatch({ type: 'SET_ACTIVE_SYSTEM', systemId: system.id })
-                  dismissOverlay()
-                }}
-              >
-                <span className="kx-system-menu__item-icon" aria-hidden="true">
-                  <SystemIcon />
-                </span>
-                <span className="kx-system-menu__item-copy">
-                  <span className="kx-system-menu__item-name">{system.name}</span>
-                  <span className="kx-system-menu__item-count">
-                    {count} {count === 1 ? 'repository' : 'repositories'}
+              <div key={system.id} className="kx-system-menu__item-wrap">
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={
+                    active ? 'kx-system-menu__item kx-system-menu__item--active' : 'kx-system-menu__item'
+                  }
+                  aria-current={active ? 'true' : undefined}
+                  onClick={() => {
+                    dispatch({ type: 'SET_ACTIVE_SYSTEM', systemId: system.id })
+                    dismissOverlay()
+                  }}
+                >
+                  <span className="kx-system-menu__item-icon" aria-hidden="true">
+                    <SystemIcon />
                   </span>
-                </span>
-              </button>
+                  <span className="kx-system-menu__item-copy">
+                    <span className="kx-system-menu__item-name">{system.name}</span>
+                    <span className="kx-system-menu__item-count">
+                      {count} {count === 1 ? 'repository' : 'repositories'}
+                    </span>
+                  </span>
+                </button>
+                {/* Per-row map action — a plain button (not a menuitem) so
+                    the menu's menuitem roster stays one-per-system; it opens
+                    the system map modal in place of this menu. */}
+                <button
+                  type="button"
+                  className="kx-system-menu__map-btn"
+                  aria-label={`System map for ${system.name}`}
+                  title={`System map for ${system.name}`}
+                  onClick={() =>
+                    dispatch({
+                      type: 'OPEN_OVERLAY',
+                      overlay: { kind: 'system-map', systemId: system.id },
+                    })
+                  }
+                >
+                  <SystemMapIcon />
+                </button>
+              </div>
             )
           })
         )}
