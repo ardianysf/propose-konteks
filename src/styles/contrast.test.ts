@@ -31,6 +31,11 @@ const GLOBAL = 'src/styles/global.css'
 // rules since the T5b dedup (they never lived in components.css, so the
 // inventory points at their real file instead of a COMPONENTS stand-in).
 const CUSTOMIZE_SHARED = 'src/components/customize/shared.css'
+// session/sessionBadges.css — the single home of the .kx-badge base +
+// modifier rules since the T5b session rework (moved out of
+// SessionStatusBadge.css; never in components.css, so — like
+// CUSTOMIZE_SHARED — the inventory points at the real file).
+const SESSION_BADGES = 'src/components/session/sessionBadges.css'
 
 const MUTED = '--kx-muted'
 const MUTED_AA = '--kx-muted-text-aa'
@@ -59,7 +64,7 @@ function contrast(a: string, b: string): number {
 }
 
 // ---------------------------------------------------------------------------
-// Complete 137-consumer inventory.
+// Complete 150-consumer inventory.
 // cls: M = enabled muted text/placeholder, A = enabled accent text/glyph,
 //      S = white-text solid background, U = unchanged (decorative/disabled).
 // token is the ORIGINAL token each consumer started from.
@@ -89,7 +94,6 @@ const mutedM = [
   '.kx-new-session__intro-body',
   '.kx-composer__input::placeholder',
   '.kx-new-session__disclaimer',
-  '.kx-badge--cancelled',
   '.kx-session-detail__context',
   '.kx-session-detail__meta',
   '.kx-session-timeline__event-text',
@@ -186,7 +190,6 @@ const accentA = [
   '.kx-agents__disclosure > summary:hover',
   '.kx-integrations__status--connected',
   '.kx-history__clear',
-  '.kx-badge--failed',
   '.kx-session-detail__action-needed',
   '.kx-session-timeline__artifact-link',
   '.kx-session-timeline__error-title',
@@ -197,7 +200,6 @@ const accentA = [
 const accentS = [
   '.kx-btn--primary',
   '.kx-composer__badge',
-  '.kx-badge--waiting_approval',
   '.kx-session-detail__stage-pill',
 ]
 
@@ -244,6 +246,20 @@ function entries(): Entry[] {
     { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__status--enabled', property: 'color', token: ACCENT_STRONG, cls: 'A' as Class },
     { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__toggle--on', property: 'background', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__toggle:focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
+    // Session badge primitive (session/sessionBadges.css — T5b session
+    // rework: the .kx-badge modifiers moved out of SessionStatusBadge.css
+    // into the shared session stylesheet; components.css never carried
+    // them). Same handling as CUSTOMIZE_SHARED above: the entries point at
+    // their REAL file (no KNOWN_INERT_DUPLICATE_SELECTORS masking), so a
+    // re-introduced second copy anywhere surfaces as an unclassified /
+    // duplicate selector. The pending-quote pill shares the
+    // waiting-approval S styling (same background token + property), so it
+    // is classified as its own accent-strong S consumer.
+    { file: SESSION_BADGES, selector: '.kx-badge--cancelled', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: SESSION_BADGES, selector: '.kx-badge--blocked', property: 'color', token: ACCENT_STRONG, cls: 'A' as Class },
+    { file: SESSION_BADGES, selector: '.kx-badge--failed', property: 'color', token: ACCENT_STRONG, cls: 'A' as Class },
+    { file: SESSION_BADGES, selector: '.kx-badge--waiting_approval', property: 'background', token: ACCENT_STRONG, cls: 'S' as Class },
+    { file: SESSION_BADGES, selector: '.kx-badge--pending_approval', property: 'background', token: ACCENT_STRONG, cls: 'S' as Class },
     // Dark-theme ink pin: the active segment's text uses --kx-accent-text-aa
     // in light mode (its dark #4f7044 resolves AA on the #95a547 fill) and
     // a [data-theme='dark'] override switches it to dark --kx-raised ink on
@@ -454,6 +470,35 @@ const KNOWN_INERT_DUPLICATE_SELECTORS = new Set([
   '.kx-history__clear',
   '.kx-history__row-button:focus-visible',
   '.kx-history__clear:focus-visible',
+  // NOTE: the .kx-badge--* selectors are deliberately ABSENT. Their only
+  // home is session/sessionBadges.css since the T5b session rework (they
+  // were never in components.css), so masking them here would hide a
+  // genuine cross-file re-duplication. Their inventory entries point at
+  // sessionBadges.css directly — same handling as .kx-preserved__*.
+  // session/SessionHeader.css
+  '.kx-session-detail__context',
+  // pages/SessionDetailPage.css
+  '.kx-session-detail__meta',
+  // session/SessionTracker.css
+  '.kx-session-detail__tracker-kicker',
+  '.kx-session-detail__action-needed',
+  '.kx-session-detail__stage-pill',
+  '.kx-session-detail__stage-pill-badge',
+  // session/SessionTimeline.css
+  '.kx-session-timeline__event-text',
+  '.kx-session-timeline__card-meta',
+  '.kx-session-timeline__card-limitations',
+  '.kx-session-timeline__artifact-link',
+  '.kx-session-timeline__error-title',
+  // session/SessionQuoteCard.css
+  '.kx-quote-approval-card__history',
+  '.kx-quote-approval-card__note',
+  '.kx-quote-approval-card__quote-ref',
+  '.kx-quote-approval-card__chevron',
+  '.kx-quote-approval-card__quote-id',
+  '.kx-quote-approval-card__header:focus-visible',
+  // session/SessionDetailComposer.css
+  '.kx-session-composer__locked-notice',
   // NOTE: the .kx-preserved__* selectors are deliberately ABSENT. They
   // were never a components.css↔domain-file transitional duplicate (their
   // only home is customize/shared.css since the T5b dedup), so masking
@@ -766,17 +811,17 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 149 consumers — 84 muted, 62 accent-strong, 3 accent-text-aa', () => {
-    expect(inventory).toHaveLength(149)
+  it('covers exactly 151 consumers — 84 muted, 64 accent-strong, 3 accent-text-aa', () => {
+    expect(inventory).toHaveLength(151)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(84)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(62)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(64)
     expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(3)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
     expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(77)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(38)
-    expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(4)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(39)
+    expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(5)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(30)
   })
 

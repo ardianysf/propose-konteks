@@ -7,6 +7,11 @@
  */
 import { useMockup } from '../../state/MockupContext'
 import type { DeliveryInfo, DetailTimelineItem, SessionQuote } from '../../data/mockData'
+import './SessionTimeline.css'
+// Renders quote/delivery status pills with the shared session badge
+// primitive (.kx-badge + modifiers) — declared here because the rules live
+// in sessionBadges.css, not in SessionTimeline.css.
+import './sessionBadges.css'
 
 function GearIcon() {
   return (

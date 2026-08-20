@@ -1,0 +1,71 @@
+/* Session Detail sticky header — title, context line, share control.
+ * Migrated from src/styles/components.css (T5b session batch). */
+
+.kx-session-detail__head {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 32px;
+  background: var(--kx-canvas);
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-session-detail__head-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.kx-session-detail__share {
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+}
+
+.kx-session-detail__context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin: 2px 0 0;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-normal);
+  color: var(--kx-muted-text-aa);
+  line-height: 1.4;
+}
+
+.kx-session-detail__context-items {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.kx-session-detail__title {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  line-height: 1.2;
+  color: var(--kx-primary);
+}
+
+@media (max-width: 760px) {
+  /* Header keeps its own compact padding — it is independent from both the
+     full-width page (no horizontal page padding) and the sticky composer. */
+.kx-session-detail__head {
+    padding: 10px 16px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+}

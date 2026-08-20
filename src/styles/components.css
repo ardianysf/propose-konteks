@@ -293,11 +293,6 @@
  * right edge of the input box so it stays visually grouped with the
  * composer's right edge even when the toolbar wraps. */
 
-.kx-session-composer .kx-panel__toolbar-right {
-  margin-left: auto;
-  justify-content: flex-end;
-}
-
 /* ── Floating anchored menu ────────────────────────────────────────── */
 
 .kx-menu {
@@ -1821,184 +1816,46 @@
 
 /* ── Session Detail page ───────────────────────────────────────────
  * Full-width sticky header above a bounded conversation reading column. */
-.kx-session-detail {
-  width: 100%;
-  min-height: 100%;
-}
-
-.kx-session-detail__content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: min(740px, calc(100% - 64px));
-  margin: 0 auto;
-  padding: 24px 0 32px;
-}
 
 /* Sticky full-width header: title, status, share only. Vertical rhythm
  * tightened (10px 32px) so the two-line header stays compact. */
-.kx-session-detail__head {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 10px 32px;
-  background: var(--kx-canvas);
-  border-bottom: 1px solid var(--kx-border);
-}
-
-.kx-session-detail__head-main {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-width: 0;
-}
 
 /* Share button — scoped compact override: the global .kx-icon-btn is a
  * 36×36px control which inflates the title row to ~36px; 28px keeps a
  * comfortable touch target and tightens the title → context visual gap. */
-.kx-session-detail__share {
-  flex-shrink: 0;
-  margin-left: auto;
-  width: 28px;
-  height: 28px;
-}
 
 /* Session context line — mode · system · component read from sessionDetail
  * (option B) on the left, status badge aligned on the same horizontal line
  * at the right edge. Muted AA text, sits directly under the title row with
  * a tight 2px gap so the header reads as one compact unit. */
-.kx-session-detail__context {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px 12px;
-  margin: 2px 0 0;
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-normal);
-  color: var(--kx-muted-text-aa);
-  line-height: 1.4;
-}
 
 /* Context items cluster (mode · system · component) — wraps as one unit
  * when the viewport is too narrow for the badge to share the line. */
-.kx-session-detail__context-items {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
 
 /* Title — sticky header title, clamped so the status/share controls
  * remain visible in a narrow timeline. Single merged rule; never
  * re-declared. */
-.kx-session-detail__title {
-  min-width: 0;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--kx-text-l);
-  font-weight: var(--kx-font-bold);
-  line-height: 1.2;
-  color: var(--kx-primary);
-}
-.kx-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-medium);
-  /* Base badge — pale bg + primary text (merged; never re-declared). */
-  background: var(--kx-pale);
-  color: var(--kx-primary);
-}
 
 /* Waiting approval badge — accent-solid-aa bg + white text */
-.kx-badge--waiting_approval {
-  background: var(--kx-accent-solid-aa);
-  color: var(--kx-raised);
-}
 
 /* Completed badge — primary bg + raised text */
-.kx-badge--completed,
-.kx-badge--approved {
-  background: var(--kx-primary);
-  color: var(--kx-raised);
-}
 
 /* Blocked/Failed badge — pale bg + accent-text-aa text */
-.kx-badge--blocked,
-.kx-badge--failed {
-  background: var(--kx-pale);
-  color: var(--kx-accent-text-aa);
-}
 
 /* In-progress badge */
-.kx-badge--in_progress {
-  background: var(--kx-pale);
-  color: var(--kx-primary);
-}
 
 /* Partially completed badge */
-.kx-badge--partially_completed {
-  background: var(--kx-pale);
-  color: var(--kx-primary);
-}
 
 /* Cancelled badge */
-.kx-badge--cancelled {
-  background: var(--kx-pale);
-  color: var(--kx-muted-text-aa);
-}
 
 /* Action-needed indicator — prominent when WAITING_APPROVAL */
-.kx-session-detail__action-needed {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  background: var(--kx-pale);
-  border-radius: 999px;
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-}
 
 /* Meta line + metadata footer — muted text (AA token), chip row below the
  * timeline. Single merged rule; never re-declared. */
-.kx-session-detail__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-  line-height: 1.4;
-}
 
 /* Cycle pill */
-.kx-session-detail__cycle-pill {
-  padding: 4px 10px;
-  background: var(--kx-pale);
-  border: 1px solid var(--kx-border);
-  border-radius: 999px;
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-secondary);
-}
 
 /* Timeline placeholder for part 2 */
-.kx-session-detail__timeline-placeholder {
-  min-height: 80px;
-  /* Content arrives in part 2 */
-}
 
 /* ── Session Tracker — minimal current-stage summary ──────────────
  * Kicker text + a slightly larger active-stage pill on the left, and the
@@ -2006,76 +1863,20 @@
  * box). 12px top padding (vs 4px elsewhere) gives the current-stage line
  * extra breathing room from whatever sits above it in the sticky region;
  * 12px bottom padding keeps it clear of the composer box below. */
-.kx-session-detail__tracker {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 12px;
-  padding: 12px 0;
-}
 
 /* The session status badge (see SessionStatusBadge) sits at the right edge
  * of the tracker row, right-aligned with the composer box. */
-.kx-session-detail__tracker [data-testid="session-status"] {
-  margin-left: auto;
-}
-
-.kx-session-detail__tracker-current {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 12px;
-}
-
-.kx-session-detail__tracker-kicker {
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-muted-text-aa);
-}
 
 /* Current-stage pill — the single active-state emphasis on this page:
  * solid AA accent fill at compact chip scale (12px bold, tight padding,
  * slight letter-spacing) with a lifted two-layer shadow and an inset light
  * ring, so the current stage reads as the one prominent element among the
  * quiet pale chips around it. */
-.kx-session-detail__stage-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  background: var(--kx-accent-solid-aa);
-  border-radius: 999px;
-  box-shadow:
-    0 2px 6px rgb(var(--kx-ink-rgb) / 0.22),
-    0 8px 20px rgba(79, 112, 68, 0.28),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.22);
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-bold);
-  letter-spacing: 0.01em;
-  line-height: 1.2;
-  color: var(--kx-raised);
-}
 
 /* Count badge nested in the current-stage pill — a small raised disc with
  * accent text so the actionable-item count reads as part of the same
  * emphasized pill treatment without competing with it. Sized down with the
  * pill (18px disc, 2xs count). */
-.kx-session-detail__stage-pill-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 6px;
-  background: var(--kx-raised);
-  border-radius: 999px;
-  box-shadow: 0 1px 3px rgb(var(--kx-ink-rgb) / 0.25);
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  letter-spacing: normal;
-  line-height: 1;
-  color: var(--kx-accent-text-aa);
-}
 
 /* ── Metadata footer chips (Task 13 Part 1) ───────────────────────
  * Chips: repository (with icon), branch, issue ref, agent. */
@@ -2084,30 +1885,12 @@
 
 /* ── Responsive: narrow viewport ≤760px ───────────────────────────
  * Header wraps; the tracker keeps its minimal single-current-stage summary. */
-@media (max-width: 760px) {
-  /* Header keeps its own compact padding — it is independent from both the
-     full-width page (no horizontal page padding) and the sticky composer. */
-  .kx-session-detail__head {
-    padding: 10px 16px;
-    flex-wrap: wrap;
-    row-gap: 8px;
-  }
-}
 
 /* ── Content blocks container ─────────────────────────────────────
  * Groups the large discrete content units (quote, timeline, metadata) as
  * flat siblings so each can later become a clickable component. The blocks
  * column is 680px max, horizontally centered within the content column
  * (the composer area spans the full content width below it). */
-.kx-session-detail__blocks {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  max-width: 680px;
-  min-width: 0;
-  margin: 0 auto;
-}
 
 /* ── Responsive rail + viewport hardening (Task 13, AC12/AC43/AC44) ──
  * At ≤1280px the sidebar renders as the existing 64px icon rail regardless
@@ -2201,223 +1984,26 @@
 /* ── Session Timeline (Task 13 Part 2) ────────────────────────────
  * Chronological list of messages, events, quote/delivery cards. */
 /* Timeline — same full reading column as the composer. */
-.kx-session-detail__timeline {
-  list-style: none;
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 16px;
-}
 
 /* Timeline items base */
-.kx-session-timeline__item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
 
 /* User message — right-aligned bubble */
-.kx-session-timeline__item--user {
-  align-items: flex-end;
-}
-
-.kx-session-timeline__bubble--user {
-  align-self: flex-end;
-  max-width: 78%;
-  padding: 12px 16px;
-  background: rgba(79, 112, 68, 0.12);
-  border-radius: 14px 14px 4px 14px;
-  font-size: var(--kx-text-md);
-  color: var(--kx-primary);
-  line-height: 1.5;
-}
 
 /* Assistant message — left aligned; identity chrome intentionally omitted. */
-.kx-session-timeline__item--assistant {
-  align-items: flex-start;
-}
-
-.kx-session-timeline__bubble--assistant {
-  align-self: flex-start;
-  max-width: 78%;
-  padding: 12px 16px;
-  background: var(--kx-pale);
-  border-radius: 14px 4px 14px 14px;
-  font-size: var(--kx-text-md);
-  color: var(--kx-primary);
-  line-height: 1.5;
-}
 
 /* System event — centered row */
-.kx-session-timeline__item--system {
-  align-items: center;
-  flex-direction: row;
-  gap: 8px;
-  padding: 6px 0;
-  border-top: 1px solid var(--kx-border);
-  border-bottom: 1px solid var(--kx-border);
-}
-
-.kx-session-timeline__event-text {
-  font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
-  font-weight: var(--kx-font-medium);
-}
 
 /* Quote and Delivery cards — raised surface */
-.kx-session-timeline__card {
-  display: grid;
-  gap: 10px;
-  padding: 14px 16px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 12px;
-}
-
-.kx-session-timeline__card--quote,
-.kx-session-timeline__card--delivery {
-  box-shadow: 0 2px 8px rgb(var(--kx-ink-rgb) / 0.06);
-}
-
-.kx-session-timeline__card-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.kx-session-timeline__card-title {
-  margin: 0;
-  font-size: var(--kx-text-l);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-session-timeline__card-body {
-  margin: 0;
-  font-size: var(--kx-text-md);
-  color: var(--kx-primary);
-  line-height: 1.4;
-}
-
-.kx-session-timeline__card-meta {
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-session-timeline__card-summary {
-  margin: 4px 0 0;
-  font-size: var(--kx-text-md);
-  color: var(--kx-primary);
-  line-height: 1.4;
-}
-
-.kx-session-timeline__card-limitations {
-  margin: 4px 0 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-  font-style: italic;
-}
 
 /* Delivery artifacts as chips/links */
-.kx-session-timeline__artifacts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.kx-session-timeline__artifact-link {
-  display: inline-block;
-  padding: 4px 10px;
-  background: var(--kx-pale);
-  border: 1px solid var(--kx-border);
-  border-radius: 6px;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-accent-text-aa);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.kx-session-timeline__artifact-link:hover {
-  background: var(--kx-accent-segment-aa);
-  border-color: var(--kx-accent);
-  color: var(--kx-primary);
-}
 
 /* Error card */
-.kx-session-timeline__card--error {
-  background: rgba(255, 200, 100, 0.12);
-  border-color: rgba(255, 180, 80, 0.4);
-}
-
-.kx-session-timeline__error-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.kx-session-timeline__error-title {
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-}
 
 /* Approval item */
-.kx-session-timeline__item--approval {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0;
-}
-
-.kx-session-timeline__approval-text {
-  font-size: var(--kx-text-sm);
-  color: var(--kx-secondary);
-}
 
 /* Artifact row */
-.kx-session-timeline__item--artifact {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.kx-session-timeline__artifact-label {
-  font-size: var(--kx-text-sm);
-  color: var(--kx-secondary);
-}
 
 /* Loading skeleton */
-.kx-session-timeline__skeleton {
-  display: grid;
-  gap: 12px;
-}
-
-.kx-session-timeline__skeleton-row {
-  height: 48px;
-  border-radius: 12px;
-  background: var(--kx-pale);
-  animation: kx-timeline-skeleton-pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes kx-timeline-skeleton-pulse {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 1;
-  }
-}
 
 /* ── Quote Approval Card (Task 13 Part 2) ────────────────────────
  * Decision card above timeline when quote is pending approval.
@@ -2425,125 +2011,8 @@
  * quote details and the smaller decision actions. */
 /* Quote approval card — quiet raised surface with a soft lift so the
  * pending decision reads clearly without competing with the stage pill. */
-.kx-quote-approval-card {
-  display: grid;
-  gap: 12px;
-  padding: 12px 14px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 14px;
-  box-shadow: 0 2px 8px rgb(var(--kx-ink-rgb) / 0.06);
-}
-
-.kx-quote-approval-card__header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 0;
-  background: transparent;
-  border: none;
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
-  border-radius: 8px;
-}
-
-.kx-quote-approval-card__header:focus-visible {
-  outline: 2px solid var(--kx-accent-strong);
-  outline-offset: 3px;
-}
-
-.kx-quote-approval-card__title {
-  margin: 0;
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-}
-
-.kx-quote-approval-card__quote-ref {
-  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
-  font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-quote-approval-card__chevron {
-  margin-left: auto;
-  flex-shrink: 0;
-  color: var(--kx-muted-text-aa);
-  transition: transform 0.15s ease;
-}
-
-.kx-quote-approval-card__chevron.is-expanded {
-  transform: rotate(180deg);
-}
-
-.kx-quote-approval-card__body {
-  display: grid;
-  gap: 10px;
-}
-
-.kx-quote-approval-card__quote-info {
-  display: grid;
-  gap: 4px;
-}
-
-.kx-quote-approval-card__quote-id {
-  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-accent-text-aa);
-}
-
-.kx-quote-approval-card__scope {
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-primary);
-  line-height: 1.4;
-}
-
-.kx-quote-approval-card__estimates {
-  display: grid;
-  gap: 2px;
-  padding: 8px 10px;
-  background: var(--kx-pale);
-  border-radius: 10px;
-}
-
-.kx-quote-approval-card__points,
-.kx-quote-approval-card__expiry {
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-secondary);
-}
-
-.kx-quote-approval-card__history {
-  margin: 0;
-  font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
-  font-style: italic;
-}
-
-.kx-quote-approval-card__actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-}
 
 /* Smaller, less dominant decision actions. */
-.kx-quote-approval-card__action {
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 10px;
-  font-size: var(--kx-text-sm);
-}
-
-.kx-quote-approval-card__note {
-  margin: 0;
-  font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
-}
 
 /* ── Session Detail Composer (Task 13 Part 2) ─────────────────────
  * Sticky bottom message composer with textarea and toolbar. */
@@ -2559,49 +2028,16 @@
  * the bottom lives *inside* the solid region (the ::before strip + the
  * composer's own bottom offset), so the composer never sits flush against
  * the viewport edge while nothing leaks through behind it. */
-.kx-session-detail__composer-area {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
-  margin: 24px -16px 0;
-  padding: 8px 16px 16px;
-  background: var(--kx-canvas);
-}
 
 /* Solid blocking strip painted behind the sticky composer area, extending
  * below its bottom edge (and across the full content width) so nothing shows
  * through the bottom offset gap while scrolling. The strip reuses the canvas
  * token and stretches past the element by the same bottom breathing room the
  * layout already reserves. */
-.kx-session-detail__composer-area::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  /* Extend below the element's own box to cover the gap between the sticky
-   * region and the viewport bottom edge. */
-  bottom: -16px;
-  z-index: -1;
-  background: var(--kx-canvas);
-}
 
 /* Detail composer — reuses the exact main-page input box with no outer card.
  * Stickiness lives on the enclosing .kx-session-detail__composer-area so the
  * tracker and composer travel as one unit. */
-.kx-session-composer {
-  position: relative;
-}
-
-.kx-session-composer--locked {
-  border: 1px solid var(--kx-border);
-  border-radius: 14px;
-  text-align: center;
-}
-
-.kx-session-composer__locked-notice {
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-  font-style: italic;
-}
 
 /* Auto-grow session-detail composer input: one line tall (40px incl. padding),
  * grows with content via inline height, capped at ~5 lines (144px). Overrides
@@ -2609,13 +2045,6 @@
  * Scoped to .kx-session-composer (0-2-0) so it wins over Composer.css's
  * .kx-composer__input regardless of stylesheet order (spec §8: cross-file
  * overrides must not rely on source order). */
-.kx-session-composer .kx-session-composer__input {
-  min-height: 40px;
-  max-height: 144px;
-  resize: none;
-  overflow-y: auto;
-  line-height: 1.5;
-}
 
 /* Keep the composer's tool cluster (attachments, voice, send) pinned to the
  * right edge of the input box so it stays visually grouped with the
@@ -2623,44 +2052,4 @@
 
 /* ── Responsive: narrow viewport ≤760px ───────────────────────────
  * Timeline bubbles full-ish width, cards reduced padding, composer static. */
-@media (max-width: 760px) {
-  .kx-session-detail__timeline {
-    max-width: none;
-  }
 
-  .kx-session-timeline__bubble--user,
-  .kx-session-timeline__bubble--assistant {
-    max-width: 90%;
-  }
-
-  .kx-session-timeline__card {
-    padding: 12px 14px;
-  }
-
-  .kx-session-timeline__card-title {
-    font-size: var(--kx-text-md);
-  }
-
-  .kx-quote-approval-card {
-    padding: 10px 12px;
-  }
-
-  .kx-session-detail__composer-area {
-    bottom: 0;
-    margin: 16px -12px 0;
-    padding: 8px 12px 12px;
-  }
-
-  .kx-session-detail__composer-area::before {
-    bottom: -12px;
-  }
-
-  
-
-  /* Session composer keeps its one-line auto-grow floor on mobile — the
-     shared 60px mobile rule above is later in source order, so restate the
-     session-specific min-height here. */
-  .kx-session-composer__input {
-    min-height: 40px;
-  }
-}

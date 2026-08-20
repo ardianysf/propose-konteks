@@ -14,6 +14,7 @@ import SessionQuoteCard from '../components/session/SessionQuoteCard'
 import SessionTimeline from '../components/session/SessionTimeline'
 import SessionTracker from '../components/session/SessionTracker'
 import SessionDetailComposer from '../components/session/SessionDetailComposer'
+import './SessionDetailPage.css'
 
 function RepoIcon() {
   return (

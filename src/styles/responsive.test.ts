@@ -329,3 +329,24 @@ describe('New Session semantic layout (composer correction)', () => {
     expect(css).toContain('.kx-panel__pill-label { min-width: 0; font-size: var(--kx-text-sm);')
   })
 })
+
+describe('session composer mobile override (T5b rework)', () => {
+  /** All max-width 760px blocks across the aggregate, combined. */
+  function mobileBlock(): string {
+    const block = extractMediaBlocks(components, '(max-width: 760px)')
+    expect(block.length).toBeGreaterThan(0)
+    return block
+  }
+
+  it('keeps the shared composer input at 60px on mobile', () => {
+    expect(flat(mobileBlock())).toContain('.kx-composer__input { min-height: 60px;')
+  })
+
+  it('scopes the session composer 40px floor to .kx-session-composer so it beats the shared 60px rule', () => {
+    // Same-width media blocks tie on order, so the override must out-specify
+    // Composer.css's .kx-composer__input (0-1-0): the descendant selector is
+    // 0-2-0 and wins regardless of stylesheet order (spec §8).
+    const block = flat(mobileBlock())
+    expect(block).toContain('.kx-session-composer .kx-session-composer__input { min-height: 40px;')
+  })
+})

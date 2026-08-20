@@ -1,0 +1,128 @@
+/* Quote Approval Card — pending-quote decision card above the timeline.
+ * Migrated from src/styles/components.css (T5b session batch). */
+
+.kx-quote-approval-card {
+  display: grid;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgb(var(--kx-ink-rgb) / 0.06);
+}
+
+.kx-quote-approval-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.kx-quote-approval-card__header:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 3px;
+}
+
+.kx-quote-approval-card__title {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-quote-approval-card__quote-ref {
+  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-quote-approval-card__chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--kx-muted-text-aa);
+  transition: transform 0.15s ease;
+}
+
+.kx-quote-approval-card__chevron.is-expanded {
+  transform: rotate(180deg);
+}
+
+.kx-quote-approval-card__body {
+  display: grid;
+  gap: 10px;
+}
+
+.kx-quote-approval-card__quote-info {
+  display: grid;
+  gap: 4px;
+}
+
+.kx-quote-approval-card__quote-id {
+  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-quote-approval-card__scope {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+  line-height: 1.4;
+}
+
+.kx-quote-approval-card__estimates {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  background: var(--kx-pale);
+  border-radius: 10px;
+}
+
+.kx-quote-approval-card__points,
+.kx-quote-approval-card__expiry {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-secondary);
+}
+
+.kx-quote-approval-card__history {
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+  font-style: italic;
+}
+
+.kx-quote-approval-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.kx-quote-approval-card__action {
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+.kx-quote-approval-card__note {
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+@media (max-width: 760px) {
+
+.kx-quote-approval-card {
+    padding: 10px 12px;
+  }
+}

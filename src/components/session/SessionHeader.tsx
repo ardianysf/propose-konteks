@@ -9,6 +9,7 @@
  */
 import { useMockup } from '../../state/MockupContext'
 import type { SessionMode } from '../../data/mockData'
+import './SessionHeader.css'
 
 function getModeLabel(mode: SessionMode): string {
   switch (mode) {

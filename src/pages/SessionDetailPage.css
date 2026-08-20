@@ -1,0 +1,85 @@
+/* Session Detail page layout — full-width page shell, bounded reading
+ * column, content blocks, metadata chips, sticky composer area.
+ * Migrated from src/styles/components.css (T5b session batch). */
+
+.kx-session-detail {
+  width: 100%;
+  min-height: 100%;
+}
+
+.kx-session-detail__content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: min(740px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 24px 0 32px;
+}
+
+.kx-session-detail__blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 680px;
+  min-width: 0;
+  margin: 0 auto;
+}
+
+.kx-session-detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+  line-height: 1.4;
+}
+
+.kx-session-detail__cycle-pill {
+  padding: 4px 10px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+}
+
+.kx-session-detail__timeline-placeholder {
+  min-height: 80px;
+  /* Content arrives in part 2 */
+}
+
+.kx-session-detail__composer-area {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  margin: 24px -16px 0;
+  padding: 8px 16px 16px;
+  background: var(--kx-canvas);
+}
+
+.kx-session-detail__composer-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Extend below the element's own box to cover the gap between the sticky
+   * region and the viewport bottom edge. */
+  bottom: -16px;
+  z-index: -1;
+  background: var(--kx-canvas);
+}
+
+@media (max-width: 760px) {
+
+.kx-session-detail__composer-area {
+    bottom: 0;
+    margin: 16px -12px 0;
+    padding: 8px 12px 12px;
+  }
+
+.kx-session-detail__composer-area::before {
+    bottom: -12px;
+  }
+}
