@@ -414,11 +414,26 @@
         "dispatches": []
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/customize/shared.css",
+        "src/components/customize/AgentsTab.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-sm"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider",
       "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -438,11 +453,26 @@
         "dispatches": []
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/customize/shared.css",
+        "src/components/customize/ContextTab.css"
       ],
-      "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "tokenDeps": [
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "tanpa repo terpilih",
+        "sessionContext committed"
+      ],
+      "fixtureRef": "MockupFixtureProvider (second variant: overrides={{ selectedRepoIds: [...] }})",
       "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -463,11 +493,31 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/customize/CustomizeModal.css"
       ],
-      "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-border",
+        "--kx-customize-h",
+        "--kx-customize-w",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xl"
+      ],
+      "variants": [
+        "tab=agents",
+        "tab=context",
+        "tab=mcp",
+        "tab=skills"
+      ],
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'customize', tab } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -483,11 +533,29 @@
       },
       "contextContract": null,
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/customize/shared.css",
+        "src/components/customize/IntegrationsTab.css"
       ],
-      "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "tokenDeps": [
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-text-2xs",
+        "--kx-text-md",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "variant=\"mcp\"",
+        "variant=\"connectors\"",
+        "variant=\"vcs\""
+      ],
+      "fixtureRef": "MockupFixtureProvider (variant grid: mcp, connectors, vcs side by side)",
       "adoptionNotes": "Presentation-only, tidak butuh MockupContext."
     },
     {
@@ -501,11 +569,24 @@
       "propDocs": null,
       "contextContract": null,
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/customize/shared.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-text-2xs",
+        "--kx-text-sm"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider",
       "adoptionNotes": "Presentation-only, tidak butuh MockupContext."
     },
     {
@@ -519,11 +600,24 @@
       "propDocs": null,
       "contextContract": null,
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/customize/shared.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-text-2xs",
+        "--kx-text-sm"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider",
       "adoptionNotes": "Presentation-only, tidak butuh MockupContext."
     },
     {
@@ -545,7 +639,7 @@
       "tokenDeps": [],
       "variants": [],
       "fixtureRef": null,
-      "adoptionNotes": "Pure adapter module; no context or CSS dependency."
+      "adoptionNotes": "Pure adapter module; no context, CSS, or token dependency. No visual preview."
     },
     {
       "id": "learned-drawer",
@@ -566,11 +660,28 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/reviews/LearnedDrawer.css"
       ],
-      "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-text-2xs",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xl"
+      ],
+      "variants": [
+        "tab=pending",
+        "tab=audit"
+      ],
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'learned', tab } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
