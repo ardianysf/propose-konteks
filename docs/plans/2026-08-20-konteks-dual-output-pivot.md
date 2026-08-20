@@ -115,3 +115,13 @@ T1 = spec ini (selesai). Setiap task melalui worker → validator sebelum diangg
 - Perbandingan visual manual (bukan pixel-diff otomatis) — mitigasi: protokol capture ketat + sign-off tertulis.
 - Nama token di typed list bisa drift dari `tokens.css` — mitigasi: `verify:manifest` mengecek keberadaan nama; penambahan token baru tanpa update list akan terdeteksi hanya jika list lama divalidasi ulang (addition tidak auto-terdeteksi — dicatat).
 - Axe pada live preview komponen yang di-render di luar konteks aplikasi aslinya bisa memunculkan violation yang tidak muncul di mockup — didokumentasikan sebagai eksklusi bila terjadi.
+
+## 8. Addendum keputusan (2026-08-20, eskalasi T5a)
+
+Ditemukan saat migrasi CSS: 8 file test (contrast, responsive, 6 komponen) melakukan source-string assertion langsung ke `src/styles/components.css`. Konflik dengan AC9 (dedup) bila tidak ada keputusan.
+
+KEPUTUSAN (Opsi A dari eskalasi):
+1. Buat helper agregat CSS untuk test (test util): gabungkan deterministik `src/styles/*.css` + `src/components/**/*.css`. Presence-assertion bersifat order-insensitive; ekstraksi @media mengumpulkan semua blok yang cocok lalu digabung.
+2. Alihkan 8 file test tsb ke helper agregat SEKALI (intent test tidak berubah — kontrak styling tetap diverifikasi; hanya lokasi baca yang berubah; diizinkan AC10 "penyesuaian mekanis"). Setelah itu migrasi domain tidak menyentuh test lagi.
+3. Primitives lintas domain (`.kx-panel`, `.kx-modal-backdrop`, `kx-modal`, `kx-menu`, `kx-btn`, `kx-input`, `kx-badge` dsb.) TETAP di `components.css` sebagai layer global design-system (diimpor global oleh kedua entry). Dilarang menduplikasinya ke file domain. `components.css` pada akhir T5 = primitives + sisa yang belum diputuskan (page namespaces → dipindah T5b ke src/pages/*.css).
+4. File domain yang ternyata hanya berisi duplikat primitives (context/shared.css) dihapus.
