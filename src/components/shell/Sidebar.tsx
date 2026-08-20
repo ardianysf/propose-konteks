@@ -20,6 +20,7 @@ import { RECENT_SESSIONS, WORKSPACE } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 import CollapseIcon from './CollapseIcon'
 import { useOverlayLifecycle } from './OverlayLifecycle'
+import './Sidebar.css'
 
 /** Pin — outline (unpinned) / filled (pinned) glyph, 14×14 currentColor. */
 function PinIcon({ pinned }: { pinned: boolean }) {

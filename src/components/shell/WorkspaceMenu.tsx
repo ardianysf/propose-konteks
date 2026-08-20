@@ -10,6 +10,8 @@
  */
 import { WORKSPACE } from '../../data/mockData'
 import { useOverlayLifecycle } from './OverlayLifecycle'
+import './shared.css'
+import './WorkspaceMenu.css'
 
 export default function WorkspaceMenu() {
   const { dismissOverlay } = useOverlayLifecycle()

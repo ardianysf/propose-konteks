@@ -141,6 +141,15 @@ async function main() {
           // Fresh context + page per target: no state/theme leakage.
           const context = await browser.newContext({
             viewport: { width: initial.width, height: initial.height },
+            // Deterministic captures: pin the app into its reduced-motion
+            // code path (global.css §15 zeroes every transition/animation
+            // duration with !important). Gesture navigation leaves the
+            // pointer hovering whatever control sits at the last click
+            // point after the compact-viewport resize (e.g. a history row,
+            // revealing the three-dot action); without this the fade-out
+            // transition is still mid-flight at screenshot time and the
+            // capture flakes by a few antialiased pixels.
+            reducedMotion: 'reduce',
           })
           try {
             const page = await context.newPage()
@@ -149,6 +158,34 @@ async function main() {
             if (navigateFirst) {
               await page.setViewportSize({ width: viewport.width, height: viewport.height })
             }
+            // Park the pointer over an inert part of the page before
+            // capturing. Gesture navigation leaves the mouse at the last
+            // click point; after the compact-viewport resize that point can
+            // land on a hover-styled element (sidebar buttons, history
+            // rows). (0,0) is NOT safe: at 1440×900 the sidebar spans
+            // x 0..312, so the corner still hovers sidebar controls. The
+            // bottom-left corner sits on the 64px rail at compact
+            // viewports (no hover-reveal controls there) and on empty
+            // canvas at desktop.
+            await page.mouse.move(2, viewport.height - 1)
+            // Wait out the viewport-resize layout race. The resize's style
+            // recalc is not guaranteed to have flushed when fonts.ready
+            // resolves: documentElement.scrollHeight can still report the
+            // PRE-resize height (900) at screenshot time, and Playwright's
+            // fullPage capture sizes the output canvas from that stale
+            // value — producing a 1200×900 PNG (top 720px identical,
+            // canvas-colored padding below) instead of 1200×720. Wait for
+            // two consecutive animation frames at the settled height so
+            // the capture always reads the post-resize layout.
+            await page.waitForFunction((expectedHeight) => {
+              return new Promise((resolve) => {
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => {
+                    resolve(document.documentElement.scrollHeight === expectedHeight)
+                  })
+                })
+              })
+            }, viewport.height)
             await waitForStable(page)
             await page.screenshot({ path: path.join(outDir, file), fullPage: true })
             captured.push(file)

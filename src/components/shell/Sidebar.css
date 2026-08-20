@@ -1,0 +1,619 @@
+/* ── Sidebar (Task 4, spec §6.1) ──────────────────────────────────────
+ * 312px expanded white rail → 64px icon rail when collapsed (AC12).
+ * The workspace box (.kx-sidebar-box) is the ONLY persistent boxed
+ * container in the sidebar (AC6); everything else stays unboxed until
+ * hover. Colors/dimensions come exclusively from tokens.css. */
+
+.kx-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--kx-sidebar-w);
+  min-width: var(--kx-sidebar-w);
+  padding: 14px 12px 10px;
+  gap: 10px;
+  background: var(--kx-sidebar-bg);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.kx-sidebar--rail {
+  width: var(--kx-sidebar-rail);
+  min-width: var(--kx-sidebar-rail);
+  padding: 14px 8px 10px;
+}
+
+/* Brand lockup — logo left, the sidebar minimize/maximize control at the
+ * top-right (AC12). In the rail the top-right toggle stands down and the
+ * logo area itself becomes the maximize control. */
+
+.kx-sidebar__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 2px 2px;
+}
+
+.kx-sidebar__logo {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.kx-sidebar__logo-img {
+  height: 26px;
+  width: auto;
+}
+
+/* Sidebar minimize control — top-right of the brand row, visible only
+ * while the sidebar is expanded (the rail swaps to the logo maximize
+ * affordance below). The shared .kx-icon-btn geometry applies. */
+.kx-sidebar__toggle {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Rail maximize affordance — the logo area is a real button (accessible
+ * name "Expand sidebar"). At rest it shows the Konteks rail icon; on
+ * hover/focus an absolutely-positioned expand-chevron layer fades in over
+ * the icon (the img stays in flow, so there is no layout shift), and on
+ * mouse-leave it fades back to the logo. */
+.kx-sidebar__logo--expand {
+  position: relative;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--kx-secondary);
+  cursor: pointer;
+}
+
+.kx-sidebar__logo-expand-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--kx-raised); /* covers the rail icon beneath */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.kx-sidebar__logo--expand:hover .kx-sidebar__logo-expand-icon,
+.kx-sidebar__logo--expand:focus-visible .kx-sidebar__logo-expand-icon,
+.kx-sidebar__logo--expand:focus-within .kx-sidebar__logo-expand-icon {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* The single persistent boxed container — workspace only (AC6) */
+
+.kx-sidebar-box {
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+}
+
+/* Controls — unboxed until hover; chevron-right marks menus that open
+ * to the right (AC7). */
+
+.kx-sidebar__control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-sidebar__control:hover {
+  background: var(--kx-pale);
+}
+
+.kx-sidebar__workspace .kx-sidebar__control {
+  border-radius: 11px; /* stay inside the box's 12px corners */
+}
+
+.kx-sidebar__control-copy {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-sidebar__control-caption {
+  font-size: var(--kx-text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-sidebar__control-name {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-sidebar__chevron {
+  flex-shrink: 0;
+  color: var(--kx-muted);
+}
+
+.kx-sidebar__workspace-avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--kx-accent), var(--kx-accent-strong));
+  color: var(--kx-raised);
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+}
+
+.kx-sidebar__system-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+}
+
+/* New session — the persistent route control between the system control
+ * and Recent sessions. Unboxed like the other controls (AC6 single-box
+ * rule); aria-current="page" carries the semantic text/icon state. The
+ * resting control paints NOTHING — base and active-route backgrounds
+ * stay transparent; only hover/focus-hover may fill pale. */
+
+.kx-sidebar__new-session {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+/* Only the interactive affordance paints — hover and keyboard focus
+ * hover get the pale fill; the active-route resting state stays
+ * transparent (no resting background). */
+.kx-sidebar__new-session:hover,
+.kx-sidebar__new-session:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-sidebar__new-session-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-sidebar__new-session-label {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Recent sessions (AC10) + View all (AC11) */
+
+.kx-sidebar__recent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  margin-top: 2px;
+  padding-top: 10px;
+  border-top: 1px solid var(--kx-border);
+}
+
+.kx-sidebar__recent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px 4px;
+}
+
+.kx-sidebar__label {
+  font-size: var(--kx-text-2xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-sidebar__view-all {
+  padding: 2px 4px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+}
+
+.kx-sidebar__view-all:hover {
+  color: var(--kx-primary);
+  text-decoration: underline;
+}
+
+.kx-sidebar__session-list {
+  list-style: none;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  gap: 1px;
+  align-content: start;
+}
+
+.kx-sidebar__session {
+  position: relative; /* tooltip anchor */
+  padding: 5px 8px;
+  border-radius: 10px;
+  transition: background-color 0.15s ease;
+}
+
+.kx-sidebar__session:hover {
+  background: var(--kx-pale);
+}
+
+.kx-sidebar__session-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kx-sidebar__session-title {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Pin-to-top control — hidden at rest, revealed on row hover/focus-within
+ * and kept visible while pinned (aria-pressed=true), so a pinned row reads
+ * pinned without requiring hover. Filled glyph when pinned via the React
+ * icon swap; color follows the AA accent on hover/pressed. */
+.kx-sidebar__session-pin {
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--kx-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.kx-sidebar__session:hover .kx-sidebar__session-pin,
+.kx-sidebar__session:focus-within .kx-sidebar__session-pin,
+.kx-sidebar__session-pin[aria-pressed='true'] {
+  opacity: 1;
+}
+
+.kx-sidebar__session-pin:hover,
+.kx-sidebar__session-pin[aria-pressed='true'] {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-sidebar__session-pin:hover {
+  background: var(--kx-pale);
+}
+
+/* Hover-reveal expand — the meta line starts collapsed (0fr) and grows
+ * open on hover/focus-within via the grid-template-rows transition, the
+ * CSS-only smooth expand/collapse pattern. The inner wrapper carries
+ * min-height:0 + overflow:hidden so the 0fr row actually clips. Focus-
+ * within is the keyboard story ONLY: the pin button's onClick blurs mouse
+ * activations (event.detail > 0) so a mouse click never strands focus on
+ * the pin and freezes the row expanded after the mouse leaves; keyboard
+ * activation (detail === 0) keeps focus and the expansion. */
+.kx-sidebar__session-expand {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.18s ease;
+}
+
+.kx-sidebar__session-expand-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.kx-sidebar__session:hover .kx-sidebar__session-expand,
+.kx-sidebar__session:focus-within .kx-sidebar__session-expand {
+  grid-template-rows: 1fr;
+}
+
+.kx-sidebar__session-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.kx-sidebar__session:hover .kx-sidebar__session-meta,
+.kx-sidebar__session:focus-within .kx-sidebar__session-meta {
+  opacity: 1;
+}
+
+/* Full-title tooltip — reveals with the row on hover/focus-within via the
+ * shared .kx-tooltip-host mechanism. Pins to the row's left edge and wraps
+ * inside the 312px sidebar (row width ≈ 262px), staying readable when the
+ * title is long enough to truncate. Colors inherit the base .kx-tooltip
+ * ink/raised pairing, which stays dark-theme safe in both modes. */
+.kx-sidebar__session-tooltip {
+  left: 0;
+  transform: none;
+  max-width: 260px;
+  white-space: normal;
+  text-align: left;
+}
+
+/* Recent-session rows — the timestamp rides the meta line's right edge
+ * (margin-left:auto) so times align down the column while the system
+ * chip keeps its natural width on the left. */
+.kx-sidebar__session-system {
+  max-width: 120px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--kx-pale);
+  color: var(--kx-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-sidebar__session-time {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* User row + sliders → Customize (AC9) */
+
+.kx-sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px 4px 2px;
+  border-top: 1px solid var(--kx-border);
+}
+
+.kx-sidebar__user-avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+}
+
+.kx-sidebar__user-name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-sidebar__customize {
+  position: relative; /* tooltip anchor */
+  flex-shrink: 0;
+}
+
+/* Tooltip grows leftward so it never clips the sidebar's right edge */
+.kx-sidebar__tooltip {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+/* Rail (collapsed) mode — icons only; the workspace box persists */
+
+.kx-sidebar--rail .kx-sidebar__top {
+  gap: 6px;
+}
+
+.kx-sidebar--rail .kx-sidebar__logo {
+  width: 100%;
+  justify-content: center;
+}
+
+.kx-sidebar--rail .kx-sidebar__logo-img {
+  height: 32px;
+  width: 32px;
+}
+
+.kx-sidebar--rail .kx-sidebar__control {
+  justify-content: center;
+  gap: 0;
+  padding: 8px 0;
+}
+
+/* The rail keeps the New session button/icon visible and centered — only
+ * the label hides. */
+.kx-sidebar--rail .kx-sidebar__new-session {
+  justify-content: center;
+  gap: 0;
+  padding: 8px 0;
+}
+
+.kx-sidebar--rail .kx-sidebar__control-copy,
+.kx-sidebar--rail .kx-sidebar__chevron,
+.kx-sidebar--rail .kx-sidebar__recent,
+.kx-sidebar--rail .kx-sidebar__user-name,
+.kx-sidebar--rail .kx-sidebar__new-session-label {
+  display: none;
+}
+
+/* Rail (collapsed) user area — pinned to the sidebar's bottom edge via
+ * margin-top:auto (Recent sessions are hidden in the rail, so nothing
+ * else fills the column), Customize stacks ABOVE the avatar in a
+ * vertical column (user-directed). */
+.kx-sidebar--rail .kx-sidebar__user {
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 10px 0 6px;
+}
+
+.kx-sidebar--rail .kx-sidebar__customize {
+  order: -1;
+}
+
+/* ── Sidebar user-row trigger (Task 12, spec §14 — AC42) ────────────
+ * The user row (avatar + name) is the account-menu trigger; the sliders
+ * icon beside it stays the separate Customize trigger (AC9). */
+.kx-sidebar__user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-sidebar__user-trigger:hover,
+.kx-sidebar__user-trigger:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-sidebar--rail .kx-sidebar__user-trigger {
+  flex: 0 0 auto;
+}
+
+/* ── Forced rail at ≤1280px (Task 13, AC12/AC43/AC44) ────────────────
+ * At ≤1280px the sidebar renders as the existing 64px icon rail regardless
+ * of the stored collapse preference, reclaiming the extra 176px for the
+ * main canvas. No reducer state is touched: crossing back above 1280px
+ * restores the stored expanded/collapsed preference untouched. The
+ * collapse toggle is display:none here because expansion is unavailable,
+ * preventing an aria-state that contradicts the effective layout.
+ * (The .kx-app grid track lives in AppShell.css; the anchored-menu rail
+ *  anchoring lives in shared.css.) */
+
+@media (max-width: 1280px) {
+
+  .kx-sidebar {
+    width: var(--kx-sidebar-rail);
+    min-width: var(--kx-sidebar-rail);
+    padding: 14px 8px 10px;
+  }
+
+  .kx-sidebar__top {
+    gap: 6px;
+  }
+
+  .kx-sidebar__logo {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .kx-sidebar__logo-img {
+    height: 32px;
+    width: 32px;
+  }
+
+  .kx-sidebar__control {
+    justify-content: center;
+    gap: 0;
+    padding: 8px 0;
+  }
+
+  /* The New session control stays visible in the forced rail — icon
+   * centered, label hidden, accessible name kept via aria-label. */
+  .kx-sidebar__new-session {
+    justify-content: center;
+    gap: 0;
+    padding: 8px 0;
+  }
+
+  .kx-sidebar__control-copy,
+  .kx-sidebar__chevron,
+  .kx-sidebar__recent,
+  .kx-sidebar__user-name,
+  .kx-sidebar__new-session-label {
+    display: none;
+  }
+
+  .kx-sidebar__user {
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 0 6px;
+  }
+
+  .kx-sidebar__customize {
+    order: -1;
+  }
+
+  .kx-sidebar__user-trigger {
+    flex: 0 0 auto;
+  }
+
+  .kx-sidebar__collapse {
+    display: none;
+  }
+
+  /* The in-sidebar top-right toggle stands down in the forced rail —
+   * expansion is unavailable at ≤1280px (same treatment the old
+   * page-header toggle had). */
+  .kx-sidebar__toggle {
+    display: none;
+  }
+
+}
