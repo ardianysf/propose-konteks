@@ -17,11 +17,26 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/account/AccountMenu.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-ink-rgb",
+        "--kx-muted",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-sidebar-rail",
+        "--kx-sidebar-w",
+        "--kx-text-2xs",
+        "--kx-text-md"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'account-menu' } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -42,11 +57,30 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/account/SettingsModal.css"
       ],
-      "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "tokenDeps": [
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-l",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xl",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "general",
+        "billing",
+        "team"
+      ],
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'settings', section } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -71,11 +105,24 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/composer/ComponentMenu.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'component-menu' } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -102,11 +149,33 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/composer/Composer.css"
       ],
-      "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "tokenDeps": [
+        "--kx-accent",
+        "--kx-accent-solid-aa",
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-radius-main",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-md",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "default",
+        "component menu terbuka"
+      ],
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'component-menu' } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -128,11 +197,28 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/composer/ExecutionProfileMenu.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent",
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-ink-rgb",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-text-2xs",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'execution-profile-menu' } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -153,11 +239,20 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/composer/SessionMode.css"
       ],
-      "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "tokenDeps": [
+        "--kx-font-bold",
+        "--kx-secondary",
+        "--kx-text-2xs"
+      ],
+      "variants": [
+        "engineering",
+        "qa",
+        "planning"
+      ],
+      "fixtureRef": "MockupFixtureProvider overrides={{ sessionMode }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -181,11 +276,28 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/context/CreateSystemModal.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-normal",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-radius-main",
+        "--kx-secondary",
+        "--kx-text-l",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xl",
+        "--kx-text-xs"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'create-system-modal', source: 'system-menu' } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -209,11 +321,28 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/context/ManualRepositoryModal.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-normal",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-l",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'manual-repo-modal' } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -242,11 +371,31 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/context/RepositorySelectorModal.css"
       ],
-      "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "tokenDeps": [
+        "--kx-accent",
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xl",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "suspended=false",
+        "suspended=true"
+      ],
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'repository-modal' } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
