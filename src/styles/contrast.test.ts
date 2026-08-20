@@ -27,6 +27,10 @@ const tokens = readFileSync(join(process.cwd(), 'src/styles/tokens.css'), 'utf8'
 
 const COMPONENTS = 'src/styles/components.css'
 const GLOBAL = 'src/styles/global.css'
+// customize/shared.css — the single surviving home of the .kx-preserved__*
+// rules since the T5b dedup (they never lived in components.css, so the
+// inventory points at their real file instead of a COMPONENTS stand-in).
+const CUSTOMIZE_SHARED = 'src/components/customize/shared.css'
 
 const MUTED = '--kx-muted'
 const MUTED_AA = '--kx-muted-text-aa'
@@ -134,11 +138,6 @@ const mutedM = [
   '.kx-context__item-note',
   '.kx-integrations__empty-text',
   '.kx-integrations__status--setup',
-  '.kx-preserved__count',
-  '.kx-preserved__item-desc',
-  '.kx-preserved__item-scope',
-  '.kx-preserved__note',
-  '.kx-preserved__status--disabled',
   '.kx-learned-item__meta',
   '.kx-learned-timeline__meta',
   '.kx-learned__empty-hint',
@@ -186,7 +185,6 @@ const accentA = [
   '.kx-component-menu__clear',
   '.kx-agents__disclosure > summary:hover',
   '.kx-integrations__status--connected',
-  '.kx-preserved__status--enabled',
   '.kx-history__clear',
   '.kx-badge--failed',
   '.kx-session-detail__action-needed',
@@ -220,8 +218,6 @@ const accentU: Array<[string, string]> = [
   ['.kx-customize__tab:focus-visible', 'outline'],
   ['.kx-agents__review', 'border-left'],
   ['.kx-agents__disclosure > summary:focus-visible', 'outline'],
-  ['.kx-preserved__toggle--on', 'background'],
-  ['.kx-preserved__toggle:focus-visible', 'outline'],
   ['.kx-learned__tab:focus-visible', 'outline'],
   ['.kx-learned-timeline__item::before', 'border'],
   ['.kx-history__clear:focus-visible', 'border-color'],
@@ -234,6 +230,20 @@ function entries(): Entry[] {
     ...accentA.map((selector) => ({ file: COMPONENTS, selector, property: 'color', token: ACCENT_STRONG, cls: 'A' as Class })),
     ...accentS.map((selector) => ({ file: COMPONENTS, selector, property: 'background', token: ACCENT_STRONG, cls: 'S' as Class })),
     ...accentU.map(([selector, property]) => ({ file: COMPONENTS, selector, property, token: ACCENT_STRONG, cls: 'U' as Class })),
+    // Preserved Skills/Tools rows (customize/shared.css — T5b dedup: the
+    // rules were duplicated verbatim in SkillsTab.css + ToolsTab.css and
+    // collapsed to a single shared.css copy; components.css never carried
+    // them). The entries point at their REAL file so KNOWN_INERT_DUPLICATE_
+    // SELECTORS no longer masks them — a re-introduced second copy in any
+    // tab stylesheet now surfaces as an unclassified selector.
+    { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__count', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__item-desc', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__item-scope', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__note', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__status--disabled', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__status--enabled', property: 'color', token: ACCENT_STRONG, cls: 'A' as Class },
+    { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__toggle--on', property: 'background', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__toggle:focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
     // Dark-theme ink pin: the active segment's text uses --kx-accent-text-aa
     // in light mode (its dark #4f7044 resolves AA on the #95a547 fill) and
     // a [data-theme='dark'] override switches it to dark --kx-raised ink on
@@ -393,6 +403,30 @@ const KNOWN_INERT_DUPLICATE_SELECTORS = new Set([
   '.kx-repo-modal__system--active .kx-repo-modal__system-radio',
   '.kx-repo-modal__system-count',
   '.kx-repo-modal__system-desc',
+  // customize/CustomizeModal.css
+  '.kx-customize__tab:focus-visible',
+  // customize/shared.css
+  ".kx-customize-tab__table th[scope='col']",
+  // customize/AgentsTab.css
+  '.kx-agents__create-label',
+  '.kx-agents__create-hint',
+  '.kx-agents__review',
+  '.kx-agents__disclosure > summary:hover',
+  '.kx-agents__disclosure > summary:focus-visible',
+  '.kx-agents__fact-term',
+  '.kx-agents__archived-on',
+  // customize/ContextTab.css
+  '.kx-context__count',
+  '.kx-context__item-note',
+  // customize/IntegrationsTab.css
+  '.kx-integrations__status--connected',
+  '.kx-integrations__status--setup',
+  '.kx-integrations__empty-text',
+  // NOTE: the .kx-preserved__* selectors are deliberately ABSENT. They
+  // were never a components.css↔domain-file transitional duplicate (their
+  // only home is customize/shared.css since the T5b dedup), so masking
+  // them here would hide a genuine cross-file re-duplication. Their
+  // inventory entries point at customize/shared.css directly.
 ])
 
 function collectUsages(): Usage[] {

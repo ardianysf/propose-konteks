@@ -2,6 +2,7 @@ import { useEffect, useReducer } from 'react'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { getAggregatedCss } from '../../test/cssAggregate'
 import LearnedDrawer from './LearnedDrawer'
 import { OverlayLifecycleProvider } from '../shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
@@ -62,7 +63,7 @@ const follows = (earlier: Element, later: Element) =>
 
 // jsdom does not load stylesheets, so the fixed 450px right geometry is
 // verified against the shipped CSS directly (tokens.test.ts convention).
-const css = readFileSync(join(process.cwd(), 'src/styles/components.css'), 'utf8')
+const css = getAggregatedCss()
 const tokens = readFileSync(join(process.cwd(), 'src/styles/tokens.css'), 'utf8')
 
 /** The shipped .kx-drawer primitive block — geometry assertions stay

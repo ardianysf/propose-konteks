@@ -1,7 +1,6 @@
 import { useEffect, useReducer } from 'react'
 import { fireEvent, render, screen, within } from '@testing-library/react'
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { getAggregatedCss } from '../../test/cssAggregate'
 import SystemMenu from './SystemMenu'
 import { OverlayLifecycleProvider } from './OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
@@ -52,7 +51,7 @@ const getMenu = () => screen.getByRole('menu', { name: 'Systems' })
 
 // jsdom does not load stylesheets, so anchoring/scroll/sticky rules are
 // verified against the shipped CSS directly (tokens.test.ts convention).
-const css = readFileSync(join(process.cwd(), 'src/styles/components.css'), 'utf8')
+const css = getAggregatedCss()
 
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u
 

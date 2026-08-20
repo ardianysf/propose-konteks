@@ -1,0 +1,57 @@
+/* Context tab (AC37) — three compact labelled rows with counts. */
+
+.kx-context__row {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+}
+
+.kx-context__row-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kx-context__row-title {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-context__count {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-medium);
+  letter-spacing: 0.02em;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-context__list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kx-context__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--kx-text-sm);
+}
+
+.kx-context__item-name {
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+.kx-context__item-note {
+  color: var(--kx-muted-text-aa);
+}

@@ -1,0 +1,122 @@
+/* ── Customize modal shell (Task 9 Part A, spec §11) ─────────────────
+ * Fixed 790×580 frame on every tab (AC34): width/height come from the
+ * --kx-customize-w/--kx-customize-h tokens and never resize when tabs
+ * switch. Settings-style layout (user-directed): the fixed header sits
+ * above a body row — vertical section nav on the left, the single
+ * scrolling content region beside it, so only tab content ever scrolls
+ * (AC35). Tab contents live in the sections below (AC36–AC38). */
+
+.kx-customize {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr); /* head / body */
+  width: var(--kx-customize-w);
+  max-width: calc(100vw - 48px);
+  height: var(--kx-customize-h);
+  /* 24px-per-side viewport budget (Task 13, AC44): the 100vh declaration
+   * stays first as the fallback, with 100dvh overriding where supported. */
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
+}
+
+/* Body — section nav left (180px, mirroring the Settings modal),
+ * scrollable content right. */
+
+.kx-customize__body {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  min-height: 0;
+}
+
+/* Header — title + dismiss control, never scrolls (AC35). */
+
+.kx-customize__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-customize__title {
+  margin: 0;
+  font-size: var(--kx-text-xl);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-customize__close {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Tab nav — pill buttons in the exact §11 order; switching happens in
+ * place (SET_CUSTOMIZE_TAB), so nothing here remounts on tab change. */
+
+/* Section nav — vertical column on the left edge, mirroring the
+ * Settings modal's section list (user-directed). */
+
+.kx-customize__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 10px;
+  border-right: 1px solid var(--kx-border);
+}
+
+.kx-customize__tab {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+
+.kx-customize__tab:hover {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-customize__tab:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-customize__tab[aria-selected='true'] {
+  background: var(--kx-primary);
+  color: var(--kx-raised);
+}
+
+/* Content — the sole scrolling region of the modal (AC35). */
+
+.kx-customize__content {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-customize__content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kx-customize__content::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 999px;
+}
+
+.kx-customize__panel {
+  min-width: 0;
+}

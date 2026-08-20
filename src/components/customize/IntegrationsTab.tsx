@@ -18,6 +18,8 @@ import {
   type ConnectorEntry,
   type McpServerEntry,
 } from '../../data/mockData'
+import './shared.css'
+import './IntegrationsTab.css'
 
 export type IntegrationsVariant = 'mcp' | 'connectors' | 'vcs'
 

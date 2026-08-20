@@ -25,6 +25,7 @@ import ContextTab from './ContextTab'
 import IntegrationsTab from './IntegrationsTab'
 import SkillsTab from './SkillsTab'
 import ToolsTab from './ToolsTab'
+import './CustomizeModal.css'
 
 /** Close — the header dismiss control. */
 function CloseIcon() {

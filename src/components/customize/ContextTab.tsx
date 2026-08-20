@@ -24,6 +24,8 @@ import {
   SYSTEMS,
 } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import './shared.css'
+import './ContextTab.css'
 
 export default function ContextTab() {
   const { state } = useMockup()
