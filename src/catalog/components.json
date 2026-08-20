@@ -964,9 +964,16 @@
         "dispatches": []
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/shell/AppShell.css",
+        "src/components/shell/shared.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-canvas",
+        "--kx-radius-main",
+        "--kx-sidebar-rail",
+        "--kx-sidebar-w"
+      ],
       "variants": [],
       "fixtureRef": null,
       "adoptionNotes": "Internal — orkestrator route/page mockup, tidak bermakna di luar aplikasi."
@@ -983,12 +990,13 @@
         "collapsed": "required, boolean — current sidebar collapsed state; the chevron points the direction the sidebar will move"
       },
       "contextContract": null,
-      "cssFiles": [
-        "src/styles/components.css"
-      ],
+      "cssFiles": [],
       "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "variants": [
+        "collapsed=false",
+        "collapsed=true"
+      ],
+      "fixtureRef": "variant grid: collapsed=false | collapsed=true",
       "adoptionNotes": "Presentation-only, tidak butuh MockupContext."
     },
     {
@@ -1043,11 +1051,35 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/shell/Sidebar.css",
+        "src/components/shell/shared.css"
       ],
-      "tokenDeps": [],
-      "variants": [],
-      "fixtureRef": null,
+      "tokenDeps": [
+        "--kx-accent",
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-muted",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-sidebar-bg",
+        "--kx-sidebar-rail",
+        "--kx-sidebar-w",
+        "--kx-text-2xs",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "expanded",
+        "collapsed rail"
+      ],
+      "fixtureRef": "MockupFixtureProvider (variant grid: expanded | collapsed rail with sidebarCollapsed=true)",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -1071,11 +1103,29 @@
         ]
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/shell/SystemMenu.css",
+        "src/components/shell/shared.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent",
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-sidebar-rail",
+        "--kx-sidebar-w",
+        "--kx-text-md",
+        "--kx-text-sm"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'system-menu' } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -1105,14 +1155,29 @@
       "propDocs": null,
       "contextContract": null,
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/shell/WorkspaceMenu.css",
+        "src/components/shell/shared.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent",
+        "--kx-accent-strong",
+        "--kx-font-bold",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-sidebar-rail",
+        "--kx-sidebar-w",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
       "variants": [
         "default",
         "dengan overlay terbuka"
       ],
-      "fixtureRef": "MockupFixtureProvider overlay=workspace-menu (atau OverlayLifecycleProvider minimal — lihat adoptionNotes)",
+      "fixtureRef": "MockupFixtureProvider overlay=workspace-menu (overrides={{ overlay: { kind: 'workspace-menu' } }})",
       "adoptionNotes": "Adoptable dengan provider contract: butuh OverlayLifecycleProvider (props overlay + dispatch; komponen memanggil useOverlayLifecycle untuk Escape/dismiss → CLOSE_OVERLAY); tanpa MockupContext — contextContract tetap null."
     },
     {
@@ -1133,11 +1198,21 @@
         "dispatches": []
       },
       "cssFiles": [
-        "src/styles/components.css"
+        "src/styles/components.css",
+        "src/components/system/SystemMapModal.css"
       ],
-      "tokenDeps": [],
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-l",
+        "--kx-text-md"
+      ],
       "variants": [],
-      "fixtureRef": null,
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'system-map', systemId: activeSystemId } }}",
       "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
     }
   ]
