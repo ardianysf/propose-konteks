@@ -1,0 +1,783 @@
+{
+  "schemaVersion": 1,
+  "components": [
+    {
+      "id": "account-menu",
+      "name": "AccountMenu",
+      "domain": "account",
+      "sourcePath": "src/components/account/AccountMenu.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Anchored account menu opened from the sidebar user row, listing mockData.ACCOUNT_ACTIONS with roving-focus menu semantics; Settings/Billing rows open the Settings modal.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [],
+        "dispatches": [
+          "OPEN_OVERLAY"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "settings-modal",
+      "name": "SettingsModal",
+      "domain": "account",
+      "sourcePath": "src/components/account/SettingsModal.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Centered Settings modal with General/Billing/Team tablist sections sourced from mockData.settings.sections; content is static illustrative, nothing persists.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "overlay"
+        ],
+        "dispatches": [
+          "OPEN_OVERLAY"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "component-menu",
+      "name": "ComponentMenu",
+      "domain": "composer",
+      "sourcePath": "src/components/composer/ComponentMenu.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Anchored Component floating menu from the composer setup row: flat checkbox multi-select of components with one search filtering names or repositories and a selection-count footer.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "demoVariant",
+          "search",
+          "selectedComponentIds"
+        ],
+        "dispatches": [
+          "CLEAR_COMPONENTS",
+          "SET_SEARCH",
+          "TOGGLE_COMPONENT"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "composer",
+      "name": "Composer",
+      "domain": "composer",
+      "sourcePath": "src/components/composer/Composer.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Unified session composer panel combining the setup/mode top row with the nested text-input box and its toolbar (attach, execution profile, voice, send).",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "activeProfileId",
+          "overlay",
+          "selectedComponentIds",
+          "sessionContext",
+          "sessionMode",
+          "systems"
+        ],
+        "dispatches": [
+          "BEGIN_SESSION_CONTEXT_DRAFT",
+          "OPEN_OVERLAY"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "execution-profile-menu",
+      "name": "ExecutionProfileMenu",
+      "domain": "composer",
+      "sourcePath": "src/components/composer/ExecutionProfileMenu.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Anchored Execution Profile menu listing profiles with a hover/focus sidecar (planner/executor model, authorization, readiness) plus a separated workspace-settings section.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "activeProfileId"
+        ],
+        "dispatches": [
+          "OPEN_OVERLAY",
+          "SET_ACTIVE_PROFILE"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "session-mode",
+      "name": "SessionMode",
+      "domain": "composer",
+      "sourcePath": "src/components/composer/SessionMode.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Engineering/QA/Planning segmented radiogroup with roving tabindex that commits the session mode to the shared store.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "sessionMode"
+        ],
+        "dispatches": [
+          "SET_MODE"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "create-system-modal",
+      "name": "CreateSystemModal",
+      "domain": "context",
+      "sourcePath": "src/components/context/CreateSystemModal.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Small centered modal form (required Name, optional Description) to create a new system; Create stays disabled while the name is blank.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "overlay",
+          "systems"
+        ],
+        "dispatches": [
+          "CREATE_SYSTEM",
+          "OPEN_OVERLAY",
+          "SET_SESSION_DRAFT_SYSTEM"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "manual-repository-modal",
+      "name": "ManualRepositoryModal",
+      "domain": "context",
+      "sourcePath": "src/components/context/ManualRepositoryModal.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "'Add repository manually' modal with VCS Connector and Execution selects, a searchable paginated active-system repository picker or URL escape hatch, and removable selection chips.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "activeSystemId",
+          "demoVariant",
+          "selectedRepoIds",
+          "systems"
+        ],
+        "dispatches": [
+          "TOGGLE_REPO"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "repository-selector-modal",
+      "name": "RepositorySelectorModal",
+      "domain": "context",
+      "sourcePath": "src/components/context/RepositorySelectorModal.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "System/repository selector modal grouping repositories under the active system with one shared search and a pinned 'Add new system' action.",
+      "propDocs": {
+        "suspended": "optional, boolean, default false — true while a nested overlay stacks above: keep rendering but stand down from the accessibility tree, pointers, and focus containment"
+      },
+      "contextContract": {
+        "reads": [
+          "demoVariant",
+          "search",
+          "sessionContextDraft",
+          "systems"
+        ],
+        "dispatches": [
+          "COMMIT_SESSION_CONTEXT_DRAFT",
+          "SET_SEARCH",
+          "SET_SESSION_DRAFT_SYSTEM",
+          "TOGGLE_SESSION_DRAFT_REPO"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "agents-tab",
+      "name": "AgentsTab",
+      "domain": "customize",
+      "sourcePath": "src/components/customize/AgentsTab.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Customize → Agents tab: Create profile action, Active Profiles table from EXECUTION_PROFILES, Review setup sticker, and five progressive-disclosure details regions.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "activeProfileId"
+        ],
+        "dispatches": []
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "context-tab",
+      "name": "ContextTab",
+      "domain": "customize",
+      "sourcePath": "src/components/customize/ContextTab.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Customize → Context tab with Files, Skills, and Repositories sections showing status/count lines; repository rows follow the session-selected scope.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "selectedRepoIds",
+          "sessionContext"
+        ],
+        "dispatches": []
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "customize-modal",
+      "name": "CustomizeModal",
+      "domain": "customize",
+      "sourcePath": "src/components/customize/CustomizeModal.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Fixed 790×580 Customize shell modal whose frame never resizes across its seven tabs (Agents, Context, MCP, Connectors, VCS, Skills, Tools); only tab content scrolls.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "overlay"
+        ],
+        "dispatches": [
+          "SET_CUSTOMIZE_TAB"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "integrations-tab",
+      "name": "IntegrationsTab",
+      "domain": "customize",
+      "sourcePath": "src/components/customize/IntegrationsTab.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Shared Customize tab content for the MCP / Connectors / VCS tabs: one parameterized component rendering a compact table or a designed empty state per variant.",
+      "propDocs": {
+        "variant": "required, 'mcp' | 'connectors' | 'vcs' — selects the tab title, action, and content table/empty state"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext."
+    },
+    {
+      "id": "skills-tab",
+      "name": "SkillsTab",
+      "domain": "customize",
+      "sourcePath": "src/components/customize/SkillsTab.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Customize → Skills tab rendering the preserved skills list via the preservedContent adapter with local-only enable/disable switches.",
+      "propDocs": null,
+      "contextContract": null,
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext."
+    },
+    {
+      "id": "tools-tab",
+      "name": "ToolsTab",
+      "domain": "customize",
+      "sourcePath": "src/components/customize/ToolsTab.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Customize → Tools tab rendering the preserved tools list via the preservedContent adapter with local-only enable/disable switches.",
+      "propDocs": null,
+      "contextContract": null,
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext."
+    },
+    {
+      "id": "preserved-content",
+      "name": "preservedContent",
+      "domain": "customize",
+      "sourcePath": "src/components/customize/preservedContent.ts",
+      "exportName": [
+        "SKILLS_SECTION",
+        "TOOLS_SECTION",
+        "preservedStatusLabel",
+        "preservedCountLine"
+      ],
+      "classification": "utility",
+      "description": "Typed adapter converting mockData PRESERVED_SKILLS/PRESERVED_TOOLS into the structured view model (names, descriptions, scopes, enabled states, per-tab action metadata) for the Skills/Tools tabs.",
+      "propDocs": null,
+      "contextContract": null,
+      "cssFiles": [],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Pure adapter module; no context or CSS dependency."
+    },
+    {
+      "id": "learned-drawer",
+      "name": "LearnedDrawer",
+      "domain": "reviews",
+      "sourcePath": "src/components/reviews/LearnedDrawer.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Fixed 450px right drawer with Pending and Audit History tabs; the frame never resizes across tabs and only tab content scrolls.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "demoVariant",
+          "overlay"
+        ],
+        "dispatches": [
+          "OPEN_OVERLAY"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "session-detail-composer",
+      "name": "SessionDetailComposer",
+      "domain": "session",
+      "sourcePath": "src/components/session/SessionDetailComposer.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Sticky session continuation input reusing the main-page input-box and toolbar primitives; Enter sends, Shift+Enter newlines, terminal sessions render a locked notice.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "activeProfileId",
+          "overlay",
+          "sessionDetail"
+        ],
+        "dispatches": [
+          "OPEN_OVERLAY",
+          "SESSION_SEND_DETAIL_MESSAGE"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "session-header",
+      "name": "SessionHeader",
+      "domain": "session",
+      "sourcePath": "src/components/session/SessionHeader.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Compact sticky header for the Session Detail page showing the session title, share affordance, and session context metadata (mode · system · component).",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "sessionDetail"
+        ],
+        "dispatches": []
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "session-quote-card",
+      "name": "SessionQuoteCard",
+      "domain": "session",
+      "sourcePath": "src/components/session/SessionQuoteCard.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Quote approval decision card rendered above the timeline while a quote is pending approval; collapsed by default, expanding reveals Approve / Reject / Request revision actions.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "sessionDetail"
+        ],
+        "dispatches": [
+          "SESSION_APPROVE_QUOTE",
+          "SESSION_REJECT_QUOTE",
+          "SESSION_REQUEST_QUOTE_REVISION"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "session-status-badge",
+      "name": "SessionStatusBadge",
+      "domain": "session",
+      "sourcePath": "src/components/session/SessionStatusBadge.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Session status pill (icon + label) living above the composer inside the sticky composer area so the status stays visible while scrolled.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "sessionDetail"
+        ],
+        "dispatches": []
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "session-timeline",
+      "name": "SessionTimeline",
+      "domain": "session",
+      "sourcePath": "src/components/session/SessionTimeline.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Chronological session conversation/workflow event list; user content is a right-aligned bubble, assistant content left-aligned, workflow events their own card/row forms.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "demoVariant",
+          "sessionDetail"
+        ],
+        "dispatches": []
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "session-tracker",
+      "name": "SessionTracker",
+      "domain": "session",
+      "sourcePath": "src/components/session/SessionTracker.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Minimal current-stage summary emphasizing only the cycle context line and the active stage pill; completed/future stages stay out of the reading flow.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "sessionDetail"
+        ],
+        "dispatches": []
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "format-time",
+      "name": "formatTime",
+      "domain": "session",
+      "sourcePath": "src/components/session/formatTime.ts",
+      "exportName": "formatTime",
+      "classification": "utility",
+      "description": "Shared UTC timestamp formatter (no Intl dependencies) for SessionDetailPage components.",
+      "propDocs": null,
+      "contextContract": null,
+      "cssFiles": [],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Pure function; no context or CSS dependency."
+    },
+    {
+      "id": "app-shell",
+      "name": "AppShell",
+      "domain": "shell",
+      "sourcePath": "src/components/shell/AppShell.tsx",
+      "exportName": "default",
+      "classification": "internal",
+      "description": "Persistent application frame: the .kx-app grid hosting the sidebar and route canvas; mockup route/page orchestrator, not meaningful outside the app.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "overlay",
+          "route",
+          "sidebarCollapsed"
+        ],
+        "dispatches": []
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Internal — orkestrator route/page mockup, tidak bermakna di luar aplikasi."
+    },
+    {
+      "id": "collapse-icon",
+      "name": "CollapseIcon",
+      "domain": "shell",
+      "sourcePath": "src/components/shell/CollapseIcon.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Shared double-chevron glyph for the sidebar minimize/maximize control; the direction points where the sidebar will move on the next toggle.",
+      "propDocs": {
+        "collapsed": "required, boolean — current sidebar collapsed state; the chevron points the direction the sidebar will move"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext."
+    },
+    {
+      "id": "overlay-lifecycle",
+      "name": "OverlayLifecycle",
+      "domain": "shell",
+      "sourcePath": "src/components/shell/OverlayLifecycle.tsx",
+      "exportName": [
+        "OverlayLifecycleProvider",
+        "useOverlayLifecycle"
+      ],
+      "classification": "mockup-coupled",
+      "description": "Single owner of overlay focus-return and Escape dismissal; provider keeps reducer state serializable by only reading the current overlay and dispatching CLOSE_OVERLAY (coupling is type-only, passed via props).",
+      "propDocs": {
+        "overlay": "required, MockupOverlay — the current overlay from the mockup store",
+        "dispatch": "required, Dispatch<MockupAction> — store dispatch used for CLOSE_OVERLAY",
+        "children": "required, ReactNode"
+      },
+      "contextContract": {
+        "reads": [],
+        "dispatches": [
+          "CLOSE_OVERLAY"
+        ]
+      },
+      "cssFiles": [],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Coupling type-only: overlay + dispatch diterima via props; wrap tree dengan OverlayLifecycleProvider."
+    },
+    {
+      "id": "sidebar",
+      "name": "Sidebar",
+      "domain": "shell",
+      "sourcePath": "src/components/shell/Sidebar.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Persistent 312px shell sidebar with brand logo, workspace box, workspace/system controls, recent sessions, New session route control, collapse-to-rail toggle, and the user row.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "activeSystemId",
+          "overlay",
+          "route",
+          "sidebarCollapsed",
+          "systems"
+        ],
+        "dispatches": [
+          "NAVIGATE",
+          "OPEN_OVERLAY",
+          "TOGGLE_SIDEBAR"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "system-menu",
+      "name": "SystemMenu",
+      "domain": "shell",
+      "sourcePath": "src/components/shell/SystemMenu.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "System floating menu anchored right of the sidebar system control: pinned 'All systems' scope row, labeled search, scrolling system list, and sticky 'Create new system' footer.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "activeSystemId",
+          "search",
+          "systems"
+        ],
+        "dispatches": [
+          "SET_ACTIVE_SYSTEM",
+          "SET_SEARCH"
+        ]
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+    },
+    {
+      "id": "use-focus-containment",
+      "name": "useFocusContainment",
+      "domain": "shell",
+      "sourcePath": "src/components/shell/useFocusContainment.ts",
+      "exportName": "useFocusContainment",
+      "classification": "utility",
+      "description": "Shared modal focus-containment hook for the six modal surfaces: focuses the tabIndex=-1 root before paint and installs redirect-guarded document keydown/focusin listeners.",
+      "propDocs": null,
+      "contextContract": null,
+      "cssFiles": [],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Standalone hook; no context or CSS dependency."
+    },
+    {
+      "id": "workspace-menu",
+      "name": "WorkspaceMenu",
+      "domain": "shell",
+      "sourcePath": "src/components/shell/WorkspaceMenu.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Workspace floating menu anchored right of the sidebar workspace control showing only the current workspace as a selected row; deliberately no workspace management.",
+      "propDocs": null,
+      "contextContract": null,
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext."
+    },
+    {
+      "id": "system-map-modal",
+      "name": "SystemMapModal",
+      "domain": "system",
+      "sourcePath": "src/components/system/SystemMapModal.tsx",
+      "exportName": "default",
+      "classification": "mockup-coupled",
+      "description": "Per-system architecture map modal rendering a deterministic inline SVG diagram of rounded-rect subsystem nodes derived from the system's name, legible in light and dark themes.",
+      "propDocs": null,
+      "contextContract": {
+        "reads": [
+          "activeSystemId",
+          "overlay",
+          "systems"
+        ],
+        "dispatches": []
+      },
+      "cssFiles": [
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [],
+      "variants": [],
+      "fixtureRef": null,
+      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
+    }
+  ]
+}
