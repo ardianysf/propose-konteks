@@ -438,7 +438,12 @@ describe('Account — theme preference section', () => {
 
     const group = within(getMenu()).getByRole('group', { name: 'Theme' })
     const radios = within(group).getAllByRole('menuitemradio')
-    expect(radios.map((radio) => radio.textContent)).toEqual(['Light', 'Dark', 'System'])
+    // Icon-only segmented radios — the accessible name is the label.
+    expect(radios.map((radio) => radio.getAttribute('aria-label'))).toEqual([
+      'Light',
+      'Dark',
+      'System',
+    ])
 
     // No stored preference → 'system' is the active radio.
     expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull()
