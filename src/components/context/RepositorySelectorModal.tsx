@@ -3,10 +3,10 @@
  * (Task 7 Part A, spec §8.1, AC25–AC28 + AC43 variants).
  *
  * A centered .kx-modal over the shared backdrop primitive. Repositories
- * group under exactly one active system: the active group renders
- * enabled, checkable repositories plus the contextual "Add repository
- * manually" action, while every other system renders its repositories
- * disabled (AC25). System heads switch the active system through
+ * group under exactly one active system: only the active group renders
+ * its repositories — enabled, checkable rows plus the contextual "Add
+ * repository manually" action — while every other system stays collapsed
+ * to its selector row (AC25). System heads switch the active system through
  * SET_ACTIVE_SYSTEM — the reducer clears the previous selection (AC26).
  * One search input filters system names and repository names together,
  * retaining the owning system group (AC27), with "Add new system" pinned
@@ -178,8 +178,20 @@ export default function RepositorySelectorModal({
         </header>
 
         <div className="kx-repo-modal__body">
-          {/* Add new system — pinned at the top of the system list (AC27). */}
+          {/* One toolbar row — search (left, system + repository names,
+              AC27) and "Add new system" (right, pinned at the top of the
+              system list, AC27). */}
           <div className="kx-repo-modal__toolbar">
+            <input
+              type="search"
+              className="kx-input kx-repo-modal__search"
+              aria-label="Search systems or repositories"
+              placeholder="Search systems or repositories"
+              value={state.search.repositories}
+              onChange={(event) =>
+                dispatch({ type: 'SET_SEARCH', list: 'repositories', value: event.target.value })
+              }
+            />
             <button
               type="button"
               className="kx-btn kx-btn--primary kx-repo-modal__add-system"
@@ -194,18 +206,6 @@ export default function RepositorySelectorModal({
               <span className="kx-repo-modal__add-system-label">Add new system</span>
             </button>
           </div>
-
-          {/* The single search input — system + repository names (AC27). */}
-          <input
-            type="search"
-            className="kx-input kx-repo-modal__search"
-            aria-label="Search systems or repositories"
-            placeholder="Search systems or repositories"
-            value={state.search.repositories}
-            onChange={(event) =>
-              dispatch({ type: 'SET_SEARCH', list: 'repositories', value: event.target.value })
-            }
-          />
 
           {/* The only scrolling region — groups or designed states (AC43). */}
           <div className="kx-repo-modal__groups">
@@ -269,40 +269,36 @@ export default function RepositorySelectorModal({
                       </span>
                     </button>
 
-                    <div className="kx-repo-modal__repos">
-                      {repos.map((repo) => (
-                        <label
-                          key={repo.id}
-                          className={
-                            active
-                              ? 'kx-repo-modal__repo'
-                              : 'kx-repo-modal__repo kx-repo-modal__repo--disabled'
-                          }
-                        >
-                          <input
-                            type="checkbox"
-                            className="kx-repo-modal__repo-check"
-                            aria-label={repo.name}
-                            checked={draft.repoIds.includes(repo.id)}
-                            disabled={!active}
-                            onChange={() =>
-                              dispatch({ type: 'TOGGLE_SESSION_DRAFT_REPO', repoId: repo.id })
-                            }
-                          />
-                          <span className="kx-repo-modal__repo-copy">
-                            <span className="kx-repo-modal__repo-name">{repo.name}</span>
-                            <span className="kx-repo-modal__repo-meta">
-                              Updated {repo.updatedAt}
+                    {/* Repository rows render only for the active system;
+                        inactive systems stay collapsed to their selector
+                        row — selecting one reveals its (query-filtered)
+                        repos. */}
+                    {active && (
+                      <div className="kx-repo-modal__repos">
+                        {repos.map((repo) => (
+                          <label key={repo.id} className="kx-repo-modal__repo">
+                            <input
+                              type="checkbox"
+                              className="kx-repo-modal__repo-check"
+                              aria-label={repo.name}
+                              checked={draft.repoIds.includes(repo.id)}
+                              onChange={() =>
+                                dispatch({ type: 'TOGGLE_SESSION_DRAFT_REPO', repoId: repo.id })
+                              }
+                            />
+                            <span className="kx-repo-modal__repo-copy">
+                              <span className="kx-repo-modal__repo-name">{repo.name}</span>
+                              <span className="kx-repo-modal__repo-meta">
+                                Updated {repo.updatedAt}
+                              </span>
                             </span>
-                          </span>
-                          <span className="kx-repo-modal__repo-vcs">{repo.vcs}</span>
-                        </label>
-                      ))}
+                            <span className="kx-repo-modal__repo-vcs">{repo.vcs}</span>
+                          </label>
+                        ))}
 
-                      {/* Contextual manual add — only inside the expanded
-                          active system group (AC28); the form modal itself
-                          is a later Task 7 part. */}
-                      {active && (
+                        {/* Contextual manual add — inside the expanded
+                            active system group (AC28); the form modal
+                            itself is a later Task 7 part. */}
                         <button
                           type="button"
                           className="kx-repo-modal__add-repo"
@@ -318,8 +314,8 @@ export default function RepositorySelectorModal({
                             Add repository manually
                           </span>
                         </button>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </section>
                 )
               })

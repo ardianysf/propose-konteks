@@ -12,7 +12,7 @@ import {
   type MockupOverlay,
   type MockupState,
 } from '../../state/mockupReducer'
-import { REPOSITORIES, SYSTEMS } from '../../data/mockData'
+import { SYSTEMS } from '../../data/mockData'
 
 // ---------------------------------------------------------------------------
 // Harness — the modal behind the real reducer via the mockup context,
@@ -176,7 +176,9 @@ describe('RepositorySelectorModal — one active system (AC25)', () => {
       'kx-repo-modal__system--active',
     )
 
-    // Every system renders its own repository count and repo rows.
+    // Every system still renders its own head with its repository count,
+    // but only the active group expands its repo rows — every inactive
+    // system stays collapsed to its selector row (AC25 new contract).
     for (const system of SYSTEMS) {
       const group = within(dialog)
         .getByRole('button', { name: new RegExp(system.name, 'i') })
@@ -186,23 +188,39 @@ describe('RepositorySelectorModal — one active system (AC25)', () => {
       expect(group).toHaveTextContent(
         `${count} ${count === 1 ? 'repository' : 'repositories'}`,
       )
-      expect(within(group!).getAllByRole('checkbox')).toHaveLength(count)
+      if (system.id === ACTIVE_SYSTEM.id) {
+        expect(within(group!).getAllByRole('checkbox')).toHaveLength(count)
+      } else {
+        expect(within(group!).queryByRole('checkbox')).not.toBeInTheDocument()
+      }
     }
   })
 
-  it('enables checkboxes only within the active system — every other system renders its repositories disabled', () => {
+  it('exposes checkboxes only within the active system — every other system renders zero checkboxes', () => {
     renderRepositorySelectorModal({ kind: 'repository-modal' })
-    const boxes = within(getDialog()).getAllByRole('checkbox')
-    expect(boxes).toHaveLength(REPOSITORIES.length)
+    const dialog = getDialog()
+    const boxes = within(dialog).getAllByRole('checkbox')
+    expect(boxes).toHaveLength(ACTIVE_SYSTEM.repoIds.length)
 
+    // Every rendered checkbox belongs to the active system and is enabled.
     for (const box of boxes) {
       const repoId = box.getAttribute('aria-label') ?? ''
-      if (ACTIVE_SYSTEM.repoIds.includes(repoId)) expect(box).toBeEnabled()
-      else expect(box).toBeDisabled()
+      expect(ACTIVE_SYSTEM.repoIds).toContain(repoId)
+      expect(box).toBeEnabled()
     }
-    expect(boxes.filter((box) => !box.hasAttribute('disabled'))).toHaveLength(
-      ACTIVE_SYSTEM.repoIds.length,
-    )
+
+    // Inactive systems collapse to their selector rows: their repositories
+    // are absent from the accessibility tree entirely — no disabled rows.
+    for (const system of SYSTEMS) {
+      if (system.id === ACTIVE_SYSTEM.id) continue
+      const group = within(dialog)
+        .getByRole('button', { name: new RegExp(system.name, 'i') })
+        .closest('.kx-repo-modal__system') as HTMLElement
+      expect(group.querySelectorAll('.kx-repo-modal__repo')).toHaveLength(0)
+      for (const repoId of system.repoIds) {
+        expect(within(dialog).queryByRole('checkbox', { name: repoId })).not.toBeInTheDocument()
+      }
+    }
   })
 
   it('checks active-system repositories through the draft (TOGGLE_SESSION_DRAFT_REPO)', () => {
@@ -236,8 +254,12 @@ describe('RepositorySelectorModal — switching systems (AC26)', () => {
     fireEvent.click(screen.getByRole('button', { name: /BSI Canteen/i }))
     expect(bucket.current?.sessionContextDraft).toEqual({ systemId: 'bsi-canteen', repoIds: [] })
 
+    // The active group moves: BSI Canteen expands its enabled checkboxes
+    // while the previous system's rows leave the tree entirely (AC26).
     expect(screen.getByRole('checkbox', { name: 'bsi/canteen-backend' })).toBeEnabled()
-    expect(screen.getByRole('checkbox', { name: 'bsi/hris-frontend-shared' })).toBeDisabled()
+    expect(
+      screen.queryByRole('checkbox', { name: 'bsi/hris-frontend-shared' }),
+    ).not.toBeInTheDocument()
 
     const activeHeads = getDialog().querySelectorAll(
       '.kx-repo-modal__system-head[aria-current="true"]',
@@ -267,6 +289,14 @@ describe('RepositorySelectorModal — search (AC27)', () => {
     expect(getDialog().querySelectorAll('.kx-repo-modal__system')).toHaveLength(1)
     expect(screen.getByRole('button', { name: /BSI Canteen/i })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /BSI - HRIS/i })).not.toBeInTheDocument()
+
+    // The surviving system is not the active one, so its matching repos
+    // stay collapsed away until its head is selected…
+    expect(
+      screen.queryByRole('checkbox', { name: 'bsi/canteen-backend' }),
+    ).not.toBeInTheDocument()
+    // …and selecting it reveals the query-filtered repo rows.
+    fireEvent.click(screen.getByRole('button', { name: /BSI Canteen/i }))
     expect(screen.getByRole('checkbox', { name: 'bsi/canteen-backend' })).toBeInTheDocument()
   })
 
@@ -546,15 +576,12 @@ describe('RepositorySelectorModal — suspended under the nested Create System m
     const activeHead = repoDialog.querySelector('.kx-repo-modal__system-head[aria-current="true"]')
     expect(activeHead).not.toBeNull()
     expect(activeHead!).toHaveTextContent(/QA Platform/i)
-    // …with an empty repository scope: no repo rows inside the new
-    // system's group, and every other system's rows present but disabled.
+    // …with an empty repository scope: the new system's active group has
+    // no repo rows, and — collapsed-system contract — it is the only group
+    // that could render any, so the tree holds zero checkboxes.
     const activeGroup = repoDialog.querySelector('.kx-repo-modal__system--active') as HTMLElement
     expect(activeGroup.querySelectorAll('.kx-repo-modal__repo')).toHaveLength(0)
-    const checks = within(repoDialog).getAllByRole('checkbox')
-    expect(checks.length).toBeGreaterThan(0)
-    for (const check of checks) {
-      expect(check).toBeDisabled()
-    }
+    expect(within(repoDialog).queryByRole('checkbox')).not.toBeInTheDocument()
     // The status reports the empty scope and nothing has committed yet.
     expect(within(repoDialog).getByText(/0 repositories selected/i)).toBeInTheDocument()
     expect(bucket.current?.sessionContext).toBeNull()
