@@ -1,8 +1,7 @@
 import { useEffect, useReducer } from 'react'
 import { fireEvent, render, screen, within } from '@testing-library/react'
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { getAggregatedCss } from '../test/cssAggregate'
 import SessionHistoryPage from './SessionHistoryPage'
 import AppShell from '../components/shell/AppShell'
 import App from '../App'
@@ -231,7 +230,7 @@ describe('SessionHistoryPage — three-dot action and local menu', () => {
   })
 
   it('defines hover-only action visibility in components.css (opacity 0 / pointer-events none, revealed on row hover and focus-within)', () => {
-    const css = readFileSync(join(process.cwd(), 'src/styles/components.css'), 'utf8')
+    const css = getAggregatedCss()
     expect(css).toMatch(/\.kx-history__action\s*\{[^}]*opacity:\s*0;/)
     expect(css).toMatch(/\.kx-history__action\s*\{[^}]*pointer-events:\s*none;/)
     expect(css).toContain('.kx-history__row:hover .kx-history__action')

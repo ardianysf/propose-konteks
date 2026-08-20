@@ -1,0 +1,151 @@
+/* Agents tab (AC36) — compact creation form, Review setup sticker, and
+ * the progressive-disclosure details regions. */
+
+.kx-agents__create {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--kx-pale);
+  border: 1px dashed var(--kx-border);
+  border-radius: 12px;
+}
+
+.kx-agents__create-label {
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-agents__create-input {
+  padding: 7px 10px;
+  font-size: var(--kx-text-sm);
+  border-radius: 10px;
+}
+
+.kx-agents__create-hint {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
+/* Review setup — an inline sticker (compact card), never a full-width
+ * panel: inline-flex sizing caps it to its content. */
+
+.kx-agents__review {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  justify-self: start;
+  max-width: 380px;
+  padding: 8px 12px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-left: 3px solid var(--kx-accent-strong);
+  border-radius: 10px;
+}
+
+.kx-agents__review-title {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kx-secondary);
+}
+
+.kx-agents__review-text {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+}
+
+/* Progressive disclosure — one compact details region per content area
+ * (AI roles / Providers / Profile assignments / Archived / Permissions). */
+
+.kx-agents__disclosure {
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 10px;
+}
+
+.kx-agents__disclosure > summary {
+  padding: 8px 12px;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.kx-agents__disclosure > summary:hover {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-agents__disclosure > summary:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: -2px;
+  border-radius: 10px;
+}
+
+.kx-agents__disclosure[open] > summary {
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-agents__disclosure-body {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.kx-agents__facts {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.kx-agents__fact {
+  display: grid;
+  gap: 1px;
+}
+
+.kx-agents__fact-term {
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-agents__fact-value {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+}
+
+.kx-agents__archived-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kx-agents__archived-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--kx-text-sm);
+}
+
+.kx-agents__archived-name {
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+.kx-agents__archived-on {
+  color: var(--kx-muted-text-aa);
+}
+

@@ -1,7 +1,6 @@
 import { useEffect, useReducer } from 'react'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { getAggregatedCss } from '../../test/cssAggregate'
 import Sidebar from './Sidebar'
 import { OverlayLifecycleProvider } from './OverlayLifecycle'
 import { MockupContext, useMockup } from '../../state/MockupContext'
@@ -49,7 +48,7 @@ const getSidebarNav = () => screen.getByRole('navigation', { name: 'Sidebar' })
 
 // jsdom does not load stylesheets, so rail treatment is verified against
 // the shipped CSS directly (tokens.test.ts convention).
-const css = readFileSync(join(process.cwd(), 'src/styles/components.css'), 'utf8')
+const css = getAggregatedCss()
 
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u
 

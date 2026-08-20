@@ -1,0 +1,208 @@
+/* ── Customize tab contents (Task 9 Part B, spec §11 — AC36/AC37) ────
+ * Shared tab scaffolding plus the Agents / Context / integration tab
+ * hierarchies. Everything stays compact: the tabs live inside the
+ * fixed 790×580 frame and only this region scrolls (AC35). */
+
+.kx-customize-tab {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+/* Shared tab heading used by every tab content component. */
+
+.kx-customize-tab__title {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+/* Tab bar — heading left, concise primary action right (never a giant
+ * card; the action stays a single compact button). */
+
+.kx-customize-tab__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kx-customize-tab__bar .kx-btn {
+  padding: 6px 12px;
+  font-size: var(--kx-text-sm);
+  border-radius: 10px;
+}
+
+/* Compact semantic table shared by the Agents and integration tabs. */
+
+.kx-customize-tab__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--kx-text-sm);
+  text-align: left;
+}
+
+.kx-customize-tab__table th[scope='col'] {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--kx-border);
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-customize-tab__table th[scope='row'] {
+  padding: 7px 8px;
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+.kx-customize-tab__table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--kx-border);
+  color: var(--kx-secondary);
+}
+
+.kx-customize-tab__table tbody tr:last-child th,
+.kx-customize-tab__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.kx-customize-tab__table tbody tr:hover {
+  background: var(--kx-pale);
+}
+
+/* Preserved Skills/Tools tabs (Task 9 Part C, spec §11 — AC38) — the
+ * preserved items render as compact rows: name + description on the
+ * left, scope + status chip + switch on the right. The switch is a
+ * local-only mock interaction — a pill knob, no persistence. Shared by
+ * SkillsTab and ToolsTab (previously duplicated verbatim in both tab
+ * stylesheets — T5b dedup). */
+
+.kx-preserved__count {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-medium);
+  letter-spacing: 0.02em;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-preserved__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kx-preserved__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+}
+
+.kx-preserved__item-main {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-preserved__item-name {
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+.kx-preserved__item-desc {
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-preserved__item-side {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.kx-preserved__item-scope {
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted-text-aa);
+}
+
+/* Status chips — the same compact pill as the integration tables. */
+
+.kx-preserved__status {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.02em;
+}
+
+.kx-preserved__status--enabled {
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-preserved__status--disabled {
+  background: transparent;
+  border: 1px solid var(--kx-border);
+  color: var(--kx-muted-text-aa);
+}
+
+/* The local-only toggle — a compact pill switch with a sliding knob. */
+
+.kx-preserved__toggle {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  background: var(--kx-pale);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.kx-preserved__toggle--on {
+  border-color: transparent;
+  background: var(--kx-accent-strong);
+}
+
+.kx-preserved__toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--kx-raised);
+  transition: transform 0.12s ease;
+}
+
+.kx-preserved__toggle--on .kx-preserved__toggle-knob {
+  transform: translateX(14px);
+}
+
+.kx-preserved__toggle:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+/* Visible illustrative marker — closes each preserved tab (AC46). */
+
+.kx-preserved__note {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}

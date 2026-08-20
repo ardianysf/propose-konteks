@@ -17,6 +17,7 @@ import {
   TOOLS_SECTION,
   type PreservedContentItem,
 } from './preservedContent'
+import './shared.css'
 
 export default function ToolsTab() {
   // Local-only toggle overrides — item id → enabled. The mock switch

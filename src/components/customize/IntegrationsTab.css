@@ -1,0 +1,47 @@
+/* Integration tabs (AC37) — compact tables with status chips and the
+ * designed empty state. No giant cards: a table or a dashed panel. */
+
+.kx-integrations__status {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.02em;
+}
+
+.kx-integrations__status--connected {
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-integrations__status--setup {
+  background: transparent;
+  border: 1px solid var(--kx-border);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-integrations__empty {
+  display: grid;
+  gap: 4px;
+  justify-self: start;
+  max-width: 420px;
+  padding: 16px 18px;
+  background: var(--kx-raised);
+  border: 1px dashed var(--kx-border);
+  border-radius: 12px;
+}
+
+.kx-integrations__empty-title {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-integrations__empty-text {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}

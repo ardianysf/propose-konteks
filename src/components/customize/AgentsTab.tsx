@@ -20,6 +20,8 @@ import {
   EXECUTION_PROFILES,
 } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import './shared.css'
+import './AgentsTab.css'
 
 const READINESS_LABELS = { ready: 'Ready', 'needs-setup': 'Needs setup' } as const
 

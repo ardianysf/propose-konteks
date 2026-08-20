@@ -17,6 +17,7 @@ import {
   SKILLS_SECTION,
   type PreservedContentItem,
 } from './preservedContent'
+import './shared.css'
 
 export default function SkillsTab() {
   // Local-only toggle overrides — item id → enabled. The mock switch
