@@ -135,3 +135,472 @@
   line-height: 1.6;
   color: var(--kx-muted-text-aa);
 }
+
+/* ------------------------------------------------------------------------
+ * Content pages (T4) — sections, cards, tables, badges, chips, code.
+ * All colors come from --kx-* tokens so everything follows the theme.
+ * ----------------------------------------------------------------------*/
+
+.kx-cat-section {
+  margin-top: 32px;
+}
+
+.kx-cat-section > h2 {
+  margin: 0 0 12px;
+  font-size: var(--kx-text-2xl);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--kx-primary);
+}
+
+.kx-cat-section > p,
+.kx-cat-page > p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--kx-secondary);
+  max-width: 720px;
+}
+
+.kx-cat-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.kx-cat-card {
+  padding: 16px 18px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+}
+
+.kx-cat-card h3 {
+  margin: 0 0 8px;
+  font-size: var(--kx-text-md);
+}
+
+.kx-cat-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--kx-secondary);
+}
+
+.kx-cat-steps {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--kx-secondary);
+}
+
+.kx-cat-steps li + li {
+  margin-top: 8px;
+}
+
+/* Classification badges — AA-safe combinations from the token palette. */
+.kx-cat-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: var(--kx-text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.kx-cat-badge--adoptable {
+  background: var(--kx-accent-solid-aa);
+  color: #fff;
+}
+
+.kx-cat-badge--mockup-coupled {
+  background: var(--kx-accent-segment-aa);
+  color: var(--kx-primary);
+}
+
+.kx-cat-badge--internal {
+  background: var(--kx-primary);
+  color: var(--kx-canvas);
+}
+
+.kx-cat-badge--utility {
+  background: var(--kx-raised);
+  color: var(--kx-muted-text-aa);
+  border: 1px solid var(--kx-border);
+}
+
+/* Chips — small labeled values (domain, contract slices, meta values). */
+.kx-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 2px 6px 2px 0;
+  padding: 3px 9px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+}
+
+.kx-cat-chip code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.kx-cat-chip--muted {
+  background: transparent;
+  color: var(--kx-muted-text-aa);
+}
+
+/* Tables (domain summary + prop docs). */
+.kx-cat-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.kx-cat-table th,
+.kx-cat-table td {
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-cat-table tr:last-child th,
+.kx-cat-table tr:last-child td {
+  border-bottom: none;
+}
+
+.kx-cat-table thead th {
+  font-size: var(--kx-text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--kx-muted-text-aa);
+  background: var(--kx-pale);
+}
+
+.kx-cat-table tbody th {
+  font-weight: 500;
+  color: var(--kx-primary);
+  white-space: nowrap;
+}
+
+.kx-cat-table td {
+  color: var(--kx-secondary);
+  line-height: 1.6;
+}
+
+/* Code blocks (usage snippets). */
+.kx-cat-code {
+  margin: 0;
+  padding: 16px 18px;
+  background: var(--kx-primary);
+  border-radius: 12px;
+  overflow-x: auto;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--kx-canvas);
+}
+
+.kx-cat-code code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+.kx-cat-muted-note {
+  font-size: 13px;
+  color: var(--kx-muted-text-aa);
+}
+
+/* ------------------------------------------------------------------------
+ * Tokens page (T4, AC7)
+ * ----------------------------------------------------------------------*/
+
+.kx-cat-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 8px;
+  padding: 4px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 10px;
+}
+
+.kx-cat-theme-toggle-label {
+  padding: 0 8px;
+  font-size: var(--kx-text-sm);
+  font-weight: 500;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-cat-theme-toggle-btn {
+  height: 28px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-md);
+  font-weight: 500;
+  color: var(--kx-secondary);
+  cursor: pointer;
+}
+
+.kx-cat-theme-toggle-btn:hover {
+  color: var(--kx-primary);
+}
+
+.kx-cat-theme-toggle-btn[aria-pressed='true'] {
+  background: var(--kx-accent-segment-aa);
+  color: var(--kx-primary);
+  font-weight: 700;
+}
+
+.kx-cat-theme-toggle-btn:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-cat-token-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kx-cat-token-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 10px;
+  min-width: 0;
+}
+
+.kx-cat-swatch {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--kx-border);
+  background: var(--kx-pale);
+}
+
+.kx-cat-token-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kx-cat-token-name {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: var(--kx-text-sm);
+  font-weight: 500;
+  color: var(--kx-primary);
+  overflow-wrap: anywhere;
+}
+
+.kx-cat-token-note {
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-cat-value-chip {
+  flex: 0 0 auto;
+  max-width: 46%;
+  padding: 3px 8px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-radius: 6px;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kx-cat-value-chip--empty {
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-cat-token-list--text .kx-cat-token-row {
+  align-items: baseline;
+}
+
+.kx-cat-type-sample {
+  flex: 0 0 auto;
+  color: var(--kx-primary);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------------
+ * Components index page (T4, AC6)
+ * ----------------------------------------------------------------------*/
+
+.kx-cat-index-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kx-cat-index-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 10px;
+}
+
+.kx-cat-index-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--kx-accent-text-aa);
+  text-decoration: none;
+}
+
+.kx-cat-index-link:hover {
+  text-decoration: underline;
+}
+
+.kx-cat-index-link--disabled {
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-cat-index-note {
+  margin-left: auto;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+  white-space: nowrap;
+}
+
+.kx-cat-index-note--preview {
+  color: var(--kx-accent-text-aa);
+}
+
+/* ------------------------------------------------------------------------
+ * Component detail page (T4, AC6/AC11)
+ * ----------------------------------------------------------------------*/
+
+.kx-cat-detail-header .kx-cat-title {
+  margin-bottom: 8px;
+}
+
+.kx-cat-detail-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.kx-cat-detail-source {
+  font-size: 13px;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-cat-preview-frame {
+  padding: 24px;
+  background: var(--kx-canvas);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+  overflow: auto;
+}
+
+/* Neutralize the production .kx-menu absolute anchoring inside the
+ * workspace-menu preview frame only (see registry.tsx WorkspaceMenuPreview). */
+.kx-cat-preview-static-menu .kx-menu {
+  position: static;
+}
+
+.kx-cat-variant-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.kx-cat-variant {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.kx-cat-variant-label {
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-cat-contract {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.kx-cat-contract-title {
+  margin: 0 0 6px;
+  font-size: var(--kx-text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-cat-meta {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kx-cat-meta-item {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.kx-cat-meta-item dt {
+  font-size: var(--kx-text-sm);
+  font-weight: 700;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-cat-meta-item dd {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--kx-secondary);
+}
+
+.kx-cat-backlink {
+  margin-top: 32px;
+  font-size: 13.5px;
+}

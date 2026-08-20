@@ -20,6 +20,19 @@ export type SessionDetailStatus =
   | 'BLOCKED'
   | 'CANCELLED'
 
+/** All session detail statuses, in union order — the runtime twin of the
+ * SessionDetailStatus type (catalog fixtures iterate it for variants). */
+export const SESSION_DETAIL_STATUSES: readonly SessionDetailStatus[] = [
+  'IN_PROGRESS',
+  'WAITING_APPROVAL',
+  'APPROVED',
+  'DELIVERING',
+  'PARTIALLY_COMPLETED',
+  'COMPLETED',
+  'BLOCKED',
+  'CANCELLED',
+]
+
 export type DetailStageId = 'ideation' | 'quote' | 'plan' | 'delivery' | 'receipt' | 'lessons'
 
 export type StageStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'BLOCKED' | 'SKIPPED' | 'FAILED'

@@ -124,8 +124,9 @@ describe('CatalogApp', () => {
     window.location.hash = '#/components/session-status-badge'
     render(<CatalogApp />)
 
+    // The detail page renders the manifest entry (name in the header).
     expect(
-      await screen.findByRole('heading', { name: 'session-status-badge' }),
+      await screen.findByRole('heading', { name: 'SessionStatusBadge' }),
     ).toBeInTheDocument()
     // Detail pages keep the Components nav item active (breadcrumb excluded
     // by scoping the query to the nav landmark).
