@@ -64,8 +64,8 @@ test.describe('modes + composer', () => {
     expect(labelBox!.y + labelBox!.height).toBeLessThanOrEqual(groupBox!.y)
 
     // The active radio renders as the exact matcha #95A547 pill with dark
-    // primary text (white fails contrast on this fill). The transition
-    // (0.15s) means the computed style must be polled.
+    // --kx-accent-text-aa text. The transition (0.15s) means the computed
+    // style must be polled.
     const active = page.getByRole('radio', { name: 'Engineering' })
     await expect(active).toBeChecked()
     await expect
@@ -75,7 +75,7 @@ test.describe('modes + composer', () => {
           return `${s.backgroundColor} ${s.color}`
         }),
       )
-      .toBe('rgb(149, 165, 71) rgb(255, 255, 255)') // --kx-accent-segment-aa #95A547 / white (user-directed)
+      .toBe('rgb(149, 165, 71) rgb(79, 112, 68)') // --kx-accent-segment-aa #95A547 / --kx-accent-text-aa #4F7044
 
     // Switching moves the active styling to QA, then Planning.
     await page.getByRole('radio', { name: 'QA' }).click()
@@ -87,7 +87,7 @@ test.describe('modes + composer', () => {
           return `${s.backgroundColor} ${s.color}`
         }),
       )
-      .toBe('rgb(149, 165, 71) rgb(255, 255, 255)')
+      .toBe('rgb(149, 165, 71) rgb(79, 112, 68)')
 
     await page.getByRole('radio', { name: 'Planning' }).click()
     const planning = page.getByRole('radio', { name: 'Planning' })
@@ -98,7 +98,7 @@ test.describe('modes + composer', () => {
           return `${s.backgroundColor} ${s.color}`
         }),
       )
-      .toBe('rgb(149, 165, 71) rgb(255, 255, 255)')
+      .toBe('rgb(149, 165, 71) rgb(79, 112, 68)')
   })
 
   test('setup pills render as compact fully-rounded pills (999px radius, 12px side padding)', async ({ page }) => {

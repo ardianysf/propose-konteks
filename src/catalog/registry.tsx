@@ -536,7 +536,7 @@ function overlayLifecyclePreview(_mod: LoadedModule): ReactNode {
   return <OverlayLifecycleProbe />
 }
 
-/** sidebar: expanded 312px vs collapsed 64px rail (a real width token
+/** sidebar: expanded 320px vs collapsed 64px rail (a real width token
  *  change, visible side by side). */
 function sidebarPreview(mod: LoadedModule): ReactNode {
   const Sidebar = asDefaultComponent(mod)

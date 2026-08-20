@@ -1,5 +1,5 @@
 /* ── Sidebar (Task 4, spec §6.1) ──────────────────────────────────────
- * 312px expanded white rail → 64px icon rail when collapsed (AC12).
+ * 320px expanded white rail → 64px icon rail when collapsed (AC12).
  * The workspace box (.kx-sidebar-box) is the ONLY persistent boxed
  * container in the sidebar (AC6); everything else stays unboxed until
  * hover. Colors/dimensions come exclusively from tokens.css. */
@@ -379,13 +379,13 @@
 
 /* Full-title tooltip — reveals with the row on hover/focus-within via the
  * shared .kx-tooltip-host mechanism. Pins to the row's left edge and wraps
- * inside the 312px sidebar (row width ≈ 262px), staying readable when the
+ * inside the 320px sidebar (row width ≈ 190px), staying readable when the
  * title is long enough to truncate. Colors inherit the base .kx-tooltip
  * ink/raised pairing, which stays dark-theme safe in both modes. */
 .kx-sidebar__session-tooltip {
   left: 0;
   transform: none;
-  max-width: 260px;
+  max-width: 190px;
   white-space: normal;
   text-align: left;
 }

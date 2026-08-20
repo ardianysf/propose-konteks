@@ -1,5 +1,5 @@
 /* ── App shell ────────────────────────────────────────────────────────
- * Grid: 312px white sidebar | matcha main canvas, full viewport height. */
+ * Grid: 320px white sidebar | matcha main canvas, full viewport height. */
 .kx-app {
   position: relative; /* floating anchored menus (system menu, §6.2) anchor here */
   display: grid;

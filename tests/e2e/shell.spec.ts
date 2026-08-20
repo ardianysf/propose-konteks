@@ -10,9 +10,9 @@ import {
 } from './helpers'
 
 test.describe('shell', () => {
-  test('renders the shell with a white 240px sidebar, matcha canvas, and DM Sans (AC1)', async ({ page }) => {
+  test('renders the shell with a white 320px sidebar, matcha canvas, and DM Sans (AC1)', async ({ page }) => {
     await goto(page)
-    await expect.poll(() => sidebarWidth(page)).toBe(240)
+    await expect.poll(() => sidebarWidth(page)).toBe(320)
     await expect(sidebar(page)).toBeVisible()
 
     const bg = await mainCanvas(page).evaluate((el) => getComputedStyle(el).backgroundColor)
@@ -340,7 +340,7 @@ test.describe('shell', () => {
       .toBe('rgb(244, 248, 238)') // --kx-pale #F4F8EE
   })
 
-  test('sidebar collapses to the icon rail and expands back to 240px (AC12)', async ({ page }) => {
+  test('sidebar collapses to the icon rail and expands back to 320px (AC12)', async ({ page }) => {
     await goto(page)
     // The collapse control lives in the sidebar's own brand row (top-right).
     const collapseToggle = page.getByRole('button', { name: 'Collapse sidebar' })
@@ -351,7 +351,7 @@ test.describe('shell', () => {
     await expect.poll(() => sidebarWidth(page)).toBe(64)
     // In the rail the top-right toggle stands down; the logo area is the
     // maximize control. Hover swaps the Konteks icon for the expand
-    // chevron; clicking expands back to 240px.
+    // chevron; clicking expands back to 320px.
     const expandToggle = page.getByRole('button', { name: 'Expand sidebar' })
     await expect(expandToggle).toHaveClass(/kx-sidebar__logo--expand/)
     await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toHaveCount(0)
@@ -367,7 +367,7 @@ test.describe('shell', () => {
     await expect(expandToggle.locator('img.kx-sidebar__logo-img')).toBeVisible()
     await expandToggle.click()
     await expect(sidebar(page)).not.toHaveClass(/kx-sidebar--rail/)
-    await expect.poll(() => sidebarWidth(page)).toBe(240)
+    await expect.poll(() => sidebarWidth(page)).toBe(320)
     await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeVisible()
   })
 
@@ -384,7 +384,7 @@ test.describe('shell', () => {
     // The rail logo expand control works on the session detail page too.
     await sidebar(page).getByRole('button', { name: 'Expand sidebar' }).click()
     await expect(sidebar(page)).not.toHaveClass(/kx-sidebar--rail/)
-    await expect.poll(() => sidebarWidth(page)).toBe(240)
+    await expect.poll(() => sidebarWidth(page)).toBe(320)
 
     // Session history: same persistent control.
     await page.getByRole('button', { name: 'View all' }).click()
@@ -622,7 +622,7 @@ test.describe('composer layout correction surfaces', () => {
 test.describe('responsive regressions (Task 13)', () => {
   test('crossing 1280px forces the rail and stands the in-sidebar toggle down; crossing back restores the stored expanded state', async ({ page }) => {
     await goto(page)
-    await expect.poll(() => sidebarWidth(page)).toBe(240)
+    await expect.poll(() => sidebarWidth(page)).toBe(320)
     await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeVisible()
 
     await page.setViewportSize({ width: 1280, height: 900 })
@@ -634,7 +634,7 @@ test.describe('responsive regressions (Task 13)', () => {
     await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeHidden()
 
     await page.setViewportSize({ width: 1281, height: 900 })
-    await expect.poll(() => sidebarWidth(page)).toBe(240)
+    await expect.poll(() => sidebarWidth(page)).toBe(320)
     await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeVisible()
   })
 

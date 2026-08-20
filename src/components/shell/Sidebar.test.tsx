@@ -318,10 +318,10 @@ describe('Sidebar', () => {
       /\.kx-sidebar__session:hover \.kx-sidebar__session-meta,\s*\.kx-sidebar__session:focus-within \.kx-sidebar__session-meta\s*\{[^}]*opacity: 1/,
     )
     // The full-title tooltip uses the shared host mechanism and stays
-    // inside the 312px sidebar: left-pinned, wrapping, max-width 260px,
+    // inside the 320px sidebar: left-pinned, wrapping, max-width 190px,
     // inheriting the base tooltip's dark-theme-safe ink/raised pairing.
     expect(css).toMatch(
-      /\.kx-sidebar__session-tooltip\s*\{[^}]*left: 0;[^}]*transform: none;[^}]*max-width: 260px;[^}]*white-space: normal;[^}]*text-align: left/,
+      /\.kx-sidebar__session-tooltip\s*\{[^}]*left: 0;[^}]*transform: none;[^}]*max-width: 190px;[^}]*white-space: normal;[^}]*text-align: left/,
     )
     // Tighter resting rows than the old two-line layout.
     expect(css).toMatch(/\.kx-sidebar__session-list\s*\{[^}]*gap: 1px/)
@@ -513,7 +513,7 @@ describe('Sidebar', () => {
     expect(css).not.toMatch(/\.kx-sidebar--rail \.kx-sidebar__new-session\s*\{[^}]*display: none/)
   })
 
-  it('collapse toggles the rail-width class through TOGGLE_SIDEBAR and restores 312px (AC12)', () => {
+  it('collapse toggles the rail-width class through TOGGLE_SIDEBAR and restores 320px (AC12)', () => {
     const { bucket } = renderSidebar()
     const nav = getSidebarNav()
     expect(nav).toHaveClass('kx-sidebar')
