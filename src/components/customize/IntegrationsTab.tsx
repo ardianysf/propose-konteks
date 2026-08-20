@@ -23,6 +23,8 @@ import './IntegrationsTab.css'
 
 export type IntegrationsVariant = 'mcp' | 'connectors' | 'vcs'
 
+const VALID_VARIANTS: readonly IntegrationsVariant[] = ['mcp', 'connectors', 'vcs'] as const
+
 const VARIANT_LABELS: Record<IntegrationsVariant, string> = {
   mcp: 'MCP',
   connectors: 'Connectors',
@@ -155,7 +157,31 @@ const VARIANT_ACTIONS: Record<IntegrationsVariant, string> = {
   vcs: 'Connect VCS',
 }
 
+/** Runtime type guard for variant prop - validates that the variant
+ *  is one of the valid IntegrationsVariant values. This prevents crashes
+ *  when an invalid variant is passed at runtime (e.g., due to state
+ *  bugs, routing issues, or incorrect prop passing). */
+function isValidVariant(value: string): value is IntegrationsVariant {
+  return VALID_VARIANTS.includes(value as IntegrationsVariant)
+}
+
 export default function IntegrationsTab({ variant }: { variant: IntegrationsVariant }) {
+  // Runtime guard: if variant is invalid, render a graceful error state
+  // instead of crashing with "Element type is invalid" error.
+  if (!isValidVariant(variant)) {
+    return (
+      <section className="kx-customize-tab kx-customize-tab--error">
+        <header className="kx-customize-tab__bar">
+          <h3 className="kx-customize-tab__title">Integrations</h3>
+        </header>
+        <div className="kx-integrations__error" role="alert">
+          <p>Invalid variant: <code>{String(variant)}</code></p>
+          <p>Valid variants are: <code>mcp</code>, <code>connectors</code>, <code>vcs</code></p>
+        </div>
+      </section>
+    )
+  }
+
   const Content = VARIANT_CONTENT[variant]
   return (
     <section className={`kx-customize-tab kx-customize-tab--${variant}`}>

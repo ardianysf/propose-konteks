@@ -538,6 +538,87 @@
   position: static;
 }
 
+/* Overlay/modal fixtures (T6): render dialogs + drawers statically inside
+ * the preview frame instead of fixed to the viewport. The shared backdrop
+ * primitive is neutralized — the frame's own border plays that role.
+ * z-index resets keep sticky composer children inside their variant. */
+.kx-cat-preview-static-overlay {
+  position: relative;
+  min-width: min(860px, 100%);
+}
+
+.kx-cat-preview-static-overlay .kx-modal-backdrop {
+  position: static;
+  padding: 0;
+  background: transparent;
+}
+
+.kx-cat-preview-static-overlay .kx-modal,
+.kx-cat-preview-static-overlay .kx-drawer {
+  position: static;
+  inset: auto;
+  transform: none;
+  max-height: none;
+  z-index: auto;
+}
+
+/* The drawer primitive is full-viewport-height; give the specimen a
+ * bounded specimen height so its head/nav/content grid lays out. */
+.kx-cat-preview-static-overlay .kx-drawer {
+  height: 560px;
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+/* Sidebar specimen: the production sidebar is a flex child of the app
+ * grid; in isolation it needs an explicit height to lay out its rows. */
+.kx-cat-preview-sidebar {
+  display: flex;
+  height: 640px;
+}
+
+.kx-cat-preview-sidebar .kx-sidebar {
+  height: 100%;
+}
+
+/* Behaviour probe (overlay-lifecycle): a tiny interactive contract demo. */
+.kx-cat-probe {
+  padding: 4px 0;
+}
+
+.kx-cat-probe-line {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--kx-secondary);
+}
+
+.kx-cat-probe-button {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  margin-bottom: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--kx-border);
+  border-radius: 8px;
+  background: var(--kx-raised);
+  font-family: inherit;
+  font-size: var(--kx-text-md);
+  font-weight: 500;
+  color: var(--kx-primary);
+  cursor: pointer;
+}
+
+.kx-cat-probe-button:hover {
+  background: var(--kx-pale);
+}
+
+.kx-cat-probe-button:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
 .kx-cat-variant-row {
   display: flex;
   flex-wrap: wrap;
