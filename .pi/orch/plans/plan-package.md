@@ -55,7 +55,7 @@ The Konteks platform helps engineers understand and navigate complex software sy
 | **Node Types** | System, Repository, Component with token-based styling |
 | **Edge Behavior** | Repository → Component and Component → System edges, left-to-right flow, no arrowheads |
 | **Selection** | Node selection with visual highlight, dependency highlighting, dimming. Clicking already-selected node keeps selection; clicking empty canvas clears selection. |
-| **Inspector Panel** | Right-side 280px panel at desktop min 1200x720, showing node details, CTA for Component nodes |
+| **Inspector Panel** | Right-side 280px panel at desktop min 1200x720, showing node details, CTA for Component nodes. Below 1200px: component outside guaranteed support, inspector remains right, graph may pan/scroll, no mobile stacking promise |
 | **Zoom/Pan Controls** | Bottom-right controls: zoom in, zoom out, fit view, reset selection (only control that modifies selection). Canvas supports pan (drag) and scroll (wheel). |
 | **Initial View** | fitView() called on graph load to center and fit all nodes |
 | **Lazy Loading** | `React.lazy()` boundary in AppShell, Suspense with skeleton fallback |
@@ -234,10 +234,11 @@ import { useReactFlow } from '@xyflow/react'
 const { state } = useMockup()
 const { dismissOverlay } = useOverlayLifecycle()
 const systemId = state.overlay.kind === 'system-map' ? state.overlay.systemId : null
-const system =
-  state.systems.find((entry) => entry.id === systemId) ??
-  state.systems.find((entry) => entry.id === state.activeSystemId) ??
-  state.systems[0]
+// BLOCKER (1): Current implementation uses fallback substitution chain
+// CORRECTED: Invalid/unresolved overlay systemId must directly produce Fallback state
+// with exact 8-node/9-edge illustrative graph (no activeSystemId/first-system substitution)
+const system = state.systems.find((entry) => entry.id === systemId) // Only direct lookup
+// If null, render Fallback state with buildMap() 8-node/9-edge graph + warning banner
 ```
 
 ### Theme Token Reference (from src/styles/tokens.css)
@@ -457,8 +458,8 @@ T01 → T02 → T03 → T04 → T05 → T06 → T07 → T08 → T09 → T10 → 
 All tasks (T01–T58) form a single critical path with test-first Red→Green→Verify flow between phases.
 
 **Parallel Opportunities (After Prerequisites Met):**
-- T06, T41, T33 can begin in parallel after T04/T05 (different test phases)
-- After T22: T23, T33, T41 test phases can run in parallel
+- BLOCKER (4): No false parallel claims—all tasks follow sequential dependencies
+- After T22: T23 test phase can begin (T33 and T41 depend on later tasks, not parallel)
 
 ---
 
@@ -560,8 +561,8 @@ All tasks (T01–T58) form a single critical path with test-first Red→Green→
 | AC26 | IME Escape handling | Both selection logic and OverlayLifecycle check `event.isComposing` | Keyboard test during composition |
 | AC27 | Initial focus | Dialog root in production, none in preview | Focus inspector |
 | AC28 | Preview interactions | All features work in preview (selection, zoom, inspector, CTA) | Preview frame test |
-| AC43 | Control accessible names | "Zoom in", "Zoom out", "Fit to view", "Reset selection" | Accessibility audit |
-| AC50 | Reset selection behavior | Only reset control modifies selection | Manual test |
+| AC43 | Light and dark themes render correctly using token values (no hardcoded colors/fallback tokens) | Visual test in both themes |
+| AC50 | Controls have accessible names: "Zoom in", "Zoom out", "Fit to view", "Reset selection" (reset selection is the only control that modifies selection) | Accessibility audit + manual test |
 
 ### Testing Constraints
 
@@ -936,7 +937,12 @@ interface FlowNodeData {
   label: string
   description?: string
   metadata?: Record<string, string>
-  repoId?: string  // For Component nodes
+  // BLOCKER (2): GraphNode.data explicitly holds underlying IDs
+  // Node IDs are namespaced (e.g., "repo-{id}", "comp-{id}")
+  // but data holds the actual componentId/repoId/systemId for CTA dispatch
+  componentId?: string  // Actual component ID for CTA dispatch
+  repoId?: string      // Actual repository ID for CTA dispatch
+  systemId?: string    // Actual system ID for context
 }
 
 type FlowNode = Node<FlowNodeData>
@@ -1010,8 +1016,10 @@ export default function SystemMapGraph() {
     if (!selectedNode || selectedNode.data.type !== 'component') return
 
     // Use exact reducer shapes from mockupReducer.ts (flat, no payload wrapper)
+    // BLOCKER (2): Graph node IDs are namespaced but GraphNode.data holds underlying IDs
+    // CTA dispatches data.componentId / data.repoId, never selectedNode.id
     dispatch({ type: 'CLEAR_COMPONENTS' })
-    dispatch({ type: 'TOGGLE_COMPONENT', componentId: selectedNode.id })
+    dispatch({ type: 'TOGGLE_COMPONENT', componentId: selectedNode.data.componentId })
     dispatch({
       type: 'CONFIRM_SESSION_CONTEXT',
       systemId: system.id,
