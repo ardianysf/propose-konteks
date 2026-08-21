@@ -189,6 +189,7 @@ dismissOverlay()
 
 ### Inspector Panel (Right Side)
 - Width: 280px, fixed, always visible at minimum viewport width 1200x720 (desktop)
+- Responsive rule: Below 1200px, component is outside guaranteed support, inspector remains right-aligned, graph may pan/scroll; no mobile stacking promise
 - Shows empty state when no selection: "Select a node to view details"
 - For selected nodes: type badge, name, description, metadata
 - Component nodes only: CTA button "Start session with {name}"
