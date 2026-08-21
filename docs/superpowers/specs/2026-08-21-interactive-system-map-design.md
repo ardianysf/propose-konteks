@@ -16,10 +16,12 @@ Replace static SVG SystemMapModal with lazy-loaded `@xyflow/react` graph visuali
 ## Visual Layout
 
 ### Graph Structure
-- **Layout direction:** Left to right
+- **Layout direction:** Left to right (deterministic manual coordinates, no layout engine)
 - **Node layers:** Repository (left) → Component (middle) → System (right)
 - **Edge direction:** All edges flow left to right (Repository → Component, Component → System)
 - **Canvas:** Fixed 480px minimum height, `--kx-raised` background
+- **Coordinate system:** Manual x/y positioning based on stable normalized-name+id ordering
+- **Interaction:** Pan and scroll enabled on canvas
 
 ### Node Styling (Tokens Only)
 
@@ -58,6 +60,27 @@ const SystemMapModal = lazy(() => import('../system/SystemMapModal'))
 )}
 ```
 
+### Inner Component Structure
+```typescript
+// SystemMapModal.tsx (eager dialog shell)
+export default function SystemMapModal() {
+  return (
+    <Dialog className="kx-modal kx-system-map">
+      <ReactFlowProvider>
+        <ErrorBoundary fallback={<SystemMapFallbackView />}>
+          <Suspense fallback={<GraphSkeleton />}>
+            <SystemMapGraph />
+          </Suspense>
+        </ErrorBoundary>
+      </ReactFlowProvider>
+    </Dialog>
+  )
+}
+
+// SystemMapGraph.tsx (lazy inner graph component)
+// useReactFlow() used only here, within ReactFlowProvider
+```
+
 ### Bundle Size Target
 - **Target:** 50–70 KB gzipped
 - **Verification:** Network tab confirms chunk loads only on overlay open, not initial page load
@@ -89,6 +112,7 @@ onKeyDown(event: KeyboardEvent) {
     if (selectedNode && !event.isComposing) {
       setSelectedNode(null)
       event.preventDefault() // Prevent OverlayLifecycle from closing
+      // NOTE: Do NOT call stopPropagation() — source may not support it
     }
     // Otherwise: no action, OverlayLifecycle document listener closes modal
   }
@@ -97,6 +121,7 @@ onKeyDown(event: KeyboardEvent) {
 - IME/composing Escape (isComposing=true): Ignored by both root selection logic and OverlayLifecycle — does not clear selection or close modal
 - Selected + Escape (non-composing): Clears selection, prevents default
 - No selection + Escape (non-composing): Delegates to OverlayLifecycle to close modal
+- **Two-phase handling:** Modal handler runs first (preventDefault), OverlayLifecycle document listener checks `event.defaultPrevented`
 
 ---
 
@@ -107,12 +132,14 @@ When clicking "Start session with {component-name}":
 ```typescript
 dispatch({ type: 'CLEAR_COMPONENTS' })
 dispatch({ type: 'TOGGLE_COMPONENT', componentId })
-dispatch({ type: 'CONFIRM_SESSION_CONTEXT', payload: { systemId, repoIds: [component.repoId] } })
+dispatch({ type: 'CONFIRM_SESSION_CONTEXT', systemId, repoIds: [component.repoId] })
 dismissOverlay()
 ```
 
-- No made-up payload fields (e.g., no `source: 'system-map-cta'`)
+- Uses actual reducer action shapes from `src/state/mockupReducer.ts`
+- `CONFIRM_SESSION_CONTEXT` payload: `{ systemId: string; repoIds?: string[] }` (no `payload` wrapper)
 - `repoIds` contains only the selected component's repository ID
+- No made-up payload fields (e.g., no `source: 'system-map-cta'`)
 
 ---
 
@@ -120,14 +147,16 @@ dismissOverlay()
 
 ### State Priority (Evaluated in Order)
 
-1. **Fallback** — System unresolved or graph construction throws exception
+1. **Fallback** — Invalid overlay systemId, system unresolved, or graph construction throws exception
    - Renders exactly deterministic 8 node / 9 edge legacy illustrative graph
    - Warning banner: "Illustrative graph — unable to load real data"
+   - Uses manual coordinates with stable ordering (same as legacy buildMap)
 
 2. **Invalid Repository** — Some repo IDs in `system.repoIds` have no matching Repository record
    - Renders dashed placeholder repository node for missing repos
    - Normal edges connect placeholder to in-scope components
    - Warning banner: "Some repositories are missing"
+   - Placeholder node semantics: dashed border stroke, same background as Repository nodes
 
 3. **Truly Empty** — System has empty `repoIds` array
    - Empty state message: "No repositories or components found for {systemName}"
@@ -153,7 +182,7 @@ dismissOverlay()
 ## UI Components
 
 ### Inspector Panel (Right Side)
-- Width: 280px, fixed, always visible
+- Width: 280px, fixed, always visible at minimum viewport width
 - Shows empty state when no selection: "Select a node to view details"
 - For selected nodes: type badge, name, description, metadata
 - Component nodes only: CTA button "Start session with {name}"
@@ -163,6 +192,7 @@ dismissOverlay()
 - Zoom out button
 - Fit view button
 - Reset selection button
+- Canvas supports pan (drag) and scroll (wheel) natively
 
 ---
 
@@ -176,7 +206,7 @@ dismissOverlay()
 
 3. Node selection highlights node with 2.5px `--kx-accent-strong` stroke and `rgb(var(--kx-ink-rgb) / 0.14)` ring.
 
-4. Selected node's direct dependencies (connected nodes and edges) highlight with `--kx-accent-strong`, non-connected elements dim to opacity 0.3.
+4. Selected node's direct dependencies (selected node + one-hop incident edge neighbors) highlight with `--kx-accent-strong`, non-connected elements dim to opacity 0.3. Edge direction is ignored for highlighting — all nodes connected via any incident edge to the selected node are highlighted.
 
 5. Inspector panel shows selected node details; Component nodes include CTA button using `.kx-btn--primary`.
 
@@ -244,6 +274,24 @@ dismissOverlay()
 
 33. Light and dark themes render correctly using token values.
 
+### User Interaction Decisions
+
+34. Clicking an already-selected node keeps selection (does not deselect).
+
+35. Clicking empty canvas area clears selection.
+
+36. Graph uses deterministic manual coordinates with stable normalized-name+id ordering (no automatic layout engine).
+
+37. Canvas supports pan (drag) and scroll (wheel) interactions.
+
+### Component Structure
+
+38. ReactFlowProvider wraps the inner lazy SystemMapGraph component; useReactFlow() is used only below the provider.
+
+39. SystemMapModal dialog shell renders eagerly with Suspense lazy-loading SystemMapGraph inside.
+
+40. Graph error boundary displays defined fallback/error view for rejected import or render errors.
+
 ---
 
 ## Validation Plan
@@ -290,11 +338,13 @@ npx vite-bundle-visualizer
 ### CTA Dispatch Verification
 1. Select Component node
 2. Click CTA button
-3. Verify Redux DevTools shows actions in sequence:
+3. Verify actions are dispatched in sequence using actual reducer shapes:
    - `CLEAR_COMPONENTS`
    - `TOGGLE_COMPONENT {componentId}`
    - `CONFIRM_SESSION_CONTEXT {systemId, repoIds:[component.repoId]}`
 4. Verify modal closes and session flow initiates
+
+**Note:** Do not reference Redux DevTools as verification tool — use manual logging or custom middleware instead.
 
 ### Token-Only CSS Verification
 ```bash
@@ -307,6 +357,24 @@ grep -r 'kx-text-on-accent\|kx-selection-ring' src/components/system/SystemMapMo
 # Should return nothing
 ```
 
+### Component Structure Verification
+| Test | Expected | Evidence |
+|------|----------|----------|
+| ReactFlowProvider placement | Wraps inner lazy SystemMapGraph | Code inspection of SystemMapModal.tsx |
+| useReactFlow usage | Used only below ReactFlowProvider | Code inspection of SystemMapGraph.tsx |
+| Error boundary placement | Wraps Suspense with SystemMapGraph | Code inspection of SystemMapModal.tsx |
+| Fallback view | Defined component for import/render errors | ErrorBoundary fallback prop verification |
+
+### User Interaction Verification
+| Test | Expected | Evidence |
+|------|----------|----------|
+| Click already-selected node | Selection kept (not cleared) | Manual test |
+| Click empty canvas | Selection cleared | Manual test |
+| Manual coordinates | Stable positions based on normalized-name+id | Visual test across renders |
+| Pan interaction | Canvas drags to pan | Manual test |
+| Scroll interaction | Canvas scrolls on wheel | Manual test |
+| Dependency highlighting | One-hop neighbors (any direction) | Select node, verify highlighted nodes |
+
 ---
 
 ## Source of Truth
@@ -317,20 +385,22 @@ grep -r 'kx-text-on-accent\|kx-selection-ring' src/components/system/SystemMapMo
 4. **Theme tokens** — `src/styles/tokens.css` — color/typography tokens
 5. **Data model** — `src/data/mockData.ts` — System, Repository, ComponentEntry interfaces
 6. **CatalogPreviewContext** — `src/catalog/CatalogPreviewContext.tsx` — preview contract
+7. **Reducer shapes** — `src/state/mockupReducer.ts` — actual action type definitions
 
 ---
 
 ## Out of Scope
 
 - Real-time graph updates from backend
-- Drag-and-drop node repositioning
+- Drag-and-drop node repositioning (graph position is deterministic/manual)
 - Edge creation/deletion
 - Graph persistence or export
 - Multi-selection of nodes
 - Mini-map or overview panel
 - Graph search or filtering
-- Custom layout algorithms beyond React Flow defaults
+- Automatic layout algorithms (uses deterministic manual coordinates)
 - Animated transitions between states
+- Bundle size claims beyond realistic measurement conditions (measure in production-like build with minification, no source maps)
 
 ---
 
