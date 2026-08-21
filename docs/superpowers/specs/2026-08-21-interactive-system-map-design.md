@@ -107,7 +107,7 @@ export interface GraphEdge {
   id: string
   source: string
   target: string
-  type: 'system-to-repo' | 'repo-to-component'
+  type: 'repo-to-component' | 'component-to-system'
 }
 ```
 
@@ -162,7 +162,7 @@ The modal frame follows the existing SystemMapModal conventions:
 ### 5.2 Graph Canvas
 
 - **Height**: Fixed 480px minimum (fits within 720px modal with header and inspector)
-- **Background**: Uses `--kx-raised` (white in light, `#1a231b` in dark)
+- **Background**: Uses `--kx-raised` (light theme: matches token value; dark theme: `#1a231b`)
 - **Grid**: Optional subtle grid pattern using `--kx-border` at low opacity
 - **Padding**: 16px around the graph content
 
@@ -178,7 +178,7 @@ The modal frame follows the existing SystemMapModal conventions:
 - Fill: `--kx-accent`
 - Stroke: `--kx-accent-strong`
 - Stroke width: 2.5px
-- Drop shadow: `0 0 0 3px rgb(var(--kx-accent-rgb) / 0.2)`
+- Drop shadow: `0 0 0 3px var(--kx-selection-ring, rgba(143, 191, 106, 0.2))` (use existing token or documented AA-safe value)
 
 **Hover state** (unselected nodes):
 - Stroke: `--kx-accent-strong`
@@ -201,7 +201,7 @@ Edges should have rounded corners (React Flow `smoothstep` or `bezier` curve typ
 - **Size**: `--kx-text-md` (12px)
 - **Weight**: `--kx-font-medium` (500)
 - **Color**: 
-  - System nodes: white text (contrast on accent fill)
+  - System nodes: `var(--kx-text-on-accent, #FFFFFF)` (AA-safe on `--kx-accent`)
   - Repository nodes: `--kx-primary`
   - Component nodes: `--kx-secondary`
 
@@ -225,7 +225,7 @@ Edges should have rounded corners (React Flow `smoothstep` or `bezier` curve typ
 
 **Inspector CTA Button** (Component nodes only):
 - Background: `--kx-accent-solid-aa`
-- Text: white
+- Text: `var(--kx-text-on-accent, #FFFFFF)` (AA-safe on `--kx-accent-solid-aa`)
 - Padding: 10px 16px
 - Border radius: 8px
 - Font: `--kx-text-sm`, `--kx-font-medium`
@@ -402,8 +402,8 @@ Uses tokens from `[data-theme='dark']`. **All runtime CSS must exclusively consu
 ### 9.1 Core Functionality
 
 1. Opening the system map modal (from SystemMenu "Map" action) displays an interactive graph using `@xyflow/react`.
-2. The graph renders the three-tier hierarchy: System node at top, Repository nodes in middle, Component nodes at bottom.
-3. Edges correctly connect System → Repository and Repository → Component based on data relationships.
+2. The graph renders the three-tier hierarchy: Repository nodes (left), Component nodes (middle), System node (right).
+3. Edges correctly connect Repository → Component and Component → System based on data relationships.
 4. Clicking a node selects it, highlighting the node with accent fill, stronger stroke, and shadow.
 5. When a node is selected, its direct dependencies (connected nodes and edges) highlight, and non-connected elements dim.
 6. The right-side inspector panel shows details for the selected node including type, name, description, and metadata.
@@ -427,8 +427,8 @@ Uses tokens from `[data-theme='dark']`. **All runtime CSS must exclusively consu
 
 ### 9.3 Theme Support
 
-21. In light theme, the graph uses light colors: white/canvas backgrounds, dark text, matcha accents.
-22. In dark theme, the graph uses dark colors: dark backgrounds, light text, matcha accents (unchanged).
+21. In light theme, the graph uses light colors: `--kx-raised`/`--kx-canvas` backgrounds, `--kx-primary` text, `--kx-accent` accents.
+22. In dark theme, the graph uses dark colors: `--kx-raised`/`--kx-canvas` backgrounds, `--kx-primary` text, `--kx-accent` accents (unchanged token values).
 23. Switching themes updates the graph colors immediately without page reload.
 24. All text in nodes, edges (if labeled), and the inspector meets WCAG AA contrast in both themes.
 
@@ -453,29 +453,29 @@ Uses tokens from `[data-theme='dark']`. **All runtime CSS must exclusively consu
 
 ### 9.6 Loading and Error States
 
-31. While the graph is loading, a spinner or skeleton is visible in the canvas area.
-32. If graph construction fails, an error message displays with a "Retry" button.
-33. When a system has no repositories or components, an empty state displays with a helpful message.
+38. While the graph is loading, a spinner or skeleton is visible in the canvas area.
+39. If graph construction fails, an error message displays with a "Retry" button.
+40. When a system has no repositories or components, an empty state displays with a helpful message.
 
 ### 9.7 Performance and Bundle Size
 
-34. The `@xyflow/react` library is lazy-loaded at the **AppShell/overlay slot boundary** and does not block initial page load.
+41. The `@xyflow/react` library is lazy-loaded at the **AppShell/overlay slot boundary** and does not block initial page load.
     - **Validation**: Run Lighthouse performance audit before and after. Initial Time to Interactive (TTI) must not increase by more than 50ms.
     - **Validation**: Network tab shows SystemMapModal chunk loaded only after user opens the modal, not on initial page load.
     - **Lazy import location**: `src/AppShell.tsx` or the overlay slot component that renders modal dialogs.
-35. The gzipped bundle size for the SystemMapModal chunk is approximately 60KB (±10KB acceptable).
+42. The gzipped bundle size for the SystemMapModal chunk is approximately 60KB (±10KB acceptable).
     - **Validation**: Run `npx vite-bundle-visualizer` or `webpack-bundle-analyzer`. Confirm SystemMapModal chunk size is between 50-70KB gzipped.
     - **Validation**: The chunk includes `@xyflow/react` core, React Flow CSS, custom node components, and graph utilities.
-36. The graph renders smoothly with no perceptible jank on first selection or zoom.
+43. The graph renders smoothly with no perceptible jank on first selection or zoom.
     - **Validation**: Chrome DevTools Performance recording shows frame rate ≥ 55 FPS during first node selection and zoom interaction.
     - **Validation**: Long Tasks API shows no task > 50ms during graph initialization or interaction.
 
 ### 9.8 Data Model Correctness
 
-37. Nodes are created from the active system's repositories (via `system.repoIds`).
-38. Components are correctly associated with their parent repositories via `component.repoId`.
-39. Edges are created only where valid relationships exist (no orphaned nodes).
-40. Node labels display the correct names from the data model.
+44. Nodes are created from the active system's repositories (via `system.repoIds`).
+45. Components are correctly associated with their parent repositories via `component.repoId`.
+46. Edges are created only where valid relationships exist (no orphaned nodes).
+47. Node labels display the correct names from the data model.
 
 ## 10. Test Plan
 
@@ -717,7 +717,7 @@ const nodeTypes = {
 .kx-flow-node--system {
   background-color: var(--kx-accent);
   border-color: var(--kx-accent-strong);
-  color: white;
+  color: var(--kx-text-on-accent, #FFFFFF); /* AA-safe on --kx-accent */
 }
 
 .kx-flow-node--repo {
@@ -727,7 +727,7 @@ const nodeTypes = {
 .kx-flow-node--selected {
   border-color: var(--kx-accent-strong);
   border-width: 2.5px;
-  box-shadow: 0 0 0 3px rgb(var(--kx-accent-rgb) / 0.2);
+  box-shadow: 0 0 0 3px var(--kx-selection-ring, rgba(143, 191, 106, 0.2)); /* Use existing token or AA-safe documented value */
 }
 
 .kx-flow-edge {
@@ -771,11 +771,9 @@ Wrap focus containment in a check for catalog preview context to disable only th
 ```typescript
 const isCatalogPreview = useIsCatalogPreview()
 
-// Disable focus trap in preview, keep all graph features enabled
+// Hook-safe focus containment: always called, enabled via option
 const dialogRef = useRef<HTMLDivElement>(null)
-if (!isCatalogPreview) {
-  useFocusContainment(dialogRef)
-}
+useFocusContainment(dialogRef, { enabled: !isCatalogPreview })
 
 // Graph interactivity remains fully functional in preview
 const onNodeClick = useCallback((event: NodeMouseEvent) => {
@@ -792,9 +790,13 @@ const onKeyDown = useCallback((event: KeyboardEvent) => {
   if (event.key !== 'Escape') return
   
   if (isCatalogPreview) {
-    // In preview: delegate immediately to parent frame
-    event.stopPropagation()
-    onClose()
+    // In preview: selection clear may run, but do NOT call onClose or stopPropagation.
+    // Allow the parent preview frame to handle Escape for navigation.
+    if (selectedNode) {
+      setSelectedNode(null)
+    }
+    // Do NOT call event.stopPropagation() or onClose() in preview.
+    // Parent preview frame manages Escape for its own navigation.
     return
   }
   
