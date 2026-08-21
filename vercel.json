@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/catalog",
+      "destination": "/catalog.html"
+    },
+    {
+      "source": "/catalog/:path*",
+      "destination": "/catalog.html"
+    }
+  ]
+}

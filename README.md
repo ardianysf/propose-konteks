@@ -25,6 +25,13 @@ visual revamp** design specification.
 | `npm run typecheck` | Type-check only (`tsc -b`) |
 | `npm run dev` | Start the Vite dev server at `http://localhost:5173` |
 
+## Vercel deployment
+
+`vercel.json` configures production routing rewrites for the design system catalog:
+- Maps `/catalog` and `/catalog/:path*` to `/catalog.html`
+- Enables clean URLs with client-side routing
+- Supports deep links and browser reloads
+
 ## Demo states
 
 Loading and empty variants are reachable via URL query parameters, consumed once at reducer init
