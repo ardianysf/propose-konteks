@@ -307,8 +307,26 @@ function entries(): Entry[] {
     // hover-reveal pattern (see the shell batch above): muted icon at
     // rest (U), AA accent on hover and while active.
     { file: COMPONENTS, selector: '.kx-account-menu__theme-seg-btn', property: 'color', token: MUTED, cls: 'U' as Class },
-    // System map diagram strokes — decorative SVG geometry, not text.
-    { file: COMPONENTS, selector: '.kx-system-map__node rect', property: 'stroke', token: ACCENT_STRONG, cls: 'U' as Class },
+    // System map node borders, outlines, and badges — decorative.
+    { file: 'src/components/system/SystemMapModal.css', selector: '.system-node', property: 'border', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.system-node.selected', property: 'border', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.system-node:focus', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.system-node__badge', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.repository-node.selected', property: 'border', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.repository-node:focus', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node.selected', property: 'border', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node:focus', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node.expanded.selected', property: 'border', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node__badge', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node__metadata-label', property: 'color', token: MUTED_AA, cls: 'M' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node__cta', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node__cta:hover', property: 'background', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node__cta:focus', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.react-flow__edge-path.highlighted', property: 'stroke', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.react-flow__controls-button:hover', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
+    // System map banners and controls — decorative borders.
+    { file: 'src/components/system/SystemMapModal.css', selector: '.kx-system-map__banner--warning', property: 'border-left', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.kx-system-map__reset-btn:hover:not(:disabled)', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: GLOBAL, selector: ':focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
   ]
 }
@@ -536,10 +554,6 @@ const KNOWN_INERT_DUPLICATE_SELECTORS = new Set([
   '.kx-new-session__approval',
   '.kx-new-session__intro-body',
   '.kx-new-session__disclaimer',
-  // system/SystemMapModal.css (T5c batch: diagram stroke moved out of
-  // components.css by the removal tool; the fold maps the surviving
-  // domain-file hit back to the components.css inventory entry)
-  '.kx-system-map__node rect',
   // NOTE: the .kx-preserved__* selectors are deliberately ABSENT. They
   // were never a components.css↔domain-file transitional duplicate (their
   // only home is customize/shared.css since the T5b dedup), so masking
@@ -850,18 +864,18 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 151 consumers — 84 muted, 64 accent-strong, 3 accent-text-aa', () => {
-    expect(inventory).toHaveLength(151)
+  it('covers exactly 168 consumers — 84 muted, 77 accent-strong, 6 accent-text-aa', () => {
+    expect(inventory).toHaveLength(168)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(84)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(64)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(3)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(77)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(6)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(77)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(39)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(78)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(42)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(5)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(30)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(43)
   })
 
   it('has no duplicate inventory selectors', () => {
