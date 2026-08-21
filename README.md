@@ -36,6 +36,13 @@ visual revamp** design specification.
 
 Run `npm run dev` for the dev server, or `npm run build && npm run preview` for the production preview.
 
+## Vercel deployment
+
+`vercel.json` configures production routing rewrites for the design system catalog:
+- Maps `/catalog` and `/catalog/:path*` to `/catalog.html`
+- Enables clean URLs with client-side routing
+- Supports deep links and browser reloads
+
 ## Demo states
 
 Loading and empty variants are reachable via URL query parameters, consumed once at reducer init
