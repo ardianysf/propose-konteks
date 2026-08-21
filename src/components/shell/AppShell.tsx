@@ -9,6 +9,7 @@
  * backdrop (§6.2). The new-session page (Task 5) and the Session
  * History page (Task 11) render here, swapped by the route.
  */
+import { lazy, Suspense } from 'react'
 import Sidebar from './Sidebar'
 import SystemMenu from './SystemMenu'
 import WorkspaceMenu from './WorkspaceMenu'
@@ -16,7 +17,6 @@ import { OverlayLifecycleProvider } from './OverlayLifecycle'
 import CreateSystemModal from '../context/CreateSystemModal'
 import ManualRepositoryModal from '../context/ManualRepositoryModal'
 import RepositorySelectorModal from '../context/RepositorySelectorModal'
-import SystemMapModal from '../system/SystemMapModal'
 import CustomizeModal from '../customize/CustomizeModal'
 import LearnedDrawer from '../reviews/LearnedDrawer'
 import AccountMenu from '../account/AccountMenu'
@@ -25,6 +25,7 @@ import NewSessionPage from '../../pages/NewSessionPage'
 import SessionHistoryPage from '../../pages/SessionHistoryPage'
 import SessionDetailPage from '../../pages/SessionDetailPage'
 import { useMockup } from '../../state/MockupContext'
+import SystemMapSkeleton from '../system/SystemMapSkeleton'
 import './AppShell.css'
 
 export default function AppShell() {
@@ -34,6 +35,9 @@ export default function AppShell() {
   // mounted (suspended) repository selector instead of replacing it.
   const repositorySuspended =
     state.overlay.kind === 'create-system-modal' && state.overlay.source === 'repository-modal'
+
+  // Lazy-loaded SystemMapModal with Suspense fallback
+  const SystemMapModal = lazy(() => import('../system/SystemMapModal'))
 
   return (
     <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
@@ -65,7 +69,11 @@ export default function AppShell() {
         )}
         {state.overlay.kind === 'manual-repo-modal' && <ManualRepositoryModal />}
         {state.overlay.kind === 'create-system-modal' && <CreateSystemModal />}
-        {state.overlay.kind === 'system-map' && <SystemMapModal />}
+        {state.overlay.kind === 'system-map' && (
+          <Suspense fallback={<SystemMapSkeleton />}>
+            <SystemMapModal />
+          </Suspense>
+        )}
         {state.overlay.kind === 'customize' && <CustomizeModal />}
         {state.overlay.kind === 'learned' && <LearnedDrawer />}
         {state.overlay.kind === 'account-menu' && <AccountMenu />}

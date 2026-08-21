@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { visualizer } from 'rollup-plugin-visualizer'
 import type { Plugin } from 'vite'
 
 /**
@@ -60,7 +61,15 @@ function catalogSpaFallback(): Plugin {
 // `main` is the clickable mockup (unchanged), `catalog` is the design system
 // reference. The manifest powers the bundle-isolation check (spec §2).
 export default defineConfig({
-  plugins: [react(), catalogSpaFallback()],
+  plugins: [
+    react(),
+    catalogSpaFallback(),
+    visualizer({
+      filename: 'dist/stats.html',
+      open: false,
+      gzipSize: true,
+    }),
+  ],
   build: {
     manifest: true,
     rollupOptions: {
