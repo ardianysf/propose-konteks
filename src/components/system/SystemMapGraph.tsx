@@ -122,6 +122,9 @@ function RepositoryNode({ data, selected, isPlaceholder }: { data: FlowNodeData;
 }
 
 function ComponentNode({ data, selected }: NodeProps) {
+  const isExpanded = (data.isExpanded as boolean) || false
+  const handleCTAClick = (data.onCTAClick as (() => void) | undefined)
+
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       if (
@@ -139,16 +142,57 @@ function ComponentNode({ data, selected }: NodeProps) {
     [],
   )
 
+  const handleButtonClick = useCallback((event: React.MouseEvent) => {
+    event.stopPropagation() // Prevent node selection when clicking button
+    handleCTAClick?.()
+  }, [handleCTAClick])
+
+  // When expanded, the container is NOT a button (avoids nested-interactive)
+  // It remains a tab-able focusable div for keyboard navigation
+  const isInteractive = !isExpanded
+
   return (
     <div
-      className={`component-node ${selected ? 'selected' : ''}`}
-      tabIndex={0}
-      role="button"
-      aria-pressed={selected}
-      onKeyDown={handleKeyDown}
+      className={`component-node ${selected ? 'selected' : ''} ${isExpanded ? 'expanded' : ''}`}
+      tabIndex={isInteractive ? 0 : -1}
+      role={isInteractive ? 'button' : undefined}
+      aria-pressed={isInteractive ? selected : undefined}
+      aria-expanded={isExpanded}
+      onKeyDown={isInteractive ? handleKeyDown : undefined}
     >
-      <span className="component-node__label">{data.label}</span>
-      <span className="component-node__badge">Component</span>
+      {!isExpanded ? (
+        <>
+          <span className="component-node__label">{data.label}</span>
+          <span className="component-node__badge">Component</span>
+        </>
+      ) : (
+        <div className="component-node__expanded-content">
+          <div className="component-node__header">
+            <span className="component-node__label">{data.label}</span>
+            <span className="component-node__badge">Component</span>
+          </div>
+          {data.description && (
+            <p className="component-node__description">{data.description}</p>
+          )}
+          {data.metadata && Object.keys(data.metadata).length > 0 && (
+            <div className="component-node__metadata">
+              {Object.entries(data.metadata as Record<string, string>).map(([key, value]) => (
+                <div key={key} className="component-node__metadata-row">
+                  <span className="component-node__metadata-label">{key}</span>
+                  <span className="component-node__metadata-value">{value || '—'}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            type="button"
+            className="component-node__cta"
+            onClick={handleButtonClick}
+          >
+            Start Session
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -163,10 +207,10 @@ const nodeTypes: NodeTypes = {
 // Graph data builder with deterministic manual coordinates
 // ---------------------------------------------------------------------------
 
-const NODE_HEIGHT = 60
-const ROW_HEIGHT = 80
+export const NODE_HEIGHT = 60
+export const ROW_HEIGHT = 80
 
-function buildGraphData(
+export function buildGraphData(
   system: System | null,
   repositories: Repository[],
   components: ComponentEntry[],
@@ -479,6 +523,166 @@ function buildFallbackGraph(systemName: string = 'Unknown System'): { nodes: Flo
 }
 
 // ---------------------------------------------------------------------------
+// Collision avoidance helper (exported for testing)
+// ---------------------------------------------------------------------------
+
+/** Constants for node dimensions and collision detection */
+export const COMPACT_NODE_WIDTH = 160
+export const COMPACT_NODE_HEIGHT = 60
+export const EXPANDED_WIDTH = 240
+export const EXPANDED_BASE_HEIGHT = 180
+export const EXPANDED_SCALE = 1.05 // CSS transform scale for expanded nodes
+export const EXPANDED_MARGIN = 20 // Extra margin for visibility
+
+/** Calculate the actual height of an expanded node's content based on metadata rows.
+ * Each metadata row adds approximately 28px (6px gap + 22px row height).
+ */
+function calculateExpandedContentHeight(metadata: Record<string, string> | undefined): number {
+  if (!metadata || Object.keys(metadata).length === 0) {
+    return EXPANDED_BASE_HEIGHT
+  }
+  const metadataRows = Object.keys(metadata).length
+  // Base 180px + 28px per metadata row (6px gap + 22px row)
+  return EXPANDED_BASE_HEIGHT + (metadataRows * 28)
+}
+
+/** Get the bounding box for a node, accounting for expanded state and CSS scale.
+ * This is a pure function exported for testing.
+ */
+export function getNodeBoundingBox(
+  node: FlowNode,
+): { left: number; right: number; top: number; bottom: number } {
+  const isExpanded = (node.data.isExpanded as boolean) || false
+  
+  let width = COMPACT_NODE_WIDTH
+  let height = COMPACT_NODE_HEIGHT
+  
+  if (node.data.type === 'component' && isExpanded) {
+    const contentHeight = calculateExpandedContentHeight(node.data.metadata as Record<string, string> | undefined)
+    // Apply CSS scale (1.05) to get actual rendered dimensions
+    width = EXPANDED_WIDTH * EXPANDED_SCALE
+    height = contentHeight * EXPANDED_SCALE
+  }
+  
+  return {
+    left: node.position.x,
+    right: node.position.x + width,
+    top: node.position.y,
+    bottom: node.position.y + height,
+  }
+}
+
+/** Check if two bounding boxes overlap (including margin).
+ * Pure function exported for testing.
+ * Boxes that are exactly margin-separated do NOT overlap.
+ */
+export function boxesOverlap(
+  box1: { left: number; right: number; top: number; bottom: number },
+  box2: { left: number; right: number; top: number; bottom: number },
+): boolean {
+  // Two boxes overlap if they are NOT separated in any direction
+  // Separated means: box1 is completely to the left, right, above, or below box2 (with margin)
+  const separatedHorizontally =
+    box1.right + EXPANDED_MARGIN <= box2.left ||
+    box2.right + EXPANDED_MARGIN <= box1.left
+
+  const separatedVertically =
+    box1.bottom + EXPANDED_MARGIN <= box2.top ||
+    box2.bottom + EXPANDED_MARGIN <= box1.top
+
+  return !separatedHorizontally && !separatedVertically
+}
+
+/** Calculate non-overlapping position for an expanded component node.
+ * Uses a deterministic bounded search: tries candidate positions (valid row positions above/below)
+ * and verifies each candidate against EVERY other node at the final position.
+ * Returns a position that guarantees no overlap with any other node.
+ * Pure function exported for testing.
+ */
+export function calculateExpandedPosition(
+  expandedNode: FlowNode,
+  allNodes: FlowNode[],
+  _allEdges: FlowEdge[], // eslint-disable-line @typescript-eslint/no-unused-vars
+): { x: number; y: number } {
+  const basePosition = expandedNode.position
+  const contentHeight = calculateExpandedContentHeight(expandedNode.data.metadata as Record<string, string> | undefined)
+  const expandedWidth = EXPANDED_WIDTH * EXPANDED_SCALE
+  const expandedHeight = contentHeight * EXPANDED_SCALE
+  
+  // Helper: check if a candidate position overlaps with any node
+  const hasOverlapAtPosition = (candidateY: number): boolean => {
+    const candidateBox = {
+      left: basePosition.x,
+      right: basePosition.x + expandedWidth,
+      top: candidateY,
+      bottom: candidateY + expandedHeight,
+    }
+    
+    return allNodes.some(node => {
+      if (node.id === expandedNode.id) return false
+      const nodeBox = getNodeBoundingBox(node)
+      return boxesOverlap(candidateBox, nodeBox)
+    })
+  }
+  
+  // Check if base position is valid (no overlap)
+  if (!hasOverlapAtPosition(basePosition.y)) {
+    return basePosition
+  }
+  
+  // Bounded deterministic candidate search
+  // Try positions in expanding distance from base, alternating up and down
+  // Search bound: try up to 50 row positions (4000px) in each direction
+  // If graph needs more vertical area, canvas/fit-view will handle it
+  const MAX_SEARCH_DISTANCE = 50 * ROW_HEIGHT // 4000px in each direction
+  
+  for (let distance = ROW_HEIGHT; distance <= MAX_SEARCH_DISTANCE; distance += ROW_HEIGHT) {
+    // Try upward first (prefer to keep node higher if possible)
+    const upCandidateY = basePosition.y - distance
+    if (upCandidateY >= 0 && !hasOverlapAtPosition(upCandidateY)) {
+      return { x: basePosition.x, y: upCandidateY }
+    }
+    
+    // Then try downward
+    const downCandidateY = basePosition.y + distance
+    if (!hasOverlapAtPosition(downCandidateY)) {
+      return { x: basePosition.x, y: downCandidateY }
+    }
+  }
+  
+  // Fallback: when bounded search is exhausted, derive a deterministic position
+  // beyond the maximum bottom of ALL relevant node bounding boxes plus production margin.
+  // Verify with the same all-node overlap predicate; advance further deterministically if needed.
+  // This guarantees we never return an overlapping position.
+  
+  // Calculate the maximum bottom of ALL node bounding boxes
+  let maxBottom = 0
+  for (const node of allNodes) {
+    if (node.id === expandedNode.id) continue
+    const nodeBox = getNodeBoundingBox(node)
+    if (nodeBox.bottom > maxBottom) {
+      maxBottom = nodeBox.bottom
+    }
+  }
+  
+  // Start candidate search beyond the maximum bottom, with production margin
+  // Use ROW_HEIGHT increments for deterministic behavior
+  let fallbackCandidateY = maxBottom + EXPANDED_MARGIN
+  
+  // Align to ROW_HEIGHT grid for deterministic positioning
+  const gridAlignedStart = Math.ceil(fallbackCandidateY / ROW_HEIGHT) * ROW_HEIGHT
+  fallbackCandidateY = Math.max(gridAlignedStart, 0)
+  
+  // Advance deterministically until we find a non-overlapping position
+  // This loop will always terminate because we're searching beyond all existing nodes
+  while (hasOverlapAtPosition(fallbackCandidateY)) {
+    fallbackCandidateY += ROW_HEIGHT
+  }
+  
+  return { x: basePosition.x, y: fallbackCandidateY }
+}
+
+// ---------------------------------------------------------------------------
 // Main SystemMapGraph component
 // ---------------------------------------------------------------------------
 
@@ -510,8 +714,11 @@ export default function SystemMapGraph() {
   // Event handlers
   const handleNodeClick = useCallback(
     (_: React.MouseEvent, node: FlowNode) => {
-      // Clicking already-selected node keeps selection
-      if (selectedNode?.id !== node.id) {
+      // Clicking already-selected component node toggles expansion
+      if (selectedNode?.id === node.id) {
+        // Keep selection, expansion is handled by re-render
+        setSelectedNode(node)
+      } else {
         setSelectedNode(node)
       }
     },
@@ -559,11 +766,28 @@ export default function SystemMapGraph() {
     return highlighted
   }, [selectedNode, displayEdges])
 
-  // Apply styling based on highlighting
-  const styledNodes = displayNodes.map((node) => ({
-    ...node,
-    className: highlightedNodes.has(node.id) ? 'highlighted' : '',
-  }))
+  // Apply styling based on highlighting and expansion state
+  const styledNodes = displayNodes.map((node) => {
+    const isHighlighted = highlightedNodes.has(node.id)
+    const isExpanded = selectedNode?.id === node.id && node.data.type === 'component'
+    
+    // Collision avoidance: shift expanded node position if needed
+    let position = { ...node.position }
+    if (isExpanded && node.data.type === 'component') {
+      position = calculateExpandedPosition(node, displayNodes, displayEdges)
+    }
+    
+    return {
+      ...node,
+      position,
+      className: isHighlighted ? 'highlighted' : '',
+      data: {
+        ...node.data,
+        isExpanded,
+        onCTAClick: isExpanded ? handleCTAClick : undefined,
+      },
+    }
+  })
 
   const styledEdges = displayEdges.map((edge) => ({
     ...edge,
@@ -572,7 +796,7 @@ export default function SystemMapGraph() {
       ? { stroke: 'var(--kx-accent-strong)', strokeWidth: 2 }
       : highlightedNodes.size > 0
         ? { stroke: 'var(--kx-border)', strokeWidth: 1, opacity: 0.3 }
-        : { stroke: 'var(--kx-border)', strokeWidth: 1.5 },
+        : { stroke: 'var(--kx-border)', strokeWidth: 1.5, opacity: 1 },
   }))
 
   // Banner message based on graph state
@@ -615,6 +839,9 @@ export default function SystemMapGraph() {
     [selectedNode],
   )
 
+  // Determine if there's an active selection for dimming purposes
+  const hasSelection = selectedNode !== null
+
   return (
     <div className="kx-system-map__content" onKeyDown={handleModalKeyDown}>
       {/* Banner */}
@@ -624,90 +851,43 @@ export default function SystemMapGraph() {
         </div>
       )}
 
-      {/* Graph + Inspector layout */}
-      <div className="kx-system-map__layout">
-        {/* React Flow graph */}
-        <div className="kx-system-map__graph-container">
-          <ReactFlow
-            nodes={styledNodes}
-            edges={styledEdges}
-            nodeTypes={nodeTypes}
-            onNodeClick={handleNodeClick}
-            onPaneClick={handlePaneClick}
-            fitView
-            nodesDraggable={false}
-            nodesConnectable={false}
-            elementsSelectable={true}
-            selectNodesOnDrag={false}
-            panOnScroll
-            panOnDrag
-            zoomOnScroll={false}
-            zoomOnPinch
-            zoomOnDoubleClick={false}
-          >
-            <Background color="var(--kx-border)" gap={16} />
-            <Controls
-              showZoom={true}
-              showFitView={true}
-              showInteractive={false}
-              className="kx-system-map__controls"
-            />
-          </ReactFlow>
-          <button
-            type="button"
-            className="kx-system-map__reset-btn"
-            onClick={() => setSelectedNode(null)}
-            aria-label="Reset selection"
-            disabled={!selectedNode}
-          >
-            Reset selection
-          </button>
-        </div>
-
-        {/* Inspector panel */}
-        <aside className="kx-system-map__inspector">
-          {selectedNode ? (
-            <div className="kx-system-map__inspector-content">
-              <div className="kx-system-map__inspector-header">
-                <span className="kx-system-map__inspector-badge">
-                  {selectedNode.data.type.charAt(0).toUpperCase() + selectedNode.data.type.slice(1)}
-                </span>
-                <h3 className="kx-system-map__inspector-title">{selectedNode.data.label as string}</h3>
-              </div>
-
-              {selectedNode.data.description && (
-                <p className="kx-system-map__inspector-description">{selectedNode.data.description as string}</p>
-              )}
-
-              {selectedNode.data.metadata && Object.keys(selectedNode.data.metadata).length > 0 && (
-                <div className="kx-system-map__inspector-metadata">
-                  {Object.entries(selectedNode.data.metadata as Record<string, string>).map(([key, value]) => (
-                    <div key={key} className="kx-system-map__inspector-metadata-row">
-                      <span className="kx-system-map__inspector-metadata-label">{key}</span>
-                      <span className="kx-system-map__inspector-metadata-value">
-                        {value || '—'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {selectedNode.data.type === 'component' && (
-                <button
-                  type="button"
-                  className="kx-btn kx-btn--primary kx-system-map__cta"
-                  onClick={handleCTAClick}
-                >
-                  Start session with {selectedNode.data.label as string}
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="kx-system-map__inspector-empty">
-              <p>Select a node to view details</p>
-            </div>
-          )}
-        </aside>
+      {/* Full-width graph container */}
+      <div className={`kx-system-map__graph-container ${hasSelection ? 'has-selection' : ''}`}>
+        <ReactFlow
+          nodes={styledNodes}
+          edges={styledEdges}
+          nodeTypes={nodeTypes}
+          onNodeClick={handleNodeClick}
+          onPaneClick={handlePaneClick}
+          fitView
+          nodesDraggable={false}
+          nodesConnectable={false}
+          elementsSelectable={true}
+          selectNodesOnDrag={false}
+          panOnScroll
+          panOnDrag
+          zoomOnScroll={false}
+          zoomOnPinch
+          zoomOnDoubleClick={false}
+          style={{ width: '100%', height: '100%' }}
+        >
+          <Background color="var(--kx-border)" gap={16} />
+          <Controls
+            showZoom={true}
+            showFitView={true}
+            showInteractive={false}
+            className="kx-system-map__controls"
+          />
+        </ReactFlow>
+        <button
+          type="button"
+          className="kx-system-map__reset-btn"
+          onClick={() => setSelectedNode(null)}
+          aria-label="Reset selection"
+          disabled={!selectedNode}
+        >
+          Reset selection
+        </button>
       </div>
     </div>
   )

@@ -66,26 +66,15 @@
   text-align: center;
 }
 
-/* Layout: graph + inspector */
-.kx-system-map__layout {
-  display: flex;
-  gap: 0;
-  min-height: 480px;
-}
-
-/* Graph container */
+/* Graph container - full width */
 .kx-system-map__graph-container {
-  flex: 1;
   position: relative;
-  background: var(--kx-raised);
-  border-radius: var(--kx-radius-main);
-  overflow: hidden;
-}
-
-.kx-system-map__graph {
   width: 100%;
   height: 480px;
   min-height: 480px;
+  background: var(--kx-raised);
+  border-radius: var(--kx-radius-main);
+  overflow: hidden;
 }
 
 /* Fallback view */
@@ -118,99 +107,7 @@
   max-width: 400px;
 }
 
-/* Inspector panel - 280px fixed at desktop min 1200x720 */
-.kx-system-map__inspector {
-  width: 280px;
-  flex-shrink: 0;
-  background: var(--kx-raised);
-  border-left: 1px solid var(--kx-border);
-  border-radius: 0 var(--kx-radius-main) var(--kx-radius-main) 0;
-  padding: 20px;
-  overflow-y: auto;
-}
 
-.kx-system-map__inspector-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--kx-secondary);
-  font-size: var(--kx-text-md);
-}
-
-.kx-system-map__inspector-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.kx-system-map__inspector-header {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.kx-system-map__inspector-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  background: var(--kx-pale);
-  border-radius: 4px;
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  align-self: flex-start;
-}
-
-.kx-system-map__inspector-title {
-  margin: 0;
-  font-size: var(--kx-text-l);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-primary);
-  line-height: 1.3;
-}
-
-.kx-system-map__inspector-description {
-  margin: 0;
-  font-size: var(--kx-text-md);
-  color: var(--kx-secondary);
-  line-height: 1.5;
-}
-
-.kx-system-map__inspector-metadata {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  background: var(--kx-pale);
-  border-radius: 8px;
-}
-
-.kx-system-map__inspector-metadata-row {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.kx-system-map__inspector-metadata-label {
-  font-size: var(--kx-text-2xs);
-  color: var(--kx-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.kx-system-map__inspector-metadata-value {
-  font-size: var(--kx-text-sm);
-  color: var(--kx-primary);
-  word-break: break-all;
-}
-
-/* CTA button */
-.kx-system-map__cta {
-  width: 100%;
-  margin-top: 8px;
-}
 
 /* Zoom/pan controls */
 .kx-system-map__controls {
@@ -339,7 +236,7 @@
   max-width: 100%;
 }
 
-/* Component node */
+/* Component node - compact by default */
 .component-node {
   display: flex;
   flex-direction: column;
@@ -353,7 +250,8 @@
   border: 1.5px solid var(--kx-border);
   border-radius: 8px;
   cursor: pointer;
-  transition: box-shadow 0.15s, border-color 0.15s;
+  transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s, z-index 0s;
+  z-index: 1;
 }
 
 .component-node.selected {
@@ -364,6 +262,23 @@
 .component-node:focus {
   outline: 2px solid var(--kx-accent-strong);
   outline-offset: 2px;
+}
+
+/* Expanded component node - in-place expansion */
+.component-node.expanded {
+  width: 240px;
+  height: auto;
+  min-height: 180px;
+  padding: 16px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  z-index: 100;
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgb(var(--kx-ink-rgb) / 0.12);
+}
+
+.component-node.expanded.selected {
+  border: 2.5px solid var(--kx-accent-strong);
 }
 
 .component-node__label {
@@ -380,9 +295,94 @@
 .component-node__badge {
   font-size: var(--kx-text-2xs);
   font-weight: var(--kx-font-bold);
-  color: var(--kx-muted);
+  color: var(--kx-accent-text-aa);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* Expanded content styles */
+.component-node__expanded-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.component-node__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.component-node__header .component-node__label {
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+}
+
+.component-node__description {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-secondary);
+  line-height: 1.4;
+}
+
+.component-node__metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: var(--kx-pale);
+  border-radius: 6px;
+}
+
+.component-node__metadata-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.component-node__metadata-label {
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted-text-aa);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.component-node__metadata-value {
+  font-size: var(--kx-text-xs);
+  color: var(--kx-primary);
+  word-break: break-all;
+}
+
+/* Start Session button inside expanded node */
+.component-node__cta {
+  width: 100%;
+  padding: 10px 16px;
+  margin-top: 4px;
+  background: var(--kx-accent);
+  border: none;
+  border-radius: 6px;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+.component-node__cta:hover {
+  background: var(--kx-accent-strong);
+}
+
+.component-node__cta:active {
+  transform: scale(0.98);
+}
+
+.component-node__cta:focus {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
 }
 
 /* Edge styles - NO arrowheads */
@@ -409,9 +409,14 @@
   border-color: var(--kx-accent-strong);
 }
 
-/* Background pattern */
+/* Background pattern - dotted grid */
 .react-flow__background {
   background: var(--kx-raised);
+}
+
+/* Ensure dots are visible */
+.react-flow__background pattern {
+  fill: var(--kx-border);
 }
 
 /* Skeleton loading states */
@@ -437,15 +442,21 @@
 }
 
 /* Highlighted node state (for dependency highlighting) */
-.react-flow__node.highlighted {
+/* Only apply dimming when there's an active selection */
+.kx-system-map__graph-container.has-selection .react-flow__node.highlighted {
   opacity: 1;
 }
 
-.react-flow__node:not(.highlighted) {
+.kx-system-map__graph-container.has-selection .react-flow__node:not(.highlighted) {
   opacity: 0.3;
 }
 
 /* Ensure selected node always has full opacity */
 .react-flow__node.selected {
   opacity: 1 !important;
+}
+
+/* Ensure all nodes have full opacity when no selection */
+.kx-system-map__graph-container:not(.has-selection) .react-flow__node {
+  opacity: 1;
 }
