@@ -1,83 +1,154 @@
 import { useSyncExternalStore } from 'react'
 
 /**
- * Konteks catalog hash router (spec §2 — "Hash router katalog").
+ * Konteks catalog clean URL router (spec §2 — "Clean URL routing").
  *
- * Route contract:
- *   '' | '#' | '#/'              → overview
- *   '#/tokens'                   → tokens
- *   '#/components'               → components index
- *   '#/components/<slug>'        → component detail (slug is URI-decoded)
- *   anything else                → not-found (carries the original hash)
+ * Route contract:\n *   `/catalog`                    → overview\n *   `/catalog/tokens`             → tokens\n *   `/catalog/components`         → components index\n *   `/catalog/components/<slug>`  → component detail (slug is URI-decoded)\n *   anything else                  → not-found (carries the original path)
  *
  * The parser is pure and unit-testable; the hook is a thin subscription over
- * `hashchange`. Navigation is plain `location.hash = ...` so browser
- * back/forward works naturally.
+ * `popstate`. Navigation uses `history.pushState` so browser back/forward
+ * works naturally.
  */
 export type CatalogRoute =
   | { name: 'overview' }
   | { name: 'tokens' }
   | { name: 'components' }
   | { name: 'component'; slug: string }
-  | { name: 'not-found'; hash: string }
+  | { name: 'not-found'; path: string }
 
-export function parseHash(hash: string): CatalogRoute {
-  // Normalize: strip the leading '#', then the leading '/'. Fragments like
-  // '', '#', and '#/' all collapse to the empty path (overview).
-  const path = hash.replace(/^#\/?/, '')
+const CATALOG_BASE = '/catalog'
 
-  if (path === '') return { name: 'overview' }
-  if (path === 'tokens') return { name: 'tokens' }
-  if (path === 'components') return { name: 'components' }
+/**
+ * Parse a pathname into a CatalogRoute. Strips the `/catalog` prefix and
+ * routes the remainder. Paths without the catalog base are treated as
+ * not-found.
+ *
+ * Valid routes:
+ *   `/catalog` or `/catalog/` → overview
+ *   `/catalog/tokens` → tokens (trailing slash not allowed)
+ *   `/catalog/components` → components (trailing slash not allowed)
+ *   `/catalog/components/<slug>` → component detail (trailing slash not allowed)
+ */
+export function parsePathname(pathname: string): CatalogRoute {
+  // Path must start with /catalog
+  if (!pathname.startsWith(CATALOG_BASE)) {
+    return { name: 'not-found', path: pathname }
+  }
 
-  if (path.startsWith('components/')) {
-    const rest = path.slice('components/'.length)
-    // `#/components/` (no slug) or a nested path is not a valid detail route.
-    if (rest !== '' && !rest.includes('/')) {
+  // Extract the path after /catalog
+  const rest = pathname.slice(CATALOG_BASE.length)
+
+  // Empty or just slash → overview (both /catalog and /catalog/ are valid)
+  if (rest === '' || rest === '/') {
+    return { name: 'overview' }
+  }
+
+  // Remove leading slash for segment matching
+  const segment = rest.startsWith('/') ? rest.slice(1) : rest
+
+  // Check for trailing slash on non-base routes (not allowed)
+  if (segment.endsWith('/')) {
+    return { name: 'not-found', path: pathname }
+  }
+
+  if (segment === 'tokens') {
+    return { name: 'tokens' }
+  }
+
+  if (segment === 'components') {
+    return { name: 'components' }
+  }
+
+  if (segment.startsWith('components/')) {
+    const slug = segment.slice('components/'.length)
+    // `/catalog/components/` (no slug) or a nested path is not a valid detail route.
+    if (slug !== '' && !slug.includes('/')) {
       try {
-        return { name: 'component', slug: decodeURIComponent(rest) }
+        return { name: 'component', slug: decodeURIComponent(slug) }
       } catch {
-        // Malformed percent-encoding (e.g. '#/components/%',
-        // '#/components/%E0%A4%A') throws URIError — per the spec contract,
-        // any hash that does not parse maps to not-found, never a crash.
-        return { name: 'not-found', hash }
+        // Malformed percent-encoding (e.g. '/catalog/components/%',
+        // '/catalog/components/%E0%A4%A') throws URIError — per the spec contract,
+        // any path that does not parse maps to not-found, never a crash.
+        return { name: 'not-found', path: pathname }
       }
     }
   }
 
-  return { name: 'not-found', hash }
+  return { name: 'not-found', path: pathname }
 }
 
 // getSnapshot must return a cached value (useSyncExternalStore re-reads it
 // during render and loops on fresh object identities), so we cache by raw
-// hash string and only re-parse when the hash actually changed.
-let cachedHash: string | null = null
+// pathname string and only re-parse when the path actually changed.
+let cachedPathname: string | null = null
 let cachedRoute: CatalogRoute = { name: 'overview' }
 
 function readRoute(): CatalogRoute {
-  const hash = window.location.hash
-  if (hash !== cachedHash) {
-    cachedHash = hash
-    cachedRoute = parseHash(hash)
+  const pathname = window.location.pathname
+  if (pathname !== cachedPathname) {
+    cachedPathname = pathname
+    cachedRoute = parsePathname(pathname)
   }
   return cachedRoute
 }
 
 function subscribe(onChange: () => void): () => void {
-  window.addEventListener('hashchange', onChange)
-  // Setting location.hash fires `hashchange` and a history entry, so
-  // back/forward arrives as `hashchange` too. Some environments (jsdom
-  // edge cases, hash-only `history.go`) can surface `popstate` without a
-  // `hashchange`; listening to both is harmless because the callback only
-  // re-reads the current hash.
   window.addEventListener('popstate', onChange)
   return () => {
-    window.removeEventListener('hashchange', onChange)
     window.removeEventListener('popstate', onChange)
   }
 }
 
-/** Current catalog route, re-derived on every hashchange/popstate. */
+/** Current catalog route, re-derived on every popstate. */
 export function useCatalogRoute(): CatalogRoute {
   return useSyncExternalStore(subscribe, readRoute)
+}
+
+/**
+ * Navigate to a catalog route using HTML5 History API.
+ * This replaces hash-based navigation (location.hash = ...) with
+ * clean URLs (history.pushState).
+ */
+export function navigateTo(route: CatalogRoute): void {
+  let pathname = CATALOG_BASE
+  switch (route.name) {
+    case 'overview':
+      pathname = CATALOG_BASE
+      break
+    case 'tokens':
+      pathname = `${CATALOG_BASE}/tokens`
+      break
+    case 'components':
+      pathname = `${CATALOG_BASE}/components`
+      break
+    case 'component':
+      pathname = `${CATALOG_BASE}/components/${encodeURIComponent(route.slug)}`
+      break
+    case 'not-found':
+      // Keep the original path for not-found routes
+      pathname = route.path
+      break
+  }
+  window.history.pushState(null, '', pathname)
+  // Manually trigger a route update since pushState doesn't fire popstate
+  window.dispatchEvent(new PopStateEvent('popstate'))
+}
+
+/**
+ * Get the pathname for a route without navigating.
+ * Useful for rendering href attributes.
+ */
+export function getPathnameFor(route: CatalogRoute): string {
+  switch (route.name) {
+    case 'overview':
+      return CATALOG_BASE
+    case 'tokens':
+      return `${CATALOG_BASE}/tokens`
+    case 'components':
+      return `${CATALOG_BASE}/components`
+    case 'component':
+      return `${CATALOG_BASE}/components/${encodeURIComponent(route.slug)}`
+    case 'not-found':
+      return route.path
+  }
 }

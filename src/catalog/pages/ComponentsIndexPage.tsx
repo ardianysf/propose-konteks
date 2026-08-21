@@ -6,6 +6,7 @@
  * dicantumkan dengan alasannya tanpa link (spec §2/§4 + AC4/AC6).
  */
 import { manifestEntries, type ManifestEntry } from '../manifest'
+import { getPathnameFor, navigateTo } from '../router'
 
 function isLinkable(entry: ManifestEntry): boolean {
   return (
@@ -36,7 +37,14 @@ function EntryRow({ entry }: { entry: ManifestEntry }) {
   return (
     <li className="kx-cat-index-row">
       {linkable ? (
-        <a className="kx-cat-index-link" href={`#/components/${entry.id}`}>
+        <a
+          className="kx-cat-index-link"
+          href={getPathnameFor({ name: 'component', slug: entry.id })}
+          onClick={(e) => {
+            e.preventDefault()
+            navigateTo({ name: 'component', slug: entry.id })
+          }}
+        >
           {entry.name}
         </a>
       ) : (

@@ -5,6 +5,7 @@
  * consumers of the catalogued components.
  */
 import { entriesByDomain, manifestEntries } from '../manifest'
+import { getPathnameFor, navigateTo } from '../router'
 
 const CLASSIFICATIONS: Array<{
   id: string
@@ -69,8 +70,8 @@ export function OverviewPage() {
           implementasi aslinya, tanpa salinan (single source of truth).
         </p>
         <p>
-          Cara pakai: navigasi via hash router (lihat nav di atas). Deep-link (
-          <code>#/components/&lt;slug&gt;</code>), reload, dan back/forward
+          Cara pakai: navigasi via clean URL router (lihat nav di atas). Deep-link (
+          <code>/catalog/components/&lt;slug&gt;</code>), reload, dan back/forward
           browser bekerja alami.
         </p>
       </section>
@@ -154,8 +155,27 @@ export function OverviewPage() {
           </tbody>
         </table>
         <p>
-          Lihat <a href="#/tokens">token live</a> dan{' '}
-          <a href="#/components">indeks komponen</a> untuk detailnya.
+          Lihat{' '}
+          <a
+            href={getPathnameFor({ name: 'tokens' })}
+            onClick={(e) => {
+              e.preventDefault()
+              navigateTo({ name: 'tokens' })
+            }}
+          >
+            token live
+          </a>{' '}
+          dan{' '}
+          <a
+            href={getPathnameFor({ name: 'components' })}
+            onClick={(e) => {
+              e.preventDefault()
+              navigateTo({ name: 'components' })
+            }}
+          >
+            indeks komponen
+          </a>{' '}
+          untuk detailnya.
         </p>
       </section>
     </section>

@@ -5,9 +5,9 @@ import AxeBuilder from '@axe-core/playwright'
  * Catalog component-detail smoke (R1 of the dual-output replan, spec
  * AC5/AC6/AC7).
  *
- * - ONE smoke test opens all 28 #/components/<slug> hash routes inside a
- *   single reused page (hash navigation never reloads the catalog SPA) and
- *   asserts, per slug: detail heading, resolved live preview (placeholder
+ * - ONE smoke test opens all 28 /catalog/components/<slug> routes inside a
+ *   single reused page (clean URL navigation never reloads the catalog SPA)
+ *   and asserts, per slug: detail heading, resolved live preview (placeholder
  *   gone, real content present), the API contract / Contoh pemakaian /
  *   Meta sections, and zero console errors / pageerrors.
  * - The slug list is a frozen snapshot of the 28 visual manifest entries
@@ -30,8 +30,8 @@ const main = (page: Page) => page.locator('main.kx-cat-main')
  *  any section inside a preview frame. */
 const detailPage = (page: Page) => main(page).locator('.kx-cat-page').last()
 
-async function gotoCatalog(page: Page, hash = '') {
-  await page.goto(`/catalog.html${hash}`)
+async function gotoCatalog(page: Page, path = '/catalog') {
+  await page.goto(path)
   await expect(nav(page)).toBeVisible()
 }
 
@@ -136,7 +136,7 @@ test.describe('catalog component detail smoke (28 visual entries)', () => {
   // real components. Generous but bounded timeout.
   test.setTimeout(180_000)
 
-  test('all 28 #/components/<slug> routes render heading, preview, and sections without console errors', async ({
+  test('all 28 /catalog/components/<slug> routes render heading, preview, and sections without console errors', async ({
     page,
   }) => {
     test.skip(VISUAL_SLUGS.length !== 28, 'visual slug snapshot drifted')
@@ -156,16 +156,14 @@ test.describe('catalog component detail smoke (28 visual entries)', () => {
     })
 
     // Initialize the catalog app at components index before looping.
-    await gotoCatalog(page, '#/components')
+    await gotoCatalog(page, '/catalog/components')
 
     for (const { slug, name } of VISUAL_SLUGS) {
-      // Isolate each lazy preview/fixture with a document navigation. Hash-only
+      // Isolate each lazy preview/fixture with a document navigation. Path-only
       // churn leaves stateful overlay fixtures from the prior specimen alive.
-      // A hash-only goto does not reload a document. Give each specimen a
-      // harmless unique query so stateful fixture trees cannot leak across
-      // slugs, while the hash router remains the route under test.
-      await page.goto(`/catalog.html?smoke=${slug}#/components/${slug}`, { waitUntil: 'networkidle' })
-      await expect(page).toHaveURL(new RegExp(`#\/components\/${slug}$`))
+      // Navigate directly to the clean URL for each slug.
+      await page.goto(`/catalog/components/${slug}?smoke=${slug}`, { waitUntil: 'networkidle' })
+      await expect(page).toHaveURL(new RegExp(`catalog/components/${slug}\\?smoke=${slug}$`))
       // Wait for the main element to be stable before checking content.
       await expect(main(page), `catalog main for ${slug}`).toBeVisible()
       // Wait for the heading to be visible - this also ensures the previous
@@ -187,7 +185,7 @@ test.describe('axe wcag2aa — representative detail per domain', () => {
     test(`${domain} representative (${slug}) has zero violations`, async ({
       page,
     }) => {
-      await gotoCatalog(page, `#/components/${slug}`)
+      await gotoCatalog(page, `/catalog/components/${slug}`)
       await expect(
         detailPage(page).getByRole('heading', { name, level: 1 }),
       ).toBeVisible()
@@ -198,6 +196,94 @@ test.describe('axe wcag2aa — representative detail per domain', () => {
         results.violations,
         `${slug}: ${JSON.stringify(results.violations, null, 2)}`,
       ).toEqual([])
+    })
+  }
+})
+
+/**
+ * Catalog breadcrumb and backlink navigation tests — verify that focus
+ * traps in catalog previews do not block navigation clicks.
+ *
+ * Tests the three components with live modal previews that were most
+ * problematic before the CatalogPreviewContext fix: customize-modal,
+ * learned-drawer, and settings-modal.
+ */
+const NAVIGATION_TEST_SLUGS: ReadonlyArray<{
+  slug: string
+  name: string
+  reason: string
+}> = [
+  {
+    slug: 'customize-modal',
+    name: 'CustomizeModal',
+    reason: 'most complex modal with 7 tabs and nested components',
+  },
+  {
+    slug: 'learned-drawer',
+    name: 'LearnedDrawer',
+    reason: 'drawer with focus containment and interactive tabs',
+  },
+  {
+    slug: 'settings-modal',
+    name: 'SettingsModal',
+    reason: 'settings modal with focus containment',
+  },
+]
+
+test.describe('catalog breadcrumb and backlink navigation', () => {
+  for (const { slug, name, reason } of NAVIGATION_TEST_SLUGS) {
+    test(`${slug} (${reason}): breadcrumb navigates to components index after preview loads`, async ({
+      page,
+    }) => {
+      await gotoCatalog(page, `/catalog/components/${slug}`)
+
+      // Wait for the detail page and preview to fully load
+      await expect(
+        detailPage(page).getByRole('heading', { name, level: 1 }),
+      ).toBeVisible()
+      await expectResolvedPreview(page)
+
+      // The breadcrumb link should be present and clickable
+      const breadcrumbLink = detailPage(page).getByRole('link', {
+        name: 'Components',
+      })
+      await expect(breadcrumbLink).toBeVisible()
+
+      // Click the breadcrumb — this should navigate to the components index
+      await breadcrumbLink.click()
+      await expect(page).toHaveURL('/catalog/components')
+
+      // Verify we're on the components index page
+      await expect(
+        main(page).getByRole('heading', { name: 'Components', level: 1 }),
+      ).toBeVisible()
+    })
+
+    test(`${slug} (${reason}): backlink navigates to components index after preview loads`, async ({
+      page,
+    }) => {
+      await gotoCatalog(page, `/catalog/components/${slug}`)
+
+      // Wait for the detail page and preview to fully load
+      await expect(
+        detailPage(page).getByRole('heading', { name, level: 1 }),
+      ).toBeVisible()
+      await expectResolvedPreview(page)
+
+      // The backlink should be present and clickable
+      const backlink = detailPage(page).getByRole('link', {
+        name: /Kembali ke indeks komponen/i,
+      })
+      await expect(backlink).toBeVisible()
+
+      // Click the backlink — this should navigate to the components index
+      await backlink.click()
+      await expect(page).toHaveURL('/catalog/components')
+
+      // Verify we're on the components index page
+      await expect(
+        main(page).getByRole('heading', { name: 'Components', level: 1 }),
+      ).toBeVisible()
     })
   }
 })

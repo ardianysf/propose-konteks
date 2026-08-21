@@ -16,8 +16,8 @@ import AxeBuilder from '@axe-core/playwright'
 const nav = (page: Page) => page.getByRole('navigation', { name: 'Catalog' })
 const main = (page: Page) => page.locator('main.kx-cat-main')
 
-async function gotoCatalog(page: Page, hash = '') {
-  await page.goto(`/catalog.html${hash}`)
+async function gotoCatalog(page: Page, path = '/catalog') {
+  await page.goto(path)
   await expect(nav(page)).toBeVisible()
 }
 
@@ -74,7 +74,7 @@ test.describe('catalog content', () => {
   test('tokens page groups render and the theme toggle flips live token values', async ({
     page,
   }) => {
-    await gotoCatalog(page, '#/tokens')
+    await gotoCatalog(page, '/catalog/tokens')
 
     // All three token groups render with their rows.
     for (const title of ['Colors', 'Typography', 'Dimensions']) {
@@ -127,7 +127,7 @@ test.describe('catalog content', () => {
   test('components index groups entries per domain and links both samples to details', async ({
     page,
   }) => {
-    await gotoCatalog(page, '#/components')
+    await gotoCatalog(page, '/catalog/components')
     await expect(main(page).getByRole('heading', { name: 'Components' })).toBeVisible()
 
     // Entries are grouped per domain (component domains + internal + utility).
@@ -155,24 +155,24 @@ test.describe('catalog content', () => {
     })
     await expect(workspaceMenuLink).toHaveAttribute(
       'href',
-      '#/components/workspace-menu',
+      '/catalog/components/workspace-menu',
     )
     await expect(sessionStatusBadgeLink).toHaveAttribute(
       'href',
-      '#/components/session-status-badge',
+      '/catalog/components/session-status-badge',
     )
 
     // Clicking each sample entry opens its detail page.
     await workspaceMenuLink.click()
-    expect(new URL(page.url()).hash).toBe('#/components/workspace-menu')
+    expect(new URL(page.url()).pathname).toBe('/catalog/components/workspace-menu')
     await expect(
       main(page).getByRole('heading', { name: 'WorkspaceMenu' }),
     ).toBeVisible()
 
     await main(page).getByRole('link', { name: 'Components' }).first().click()
-    expect(new URL(page.url()).hash).toBe('#/components')
+    expect(new URL(page.url()).pathname).toBe('/catalog/components')
     await sessionStatusBadgeLink.click()
-    expect(new URL(page.url()).hash).toBe('#/components/session-status-badge')
+    expect(new URL(page.url()).pathname).toBe('/catalog/components/session-status-badge')
     await expect(
       main(page).getByRole('heading', { name: 'SessionStatusBadge' }),
     ).toBeVisible()
@@ -181,7 +181,7 @@ test.describe('catalog content', () => {
   test('workspace-menu detail shows the live preview and contract/meta sections', async ({
     page,
   }) => {
-    await gotoCatalog(page, '#/components/workspace-menu')
+    await gotoCatalog(page, '/catalog/components/workspace-menu')
     await expect(
       main(page).getByRole('heading', { name: 'WorkspaceMenu' }),
     ).toBeVisible()
@@ -215,7 +215,7 @@ test.describe('catalog content', () => {
   test('session-status-badge detail shows status variant previews and sections', async ({
     page,
   }) => {
-    await gotoCatalog(page, '#/components/session-status-badge')
+    await gotoCatalog(page, '/catalog/components/session-status-badge')
     await expect(
       main(page).getByRole('heading', { name: 'SessionStatusBadge' }),
     ).toBeVisible()
@@ -247,14 +247,14 @@ test.describe('catalog content', () => {
   })
 
   test.describe('axe wcag2aa', () => {
-    const PAGES: Array<{ label: string; hash: string }> = [
-      { label: 'overview', hash: '#/' },
-      { label: 'tokens', hash: '#/tokens' },
-      { label: 'components index', hash: '#/components' },
-      { label: 'workspace-menu detail', hash: '#/components/workspace-menu' },
+    const PAGES: Array<{ label: string; path: string }> = [
+      { label: 'overview', path: '/catalog' },
+      { label: 'tokens', path: '/catalog/tokens' },
+      { label: 'components index', path: '/catalog/components' },
+      { label: 'workspace-menu detail', path: '/catalog/components/workspace-menu' },
       {
         label: 'session-status-badge detail',
-        hash: '#/components/session-status-badge',
+        path: '/catalog/components/session-status-badge',
       },
     ]
     const VIEWPORTS: Array<{ width: number; height: number }> = [
@@ -263,18 +263,18 @@ test.describe('catalog content', () => {
     ]
 
     for (const viewport of VIEWPORTS) {
-      for (const { label, hash } of PAGES) {
+      for (const { label, path } of PAGES) {
         test(`${label} has zero violations at ${viewport.width}x${viewport.height}`, async ({
           page,
         }) => {
           await page.setViewportSize(viewport)
-          await gotoCatalog(page, hash)
+          await gotoCatalog(page, path)
           // Wait for the page's main heading (and, on detail pages, the
           // async live preview) so axe scans the fully rendered content.
           await expect(
             main(page).locator('h1.kx-cat-title').first(),
           ).toBeVisible()
-          if (hash.startsWith('#/components/')) {
+          if (path.startsWith('/catalog/components/')) {
             await expect(
               main(page)
                 .locator('.kx-cat-preview-frame')
