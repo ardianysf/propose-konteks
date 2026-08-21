@@ -434,22 +434,22 @@ Uses tokens from `[data-theme='dark']`. **All runtime CSS must exclusively consu
 
 ### 9.4 Catalog Preview Compatibility
 
-25. When rendered in the catalog preview (`CatalogPreviewContext`), production focus containment is disabled (no focus trap, no modal blocking).
+25. When rendered in the catalog preview, `useFocusContainment(dialogRef)` automatically bypasses itself (no custom option needed).
 26. The graph renders correctly in the catalog preview frame with the static overlay class.
 27. Graph selection, zoom/pan controls, and inspector panel remain fully interactive in catalog preview.
 28. CTA button on Component nodes is functional in catalog preview and performs the same navigation/dispatch action.
 29. Catalog navigation (breadcrumb, backlink) remains functional when the SystemMapModal preview loads.
-30. Escape key in catalog preview does not have two-phase ownership; it delegates to the parent preview frame immediately.
+30. Escape key behavior is identical in production and preview; two-phase acts on fixture-local overlay.
 
 ### 9.5 Graph States
 
 31. When the graph is in **Normal state**, all nodes and edges render correctly with valid relationships.
 32. When the graph is in **Repos-No-Components state**, an info banner displays "No components — repositories exist but components are missing".
-33. When the graph is in **Invalid Relations/Orphans state**, a warning banner displays "Some components reference unknown repositories" and orphaned nodes appear with a warning indicator.
-34. When the graph is in **Truly Empty System state**, an empty state displays with message "No repositories or components found for {systemName}. Add repositories to this system to see its architecture graph."
-35. When the graph is in **Fallback state**, a fallback illustrative graph renders with warning banner "Illustrative graph — unable to load real data".
+33. When the graph is in **Invalid state**, a warning banner displays "Some repositories are missing" and dashed placeholder repository nodes render for missing repos.
+34. When the graph is in **Truly Empty state**, an empty state displays with message "No repositories or components found for {systemName}. Add repositories to this system to see its architecture graph."
+35. When the graph is in **Fallback state**, a deterministic 8-node/9-edge illustrative graph renders with warning banner "Illustrative graph — unable to load real data".
 36. The fallback graph is interactive (selectable, zoomable) like the real graph.
-37. Graph states are mutually exclusive and evaluated in priority order: Fallback → Invalid Relations/Orphans → Truly Empty System → Repos-No-Components → Normal.
+37. Graph states are mutually exclusive and evaluated in priority order: Fallback → Invalid → Truly Empty → Repos-No-Components → Normal.
 
 ### 9.6 Loading and Error States
 
@@ -460,11 +460,11 @@ Uses tokens from `[data-theme='dark']`. **All runtime CSS must exclusively consu
 ### 9.7 Performance and Bundle Size
 
 41. The `@xyflow/react` library is lazy-loaded at the **AppShell/overlay slot boundary** and does not block initial page load.
-    - **Validation**: Run Lighthouse performance audit before and after. Initial Time to Interactive (TTI) must not increase by more than 50ms.
     - **Validation**: Network tab shows SystemMapModal chunk loaded only after user opens the modal, not on initial page load.
-    - **Lazy import location**: `src/AppShell.tsx` or the overlay slot component that renders modal dialogs.
-42. The gzipped bundle size for the SystemMapModal chunk is approximately 60KB (±10KB acceptable).
-    - **Validation**: Run `npx vite-bundle-visualizer` or `webpack-bundle-analyzer`. Confirm SystemMapModal chunk size is between 50-70KB gzipped.
+    - **Evidence**: Provide build output or bundle analyzer screenshot confirming chunk is only loaded when overlay opens.
+    - **Lazy import location**: `src/AppShell.tsx` overlay slot.
+42. The gzipped bundle size for the SystemMapModal chunk is **50–70 KB**.
+    - **Validation**: Run `npx vite-bundle-visualizer` or `webpack-bundle-analyzer`. Confirm SystemMapModal chunk size is within 50-70KB gzipped.
     - **Validation**: The chunk includes `@xyflow/react` core, React Flow CSS, custom node components, and graph utilities.
 43. The graph renders smoothly with no perceptible jank on first selection or zoom.
     - **Validation**: Chrome DevTools Performance recording shows frame rate ≥ 55 FPS during first node selection and zoom interaction.
@@ -472,9 +472,9 @@ Uses tokens from `[data-theme='dark']`. **All runtime CSS must exclusively consu
 
 ### 9.8 Data Model Correctness
 
-44. Nodes are created from the active system's repositories (via `system.repoIds`).
-45. Components are correctly associated with their parent repositories via `component.repoId`.
-46. Edges are created only where valid relationships exist (no orphaned nodes).
+44. Repository nodes are created only for `repo.id` values in `system.repoIds` where Repository record exists.
+45. Component nodes render only if `component.repoId` is in `system.repoIds` (out-of-scope components never render).
+46. Edges are created only for valid relationships; Invalid state renders dashed placeholder repository nodes so edges have valid targets.
 47. Node labels display the correct names from the data model.
 
 ## 10. Test Plan
@@ -678,19 +678,37 @@ Define custom node components for each type:
 
 ```typescript
 const SystemNode = ({ data, selected }: NodeProps) => (
-  <div className={`kx-flow-node kx-flow-node--system ${selected ? 'kx-flow-node--selected' : ''}`}>
+  <div 
+    className={`kx-flow-node kx-flow-node--system ${selected ? 'kx-flow-node--selected' : ''}`}
+    tabIndex={0}
+    aria-pressed={selected}
+    role="button"
+    aria-label={`System: ${data.label}`}
+  >
     {data.label}
   </div>
 )
 
 const RepositoryNode = ({ data, selected }: NodeProps) => (
-  <div className={`kx-flow-node kx-flow-node--repo ${selected ? 'kx-flow-node--selected' : ''}`}>
+  <div 
+    className={`kx-flow-node kx-flow-node--repo ${selected ? 'kx-flow-node--selected' : ''}`}
+    tabIndex={0}
+    aria-pressed={selected}
+    role="button"
+    aria-label={`Repository: ${data.label}`}
+  >
     {data.label}
   </div>
 )
 
 const ComponentNode = ({ data, selected }: NodeProps) => (
-  <div className={`kx-flow-node kx-flow-node--component ${selected ? 'kx-flow-node--selected' : ''}`}>
+  <div 
+    className={`kx-flow-node kx-flow-node--component ${selected ? 'kx-flow-node--selected' : ''}`}
+    tabIndex={0}
+    aria-pressed={selected}
+    role="button"
+    aria-label={`Component: ${data.label}`}
+  >
     {data.label}
   </div>
 )
@@ -707,6 +725,7 @@ const nodeTypes = {
 **All runtime CSS must exclusively consume tokens. No hardcoded hex values in production code.**
 
 ```css
+/* All runtime CSS uses tokens exclusively; no hardcoded hex values */
 .kx-flow-node {
   background-color: var(--kx-raised);
   border: 1.5px solid var(--kx-border);
@@ -715,19 +734,32 @@ const nodeTypes = {
 }
 
 .kx-flow-node--system {
-  background-color: var(--kx-accent);
+  background-color: var(--kx-raised);
   border-color: var(--kx-accent-strong);
-  color: var(--kx-text-on-accent, #FFFFFF); /* AA-safe on --kx-accent */
+  color: var(--kx-primary);
+}
+
+.kx-flow-node--system .kx-flow-node__type-badge {
+  color: var(--kx-accent-text-aa);
 }
 
 .kx-flow-node--repo {
   background-color: var(--kx-pale);
+  border-color: var(--kx-border);
+  color: var(--kx-primary);
+}
+
+.kx-flow-node--component {
+  background-color: var(--kx-raised);
+  border-color: var(--kx-border);
+  color: var(--kx-primary);
 }
 
 .kx-flow-node--selected {
+  /* Fill unchanged from unselected state */
   border-color: var(--kx-accent-strong);
   border-width: 2.5px;
-  box-shadow: 0 0 0 3px var(--kx-selection-ring, rgba(143, 191, 106, 0.2)); /* Use existing token or AA-safe documented value */
+  box-shadow: 0 0 0 4px rgb(var(--kx-ink-rgb) / 0.14);
 }
 
 .kx-flow-edge {
@@ -745,16 +777,21 @@ const nodeTypes = {
   stroke-width: 1px;
   opacity: 0.3;
 }
+
+/* CTA reuses .kx-btn--primary primitive - no internal color restatement */
+.kx-system-map__cta {
+  /* Extends .kx-btn--primary - no color properties defined here */
+}
 ```
 
 ### 12.4 Focus Containment Integration
 
-Preserve the existing `useFocusContainment` hook usage:
+Call existing `useFocusContainment` with no custom option:
 
 ```typescript
 export default function SystemMapModal() {
   const dialogRef = useRef<HTMLDivElement>(null)
-  useFocusContainment(dialogRef)
+  useFocusContainment(dialogRef) // No custom option - bypasses itself in CatalogPreviewProvider
   
   return (
     <div ref={dialogRef} role="dialog" aria-modal="true" className="kx-modal kx-system-map">
@@ -766,49 +803,33 @@ export default function SystemMapModal() {
 
 ### 12.5 Catalog Preview Compatibility
 
-Wrap focus containment in a check for catalog preview context to disable only the focus trap, while preserving all graph interactivity:
+No conditional branches for `isCatalogPreview` in component code:
 
 ```typescript
-const isCatalogPreview = useIsCatalogPreview()
+// Zero isCatalogPreview branches - behavior differs automatically
+// Focus: useFocusContainment bypasses itself in CatalogPreviewProvider
+// Interactions: selection, zoom, pan, inspector, CTA all work identically
 
-// Hook-safe focus containment: always called, enabled via option
-const dialogRef = useRef<HTMLDivElement>(null)
-useFocusContainment(dialogRef, { enabled: !isCatalogPreview })
-
-// Graph interactivity remains fully functional in preview
+// Graph interactivity remains fully functional in both contexts
 const onNodeClick = useCallback((event: NodeMouseEvent) => {
-  // Normal selection logic works in both production and preview
-  // No need to check isCatalogPreview here
   setSelectedNode(event.node)
   updateInspector(event.node)
 }, [])
 ```
 
-For Escape key handling:
+Escape key handling (identical in production and preview):
 ```typescript
 const onKeyDown = useCallback((event: KeyboardEvent) => {
   if (event.key !== 'Escape') return
   
-  if (isCatalogPreview) {
-    // In preview: selection clear may run, but do NOT call onClose or stopPropagation.
-    // Allow the parent preview frame to handle Escape for navigation.
-    if (selectedNode) {
-      setSelectedNode(null)
-    }
-    // Do NOT call event.stopPropagation() or onClose() in preview.
-    // Parent preview frame manages Escape for its own navigation.
-    return
-  }
-  
-  // In production: two-phase ownership
-  if (selectedNode) {
+  // Identical behavior in production and preview
+  if (selectedNode && !event.isComposing) {
     setSelectedNode(null)
-    // Return focus to first node or close button
-    focusFirstNodeOrClose()
-  } else {
-    onClose() // Close modal and restore focus to trigger
+    event.preventDefault() // Prevent OverlayLifecycle from closing
   }
-}, [selectedNode, isCatalogPreview, onClose])
+  // Otherwise: no action, OverlayLifecycle document listener closes modal
+  // Close calls dismissOverlay (no restoration in preview due to null origin)
+}, [selectedNode])
 ```
 
 ## 13. Risks and Non-Goals
@@ -841,23 +862,20 @@ const onKeyDown = useCallback((event: KeyboardEvent) => {
 **User-confirmed behavior for "Start session with {component-name}"**:
 
 When a user clicks the CTA button on a selected Component node:
-1. The System Map modal closes immediately
-2. Navigation/dispatch to the New Session route or modal occurs
-3. The selected component is committed as the session context with the following data:
-   ```typescript
-   {
-     componentId: string,      // The selected component's ID
-     repositoryId: string,     // The component's parent repository ID
-     systemId: string,         // The active system's ID
-     source: 'system-map-cta'  // Indicates the source for analytics
-   }
-   ```
+1. The System Map modal closes immediately (via `dismissOverlay`)
+2. The following reducer actions are dispatched in sequence:
+   - `CLEAR_COMPONENTS`
+   - `TOGGLE_COMPONENT {componentId}`
+   - `CONFIRM_SESSION_CONTEXT {systemId, repoIds: [component.repoId]}`
+3. Navigation/dispatch to the New Session route or modal occurs
 
 **Implementation requirements**:
+- Use the actual reducer sequence as specified (no made-up payload)
+- `repoIds` array contains only the selected component's repository ID
+- Do not add `source: 'system-map-cta'` or other made-up payload fields
 - Use the existing session creation flow (same as selecting a component from other UI paths)
 - Do not bypass existing validation or authentication checks
 - Ensure focus is properly managed after navigation
-- Log the `system-map-cta` source for analytics
 
 ### 14.2 Additional Implementation Notes
 
@@ -884,13 +902,14 @@ When a user clicks the CTA button on a selected Component node:
 | Zoom/pan controls | ✅ Clear | Four buttons: in, out, fit, reset |
 | Theme support | ✅ Resolved | All runtime CSS uses tokens exclusively; hex values documentation-only |
 | Keyboard navigation | ✅ Resolved | Two-phase Escape ownership: clear selection first, then close |
-| Focus management | ✅ Resolved | Production (focus trap) vs Preview (no trap) behavior separately defined |
-| Node keyboard focus | ✅ Resolved | Focusable nodes in both contexts with visible indicators |
-| Catalog preview | ✅ Resolved | Focus trap disabled, graph interactivity fully functional |
-| Graph states | ✅ Resolved | Five mutually exclusive states: normal, repos-no-components, invalid relations/orphans, truly empty, fallback |
-| Fallback behavior | ✅ Clear | Illustrative graph only in Fallback state |
-| Bundle strategy | ✅ Resolved | Lazy load at AppShell/overlay slot, measurable validation defined |
-| Accessibility | ✅ Clear | ARIA, focus management, screen reader support |
+| Focus management | ✅ Resolved | Production (focus trap via useFocusContainment, no custom option) vs Preview (bypasses automatically in CatalogPreviewProvider) |
+| Node keyboard focus | ✅ Resolved | tabIndex=0, aria-pressed for selection state |
+| Catalog preview | ✅ Resolved | Zero isCatalogPreview conditional branches; Escape two-phase acts on fixture-local overlay |
+| Graph states | ✅ Resolved | Five mutually exclusive states: normal, repos-no-components, invalid, truly empty, fallback |
+| Graph scope | ✅ Resolved | Repos from system.repoIds with matching records; components only if repoId in system.repoIds |
+| Fallback behavior | ✅ Clear | Deterministic 8-node/9-edge illustrative graph; no synchronous retry |
+| Bundle strategy | ✅ Resolved | Lazy load at AppShell/overlay slot, 50–70KB gzip budget |
+| Accessibility | ✅ Clear | ARIA, focus management, screen reader support, aria-pressed not aria-selected |
 
 ### 15.2 Previously Resolved Ambiguities
 
@@ -906,29 +925,32 @@ When a user clicks the CTA button on a selected Component node:
 
 6. **CTA behavior**: **RESOLVED** — User confirmed: closes System Map, navigates to New Session, commits component as session context.
 
-7. **Catalog preview interactivity**: **RESOLVED** — Only focus trap is disabled; graph selection, controls, inspector, and CTA all work normally.
+7. **Catalog preview interactivity**: **RESOLVED** — Only focus behavior differs automatically; zero isCatalogPreview branches.
 
-8. **Escape key ownership**: **RESOLVED** — Two-phase in production (clear selection, then close); immediate delegation in preview.
+8. **Escape key ownership**: **RESOLVED** — Identical prod/preview; root onKeyDown, if selected+Escape non-composing then clear+preventDefault.
 
 9. **Direct dependencies definition**: **RESOLVED** — Immediate incoming/outgoing neighbors only, not transitive.
 
-10. **Lazy import boundary**: **RESOLVED** — At AppShell/overlay slot with measurable validation criteria.
+10. **Lazy import boundary**: **RESOLVED** — At AppShell/overlay slot, 50–70KB gzip budget, evidence required.
 
-11. **Theme CSS literals**: **RESOLVED** — Runtime CSS uses tokens exclusively; hex values only in documentation.
+11. **Theme CSS literals**: **RESOLVED** — Runtime CSS uses tokens exclusively; hex values only in documentation; no --kx-text-on-accent or --kx-selection-ring tokens.
 
-12. **Initial focus separation**: **RESOLVED** — Production (first node or close button) vs Preview (first node, no trap).
+12. **Initial focus separation**: **RESOLVED** — Production (dialog root) vs Preview (none).
 
 ### 15.3 No Contradictions Found
 
 The specification is now internally consistent:
 - Visual design uses the same token system as the rest of the app
+- Runtime CSS uses tokens exclusively; no hardcoded colors or nonexistent tokens
 - Interaction patterns match existing modal behavior
-- Accessibility requirements align with WCAG AA and existing patterns
-- Bundle strategy accounts for the new dependency with measurable validation
-- All validator findings have been addressed
-- Graph states are mutually exclusive and clearly prioritized
-- CTA state and dispatch contract are explicit
-- Escape key ownership is clearly defined for both production and preview contexts
+- Accessibility requirements align with WCAG AA and existing patterns (aria-pressed, not aria-selected)
+- Bundle strategy accounts for the new dependency with 50–70KB gzip budget
+- Focus containment uses existing hook with no custom option; bypasses automatically in preview
+- Escape key ownership is identical in production and preview
+- Graph states are mutually exclusive, clearly prioritized, and properly scoped
+- CTA dispatch uses actual reducer sequence (no made-up payload)
+- Canonical Repository → Component → System ordering everywhere
+- All AC IDs are uniquely numbered
 
 ---
 
