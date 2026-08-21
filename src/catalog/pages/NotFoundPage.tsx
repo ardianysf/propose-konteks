@@ -1,25 +1,29 @@
+import { getPathnameFor } from '../router'
+
 interface NotFoundPageProps {
-  /** Original hash that failed to parse, shown verbatim for debugging. */
-  hash: string
+  /** Original path that failed to parse, shown verbatim for debugging. */
+  path: string
 }
 
 /**
- * Not-found — hash tak dikenal (kontrak router spec §2: didokumentasikan,
+ * Not-found — path tak dikenal (kontrak router spec §2: didokumentasikan,
  * bukan redirect diam-diam).
  */
-export function NotFoundPage({ hash }: NotFoundPageProps) {
+export function NotFoundPage({ path }: NotFoundPageProps) {
   return (
     <section className="kx-cat-page" aria-labelledby="kx-cat-notfound-title">
       <h1 id="kx-cat-notfound-title" className="kx-cat-title">
         Halaman tidak ditemukan
       </h1>
       <p className="kx-cat-lede">
-        Hash <code>{hash || '(kosong)'}</code> tidak cocok dengan route katalog
+        Path <code>{path || '(kosong)'}</code> tidak cocok dengan route katalog
         manapun.
       </p>
       <p>
-        Route yang tersedia: <a href="#/">Overview</a>,{' '}
-        <a href="#/tokens">Tokens</a>, dan <a href="#/components">Components</a>.
+        Route yang tersedia:{' '}
+        <a href={getPathnameFor({ name: 'overview' })}>Overview</a>,{' '}
+        <a href={getPathnameFor({ name: 'tokens' })}>Tokens</a>, dan{' '}
+        <a href={getPathnameFor({ name: 'components' })}>Components</a>.
       </p>
     </section>
   )

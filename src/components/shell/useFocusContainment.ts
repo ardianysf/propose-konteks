@@ -7,9 +7,14 @@
  * tabIndex={-1} root, then installs bubbling document keydown/focusin
  * listeners with a redirect guard; cleanup removes both listeners. Menus
  * intentionally do not use this hook.
+ *
+ * Catalog previews bypass containment (via CatalogPreviewContext) to
+ * preserve catalog navigation: focus traps would block breadcrumb/backlink
+ * clicks after the lazy preview resolves.
  */
 import { useLayoutEffect, useRef, type RefObject } from 'react'
 import { getTabbableElements } from '../../utils/overlays'
+import { useIsCatalogPreview } from '../../catalog/CatalogPreviewContext'
 
 export interface FocusContainmentOptions {
   /** When false the hook installs nothing (kept for callers that may gate). */
@@ -22,8 +27,11 @@ export function useFocusContainment(
 ): void {
   const active = options?.active ?? true
   const redirectingRef = useRef(false)
+  const isCatalogPreview = useIsCatalogPreview()
 
   useLayoutEffect(() => {
+    // Skip containment in catalog previews to preserve navigation
+    if (isCatalogPreview) return
     if (!active) return
     const root = rootRef.current
     if (!root || !root.isConnected) return
@@ -99,5 +107,5 @@ export function useFocusContainment(
       document.removeEventListener('keydown', onKeyDown)
       document.removeEventListener('focusin', onFocusIn)
     }
-  }, [active, rootRef])
+  }, [active, isCatalogPreview, rootRef])
 }

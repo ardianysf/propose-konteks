@@ -6,6 +6,22 @@
  * Target viewport: ≥1200px (1440 & 1200 tested; below that is out of scope).
  */
 
+/* ------------------------------------------------------------------------
+ * Catalog-scoped scroll enablement
+ *
+ * global.css locks html/body with overflow: hidden for the mockup app.
+ * The catalog doesn't render .kx-app/.kx-main (the mockup scroll owners),
+ * so we enable document-level scrolling ONLY when the kx-catalog-page class
+ * is present (added by catalog/main.tsx). This preserves the mockup's
+ * scroll ownership contract.
+ * ----------------------------------------------------------------------*/
+
+html.kx-catalog-page,
+html.kx-catalog-page body {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .kx-cat-shell {
   min-height: 100vh;
   background: var(--kx-canvas);

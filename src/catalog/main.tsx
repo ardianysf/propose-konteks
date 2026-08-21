@@ -14,6 +14,20 @@ import CatalogApp from './CatalogApp'
 // already stamped data-theme; this persists/attaches the system listener).
 initTheme()
 
+// Add catalog-scoped class to enable vertical scrolling.
+// This overrides global.css's overflow: hidden for catalog pages only,
+// preserving the mockup shell's scroll ownership.
+document.documentElement.classList.add('kx-catalog-page')
+
+// Cleanup function for hot module replacement (development only).
+// @ts-ignore - Vite HMR API
+if (import.meta.hot) {
+  // @ts-ignore - Vite HMR API
+  import.meta.hot.dispose(() => {
+    document.documentElement.classList.remove('kx-catalog-page')
+  })
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <CatalogApp />

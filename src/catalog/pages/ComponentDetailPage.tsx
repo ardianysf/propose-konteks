@@ -13,6 +13,8 @@
 import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from 'react'
 import { getManifestEntry, type ManifestEntry } from '../manifest'
 import { registry, usageSnippet } from '../registry'
+import { getPathnameFor, navigateTo } from '../router'
+import { CatalogPreviewProvider } from '../CatalogPreviewContext'
 
 type LoadedModule = { default?: unknown; [k: string]: unknown }
 
@@ -118,7 +120,11 @@ function LivePreview({ entry }: { entry: ManifestEntry }) {
   }
 
   if (registryEntry?.preview) {
-    return <>{registryEntry.preview(mod)}</>
+    return (
+      <CatalogPreviewProvider>
+        {registryEntry.preview(mod)}
+      </CatalogPreviewProvider>
+    )
   }
 
   const ComponentImpl = mod.default as
@@ -132,9 +138,11 @@ function LivePreview({ entry }: { entry: ManifestEntry }) {
     )
   }
   return (
-    <PreviewErrorBoundary resetKey={entry.id}>
-      <ComponentImpl />
-    </PreviewErrorBoundary>
+    <CatalogPreviewProvider>
+      <PreviewErrorBoundary resetKey={entry.id}>
+        <ComponentImpl />
+      </PreviewErrorBoundary>
+    </CatalogPreviewProvider>
   )
 }
 
@@ -277,7 +285,15 @@ export function ComponentDetailPage({ slug }: ComponentDetailPageProps) {
     return (
       <section className="kx-cat-page" aria-labelledby="kx-cat-component-title">
         <p className="kx-cat-breadcrumb">
-          <a href="#/components">Components</a>
+          <a
+            href={getPathnameFor({ name: 'components' })}
+            onClick={(e) => {
+              e.preventDefault()
+              navigateTo({ name: 'components' })
+            }}
+          >
+            Components
+          </a>
           <span aria-hidden="true"> / </span>
           {slug}
         </p>
@@ -289,8 +305,17 @@ export function ComponentDetailPage({ slug }: ComponentDetailPageProps) {
           <code>src/catalog/components.json</code>.
         </p>
         <p>
-          Kembali ke <a href="#/components">indeks komponen</a> untuk daftar
-          lengkap.
+          Kembali ke{' '}
+          <a
+            href={getPathnameFor({ name: 'components' })}
+            onClick={(e) => {
+              e.preventDefault()
+              navigateTo({ name: 'components' })
+            }}
+          >
+            indeks komponen
+          </a>{' '}
+          untuk daftar lengkap.
         </p>
       </section>
     )
@@ -299,7 +324,15 @@ export function ComponentDetailPage({ slug }: ComponentDetailPageProps) {
   return (
     <section className="kx-cat-page" aria-labelledby="kx-cat-component-title">
       <p className="kx-cat-breadcrumb">
-        <a href="#/components">Components</a>
+        <a
+          href={getPathnameFor({ name: 'components' })}
+          onClick={(e) => {
+            e.preventDefault()
+            navigateTo({ name: 'components' })
+          }}
+        >
+          Components
+        </a>
         <span aria-hidden="true"> / </span>
         {entry.id}
       </p>
@@ -369,7 +402,15 @@ export function ComponentDetailPage({ slug }: ComponentDetailPageProps) {
       </section>
 
       <p className="kx-cat-backlink">
-        <a href="#/components">← Kembali ke indeks komponen</a>
+        <a
+          href={getPathnameFor({ name: 'components' })}
+          onClick={(e) => {
+            e.preventDefault()
+            navigateTo({ name: 'components' })
+          }}
+        >
+          ← Kembali ke indeks komponen
+        </a>
       </p>
     </section>
   )

@@ -52,7 +52,7 @@ describe('ComponentDetailPage', () => {
     // Back link
     expect(
       screen.getByRole('link', { name: /Kembali ke indeks komponen/ }),
-    ).toHaveAttribute('href', '#/components')
+    ).toHaveAttribute('href', '/catalog/components')
   })
 
   it('renders preview variants and context contract for session-status-badge', async () => {
@@ -97,6 +97,6 @@ describe('ComponentDetailPage', () => {
     ).toBeGreaterThan(0)
     expect(
       screen.getByRole('link', { name: 'indeks komponen' }),
-    ).toHaveAttribute('href', '#/components')
+    ).toHaveAttribute('href', '/catalog/components')
   })
 })
