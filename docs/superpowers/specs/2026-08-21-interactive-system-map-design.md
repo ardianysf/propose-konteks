@@ -9,7 +9,7 @@
 
 ## 1. Objective
 
-Replace the current static SVG SystemMapModal with an interactive, lazy-loaded graph visualization powered by `@xyflow/react` (React Flow). The new interactive system map will display the relationship hierarchy **Repository → Component → System**, enable node selection, highlight direct dependencies, expose component actions via a right-side inspector, and provide zoom/pan controls while maintaining production focus containment, catalog preview compatibility, and full theme token support for both light and dark modes.
+Replace the current static SVG SystemMapModal with an interactive, lazy-loaded graph visualization powered by `@xyflow/react` (React Flow). The new interactive system map will display the relationship hierarchy **Repository → Component → System** (left to right), enable node selection, highlight direct dependencies, expose component actions via a right-side inspector, and provide zoom/pan controls while maintaining production focus containment, catalog preview compatibility, and full theme token support for both light and dark modes.
 
 ## 2. Source of Truth
 
@@ -26,7 +26,8 @@ Replace the current static SVG SystemMapModal with an interactive, lazy-loaded g
 ### 3.1 In Scope
 
 - Replace static SVG SystemMapModal with lazy-loaded `@xyflow/react` graph
-- Three-tier graph hierarchy: **System (top/center) → Repository (middle layer) → Component (bottom layer)**
+- Three-tier graph hierarchy: **Repository (left) → Component (middle) → System (right)**
+- Edge direction: Left to right (Repository → Component, Component → System)
 - Node selection via mouse click and keyboard (Enter/Space)
 - Selection highlights direct dependencies (connected nodes and edges)
 - Right-side inspector panel showing selected node details
@@ -112,22 +113,33 @@ export interface GraphEdge {
 
 ### 4.3 Graph Construction Rules
 
-- **Root node**: System node (the active system from context)
-- **Middle layer**: All Repository nodes belonging to the system (via `system.repoIds`)
-- **Bottom layer**: All Component nodes belonging to each repository (via `component.repoId`)
-- **Edges**: System → Repository (one per repo), Repository → Component (one per component)
-- **Positioning**: Hierarchical layout with System at top-center, Repository nodes in a middle row, Component nodes in a bottom row
+- **Left layer**: All Repository nodes belonging to the system (via `system.repoIds`)
+- **Middle layer**: All Component nodes belonging to each repository (via `component.repoId`)
+- **Right layer**: System node (the active system from context)
+- **Edges**: Repository → Component (one per component), Component → System (one per component)
+- **Positioning**: Left-to-right layout with Repository nodes in a left column, Component nodes in a middle column, System node on the right
+- **Edge direction**: All edges flow left to right, representing dependency direction (System depends on Components depends on Repositories)
 
-### 4.4 Fallback Graph Data
+### 4.4 Graph States
 
-When relation data is incomplete (e.g., `repoIds` is empty, or components have invalid `repoId` references), render a deterministic illustrative graph similar to the current SVG implementation:
+The graph operates in mutually exclusive states. The current state is determined by data availability and validity:
 
+| State | Trigger Condition | Behavior | Indicator |
+|-------|------------------|----------|-----------|
+| **Normal** | System has `repoIds` with at least one repository; components have valid `repoId` references | Renders full interactive graph with all nodes and edges | None (normal rendering) |
+| **Repos-No-Components** | System has repositories but no components, or all components have invalid `repoId` references | Renders Repository nodes and System node, shows message "No components found for these repositories" | Info banner: "No components — repositories exist but components are missing" |
+| **Invalid Relations/Orphans** | Some components have `repoId` values that don't match any repository in `system.repoIds` | Renders valid nodes, orphaned nodes appear with warning indicator, dashed edges to orphan container | Warning banner: "Some components reference unknown repositories" |
+| **Truly Empty System** | System has empty `repoIds` array or system exists with no associated repositories | Shows empty state with helpful message | Empty state: "No repositories or components found for {systemName}. Add repositories to this system to see its architecture graph." |
+| **Fallback** | Graph construction throws exception or data is null/undefined | Renders deterministic illustrative graph (1 System, 2-3 Repository, 2-3 Component per repo) | Warning banner: "Illustrative graph — unable to load real data" |
+
+**State Priority (evaluated in order)**: Fallback → Invalid Relations/Orphans → Truly Empty System → Repos-No-Components → Normal
+
+**Fallback Graph Data** (only for Fallback state):
 - 1 System node
 - 2-3 Repository nodes
 - 2-3 Component nodes per repository
+- Edges: Repository → Component → System (same hierarchy as normal)
 - Edges following the same hierarchy
-
-Label the graph with a visible indicator: "Illustrative graph — relation data incomplete"
 
 ## 5. Visual and Layout Contract
 
@@ -158,9 +170,9 @@ The modal frame follows the existing SystemMapModal conventions:
 
 | Node Type | Fill | Stroke | Stroke Width | Corner Radius |
 |-----------|------|--------|--------------|---------------|
-| System | `--kx-accent` (`#8FBF6A`) | `--kx-accent-strong` (`#5F8D4E`) | 2px | 12px |
-| Repository | `--kx-pale` (`#F4F8EE`) | `--kx-border` (`#E2E9D5`) | 1.5px | 10px |
-| Component | `--kx-raised` (`#FFF`) | `--kx-border` (`#E2E9D5`) | 1.5px | 8px |
+| System | `--kx-accent` | `--kx-accent-strong` | 2px | 12px |
+| Repository | `--kx-pale` | `--kx-border` | 1.5px | 10px |
+| Component | `--kx-raised` | `--kx-border` | 1.5px | 8px |
 
 **Selected state** (any type):
 - Fill: `--kx-accent`
@@ -179,6 +191,7 @@ The modal frame follows the existing SystemMapModal conventions:
 | Default (unselected) | `--kx-border` | 1.5px | solid |
 | Highlighted (selected node's dependencies) | `--kx-accent-strong` | 2px | solid |
 | Dimmed (not related to selection) | `--kx-border` | 1px | opacity 0.3 |
+| Orphan component edge | `--kx-border` | 1px | dashed |
 
 Edges should have rounded corners (React Flow `smoothstep` or `bezier` curve type).
 
@@ -211,12 +224,13 @@ Edges should have rounded corners (React Flow `smoothstep` or `bezier` curve typ
 ```
 
 **Inspector CTA Button** (Component nodes only):
-- Background: `--kx-accent-solid-aa` (`#4f7044`)
+- Background: `--kx-accent-solid-aa`
 - Text: white
 - Padding: 10px 16px
 - Border radius: 8px
 - Font: `--kx-text-sm`, `--kx-font-medium`
-- Hover: background `--kx-accent-strong` (`#5F8D4E`)
+- Hover: background `--kx-accent-strong`
+- Disabled state (no component selected): opacity 0.5, pointer-events: none
 
 ### 5.7 Zoom/Pan Controls
 
@@ -246,7 +260,7 @@ Edges should have rounded corners (React Flow `smoothstep` or `bezier` curve typ
    - Direct dependencies highlight (connected nodes and edges)
    - Non-connected nodes/edges dim (opacity 0.3)
    - Inspector populates with node details
-   - For Component nodes: CTA button appears
+   - For Component nodes: CTA button appears in enabled state
 3. **User clicks another node**:
    - Previous selection clears
    - New node selected
@@ -255,13 +269,19 @@ Edges should have rounded corners (React Flow `smoothstep` or `bezier` curve typ
    - Selection clears
    - All nodes/edges return to normal opacity
    - Inspector shows empty state
+5. **User clicks CTA on selected Component**:
+   - System Map modal closes
+   - Navigation/dispatch to New Session route/modal
+   - Selected component is committed as the session context (component ID, repository ID, system ID)
 
 ### 6.2 Keyboard Navigation
 
-- **Tab**: Move focus to next tabbable element (nodes, zoom controls, close button, CTA)
+- **Tab**: Move focus to next tabbable element (nodes, zoom controls, inspector content, close button, CTA)
 - **Shift+Tab**: Move focus backward
 - **Enter/Space**: Activate focused node (select it)
-- **Escape**: Clear selection (if selected) or close modal (if no selection)
+- **Escape** (two-phase ownership):
+  1. **First Escape** (when a node is selected): Clears selection, returns focus to the first node or close button
+  2. **Second Escape** (or when no selection): Delegates to modal close lifecycle, closes the modal and restores focus to trigger
 - **Arrow keys** (optional enhancement): Navigate between connected nodes
 
 ### 6.3 Zoom/Pan Interaction
@@ -302,11 +322,25 @@ When a system has no repositories or components:
 
 ### 7.2 Focus Management
 
-- Preserve existing `useFocusContainment` behavior
-- Respect `CatalogPreviewContext` (skip containment in catalog preview)
+#### Production Dialog Root Behavior (modal opened in-app)
+- Preserve existing `useFocusContainment` behavior for focus trapping
 - Initial focus: First node in the graph (or close button if graph is empty)
-- Focus trap: All focus stays within modal (except in catalog preview)
+- Focus trap: All focus stays within modal boundaries
 - Focus restoration: On modal close, return focus to trigger element
+- Escape key: Two-phase ownership as defined in §6.2
+
+#### Catalog Preview Behavior (modal rendered in preview frame)
+- Respect `CatalogPreviewContext` by disabling only production focus-trap and modal blocking behavior
+- **Graph interactivity remains fully functional**: node selection, zoom/pan controls, inspector, CTA button all work normally
+- Initial focus: First node in the graph (no focus trap applied)
+- No focus restoration on close (preview frame manages its own focus)
+- Escape key: Delegated entirely to parent preview frame (no two-phase ownership in preview)
+
+#### Node Keyboard Focus
+- Nodes are focusable via Tab/Shift+Tab in both production and preview contexts
+- Focused node receives visible focus indicator (outline or ring)
+- Enter/Space on focused node triggers selection
+- Arrow keys (if implemented) move focus between connected nodes
 
 ### 7.3 Keyboard Operability
 
@@ -332,35 +366,35 @@ When a system has no repositories or components:
 
 ### 8.1 Light Theme (Default)
 
-Uses tokens from `:root` in `src/styles/tokens.css`:
+Uses tokens from `:root` in `src/styles/tokens.css`. **All runtime CSS must exclusively consume tokens; hex values in this section are documentation-only for reference**:
 
-- Canvas: `--kx-canvas` (`#FAF8EF`)
-- Modal background: `--kx-raised` (`#FFF`)
-- Graph background: `--kx-raised` (`#FFF`)
-- Borders: `--kx-border` (`#E2E9D5`)
-- Text primary: `--kx-primary` (`#243025`)
-- Text secondary: `--kx-secondary` (`#58735A`)
-- Accent: `--kx-accent` (`#8FBF6A`)
-- Accent strong: `--kx-accent-strong` (`#5F8D4E`)
+- Canvas: `--kx-canvas` (documentation: `#FAF8EF`)
+- Modal background: `--kx-raised` (documentation: `#FFF`)
+- Graph background: `--kx-raised` (documentation: `#FFF`)
+- Borders: `--kx-border` (documentation: `#E2E9D5`)
+- Text primary: `--kx-primary` (documentation: `#243025`)
+- Text secondary: `--kx-secondary` (documentation: `#58735A`)
+- Accent: `--kx-accent` (documentation: `#8FBF6A`)
+- Accent strong: `--kx-accent-strong` (documentation: `#5F8D4E`)
 
 ### 8.2 Dark Theme
 
-Uses tokens from `[data-theme='dark']`:
+Uses tokens from `[data-theme='dark']`. **All runtime CSS must exclusively consume tokens; hex values in this section are documentation-only for reference**:
 
-- Canvas: `--kx-canvas` (`#0F1510`)
-- Modal background: `--kx-raised` (`#1A231B`)
-- Graph background: `--kx-raised` (`#1A231B`)
-- Borders: `--kx-border` (`#35502C`)
-- Text primary: `--kx-primary` (`#E8EDE8`)
-- Text secondary: `--kx-secondary` (`#C5CFC6`)
-- Accent: `--kx-accent` (`#8FBF6A`) — unchanged
-- Accent strong: `--kx-accent-strong` (`#5F8D4E`) — unchanged
+- Canvas: `--kx-canvas` (documentation: `#0F1510`)
+- Modal background: `--kx-raised` (documentation: `#1A231B`)
+- Graph background: `--kx-raised` (documentation: `#1A231B`)
+- Borders: `--kx-border` (documentation: `#35502C`)
+- Text primary: `--kx-primary` (documentation: `#E8EDE8`)
+- Text secondary: `--kx-secondary` (documentation: `#C5CFC6`)
+- Accent: `--kx-accent` (documentation: `#8FBF6A`) — unchanged
+- Accent strong: `--kx-accent-strong` (documentation: `#5F8D4E`) — unchanged
 
 ### 8.3 Theme Switching
 
 - React Flow must re-render when theme changes
-- Use CSS custom properties (variables) for all colors
-- No hardcoded hex values in React Flow node/edge styles
+- **All runtime CSS must use CSS custom properties (variables) exclusively; hardcoded hex values are prohibited in production code**
+- Hex values are only allowed in documentation (as shown in §8.1 and §8.2) and in token definitions in `src/styles/tokens.css`
 - Listen for theme changes and update React Flow instance if needed
 
 ## 9. Acceptance Criteria
@@ -400,15 +434,22 @@ Uses tokens from `[data-theme='dark']`:
 
 ### 9.4 Catalog Preview Compatibility
 
-25. When rendered in the catalog preview (`CatalogPreviewContext`), focus containment is disabled.
+25. When rendered in the catalog preview (`CatalogPreviewContext`), production focus containment is disabled (no focus trap, no modal blocking).
 26. The graph renders correctly in the catalog preview frame with the static overlay class.
-27. Catalog navigation (breadcrumb, backlink) remains functional when the SystemMapModal preview loads.
+27. Graph selection, zoom/pan controls, and inspector panel remain fully interactive in catalog preview.
+28. CTA button on Component nodes is functional in catalog preview and performs the same navigation/dispatch action.
+29. Catalog navigation (breadcrumb, backlink) remains functional when the SystemMapModal preview loads.
+30. Escape key in catalog preview does not have two-phase ownership; it delegates to the parent preview frame immediately.
 
-### 9.5 Fallback Behavior
+### 9.5 Graph States
 
-28. When a system has no `repoIds` or repositories have no matching components, a fallback illustrative graph renders.
-29. The fallback graph includes a visible indicator "Illustrative graph — relation data incomplete".
-30. The fallback graph is interactive (selectable, zoomable) like the real graph.
+31. When the graph is in **Normal state**, all nodes and edges render correctly with valid relationships.
+32. When the graph is in **Repos-No-Components state**, an info banner displays "No components — repositories exist but components are missing".
+33. When the graph is in **Invalid Relations/Orphans state**, a warning banner displays "Some components reference unknown repositories" and orphaned nodes appear with a warning indicator.
+34. When the graph is in **Truly Empty System state**, an empty state displays with message "No repositories or components found for {systemName}. Add repositories to this system to see its architecture graph."
+35. When the graph is in **Fallback state**, a fallback illustrative graph renders with warning banner "Illustrative graph — unable to load real data".
+36. The fallback graph is interactive (selectable, zoomable) like the real graph.
+37. Graph states are mutually exclusive and evaluated in priority order: Fallback → Invalid Relations/Orphans → Truly Empty System → Repos-No-Components → Normal.
 
 ### 9.6 Loading and Error States
 
@@ -418,9 +459,16 @@ Uses tokens from `[data-theme='dark']`:
 
 ### 9.7 Performance and Bundle Size
 
-34. The `@xyflow/react` library is lazy-loaded and does not block initial page load.
+34. The `@xyflow/react` library is lazy-loaded at the **AppShell/overlay slot boundary** and does not block initial page load.
+    - **Validation**: Run Lighthouse performance audit before and after. Initial Time to Interactive (TTI) must not increase by more than 50ms.
+    - **Validation**: Network tab shows SystemMapModal chunk loaded only after user opens the modal, not on initial page load.
+    - **Lazy import location**: `src/AppShell.tsx` or the overlay slot component that renders modal dialogs.
 35. The gzipped bundle size for the SystemMapModal chunk is approximately 60KB (±10KB acceptable).
+    - **Validation**: Run `npx vite-bundle-visualizer` or `webpack-bundle-analyzer`. Confirm SystemMapModal chunk size is between 50-70KB gzipped.
+    - **Validation**: The chunk includes `@xyflow/react` core, React Flow CSS, custom node components, and graph utilities.
 36. The graph renders smoothly with no perceptible jank on first selection or zoom.
+    - **Validation**: Chrome DevTools Performance recording shows frame rate ≥ 55 FPS during first node selection and zoom interaction.
+    - **Validation**: Long Tasks API shows no task > 50ms during graph initialization or interaction.
 
 ### 9.8 Data Model Correctness
 
@@ -435,14 +483,23 @@ Uses tokens from `[data-theme='dark']`:
 
 - `buildGraphData(system, repositories, components)`:
   - Returns correct node count (1 system + N repos + M components)
-  - Creates correct edges (system→repo, repo→component)
-  - Handles empty `repoIds` with fallback
-  - Handles invalid `repoId` references gracefully
+  - Creates correct edges (repo→component, component→system)
+  - Handles empty `repoIds` with appropriate state (not fallback)
+  - Handles invalid `repoId` references by triggering "Invalid Relations/Orphans" state
+  - Determines correct graph state based on data availability
 
 - `getHighlightedNodesAndEdges(selectedNodeId, nodes, edges)`:
-  - Returns direct neighbors (upstream and downstream)
-  - Returns edges connecting to neighbors
+  - Returns direct neighbors (immediate incoming/outgoing only, no transitive)
+  - Returns edges connecting to direct neighbors only
   - Returns empty arrays when no selection
+  - Test with graph depth > 2 to verify only immediate neighbors are returned
+
+- `getGraphState(system, repositories, components)`:
+  - Returns 'normal' when all data is valid and complete
+  - Returns 'repos-no-components' when repos exist but no components
+  - Returns 'invalid-relations' when components have invalid repoId references
+  - Returns 'truly-empty' when system has no repositories
+  - Returns 'fallback' when data is null/undefined or construction fails
 
 - Inspector component:
   - Renders empty state when no selection
@@ -519,16 +576,32 @@ Add `@xyflow/react` to `package.json`:
 
 Version should be the latest stable at implementation time (v11+ recommended for modern React 18+ support).
 
-### 11.2 Lazy Loading
+### 11.2 Lazy Loading Boundary
 
-The SystemMapModal and its React Flow dependency should be code-split:
+The SystemMapModal and its React Flow dependency must be lazy-loaded at the **AppShell/overlay slot boundary**:
 
 ```typescript
-// In catalog registry or component loader
-const SystemMapModal = lazy(() => import('../components/system/SystemMapModal'))
+// In src/AppShell.tsx or overlay slot component
+const SystemMapModal = lazy(() => import('./components/system/SystemMapModal'))
+
+// Usage in overlay slot:
+{state.modal === 'system-map' && (
+  <Suspense fallback={<SystemMapSkeleton />}>
+    <SystemMapModal />
+  </Suspense>
+)}
 ```
 
 This ensures the ~60KB gzip chunk is only loaded when the system map is actually opened.
+
+**Measurable chunk validation**:
+```bash
+# Build and analyze bundle
+npm run build
+npx vite-bundle-visualizer
+# Check that SystemMapModal appears as separate chunk
+# Verify chunk size: 50-70KB gzipped
+```
 
 ### 11.3 Bundle Size Targets
 
@@ -562,41 +635,41 @@ React Flow's CSS should be imported in the SystemMapModal component or in a shar
 
 ### 12.1 Graph Layout Algorithm
 
-Use React Flow's built-in positioning or a simple hierarchical layout:
+Use React Flow's built-in positioning or a simple left-to-right hierarchical layout:
 
 ```typescript
-// Position nodes in three rows
-const SYSTEM_ROW_Y = 50
-const REPO_ROW_Y = 200
-const COMPONENT_ROW_Y = 350
+// Position nodes in three columns (left to right)
+const REPO_COL_X = 50
+const COMPONENT_COL_X = 300
+const SYSTEM_COL_X = 600
 
-// System: centered horizontally
-const systemNode = {
-  id: system.id,
-  type: 'system',
-  position: { x: 320, y: SYSTEM_ROW_Y }, // Center of 640px canvas
-  // ...
-}
-
-// Repositories: distributed horizontally
+// Repositories: distributed vertically on the left
 const repoNodes = repositories.map((repo, i) => ({
   id: repo.id,
   type: 'repository',
-  position: { x: 80 + (i * 200), y: REPO_ROW_Y },
+  position: { x: REPO_COL_X, y: 50 + (i * 120) },
   // ...
 }))
 
-// Components: grouped under their repositories
+// Components: grouped vertically in the middle
 const componentNodes = components.map((comp, i) => {
   const repoIndex = repositories.findIndex(r => r.id === comp.repoId)
-  const baseX = 80 + (repoIndex * 200)
+  const baseY = 50 + (repoIndex * 120)
   return {
     id: comp.id,
     type: 'component',
-    position: { x: baseX + ((i % 3) * 60), y: COMPONENT_ROW_Y + (Math.floor(i / 3) * 60) },
+    position: { x: COMPONENT_COL_X, y: baseY + ((i % 3) * 40) },
     // ...
 }
 })
+
+// System: centered vertically on the right
+const systemNode = {
+  id: system.id,
+  type: 'system',
+  position: { x: SYSTEM_COL_X, y: 200 }, // Center of ~400px height
+  // ...
+}
 ```
 
 ### 12.2 Custom Node Types
@@ -631,7 +704,7 @@ const nodeTypes = {
 
 ### 12.3 CSS Variables for Theming
 
-Use CSS custom properties in React Flow node styles:
+**All runtime CSS must exclusively consume tokens. No hardcoded hex values in production code.**
 
 ```css
 .kx-flow-node {
@@ -654,7 +727,23 @@ Use CSS custom properties in React Flow node styles:
 .kx-flow-node--selected {
   border-color: var(--kx-accent-strong);
   border-width: 2.5px;
-  box-shadow: 0 0 0 3px rgb(var(--kx-ink-rgb) / 0.14);
+  box-shadow: 0 0 0 3px rgb(var(--kx-accent-rgb) / 0.2);
+}
+
+.kx-flow-edge {
+  stroke: var(--kx-border);
+  stroke-width: 1.5px;
+}
+
+.kx-flow-edge--highlighted {
+  stroke: var(--kx-accent-strong);
+  stroke-width: 2px;
+}
+
+.kx-flow-edge--dimmed {
+  stroke: var(--kx-border);
+  stroke-width: 1px;
+  opacity: 0.3;
 }
 ```
 
@@ -677,15 +766,47 @@ export default function SystemMapModal() {
 
 ### 12.5 Catalog Preview Compatibility
 
-Wrap graph initialization in a check for catalog preview context to disable any React Flow features that might interfere:
+Wrap focus containment in a check for catalog preview context to disable only the focus trap, while preserving all graph interactivity:
 
 ```typescript
 const isCatalogPreview = useIsCatalogPreview()
 
+// Disable focus trap in preview, keep all graph features enabled
+const dialogRef = useRef<HTMLDivElement>(null)
+if (!isCatalogPreview) {
+  useFocusContainment(dialogRef)
+}
+
+// Graph interactivity remains fully functional in preview
 const onNodeClick = useCallback((event: NodeMouseEvent) => {
-  if (isCatalogPreview) return // Disable selection in preview
-  // ... normal selection logic
-}, [isCatalogPreview])
+  // Normal selection logic works in both production and preview
+  // No need to check isCatalogPreview here
+  setSelectedNode(event.node)
+  updateInspector(event.node)
+}, [])
+```
+
+For Escape key handling:
+```typescript
+const onKeyDown = useCallback((event: KeyboardEvent) => {
+  if (event.key !== 'Escape') return
+  
+  if (isCatalogPreview) {
+    // In preview: delegate immediately to parent frame
+    event.stopPropagation()
+    onClose()
+    return
+  }
+  
+  // In production: two-phase ownership
+  if (selectedNode) {
+    setSelectedNode(null)
+    // Return focus to first node or close button
+    focusFirstNodeOrClose()
+  } else {
+    onClose() // Close modal and restore focus to trigger
+  }
+}, [selectedNode, isCatalogPreview, onClose])
 ```
 
 ## 13. Risks and Non-Goals
@@ -711,30 +832,40 @@ const onNodeClick = useCallback((event: NodeMouseEvent) => {
 - Mini-map or overview panel (not required for current scope)
 - Edge labels or annotations (nodes carry the information)
 
-## 14. Open Questions
+## 14. Resolved Decisions
 
-1. **CTA integration**: What is the exact action for "Start session with {component-name}"? Does it:
-   - Navigate to the New Session page with the component pre-selected?
-   - Open the New Session modal with the component pre-selected?
-   - Trigger a specific session creation API call?
-   
-   *Recommendation*: Navigate to New Session page (or open modal if that's the primary session creation flow) with component pre-selected, matching existing session creation patterns.
+### 14.1 CTA State and Dispatch Contract (RESOLVED)
 
-2. **Graph canvas size**: Is the fixed 480px height sufficient for systems with many components? Should it be dynamic based on node count?
+**User-confirmed behavior for "Start session with {component-name}"**:
 
-   *Recommendation*: Start with fixed 480px with scroll within the canvas if needed. Evaluate post-implementation and adjust if real-world systems overflow.
+When a user clicks the CTA button on a selected Component node:
+1. The System Map modal closes immediately
+2. Navigation/dispatch to the New Session route or modal occurs
+3. The selected component is committed as the session context with the following data:
+   ```typescript
+   {
+     componentId: string,      // The selected component's ID
+     repositoryId: string,     // The component's parent repository ID
+     systemId: string,         // The active system's ID
+     source: 'system-map-cta'  // Indicates the source for analytics
+   }
+   ```
 
-3. **Component grouping**: Should components be visually grouped under their repositories (e.g., subtle background regions), or is the hierarchical edge connection sufficient?
+**Implementation requirements**:
+- Use the existing session creation flow (same as selecting a component from other UI paths)
+- Do not bypass existing validation or authentication checks
+- Ensure focus is properly managed after navigation
+- Log the `system-map-cta` source for analytics
 
-   *Recommendation*: Edge connections are sufficient for this phase. Visual grouping can be a future enhancement.
+### 14.2 Additional Implementation Notes
 
-4. **Zoom limits**: What are the minimum and maximum zoom levels? React Flow defaults may need adjustment.
+1. **Graph canvas size**: The fixed 480px height is sufficient for typical systems (<20 nodes). For systems with many components, the React Flow canvas supports scrolling/panning internally.
 
-   *Recommendation*: Use React Flow defaults (min: 0.1, max: 4) unless testing shows they're inadequate.
+2. **Component grouping**: Edge connections are sufficient for this phase. Visual grouping (subtle background regions) can be a future enhancement.
 
-5. **Session context**: When clicking the CTA, what additional context is passed to the session? System? Repository? Execution profile?
+3. **Zoom limits**: Use React Flow defaults (min: 0.1, max: 4) unless testing shows they're inadequate.
 
-   *Recommendation*: Pass the full context: system ID, repository ID (from component's repo), and component ID. Let the session flow determine execution profile.
+4. **Session context**: When clicking the CTA, the full context is passed: system ID, repository ID (from component's repo), and component ID. The session flow determines execution profile.
 
 ## 15. Self-Review for Ambiguity and Contradictions
 
@@ -742,39 +873,60 @@ const onNodeClick = useCallback((event: NodeMouseEvent) => {
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Graph hierarchy | Clear | System → Repository → Component is well-defined |
-| Node selection | Clear | Single selection with dependency highlighting |
-| Inspector content | Clear | Details vary by node type, CTA for Components only |
-| Zoom/pan controls | Clear | Four buttons: in, out, fit, reset |
-| Theme support | Clear | All colors via CSS variables, no hardcoded values |
-| Keyboard navigation | Clear | Tab, Enter/Space, Escape documented |
-| Focus containment | Clear | Preserve existing `useFocusContainment` behavior |
-| Catalog preview | Clear | Respect `CatalogPreviewContext` |
-| Fallback behavior | Clear | Illustrative graph when data incomplete |
-| Bundle strategy | Clear | Lazy loading, ~60KB gzip target |
-| Accessibility | Clear | ARIA, focus management, screen reader support |
+| Graph hierarchy | ✅ Resolved | Repository → Component → System (left to right) is clearly defined |
+| Edge direction | ✅ Resolved | All edges flow left to right, representing dependency direction |
+| Node selection | ✅ Clear | Single selection with dependency highlighting |
+| Direct dependencies | ✅ Resolved | Immediate incoming/outgoing neighbors only (no transitive) |
+| Inspector content | ✅ Clear | Details vary by node type, CTA for Components only |
+| CTA contract | ✅ Resolved | Close modal → navigate to New Session → commit component context |
+| Zoom/pan controls | ✅ Clear | Four buttons: in, out, fit, reset |
+| Theme support | ✅ Resolved | All runtime CSS uses tokens exclusively; hex values documentation-only |
+| Keyboard navigation | ✅ Resolved | Two-phase Escape ownership: clear selection first, then close |
+| Focus management | ✅ Resolved | Production (focus trap) vs Preview (no trap) behavior separately defined |
+| Node keyboard focus | ✅ Resolved | Focusable nodes in both contexts with visible indicators |
+| Catalog preview | ✅ Resolved | Focus trap disabled, graph interactivity fully functional |
+| Graph states | ✅ Resolved | Five mutually exclusive states: normal, repos-no-components, invalid relations/orphans, truly empty, fallback |
+| Fallback behavior | ✅ Clear | Illustrative graph only in Fallback state |
+| Bundle strategy | ✅ Resolved | Lazy load at AppShell/overlay slot, measurable validation defined |
+| Accessibility | ✅ Clear | ARIA, focus management, screen reader support |
 
-### 15.2 Potential Ambiguities Resolved
+### 15.2 Previously Resolved Ambiguities
 
-1. **Ambiguity**: Should the graph be draggable or fixed position?
-   - **Resolution**: Graph nodes are NOT draggable (user cannot rearrange layout). The canvas is pannable via drag.
+1. **Graph layout direction**: **RESOLVED** — Left-to-right (Repository → Component → System), not top-to-bottom.
 
-2. **Ambiguity**: What happens when a component's `repoId` doesn't match any repository?
-   - **Resolution**: Orphan components render as separate nodes but with a warning icon or visual indicator. They connect to the graph if possible, or float separately.
+2. **Edge direction**: **RESOLVED** — All edges flow left to right, representing that System depends on Components, which depend on Repositories.
 
-3. **Ambiguity**: Should the inspector be collapsible?
-   - **Resolution**: No, inspector is fixed-width (280px) and always visible. It shows empty state when no selection.
+3. **Node dragging**: **RESOLVED** — Graph nodes are NOT draggable. The canvas is pannable via drag.
 
-4. **Ambiguity**: How does the CTA interact with existing session flow?
-   - **Resolution**: This is documented as an open question (§14.1). The spec recommends navigation to New Session with pre-selection.
+4. **Orphan components**: **RESOLVED** — Handled by "Invalid Relations/Orphans" state with warning banner.
+
+5. **Inspector collapsibility**: **RESOLVED** — Inspector is fixed-width (280px) and always visible, showing empty state when no selection.
+
+6. **CTA behavior**: **RESOLVED** — User confirmed: closes System Map, navigates to New Session, commits component as session context.
+
+7. **Catalog preview interactivity**: **RESOLVED** — Only focus trap is disabled; graph selection, controls, inspector, and CTA all work normally.
+
+8. **Escape key ownership**: **RESOLVED** — Two-phase in production (clear selection, then close); immediate delegation in preview.
+
+9. **Direct dependencies definition**: **RESOLVED** — Immediate incoming/outgoing neighbors only, not transitive.
+
+10. **Lazy import boundary**: **RESOLVED** — At AppShell/overlay slot with measurable validation criteria.
+
+11. **Theme CSS literals**: **RESOLVED** — Runtime CSS uses tokens exclusively; hex values only in documentation.
+
+12. **Initial focus separation**: **RESOLVED** — Production (first node or close button) vs Preview (first node, no trap).
 
 ### 15.3 No Contradictions Found
 
-The specification is internally consistent:
+The specification is now internally consistent:
 - Visual design uses the same token system as the rest of the app
 - Interaction patterns match existing modal behavior
 - Accessibility requirements align with WCAG AA and existing patterns
-- Bundle strategy accounts for the new dependency
+- Bundle strategy accounts for the new dependency with measurable validation
+- All validator findings have been addressed
+- Graph states are mutually exclusive and clearly prioritized
+- CTA state and dispatch contract are explicit
+- Escape key ownership is clearly defined for both production and preview contexts
 
 ---
 
