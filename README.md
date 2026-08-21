@@ -1,145 +1,257 @@
 # Konteks — Clickable Mockup
 
-A clickable, local-state-only React + TypeScript mockup of the approved **Konteks "Warm Enterprise"
-visual revamp** design specification.
+A local React + TypeScript mockup of the **Konteks "Warm Enterprise" visual revamp** design specification.
 
 - **Authoritative contract:** [`docs/superpowers/specs/2026-08-16-konteks-visual-revamp-design.md`](docs/superpowers/specs/2026-08-16-konteks-visual-revamp-design.md) (46 acceptance criteria, AC1–AC46).
 - **Implementation plan:** [`docs/plans/2026-08-16-konteks-clickable-mockup-implementation.md`](docs/plans/2026-08-16-konteks-clickable-mockup-implementation.md).
-- **Scope:** a single-page app driven by one `mockupReducer` (route, sidebar, mode, system/repository/component
-  selection, Execution Profile, and every overlay). No backend, no network calls, no persistence.
+- **Scope:** Single-page app driven by `mockupReducer` (route, sidebar, mode, system/repository/component selection, Execution Profile, overlays). No backend, no network calls, no persistence — **except** theme preference, which uses real `localStorage` (see §Theme below).
 
-> **All content is illustrative.** Every timestamp, count, session name, system name, repository name, and
-> model name shown in the mockup is placeholder data, not production fact. A visible **"Illustrative data"**
-> marker renders on the Session History page and inside the Settings modal; the sidebar and the New Session
-> page carry no marker (spec §2, AC46).
+> **All content is illustrative.** Timestamps, counts, session names, system names, repository names, and model names are placeholder data. A visible **"Illustrative data"** marker appears on Session History and in Settings; sidebar and New Session carry no marker (spec §2, AC46).
+
+## Prerequisites
+
+Node.js 18+ required. Install dependencies with:
+
+```bash
+npm install
+```
+
+Exits 0 when already up-to-date.
 
 ## Commands
 
-| Command | What it does |
+| Command | Purpose |
 |---|---|
-| `npm install` | Install dependencies (exit 0 when up-to-date) |
-| `npm test` | Run Vitest unit/component suites (`src/**/*.{test,spec}.{ts,tsx}`) |
-| `npm run build` | Type-check (`tsc -b`), copy manifest/ai-adoption docs, and emit production builds to `dist/` |
-| `npm run preview` | Preview production builds from `dist/` | 
-| `npm run test:e2e` | Run Playwright core-flow + visual + axe checks against the dev server |
-| `npm run verify:assets` | Verify the 5 first-party Konteks PNG assets (existence, size, PNG magic, SHA-256) |
-| `npm run verify:manifest` | Validate `src/catalog/components.json` against repo and registry | 
+| `npm run dev` | Start Vite dev server (both mockup + catalog) |
+| `npm run build` | Type-check, build both outputs, copy docs to `dist/` |
+| `npm run preview` | Preview production builds from `dist/` |
+| `npm test` | Run Vitest unit/component suites |
+| `npm run test:watch` | Vitest watch mode |
+| `npm run test:e2e` | Run Playwright E2E tests |
 | `npm run typecheck` | Type-check only (`tsc -b`) |
-| `npm run dev` | Start the Vite dev server |
+| `npm run verify:assets` | Verify 5 Konteks PNG assets (existence, size, PNG magic, SHA-256) |
+| `npm run verify:manifest` | Validate `src/catalog/components.json` against repo/registry |
+| `npm run capture:mockup` | Capture mockup screenshots (requires `-- <label> --port 4173` or `--base-url`) |
 
-## Dev server URLs
+## Local URLs
 
-| Output | URL (dev) | URL (preview) |
-|--------|-----------|---------------|
-| **Main mockup** | `http://localhost:5173` | `http://localhost:4173` |
-| **Design system catalog** | `http://localhost:5173/catalog.html` | `http://localhost:4173/catalog.html` |
+| Output | Dev | Preview |
+|--------|-----|---------|
+| **Main mockup** | `http://localhost:5173/` | `http://localhost:4173/` |
+| **Design system catalog** | `http://localhost:5173/catalog` | `http://localhost:4173/catalog` |
+| **Catalog tokens** | `http://localhost:5173/catalog/tokens` | `http://localhost:4173/catalog/tokens` |
+| **Catalog components** | `http://localhost:5173/catalog/components` | `http://localhost:4173/catalog/components` |
+| **Catalog component detail** | `http://localhost:5173/catalog/components/<slug>` | `http://localhost:4173/catalog/components/<slug>` |
 
-Run `npm run dev` for the dev server, or `npm run build && npm run preview` for the production preview.
+Run `npm run dev` for development or `npm run build && npm run preview` for production preview.
 
-## Vercel deployment
+## Theme
+
+Theme preference is **real**, persisted to `localStorage` under key `konteks-theme`. Three options:
+- `light` — always light
+- `dark` — always dark  
+- `system` — follows OS preference
+
+The theme selector lives in the account menu (sidebar user row → click menu → see theme radio group). Both `index.html` and `catalog.html` run inline theme-stamping scripts before module load to prevent flashes on reload.
+
+Theme lives **outside** `mockupReducer` — it's actual user state, not mock scenario state. See `src/theme.ts`.
+
+## Demo States
+
+Loading and empty variants are reachable via URL query parameters (consumed once at reducer init, spec §15, AC43):
+
+- `/?mock=loading` — Skeleton/loading states for sessions, systems, repositories, components, pending reviews
+- `/?mock=empty` — Designed empty states for the same primary flows
+- `/` — Default populated "ready" state
+
+## Vercel Deployment
 
 `vercel.json` configures production routing rewrites for the design system catalog:
-- Maps `/catalog` and `/catalog/:path*` to `/catalog.html`
-- Enables clean URLs with client-side routing
-- Supports deep links and browser reloads
 
-## Demo states
+```json
+{
+  "rewrites": [
+    { "source": "/catalog", "destination": "/catalog.html" },
+    { "source": "/catalog/:path*", "destination": "/catalog.html" }
+  ]
+}
+```
 
-Loading and empty variants are reachable via URL query parameters, consumed once at reducer init
-(spec §15, AC43):
+This enables clean URL routing (`/catalog/tokens`, `/catalog/components/<slug>`) with client-side navigation via HTML5 History API. Browser back/forward and direct deep links work correctly.
 
-- `/?mock=loading` — skeleton/loading states for sessions, systems, repositories, components, and pending reviews.
-- `/?mock=empty` — designed empty states for the same primary flows.
-- No query (`/`) — the default populated "ready" state.
+## Build Artifacts
 
-## Assets — provenance & verification
-
-First-party production Konteks assets live in [`public/assets/konteks/`](public/assets/konteks/). Provenance
-(source URLs / Figma nodes) and SHA-256 digests are recorded in
-[`public/assets/konteks/ASSETS.md`](public/assets/konteks/ASSETS.md).
-
-`npm run verify:assets` runs [`scripts/verify-assets.mjs`](scripts/verify-assets.mjs), which asserts for each of
-the five required PNGs: file exists, size > 1 KiB, valid PNG magic bytes, and a SHA-256 digest matching the
-`ASSETS.md` table. Success output is `OK: 5/5 Konteks assets verified` (exit 0).
-
-## Build artifacts
-
-The `npm run build` command produces the following files in `dist/`:
+`npm run build` produces:
 
 | Artifact | Source | Purpose |
 |----------|--------|---------|
-| `dist/index.html` | `index.html` + Vite | Main clickable mockup entry point |
-| `dist/catalog.html` | `catalog.html` + Vite | Design system catalog entry point |
-| `dist/components.json` | `src/catalog/components.json` | Canonical component manifest (copied verbatim) |
-| `dist/ai-adoption.md` | `docs/ai-adoption.md` | AI adoption guide for component reuse (copied verbatim) |
+| `dist/index.html` | `index.html` + Vite | Main mockup entry |
+| `dist/catalog.html` | `catalog.html` + Vite | Catalog entry |
+| `dist/components.json` | `src/catalog/components.json` | Canonical component manifest (copied) |
+| `dist/ai-adoption.md` | `docs/ai-adoption.md` | AI adoption guide (copied) |
 | `dist/assets/*.css` | Vite | Bundled CSS (both outputs) |
-| `dist/assets/*.js` | Vite | Bundled JavaScript (both outputs) |
-| `dist/manifest.json` | Vite | Build manifest for asset references |
+| `dist/assets/*.js` | Vite | Bundled JS (both outputs) |
+| `dist/.vite/manifest.json` | Vite | Build manifest for asset references |
 
-The copy step is handled by `scripts/copy-dist-assets.mjs` (see below), which runs after Vite to ensure `components.json` and `ai-adoption.md` are always present in `dist/`.
+Copy step handled by `scripts/copy-dist-assets.mjs`.
 
-## Visual screenshot output
+## Repository Structure
 
-`npm run test:e2e` (specifically `tests/e2e/visual.spec.ts`) performs deterministic capture checks — real
-assertions that each surface is visible, followed by a `page.screenshot()` (no snapshot-baseline diffing) —
-at both **1440×900** and **1200×720** for:
+```
+src/
+├── main.tsx                 # Mockup entry point
+├── App.tsx                  # Mockup root + routing
+├── theme.ts                 # Theme preference (localStorage)
+├── state/                   # Mockup reducer, actions, selectors
+├── components/              # Domain components (account, composer, context, customize, reviews, session, shell, system)
+│   ├── account/             # AccountMenu, SettingsModal
+│   ├── composer/            # ComponentMenu, Composer, ExecutionProfileMenu, SessionMode
+│   ├── context/             # CreateSystemModal, ManualRepositoryModal, RepositorySelectorModal
+│   ├── customize/           # CustomizeModal, AgentsTab, ContextTab, IntegrationsTab, SkillsTab, ToolsTab
+│   ├── reviews/             # LearnedDrawer
+│   ├── session/             # SessionDetailComposer, SessionHeader, SessionQuoteCard, SessionTimeline, SessionTracker
+│   ├── shell/               # AppShell, Sidebar, SystemMenu, WorkspaceMenu
+│   └── system/              # SystemMapModal
+├── pages/                   # Page-level components (NewSessionPage, SessionDetailPage, SessionHistoryPage)
+├── catalog/                 # Design system catalog (dual output)
+│   ├── main.tsx             # Catalog entry
+│   ├── CatalogApp.tsx       # Catalog root
+│   ├── router.ts            # Clean URL router
+│   ├── manifest.ts          # Typed manifest access
+│   ├── registry.tsx         # Component registry for previews
+│   ├── components.json      # Canonical component manifest
+│   ├── tokens.ts            # Token documentation
+│   ├── fixtures/            # MockupFixtureProvider for previews
+│   └── pages/               # OverviewPage, TokensPage, ComponentsIndexPage, ComponentDetailPage, NotFoundPage
+├── data/                    # Mock data (sessions, systems, repositories, profiles)
+├── styles/                  # Global styles, tokens.css, component.css
+└── utils/                   # Utilities (formatTime, etc.)
 
-Engineering · Planning · system menu · Execution Profile (with hover sidecar) · repository modal ·
-component menu · Customize Agents · Customize MCP (integration tab) · Learned drawer · Session History · Settings.
+tests/
+├── e2e/                     # Playwright E2E specs
+│   ├── accessibility.spec.ts         # WCAG AA checks (wcag2aa tag only)
+│   ├── visual.spec.ts                # Screenshot captures
+│   ├── shell.spec.ts                 # Shell behavior
+│   ├── session-history.spec.ts       # Session history flow
+│   ├── session-detail.spec.ts        # Session detail flow
+│   ├── modes-composer.spec.ts        # Composer modes
+│   ├── system-repository.spec.ts     # System/repository selection
+│   ├── component-menu.spec.ts        # Component menu
+│   ├── execution-profile.spec.ts     # Execution profile menu
+│   ├── customize.spec.ts             # Customize modal
+│   ├── account-settings.spec.ts      # Account settings
+│   ├── learned-drawer.spec.ts        # Learned drawer
+│   ├── catalog-shell.spec.ts         # Catalog shell
+│   ├── catalog-content.spec.ts       # Catalog content pages
+│   └── catalog-component-detail.spec.ts # Component detail pages
+└── copy-dist-assets.test.ts  # Build artifact copy verification
 
-Screenshots are written to the gitignored `artifacts/screenshots/<view>-<w>x<h>.png`. At 1200×720 the spec
-also asserts no horizontal document overflow and that the 790×580 Customize modal fits fully within the viewport
-(AC44).
+scripts/
+├── verify-assets.mjs        # PNG asset verification (SHA-256, size, magic bytes)
+├── verify-manifest.mjs      # Manifest validation (S1–S7 checks)
+├── copy-dist-assets.mjs     # Copy components.json + ai-adoption.md to dist/
+├── capture-mockup.mjs       # Mockup screenshot capture
+└── remove-migrated-css.mjs  # CSS migration utility
 
-## Acceptance criteria → spec cross-reference
+public/
+└── assets/konteks/          # First-party Konteks PNG assets
+    ├── ASSETS.md            # Provenance and checksums
+    ├── logo-text-main.png
+    ├── web-topbar-icon-128.png
+    ├── favicon.png
+    ├── empty-sessions.png
+    └── empty-results.png
 
-| AC | Spec section | AC | Spec section |
-|---|---|---|---|
-| AC1 | §5.1, §6.1 | AC24 | §7.3 |
-| AC2 | §6.1 | AC25 | §8.1 |
-| AC3 | §5.1 | AC26 | §8.1 |
-| AC4 | §5.1 | AC27 | §8.1 |
-| AC5 | §5.2 | AC28 | §8.1 |
-| AC6 | §6.1 | AC29 | §8.2 |
-| AC7 | §6.1 | AC30 | §9 |
-| AC8 | §6.2 | AC31 | §9 |
-| AC9 | §6.1, §11 | AC32 | §9 |
-| AC10 | §6.1 | AC33 | §10 |
-| AC11 | §6.1, §13 | AC34 | §11 |
-| AC12 | §6.1 | AC35 | §11 |
-| AC13 | §6.2 | AC36 | §11 |
-| AC14 | §6.2 | AC37 | §11 |
-| AC15 | §7.1 | AC38 | §11 |
-| AC16 | §7.1 | AC39 | §12 |
-| AC17 | §7.1 | AC40 | §13 |
-| AC18 | §7.2 | AC41 | §13 |
-| AC19 | §7.2 | AC42 | §14 |
-| AC20 | §7.2, §12 | AC43 | §15 |
-| AC21 | §7.3 | AC44 | §16 |
-| AC22 | §7.3 | AC45 | §16 |
-| AC23 | §7.3 | AC46 | §2 |
+docs/
+├── ai-adoption.md           # AI adoption guide for component reuse
+├── plans/                   # Implementation plans
+├── superpowers/
+│   └── specs/               # Design specifications (authoritative contract)
+└── validation/              # Validation evidence and reports
+```
 
-## AI adoption guide
+## Test Layers
 
-For AI-assisted component discovery and adoption, see [`docs/ai-adoption.md`](docs/ai-adoption.md). This guide covers:
+| Layer | Tool | Location | Output |
+|-------|------|----------|--------|
+| Unit/component | Vitest | `src/**/*.{test,spec}.{ts,tsx}` | Console (exit 0 on pass) |
+| E2E | Playwright | `tests/e2e/*.spec.ts` | `artifacts/test-results/` (HTML report via `npx playwright show-report artifacts/playwright-report`) |
+| Screenshot | Playwright | `tests/e2e/visual.spec.ts` | `artifacts/screenshots/` (gitignored) |
+| Accessibility | Axe + Playwright | `tests/e2e/accessibility.spec.ts` | Console (wcag2aa tag only) |
+| Asset verification | Node | `scripts/verify-assets.mjs` | Console |
+| Manifest validation | TypeScript Compiler API | `scripts/verify-manifest.mjs` | Console |
 
-- How to locate the catalog and component manifest
+Run `npm test` for unit/component tests, `npm run test:e2e` for E2E.
+
+## Responsive Targets
+
+- **Ideal:** 1440×900 (desktop)
+- **Minimum:** ~1200×720 (desktop-focused target)
+- Sidebar collapses to rail at ≤1280px width
+- Composer and 790×580 modals must fit viewport at both target sizes
+- No horizontal page scroll at 1200×720 (AC44)
+- Narrow-viewport accommodation: `@media (max-width: 760px)` layout adjustments in `NewSessionPage.css` (formal design target remains desktop; narrow-viewport support is an accommodation, not a full mobile/tablet responsive implementation)
+
+See spec §16 for full responsive requirements.
+
+## AI Adoption Guide
+
+For AI-assisted component discovery and adoption, see [`docs/ai-adoption.md`](docs/ai-adoption.md). Covers:
+
+- Locating the catalog and manifest
 - Component classifications (`adoptable`, `mockup-coupled`, `internal`, `utility`)
 - Copy-layout convention (relative imports, not npm)
 - What to copy: `.tsx`, `.css`, dependencies, providers, tokens
 - Token contract and CSS custom properties
 - `MockupFixtureProvider` and `OverlayLifecycle` caveats
 - Using the manifest for programmatic discovery
-- Verification commands (`npm run verify:manifest`, `typecheck`, `build`)
-- Quick-start examples for both `adoptable` and `mockup-coupled` components
+- Verification commands (`verify:manifest`, `typecheck`, `build`)
+- Quick-start examples for `adoptable` and `mockup-coupled` components
 
-## Chromium scope & known evidence limits
+## Asset Verification
 
-- Playwright runs a single **Chromium** project (`Desktop Chrome`); cross-browser (Firefox/WebKit) behavior is
-  outside the mockup's verification scope.
-- Axe checks in `tests/e2e/accessibility.spec.ts` target the **`wcag2aa`** tag only; stricter levels (AAA) and
-  best-practice tags are intentionally excluded from the gate.
+First-party production assets live in [`public/assets/konteks/`](public/assets/konteks/). Provenance and SHA-256 digests in [`ASSETS.md`](public/assets/konteks/ASSETS.md).
+
+`npm run verify:assets` checks each of the 5 required PNGs:
+- File exists
+- Size > 1 KiB
+- Valid PNG magic bytes (`89 50 4E 47 0D 0A 1A 0A`)
+- SHA-256 digest matches `ASSETS.md`
+
+Success output: `OK: 5/5 Konteks assets verified` (exit 0).
+
+## Manifest Verification
+
+`npm run verify:manifest` validates `src/catalog/components.json` against the repo and registry:
+
+| Check | Description |
+|-------|-------------|
+| S1 | Schema version, unique kebab-case IDs, valid domains/classifications |
+| S2 | All `sourcePath` files exist |
+| S3 | All declared exports exist (via TypeScript Compiler API) |
+| S4 | All documented props exist in component type |
+| S5 | Manifest ↔ registry 1:1 (every ID has both) |
+| S6 | All token dependencies defined in `tokens.css` |
+| S7 | `contextContract` shape matches classification rules |
+
+Exit 0 with `OK (<n> entries)` on pass; exit 1 with violation list on fail.
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Theme flashes light on reload | Check `<html data-theme>` in browser inspector; inline script may be missing in `index.html` or `catalog.html` |
+| `/catalog` routes 404 on Vercel | Verify `vercel.json` rewrites are deployed (check Vercel dashboard → Settings → Rewrites) |
+| `npm run verify:manifest` fails | Run `npm run typecheck` first; ensure `src/catalog/components.json` and `src/catalog/registry.tsx` are in sync |
+| Playwright fails to find elements | Ensure dev server is running (`npm run dev`) or use production build (`npm run build && npm run preview`) |
+| Assets fail verification | Re-download from `app.konteks.io` per `ASSETS.md` URLs; verify file integrity |
+| Catalog navigation breaks | Clean URLs require server-side rewrite; dev server handles this via `catalogSpaFallback()` plugin in `vite.config.ts` |
+| CSS not loading after migration | Run `npm run build` and check `dist/assets/*.css`; ensure migrated CSS files are referenced in component imports |
+| Type errors after changes | Run `npm run typecheck` to see full TypeScript output; check `tsconfig.json` paths |
+
+## Known Scope Limits
+
+- Playwright runs a single **Chromium** project (`Desktop Chrome`); cross-browser (Firefox/WebKit) behavior is outside verification scope.
+- Axe checks target **`wcag2aa`** tag only; AAA and best-practice tags are excluded from the gate.
 - Visual captures are **deterministic surface checks, not pixel/snapshot baselines**; they exist for human review.
-- The Customize **Skills/Tools** tabs are specified as "preserve current functionality/content, adopt shell"
-  (spec §11, §18) and were transcribed from the approved prototypes; reconcile against the real product before
-  production use.
+- Customize **Skills/Tools** tabs preserve existing prototype content (spec §11, §18); reconcile against real product before production use.
