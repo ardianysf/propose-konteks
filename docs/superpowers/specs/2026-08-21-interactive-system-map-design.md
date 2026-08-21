@@ -51,7 +51,7 @@ Replace static SVG SystemMapModal with lazy-loaded `@xyflow/react` graph visuali
 // src/components/shell/AppShell.tsx overlay slot
 const SystemMapModal = lazy(() => import('../system/SystemMapModal'))
 
-{state.modal === 'system-map' && (
+{state.overlay.kind === 'system-map' && (
   <Suspense fallback={<SystemMapSkeleton />}>
     <SystemMapModal />
   </Suspense>
@@ -69,7 +69,7 @@ const SystemMapModal = lazy(() => import('../system/SystemMapModal'))
 
 ### Production Dialog Root
 - `useFocusContainment(dialogRef)` — no custom option
-- Initial focus: Dialog root (first tabbable element receives focus via dialog behavior)
+- Initial focus: Dialog root via useFocusContainment (never first tabbable)
 - Focus trap: Active, all focus stays within modal
 
 ### Catalog Preview
@@ -94,8 +94,9 @@ onKeyDown(event: KeyboardEvent) {
   }
 }
 ```
+- IME/composing Escape (isComposing=true): Ignored by both root selection logic and OverlayLifecycle — does not clear selection or close modal
 - Selected + Escape (non-composing): Clears selection, prevents default
-- No selection or Escape while composing: OverlayLifecycle closes modal
+- No selection + Escape (non-composing): Delegates to OverlayLifecycle to close modal
 
 ---
 
@@ -105,7 +106,7 @@ When clicking "Start session with {component-name}":
 
 ```typescript
 dispatch({ type: 'CLEAR_COMPONENTS' })
-dispatch({ type: 'TOGGLE_COMPONENT', payload: { componentId } })
+dispatch({ type: 'TOGGLE_COMPONENT', componentId })
 dispatch({ type: 'CONFIRM_SESSION_CONTEXT', payload: { systemId, repoIds: [component.repoId] } })
 dismissOverlay()
 ```
