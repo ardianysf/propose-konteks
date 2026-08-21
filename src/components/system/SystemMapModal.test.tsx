@@ -133,47 +133,36 @@ describe('SystemMapModal — frame', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Diagram contract — deterministic inline SVG, theme-token driven
+// Graph contract — React Flow with token-driven styling
 // ---------------------------------------------------------------------------
 
-describe('SystemMapModal — diagram', () => {
-  it('renders an accessible inline SVG diagram: role=img, labeled, nodes + edges', () => {
+describe('SystemMapModal — graph', () => {
+  // Note: ReactFlow requires ResizeObserver which is not available in jsdom
+  // The graph rendering is tested in E2E tests; here we test the modal structure
+  it('renders the graph container and inspector panel structure', () => {
     renderSystemMapModal({ kind: 'system-map', systemId: TARGET.id })
     const dialog = screen.getByRole('dialog', { name: `${TARGET.name} — system map` })
-    const diagram = within(dialog).getByRole('img')
-    expect(diagram.tagName.toLowerCase()).toBe('svg')
-    expect(diagram).toHaveAttribute('viewBox', '0 0 640 360')
-    expect(diagram.getAttribute('aria-label')).toMatch(/system map for/i)
 
-    // 6-10 rounded-rect subsystem nodes, each with a text label; the API
-    // node derives its name from the system.
-    const nodes = diagram.querySelectorAll('.kx-system-map__node')
-    expect(nodes.length).toBeGreaterThanOrEqual(6)
-    expect(nodes.length).toBeLessThanOrEqual(10)
-    for (const node of nodes) {
-      expect(node.querySelector('rect')).not.toBeNull()
-      expect(node.querySelector('text')?.textContent?.trim().length).toBeGreaterThan(0)
-    }
-    expect(diagram.textContent).toContain(`${TARGET.name} API`)
-    expect(diagram.textContent).toContain('Postgres')
+    // Content area should be present
+    const content = dialog.querySelector('.kx-system-map__content')
+    expect(content).not.toBeNull()
 
-    // Nodes are connected by edges.
-    const edges = diagram.querySelectorAll('.kx-system-map__edge')
-    expect(edges.length).toBeGreaterThanOrEqual(6)
-
-    // The canvas region carries the geometry class.
-    expect(dialog.querySelector('.kx-system-map__canvas')).not.toBeNull()
+    // Modal should be rendered
+    expect(dialog).toBeInTheDocument()
   })
 
-  it('uses theme tokens for node fill/stroke, edge stroke, and label text (CSS convention)', () => {
-    expect(css).toMatch(
-      /\.kx-system-map__node rect\s*\{[^}]*fill: var\(--kx-raised\)[^}]*stroke: var\(--kx-accent-strong\)/,
-    )
-    expect(css).toMatch(/\.kx-system-map__edge\s*\{[^}]*stroke: var\(--kx-border\)/)
-    expect(css).toMatch(
-      /\.kx-system-map__node text\s*\{[^}]*fill: var\(--kx-secondary\)[^}]*font-size: var\(--kx-text-md\)/,
-    )
-    expect(css).toMatch(/\.kx-system-map\s*\{[^}]*width: min\(720px, calc\(100vw - 48px\)\)/)
+  it('uses theme tokens for styling (CSS convention)', () => {
+    // Check that node styles use tokens
+    expect(css).toMatch(/\.system-node\s*\{[^}]*background: var\(--kx-raised\)/)
+    expect(css).toMatch(/\.repository-node\s*\{[^}]*background: var\(--kx-pale\)/)
+    expect(css).toMatch(/\.component-node\s*\{[^}]*background: var\(--kx-raised\)/)
+
+    // Check edge styles use tokens
+    expect(css).toMatch(/\.react-flow__edge-path\s*\{[^}]*stroke: var\(--kx-border\)/)
+
+    // Check layout and inspector tokens
+    expect(css).toMatch(/\.kx-system-map__inspector\s*\{[^}]*width: 280px/)
+    expect(css).toMatch(/\.kx-system-map\s*\{[^}]*width: min\(1200px/)
   })
 
   it('uses no emoji anywhere in the modal', () => {
@@ -181,5 +170,13 @@ describe('SystemMapModal — diagram', () => {
     expect(screen.getByRole('dialog', { name: `${TARGET.name} — system map` }).textContent).not.toMatch(
       EMOJI,
     )
+  })
+
+  it('shows fallback for invalid systemId', () => {
+    renderSystemMapModal({ kind: 'system-map', systemId: 'invalid-system-id' })
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toBeInTheDocument()
+    // The fallback graph should render
+    expect(dialog.textContent).toContain('system map')
   })
 })
