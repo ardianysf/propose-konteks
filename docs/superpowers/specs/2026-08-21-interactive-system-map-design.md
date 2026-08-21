@@ -22,6 +22,8 @@ Replace static SVG SystemMapModal with lazy-loaded `@xyflow/react` graph visuali
 - **Canvas:** Fixed 480px minimum height, `--kx-raised` background
 - **Coordinate system:** Manual x/y positioning based on stable normalized-name+id ordering
 - **Interaction:** Pan and scroll enabled on canvas
+- **Arrowheads:** None (edges are plain lines without arrow markers)
+- **Maximum support:** Current fixture data (~37 nodes) + 50 node smoke envelope = ~87 nodes maximum
 
 ### Node Styling (Tokens Only)
 
@@ -37,12 +39,16 @@ Replace static SVG SystemMapModal with lazy-loaded `@xyflow/react` graph visuali
 - Background unchanged from unselected
 
 **Edge styling:**
-- Default: `--kx-border`, 1.5px solid
+- Default: `--kx-border`, 1.5px solid, no arrowheads
 - Highlighted (selected dependencies): `--kx-accent-strong`, 2px solid
 - Dimmed: `--kx-border`, 1px, opacity 0.3
 - Dashed placeholder: `--kx-border`, 1px dashed
 
 **CTA button:** Reuses `.kx-btn--primary` primitive — no internal color restatement.
+
+**Fixed row spacing:** Horizontal layers with fixed vertical spacing between node rows.
+
+**Long label truncate:** Node labels truncate with ellipsis after maximum width, full name available in inspector.
 
 ---
 
@@ -81,10 +87,10 @@ export default function SystemMapModal() {
 // useReactFlow() used only here, within ReactFlowProvider
 ```
 
-### Bundle Size Target
-- **Target:** 50–70 KB gzipped
-- **Verification:** Network tab confirms chunk loads only on overlay open, not initial page load
-- **Evidence required:** Build output or bundle analyzer screenshot
+### Bundle Size Metric
+- **Target:** Total first-open feature JS+CSS gzip: 50–70 KB
+- **Verification:** Build output or bundle analyzer screenshot
+- **Spike gate:** If bundle exceeds 70 KB gzipped, spike investigation required before proceeding
 
 ---
 
@@ -136,7 +142,7 @@ dispatch({ type: 'CONFIRM_SESSION_CONTEXT', systemId, repoIds: [component.repoId
 dismissOverlay()
 ```
 
-- Uses actual reducer action shapes from `src/state/mockupReducer.ts`
+- Uses actual reducer action shapes from `src/state/mockupReducer.ts` (exact flat shapes)
 - `CONFIRM_SESSION_CONTEXT` payload: `{ systemId: string; repoIds?: string[] }` (no `payload` wrapper)
 - `repoIds` contains only the selected component's repository ID
 - No made-up payload fields (e.g., no `source: 'system-map-cta'`)
@@ -172,7 +178,7 @@ dismissOverlay()
 
 ### Data Scope Rules
 - Repository nodes: Only for `repo.id` in `system.repoIds` with matching Repository record
-- Component nodes: Only if `component.repoId` in `system.repoIds`
+- Component nodes: Only if `component.repoId` in `system.repoIds` (component scope only system repoIds)
 - Out-of-scope components: Never render
 - No orphan container
 - No retry logic
@@ -182,115 +188,131 @@ dismissOverlay()
 ## UI Components
 
 ### Inspector Panel (Right Side)
-- Width: 280px, fixed, always visible at minimum viewport width
+- Width: 280px, fixed, always visible at minimum viewport width 1200x720 (desktop)
 - Shows empty state when no selection: "Select a node to view details"
 - For selected nodes: type badge, name, description, metadata
 - Component nodes only: CTA button "Start session with {name}"
+- Inspector fields:
+  - **Type badge:** Node type (System/Repository/Component)
+  - **Name:** Full node name
+  - **Description:** Node description if available
+  - **Metadata:** Key-value pairs (VCS for repositories, systemId for components, etc.)
+  - **CTA:** "Start session with {name}" button for Component nodes only
+- Placeholder properties: When node data is incomplete or pending, show loading placeholder or "—" for missing values
 
 ### Zoom/Pan Controls (Bottom-Right)
-- Zoom in button
-- Zoom out button
-- Fit view button
-- Reset selection button
+- Zoom in button (accessible name: "Zoom in")
+- Zoom out button (accessible name: "Zoom out")
+- Fit view button (accessible name: "Fit to view")
+- Reset selection button (accessible name: "Reset selection"; this is the only control that modifies selection)
 - Canvas supports pan (drag) and scroll (wheel) natively
+
+### Initial View
+- On graph load, call `fitView()` to center and fit all nodes in viewport
 
 ---
 
 ## Acceptance Criteria
 
-### Core Functionality
-
 1. Opening system map displays interactive `@xyflow/react` graph with Repository → Component → System layout (left to right).
 
-2. Edges connect Repository → Component and Component → System flowing left to right based on data relationships.
+2. Edges connect Repository → Component and Component → System flowing left to right based on data relationships with no arrowheads.
 
 3. Node selection highlights node with 2.5px `--kx-accent-strong` stroke and `rgb(var(--kx-ink-rgb) / 0.14)` ring.
 
 4. Selected node's direct dependencies (selected node + one-hop incident edge neighbors) highlight with `--kx-accent-strong`, non-connected elements dim to opacity 0.3. Edge direction is ignored for highlighting — all nodes connected via any incident edge to the selected node are highlighted.
 
-5. Inspector panel shows selected node details; Component nodes include CTA button using `.kx-btn--primary`.
+5. Inspector panel (280px right, visible at desktop min 1200x720) shows selected node details; Component nodes include CTA button using `.kx-btn--primary`.
 
 6. Clicking CTA dispatches `CLEAR_COMPONENTS` → `TOGGLE_COMPONENT {componentId}` → `CONFIRM_SESSION_CONTEXT {systemId, repoIds:[component.repoId]}` → `dismissOverlay`.
 
-7. Zoom/pan controls (in, out, fit, reset) are functional and positioned bottom-right.
+7. Zoom/pan controls (in, out, fit, reset selection only) are functional and positioned bottom-right with accessible names.
 
-8. System nodes use `--kx-raised` background, `--kx-accent-strong` stroke, `--kx-primary` text, `--kx-accent-text-aa` badge.
+8. Initial view calls `fitView()` to center and fit all nodes in viewport on graph load.
 
-9. Repository nodes use `--kx-pale` background, `--kx-border` stroke, `--kx-primary` text.
+9. System nodes use `--kx-raised` background, `--kx-accent-strong` stroke, `--kx-primary` text, `--kx-accent-text-aa` badge.
 
-10. Component nodes use `--kx-raised` background, `--kx-border` stroke, `--kx-primary` text.
+10. Repository nodes use `--kx-pale` background, `--kx-border` stroke, `--kx-primary` text.
 
-### Bundle and Lazy Loading
+11. Component nodes use `--kx-raised` background, `--kx-border` stroke, `--kx-primary` text.
 
-11. `@xyflow/react` is lazy-loaded at `src/components/shell/AppShell.tsx` overlay slot.
+12. `@xyflow/react` is lazy-loaded at `src/components/shell/AppShell.tsx` overlay slot with eager dialog shell retaining dialog semantics and existing lifecycle/focus behavior.
 
-12. SystemMapModal chunk is 50–70 KB gzipped (verified via bundle analyzer).
+13. React Flow stays out of initial bundle (verified via Network tab).
 
-13. Network tab confirms chunk loads only on overlay open, not initial page load.
+14. Outer error boundary renders distinct feature-load-error (SystemMapFallbackView).
 
-### Accessibility
+15. SystemMapModal chunk is 50–70 KB gzipped (total first-open feature JS+CSS gzip, verified via bundle analyzer).
 
-14. Production uses `useFocusContainment(dialogRef)` with no custom option.
+16. Bundle metric includes spike gate: if bundle exceeds 70 KB gzipped, spike investigation required.
 
-15. Catalog preview bypasses focus containment automatically (no conditional code).
+17. Performance measured in production preview Chrome, cache disabled, localhost, 10 runs median/p95 (evidence reported, no unsupported hard 300ms claim).
 
-16. Nodes have `tabIndex={0}` and `aria-pressed={selected}` (not `aria-selected`).
+18. Graph uses deterministic manual coordinates with stable normalized-name+id ordering (no layout engine).
 
-17. Selected node + Escape (non-composing) clears selection and prevents default.
+19. Graph supports maximum of ~87 nodes (current fixture data ~37 + 50 node smoke envelope).
 
-18. Escape without selection delegates to OverlayLifecycle to close modal (identical production/preview).
+20. Fixed row spacing between node layers with long label truncate (ellipsis after max width, full name in inspector).
 
-19. Initial focus goes to dialog root in production; no initial focus trap in preview.
+21. Production uses `useFocusContainment(dialogRef)` with no custom option.
 
-20. All interactions (selection, zoom/pan, inspector, CTA) remain live in catalog preview.
+22. Catalog preview bypasses focus containment automatically (no conditional code).
 
-### Graph States
+23. Nodes have `tabIndex={0}` and `aria-pressed={selected}` (not `aria-selected`).
 
-21. Fallback state (unresolved system/build exception) renders exactly 8 nodes / 9 edges deterministic illustrative graph with warning banner.
+24. Selected node + Escape (non-composing) clears selection and prevents default; modal-wide noncomposing Escape handling.
 
-22. Invalid repository state (missing repo record) renders dashed placeholder repository node with normal edges.
+25. Escape without selection delegates to OverlayLifecycle to close modal (identical production/preview).
 
-23. Truly empty state (empty `repoIds`) shows empty message with no graph.
+26. IME Escape (isComposing=true) ignored by both selection logic and OverlayLifecycle.
 
-24. Repos-no-components state (all repos resolve, zero components) renders repositories + system with info banner.
+27. Initial focus goes to dialog root in production; no initial focus trap in preview.
 
-25. Normal state renders full graph with no banner.
+28. All interactions (selection, zoom/pan, inspector, CTA) remain live in catalog preview.
 
-26. Graph states are mutually exclusive and evaluated in priority order: Fallback → Invalid → Truly Empty → Repos-No-Components → Normal.
+29. Fallback state (invalid systemId) renders exactly 8 nodes / 9 edges deterministic illustrative graph with warning banner.
 
-27. Out-of-scope components (repoId not in system.repoIds) never render.
+30. Invalid repository state (missing repo record) renders dashed placeholder repository node with normal edges.
 
-28. No orphan container or retry logic exists.
+31. Truly empty state (empty `repoIds`) shows empty message with no graph.
 
-### Theme and Styling
+32. Repos-no-components state (all repos resolve, zero components) renders repositories + system with info banner.
 
-29. All runtime CSS uses tokens exclusively; no raw hex colors or nonexistent tokens.
+33. Normal state renders full graph with no banner.
 
-30. Selected state ring uses exactly `rgb(var(--kx-ink-rgb) / 0.14)`.
+34. Graph states are mutually exclusive and evaluated in priority order: Fallback → Invalid → Truly Empty → Repos-No-Components → Normal.
 
-31. CTA button reuses `.kx-btn--primary` with no internal color restatement.
+35. Out-of-scope components (repoId not in system.repoIds) never render.
 
-32. System node badge uses `--kx-accent-text-aa`.
+36. Component scope only includes system repoIds (no cross-system components).
 
-33. Light and dark themes render correctly using token values.
+37. No orphan container or retry logic exists.
 
-### User Interaction Decisions
+38. Graph model excludes build exceptions (handled by distinct outer error boundary).
 
-34. Clicking an already-selected node keeps selection (does not deselect).
+39. All runtime CSS uses tokens exclusively; no raw hex colors or nonexistent tokens.
 
-35. Clicking empty canvas area clears selection.
+40. Selected state ring uses exactly `rgb(var(--kx-ink-rgb) / 0.14)`.
 
-36. Graph uses deterministic manual coordinates with stable normalized-name+id ordering (no automatic layout engine).
+41. CTA button reuses `.kx-btn--primary` with no internal color restatement.
 
-37. Canvas supports pan (drag) and scroll (wheel) interactions.
+42. System node badge uses `--kx-accent-text-aa`.
 
-### Component Structure
+43. Light and dark themes render correctly using token values (no hardcoded colors/fallback tokens).
 
-38. ReactFlowProvider wraps the inner lazy SystemMapGraph component; useReactFlow() is used only below the provider.
+44. Clicking an already-selected node keeps selection (does not deselect).
 
-39. SystemMapModal dialog shell renders eagerly with Suspense lazy-loading SystemMapGraph inside.
+45. Clicking empty canvas area clears selection.
 
-40. Graph error boundary displays defined fallback/error view for rejected import or render errors.
+46. Canvas supports pan (drag) and scroll (wheel) interactions.
+
+47. ReactFlowProvider wraps the inner lazy SystemMapGraph component; useReactFlow() is used only below the provider.
+
+48. SystemMapModal dialog shell renders eagerly with Suspense lazy-loading SystemMapGraph inside.
+
+49. Inspector fields include type badge, name, description, metadata, and placeholder properties for incomplete data.
+
+50. Controls have accessible names: "Zoom in", "Zoom out", "Fit to view", "Reset selection" (reset selection is the only control that modifies selection).
 
 ---
 
@@ -299,9 +321,9 @@ dismissOverlay()
 ### Bundle Size Verification
 ```bash
 npm run build
-npx vite-bundle-visualizer
-# Verify SystemMapModal chunk: 50–70 KB gzipped
+# Verify SystemMapModal chunk: 50–70 KB gzipped (total first-open feature JS+CSS gzip)
 # Screenshot bundle analyzer for evidence
+# If > 70 KB gzipped, trigger spike gate investigation
 ```
 
 ### Lazy Loading Verification
@@ -312,11 +334,31 @@ npx vite-bundle-visualizer
 5. Verify SystemMapModal chunk loads at this moment
 6. Screenshot network tab for evidence
 
+### Performance Verification
+```bash
+# 1. Build production preview
+npm run build
+npm run preview
+
+# 2. Open Chrome with cache disabled
+# Settings > Privacy and security > Cookies and other site data > Clear browsing data > Cached images and files
+
+# 3. Navigate to localhost:4173
+
+# 4. Open DevTools Performance tab
+
+# 5. Record 10 runs of opening system map (first open only)
+
+# 6. Calculate median and p95 load times
+
+# 7. Report evidence (no unsupported hard 300ms claim)
+```
+
 ### Graph States Verification
 | Test | Expected State | Evidence |
 |------|----------------|----------|
-| Null system data | Fallback | 8 nodes/9 edges, warning banner |
-| Build exception | Fallback | 8 nodes/9 edges, warning banner |
+| Invalid systemId | Fallback | 8 nodes/9 edges, warning banner |
+| Build exception | Fallback via error boundary | SystemMapFallbackView rendered |
 | Missing repo record | Invalid | Dashed placeholder node, warning banner |
 | Empty repoIds array | Truly Empty | Empty message, no graph |
 | All repos resolve, 0 components | Repos-No-Components | Repos + system, info banner |
@@ -334,6 +376,7 @@ npx vite-bundle-visualizer
 | Preview | Tab through nodes | Focus moves, can exit modal |
 | Preview | Escape with selection | Selection cleared, modal stays open |
 | Preview | Escape without selection | Modal closes |
+| IME composition | Escape while composing | No action (selection kept, modal stays open) |
 
 ### CTA Dispatch Verification
 1. Select Component node
@@ -364,6 +407,7 @@ grep -r 'kx-text-on-accent\|kx-selection-ring' src/components/system/SystemMapMo
 | useReactFlow usage | Used only below ReactFlowProvider | Code inspection of SystemMapGraph.tsx |
 | Error boundary placement | Wraps Suspense with SystemMapGraph | Code inspection of SystemMapModal.tsx |
 | Fallback view | Defined component for import/render errors | ErrorBoundary fallback prop verification |
+| Lazy loading boundary | AppShell overlay slot | Code inspection of AppShell.tsx |
 
 ### User Interaction Verification
 | Test | Expected | Evidence |
@@ -374,6 +418,20 @@ grep -r 'kx-text-on-accent\|kx-selection-ring' src/components/system/SystemMapMo
 | Pan interaction | Canvas drags to pan | Manual test |
 | Scroll interaction | Canvas scrolls on wheel | Manual test |
 | Dependency highlighting | One-hop neighbors (any direction) | Select node, verify highlighted nodes |
+| Initial view | fitView() called on load | Code inspection + visual test |
+
+### Inspector and Controls Verification
+| Test | Expected | Evidence |
+|------|----------|----------|
+| Inspector width | 280px fixed | Visual inspection |
+| Inspector visible at | Min viewport 1200x720 | Visual test |
+| Empty state | "Select a node to view details" | Visual test |
+| Component node inspector | Type badge, name, description, metadata, CTA | Visual test |
+| Non-component inspector | Type badge, name, description, metadata (no CTA) | Visual test |
+| Placeholder properties | "—" or loading for missing data | Visual test |
+| Long label truncate | Ellipsis after max width | Visual test |
+| Control accessible names | "Zoom in", "Zoom out", "Fit to view", "Reset selection" | Accessibility audit |
+| Reset selection only | Only reset control modifies selection | Manual test |
 
 ---
 
@@ -400,7 +458,8 @@ grep -r 'kx-text-on-accent\|kx-selection-ring' src/components/system/SystemMapMo
 - Graph search or filtering
 - Automatic layout algorithms (uses deterministic manual coordinates)
 - Animated transitions between states
-- Bundle size claims beyond realistic measurement conditions (measure in production-like build with minification, no source maps)
+- Hard 300ms performance claim (report median/p95 evidence instead)
+- Graph support beyond ~87 nodes (current fixture data + 50 node smoke envelope)
 
 ---
 
