@@ -45,12 +45,12 @@
 
 .kx-btn--primary {
   background: var(--kx-accent-solid-aa);
-  color: var(--kx-raised);
+  color: var(--kx-accent-solid-ink);
 }
 
 .kx-btn--primary:hover:not(:disabled) {
   background: var(--kx-accent);
-  color: var(--kx-primary);
+  color: var(--kx-accent-fill-ink);
 }
 
 .kx-btn--ghost {

@@ -942,7 +942,9 @@ describe('mockData contract', () => {
   it('associates every component with an existing repository', () => {
     const repoIds = new Set(REPOSITORIES.map((r) => r.id))
     for (const component of COMPONENTS) {
-      expect(repoIds.has(component.repoId)).toBe(true)
+      for (const repoId of component.repoIds) {
+        expect(repoIds.has(repoId)).toBe(true)
+      }
     }
   })
 

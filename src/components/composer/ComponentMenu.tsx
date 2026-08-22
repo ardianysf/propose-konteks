@@ -29,10 +29,13 @@ export default function ComponentMenu() {
   const query = state.search.components.trim().toLowerCase()
   const visible: ComponentEntry[] = query
     ? COMPONENTS.filter((component) => {
-        const repo = repoById.get(component.repoId)
+        // A component may span several repos — match on any of them.
+        const repoNames = component.repoIds.map(
+          (id) => repoById.get(id)?.name.toLowerCase() ?? '',
+        )
         return (
           component.name.toLowerCase().includes(query) ||
-          (repo?.name.toLowerCase().includes(query) ?? false)
+          repoNames.some((name) => name.includes(query))
         )
       })
     : COMPONENTS
@@ -89,8 +92,9 @@ export default function ComponentMenu() {
         ) : (
           visible.map((component) => {
             const checked = state.selectedComponentIds.includes(component.id)
-            const repo = repoById.get(component.repoId)
-            const repoName = repo?.name ?? component.repoId
+            const primaryRepoId = component.repoIds[0]
+            const repo = primaryRepoId ? repoById.get(primaryRepoId) : undefined
+            const repoName = repo?.name ?? (primaryRepoId ?? '—')
             return (
               <label
                 key={component.id}

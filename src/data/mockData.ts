@@ -164,7 +164,22 @@ export interface WorkspaceSetting {
 export interface ComponentEntry {
   id: string
   name: string
-  repoId: string
+  /** C4 level 3 — the container this component lives in. */
+  containerId: string
+  /** C4 level 4 — code elements: the repositories implementing this
+   * component. Many-to-many: one repo may host several components and
+   * one component may span multiple repos. */
+  repoIds: string[]
+}
+
+/** C4 level 2 — a container (web app, API, mobile app, CLI…) inside a
+ * software system. */
+export interface Container {
+  id: string
+  name: string
+  systemId: string
+  tech?: string
+  description?: string
 }
 
 export interface RecentSession {
@@ -381,20 +396,40 @@ export const WORKSPACE_SETTINGS: WorkspaceSetting[] = [
 // Components (name + owning repository)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// C4 level 2 — containers (one or more per system)
+// ---------------------------------------------------------------------------
+
+export const CONTAINERS: Container[] = [
+  { id: 'cont-hris-web', name: 'HRIS Web App', systemId: 'nusa-hris', tech: 'React SPA', description: 'Employee-facing web application' },
+  { id: 'cont-hris-api', name: 'HRIS API', systemId: 'nusa-hris', tech: 'Node.js', description: 'Backend API for HRIS data' },
+  { id: 'cont-canteen-api', name: 'Canteen API', systemId: 'nusa-canteen', tech: 'Go', description: 'Ordering backend service' },
+  { id: 'cont-canteen-cms', name: 'Canteen CMS', systemId: 'nusa-canteen', tech: 'Next.js', description: 'Menu content management' },
+  { id: 'cont-mypoin-mobile', name: 'Mypoin Mobile App', systemId: 'mgp-mypoin', tech: 'Flutter', description: 'Customer mobile application' },
+  { id: 'cont-portal-api', name: 'Portal Vendor API', systemId: 'mgp-portal-vendor', tech: 'Node.js', description: 'Vendor portal service' },
+  { id: 'cont-arjuna-api', name: 'Arjuna API', systemId: 'arjuna', tech: 'Python', description: 'Automation orchestration API' },
+  { id: 'cont-agent-runner', name: 'Agent Runner CLI', systemId: 'kitchenly', tech: 'TypeScript', description: 'Local agent execution runtime' },
+  { id: 'cont-brightapp-web', name: 'Brightapp Web', systemId: 'brightapp', tech: 'React SPA', description: 'Product web frontend' },
+  { id: 'cont-brightapp-svc', name: 'Brightapp Service', systemId: 'brightapp', tech: 'Java', description: 'Product backend service' },
+  { id: 'cont-store-web', name: 'Storefront Web', systemId: 'online-store', tech: 'Next.js', description: 'Customer storefront' },
+  { id: 'cont-checkout', name: 'Checkout Service', systemId: 'online-store', tech: 'Go', description: 'Payment and checkout processing' },
+]
+
 export const COMPONENTS: ComponentEntry[] = [
-  { id: 'comp-hris-web', name: 'hris-web', repoId: 'bsi/hris-frontend-shared' },
-  { id: 'comp-hris-promotion', name: 'hris-promotion', repoId: 'bsi/hris-frontend-promotion' },
-  { id: 'comp-pref-eval', name: 'pref-eval', repoId: 'bsi/hris-frontend-pref-eval' },
-  { id: 'comp-canteen-api', name: 'canteen-api', repoId: 'bsi/canteen-backend' },
-  { id: 'comp-canteen-cms', name: 'canteen-cms', repoId: 'bsi/canteen-cms' },
-  { id: 'comp-mypoin-mobile', name: 'mypoin-mobile', repoId: 'mpm/mypoin' },
-  { id: 'comp-portal-vendor-api', name: 'portal-vendor-api', repoId: 'mpm/portal-vendor' },
-  { id: 'comp-arjuna-api', name: 'arjuna-api', repoId: 'arjuna/api' },
-  { id: 'comp-agent-runner', name: 'agent-runner', repoId: 'kitchenly/agent-runner' },
-  { id: 'comp-brightapp-fe', name: 'brightapp-fe', repoId: 'brightapp/fe-brightapp' },
-  { id: 'comp-brightapp-be', name: 'brightapp-be', repoId: 'brightapp/be-brightapp' },
-  { id: 'comp-storefront', name: 'storefront', repoId: 'online-store/storefront' },
-  { id: 'comp-checkout-api', name: 'checkout-api', repoId: 'online-store/checkout-api' },
+  // hris-web spans two repos: one component implemented across repositories.
+  { id: 'comp-hris-web', name: 'hris-web', containerId: 'cont-hris-web', repoIds: ['bsi/hris-frontend-shared', 'bsi/hris-frontend-promotion'] },
+  { id: 'comp-hris-promotion', name: 'hris-promotion', containerId: 'cont-hris-web', repoIds: ['bsi/hris-frontend-promotion'] },
+  { id: 'comp-pref-eval', name: 'pref-eval', containerId: 'cont-hris-api', repoIds: ['bsi/hris-frontend-pref-eval'] },
+  { id: 'comp-canteen-api', name: 'canteen-api', containerId: 'cont-canteen-api', repoIds: ['bsi/canteen-backend'] },
+  { id: 'comp-canteen-cms', name: 'canteen-cms', containerId: 'cont-canteen-cms', repoIds: ['bsi/canteen-cms'] },
+  { id: 'comp-mypoin-mobile', name: 'mypoin-mobile', containerId: 'cont-mypoin-mobile', repoIds: ['mpm/mypoin'] },
+  { id: 'comp-portal-vendor-api', name: 'portal-vendor-api', containerId: 'cont-portal-api', repoIds: ['mpm/portal-vendor'] },
+  { id: 'comp-arjuna-api', name: 'arjuna-api', containerId: 'cont-arjuna-api', repoIds: ['arjuna/api'] },
+  { id: 'comp-agent-runner', name: 'agent-runner', containerId: 'cont-agent-runner', repoIds: ['kitchenly/agent-runner'] },
+  { id: 'comp-brightapp-fe', name: 'brightapp-fe', containerId: 'cont-brightapp-web', repoIds: ['brightapp/fe-brightapp'] },
+  { id: 'comp-brightapp-be', name: 'brightapp-be', containerId: 'cont-brightapp-svc', repoIds: ['brightapp/be-brightapp'] },
+  { id: 'comp-storefront', name: 'storefront', containerId: 'cont-store-web', repoIds: ['online-store/storefront'] },
+  { id: 'comp-checkout-api', name: 'checkout-api', containerId: 'cont-checkout', repoIds: ['online-store/checkout-api'] },
 ]
 
 // ---------------------------------------------------------------------------
@@ -772,6 +807,7 @@ export interface MockData {
   workspace: Workspace
   systems: System[]
   repositories: Repository[]
+  containers: Container[]
   profiles: ExecutionProfile[]
   workspaceSettings: WorkspaceSetting[]
   components: ComponentEntry[]
@@ -789,6 +825,7 @@ export const mockData: MockData = {
   workspace: WORKSPACE,
   systems: SYSTEMS,
   repositories: REPOSITORIES,
+  containers: CONTAINERS,
   profiles: EXECUTION_PROFILES,
   workspaceSettings: WORKSPACE_SETTINGS,
   components: COMPONENTS,

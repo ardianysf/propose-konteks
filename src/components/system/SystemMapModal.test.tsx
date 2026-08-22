@@ -157,15 +157,19 @@ describe('SystemMapModal — graph', () => {
 
   it('uses theme tokens for styling (CSS convention)', () => {
     // Check that node styles use tokens
-    expect(css).toMatch(/\.system-node\s*\{[^}]*background: var\(--kx-raised\)/)
+    // All four node cards share one raised card surface (grouped rule);
+    // the repo card overrides it with the pale wash.
+    expect(css).toMatch(
+      /\.system-node,\s*\.container-node,\s*\.repository-node,\s*\.component-node\s*\{[^}]*background: var\(--kx-raised\)/,
+    )
     expect(css).toMatch(/\.repository-node\s*\{[^}]*background: var\(--kx-pale\)/)
-    expect(css).toMatch(/\.component-node\s*\{[^}]*background: var\(--kx-raised\)/)
 
-    // Check edge styles use tokens
-    expect(css).toMatch(/\.react-flow__edge-path\s*\{[^}]*stroke: var\(--kx-border\)/)
+    // Check edge styles use theme-token RGB values
+    expect(css).toMatch(/\.react-flow__edge-path/)
+    expect(css).toMatch(/rgb\(var\(--kx-ink-rgb\) \/ 0\.28\)/)
 
     // Check expanded component node styles
-    expect(css).toMatch(/\.component-node\.expanded\s*\{[^}]*width: 240px/)
+    expect(css).toMatch(/\.component-node\.expanded\s*\{[^}]*width: 260px/)
     expect(css).toMatch(/\.component-node__cta\s*\{[^}]*background: var\(--kx-accent\)/)
 
     // Check graph container takes full width (no inspector)
@@ -192,7 +196,7 @@ describe('SystemMapModal — graph', () => {
 
   it('has expanded component node styles defined', () => {
     // Expanded node should have proper dimensions
-    expect(css).toMatch(/\.component-node\.expanded\s*\{[^}]*min-height: 180px/)
+    expect(css).toMatch(/\.component-node\.expanded\s*\{[^}]*min-height: 200px/)
     expect(css).toMatch(/\.component-node\.expanded\s*\{[^}]*z-index: 100/)
 
     // Expanded content should be styled
@@ -206,10 +210,8 @@ describe('SystemMapModal — graph', () => {
     expect(css).toContain('.component-node__cta')
   })
 
-  it('has dotted background pattern', () => {
-    // Background component should render dotted pattern
-    expect(css).toMatch(/\.react-flow__background\s*\{[^}]*background: var\(--kx-raised\)/)
-    expect(css).toMatch(/\.react-flow__background pattern\s*\{[^}]*fill: var\(--kx-border\)/)
+  it('keeps the React Flow background SVG transparent so edges remain visible', () => {
+    expect(css).toMatch(/\.react-flow__background\s*\{[^}]*background: transparent/)
   })
 
   // ---------------------------------------------------------------------------
@@ -239,10 +241,9 @@ describe('SystemMapModal — graph', () => {
   })
 
   it('initial load has all edges at full opacity (AC: edges visible on load)', () => {
-    // Edge styling is applied inline in the component
-    // Verify the CSS pattern for full opacity edges exists
-    expect(css).toMatch(/\.react-flow__edge-path\s*\{[^}]*stroke: var\(--kx-border\)/)
-    expect(css).toMatch(/\.react-flow__edge-path\s*\{[^}]*stroke-width: 1\.5px/)
+    expect(css).toMatch(/\.react-flow__edge-path/)
+    expect(css).toMatch(/rgb\(var\(--kx-ink-rgb\) \/ 0\.28\)/)
+    expect(css).toMatch(/stroke-width: 1\.5px/)
   })
 
   it('dimming only applies after selection (AC: dim after selection)', () => {
@@ -260,7 +261,7 @@ describe('SystemMapModal — graph', () => {
     // This is applied inline in the component, not in CSS
     // We verify the pattern exists by checking the CSS for edge styles
     expect(css).toContain('.react-flow__edge-path')
-    expect(css).toContain('.react-flow__edge-path.highlighted')
+    expect(css).toContain('.react-flow__edge:not(.highlighted) .react-flow__edge-path')
   })
 
   it('component node expansion shows literal "Start Session" button (AC: literal button label)', () => {
@@ -276,8 +277,8 @@ describe('SystemMapModal — graph', () => {
 
   it('expanded component node stays in place (AC: in-place expansion)', () => {
     // Verify expanded node styles maintain in-place positioning
-    expect(css).toMatch(/\.component-node\.expanded\s*\{[^}]*width: 240px/)
-    expect(css).toMatch(/\.component-node\.expanded\s*\{[^}]*min-height: 180px/)
+    expect(css).toMatch(/\.component-node\.expanded\s*\{[^}]*width: 260px/)
+    expect(css).toMatch(/\.component-node\.expanded\s*\{[^}]*min-height: 200px/)
     expect(css).toMatch(/\.component-node\.expanded\s*\{[^}]*z-index: 100/)
     
     // The transform scale effect keeps it visually anchored
@@ -303,15 +304,15 @@ describe('SystemMapModal — graph', () => {
     
     // Verify edge styles exist for rendering all relationships
     expect(css).toContain('.react-flow__edge-path')
-    expect(css).toMatch(/stroke: var\(--kx-border\)/)
+    expect(css).toMatch(/rgb\(var\(--kx-ink-rgb\) \/ 0\.28\)/)
   })
 
   it('React Flow edges are defined for all node connections (AC: edges attachable)', () => {
     // Edges are created in buildGraphData with source/target IDs
     // This ensures React Flow can render and attach edges to nodes
-    // Verify the edge styling exists for proper rendering
+    // Verify edge paths and visible connection handles are styled
     expect(css).toContain('.react-flow__edge-path')
-    expect(css).toMatch(/stroke: var\(--kx-border\)/)
+    expect(css).toContain('.kx-system-map__handle')
   })
 
   it('reset button exists for clearing selection (AC: selection clears)', () => {

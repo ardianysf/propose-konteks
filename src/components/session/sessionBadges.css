@@ -39,14 +39,14 @@
 
 .kx-badge--waiting_approval {
   background: var(--kx-accent-solid-aa);
-  color: var(--kx-raised);
+  color: var(--kx-accent-solid-ink);
 }
 
 /* Same S styling as --waiting_approval (kept as its own rule: the contrast
  * inventory and its selector walk key single-line selectors). */
 .kx-badge--pending_approval {
   background: var(--kx-accent-solid-aa);
-  color: var(--kx-raised);
+  color: var(--kx-accent-solid-ink);
 }
 
 .kx-badge--completed,

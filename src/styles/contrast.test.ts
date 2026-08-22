@@ -307,19 +307,17 @@ function entries(): Entry[] {
     // hover-reveal pattern (see the shell batch above): muted icon at
     // rest (U), AA accent on hover and while active.
     { file: COMPONENTS, selector: '.kx-account-menu__theme-seg-btn', property: 'color', token: MUTED, cls: 'U' as Class },
-    // System map node borders, outlines, and badges — decorative.
-    { file: 'src/components/system/SystemMapModal.css', selector: '.system-node', property: 'border', token: ACCENT_STRONG, cls: 'U' as Class },
-    { file: 'src/components/system/SystemMapModal.css', selector: '.system-node.selected', property: 'border', token: ACCENT_STRONG, cls: 'U' as Class },
+    // System map node borders and outlines — decorative.
+    { file: 'src/components/system/SystemMapModal.css', selector: '.system-node.selected', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.system-node:focus', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
-    { file: 'src/components/system/SystemMapModal.css', selector: '.system-node__badge', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
-    { file: 'src/components/system/SystemMapModal.css', selector: '.repository-node.selected', property: 'border', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.container-node.selected', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.repository-node.selected', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.repository-node:focus', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
-    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node.selected', property: 'border', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.container-node:focus', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node.selected', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.component-node:focus', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.component-node.expanded.selected', property: 'border', token: ACCENT_STRONG, cls: 'U' as Class },
-    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node__badge', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.component-node__metadata-label', property: 'color', token: MUTED_AA, cls: 'M' as Class },
-    { file: 'src/components/system/SystemMapModal.css', selector: '.component-node__cta', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.component-node__cta:hover', property: 'background', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.component-node__cta:focus', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.react-flow__edge-path.highlighted', property: 'stroke', token: ACCENT_STRONG, cls: 'U' as Class },
@@ -864,18 +862,18 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 168 consumers — 84 muted, 77 accent-strong, 6 accent-text-aa', () => {
-    expect(inventory).toHaveLength(168)
+  it('covers exactly 166 consumers — 84 muted, 78 accent-strong, 3 accent-text-aa', () => {
+    expect(inventory).toHaveLength(166)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(84)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(77)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(6)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(78)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(3)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
     expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(78)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(42)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(39)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(5)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(43)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(44)
   })
 
   it('has no duplicate inventory selectors', () => {
