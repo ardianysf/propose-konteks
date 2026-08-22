@@ -26,6 +26,11 @@
   --kx-pale: #f4f8ee; /* Hover fills, selected states, subtle washes */
   --kx-accent: #8fbf6a; /* Primary action accent, highlights */
   --kx-accent-strong: #5f8d4e; /* Emphasized actions, active indicators */
+  /* Inks for text sitting ON accent fills. The fills are light greens in
+   * BOTH themes, so the ink is dark in both themes — never --kx-raised
+   * (which flips to near-black in dark mode and sinks the contrast). */
+  --kx-accent-solid-ink: #ffffff; /* Text on --kx-accent-solid-aa #4f7044 fills — white stays AA (5.6:1) in both themes */
+  --kx-accent-fill-ink: #243025; /* Text on --kx-accent #8fbf6a fills (6.4:1) */
   /* Ink as an RGB triplet so shadows/backdrops can compose it with
    * per-use alpha: rgb(var(--kx-ink-rgb) / 0.14). Equals #243025.
    * The triplet MUST stay space-separated (no commas): it substitutes
@@ -39,6 +44,21 @@
    * is a faint extra tint for stacked dialogs. */
   --kx-scrim-base: rgb(36 48 37 / 0.44);
   --kx-scrim-nested: rgb(36 48 37 / 0.14);
+
+  /* System map graph (React Flow) — edge strokes and background dots.
+   * Ink-based in light mode: a calm gray-green line over the paper canvas. */
+  --kx-system-map-edge: rgb(var(--kx-ink-rgb) / 0.3);
+  --kx-system-map-dot: rgb(var(--kx-ink-rgb) / 0.18);
+
+  /* C4 node-type accents — one glance tells system/container/component/repo
+   * apart via border + icon hue. Repo keeps the neutral pale treatment. */
+  --kx-system-map-system: #5f8d4e; /* C1 system — brand green (accent-strong) */
+  --kx-system-map-container: #7c5cbf; /* C2 container — plum */
+  --kx-system-map-component: #2f6f8f; /* C3 component — teal blue */
+  /* Ink for the icon glyph sitting on the colored chips. The chips use the
+   * same saturated hues in both themes, so white glyphs work in light; the
+   * brighter dark-theme hues need near-black glyphs instead. */
+  --kx-system-map-icon-ink: #ffffff;
 
   /* ── Typography — DM Sans (AC5). Spec §5.2 scale at 90% density, ────
    * rounded to whole px. Token names and semantic hierarchy unchanged. ── */
@@ -85,6 +105,10 @@
   --kx-accent-text-aa: #c5d9a6; /* Enabled accent text + glyphs (9.9:1 on canvas) */
   --kx-accent-solid-aa: #4f7044; /* Unchanged — white text stays AA (5.6:1) in dark too */
   --kx-accent-segment-aa: #a8c883; /* Active segment fill — dark --kx-primary text stays AA */
+  /* Accent-fill inks stay white/dark: the accent fills themselves do not
+   * flip in dark mode, so neither does the ink that sits on them. */
+  --kx-accent-solid-ink: #ffffff; /* White on #4f7044 stays AA (5.6:1) in dark */
+  --kx-accent-fill-ink: #0f1510; /* Near-black ink on the light #8fbf6a fill (≈8.7:1) */
   --kx-border: #35502c; /* Dividers, input borders, hairlines */
   --kx-pale: #152618; /* Hover fills, selected states, subtle washes */
   /* --kx-accent #8fbf6a and --kx-accent-strong #5f8d4e are unchanged. */
@@ -97,4 +121,17 @@
    * Black at 0.55 / 0.3 always darkens regardless of the underlying color. */
   --kx-scrim-base: rgb(0 0 0 / 0.55);
   --kx-scrim-nested: rgb(0 0 0 / 0.3);
+
+  /* System map graph (React Flow) — dark ink strokes would vanish on the
+   * ink-900 canvas, so edges/dots flip to the light --kx-primary #e8ede8
+   * at low alpha. Dots sit BELOW edges/nodes and stay faint (0.12) so the
+   * graph content remains the highest-contrast layer on the canvas. */
+  --kx-system-map-edge: rgb(232 237 232 / 0.34);
+  --kx-system-map-dot: rgb(232 237 232 / 0.12);
+
+  /* C4 node-type accents brightened for the dark canvas. */
+  --kx-system-map-system: #8fbf6a;
+  --kx-system-map-container: #b9a0e8;
+  --kx-system-map-component: #7cc4e0;
+  --kx-system-map-icon-ink: #0f1510;
 }

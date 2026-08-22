@@ -12,8 +12,10 @@ import {
   EXPANDED_WIDTH,
   EXPANDED_BASE_HEIGHT,
   EXPANDED_SCALE,
+  buildGraphData,
   type FlowNode,
 } from './SystemMapGraph'
+import { mockData } from '../../data/mockData'
 
 function createTestNode(
   id: string,
@@ -36,6 +38,79 @@ function createTestNode(
     },
   }
 }
+
+// ---------------------------------------------------------------------------
+// ConnectionMode edge rendering regression test
+// ---------------------------------------------------------------------------
+
+describe('SystemMapGraph — ConnectionMode edge rendering regression', () => {
+  it('builds edges without explicit handle IDs, requiring ConnectionMode.Loose', () => {
+    // This test verifies the edge structure that necessitates ConnectionMode.Loose
+    // In @xyflow/react v12, edges without explicit sourceHandle/targetHandle IDs
+    // require ConnectionMode.Loose to render properly
+
+    const system = mockData.systems[0] // BSI - HRIS
+    const { nodes, edges } = buildGraphData(
+      system,
+      mockData.repositories,
+      mockData.components,
+      mockData.containers,
+    )
+
+    // Verify edges exist and have the expected structure
+    expect(edges.length).toBeGreaterThan(0)
+
+    // Verify edges connect nodes (source and target are node IDs)
+    // but do NOT have explicit handle IDs
+    for (const edge of edges) {
+      // Edge must have valid source and target node IDs
+      expect(edge.source).toBeTruthy()
+      expect(edge.target).toBeTruthy()
+
+      // Verify source is a valid node ID
+      const sourceNode = nodes.find(n => n.id === edge.source)
+      expect(sourceNode).toBeDefined()
+
+      // Verify target is a valid node ID
+      const targetNode = nodes.find(n => n.id === edge.target)
+      expect(targetNode).toBeDefined()
+
+      // CRITICAL: Edges do NOT have explicit handle IDs
+      // This is why ConnectionMode.Loose is required
+      expect(edge.sourceHandle).toBeUndefined()
+      expect(edge.targetHandle).toBeUndefined()
+    }
+
+    // Verify the C4 edge chain: repo → component → container → system
+    const typeOf = (id: string) => nodes.find(n => n.id === id)?.data.type
+
+    const repoToCompEdges = edges.filter(e =>
+      typeOf(e.source) === 'repository' && typeOf(e.target) === 'component')
+    expect(repoToCompEdges.length).toBeGreaterThan(0)
+
+    const compToContEdges = edges.filter(e =>
+      typeOf(e.source) === 'component' && typeOf(e.target) === 'container')
+    expect(compToContEdges.length).toBeGreaterThan(0)
+
+    const contToSysEdges = edges.filter(e =>
+      typeOf(e.source) === 'container' && typeOf(e.target) === 'system')
+    expect(contToSysEdges.length).toBeGreaterThan(0)
+  })
+
+  it('fallback graph also builds edges without handle IDs', () => {
+    // Test the fallback graph scenario (invalid systemId)
+    const { edges, state } = buildGraphData(
+      null, // null system triggers fallback
+      mockData.repositories,
+      mockData.components,
+      mockData.containers,
+    )
+
+    // Fallback state should have no edges (handled by component fallback rendering)
+    expect(state).toBe('fallback')
+    expect(edges.length).toBe(0)
+  })
+})
 
 describe('SystemMapGraph — collision regression bug fix', () => {
   it('counterexample: {x:280,y:0} expands without overlapping {x:280,y:80} OR {x:280,y:220}', () => {

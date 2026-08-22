@@ -229,12 +229,12 @@ html.kx-catalog-page body {
 
 .kx-cat-badge--adoptable {
   background: var(--kx-accent-solid-aa);
-  color: #fff;
+  color: var(--kx-accent-solid-ink);
 }
 
 .kx-cat-badge--mockup-coupled {
   background: var(--kx-accent-segment-aa);
-  color: var(--kx-primary);
+  color: var(--kx-accent-fill-ink);
 }
 
 .kx-cat-badge--internal {
@@ -576,6 +576,13 @@ html.kx-catalog-page body {
   transform: none;
   max-height: none;
   z-index: auto;
+}
+
+/* The system map dialog sizes itself against the viewport in the app
+ * (min(900px, 100vw - 48px)); inside the preview frame that would overflow
+ * the specimen, so it fits the frame instead. */
+.kx-cat-preview-static-overlay .kx-system-map {
+  width: min(900px, 100%);
 }
 
 /* The drawer primitive is full-viewport-height; give the specimen a

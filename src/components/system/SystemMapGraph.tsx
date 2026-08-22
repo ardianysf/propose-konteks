@@ -13,8 +13,12 @@ import {
   type Edge,
   Controls,
   Background,
-  useReactFlow,
+  BackgroundVariant,
+  useNodesState,
   type NodeTypes,
+  ConnectionMode,
+  Handle,
+  Position,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
@@ -23,21 +27,25 @@ const ReactFlow = ReactFlowComponent as any
 import { useMockup } from '../../state/MockupContext'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import { mockData } from '../../data/mockData'
-import type { System, Repository, ComponentEntry } from '../../data/mockData'
+import type { System, Repository, ComponentEntry, Container } from '../../data/mockData'
 
 // ---------------------------------------------------------------------------
 // Type definitions
 // ---------------------------------------------------------------------------
 
 export interface FlowNodeData extends Record<string, unknown> {
-  type: 'system' | 'repository' | 'component'
+  type: 'system' | 'container' | 'repository' | 'component'
   label: string
   description?: string
   metadata?: Record<string, string>
   // Underlying data IDs for CTA dispatch (node IDs are namespaced)
   componentId?: string
   repoId?: string
+  repoIds?: string[]
+  containerId?: string
   systemId?: string
+  /** Compact chips under the node name (VCS, tech, counts…). */
+  tags?: string[]
 }
 
 export type FlowNode = Node<FlowNodeData>
@@ -55,6 +63,63 @@ export type GraphState =
 interface NodeProps {
   data: FlowNodeData
   selected?: boolean
+}
+
+/** C4 type icons — 14×14 inline SVG, stroke follows the type color token
+ * (set on the wrapping node class) so each level is recognizable at a
+ * glance: system=monitor, container=box, component=chip, repo=git-branch. */
+function MonitorIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+      <rect x="1.5" y="2.5" width="13" height="9" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5.5 14h5M8 11.5V14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function BoxIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+      <path d="M8 1.5 14 4.5v7L8 14.5 2 11.5v-7L8 1.5Z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M2 4.5 8 7.5l6-3M8 7.5v7" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function ChipIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+      <rect x="4" y="4" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M6 4V1.5M10 4V1.5M6 14.5V12M10 14.5V12M4 6H1.5M4 10H1.5M14.5 6H12M14.5 10H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function BranchIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+      <circle cx="4" cy="3.5" r="1.75" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="4" cy="12.5" r="1.75" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="12" cy="6" r="1.75" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M4 5.25v5.5M5.75 6h2.5a2 2 0 0 1 2 2v0.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/** Compact card chrome shared by every C4 node type: colored icon chip
+ * header → CATEGORY caps in the type color → node name → tag chips. */
+function NodeTags({ base, tags }: { base: string; tags: string[] | undefined }) {
+  if (!tags || tags.length === 0) return null
+  return (
+    <div className={`${base}__tags`}>
+      {tags.slice(0, 2).map((tag) => (
+        <span key={tag} className={`${base}__tag`}>
+          {tag}
+        </span>
+      ))}
+      {tags.length > 2 && <span className={`${base}__tag`}>+{tags.length - 2}</span>}
+    </div>
+  )
 }
 
 function SystemNode({ data, selected }: NodeProps) {
@@ -77,16 +142,29 @@ function SystemNode({ data, selected }: NodeProps) {
   )
 
   return (
-    <div
-      className={`system-node ${selected ? 'selected' : ''}`}
-      tabIndex={0}
-      role="button"
-      aria-pressed={selected}
-      onKeyDown={handleKeyDown}
-    >
-      <span className="system-node__label">{data.label}</span>
-      <span className="system-node__badge">System</span>
-    </div>
+    <>
+      <Handle
+        className="kx-system-map__handle"
+        type="target"
+        position={Position.Left}
+      />
+      <div
+        className={`system-node ${selected ? 'selected' : ''}`}
+        tabIndex={0}
+        role="button"
+        aria-pressed={selected}
+        onKeyDown={handleKeyDown}
+      >
+        <div className="system-node__head">
+          <span className="system-node__icon"><MonitorIcon /></span>
+        </div>
+        <div className="system-node__body">
+          <span className="system-node__cat">System</span>
+          <span className="system-node__name">{data.label}</span>
+          <NodeTags base="system-node" tags={data.tags as string[] | undefined} />
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -109,15 +187,79 @@ function RepositoryNode({ data, selected, isPlaceholder }: { data: FlowNodeData;
   )
 
   return (
-    <div
-      className={`repository-node ${selected ? 'selected' : ''} ${isPlaceholder ? 'placeholder' : ''}`}
-      tabIndex={0}
-      role="button"
-      aria-pressed={selected}
-      onKeyDown={handleKeyDown}
-    >
-      <span className="repository-node__label">{data.label}</span>
-    </div>
+    <>
+      <Handle
+        className="kx-system-map__handle"
+        type="source"
+        position={Position.Right}
+      />
+      <div
+        className={`repository-node ${selected ? 'selected' : ''} ${isPlaceholder ? 'placeholder' : ''}`}
+        tabIndex={0}
+        role="button"
+        aria-pressed={selected}
+        onKeyDown={handleKeyDown}
+      >
+        <div className="repository-node__head">
+          <span className="repository-node__icon"><BranchIcon /></span>
+        </div>
+        <div className="repository-node__body">
+          <span className="repository-node__cat">Repo</span>
+          <span className="repository-node__name">{data.label}</span>
+          <NodeTags base="repository-node" tags={data.tags as string[] | undefined} />
+        </div>
+      </div>
+    </>
+  )
+}
+
+function ContainerNode({ data, selected }: NodeProps) {
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (
+        (event.key === 'Enter' || event.key === ' ') &&
+        !(event.nativeEvent as KeyboardEvent).isComposing
+      ) {
+        event.preventDefault()
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+        })
+        event.currentTarget.dispatchEvent(clickEvent)
+      }
+    },
+    [],
+  )
+
+  return (
+    <>
+      <Handle
+        className="kx-system-map__handle"
+        type="target"
+        position={Position.Left}
+      />
+      <Handle
+        className="kx-system-map__handle"
+        type="source"
+        position={Position.Right}
+      />
+      <div
+        className={`container-node ${selected ? 'selected' : ''}`}
+        tabIndex={0}
+        role="button"
+        aria-pressed={selected}
+        onKeyDown={handleKeyDown}
+      >
+        <div className="container-node__head">
+          <span className="container-node__icon"><BoxIcon /></span>
+        </div>
+        <div className="container-node__body">
+          <span className="container-node__cat">Container</span>
+          <span className="container-node__name">{data.label}</span>
+          <NodeTags base="container-node" tags={data.tags as string[] | undefined} />
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -152,53 +294,75 @@ function ComponentNode({ data, selected }: NodeProps) {
   const isInteractive = !isExpanded
 
   return (
-    <div
-      className={`component-node ${selected ? 'selected' : ''} ${isExpanded ? 'expanded' : ''}`}
-      tabIndex={isInteractive ? 0 : -1}
-      role={isInteractive ? 'button' : undefined}
-      aria-pressed={isInteractive ? selected : undefined}
-      aria-expanded={isExpanded}
-      onKeyDown={isInteractive ? handleKeyDown : undefined}
-    >
-      {!isExpanded ? (
-        <>
-          <span className="component-node__label">{data.label}</span>
-          <span className="component-node__badge">Component</span>
-        </>
-      ) : (
-        <div className="component-node__expanded-content">
-          <div className="component-node__header">
-            <span className="component-node__label">{data.label}</span>
-            <span className="component-node__badge">Component</span>
-          </div>
-          {data.description && (
-            <p className="component-node__description">{data.description}</p>
-          )}
-          {data.metadata && Object.keys(data.metadata).length > 0 && (
-            <div className="component-node__metadata">
-              {Object.entries(data.metadata as Record<string, string>).map(([key, value]) => (
-                <div key={key} className="component-node__metadata-row">
-                  <span className="component-node__metadata-label">{key}</span>
-                  <span className="component-node__metadata-value">{value || '—'}</span>
-                </div>
-              ))}
+    <>
+      <Handle
+        className="kx-system-map__handle"
+        type="target"
+        position={Position.Left}
+      />
+      <Handle
+        className="kx-system-map__handle"
+        type="source"
+        position={Position.Right}
+      />
+      <div
+        className={`component-node ${selected ? 'selected' : ''} ${isExpanded ? 'expanded' : ''}`}
+        tabIndex={isInteractive ? 0 : -1}
+        role={isInteractive ? 'button' : undefined}
+        aria-pressed={isInteractive ? selected : undefined}
+        aria-expanded={isExpanded}
+        onKeyDown={isInteractive ? handleKeyDown : undefined}
+      >
+        {!isExpanded ? (
+          <>
+            <div className="component-node__head">
+              <span className="component-node__icon"><ChipIcon /></span>
             </div>
-          )}
-          <button
-            type="button"
-            className="component-node__cta"
-            onClick={handleButtonClick}
-          >
-            Start Session
-          </button>
-        </div>
-      )}
-    </div>
+            <div className="component-node__body">
+              <span className="component-node__cat">Component</span>
+              <span className="component-node__name">{data.label}</span>
+              <NodeTags base="component-node" tags={data.tags as string[] | undefined} />
+            </div>
+          </>
+        ) : (
+          <div className="component-node__expanded-content">
+            <div className="component-node__header">
+              <span className="component-node__icon"><ChipIcon /></span>
+              <span className="component-node__cat">Component</span>
+              <span className="component-node__name">{data.label}</span>
+              <NodeTags base="component-node" tags={data.tags as string[] | undefined} />
+            </div>
+            {data.description && (
+              <p className="component-node__description">{data.description}</p>
+            )}
+            <div className="component-node__rel-heading">Relationships</div>
+            {data.metadata && Object.keys(data.metadata).length > 0 && (
+              <div className="component-node__metadata">
+                {Object.entries(data.metadata as Record<string, string>).map(([key, value]) => (
+                  <div key={key} className="component-node__metadata-row">
+                    <span className="component-node__metadata-label">{key}</span>
+                    <span className="component-node__metadata-value">{value || '—'}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              className="component-node__cta"
+              onClick={handleButtonClick}
+            >
+              Start Session
+            </button>
+          </div>
+        )}
+      </div>
+    </>
   )
 }
 
 const nodeTypes: NodeTypes = {
   system: SystemNode,
+  container: ContainerNode,
   repository: RepositoryNode,
   component: ComponentNode,
 }
@@ -207,13 +371,22 @@ const nodeTypes: NodeTypes = {
 // Graph data builder with deterministic manual coordinates
 // ---------------------------------------------------------------------------
 
-export const NODE_HEIGHT = 60
-export const ROW_HEIGHT = 80
+export const NODE_HEIGHT = 92
+export const ROW_HEIGHT = 112
+
+// C4 columns (left → right): code repos → components → containers → system.
+export const COL_REPO_X = 40
+export const COL_COMPONENT_X = 300
+export const COL_CONTAINER_X = 560
+export const COL_SYSTEM_X = 820
+
+const EDGE_STYLE = { stroke: 'var(--kx-system-map-edge)', strokeWidth: 1.5 }
 
 export function buildGraphData(
   system: System | null,
   repositories: Repository[],
   components: ComponentEntry[],
+  containers: Container[],
 ): { nodes: FlowNode[]; edges: FlowEdge[]; state: GraphState; hasMissingRepos: boolean } {
   // Fallback state: invalid systemId or unresolved system
   if (!system) {
@@ -229,97 +402,30 @@ export function buildGraphData(
   const inScopeRepos = repositories.filter((repo) => system.repoIds.includes(repo.id))
   const hasMissingRepos = inScopeRepos.length < system.repoIds.length
 
-  // Filter components to only those whose repoId is in the system's repoIds
-  const inScopeComponents = components.filter((comp) => system.repoIds.includes(comp.repoId))
-
-  // Repos-no-components state
-  // If hasMissingRepos, classify as 'invalid' instead (AC 34 priority)
-  if (inScopeComponents.length === 0) {
-    const state = hasMissingRepos ? 'invalid' : 'repos-no-components'
-
-    // Create placeholder nodes for missing repos
-    const missingRepoIds = system.repoIds.filter(
-      (id) => !inScopeRepos.some((r) => r.id === id),
+  // C2: containers belonging to this system
+  const inScopeContainers = containers
+    .filter((cont) => cont.systemId === system.id)
+    .sort((a, b) =>
+      `${a.name.toLowerCase()}-${a.id}`.localeCompare(`${b.name.toLowerCase()}-${b.id}`),
     )
+  const containerById = new Map(inScopeContainers.map((cont) => [cont.id, cont]))
 
-    const repoNodes = inScopeRepos.map((repo, index) => ({
-      id: `repo-${repo.id}`,
-      type: 'repository' as const,
-      position: { x: 50, y: index * ROW_HEIGHT },
-      data: {
-        type: 'repository' as const,
-        label: repo.name,
-        description: `Repository in ${system.name}`,
-        metadata: {
-          VCS: repo.vcs,
-          'Last updated': repo.updatedAt,
-        },
-        repoId: repo.id,
-        systemId: system.id,
-      },
-    }))
-
-    const placeholderNodes = missingRepoIds.map((repoId, index) => ({
-      id: `repo-placeholder-${repoId}`,
-      type: 'repository' as const,
-      position: { x: 50, y: (inScopeRepos.length + index) * ROW_HEIGHT },
-      data: {
-        type: 'repository' as const,
-        label: `[Missing: ${repoId}]`,
-        description: 'Repository not found',
-        metadata: {},
-        repoId,
-        systemId: system.id,
-      },
-    }))
-
-    const allRepoNodes = [...repoNodes, ...placeholderNodes]
-
-    const nodes: FlowNode[] = [
-      {
-        id: `system-${system.id}`,
-        type: 'system',
-        position: { x: 500, y: (allRepoNodes.length * ROW_HEIGHT) / 2 - NODE_HEIGHT / 2 },
-        data: {
-          type: 'system',
-          label: system.name,
-          description: system.description,
-          metadata: { systemId: system.id },
-          systemId: system.id,
-        },
-      },
-      ...allRepoNodes,
-    ]
-
-    const edges: FlowEdge[] = allRepoNodes.map((repo) => ({
-      id: `edge-${repo.data.repoId as string}-to-${system.id}`,
-      source: repo.id,
-      target: `system-${system.id}`,
-      animated: false,
-      style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 },
-    }))
-
-    return { nodes, edges, state, hasMissingRepos }
-  }
-
-  // Normal state: build full graph with manual coordinates
-  // Sort for stable ordering (normalized-name+id)
-  const sortedRepos = [...inScopeRepos].sort((a, b) =>
-    `${a.name.toLowerCase()}-${a.id}`.localeCompare(`${b.name.toLowerCase()}-${b.id}`),
-  )
-  const sortedComponents = [...inScopeComponents].sort((a, b) =>
-    `${a.name.toLowerCase()}-${a.id}`.localeCompare(`${b.name.toLowerCase()}-${b.id}`),
-  )
+  // C3: components living in those containers
+  const inScopeComponents = components
+    .filter((comp) => containerById.has(comp.containerId))
+    .sort((a, b) =>
+      `${a.name.toLowerCase()}-${a.id}`.localeCompare(`${b.name.toLowerCase()}-${b.id}`),
+    )
 
   // Create placeholder nodes for missing repos
   const missingRepoIds = system.repoIds.filter(
     (id) => !inScopeRepos.some((r) => r.id === id),
   )
 
-  const repoNodes = sortedRepos.map((repo, index) => ({
+  const repoNodes = inScopeRepos.map((repo, index) => ({
     id: `repo-${repo.id}`,
     type: 'repository' as const,
-    position: { x: 50, y: index * ROW_HEIGHT },
+    position: { x: COL_REPO_X, y: index * ROW_HEIGHT },
     data: {
       type: 'repository' as const,
       label: repo.name,
@@ -330,13 +436,14 @@ export function buildGraphData(
       },
       repoId: repo.id,
       systemId: system.id,
+      tags: [repo.vcs],
     },
   }))
 
   const placeholderNodes = missingRepoIds.map((repoId, index) => ({
     id: `repo-placeholder-${repoId}`,
     type: 'repository' as const,
-    position: { x: 50, y: (sortedRepos.length + index) * ROW_HEIGHT },
+    position: { x: COL_REPO_X, y: (inScopeRepos.length + index) * ROW_HEIGHT },
     data: {
       type: 'repository' as const,
       label: `[Missing: ${repoId}]`,
@@ -344,74 +451,149 @@ export function buildGraphData(
       metadata: {},
       repoId,
       systemId: system.id,
+      tags: ['missing'],
     },
   }))
 
   const allRepoNodes = [...repoNodes, ...placeholderNodes]
 
+  // Repos-no-components state (also covers systems with no containers)
+  // If hasMissingRepos, classify as 'invalid' instead (AC 34 priority)
+  if (inScopeComponents.length === 0) {
+    const state = hasMissingRepos ? 'invalid' : 'repos-no-components'
+
+    const nodes: FlowNode[] = [
+      {
+        id: `system-${system.id}`,
+        type: 'system',
+        position: { x: COL_SYSTEM_X, y: (allRepoNodes.length * ROW_HEIGHT) / 2 - NODE_HEIGHT / 2 },
+        data: {
+          type: 'system',
+          label: system.name,
+          description: system.description,
+          metadata: { systemId: system.id },
+          systemId: system.id,
+          tags: [`${allRepoNodes.length} repos`],
+        },
+      },
+      ...allRepoNodes,
+    ]
+
+    const edges: FlowEdge[] = allRepoNodes.map((repo) => ({
+      id: `edge-${repo.data.repoId as string}-to-${system.id}`,
+      source: repo.id,
+      target: `system-${system.id}`,
+      animated: false,
+      style: EDGE_STYLE,
+    }))
+
+    return { nodes, edges, state, hasMissingRepos }
+  }
+
+  // Normal state: full C4 graph with manual coordinates
+  const containerNodes = inScopeContainers.map((cont, index) => {
+    const metadata: Record<string, string> = {}
+    if (cont.tech) metadata.Tech = cont.tech
+    return {
+      id: `cont-${cont.id}`,
+      type: 'container' as const,
+      position: { x: COL_CONTAINER_X, y: index * ROW_HEIGHT },
+      data: {
+        type: 'container' as const,
+        label: cont.name,
+        description: cont.description ?? `Container in ${system.name}`,
+        metadata,
+        containerId: cont.id,
+        systemId: system.id,
+        tags: cont.tech ? [cont.tech] : [],
+      },
+    }
+  })
+
+  const componentNodes = inScopeComponents.map((comp, index) => {
+    const container = containerById.get(comp.containerId)!
+    return {
+      id: `comp-${comp.id}`,
+      type: 'component' as const,
+      position: { x: COL_COMPONENT_X, y: index * ROW_HEIGHT },
+      data: {
+        type: 'component' as const,
+        label: comp.name,
+        description: `Component in ${container.name}`,
+        metadata: {
+          Container: container.name,
+          Repos: comp.repoIds.join(', '),
+          System: system.name,
+        },
+        componentId: comp.id,
+        containerId: comp.containerId,
+        repoIds: comp.repoIds,
+        systemId: system.id,
+        tags: comp.repoIds.map((repoId) => repoId.split('/').pop() ?? repoId),
+      },
+    }
+  })
+
   const nodes: FlowNode[] = [
-    // System node (right column)
+    // System node (rightmost column)
     {
       id: `system-${system.id}`,
       type: 'system',
-      position: { x: 500, y: (Math.max(allRepoNodes.length, sortedComponents.length) * ROW_HEIGHT) / 2 - NODE_HEIGHT / 2 },
+      position: {
+        x: COL_SYSTEM_X,
+        y: (Math.max(allRepoNodes.length, componentNodes.length, containerNodes.length) * ROW_HEIGHT) / 2 - NODE_HEIGHT / 2,
+      },
       data: {
         type: 'system',
         label: system.name,
         description: system.description,
         metadata: { systemId: system.id },
         systemId: system.id,
+        tags: [
+          `${inScopeContainers.length} container${inScopeContainers.length === 1 ? '' : 's'}`,
+          `${allRepoNodes.length} repo${allRepoNodes.length === 1 ? '' : 's'}`,
+        ],
       },
     },
-    // Repository nodes (left column)
+    // Repository nodes (leftmost column — C4 code elements)
     ...allRepoNodes,
-    // Component nodes (middle column)
-    ...sortedComponents.map((comp, index) => ({
-      id: `comp-${comp.id}`,
-      type: 'component' as const,
-      position: { x: 280, y: index * ROW_HEIGHT },
-      data: {
-        type: 'component' as const,
-        label: comp.name,
-        description: `Component in ${comp.repoId}`,
-        metadata: {
-          'Repository ID': comp.repoId,
-        },
-        componentId: comp.id,
-        repoId: comp.repoId,
-        systemId: system.id,
-      },
-    })),
+    // Component nodes (middle-left column)
+    ...componentNodes,
+    // Container nodes (middle-right column)
+    ...containerNodes,
   ]
 
-  // Edges: Repository → Component, Component → System
-  // Placeholder repos also connect to their components (if any)
+  // Edges — many-to-many repo↔component, then component→container→system.
   const edges: FlowEdge[] = [
-    ...sortedComponents.flatMap((comp) => {
-      const repoNode = allRepoNodes.find(
-        (r) => r.data.repoId === comp.repoId,
-      )
-      const repoEdge: FlowEdge[] = [
-        {
-          id: `edge-${comp.repoId}-to-${comp.id}`,
-          source: repoNode ? repoNode.id : `repo-placeholder-${comp.repoId}`,
-          target: `comp-${comp.id}`,
-          animated: false,
-          style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 },
-        },
-      ]
-      // Add edge to system only if repo exists (not a placeholder)
-      if (inScopeRepos.some((r) => r.id === comp.repoId)) {
-        repoEdge.push({
-          id: `edge-${comp.id}-to-${system.id}`,
-          source: `comp-${comp.id}`,
-          target: `system-${system.id}`,
-          animated: false,
-          style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 },
-        })
-      }
-      return repoEdge
-    }),
+    // C4 level 4 → 3: each repo implementing each component (a component
+    // may span several repos; a repo may host several components).
+    ...inScopeComponents.flatMap((comp) =>
+      comp.repoIds.map((repoId) => ({
+        id: `edge-${repoId}-to-${comp.id}`,
+        source: inScopeRepos.some((r) => r.id === repoId)
+          ? `repo-${repoId}`
+          : `repo-placeholder-${repoId}`,
+        target: `comp-${comp.id}`,
+        animated: false,
+        style: EDGE_STYLE,
+      })),
+    ),
+    // C4 level 3 → 2: component lives in its container
+    ...inScopeComponents.map((comp) => ({
+      id: `edge-${comp.id}-to-${comp.containerId}`,
+      source: `comp-${comp.id}`,
+      target: `cont-${comp.containerId}`,
+      animated: false,
+      style: EDGE_STYLE,
+    })),
+    // C4 level 2 → 1: container is part of the system
+    ...inScopeContainers.map((cont) => ({
+      id: `edge-${cont.id}-to-${system.id}`,
+      source: `cont-${cont.id}`,
+      target: `system-${system.id}`,
+      animated: false,
+      style: EDGE_STYLE,
+    })),
   ]
 
   return {
@@ -421,14 +603,14 @@ export function buildGraphData(
     hasMissingRepos,
   }
 }
-
-// Fallback graph (8 nodes / 9 edges) for invalid systemId
+// Fallback graph (9 nodes / 11 edges) for invalid systemId — full C4 shape:
+// repos (left) → components → containers → system (right).
 function buildFallbackGraph(systemName: string = 'Unknown System'): { nodes: FlowNode[]; edges: FlowEdge[] } {
   const nodes: FlowNode[] = [
     {
       id: 'client',
       type: 'repository',
-      position: { x: 50, y: 90 },
+      position: { x: COL_REPO_X, y: 90 },
       data: {
         type: 'repository',
         label: 'Web client',
@@ -438,7 +620,7 @@ function buildFallbackGraph(systemName: string = 'Unknown System'): { nodes: Flo
     {
       id: 'mobile',
       type: 'repository',
-      position: { x: 50, y: 226 },
+      position: { x: COL_REPO_X, y: 226 },
       data: {
         type: 'repository',
         label: 'Mobile app',
@@ -448,7 +630,7 @@ function buildFallbackGraph(systemName: string = 'Unknown System'): { nodes: Flo
     {
       id: 'api',
       type: 'component',
-      position: { x: 280, y: 24 },
+      position: { x: COL_COMPONENT_X, y: 24 },
       data: {
         type: 'component',
         label: `${systemName} API`,
@@ -458,7 +640,7 @@ function buildFallbackGraph(systemName: string = 'Unknown System'): { nodes: Flo
     {
       id: 'auth',
       type: 'component',
-      position: { x: 280, y: 112 },
+      position: { x: COL_COMPONENT_X, y: 112 },
       data: {
         type: 'component',
         label: 'Auth service',
@@ -468,7 +650,7 @@ function buildFallbackGraph(systemName: string = 'Unknown System'): { nodes: Flo
     {
       id: 'worker',
       type: 'component',
-      position: { x: 280, y: 200 },
+      position: { x: COL_COMPONENT_X, y: 200 },
       data: {
         type: 'component',
         label: 'Worker queue',
@@ -478,7 +660,7 @@ function buildFallbackGraph(systemName: string = 'Unknown System'): { nodes: Flo
     {
       id: 'dashboard',
       type: 'component',
-      position: { x: 280, y: 288 },
+      position: { x: COL_COMPONENT_X, y: 288 },
       data: {
         type: 'component',
         label: 'Dashboard',
@@ -487,36 +669,48 @@ function buildFallbackGraph(systemName: string = 'Unknown System'): { nodes: Flo
     },
     {
       id: 'db',
-      type: 'system',
-      position: { x: 500, y: 68 },
+      type: 'container',
+      position: { x: COL_CONTAINER_X, y: 68 },
       data: {
-        type: 'system',
+        type: 'container',
         label: 'Postgres',
         metadata: {},
       },
     },
     {
       id: 'cache',
+      type: 'container',
+      position: { x: COL_CONTAINER_X, y: 200 },
+      data: {
+        type: 'container',
+        label: 'Redis cache',
+        metadata: {},
+      },
+    },
+    {
+      id: 'sys',
       type: 'system',
-      position: { x: 500, y: 200 },
+      position: { x: COL_SYSTEM_X, y: 174 },
       data: {
         type: 'system',
-        label: 'Redis cache',
+        label: systemName,
         metadata: {},
       },
     },
   ]
 
   const edges: FlowEdge[] = [
-    { id: 'e1', source: 'client', target: 'api', style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 } },
-    { id: 'e2', source: 'client', target: 'auth', style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 } },
-    { id: 'e3', source: 'mobile', target: 'api', style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 } },
-    { id: 'e4', source: 'mobile', target: 'worker', style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 } },
-    { id: 'e5', source: 'api', target: 'db', style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 } },
-    { id: 'e6', source: 'auth', target: 'db', style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 } },
-    { id: 'e7', source: 'worker', target: 'cache', style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 } },
-    { id: 'e8', source: 'worker', target: 'db', style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 } },
-    { id: 'e9', source: 'dashboard', target: 'cache', style: { stroke: 'var(--kx-border)', strokeWidth: 1.5 } },
+    { id: 'e1', source: 'client', target: 'api', style: EDGE_STYLE },
+    { id: 'e2', source: 'client', target: 'auth', style: EDGE_STYLE },
+    { id: 'e3', source: 'mobile', target: 'api', style: EDGE_STYLE },
+    { id: 'e4', source: 'mobile', target: 'worker', style: EDGE_STYLE },
+    { id: 'e5', source: 'api', target: 'db', style: EDGE_STYLE },
+    { id: 'e6', source: 'auth', target: 'db', style: EDGE_STYLE },
+    { id: 'e7', source: 'worker', target: 'cache', style: EDGE_STYLE },
+    { id: 'e8', source: 'worker', target: 'db', style: EDGE_STYLE },
+    { id: 'e9', source: 'dashboard', target: 'cache', style: EDGE_STYLE },
+    { id: 'e10', source: 'db', target: 'sys', style: EDGE_STYLE },
+    { id: 'e11', source: 'cache', target: 'sys', style: EDGE_STYLE },
   ]
 
   return { nodes, edges }
@@ -528,9 +722,9 @@ function buildFallbackGraph(systemName: string = 'Unknown System'): { nodes: Flo
 
 /** Constants for node dimensions and collision detection */
 export const COMPACT_NODE_WIDTH = 160
-export const COMPACT_NODE_HEIGHT = 60
+export const COMPACT_NODE_HEIGHT = 92
 export const EXPANDED_WIDTH = 240
-export const EXPANDED_BASE_HEIGHT = 180
+export const EXPANDED_BASE_HEIGHT = 230
 export const EXPANDED_SCALE = 1.05 // CSS transform scale for expanded nodes
 export const EXPANDED_MARGIN = 20 // Extra margin for visibility
 
@@ -689,7 +883,6 @@ export function calculateExpandedPosition(
 export default function SystemMapGraph() {
   const { state, dispatch } = useMockup()
   const { dismissOverlay } = useOverlayLifecycle()
-  const { fitView } = useReactFlow()
   const [selectedNode, setSelectedNode] = useState<FlowNode | null>(null)
 
   // Resolve system
@@ -698,18 +891,22 @@ export default function SystemMapGraph() {
 
   // Build graph data
   const { nodes, edges, state: graphState, hasMissingRepos } = useMemo(
-    () => buildGraphData(system, mockData.repositories, mockData.components),
+    () => buildGraphData(system, mockData.repositories, mockData.components, mockData.containers),
     [system],
   )
 
   // Fallback nodes/edges when in fallback state
-  const displayNodes = graphState === 'fallback' ? buildFallbackGraph(system?.name).nodes : nodes
-  const displayEdges = graphState === 'fallback' ? buildFallbackGraph(system?.name).edges : edges
+  const fallbackGraph = useMemo(
+    () => graphState === 'fallback' ? buildFallbackGraph(system?.name) : null,
+    [graphState, system?.name],
+  )
+  const displayNodes = fallbackGraph?.nodes ?? nodes
+  const displayEdges = fallbackGraph?.edges ?? edges
+  const [interactiveNodes, setInteractiveNodes, onNodesChange] = useNodesState<FlowNode>(displayNodes)
 
-  // Initial fitView on graph load
   useEffect(() => {
-    fitView({ duration: 0 })
-  }, [fitView, displayNodes])
+    setInteractiveNodes(displayNodes)
+  }, [displayNodes, setInteractiveNodes])
 
   // Event handlers
   const handleNodeClick = useCallback(
@@ -739,7 +936,7 @@ export default function SystemMapGraph() {
     dispatch({
       type: 'CONFIRM_SESSION_CONTEXT',
       systemId: system?.id || (selectedNode.data.systemId as string),
-      repoIds: [selectedNode.data.repoId as string],
+      repoIds: (selectedNode.data.repoIds as string[]) ?? [],
     })
     dismissOverlay()
   }, [selectedNode, system, dispatch, dismissOverlay])
@@ -767,14 +964,14 @@ export default function SystemMapGraph() {
   }, [selectedNode, displayEdges])
 
   // Apply styling based on highlighting and expansion state
-  const styledNodes = displayNodes.map((node) => {
+  const styledNodes = interactiveNodes.map((node) => {
     const isHighlighted = highlightedNodes.has(node.id)
     const isExpanded = selectedNode?.id === node.id && node.data.type === 'component'
     
     // Collision avoidance: shift expanded node position if needed
     let position = { ...node.position }
     if (isExpanded && node.data.type === 'component') {
-      position = calculateExpandedPosition(node, displayNodes, displayEdges)
+      position = calculateExpandedPosition(node, interactiveNodes, displayEdges)
     }
     
     return {
@@ -793,10 +990,10 @@ export default function SystemMapGraph() {
     ...edge,
     className: highlightedEdges.has(edge.id) ? 'highlighted' : '',
     style: highlightedEdges.has(edge.id)
-      ? { stroke: 'var(--kx-accent-strong)', strokeWidth: 2 }
+      ? { stroke: 'var(--kx-accent-strong)', strokeWidth: 2, opacity: 1 }
       : highlightedNodes.size > 0
-        ? { stroke: 'var(--kx-border)', strokeWidth: 1, opacity: 0.3 }
-        : { stroke: 'var(--kx-border)', strokeWidth: 1.5, opacity: 1 },
+        ? { stroke: 'var(--kx-system-map-edge)', strokeWidth: 1.5, opacity: 0.3 }
+        : { stroke: 'var(--kx-system-map-edge)', strokeWidth: 1.5, opacity: 1 },
   }))
 
   // Banner message based on graph state
@@ -857,10 +1054,29 @@ export default function SystemMapGraph() {
           nodes={styledNodes}
           edges={styledEdges}
           nodeTypes={nodeTypes}
+          connectionMode={ConnectionMode.Loose}
+          defaultEdgeOptions={{
+            type: 'smoothstep',
+            animated: false,
+            style: {
+              stroke: 'var(--kx-system-map-edge)',
+              strokeWidth: 1.5,
+            },
+          }}
+          proOptions={{ hideAttribution: true }}
+          onNodesChange={onNodesChange}
           onNodeClick={handleNodeClick}
           onPaneClick={handlePaneClick}
-          fitView
-          nodesDraggable={false}
+          // No fitView: the initial viewport is fixed below and the user's
+          // zoom/pan choice persists (only the Controls fit button re-fits).
+          defaultViewport={{
+            x: 10,
+            y: 90,
+            zoom: 0.85,
+          }}
+          minZoom={0.3}
+          maxZoom={1.5}
+          nodesDraggable
           nodesConnectable={false}
           elementsSelectable={true}
           selectNodesOnDrag={false}
@@ -871,7 +1087,12 @@ export default function SystemMapGraph() {
           zoomOnDoubleClick={false}
           style={{ width: '100%', height: '100%' }}
         >
-          <Background color="var(--kx-border)" gap={16} />
+          <Background
+            color="var(--kx-system-map-dot)"
+            gap={20}
+            variant={BackgroundVariant.Dots}
+            size={2.8}
+          />
           <Controls
             showZoom={true}
             showFitView={true}

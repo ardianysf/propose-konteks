@@ -154,7 +154,7 @@
   padding: 0 5px;
   background: var(--kx-accent-solid-aa);
   border-radius: 999px;
-  color: var(--kx-raised);
+  color: var(--kx-accent-solid-ink);
   font-size: var(--kx-text-2xs);
   font-weight: var(--kx-font-bold);
 }

@@ -444,11 +444,12 @@ describe('SystemMapGraph — calculateExpandedPosition', () => {
       'Fallback position must be beyond all bounded candidates (proves fallback executed)'
     ).toBeGreaterThan(maxBoundedCandidate)
 
-    // With a node at y=2000, maxBottom is 6060 (from node at y=6000)
-    // Fallback start: ceil((6060 + 20) / 80) * 80 = 6080
-    // With expanded height 189 at y=6080, bottom would be 6269
-    // Node at y=6080 would have bottom 6140, so no overlap at 6080
-    const expectedFallbackY = 6080
+    // Fallback start = grid-aligned (last dense node bottom + margin). The
+    // last node sits on the ROW_HEIGHT grid at or below maxY.
+    const lastNodeY = maxY - (maxY % ROW_HEIGHT)
+    const expectedFallbackY = Math.ceil(
+      (lastNodeY + COMPACT_NODE_HEIGHT + EXPANDED_MARGIN) / ROW_HEIGHT,
+    ) * ROW_HEIGHT
     expect(result.y).toBe(expectedFallbackY)
 
     // Prove the final position does NOT overlap ANY node
@@ -486,9 +487,8 @@ describe('SystemMapGraph — calculateExpandedPosition', () => {
     }
 
     // Calculate where the initial fallback would be (maxBottom + margin, grid-aligned)
-    // Max node is at y=6000 with bottom=6060
-    // Fallback start = 6060 + 20 = 6080, already grid-aligned
-    const maxBottom = 6000 + COMPACT_NODE_HEIGHT // 6060
+    // The last dense node sits at maxY; its bottom + margin starts the fallback
+    const maxBottom = maxY + COMPACT_NODE_HEIGHT
     const initialFallbackY = Math.ceil((maxBottom + EXPANDED_MARGIN) / ROW_HEIGHT) * ROW_HEIGHT // 6080
 
     // Place a node at the initial fallback coordinate to block it
@@ -523,12 +523,8 @@ describe('SystemMapGraph — calculateExpandedPosition', () => {
       'Result must advance beyond the blocked initial fallback coordinate'
     ).toBeGreaterThan(initialFallbackY) // 6080
 
-    // Expected result: initialFallbackY (6080) is blocked
-    // With expanded height 189, at y=6080 bottom would be 6269
-    // Node at y=6080 has bottom 6140
-    // With 20px margin: need node.bottom + margin <= result.top for vertical separation
-    // At y=6160: node.bottom + margin = 6140 + 20 = 6160 <= result.top (6160), no overlap!
-    const expectedAdvancedFallbackY = 6160
+    // One grid step past the blocked coordinate clears the blocking node.
+    const expectedAdvancedFallbackY = initialFallbackY + ROW_HEIGHT
     expect(result.y).toBe(expectedAdvancedFallbackY)
 
     // Prove the result does NOT overlap the node at the initial fallback coordinate
@@ -560,12 +556,13 @@ describe('SystemMapGraph — calculateExpandedPosition', () => {
 // ---------------------------------------------------------------------------
 
 describe('SystemMapGraph — buildGraphData', () => {
-  it('builds complete repository → component → system graph edges', () => {
+  it('builds the complete C4 chain: repo → component → container → system', () => {
     const system = mockData.systems[0] // BSI - HRIS
     const { nodes, edges, state } = buildGraphData(
       system,
       mockData.repositories,
       mockData.components,
+      mockData.containers,
     )
 
     expect(state).not.toBe('truly-empty')
@@ -585,22 +582,30 @@ describe('SystemMapGraph — buildGraphData', () => {
     const componentNodes = nodes.filter(n => n.data.type === 'component')
     expect(componentNodes.length).toBeGreaterThan(0)
 
-    // Verify edges connect repository → component
-    const repoToCompEdges = edges.filter(e => {
-      const source = nodes.find(n => n.id === e.source)
-      const target = nodes.find(n => n.id === e.target)
-      return source?.data.type === 'repository' && target?.data.type === 'component'
-    })
-    expect(repoToCompEdges.length).toBeGreaterThan(0)
+    // Verify we have container nodes (C2)
+    const containerNodes = nodes.filter(n => n.data.type === 'container')
+    expect(containerNodes.length).toBeGreaterThan(0)
+
+    const typeOf = (id: string) => nodes.find(n => n.id === id)?.data.type
+
+    // C4 level 4 → 3: repository implements component
+    const repoToCompEdges = edges.filter(e =>
+      typeOf(e.source) === 'repository' && typeOf(e.target) === 'component')
     expect(repoToCompEdges.length).toBeGreaterThan(0)
 
-    // Verify edges connect component → system
-    const compToSysEdges = edges.filter(e => {
-      const source = nodes.find(n => n.id === e.source)
-      const target = nodes.find(n => n.id === e.target)
-      return source?.data.type === 'component' && target?.data.type === 'system'
-    })
-    expect(compToSysEdges.length).toBeGreaterThan(0)
+    // Many-to-many: hris-web spans two repos — two repo→component edges
+    const hrisWebEdges = edges.filter(e => e.target === 'comp-comp-hris-web')
+    expect(hrisWebEdges.length).toBe(2)
+
+    // C4 level 3 → 2: component lives in container
+    const compToContEdges = edges.filter(e =>
+      typeOf(e.source) === 'component' && typeOf(e.target) === 'container')
+    expect(compToContEdges.length).toBeGreaterThan(0)
+
+    // C4 level 2 → 1: container belongs to system
+    const contToSysEdges = edges.filter(e =>
+      typeOf(e.source) === 'container' && typeOf(e.target) === 'system')
+    expect(contToSysEdges.length).toBeGreaterThan(0)
   })
 
   it('assigns correct node types and metadata', () => {
@@ -609,6 +614,7 @@ describe('SystemMapGraph — buildGraphData', () => {
       system,
       mockData.repositories,
       mockData.components,
+      mockData.containers,
     )
 
     // Check system node
@@ -625,12 +631,21 @@ describe('SystemMapGraph — buildGraphData', () => {
       expect(repoNode.data.systemId).toBe(system.id)
     }
 
+    // Check container nodes (C2)
+    const containerNodes = nodes.filter(n => n.data.type === 'container')
+    expect(containerNodes.length).toBeGreaterThan(0)
+    for (const contNode of containerNodes) {
+      expect(contNode.data.containerId).toBeDefined()
+      expect(contNode.data.systemId).toBe(system.id)
+    }
+
     // Check component nodes
     const componentNodes = nodes.filter(n => n.data.type === 'component')
     for (const compNode of componentNodes) {
       expect(compNode.data.type).toBe('component')
       expect(compNode.data.componentId).toBeDefined()
-      expect(compNode.data.repoId).toBeDefined()
+      expect(compNode.data.containerId).toBeDefined()
+      expect((compNode.data.repoIds as string[]).length).toBeGreaterThan(0)
       expect(compNode.data.systemId).toBe(system.id)
     }
   })
@@ -641,6 +656,7 @@ describe('SystemMapGraph — buildGraphData', () => {
       emptySystem,
       mockData.repositories,
       mockData.components,
+      mockData.containers,
     )
 
     expect(state).toBe('truly-empty')
@@ -657,6 +673,7 @@ describe('SystemMapGraph — buildGraphData', () => {
       system,
       [testRepo],
       [],
+      mockData.containers,
     )
 
     expect(state).toBe('repos-no-components')
@@ -668,6 +685,7 @@ describe('SystemMapGraph — buildGraphData', () => {
       null,
       mockData.repositories,
       mockData.components,
+      mockData.containers,
     )
 
     expect(state).toBe('fallback')

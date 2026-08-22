@@ -5,7 +5,7 @@
 
 /* Modal frame */
 .kx-system-map {
-  width: min(1200px, calc(100vw - 48px));
+  width: min(900px, calc(100vw - 48px));
   display: flex;
   flex-direction: column;
 }
@@ -72,9 +72,10 @@
   width: 100%;
   height: 480px;
   min-height: 480px;
-  background: var(--kx-raised);
+  background: rgb(var(--kx-ink-rgb) / 0.02);
   border-radius: var(--kx-radius-main);
   overflow: hidden;
+  border: 1px solid var(--kx-border);
 }
 
 /* Fallback view */
@@ -112,8 +113,9 @@
 /* Zoom/pan controls */
 .kx-system-map__controls {
   position: absolute;
-  bottom: 16px;
-  right: 16px;
+  left: 16px !important;
+  right: auto !important;
+  bottom: 16px !important;
   display: flex;
   gap: 8px;
   z-index: 10;
@@ -122,7 +124,7 @@
 .kx-system-map__reset-btn {
   position: absolute;
   bottom: 16px;
-  right: 140px;
+  right: 16px;
   padding: 8px 12px;
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
@@ -149,129 +151,207 @@
   padding: 0;
 }
 
-/* System node */
-.system-node {
+/* React Flow custom node styles */
+.react-flow__node {
+  padding: 0;
+}
+
+/* ── Shared C4 card chrome ────────────────────────────────────────────
+ * Every node type renders: a header strip holding a colored icon chip →
+ * the CATEGORY in caps colored by type → the node name → tag chips.
+ * The per-type color comes from the --kx-system-map-* tokens set on the
+ * type's root class (border + icon chip + category text). */
+
+.system-node,
+.container-node,
+.repository-node,
+.component-node {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
   width: 160px;
-  height: 60px;
-  padding: 8px 12px;
+  height: 92px;
+  padding: 0;
   background: var(--kx-raised);
-  border: 2px solid var(--kx-accent-strong);
-  border-radius: 8px;
+  border: 1.5px solid var(--kx-border);
+  border-radius: 10px;
+  overflow: hidden;
   cursor: pointer;
-  transition: box-shadow 0.15s;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  text-align: left;
 }
 
-.system-node.selected {
-  border: 2.5px solid var(--kx-accent-strong);
-  box-shadow: 0 0 0 4px rgb(var(--kx-ink-rgb) / 0.14);
+.system-node,
+.container-node,
+.repository-node,
+.component-node {
+  position: relative;
 }
 
-.system-node:focus {
-  outline: 2px solid var(--kx-accent-strong);
-  outline-offset: 2px;
+/* Header strip — soft neutral band that carries the colored icon chip */
+.system-node__head,
+.container-node__head,
+.repository-node__head,
+.component-node__head {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px 0;
 }
 
-.system-node__label {
+/* Icon chip — the colored badge that makes the type readable at a glance */
+.system-node__icon,
+.container-node__icon,
+.repository-node__icon,
+.component-node__icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 6px;
+  color: var(--kx-system-map-icon-ink);
+}
+
+.system-node__icon { background: var(--kx-system-map-system); }
+.container-node__icon { background: var(--kx-system-map-container); }
+.repository-node__icon { background: var(--kx-secondary); }
+.component-node__icon { background: var(--kx-system-map-component); }
+
+/* Body — category caps, name, tags */
+.system-node__body,
+.container-node__body,
+.repository-node__body,
+.component-node__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px 7px;
+}
+
+.system-node__cat,
+.container-node__cat,
+.repository-node__cat,
+.component-node__cat {
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.system-node__cat { color: var(--kx-system-map-system); }
+.container-node__cat { color: var(--kx-system-map-container); }
+.repository-node__cat { color: var(--kx-secondary); }
+.component-node__cat { color: var(--kx-system-map-component); }
+
+.system-node__name,
+.container-node__name,
+.repository-node__name,
+.component-node__name {
   font-size: var(--kx-text-md);
   font-weight: var(--kx-font-medium);
   color: var(--kx-primary);
-  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
 }
 
-.system-node__badge {
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Repository node */
-.repository-node {
+/* Tag chips under the name */
+.system-node__tags,
+.container-node__tags,
+.repository-node__tags,
+.component-node__tags {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 160px;
-  height: 60px;
-  padding: 8px 12px;
-  background: var(--kx-pale);
-  border: 1.5px solid var(--kx-border);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: box-shadow 0.15s, border-color 0.15s;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 2px;
+  min-height: 0;
 }
 
-.repository-node.selected {
-  border: 2.5px solid var(--kx-accent-strong);
-  box-shadow: 0 0 0 4px rgb(var(--kx-ink-rgb) / 0.14);
+.system-node__tag,
+.container-node__tag,
+.repository-node__tag,
+.component-node__tag {
+  max-width: 100%;
+  padding: 1px 6px;
+  background: var(--kx-pale);
+  border-radius: 999px;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+/* Per-type border accents — C1 green, C2 plum, C3 teal; repo stays neutral */
+.system-node { border-color: var(--kx-system-map-system); }
+.container-node { border-color: var(--kx-system-map-container); }
+.component-node { border-color: var(--kx-system-map-component); }
+.repository-node { background: var(--kx-pale); }
 
 .repository-node.placeholder {
   border-style: dashed;
   border-width: 1px;
 }
 
-.repository-node:focus {
-  outline: 2px solid var(--kx-accent-strong);
-  outline-offset: 2px;
+/* Selection + focus states (per-type rules — the contrast inventory
+ * walks single-line selectors) */
+.system-node.selected {
+  border-color: var(--kx-accent-strong);
 }
 
-.repository-node__label {
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-primary);
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+.container-node.selected {
+  border-color: var(--kx-accent-strong);
 }
 
-/* Component node - compact by default */
-.component-node {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  width: 160px;
-  height: 60px;
-  padding: 8px 12px;
-  background: var(--kx-raised);
-  border: 1.5px solid var(--kx-border);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s, z-index 0s;
-  z-index: 1;
+.repository-node.selected {
+  border-color: var(--kx-accent-strong);
 }
 
 .component-node.selected {
-  border: 2.5px solid var(--kx-accent-strong);
+  border-color: var(--kx-accent-strong);
+}
+
+.system-node.selected,
+.container-node.selected,
+.repository-node.selected,
+.component-node.selected {
+  border-width: 2px;
   box-shadow: 0 0 0 4px rgb(var(--kx-ink-rgb) / 0.14);
+}
+
+.system-node:focus {
+  outline: 2px solid var(--kx-accent-strong);
+}
+
+.container-node:focus {
+  outline: 2px solid var(--kx-accent-strong);
+}
+
+.repository-node:focus {
+  outline: 2px solid var(--kx-accent-strong);
 }
 
 .component-node:focus {
   outline: 2px solid var(--kx-accent-strong);
+}
+
+.system-node:focus,
+.container-node:focus,
+.repository-node:focus,
+.component-node:focus {
   outline-offset: 2px;
 }
 
-/* Expanded component node - in-place expansion */
+/* ── Expanded component node — in-place detail card ──────────────────
+ * Keeps the card head (icon + category + name + tags), then a short
+ * description, the relationship list, and the Start Session action. */
 .component-node.expanded {
-  width: 240px;
+  width: 260px;
   height: auto;
-  min-height: 180px;
-  padding: 16px;
-  align-items: flex-start;
-  justify-content: flex-start;
+  min-height: 200px;
   z-index: 100;
   transform: scale(1.05);
   box-shadow: 0 8px 24px rgb(var(--kx-ink-rgb) / 0.12);
@@ -281,45 +361,33 @@
   border: 2.5px solid var(--kx-accent-strong);
 }
 
-.component-node__label {
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-primary);
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.component-node__badge {
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Expanded content styles */
 .component-node__expanded-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  width: 100%;
+  gap: 10px;
+  padding: 10px 12px 12px;
 }
 
 .component-node__header {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  gap: 3px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--kx-border);
 }
 
-.component-node__header .component-node__label {
+.component-node__header .component-node__icon {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+}
+
+.component-node__header .component-node__name {
   font-size: var(--kx-text-l);
   font-weight: var(--kx-font-bold);
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
 }
 
 .component-node__description {
@@ -329,14 +397,23 @@
   line-height: 1.4;
 }
 
+.component-node__rel-heading {
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
 .component-node__metadata {
   display: flex;
   flex-direction: column;
   gap: 6px;
   padding: 10px;
   background: var(--kx-pale);
-  border-radius: 6px;
+  border-radius: 8px;
 }
+
 
 .component-node__metadata-row {
   display: flex;
@@ -367,7 +444,7 @@
   border-radius: 6px;
   font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-medium);
-  color: var(--kx-accent-text-aa);
+  color: var(--kx-accent-fill-ink);
   cursor: pointer;
   transition: background-color 0.15s, transform 0.1s;
 }
@@ -385,9 +462,25 @@
   outline-offset: 2px;
 }
 
-/* Edge styles - NO arrowheads */
+/* Connection handles and edge paths */
+.react-flow__edges,
+.react-flow__edges > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.kx-system-map__handle {
+  width: 7px !important;
+  height: 7px !important;
+  min-width: 7px !important;
+  min-height: 7px !important;
+  background: var(--kx-raised) !important;
+  border: 1.5px solid var(--kx-secondary) !important;
+  pointer-events: none;
+}
+
 .react-flow__edge-path {
-  stroke: var(--kx-border);
+  stroke: rgb(var(--kx-ink-rgb) / 0.28);
   stroke-width: 1.5px;
   fill: none;
 }
@@ -397,26 +490,50 @@
   stroke-width: 2px;
 }
 
-/* React Flow controls styling */
+/* React Flow attribution label — hidden (also via proOptions). */
+.react-flow__attribution {
+  display: none !important;
+}
+
+/* React Flow controls styling - no box, icon-only */
+.react-flow__controls {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 .react-flow__controls-button {
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  color: var(--kx-primary);
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--kx-primary) !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.15s !important;
 }
 
 .react-flow__controls-button:hover {
-  background: var(--kx-pale);
-  border-color: var(--kx-accent-strong);
+  background: var(--kx-pale) !important;
+  border-color: var(--kx-accent-strong) !important;
 }
 
-/* Background pattern - dotted grid */
+.react-flow__controls-button svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.react-flow__controls-button path {
+  stroke: var(--kx-primary) !important;
+  stroke-width: 2 !important;
+  fill: none !important;
+}
+
+/* Background pattern — keep the SVG transparent so it cannot cover edges. */
 .react-flow__background {
-  background: var(--kx-raised);
-}
-
-/* Ensure dots are visible */
-.react-flow__background pattern {
-  fill: var(--kx-border);
+  background: transparent;
 }
 
 /* Skeleton loading states */
@@ -448,6 +565,16 @@
 }
 
 .kx-system-map__graph-container.has-selection .react-flow__node:not(.highlighted) {
+  opacity: 0.3;
+}
+
+/* Edge highlighting — className is applied to the edge group. */
+.kx-system-map__graph-container:not(.has-selection) .react-flow__edge-path,
+.kx-system-map__graph-container.has-selection .react-flow__edge.highlighted .react-flow__edge-path {
+  opacity: 1;
+}
+
+.kx-system-map__graph-container.has-selection .react-flow__edge:not(.highlighted) .react-flow__edge-path {
   opacity: 0.3;
 }
 

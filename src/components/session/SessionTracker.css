@@ -42,7 +42,7 @@
   font-weight: var(--kx-font-bold);
   letter-spacing: 0.01em;
   line-height: 1.2;
-  color: var(--kx-raised);
+  color: var(--kx-accent-solid-ink);
 }
 
 .kx-session-detail__stage-pill-badge {

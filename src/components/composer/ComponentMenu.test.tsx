@@ -51,7 +51,7 @@ const openMenu = () => {
 }
 
 const repoNameOf = (componentId: string) =>
-  REPOSITORIES.find((repo) => repo.id === COMPONENTS.find((c) => c.id === componentId)!.repoId)!
+  REPOSITORIES.find((repo) => repo.id === COMPONENTS.find((c) => c.id === componentId)!.repoIds[0])!
     .name
 
 /** True when `later` comes after `earlier` in document order. */

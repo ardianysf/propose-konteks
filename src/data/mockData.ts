@@ -164,7 +164,22 @@ export interface WorkspaceSetting {
 export interface ComponentEntry {
   id: string
   name: string
-  repoId: string
+  /** C4 level 3 — the container this component lives in. */
+  containerId: string
+  /** C4 level 4 — code elements: the repositories implementing this
+   * component. Many-to-many: one repo may host several components and
+   * one component may span multiple repos. */
+  repoIds: string[]
+}
+
+/** C4 level 2 — a container (web app, API, mobile app, CLI…) inside a
+ * software system. */
+export interface Container {
+  id: string
+  name: string
+  systemId: string
+  tech?: string
+  description?: string
 }
 
 export interface RecentSession {
@@ -381,20 +396,40 @@ export const WORKSPACE_SETTINGS: WorkspaceSetting[] = [
 // Components (name + owning repository)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// C4 level 2 — containers (one or more per system)
+// ---------------------------------------------------------------------------
+
+export const CONTAINERS: Container[] = [
+  { id: 'cont-hris-web', name: 'HRIS Web App', systemId: 'bsi-hris', tech: 'React SPA', description: 'Employee-facing web application' },
+  { id: 'cont-hris-api', name: 'HRIS API', systemId: 'bsi-hris', tech: 'Node.js', description: 'Backend API for HRIS data' },
+  { id: 'cont-canteen-api', name: 'Canteen API', systemId: 'bsi-canteen', tech: 'Go', description: 'Ordering backend service' },
+  { id: 'cont-canteen-cms', name: 'Canteen CMS', systemId: 'bsi-canteen', tech: 'Next.js', description: 'Menu content management' },
+  { id: 'cont-mytok-mobile', name: 'Mytok Mobile App', systemId: 'mpm-mytok', tech: 'Flutter', description: 'Customer mobile application' },
+  { id: 'cont-portal-api', name: 'Portal Vendor API', systemId: 'mpm-portal-vendor', tech: 'Node.js', description: 'Vendor portal service' },
+  { id: 'cont-hanoman-api', name: 'Hanoman API', systemId: 'hanoman', tech: 'Python', description: 'Automation orchestration API' },
+  { id: 'cont-agent-runner', name: 'Agent Runner CLI', systemId: 'kookree', tech: 'TypeScript', description: 'Local agent execution runtime' },
+  { id: 'cont-richapp-web', name: 'Richapp Web', systemId: 'richapp', tech: 'React SPA', description: 'Product web frontend' },
+  { id: 'cont-richapp-svc', name: 'Richapp Service', systemId: 'richapp', tech: 'Java', description: 'Product backend service' },
+  { id: 'cont-store-web', name: 'Storefront Web', systemId: 'online-store', tech: 'Next.js', description: 'Customer storefront' },
+  { id: 'cont-checkout', name: 'Checkout Service', systemId: 'online-store', tech: 'Go', description: 'Payment and checkout processing' },
+]
+
 export const COMPONENTS: ComponentEntry[] = [
-  { id: 'comp-hris-web', name: 'hris-web', repoId: 'bsi/hris-frontend-shared' },
-  { id: 'comp-hris-promotion', name: 'hris-promotion', repoId: 'bsi/hris-frontend-promotion' },
-  { id: 'comp-pref-eval', name: 'pref-eval', repoId: 'bsi/hris-frontend-pref-eval' },
-  { id: 'comp-canteen-api', name: 'canteen-api', repoId: 'bsi/canteen-backend' },
-  { id: 'comp-canteen-cms', name: 'canteen-cms', repoId: 'bsi/canteen-cms' },
-  { id: 'comp-mytok-mobile', name: 'mytok-mobile', repoId: 'mpm/mytok' },
-  { id: 'comp-portal-vendor-api', name: 'portal-vendor-api', repoId: 'mpm/portal-vendor' },
-  { id: 'comp-hanoman-api', name: 'hanoman-api', repoId: 'hanoman/api' },
-  { id: 'comp-agent-runner', name: 'agent-runner', repoId: 'kookree/agent-runner' },
-  { id: 'comp-richapp-fe', name: 'richapp-fe', repoId: 'richapp/fe-richapp' },
-  { id: 'comp-richapp-be', name: 'richapp-be', repoId: 'richapp/be-richapp' },
-  { id: 'comp-storefront', name: 'storefront', repoId: 'online-store/storefront' },
-  { id: 'comp-checkout-api', name: 'checkout-api', repoId: 'online-store/checkout-api' },
+  // hris-web spans two repos: one component implemented across repositories.
+  { id: 'comp-hris-web', name: 'hris-web', containerId: 'cont-hris-web', repoIds: ['bsi/hris-frontend-shared', 'bsi/hris-frontend-promotion'] },
+  { id: 'comp-hris-promotion', name: 'hris-promotion', containerId: 'cont-hris-web', repoIds: ['bsi/hris-frontend-promotion'] },
+  { id: 'comp-pref-eval', name: 'pref-eval', containerId: 'cont-hris-api', repoIds: ['bsi/hris-frontend-pref-eval'] },
+  { id: 'comp-canteen-api', name: 'canteen-api', containerId: 'cont-canteen-api', repoIds: ['bsi/canteen-backend'] },
+  { id: 'comp-canteen-cms', name: 'canteen-cms', containerId: 'cont-canteen-cms', repoIds: ['bsi/canteen-cms'] },
+  { id: 'comp-mytok-mobile', name: 'mytok-mobile', containerId: 'cont-mytok-mobile', repoIds: ['mpm/mytok'] },
+  { id: 'comp-portal-vendor-api', name: 'portal-vendor-api', containerId: 'cont-portal-api', repoIds: ['mpm/portal-vendor'] },
+  { id: 'comp-hanoman-api', name: 'hanoman-api', containerId: 'cont-hanoman-api', repoIds: ['hanoman/api'] },
+  { id: 'comp-agent-runner', name: 'agent-runner', containerId: 'cont-agent-runner', repoIds: ['kookree/agent-runner'] },
+  { id: 'comp-richapp-fe', name: 'richapp-fe', containerId: 'cont-richapp-web', repoIds: ['richapp/fe-richapp'] },
+  { id: 'comp-richapp-be', name: 'richapp-be', containerId: 'cont-richapp-svc', repoIds: ['richapp/be-richapp'] },
+  { id: 'comp-storefront', name: 'storefront', containerId: 'cont-store-web', repoIds: ['online-store/storefront'] },
+  { id: 'comp-checkout-api', name: 'checkout-api', containerId: 'cont-checkout', repoIds: ['online-store/checkout-api'] },
 ]
 
 // ---------------------------------------------------------------------------
@@ -772,6 +807,7 @@ export interface MockData {
   workspace: Workspace
   systems: System[]
   repositories: Repository[]
+  containers: Container[]
   profiles: ExecutionProfile[]
   workspaceSettings: WorkspaceSetting[]
   components: ComponentEntry[]
@@ -789,6 +825,7 @@ export const mockData: MockData = {
   workspace: WORKSPACE,
   systems: SYSTEMS,
   repositories: REPOSITORIES,
+  containers: CONTAINERS,
   profiles: EXECUTION_PROFILES,
   workspaceSettings: WORKSPACE_SETTINGS,
   components: COMPONENTS,
