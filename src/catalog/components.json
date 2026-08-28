@@ -685,6 +685,36 @@
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
+      "id": "dot-matrix-loader",
+      "name": "DotMatrixLoader",
+      "domain": "session",
+      "sourcePath": "src/components/ui/DotMatrixLoader.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "3×3 dot-matrix loading indicator with five opacity-only animation variants (spiral, drift, ripple, echo, glyph); currentColor dots colored via --kx-primary so light/dark themes both work with zero extra theming, used as the pending-assistant indicator in the session timeline.",
+      "propDocs": {
+        "variant": "optional, 'spiral' | 'drift' | 'ripple' | 'echo' | 'glyph' (default 'spiral') — animation variant; consumers can rotate via the DOT_MATRIX_VARIANTS named export",
+        "size": "optional, number (default 22) — root width/height in px",
+        "label": "optional, string (default 'Memuat') — accessible name announced via role=\"status\""
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/ui/DotMatrixLoader.css"
+      ],
+      "tokenDeps": [
+        "--kx-primary"
+      ],
+      "variants": [
+        "spiral",
+        "drift",
+        "ripple",
+        "echo",
+        "glyph"
+      ],
+      "fixtureRef": "variant grid: spiral | drift | ripple | echo | glyph + one size=32 specimen",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; drop-in via default export, ukuran via prop size, warna mengikuti token --kx-primary, dan hormat prefers-reduced-motion otomatis."
+    },
+    {
       "id": "session-detail-composer",
       "name": "SessionDetailComposer",
       "domain": "session",
