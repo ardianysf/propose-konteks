@@ -7,6 +7,7 @@
  */
 import { useMockup } from '../../state/MockupContext'
 import type { DeliveryInfo, DetailTimelineItem, SessionQuote } from '../../data/mockData'
+import DotMatrixLoader, { DOT_MATRIX_VARIANTS } from '../ui/DotMatrixLoader'
 import './SessionTimeline.css'
 // Renders quote/delivery status pills with the shared session badge
 // primitive (.kx-badge + modifiers) — declared here because the rules live
@@ -157,6 +158,24 @@ function TimelineSkeleton() {
   return <div className="kx-session-timeline__skeleton" data-testid="timeline-skeleton">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="kx-session-timeline__skeleton-row" />)}</div>
 }
 
+/** Pending assistant reply — trailing assistant-aligned bubble holding the
+ * 3×3 dot-matrix loader. Send #n maps to variants[(n − 1) % 5] via loadCount
+ * (1-based): #1 spiral, #2 drift, … #5 glyph, #6 wraps back to spiral. */
+function PendingAssistantItem({ loadCount }: { loadCount: number }) {
+  const variant =
+    DOT_MATRIX_VARIANTS[(loadCount - 1 + DOT_MATRIX_VARIANTS.length) % DOT_MATRIX_VARIANTS.length]
+  return (
+    <li
+      className="kx-session-timeline__item kx-session-timeline__item--assistant"
+      data-testid="timeline-pending-assistant"
+    >
+      <div className="kx-session-timeline__bubble kx-session-timeline__bubble--assistant kx-session-timeline__bubble--pending">
+        <DotMatrixLoader variant={variant} label="Menyusun jawaban" />
+      </div>
+    </li>
+  )
+}
+
 export default function SessionTimeline() {
   const { state } = useMockup()
   if (state.demoVariant === 'loading') return <TimelineSkeleton />
@@ -177,6 +196,9 @@ export default function SessionTimeline() {
             case 'ARTIFACT': return <ArtifactItem key={item.id} item={item} />
           }
         })}
+        {state.sessionDetail.pendingAssistant ? (
+          <PendingAssistantItem loadCount={state.sessionDetail.loadCount} />
+        ) : null}
       </ol>
     </section>
   )

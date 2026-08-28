@@ -701,7 +701,8 @@
         ],
         "dispatches": [
           "OPEN_OVERLAY",
-          "SESSION_SEND_DETAIL_MESSAGE"
+          "SESSION_SEND_DETAIL_MESSAGE",
+          "SESSION_RECEIVE_DETAIL_MESSAGE"
         ]
       },
       "cssFiles": [

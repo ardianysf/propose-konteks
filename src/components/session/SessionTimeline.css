@@ -48,6 +48,14 @@
   line-height: 1.5;
 }
 
+/* Pending assistant reply — same bubble family, hugging the dot-matrix
+ * loader (dots take their color from --kx-primary via the cascade). */
+.kx-session-timeline__bubble--pending {
+  display: inline-flex;
+  padding: 10px 12px;
+  line-height: 0;
+}
+
 .kx-session-timeline__item--system {
   align-items: center;
   flex-direction: row;

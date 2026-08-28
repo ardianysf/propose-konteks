@@ -1,0 +1,165 @@
+/* DotMatrixLoader — 3×3 dot-matrix loading indicator.
+ *
+ * Opacity-only animation on currentColor dots; root color comes from
+ * --kx-primary via the cascade, so themes need zero extra wiring.
+ * Per-dot CSS custom props (--kx-dmx-order/path/distance/ring/parity) are
+ * set inline by the component and drive both the animation delays and the
+ * prefers-reduced-motion static gradient. The glyph variant is JS-driven
+ * (DotMatrixLoader.tsx) and has no CSS animation.
+ */
+
+.kx-dmx {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 1px;
+  width: var(--kx-dmx-size, 22px);
+  height: var(--kx-dmx-size, 22px);
+  color: var(--kx-primary);
+}
+
+.kx-dmx__dot {
+  width: calc((var(--kx-dmx-size, 22px) - 2px) / 3);
+  height: calc((var(--kx-dmx-size, 22px) - 2px) / 3);
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.06;
+}
+
+/* 1 — spiral: comet spirals clockwise inward (order × 50ms delay). */
+.kx-dmx--spiral .kx-dmx__dot {
+  animation: kx-dmx-spiral 1020ms linear infinite;
+  animation-delay: calc(var(--kx-dmx-order, 0) * 50ms);
+}
+
+/* 2 — drift: diagonal bands pulse top-left → bottom-right (path × 250ms). */
+.kx-dmx--drift .kx-dmx__dot {
+  animation: kx-dmx-drift 890ms cubic-bezier(0.42, 0, 0.58, 1) infinite;
+  animation-delay: calc(var(--kx-dmx-path, 0) * 250ms);
+}
+
+/* 3 — ripple: concentric ripples from the center dot (distance × 112ms). */
+.kx-dmx--ripple .kx-dmx__dot {
+  animation: kx-dmx-ripple 1115ms ease-out infinite;
+  animation-delay: calc(var(--kx-dmx-distance, 0) * 112ms);
+}
+
+/* 4 — echo: square rings echo outward with a parity shimmer. */
+.kx-dmx--echo .kx-dmx__dot {
+  animation: kx-dmx-echo 910ms ease-in-out infinite;
+  animation-delay: calc(var(--kx-dmx-ring, 0) * 103ms + var(--kx-dmx-parity, 0) * 17ms);
+}
+
+/* Static fallback: global.css force-disables animations under reduced
+ * motion, so the idle pattern must come from explicit per-dot opacity —
+ * the variant driver normalized to a 0.15→0.75 gradient. */
+@media (prefers-reduced-motion: reduce) {
+  .kx-dmx--spiral .kx-dmx__dot {
+    animation: none;
+    opacity: calc(0.15 + var(--kx-dmx-order, 0) * 0.075);
+  }
+
+  .kx-dmx--drift .kx-dmx__dot {
+    animation: none;
+    opacity: calc(0.15 + var(--kx-dmx-path, 0) * 0.6);
+  }
+
+  .kx-dmx--ripple .kx-dmx__dot {
+    animation: none;
+    opacity: calc(0.15 + var(--kx-dmx-distance, 0) / 1.4142 * 0.6);
+  }
+
+  .kx-dmx--echo .kx-dmx__dot {
+    animation: none;
+    opacity: calc(0.15 + var(--kx-dmx-ring, 0) * 0.3);
+  }
+}
+
+@keyframes kx-dmx-spiral {
+  0%,
+  100% {
+    opacity: 0.03;
+  }
+  8% {
+    opacity: 1;
+  }
+  16% {
+    opacity: 0.62;
+  }
+  24% {
+    opacity: 0.4;
+  }
+  32% {
+    opacity: 0.19;
+  }
+  40%,
+  40.01% {
+    opacity: 0.05;
+  }
+}
+
+@keyframes kx-dmx-drift {
+  0%,
+  100% {
+    opacity: 0.06;
+  }
+  3% {
+    opacity: 0.22;
+  }
+  6% {
+    opacity: 0.65;
+  }
+  10% {
+    opacity: 1;
+  }
+  14% {
+    opacity: 0.65;
+  }
+  17% {
+    opacity: 0.22;
+  }
+  20% {
+    opacity: 0.06;
+  }
+}
+
+@keyframes kx-dmx-ripple {
+  0%,
+  100% {
+    opacity: 0.06;
+  }
+  3% {
+    opacity: 0.22;
+  }
+  6% {
+    opacity: 0.65;
+  }
+  10% {
+    opacity: 1;
+  }
+  14% {
+    opacity: 0.65;
+  }
+  17% {
+    opacity: 0.22;
+  }
+  20% {
+    opacity: 0.06;
+  }
+}
+
+@keyframes kx-dmx-echo {
+  0%,
+  100% {
+    opacity: 0.06;
+  }
+  28% {
+    opacity: 0.98;
+  }
+  56% {
+    opacity: 0.32;
+  }
+  78% {
+    opacity: 0.78;
+  }
+}
