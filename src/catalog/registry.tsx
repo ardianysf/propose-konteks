@@ -1,6 +1,6 @@
 /*
  * registry.tsx (Task T3a, extended T4 + T6) — the runtime registry
- * mirroring src/catalog/components.json 1:1 (32 entries).
+ * mirroring src/catalog/components.json 1:1 (33 entries).
  *
  * Each entry lazy-imports its source module from src/components/ so the
  * catalog can load implementations on demand without copying them.
@@ -372,6 +372,23 @@ function learnedDrawerPreview(mod: LoadedModule): ReactNode {
 // ---------------------------------------------------------------------------
 // session
 // ---------------------------------------------------------------------------
+
+/** dot-matrix-loader (adoptable): all five variants animating side by
+ *  side, plus one larger-size specimen. */
+function dotMatrixLoaderPreview(mod: LoadedModule): ReactNode {
+  const DotMatrixLoader = asDefaultComponent(mod)
+  const variants = mod.DOT_MATRIX_VARIANTS as readonly string[]
+  return variantRow([
+    ...variants.map((variant) => ({
+      label: <code>{variant}</code>,
+      node: <DotMatrixLoader variant={variant} />,
+    })),
+    {
+      label: <code>{`size={32}`}</code>,
+      node: <DotMatrixLoader variant="spiral" size={32} />,
+    },
+  ])
+}
 
 /** session-detail-composer: active session (send enabled) vs terminal
  *  (locked notice). */
@@ -763,6 +780,12 @@ export const registry: RegistryEntry[] = [
     preview: learnedDrawerPreview,
   },
   // session
+  {
+    id: 'dot-matrix-loader',
+    kind: 'component',
+    load: () => import('../components/ui/DotMatrixLoader'),
+    preview: dotMatrixLoaderPreview,
+  },
   {
     id: 'session-detail-composer',
     kind: 'component',
