@@ -121,6 +121,7 @@ export type MockupAction =
   | { type: 'SESSION_REJECT_QUOTE'; quoteId: string; reason: string }
   | { type: 'SESSION_REQUEST_QUOTE_REVISION'; quoteId: string }
   | { type: 'SESSION_SEND_DETAIL_MESSAGE'; content: string }
+  | { type: 'SESSION_RECEIVE_DETAIL_MESSAGE' }
 
 /**
  * Builds the initial mockup state. The `mock` query parameter
@@ -484,6 +485,10 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
       }
     }
 
+    // Two-phase pending chat flow: the send lands only the user message and
+    // flags the assistant reply as pending (with a rotation counter for the
+    // loading indicator); the fixed acknowledgment arrives via
+    // SESSION_RECEIVE_DETAIL_MESSAGE once the (simulated) wait elapses.
     case 'SESSION_SEND_DETAIL_MESSAGE': {
       const now = new Date().toISOString()
       const userMessage = {
@@ -494,6 +499,20 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
         createdAt: now,
       }
 
+      return {
+        ...state,
+        sessionDetail: {
+          ...state.sessionDetail,
+          updatedAt: now,
+          pendingAssistant: true,
+          loadCount: state.sessionDetail.loadCount + 1,
+          timeline: [...state.sessionDetail.timeline, userMessage],
+        },
+      }
+    }
+
+    case 'SESSION_RECEIVE_DETAIL_MESSAGE': {
+      const now = new Date().toISOString()
       const assistantAck = {
         id: `T-${Date.now()}-assistant`,
         type: 'ASSISTANT_MESSAGE' as const,
@@ -507,7 +526,8 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
         sessionDetail: {
           ...state.sessionDetail,
           updatedAt: now,
-          timeline: [...state.sessionDetail.timeline, userMessage, assistantAck],
+          pendingAssistant: false,
+          timeline: [...state.sessionDetail.timeline, assistantAck],
         },
       }
     }

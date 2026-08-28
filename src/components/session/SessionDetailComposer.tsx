@@ -12,6 +12,11 @@ import ExecutionProfileMenu from '../composer/ExecutionProfileMenu'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import './SessionDetailComposer.css'
 
+/** Simulated assistant latency after each send. Exported so tests can
+ * advance fake timers by exactly this amount (and a real API wait can later
+ * replace the timeout without UI changes). */
+export const RESPONSE_DELAY_MS = 1600
+
 function AttachmentIcon() {
   return (
     <svg data-icon="attachment" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
@@ -58,6 +63,32 @@ export default function SessionDetailComposer() {
   const { sessionDetail } = state
   const [message, setMessage] = useState('')
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  // Pending assistant-reply timer. On unmount with the reply still in
+  // flight (timer armed), clear it AND land the reply — "reply arrived while
+  // away" — so navigating away and back never leaves a stuck pendingAssistant
+  // (eternal loader + permanently disabled send). When the timer already
+  // fired it nulls its own ref, so unmount is a no-op in that case.
+  const receiveTimeoutRef = useRef<number | null>(null)
+  useEffect(() => {
+    return () => {
+      if (receiveTimeoutRef.current !== null) {
+        window.clearTimeout(receiveTimeoutRef.current)
+        receiveTimeoutRef.current = null
+        dispatch({ type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
+      }
+    }
+  }, [dispatch])
+
+  // Mount-time recovery: pendingAssistant observed on mount with no timer
+  // armed (stale state from HMR or a future caller) would render an
+  // unresolvable loader and a locked composer — resolve it on arrival.
+  // Mount-only by design: after mount, the send path owns the pending flag.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (sessionDetail.pendingAssistant && receiveTimeoutRef.current === null) {
+      dispatch({ type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
+    }
+  }, [dispatch])
 
   // Auto-grow: collapse to one line, then expand to fit content (capped by CSS max-height).
   useEffect(() => {
@@ -71,9 +102,14 @@ export default function SessionDetailComposer() {
   const trimmedMessage = message.trim()
 
   const send = () => {
-    if (!trimmedMessage) return
+    if (!trimmedMessage || sessionDetail.pendingAssistant) return
     dispatch({ type: 'SESSION_SEND_DETAIL_MESSAGE', content: trimmedMessage })
     setMessage('')
+    if (receiveTimeoutRef.current !== null) window.clearTimeout(receiveTimeoutRef.current)
+    receiveTimeoutRef.current = window.setTimeout(() => {
+      receiveTimeoutRef.current = null
+      dispatch({ type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
+    }, RESPONSE_DELAY_MS)
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -150,7 +186,7 @@ export default function SessionDetailComposer() {
               className="kx-composer__send"
               type="button"
               onClick={send}
-              disabled={!trimmedMessage}
+              disabled={!trimmedMessage || sessionDetail.pendingAssistant}
               aria-label="Send message"
             >
               <SendIcon />

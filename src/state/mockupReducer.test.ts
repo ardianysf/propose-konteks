@@ -778,40 +778,81 @@ describe('SESSION_REQUEST_QUOTE_REVISION', () => {
 })
 
 // ---------------------------------------------------------------------------
-// SESSION_SEND_DETAIL_MESSAGE — appends user message and assistant ack
+// SESSION_SEND_DETAIL_MESSAGE / SESSION_RECEIVE_DETAIL_MESSAGE — two-phase
+// pending chat flow: the send lands only the user message and flags the
+// assistant reply as pending; the fixed acknowledgment arrives on receive.
 // ---------------------------------------------------------------------------
 
 describe('SESSION_SEND_DETAIL_MESSAGE', () => {
-  it('appends user message and assistant acknowledgment', () => {
+  it('appends only the user message and flags a pending assistant reply', () => {
     let state = freshState()
     const beforeTimelineLength = state.sessionDetail.timeline.length
     const content = 'Please add unit tests for the pagination fix'
 
     state = mockupReducer(state, { type: 'SESSION_SEND_DETAIL_MESSAGE', content })
 
-    expect(state.sessionDetail.timeline).toHaveLength(beforeTimelineLength + 2)
-    const lastTwo = state.sessionDetail.timeline.slice(-2)
-    expect(lastTwo[0].type).toBe('USER_MESSAGE')
-    expect(lastTwo[0].content).toBe(content)
-    expect(lastTwo[0].actorType).toBe('USER')
-    expect(lastTwo[1].type).toBe('ASSISTANT_MESSAGE')
-    expect(lastTwo[1].content).toContain('Noted — added to the working context')
-    expect(lastTwo[1].actorType).toBe('ASSISTANT')
+    expect(state.sessionDetail.timeline).toHaveLength(beforeTimelineLength + 1)
+    const last = state.sessionDetail.timeline[state.sessionDetail.timeline.length - 1]
+    expect(last.type).toBe('USER_MESSAGE')
+    expect(last.content).toBe(content)
+    expect(last.actorType).toBe('USER')
+    expect(state.sessionDetail.pendingAssistant).toBe(true)
 
     expect(state.sessionDetail.updatedAt).toBeDefined()
   })
 
-  it('messages appear with bumped timestamps', () => {
+  it('increments loadCount on every send — #2 → 2 (drift), #6 → 6 (wraps to spiral via (loadCount − 1) % 5)', () => {
+    let state = freshState()
+    expect(state.sessionDetail.pendingAssistant).toBe(false)
+    expect(state.sessionDetail.loadCount).toBe(0)
+
+    for (let sends = 1; sends <= 6; sends += 1) {
+      state = mockupReducer(state, { type: 'SESSION_SEND_DETAIL_MESSAGE', content: 'test' })
+      expect(state.sessionDetail.loadCount).toBe(sends)
+      expect(state.sessionDetail.pendingAssistant).toBe(true)
+    }
+  })
+
+  it('user message appears with bumped timestamp', () => {
     let state = freshState()
     const lastTimestamp = state.sessionDetail.timeline[state.sessionDetail.timeline.length - 1].createdAt
 
     state = mockupReducer(state, { type: 'SESSION_SEND_DETAIL_MESSAGE', content: 'test' })
 
-    const newItems = state.sessionDetail.timeline.slice(-2)
-    expect(new Date(newItems[0].createdAt).getTime()).toBeGreaterThanOrEqual(
+    const newMessage = state.sessionDetail.timeline[state.sessionDetail.timeline.length - 1]
+    expect(new Date(newMessage.createdAt).getTime()).toBeGreaterThanOrEqual(
       new Date(lastTimestamp).getTime(),
     )
-    expect(newItems[1].createdAt).toBe(newItems[0].createdAt)
+  })
+})
+
+describe('SESSION_RECEIVE_DETAIL_MESSAGE', () => {
+  it('appends the fixed assistant acknowledgment and clears the pending flag', () => {
+    let state = freshState()
+    const beforeTimelineLength = state.sessionDetail.timeline.length
+
+    state = mockupReducer(state, { type: 'SESSION_SEND_DETAIL_MESSAGE', content: 'test' })
+    state = mockupReducer(state, { type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
+
+    expect(state.sessionDetail.timeline).toHaveLength(beforeTimelineLength + 2)
+    const lastTwo = state.sessionDetail.timeline.slice(-2)
+    expect(lastTwo[0].type).toBe('USER_MESSAGE')
+    expect(lastTwo[1].type).toBe('ASSISTANT_MESSAGE')
+    expect(lastTwo[1].content).toContain('Noted — added to the working context')
+    expect(lastTwo[1].actorType).toBe('ASSISTANT')
+    expect(state.sessionDetail.pendingAssistant).toBe(false)
+    expect(state.sessionDetail.loadCount).toBe(1)
+  })
+
+  it('acknowledgment timestamp is not earlier than the send timestamp', () => {
+    let state = freshState()
+    state = mockupReducer(state, { type: 'SESSION_SEND_DETAIL_MESSAGE', content: 'test' })
+    const sentAt = state.sessionDetail.timeline[state.sessionDetail.timeline.length - 1].createdAt
+
+    state = mockupReducer(state, { type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
+
+    const ack = state.sessionDetail.timeline[state.sessionDetail.timeline.length - 1]
+    expect(new Date(ack.createdAt).getTime()).toBeGreaterThanOrEqual(new Date(sentAt).getTime())
   })
 })
 
