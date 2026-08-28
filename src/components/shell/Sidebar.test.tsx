@@ -578,7 +578,43 @@ describe('Sidebar', () => {
     renderSidebar()
     const nav = getSidebarNav()
     expect(screen.queryByText(/all systems/i)).not.toBeInTheDocument()
-    expect(within(nav).queryByRole('link')).not.toBeInTheDocument()
-    expect(nav.querySelectorAll('a')).toHaveLength(0)
+    // The catalog deep-link (a separate Vite entry, not a reducer route) is
+    // the only anchor in the sidebar chrome.
+    const links = within(nav).getAllByRole('link')
+    expect(links).toHaveLength(1)
+    expect(links[0]).toHaveAccessibleName('Component catalog')
+  })
+
+  it('user row carries a catalog deep-link to /catalog in a new tab with the Customize tooltip contract', () => {
+    renderSidebar()
+    const link = screen.getByRole('link', { name: 'Component catalog' })
+    expect(link).toHaveAttribute('href', '/catalog')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noreferrer')
+    expect(link).toHaveAttribute('data-testid', 'catalog-link')
+    expect(link).toHaveClass('kx-icon-btn', 'kx-tooltip-host')
+
+    // Decorative 3×3 dots glyph echoing the inline 2×2 system-grid icon.
+    const icon = link.querySelector('svg[data-icon="catalog"]')
+    expect(icon).not.toBeNull()
+    expect(icon).toHaveAttribute('aria-hidden', 'true')
+    expect(icon).toHaveAttribute('focusable', 'false')
+    expect(icon!.querySelectorAll('circle')).toHaveLength(9)
+
+    // Same keyboard-focusable tooltip contract as the Customize control.
+    const tooltip = link.querySelector('[role="tooltip"]')
+    expect(tooltip).not.toBeNull()
+    expect(tooltip).toHaveTextContent('Component catalog')
+    expect(tooltip).not.toBeVisible()
+
+    fireEvent.mouseEnter(link)
+    expect(tooltip).toBeVisible()
+    fireEvent.mouseLeave(link)
+    expect(tooltip).not.toBeVisible()
+
+    fireEvent.focus(link)
+    expect(tooltip).toBeVisible()
+    fireEvent.blur(link)
+    expect(tooltip).not.toBeVisible()
   })
 })
