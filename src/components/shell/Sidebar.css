@@ -443,7 +443,8 @@
   text-overflow: ellipsis;
 }
 
-.kx-sidebar__customize {
+.kx-sidebar__customize,
+.kx-sidebar__catalog {
   position: relative; /* tooltip anchor */
   flex-shrink: 0;
 }

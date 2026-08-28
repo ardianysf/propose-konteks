@@ -9,8 +9,10 @@
  * the sidebar stays untouched (AC11), the New session route control
  * between the system control and Recent sessions, the collapse toggle to
  * the 64px icon rail (AC12), the user row that opens the account menu
- * (Task 12, AC42), and the sliders icon beside it that opens Customize on
- * the agents tab with a keyboard-focusable tooltip (AC9). No "All Systems"
+ * (Task 12, AC42), the sliders icon beside it that opens Customize on
+ * the agents tab with a keyboard-focusable tooltip (AC9), and the catalog
+ * icon link beside that — a plain deep-link to the separate /catalog Vite
+ * entry (never a reducer route) opening in a new tab. No "All Systems"
  * page or link exists anywhere here (AC14). The workspace, system, and
  * account triggers toggle their own overlay on a repeated click and
  * replace any other open overlay (focus returns to the root trigger).
@@ -110,6 +112,31 @@ function NewSessionIcon() {
   )
 }
 
+/** 3×3 dots — the component-catalog deep-link glyph, echoing the inline
+ * system 2×2-grid icon pattern. */
+function CatalogIcon() {
+  return (
+    <svg
+      data-icon="catalog"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="3" cy="3" r="1.4" fill="currentColor" />
+      <circle cx="8" cy="3" r="1.4" fill="currentColor" />
+      <circle cx="13" cy="3" r="1.4" fill="currentColor" />
+      <circle cx="3" cy="8" r="1.4" fill="currentColor" />
+      <circle cx="8" cy="8" r="1.4" fill="currentColor" />
+      <circle cx="13" cy="8" r="1.4" fill="currentColor" />
+      <circle cx="3" cy="13" r="1.4" fill="currentColor" />
+      <circle cx="8" cy="13" r="1.4" fill="currentColor" />
+      <circle cx="13" cy="13" r="1.4" fill="currentColor" />
+    </svg>
+  )
+}
+
 /** Sliders — inline SVG, no emoji (AC9). */
 function SlidersIcon() {
   return (
@@ -142,6 +169,7 @@ export default function Sidebar() {
   const activeSystem =
     state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
   const [customizeTooltipShown, setCustomizeTooltipShown] = useState(false)
+  const [catalogTooltipShown, setCatalogTooltipShown] = useState(false)
   // Pinned recent sessions — local UI state: pinned rows float to the top
   // of the list (keeping their relative order), unpinned follow unchanged.
   const [pinnedIds, setPinnedIds] = useState<ReadonlySet<string>>(new Set())
@@ -405,6 +433,26 @@ export default function Sidebar() {
             Customize
           </span>
         </button>
+        {/* Catalog deep-link — opens the separate /catalog Vite entry in a
+            new tab (dev/preview middleware + vercel.json rewrite /catalog*
+            to catalog.html, so the absolute href works everywhere). */}
+        <a
+          className="kx-icon-btn kx-tooltip-host kx-sidebar__catalog"
+          href="/catalog"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Component catalog"
+          data-testid="catalog-link"
+          onMouseEnter={() => setCatalogTooltipShown(true)}
+          onMouseLeave={() => setCatalogTooltipShown(false)}
+          onFocus={() => setCatalogTooltipShown(true)}
+          onBlur={() => setCatalogTooltipShown(false)}
+        >
+          <CatalogIcon />
+          <span className="kx-tooltip kx-sidebar__tooltip" role="tooltip" hidden={!catalogTooltipShown}>
+            Component catalog
+          </span>
+        </a>
       </div>
     </nav>
   )
