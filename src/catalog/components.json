@@ -692,9 +692,9 @@
       "sourcePath": "src/components/ui/DotMatrixLoader.tsx",
       "exportName": "default",
       "classification": "adoptable",
-      "description": "3×3 dot-matrix loading indicator with five opacity-only animation variants (spiral, drift, ripple, echo, glyph); currentColor dots colored via --kx-primary so light/dark themes both work with zero extra theming, used as the pending-assistant indicator in the session timeline.",
+      "description": "3×3 dot-matrix loading indicator with five opacity-only animation variants (spiral, drift, ripple, echo, glyph); currentColor dots colored via --kx-primary so light/dark themes both work with zero extra theming. Used as the pending-assistant indicator in the session timeline, where the running process phase (see session/pendingPhases) drives the variant.",
       "propDocs": {
-        "variant": "optional, 'spiral' | 'drift' | 'ripple' | 'echo' | 'glyph' (default 'spiral') — animation variant; consumers can rotate via the DOT_MATRIX_VARIANTS named export",
+        "variant": "optional, 'spiral' | 'drift' | 'ripple' | 'echo' | 'glyph' (default 'spiral') — animation variant; consumers can map process phases to variants via the DOT_MATRIX_VARIANTS named export (see session/pendingPhases)",
         "size": "optional, number (default 22) — root width/height in px",
         "label": "optional, string (default 'Memuat') — accessible name announced via role=\"status\""
       },
@@ -713,7 +713,42 @@
         "glyph"
       ],
       "fixtureRef": "variant grid: spiral | drift | ripple | echo | glyph + one size=32 specimen",
-      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; drop-in via default export, ukuran via prop size, warna mengikuti token --kx-primary, dan hormat prefers-reduced-motion otomatis."
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; drop-in via default export, ukuran via prop size, warna mengikuti token --kx-primary, dan hormat prefers-reduced-motion otomatis. Untuk pola loading bertahap (Validating/Analyzing/…), lihat session/pendingPhases yang memetakan fase proses ke varian."
+    },
+    {
+      "id": "response-footer",
+      "name": "ResponseFooter",
+      "domain": "session",
+      "sourcePath": "src/components/session/ResponseFooter.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Per-response action row rendered under every assistant message: copy, thumbs up/down reactions, and a three-dot more menu with the response date plus Retry / Fork / Share; hovering or focusing the row reveals response stats (duration and tokens in/out) when the message carries meta.",
+      "propDocs": {
+        "item": "required, DetailTimelineItem — the assistant message (content, createdAt, optional meta { durationMs, tokensIn, tokensOut })",
+        "onRetry": "optional, () => void — invoked from the more menu's Retry action; the timeline re-asks the nearest preceding user message",
+        "initialReaction": "optional, 'up' | 'down' | null (default null) — initial reaction state (catalog specimens)",
+        "initialMenuOpen": "optional, boolean (default false) — render with the more menu already open (catalog specimens)"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/ResponseFooter.css"
+      ],
+      "tokenDeps": [
+        "--kx-primary",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-raised",
+        "--kx-border",
+        "--kx-accent-text-aa"
+      ],
+      "variants": [
+        "default (stats on hover)",
+        "thumbs active",
+        "menu open",
+        "without stats (no meta)"
+      ],
+      "fixtureRef": "specimen row: default with stats | thumbs active | menu open | no meta",
+      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext; stats muncul saat hover/focus (CSS) dengan fallback title; tombol salin memakai navigator.clipboard dengan feedback transien 'Copied'."
     },
     {
       "id": "session-detail-composer",

@@ -10,6 +10,8 @@ import {
   type SessionStage,
   type DeliveryInfo,
 } from '../data/mockData'
+import { pickAssistantResponse, generateResponseMeta } from '../data/assistantResponses'
+import { generatePendingPhases } from '../components/session/pendingPhases'
 
 export type { SessionMode } from '../data/mockData'
 
@@ -489,9 +491,9 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
     }
 
     // Two-phase pending chat flow: the send lands only the user message and
-    // flags the assistant reply as pending; the fixed acknowledgment arrives
-    // via SESSION_RECEIVE_DETAIL_MESSAGE once the (simulated) wait elapses
-    // (the pending bubble cycles its process phases meanwhile).
+    // flags the assistant reply as pending; a randomized natural response
+    // arrives via SESSION_RECEIVE_DETAIL_MESSAGE once the (simulated) wait
+    // elapses (the pending bubble cycles the drawn process phases meanwhile).
     case 'SESSION_SEND_DETAIL_MESSAGE': {
       const now = new Date().toISOString()
       const userMessage = {
@@ -508,6 +510,7 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
           ...state.sessionDetail,
           updatedAt: now,
           pendingAssistant: true,
+          pendingPhases: generatePendingPhases().map((phase) => phase.label),
           timeline: [...state.sessionDetail.timeline, userMessage],
         },
       }
@@ -547,6 +550,7 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
           createdAt: now,
           updatedAt: now,
           pendingAssistant: true,
+          pendingPhases: generatePendingPhases().map((phase) => phase.label),
           currentCycle: 1,
           stages: SESSION_DETAIL.stages.map((stage, index) => ({
             ...stage,
@@ -569,12 +573,13 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
 
     case 'SESSION_RECEIVE_DETAIL_MESSAGE': {
       const now = new Date().toISOString()
-      const assistantAck = {
+      const assistantMessage = {
         id: `T-${Date.now()}-assistant`,
         type: 'ASSISTANT_MESSAGE' as const,
-        content: 'Noted — added to the working context for this cycle.',
+        content: pickAssistantResponse(),
         actorType: 'ASSISTANT' as const,
         createdAt: now,
+        meta: generateResponseMeta(),
       }
 
       return {
@@ -583,7 +588,8 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
           ...state.sessionDetail,
           updatedAt: now,
           pendingAssistant: false,
-          timeline: [...state.sessionDetail.timeline, assistantAck],
+          pendingPhases: [],
+          timeline: [...state.sessionDetail.timeline, assistantMessage],
         },
       }
     }

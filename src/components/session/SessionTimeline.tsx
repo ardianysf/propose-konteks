@@ -9,7 +9,8 @@ import { useEffect, useState } from 'react'
 import { useMockup } from '../../state/MockupContext'
 import type { DeliveryInfo, DetailTimelineItem, SessionQuote } from '../../data/mockData'
 import DotMatrixLoader from '../ui/DotMatrixLoader'
-import { PENDING_PHASES, PENDING_PHASE_DURATION_MS } from './pendingPhases'
+import ResponseFooter from './ResponseFooter'
+import { PENDING_PROCESS_PHASES, PENDING_PHASE_DURATION_MS } from './pendingPhases'
 import './SessionTimeline.css'
 // Renders quote/delivery status pills with the shared session badge
 // primitive (.kx-badge + modifiers) — declared here because the rules live
@@ -69,10 +70,11 @@ function UserMessage({ item }: { item: DetailTimelineItem }) {
   )
 }
 
-function AssistantMessage({ item }: { item: DetailTimelineItem }) {
+function AssistantMessage({ item, onRetry }: { item: DetailTimelineItem; onRetry?: () => void }) {
   return (
     <li className="kx-session-timeline__item kx-session-timeline__item--assistant">
       <div className="kx-session-timeline__bubble kx-session-timeline__bubble--assistant">{item.content}</div>
+      <ResponseFooter item={item} onRetry={onRetry} />
     </li>
   )
 }
@@ -161,19 +163,26 @@ function TimelineSkeleton() {
 }
 
 /** Pending assistant reply — trailing assistant-aligned bubble with the
- * compact 12px dot-matrix loader and the running process label beside it.
- * The phase advances Validating → Analyzing → Synthesizing every
- * PENDING_PHASE_DURATION_MS (holding the last phase until the reply
- * lands); each phase drives its own loader variant. */
-function PendingAssistantItem() {
+ * compact 12px dot-matrix loader and the running process label (with an
+ * animated ellipsis) beside it. The phase list comes from the state's
+ * pendingPhases slice (falling back to the first three canonical phases); a
+ * local index advances through it every PENDING_PHASE_DURATION_MS (holding
+ * the last phase until the reply lands). The current phase drives both the
+ * visible label and its loader variant. */
+function PendingAssistantItem({ phases }: { phases: readonly string[] }) {
+  const labels =
+    phases.length > 0 ? phases : PENDING_PROCESS_PHASES.slice(0, 3).map((phase) => phase.label)
   const [phaseIndex, setPhaseIndex] = useState(0)
   useEffect(() => {
     const id = window.setInterval(() => {
-      setPhaseIndex((index) => Math.min(index + 1, PENDING_PHASES.length - 1))
+      setPhaseIndex((index) => Math.min(index + 1, labels.length - 1))
     }, PENDING_PHASE_DURATION_MS)
     return () => window.clearInterval(id)
-  }, [])
-  const phase = PENDING_PHASES[phaseIndex]
+  }, [labels.length])
+  const label = labels[Math.min(phaseIndex, labels.length - 1)]
+  const variant =
+    PENDING_PROCESS_PHASES.find((phase) => phase.label === label)?.variant ??
+    PENDING_PROCESS_PHASES[0].variant
   return (
     <li
       className="kx-session-timeline__item kx-session-timeline__item--assistant"
@@ -181,28 +190,47 @@ function PendingAssistantItem() {
     >
       <div className="kx-session-timeline__bubble kx-session-timeline__bubble--assistant kx-session-timeline__bubble--pending">
         <DotMatrixLoader
-          variant={phase.variant}
+          variant={variant}
           size={12}
-          label={`Menyusun jawaban — ${phase.label}`}
+          label={`Menyusun jawaban — ${label}`}
         />
-        <span className="kx-session-timeline__pending-phase">{phase.label}</span>
+        <span className="kx-session-timeline__pending-phase">
+          {label}
+          <span className="kx-session-timeline__pending-dots" aria-hidden="true">
+            <span className="kx-session-timeline__pending-dot" />
+            <span className="kx-session-timeline__pending-dot" />
+            <span className="kx-session-timeline__pending-dot" />
+          </span>
+        </span>
       </div>
     </li>
   )
 }
 
 export default function SessionTimeline() {
-  const { state } = useMockup()
+  const { state, dispatch } = useMockup()
   if (state.demoVariant === 'loading') return <TimelineSkeleton />
 
   const { timeline, quotes, delivery } = state.sessionDetail
+  // Retry re-asks the nearest preceding user message: a fresh pending cycle
+  // with newly drawn process phases and a new response.
+  const retryFrom = (assistantId: string) => {
+    if (state.sessionDetail.pendingAssistant) return
+    const index = timeline.findIndex((entry) => entry.id === assistantId)
+    for (let i = index - 1; i >= 0; i -= 1) {
+      if (timeline[i].type === 'USER_MESSAGE') {
+        dispatch({ type: 'SESSION_SEND_DETAIL_MESSAGE', content: timeline[i].content })
+        return
+      }
+    }
+  }
   return (
     <section aria-label="Session timeline" data-testid="session-timeline">
       <ol className="kx-session-detail__timeline">
         {timeline.map((item) => {
           switch (item.type) {
             case 'USER_MESSAGE': return <UserMessage key={item.id} item={item} />
-            case 'ASSISTANT_MESSAGE': return <AssistantMessage key={item.id} item={item} />
+            case 'ASSISTANT_MESSAGE': return <AssistantMessage key={item.id} item={item} onRetry={() => retryFrom(item.id)} />
             case 'SYSTEM_EVENT': return <SystemEvent key={item.id} item={item} />
             case 'QUOTE': return <QuoteItem key={item.id} quote={quotes.find((quote) => quote.id === item.quoteId)} />
             case 'APPROVAL': return <ApprovalItem key={item.id} item={item} />
@@ -211,7 +239,9 @@ export default function SessionTimeline() {
             case 'ARTIFACT': return <ArtifactItem key={item.id} item={item} />
           }
         })}
-        {state.sessionDetail.pendingAssistant ? <PendingAssistantItem /> : null}
+        {state.sessionDetail.pendingAssistant ? (
+          <PendingAssistantItem phases={state.sessionDetail.pendingPhases} />
+        ) : null}
       </ol>
     </section>
   )
