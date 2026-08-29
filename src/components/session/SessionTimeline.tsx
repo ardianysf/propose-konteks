@@ -5,9 +5,11 @@
  * content is distinguished by a right-aligned bubble, assistant content by
  * a left-aligned bubble, and workflow events by their own card/row forms.
  */
+import { useEffect, useState } from 'react'
 import { useMockup } from '../../state/MockupContext'
 import type { DeliveryInfo, DetailTimelineItem, SessionQuote } from '../../data/mockData'
-import DotMatrixLoader, { DOT_MATRIX_VARIANTS } from '../ui/DotMatrixLoader'
+import DotMatrixLoader from '../ui/DotMatrixLoader'
+import { PENDING_PHASES, PENDING_PHASE_DURATION_MS } from './pendingPhases'
 import './SessionTimeline.css'
 // Renders quote/delivery status pills with the shared session badge
 // primitive (.kx-badge + modifiers) — declared here because the rules live
@@ -158,19 +160,32 @@ function TimelineSkeleton() {
   return <div className="kx-session-timeline__skeleton" data-testid="timeline-skeleton">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="kx-session-timeline__skeleton-row" />)}</div>
 }
 
-/** Pending assistant reply — trailing assistant-aligned bubble holding the
- * 3×3 dot-matrix loader. Send #n maps to variants[(n − 1) % 5] via loadCount
- * (1-based): #1 spiral, #2 drift, … #5 glyph, #6 wraps back to spiral. */
-function PendingAssistantItem({ loadCount }: { loadCount: number }) {
-  const variant =
-    DOT_MATRIX_VARIANTS[(loadCount - 1 + DOT_MATRIX_VARIANTS.length) % DOT_MATRIX_VARIANTS.length]
+/** Pending assistant reply — trailing assistant-aligned bubble with the
+ * compact 12px dot-matrix loader and the running process label beside it.
+ * The phase advances Validating → Analyzing → Synthesizing every
+ * PENDING_PHASE_DURATION_MS (holding the last phase until the reply
+ * lands); each phase drives its own loader variant. */
+function PendingAssistantItem() {
+  const [phaseIndex, setPhaseIndex] = useState(0)
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setPhaseIndex((index) => Math.min(index + 1, PENDING_PHASES.length - 1))
+    }, PENDING_PHASE_DURATION_MS)
+    return () => window.clearInterval(id)
+  }, [])
+  const phase = PENDING_PHASES[phaseIndex]
   return (
     <li
       className="kx-session-timeline__item kx-session-timeline__item--assistant"
       data-testid="timeline-pending-assistant"
     >
       <div className="kx-session-timeline__bubble kx-session-timeline__bubble--assistant kx-session-timeline__bubble--pending">
-        <DotMatrixLoader variant={variant} label="Menyusun jawaban" />
+        <DotMatrixLoader
+          variant={phase.variant}
+          size={12}
+          label={`Menyusun jawaban — ${phase.label}`}
+        />
+        <span className="kx-session-timeline__pending-phase">{phase.label}</span>
       </div>
     </li>
   )
@@ -196,9 +211,7 @@ export default function SessionTimeline() {
             case 'ARTIFACT': return <ArtifactItem key={item.id} item={item} />
           }
         })}
-        {state.sessionDetail.pendingAssistant ? (
-          <PendingAssistantItem loadCount={state.sessionDetail.loadCount} />
-        ) : null}
+        {state.sessionDetail.pendingAssistant ? <PendingAssistantItem /> : null}
       </ol>
     </section>
   )

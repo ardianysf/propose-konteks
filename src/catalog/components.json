@@ -145,7 +145,8 @@
         ],
         "dispatches": [
           "BEGIN_SESSION_CONTEXT_DRAFT",
-          "OPEN_OVERLAY"
+          "OPEN_OVERLAY",
+          "SESSION_CREATE_FROM_COMPOSER"
         ]
       },
       "cssFiles": [
