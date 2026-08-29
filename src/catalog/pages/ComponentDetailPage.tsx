@@ -1,6 +1,9 @@
 /*
  * Component detail — satu halaman per entri manifest (T4 real content,
- * spec §2 "Detail page" + AC6/AC11).
+ * spec §2 "Detail page" + AC6/AC11), direstyle sebagai lembar data
+ * (datasheet) di dunia "Industrial Parts Catalog": header spec-sheet
+ * (part number, chip klasifikasi, rule tinta 2px, meta line mono),
+ * plate live preview dengan ground literal, tabel spec hairline.
  *
  * Generik dan manifest-driven: header (nama, domain, klasifikasi, source),
  * LIVE PREVIEW dari registry (entry.preview ?? render default export di
@@ -12,6 +15,7 @@
  */
 import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from 'react'
 import { getManifestEntry, type ManifestEntry } from '../manifest'
+import { partNumber } from '../partNumbers'
 import { registry, usageSnippet } from '../registry'
 import { getPathnameFor, navigateTo } from '../router'
 import { CatalogPreviewProvider } from '../CatalogPreviewContext'
@@ -270,6 +274,25 @@ function MetaList({ entry }: { entry: ManifestEntry }) {
 }
 
 // ---------------------------------------------------------------------------
+// SectionHead — datasheet section header: mono index + caps title over the
+// 2px ink rule. The index numeral lives OUTSIDE the h2 so heading accessible
+// names stay exactly "Live preview" / "API contract" / etc.
+// ---------------------------------------------------------------------------
+
+function SectionHead({ index, title, id }: { index: number; title: string; id: string }) {
+  return (
+    <div className="kx-cat-ds-sechead">
+      <span className="kx-cat-ds-secno" aria-hidden="true">
+        {String(index).padStart(2, '0')}
+      </span>
+      <h2 id={id} className="kx-cat-ds-sectitle">
+        {title}
+      </h2>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
@@ -292,31 +315,36 @@ export function ComponentDetailPage({ slug }: ComponentDetailPageProps) {
               navigateTo({ name: 'components' })
             }}
           >
-            Components
+            Components — back to index
           </a>
           <span aria-hidden="true"> / </span>
           {slug}
         </p>
-        <h1 id="kx-cat-component-title" className="kx-cat-title">
-          Komponen tidak ditemukan
-        </h1>
-        <p className="kx-cat-lede">
-          Slug <code>{slug}</code> tidak ada di manifest{' '}
-          <code>src/catalog/components.json</code>.
-        </p>
-        <p>
-          Kembali ke{' '}
-          <a
-            href={getPathnameFor({ name: 'components' })}
-            onClick={(e) => {
-              e.preventDefault()
-              navigateTo({ name: 'components' })
-            }}
-          >
-            indeks komponen
-          </a>{' '}
-          untuk daftar lengkap.
-        </p>
+        <header className="kx-cat-detail-header">
+          <h1 id="kx-cat-component-title" className="kx-cat-title kx-cat-detail-title">
+            Komponen tidak ditemukan
+          </h1>
+          <p className="kx-cat-detail-tags">
+            <span className="kx-cat-stamp">missing</span>
+          </p>
+          <p className="kx-cat-lede">
+            Slug <code>{slug}</code> tidak ada di manifest{' '}
+            <code>src/catalog/components.json</code>.
+          </p>
+          <p>
+            Kembali ke{' '}
+            <a
+              href={getPathnameFor({ name: 'components' })}
+              onClick={(e) => {
+                e.preventDefault()
+                navigateTo({ name: 'components' })
+              }}
+            >
+              indeks komponen
+            </a>{' '}
+            untuk daftar lengkap.
+          </p>
+        </header>
       </section>
     )
   }
@@ -331,17 +359,18 @@ export function ComponentDetailPage({ slug }: ComponentDetailPageProps) {
             navigateTo({ name: 'components' })
           }}
         >
-          Components
+          Components — back to index
         </a>
         <span aria-hidden="true"> / </span>
         {entry.id}
       </p>
 
       <header className="kx-cat-detail-header">
-        <h1 id="kx-cat-component-title" className="kx-cat-title">
+        <h1 id="kx-cat-component-title" className="kx-cat-title kx-cat-detail-title">
           {entry.name}
         </h1>
         <p className="kx-cat-detail-tags">
+          <span className="kx-cat-detail-no">{partNumber(entry)}</span>
           <span className="kx-cat-chip">
             domain: <code>{entry.domain}</code>
           </span>
@@ -351,7 +380,6 @@ export function ComponentDetailPage({ slug }: ComponentDetailPageProps) {
             {entry.classification}
           </span>
         </p>
-        <p className="kx-cat-lede">{entry.description}</p>
         <p className="kx-cat-detail-source">
           <code>{entry.sourcePath}</code>
           <span aria-hidden="true"> · </span>
@@ -362,19 +390,27 @@ export function ComponentDetailPage({ slug }: ComponentDetailPageProps) {
               : entry.exportName}
           </code>
         </p>
+        <p className="kx-cat-lede">{entry.description}</p>
       </header>
 
       <section aria-labelledby="kx-cat-preview-title" className="kx-cat-section">
-        <h2 id="kx-cat-preview-title">Live preview</h2>
-        <div className="kx-cat-preview-frame">
-          <LivePreview entry={entry} />
+        <SectionHead index={1} title="Live preview" id="kx-cat-preview-title" />
+        <div className="kx-cat-plate">
+          <p className="kx-cat-plate-strip" aria-hidden="true">
+            Plate · Live preview
+          </p>
+          <div className="kx-cat-plate-ground kx-cat-preview-frame">
+            <LivePreview entry={entry} />
+          </div>
         </div>
       </section>
 
       <section aria-labelledby="kx-cat-api-title" className="kx-cat-section">
-        <h2 id="kx-cat-api-title">API contract</h2>
+        <SectionHead index={2} title="API contract" id="kx-cat-api-title" />
         {entry.propDocs && Object.keys(entry.propDocs).length > 0 ? (
-          <PropDocsTable propDocs={entry.propDocs} />
+          <div className="kx-cat-table-scroll">
+            <PropDocsTable propDocs={entry.propDocs} />
+          </div>
         ) : (
           <p className="kx-cat-muted-note">
             Tidak ada props terdokumentasi
@@ -390,14 +426,14 @@ export function ComponentDetailPage({ slug }: ComponentDetailPageProps) {
       </section>
 
       <section aria-labelledby="kx-cat-usage-title" className="kx-cat-section">
-        <h2 id="kx-cat-usage-title">Contoh pemakaian</h2>
+        <SectionHead index={3} title="Contoh pemakaian" id="kx-cat-usage-title" />
         <pre className="kx-cat-code">
           <code>{usageSnippet(entry)}</code>
         </pre>
       </section>
 
       <section aria-labelledby="kx-cat-meta-title" className="kx-cat-section">
-        <h2 id="kx-cat-meta-title">Meta</h2>
+        <SectionHead index={4} title="Meta" id="kx-cat-meta-title" />
         <MetaList entry={entry} />
       </section>
 
@@ -409,7 +445,7 @@ export function ComponentDetailPage({ slug }: ComponentDetailPageProps) {
             navigateTo({ name: 'components' })
           }}
         >
-          ← Kembali ke indeks komponen
+          Kembali ke indeks komponen
         </a>
       </p>
     </section>

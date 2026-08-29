@@ -47,27 +47,34 @@ test.describe('catalog content', () => {
     await captureErrors(page, async () => {
       await gotoCatalog(page)
       await expect(
-        main(page).getByRole('heading', { name: 'Konteks Design System' }),
+        main(page).getByRole('heading', { name: 'Component Catalog' }),
       ).toBeVisible()
-      // Core sections of the real overview content (T4).
-      await expect(
-        main(page).getByRole('heading', { name: 'Dual-output repository' }),
-      ).toBeVisible()
-      await expect(
-        main(page).getByRole('heading', { name: 'Klasifikasi komponen' }),
-      ).toBeVisible()
-      // Classification cards carry their badge labels.
+      // Core sections of the redesigned overview (Industrial Parts Catalog):
+      // the identity counters and the domain index carry the content.
+      await expect(main(page).getByText('Components', { exact: true })).toBeVisible()
+      await expect(main(page).getByText('Domains', { exact: true })).toBeVisible()
+      await expect(main(page).getByText('Tokens', { exact: true })).toBeVisible()
+      await expect(main(page).getByText('Outputs', { exact: true })).toBeVisible()
+      // Classification legend carries its labels.
       for (const label of ['Adoptable', 'Mockup-coupled', 'Internal', 'Utility']) {
         await expect(main(page).getByText(label, { exact: true })).toBeVisible()
       }
-      await expect(
-        main(page).getByRole('heading', { name: 'Cara AI memakai katalog ini' }),
-      ).toBeVisible()
-      await expect(
-        main(page).getByRole('heading', { name: 'Contoh komposisi' }),
-      ).toBeVisible()
-      // Composition table lists the domain groups (chips per component).
-      await expect(main(page).locator('table.kx-cat-table')).toBeVisible()
+      // The domain index lists every domain as a link to the components page.
+      for (const domain of [
+        'Account',
+        'Composer',
+        'Context',
+        'Customize',
+        'Reviews',
+        'Session',
+        'Shell',
+        'System',
+      ]) {
+        await expect(
+          main(page).getByRole('link', { name: new RegExp(domain, 'i') }).first(),
+        ).toBeVisible()
+      }
+      await expect(main(page).locator('a.kx-cat-row')).toHaveCount(8)
     })
   })
 
@@ -96,7 +103,7 @@ test.describe('catalog content', () => {
     // The displayed value chips are read live via getComputedStyle, so
     // --kx-canvas (a theme-aware palette token) must flip with the theme.
     const canvasRow = main(page)
-      .locator('li.kx-cat-token-row', { hasText: '--kx-canvas' })
+      .locator('.kx-cat-ledger-row', { hasText: '--kx-canvas' })
       .first()
     const canvasChip = canvasRow.locator('.kx-cat-value-chip')
     const lightValue = (await canvasChip.textContent())?.trim()

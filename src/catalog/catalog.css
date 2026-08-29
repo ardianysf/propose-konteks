@@ -1,13 +1,20 @@
 /*
- * Konteks catalog shell styles (T2).
+ * Konteks catalog — "Industrial Parts Catalog" visual world.
  * ALL selectors are namespaced `.kx-cat-*` — catalog styles never touch the
  * mockup selectors, and no catalog selectors live under src/styles/
  * (CSS ownership rule, spec §2).
+ *
+ * The language: flat paper canvas, hairline rules, stamp-red actives,
+ * stencil-blue indices. Sarabun for display/UI, ui-monospace for part
+ * numbers and data. No radii, no shadows.
+ * Motion is "mechanical press": fast, linear, decisive, settles — 80–180ms,
+ * linear timing, transforms bounded to a few px, color-only theme shifts,
+ * all disabled under prefers-reduced-motion (see MOTION LAYER at EOF).
  * Target viewport: ≥1200px (1440 & 1200 tested; below that is out of scope).
  */
 
 /* ------------------------------------------------------------------------
- * Catalog-scoped scroll enablement
+ * Catalog-scoped scroll enablement (contract: catalogScrollContract.test.ts)
  *
  * global.css locks html/body with overflow: hidden for the mockup app.
  * The catalog doesn't render .kx-app/.kx-main (the mockup scroll owners),
@@ -22,115 +29,531 @@ html.kx-catalog-page body {
   overflow-x: hidden;
 }
 
-.kx-cat-shell {
-  min-height: 100vh;
-  background: var(--kx-canvas);
-  color: var(--kx-primary);
-  font-family: 'DM Sans', system-ui, sans-serif;
+/* Browser-surface re-ink (catalog pages only): thin scrollbar whose colors
+ * mirror the shell's --kxcat-hair-strong/--kxcat-canvas tokens. Literal
+ * values because the scrollbar lives on <html>, outside .kx-cat-shell
+ * where the custom properties are defined. */
+html.kx-catalog-page {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(22, 24, 29, 0.5) #f5f6f4;
 }
 
-.kx-cat-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
+html.kx-catalog-page[data-theme='dark'] {
+  scrollbar-color: rgba(232, 234, 229, 0.5) #12151a;
+}
+
+/* Selection + caret resolve the shell's tokens per element, so both themes
+ * re-ink as one (stamp-red wash behind full ink). */
+.kx-cat-shell ::selection {
+  background: color-mix(in srgb, var(--kxcat-red) 24%, transparent);
+  color: var(--kxcat-ink);
+}
+
+/* ------------------------------------------------------------------------
+ * Shell custom properties — the industrial parts-catalog palette.
+ * Light is the default; dark re-inks under html[data-theme='dark'].
+ * ----------------------------------------------------------------------*/
+
+.kx-cat-shell {
+  --kxcat-canvas: #f5f6f4;
+  --kxcat-ink: #16181d;
+  --kxcat-red: #d0342c;
+  --kxcat-blue: #2f6f8f;
+  --kxcat-hair: rgba(22, 24, 29, 0.2);
+  --kxcat-hair-strong: rgba(22, 24, 29, 0.5);
+  /* Derived dims: secondary/tertiary ink, soft row hairlines, ruler ticks. */
+  --kxcat-ink-2: rgba(22, 24, 29, 0.72);
+  --kxcat-ink-3: rgba(22, 24, 29, 0.62);
+  --kxcat-ink-4: rgba(22, 24, 29, 0.4);
+  --kxcat-ink-soft: rgba(22, 24, 29, 0.85);
+  --kxcat-hair-soft: rgba(22, 24, 29, 0.18);
+  --kxcat-rule: rgba(22, 24, 29, 0.25);
+  --kxcat-tick: rgba(22, 24, 29, 0.4);
+  --kxcat-tick-strong: rgba(22, 24, 29, 0.6);
+  --kxcat-wash: rgba(22, 24, 29, 0.03);
+  --kxcat-font: 'Sarabun', system-ui, sans-serif;
+  --kxcat-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--kxcat-canvas);
+  color: var(--kxcat-ink);
+  font-family: var(--kxcat-font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  caret-color: var(--kxcat-red);
+}
+
+html[data-theme='dark'] .kx-cat-shell {
+  --kxcat-canvas: #12151a;
+  --kxcat-ink: #e8eae5;
+  --kxcat-red: #e0493a;
+  --kxcat-blue: #6fa8d4;
+  --kxcat-hair: rgba(232, 234, 229, 0.18);
+  --kxcat-hair-strong: rgba(232, 234, 229, 0.5);
+  --kxcat-ink-2: rgba(232, 234, 229, 0.72);
+  --kxcat-ink-3: rgba(232, 234, 229, 0.62);
+  --kxcat-ink-4: rgba(232, 234, 229, 0.4);
+  --kxcat-ink-soft: rgba(232, 234, 229, 0.85);
+  --kxcat-hair-soft: rgba(232, 234, 229, 0.16);
+  --kxcat-rule: rgba(232, 234, 229, 0.22);
+  --kxcat-tick: rgba(232, 234, 229, 0.4);
+  --kxcat-tick-strong: rgba(232, 234, 229, 0.55);
+  --kxcat-wash: rgba(232, 234, 229, 0.04);
+}
+
+/* Keyboard focus is a hard ink outline, everywhere in the catalog. */
+.kx-cat-shell a:focus-visible,
+.kx-cat-shell button:focus-visible {
+  outline: 2px solid var(--kxcat-ink);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------------
+ * Shell layout: main grows, footer is the 44px band with the 2px top rule.
+ * ----------------------------------------------------------------------*/
+
+.kx-cat-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.kx-cat-footer {
+  flex: none;
+  height: 44px;
+  border-top: 2px solid var(--kxcat-ink);
   display: flex;
   align-items: center;
-  gap: 32px;
-  padding: 0 32px;
-  height: 56px;
-  background: var(--kx-raised);
-  border-bottom: 1px solid var(--kx-border);
+  justify-content: space-between;
+  padding: 0 36px;
+  position: relative;
 }
 
-.kx-cat-brand {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--kx-primary);
-  text-decoration: none;
-  letter-spacing: -0.01em;
+/* Registration crosshairs — print-sheet corner marks on the footer band.
+ * Purely decorative: aria-hidden in the markup, pointer-events none here,
+ * hairline strokes at ~55% ink. Non-interactive by construction. */
+.kx-cat-regmark {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  color: var(--kxcat-ink);
+  opacity: 0.55;
+  pointer-events: none;
 }
 
-.kx-cat-brand span {
-  font-weight: 500;
-  color: var(--kx-secondary);
+.kx-cat-regmark--tl {
+  top: 4px;
+  left: 8px;
+}
+
+.kx-cat-regmark--tr {
+  top: 4px;
+  right: 8px;
+}
+
+.kx-cat-regmark--bl {
+  bottom: 4px;
+  left: 8px;
+}
+
+.kx-cat-regmark--br {
+  bottom: 4px;
+  right: 8px;
 }
 
 .kx-cat-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 100%;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
 }
 
 .kx-cat-nav a {
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 8px;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--kx-secondary);
+  color: var(--kxcat-ink-2);
   text-decoration: none;
 }
 
 .kx-cat-nav a:hover {
-  background: var(--kx-pale);
-  color: var(--kx-primary);
+  color: var(--kxcat-ink);
 }
 
 .kx-cat-nav a[aria-current='page'] {
-  background: var(--kx-pale);
-  color: var(--kx-accent-text-aa);
+  color: var(--kxcat-red);
   font-weight: 700;
 }
 
-.kx-cat-nav a:focus-visible,
-.kx-cat-brand:focus-visible,
-.kx-cat-page a:focus-visible {
-  outline: 2px solid var(--kx-accent-strong);
-  outline-offset: 2px;
+.kx-cat-nav-dot {
+  color: var(--kxcat-ink-4);
+  padding: 0 9px;
 }
 
-.kx-cat-main {
+.kx-cat-sheet {
+  margin: 0;
+  font-family: var(--kxcat-mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  color: var(--kxcat-ink-2);
+}
+
+/* ------------------------------------------------------------------------
+ * Overview — the catalog hero spread (comp A).
+ * Grid: 38% identity column | 1fr domain index | 26px ruler margin.
+ * ----------------------------------------------------------------------*/
+
+.kx-cat-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
   max-width: 960px;
   margin: 0 auto;
   padding: 40px 32px 96px;
 }
 
+.kx-cat-hero {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.kx-cat-hero-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 38% 1fr 26px;
+}
+
+/* --- left: identity column -------------------------------------------- */
+
+.kx-cat-hero-left {
+  min-width: 0;
+  min-height: 0;
+  padding: 26px 30px 20px 36px;
+  border-right: 1px solid var(--kxcat-hair);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.kx-cat-brand {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink);
+}
+
+.kx-cat-sep {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--kxcat-ink);
+  margin: 0 10px 1px 0;
+}
+
+.kx-cat-brand-ds {
+  font-weight: 500;
+  letter-spacing: 0.14em;
+}
+
+.kx-cat-docmeta {
+  margin: 7px 0 0;
+  font-family: var(--kxcat-mono);
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+  color: var(--kxcat-ink-3);
+}
+
+.kx-cat-hero-title {
+  margin: 20px 0 0;
+  /* Fluid 1280–1600: 5.2vw ≈ 74.9px at the 1440 reference, clamped. */
+  font-size: clamp(48px, 5.2vw, 76px);
+  line-height: 0.94;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-transform: none;
+  color: var(--kxcat-ink);
+}
+
+.kx-cat-counters {
+  /* 22px → 16px: the 5.2vw title renders ~6px taller than the 5vw one;
+   * absorbing it here keeps the counters at y≈240 and the intro at y≈697
+   * at the 1440 reference. */
+  margin-top: 16px;
+}
+
+.kx-cat-counter {
+  padding: 2px 0 4px;
+}
+
+.kx-cat-counter + .kx-cat-counter {
+  border-top: 1px solid var(--kxcat-hair-soft);
+}
+
+.kx-cat-counter-big {
+  /* Fluid 1280–1600: ~100px at the 1440 reference, clamped. */
+  font-size: clamp(64px, 6.9vw, 100px);
+  line-height: 0.88;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--kxcat-ink);
+}
+
+.kx-cat-counter-lbl {
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink-2);
+}
+
+.kx-cat-hero-intro {
+  margin: 16px 0 0;
+  max-width: 392px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--kxcat-ink-soft);
+}
+
+.kx-cat-stamp {
+  /* 14px after the −6px counters compensation seats the ink box on its
+   * comp region (top rule ≈2–3px into the box, like the comp). */
+  margin: 14px 0 0;
+  align-self: flex-start;
+  border: 1px solid var(--kxcat-red);
+  color: var(--kxcat-red);
+  /* Ink box ≈30px tall at the 1440 reference: 8+7 padding + 10px caps at
+   * 1.3 leading + 2px border. Same red border/caps/tracking. */
+  padding: 8px 16px 7px;
+  font-size: 10px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* --- right: domain index ----------------------------------------------- */
+
+.kx-cat-hero-right {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 20px 14px 32px;
+}
+
+.kx-cat-thead,
+.kx-cat-row {
+  display: grid;
+  /* Fluid 1280–1600: the domain track yields (120px floor) before the
+   * samples column starves; 168px is kept at the 1440 reference. */
+  grid-template-columns: 46px minmax(120px, 168px) 1fr 74px;
+  column-gap: 18px;
+  align-items: center;
+}
+
+.kx-cat-thead {
+  /* Thin ink strip: caps line + 6px feed + 2px rule; cells carry no extra
+   * padding/borders, and the 10px caps floor is kept for legibility. */
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--kxcat-ink);
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink-3);
+}
+
+/* Header cells render at header scale regardless of the row-cell rules. */
+.kx-cat-thead .kx-cat-cell-no,
+.kx-cat-thead .kx-cat-cell-dom,
+.kx-cat-thead .kx-cat-cell-parts,
+.kx-cat-thead .kx-cat-cell-count {
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.kx-cat-thead .kx-cat-cell-count,
+.kx-cat-row .kx-cat-cell-count {
+  text-align: right;
+}
+
+.kx-cat-rows {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.kx-cat-row {
+  flex: 1 1 0;
+  min-height: 0;
+  border-bottom: 1px solid var(--kxcat-hair-soft);
+  color: inherit;
+  text-decoration: none;
+}
+
+.kx-cat-row:hover {
+  background: var(--kxcat-wash);
+}
+
+.kx-cat-cell-no {
+  font-family: var(--kxcat-mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--kxcat-blue);
+}
+
+.kx-cat-cell-dom {
+  font-size: 19px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink);
+}
+
+.kx-cat-cell-parts {
+  font-family: var(--kxcat-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--kxcat-ink-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.kx-cat-cell-count {
+  font-family: var(--kxcat-mono);
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--kxcat-ink);
+}
+
+.kx-cat-legend {
+  margin: 0;
+  padding-top: 11px;
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink-2);
+}
+
+.kx-cat-legend-label {
+  color: var(--kxcat-blue);
+  font-weight: 700;
+  margin-right: 10px;
+}
+
+.kx-cat-legend-sep {
+  font-weight: 400;
+  color: var(--kxcat-ink-4);
+  padding: 0 4px;
+}
+
+/* --- ruler margin ------------------------------------------------------- */
+
+.kx-cat-ruler {
+  border-left: 1px solid var(--kxcat-rule);
+  background-image: repeating-linear-gradient(
+      to bottom,
+      var(--kxcat-tick) 0,
+      var(--kxcat-tick) 1px,
+      transparent 1px,
+      transparent 9px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--kxcat-tick-strong) 0,
+      var(--kxcat-tick-strong) 1px,
+      transparent 1px,
+      transparent 45px
+    );
+  background-size: 8px 100%, 16px 100%;
+  background-repeat: no-repeat, no-repeat;
+  background-position: left top, left top;
+}
+
+/* ------------------------------------------------------------------------
+ * Content pages (tokens / components / detail / not-found) — light coat in
+ * the same industrial language: hairlines, square corners, tracked caps.
+ * ----------------------------------------------------------------------*/
+
 .kx-cat-page .kx-cat-title {
   margin: 0 0 12px;
   font-size: 28px;
+  line-height: 1.15;
   font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--kx-primary);
+  letter-spacing: -0.01em;
+  color: var(--kxcat-ink);
+}
+
+/* The overview's display title also carries the page-title contract class;
+   its measured hero scale outranks the generic page-title size. */
+.kx-cat-hero-title.kx-cat-title {
+  margin: 20px 0 0;
+  font-size: clamp(48px, 5.2vw, 76px);
+  line-height: 0.94;
+  letter-spacing: -0.03em;
 }
 
 .kx-cat-page .kx-cat-lede {
   margin: 0 0 24px;
   font-size: 15px;
   line-height: 1.6;
-  color: var(--kx-secondary);
+  color: var(--kxcat-ink-2);
   max-width: 640px;
 }
 
 .kx-cat-page code {
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-family: var(--kxcat-mono);
   font-size: 0.9em;
-  background: var(--kx-pale);
-  border: 1px solid var(--kx-border);
-  border-radius: 5px;
+  border: 1px solid var(--kxcat-hair);
   padding: 1px 5px;
 }
 
 .kx-cat-page a {
-  color: var(--kx-accent-text-aa);
+  color: var(--kxcat-blue);
+}
+
+.kx-cat-page a:hover {
+  color: var(--kxcat-ink);
 }
 
 .kx-cat-breadcrumb {
   margin: 0 0 8px;
-  font-size: 13px;
-  color: var(--kx-muted-text-aa);
+  font-family: var(--kxcat-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  color: var(--kxcat-ink-3);
 }
 
 .kx-cat-breadcrumb a {
@@ -144,18 +567,11 @@ html.kx-catalog-page body {
 .kx-cat-placeholder {
   margin-top: 24px;
   padding: 20px 24px;
-  background: var(--kx-raised);
-  border: 1px dashed var(--kx-border);
-  border-radius: 12px;
+  border: 1px dashed var(--kxcat-hair-strong);
   font-size: 14px;
   line-height: 1.6;
-  color: var(--kx-muted-text-aa);
+  color: var(--kxcat-ink-3);
 }
-
-/* ------------------------------------------------------------------------
- * Content pages (T4) — sections, cards, tables, badges, chips, code.
- * All colors come from --kx-* tokens so everything follows the theme.
- * ----------------------------------------------------------------------*/
 
 .kx-cat-section {
   margin-top: 32px;
@@ -163,10 +579,12 @@ html.kx-catalog-page body {
 
 .kx-cat-section > h2 {
   margin: 0 0 12px;
-  font-size: var(--kx-text-2xl);
+  font-size: 20px;
+  line-height: 1.2;
   font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--kx-primary);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink);
 }
 
 .kx-cat-section > p,
@@ -174,7 +592,7 @@ html.kx-catalog-page body {
   margin: 0 0 12px;
   font-size: 14px;
   line-height: 1.65;
-  color: var(--kx-secondary);
+  color: var(--kxcat-ink-2);
   max-width: 720px;
 }
 
@@ -186,21 +604,21 @@ html.kx-catalog-page body {
 
 .kx-cat-card {
   padding: 16px 18px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 12px;
+  border: 1px solid var(--kxcat-hair);
 }
 
 .kx-cat-card h3 {
   margin: 0 0 8px;
-  font-size: var(--kx-text-md);
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
 }
 
 .kx-cat-card p {
   margin: 0;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--kx-secondary);
+  color: var(--kxcat-ink-2);
 }
 
 .kx-cat-steps {
@@ -208,44 +626,44 @@ html.kx-catalog-page body {
   padding-left: 22px;
   font-size: 14px;
   line-height: 1.65;
-  color: var(--kx-secondary);
+  color: var(--kxcat-ink-2);
 }
 
 .kx-cat-steps li + li {
   margin-top: 8px;
 }
 
-/* Classification badges — AA-safe combinations from the token palette. */
+/* Classification badges — square stenciled tags. */
 .kx-cat-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 9px;
-  border-radius: 999px;
-  font-size: var(--kx-text-2xs);
+  padding: 2px 8px;
+  border: 1px solid var(--kxcat-hair-strong);
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
 .kx-cat-badge--adoptable {
-  background: var(--kx-accent-solid-aa);
-  color: var(--kx-accent-solid-ink);
+  border-color: var(--kxcat-blue);
+  color: var(--kxcat-blue);
 }
 
 .kx-cat-badge--mockup-coupled {
-  background: var(--kx-accent-segment-aa);
-  color: var(--kx-accent-fill-ink);
+  border-color: var(--kxcat-red);
+  color: var(--kxcat-red);
 }
 
 .kx-cat-badge--internal {
-  background: var(--kx-primary);
-  color: var(--kx-canvas);
+  background: var(--kxcat-ink);
+  color: var(--kxcat-canvas);
 }
 
 .kx-cat-badge--utility {
-  background: var(--kx-raised);
-  color: var(--kx-muted-text-aa);
-  border: 1px solid var(--kx-border);
+  color: var(--kxcat-ink-3);
 }
 
 /* Chips — small labeled values (domain, contract slices, meta values). */
@@ -254,12 +672,12 @@ html.kx-catalog-page body {
   align-items: center;
   gap: 4px;
   margin: 2px 6px 2px 0;
-  padding: 3px 9px;
-  background: var(--kx-pale);
-  border: 1px solid var(--kx-border);
-  border-radius: 999px;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-primary);
+  padding: 2px 7px;
+  border: 1px solid var(--kxcat-hair);
+  font-family: var(--kxcat-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--kxcat-ink);
 }
 
 .kx-cat-chip code {
@@ -269,18 +687,14 @@ html.kx-catalog-page body {
 }
 
 .kx-cat-chip--muted {
-  background: transparent;
-  color: var(--kx-muted-text-aa);
+  color: var(--kxcat-ink-3);
 }
 
 /* Tables (domain summary + prop docs). */
 .kx-cat-table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 12px;
-  overflow: hidden;
+  border: 1px solid var(--kxcat-hair);
   font-size: 13px;
 }
 
@@ -289,7 +703,7 @@ html.kx-catalog-page body {
   padding: 10px 14px;
   text-align: left;
   vertical-align: top;
-  border-bottom: 1px solid var(--kx-border);
+  border-bottom: 1px solid var(--kxcat-hair-soft);
 }
 
 .kx-cat-table tr:last-child th,
@@ -297,23 +711,32 @@ html.kx-catalog-page body {
   border-bottom: none;
 }
 
+/* Scroll guard for spec tables on narrow viewports. At desktop widths the
+ * table fits its container, so no scrollbar ever appears (layout unchanged
+ * at ≥1280); below that the wrapper scrolls instead of the page. */
+.kx-cat-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .kx-cat-table thead th {
-  font-size: var(--kx-text-xs);
+  font-size: 10px;
   font-weight: 700;
+  line-height: 1.3;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--kx-muted-text-aa);
-  background: var(--kx-pale);
+  letter-spacing: 0.14em;
+  color: var(--kxcat-ink-3);
+  border-bottom: 2px solid var(--kxcat-ink);
 }
 
 .kx-cat-table tbody th {
-  font-weight: 500;
-  color: var(--kx-primary);
+  font-weight: 600;
+  color: var(--kxcat-ink);
   white-space: nowrap;
 }
 
 .kx-cat-table td {
-  color: var(--kx-secondary);
+  color: var(--kxcat-ink-2);
   line-height: 1.6;
 }
 
@@ -321,13 +744,12 @@ html.kx-catalog-page body {
 .kx-cat-code {
   margin: 0;
   padding: 16px 18px;
-  background: var(--kx-primary);
-  border-radius: 12px;
+  background: var(--kxcat-ink);
   overflow-x: auto;
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-family: var(--kxcat-mono);
   font-size: 12.5px;
   line-height: 1.6;
-  color: var(--kx-canvas);
+  color: var(--kxcat-canvas);
 }
 
 .kx-cat-code code {
@@ -339,11 +761,11 @@ html.kx-catalog-page body {
 
 .kx-cat-muted-note {
   font-size: 13px;
-  color: var(--kx-muted-text-aa);
+  color: var(--kxcat-ink-3);
 }
 
 /* ------------------------------------------------------------------------
- * Tokens page (T4, AC7)
+ * Tokens page — theme toggle + token ledger.
  * ----------------------------------------------------------------------*/
 
 .kx-cat-theme-toggle {
@@ -352,43 +774,43 @@ html.kx-catalog-page body {
   gap: 6px;
   margin: 4px 0 8px;
   padding: 4px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 10px;
+  border: 1px solid var(--kxcat-hair);
 }
 
 .kx-cat-theme-toggle-label {
   padding: 0 8px;
-  font-size: var(--kx-text-sm);
+  font-size: 13px;
+  line-height: 1.4;
   font-weight: 500;
-  color: var(--kx-muted-text-aa);
+  color: var(--kxcat-ink-3);
 }
 
 .kx-cat-theme-toggle-btn {
   height: 28px;
   padding: 0 14px;
   border: none;
-  border-radius: 7px;
   background: transparent;
   font-family: inherit;
-  font-size: var(--kx-text-md);
+  font-size: 13px;
+  line-height: 1.4;
   font-weight: 500;
-  color: var(--kx-secondary);
+  color: var(--kxcat-ink-2);
   cursor: pointer;
 }
 
 .kx-cat-theme-toggle-btn:hover {
-  color: var(--kx-primary);
+  color: var(--kxcat-ink);
 }
 
 .kx-cat-theme-toggle-btn[aria-pressed='true'] {
-  background: var(--kx-accent-segment-aa);
-  color: var(--kx-primary);
+  background: var(--kxcat-wash);
+  box-shadow: inset 0 0 0 1px var(--kxcat-ink);
+  color: var(--kxcat-ink);
   font-weight: 700;
 }
 
 .kx-cat-theme-toggle-btn:focus-visible {
-  outline: 2px solid var(--kx-accent-strong);
+  outline: 2px solid var(--kxcat-ink);
   outline-offset: 2px;
 }
 
@@ -406,9 +828,7 @@ html.kx-catalog-page body {
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 10px;
+  border: 1px solid var(--kxcat-hair);
   min-width: 0;
 }
 
@@ -416,9 +836,8 @@ html.kx-catalog-page body {
   flex: 0 0 36px;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
-  border: 1px solid var(--kx-border);
-  background: var(--kx-pale);
+  border: 1px solid var(--kxcat-hair);
+  background: transparent;
 }
 
 .kx-cat-token-meta {
@@ -430,35 +849,37 @@ html.kx-catalog-page body {
 }
 
 .kx-cat-token-name {
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: var(--kx-text-sm);
+  font-family: var(--kxcat-mono);
+  font-size: 13px;
+  line-height: 1.4;
   font-weight: 500;
-  color: var(--kx-primary);
+  color: var(--kxcat-ink);
   overflow-wrap: anywhere;
 }
 
 .kx-cat-token-note {
-  font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--kxcat-ink-3);
 }
 
 .kx-cat-value-chip {
   flex: 0 0 auto;
   max-width: 46%;
-  padding: 3px 8px;
-  background: var(--kx-pale);
-  border: 1px solid var(--kx-border);
-  border-radius: 6px;
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: var(--kx-text-xs);
-  color: var(--kx-secondary);
+  padding: 2px 6px;
+  border: 1px solid var(--kxcat-hair);
+  font-family: var(--kxcat-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  color: var(--kxcat-ink-2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .kx-cat-value-chip--empty {
-  color: var(--kx-muted-text-aa);
+  color: var(--kxcat-ink-3);
 }
 
 .kx-cat-token-list--text .kx-cat-token-row {
@@ -467,12 +888,12 @@ html.kx-catalog-page body {
 
 .kx-cat-type-sample {
   flex: 0 0 auto;
-  color: var(--kx-primary);
+  color: var(--kxcat-ink);
   white-space: nowrap;
 }
 
 /* ------------------------------------------------------------------------
- * Components index page (T4, AC6)
+ * Components index page.
  * ----------------------------------------------------------------------*/
 
 .kx-cat-index-list {
@@ -489,39 +910,312 @@ html.kx-catalog-page body {
   align-items: center;
   gap: 10px;
   padding: 9px 14px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 10px;
+  border-bottom: 1px solid var(--kxcat-hair-soft);
 }
 
 .kx-cat-index-link {
   font-size: 14px;
+  line-height: 1.5;
   font-weight: 500;
-  color: var(--kx-accent-text-aa);
+  color: var(--kxcat-blue);
   text-decoration: none;
 }
 
 .kx-cat-index-link:hover {
   text-decoration: underline;
+  color: var(--kxcat-ink);
 }
 
 .kx-cat-index-link--disabled {
-  color: var(--kx-muted-text-aa);
+  color: var(--kxcat-ink-3);
 }
 
 .kx-cat-index-note {
   margin-left: auto;
-  font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--kxcat-ink-3);
   white-space: nowrap;
 }
 
 .kx-cat-index-note--preview {
-  color: var(--kx-accent-text-aa);
+  color: var(--kxcat-blue);
 }
 
 /* ------------------------------------------------------------------------
- * Component detail page (T4, AC6/AC11)
+ * Spec-sheet classes used by TokensPage + ComponentsIndexPage (doc head,
+ * group heads, token ledger, parts table). Same industrial language: caps
+ * labels, mono indices, hairline rows over 2px ink rules.
+ * ----------------------------------------------------------------------*/
+
+/* Page header: caps kicker + mono docmeta over the 2px ink rule, then the
+ * big title with the count summary on the baseline to the right. */
+.kx-cat-doc-head {
+  margin: 0 0 8px;
+}
+
+/* Page header: one mono doc-meta line (page/section folded into the sheet
+ * reference — no separate kicker pre-heading) over the 2px ink rule. */
+.kx-cat-doc-band {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 9px;
+  border-bottom: 2px solid var(--kxcat-ink);
+}
+
+.kx-cat-doc-titlerow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 14px;
+}
+
+.kx-cat-page .kx-cat-doc-title {
+  margin: 0;
+  font-size: 44px;
+  line-height: 1.02;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--kxcat-ink);
+}
+
+.kx-cat-doc-count {
+  margin: 0;
+  font-family: var(--kxcat-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink-3);
+}
+
+/* Group head (per token group / domain): mono index + caps title + count.
+ * Default carries the 2px ink rule; --hair downgrades to a hairline. */
+.kx-cat-grouthead {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0 0 12px;
+  padding-bottom: 9px;
+  border-bottom: 2px solid var(--kxcat-ink);
+}
+
+.kx-cat-grouthead--hair {
+  border-bottom: 1px solid var(--kxcat-hair-strong);
+}
+
+.kx-cat-grouthead-no {
+  font-family: var(--kxcat-mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--kxcat-blue);
+}
+
+.kx-cat-grouthead-title {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink);
+}
+
+.kx-cat-grouthead-count {
+  margin-left: auto;
+  font-family: var(--kxcat-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  color: var(--kxcat-ink-3);
+}
+
+/* Token ledger — a div spec table: caps head row over hairline rows. */
+.kx-cat-ledger {
+  border: 1px solid var(--kxcat-hair);
+}
+
+.kx-cat-ledger-head,
+.kx-cat-ledger-row {
+  display: grid;
+  align-items: center;
+  column-gap: 14px;
+  padding-left: 14px;
+  padding-right: 14px;
+  min-width: 0;
+}
+
+.kx-cat-ledger-head {
+  padding-top: 8px;
+  padding-bottom: 7px;
+  border-bottom: 2px solid var(--kxcat-ink);
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink-3);
+}
+
+.kx-cat-ledger-row {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--kxcat-hair-soft);
+}
+
+.kx-cat-ledger-row:last-child {
+  border-bottom: none;
+}
+
+.kx-cat-ledger--color .kx-cat-ledger-head,
+.kx-cat-ledger--color .kx-cat-ledger-row {
+  grid-template-columns: 56px minmax(180px, 1.1fr) minmax(0, 1.3fr) minmax(150px, 0.9fr);
+}
+
+.kx-cat-ledger--text .kx-cat-ledger-head,
+.kx-cat-ledger--text .kx-cat-ledger-row {
+  grid-template-columns: minmax(180px, 1.1fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(140px, 0.8fr);
+}
+
+.kx-cat-ledger--value .kx-cat-ledger-head,
+.kx-cat-ledger--value .kx-cat-ledger-row {
+  grid-template-columns: minmax(180px, 1.1fr) minmax(0, 1.4fr) minmax(150px, 0.9fr);
+}
+
+.kx-cat-cell-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.kx-cat-ledger .kx-cat-token-name {
+  font-size: 12.5px;
+}
+
+.kx-cat-cell-note {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--kxcat-ink-3);
+  min-width: 0;
+}
+
+.kx-cat-cell-value {
+  text-align: right;
+  min-width: 0;
+}
+
+.kx-cat-cell-sample {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.kx-cat-cell-sample .kx-cat-type-sample {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Parts table (components index) — same ledger idiom, part-number rows.
+ * Display lives here; the registration-stamp motion rules at EOF add only
+ * position/transition on top of this grid. */
+.kx-cat-parts {
+  border: 1px solid var(--kxcat-hair);
+}
+
+.kx-cat-parts-head,
+.kx-cat-parts-row {
+  display: grid;
+  grid-template-columns: 108px minmax(140px, 1fr) 150px minmax(0, 1.8fr) 28px;
+  column-gap: 14px;
+  align-items: center;
+  padding-left: 14px;
+  padding-right: 14px;
+  min-width: 0;
+}
+
+.kx-cat-parts-head {
+  padding-top: 8px;
+  padding-bottom: 7px;
+  border-bottom: 2px solid var(--kxcat-ink);
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink-3);
+}
+
+.kx-cat-parts-row {
+  padding-top: 11px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--kxcat-hair-soft);
+}
+
+.kx-cat-parts-row:last-child {
+  border-bottom: none;
+}
+
+.kx-cat-parts-no {
+  font-family: var(--kxcat-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--kxcat-blue);
+}
+
+.kx-cat-parts-name {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--kxcat-ink);
+  min-width: 0;
+}
+
+.kx-cat-parts-name a {
+  color: var(--kxcat-blue);
+  text-decoration: none;
+}
+
+.kx-cat-parts-name a:hover {
+  text-decoration: underline;
+  color: var(--kxcat-ink);
+}
+
+.kx-cat-parts-name--disabled {
+  color: var(--kxcat-ink-3);
+}
+
+.kx-cat-parts-desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--kxcat-ink-2);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kx-cat-parts-arrow {
+  text-align: right;
+  color: var(--kxcat-blue);
+  line-height: 0;
+}
+
+.kx-cat-domain-note {
+  margin: 0 0 10px;
+}
+
+/* ------------------------------------------------------------------------
+ * Component detail page.
  * ----------------------------------------------------------------------*/
 
 .kx-cat-detail-header .kx-cat-title {
@@ -537,14 +1231,14 @@ html.kx-catalog-page body {
 
 .kx-cat-detail-source {
   font-size: 13px;
-  color: var(--kx-muted-text-aa);
+  line-height: 1.5;
+  color: var(--kxcat-ink-3);
 }
 
 .kx-cat-preview-frame {
   padding: 24px;
-  background: var(--kx-canvas);
-  border: 1px solid var(--kx-border);
-  border-radius: 12px;
+  background: var(--kxcat-canvas);
+  border: 1px solid var(--kxcat-hair);
   overflow: auto;
 }
 
@@ -589,8 +1283,7 @@ html.kx-catalog-page body {
  * bounded specimen height so its head/nav/content grid lays out. */
 .kx-cat-preview-static-overlay .kx-drawer {
   height: 560px;
-  border: 1px solid var(--kx-border);
-  border-radius: 12px;
+  border: 1px solid var(--kxcat-hair);
   box-shadow: none;
 }
 
@@ -614,7 +1307,7 @@ html.kx-catalog-page body {
   margin: 0 0 10px;
   font-size: 13.5px;
   line-height: 1.6;
-  color: var(--kx-secondary);
+  color: var(--kxcat-ink-2);
 }
 
 .kx-cat-probe-button {
@@ -623,22 +1316,22 @@ html.kx-catalog-page body {
   height: 32px;
   margin-bottom: 10px;
   padding: 0 14px;
-  border: 1px solid var(--kx-border);
-  border-radius: 8px;
-  background: var(--kx-raised);
+  border: 1px solid var(--kxcat-hair-strong);
+  background: transparent;
   font-family: inherit;
-  font-size: var(--kx-text-md);
+  font-size: 13px;
+  line-height: 1;
   font-weight: 500;
-  color: var(--kx-primary);
+  color: var(--kxcat-ink);
   cursor: pointer;
 }
 
 .kx-cat-probe-button:hover {
-  background: var(--kx-pale);
+  background: var(--kxcat-wash);
 }
 
 .kx-cat-probe-button:focus-visible {
-  outline: 2px solid var(--kx-accent-strong);
+  outline: 2px solid var(--kxcat-ink);
   outline-offset: 2px;
 }
 
@@ -657,8 +1350,10 @@ html.kx-catalog-page body {
 }
 
 .kx-cat-variant-label {
-  font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
+  font-size: 12px;
+  line-height: 1.4;
+  font-family: var(--kxcat-mono);
+  color: var(--kxcat-ink-3);
 }
 
 .kx-cat-contract {
@@ -668,13 +1363,18 @@ html.kx-catalog-page body {
   margin-top: 12px;
 }
 
+.kx-cat-contract-group {
+  min-width: 200px;
+}
+
 .kx-cat-contract-title {
   margin: 0 0 6px;
-  font-size: var(--kx-text-xs);
+  font-size: 10px;
+  line-height: 1.4;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--kx-muted-text-aa);
+  letter-spacing: 0.14em;
+  color: var(--kxcat-ink-3);
 }
 
 .kx-cat-meta {
@@ -692,19 +1392,600 @@ html.kx-catalog-page body {
 }
 
 .kx-cat-meta-item dt {
-  font-size: var(--kx-text-sm);
+  font-size: 10px;
+  line-height: 1.6;
   font-weight: 700;
-  color: var(--kx-muted-text-aa);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--kxcat-ink-3);
 }
 
 .kx-cat-meta-item dd {
   margin: 0;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--kx-secondary);
+  color: var(--kxcat-ink-2);
 }
 
 .kx-cat-backlink {
   margin-top: 32px;
   font-size: 13.5px;
+}
+
+/* ------------------------------------------------------------------------
+ * Component detail — datasheet restyle. Same industrial language as the
+ * overview/index: caps labels, mono part numbers, hairlines + 2px ink
+ * rules, literal specimen ground inside the preview plate.
+ * ---------------------------------------------------------------------- */
+
+/* Spec-sheet header: 44px Sarabun 700 name over the chips row. */
+.kx-cat-page .kx-cat-detail-title {
+  font-size: 44px;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+/* Mono part-number chip (KX-<DOM>-<NN>), tabular like the index. */
+.kx-cat-detail-no {
+  padding: 4px 8px;
+  border: 1px solid var(--kxcat-hair);
+  font-family: var(--kxcat-mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--kxcat-blue);
+  white-space: nowrap;
+}
+
+.kx-cat-detail-tags {
+  margin-bottom: 0;
+}
+
+/* Mono meta line under the 2px ink rule (source · export). */
+.kx-cat-detail-source {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 2px solid var(--kxcat-ink);
+  font-family: var(--kxcat-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: var(--kxcat-ink-2);
+}
+
+/* Datasheet section head: mono index + caps title over the 2px ink rule. */
+.kx-cat-ds-sechead {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0 0 14px;
+  padding-bottom: 9px;
+  border-bottom: 2px solid var(--kxcat-ink);
+}
+
+.kx-cat-ds-secno {
+  font-family: var(--kxcat-mono);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--kxcat-blue);
+}
+
+.kx-cat-ds-sectitle {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink);
+}
+
+/* Plate — hairline frame, caps label strip, literal specimen ground so
+ * production component tokens resolve inside the frame. */
+.kx-cat-plate {
+  border: 1px solid var(--kxcat-hair);
+}
+
+.kx-cat-plate-strip {
+  margin: 0;
+  padding: 8px 14px 7px;
+  border-bottom: 1px solid var(--kxcat-hair);
+  font-family: var(--kxcat-mono);
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kxcat-ink-3);
+}
+
+.kx-cat-plate-ground {
+  background: #faf8ef;
+}
+
+html[data-theme='dark'] .kx-cat-plate-ground {
+  background: #0f1510;
+}
+
+/* The ground carries the plate's interior; drop the generic frame border. */
+.kx-cat-plate .kx-cat-preview-frame {
+  border: none;
+}
+
+/* Usage snippet — paper code block, hair border (no ink fill). */
+.kx-cat-page .kx-cat-code {
+  padding: 14px 16px;
+  background: var(--kxcat-wash);
+  border: 1px solid var(--kxcat-hair);
+  color: var(--kxcat-ink-2);
+}
+
+/* Meta ledger — hairline row rules between entries. */
+.kx-cat-page .kx-cat-meta {
+  gap: 0;
+  border-top: 1px solid var(--kxcat-hair);
+}
+
+.kx-cat-page .kx-cat-meta-item {
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--kxcat-hair-soft);
+}
+
+/* Breadcrumb — caps mono reference row; link stays stencil blue. */
+.kx-cat-page .kx-cat-breadcrumb {
+  margin-bottom: 20px;
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+/* Bottom backlink — same caps mono idiom. */
+.kx-cat-page .kx-cat-backlink a {
+  font-family: var(--kxcat-mono);
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.kx-cat-page .kx-cat-backlink a:hover {
+  text-decoration: underline;
+}
+
+/* Unknown-slug header keeps the idiom; stamp sits in the chips row. */
+.kx-cat-detail-tags .kx-cat-stamp {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------------
+ * RESPONSIVE LAYER
+ * ≥900px is the desktop reference (fluid 1280–1600 handled by the clamp()
+ * /minmax() tracks declared with the layout they scale — 1440 is bit-stable).
+ * Below: the ≤899px mobile sheet. Layout only — no color changes, so WCAG AA
+ * contrast holds in both themes at both sizes.
+ * ----------------------------------------------------------------------*/
+@media (max-width: 899px) {
+  /* Page gutter tightens; content pages are single-column by nature. */
+  .kx-cat-page {
+    padding: 24px 20px 64px;
+  }
+
+  /* --- Footer: one row, tighter tracking, 40px touch targets, sheet meta
+   *    hidden (44px band stays; 15px+15px padding + 10px line = 40px). */
+  .kx-cat-footer {
+    padding: 0 16px;
+  }
+
+  /* Pull the corner marks in so they clear the 16px nav gutter. */
+  .kx-cat-regmark--tl,
+  .kx-cat-regmark--bl {
+    left: 3px;
+  }
+
+  .kx-cat-regmark--tr,
+  .kx-cat-regmark--br {
+    right: 3px;
+  }
+
+  .kx-cat-nav {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+
+  .kx-cat-nav a {
+    display: inline-block;
+    padding: 15px 0;
+  }
+
+  .kx-cat-nav-dot {
+    padding: 0 6px;
+  }
+
+  .kx-cat-sheet {
+    display: none;
+  }
+
+  /* --- Overview: the spread stacks. Identity block first, then the domain
+   *    index; the 26px ruler margin is dropped. */
+  .kx-cat-hero-grid {
+    display: block;
+  }
+
+  .kx-cat-ruler {
+    display: none;
+  }
+
+  .kx-cat-hero-left {
+    border-right: none;
+    border-bottom: 2px solid var(--kxcat-ink);
+    padding: 0 0 22px;
+  }
+
+  .kx-cat-hero-title {
+    margin-top: 16px;
+    font-size: 40px;
+  }
+
+  /* Counters compact into a 2×2 grid with hairline inner rules. */
+  .kx-cat-counters {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .kx-cat-counter {
+    padding: 10px 0 12px;
+  }
+
+  .kx-cat-counter + .kx-cat-counter {
+    border-top: none;
+  }
+
+  .kx-cat-counter:nth-child(even) {
+    border-left: 1px solid var(--kxcat-hair-soft);
+    padding-left: 16px;
+  }
+
+  .kx-cat-counter:nth-child(n + 3) {
+    border-top: 1px solid var(--kxcat-hair-soft);
+  }
+
+  .kx-cat-counter-big {
+    font-size: 48px;
+  }
+
+  .kx-cat-hero-intro {
+    margin-top: 14px;
+    max-width: none;
+  }
+
+  .kx-cat-stamp {
+    margin-top: 12px;
+  }
+
+  /* Domain index: header row goes away; each row becomes a two-line block —
+   * line 1 = mono index + domain caps + count right, line 2 = samples.
+   * 12px vertical padding keeps the link ≥40px tall. */
+  .kx-cat-hero-right {
+    padding: 4px 0 0;
+  }
+
+  .kx-cat-thead {
+    display: none;
+  }
+
+  .kx-cat-row {
+    /* Content-sized: the desktop flex:1/min-height:0 equal-height row share
+     * collapses to 0 once the spread stacks. */
+    flex: none;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      'no dom count'
+      'parts parts parts';
+    column-gap: 10px;
+    row-gap: 3px;
+    align-items: baseline;
+    padding: 12px 0;
+  }
+
+  .kx-cat-counter {
+    padding-right: 16px;
+  }
+
+  .kx-cat-cell-no {
+    grid-area: no;
+  }
+
+  .kx-cat-cell-dom {
+    grid-area: dom;
+    font-size: 15px;
+  }
+
+  .kx-cat-cell-count {
+    grid-area: count;
+    font-size: 20px;
+  }
+
+  .kx-cat-cell-parts {
+    grid-area: parts;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  /* --- Tokens / Components / Detail: headers stack, spec tables scroll
+   *    inside their own container, chips wrap, nothing overflows. */
+  .kx-cat-doc-band {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .kx-cat-page .kx-cat-doc-title {
+    font-size: 32px;
+  }
+
+  .kx-cat-page .kx-cat-detail-title {
+    font-size: 30px;
+  }
+
+  .kx-cat-detail-tags {
+    flex-wrap: wrap;
+  }
+
+  .kx-cat-detail-source {
+    overflow-wrap: anywhere;
+  }
+
+  .kx-cat-chip {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .kx-cat-meta-item {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .kx-cat-contract-group {
+    min-width: 0;
+  }
+
+  .kx-cat-code {
+    font-size: 11.5px;
+  }
+
+  /* Spec tables scroll within their card instead of the page. */
+  .kx-cat-ledger {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kx-cat-ledger-head,
+  .kx-cat-ledger-row {
+    min-width: 620px;
+  }
+
+  .kx-cat-parts {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kx-cat-parts-head,
+  .kx-cat-parts-row {
+    min-width: 680px;
+  }
+
+  .kx-cat-preview-frame {
+    padding: 12px;
+  }
+
+  /* --- Touch targets: interactive rows/links reach ≥40px via padding. */
+  .kx-cat-theme-toggle-btn {
+    height: 40px;
+    padding: 0 16px;
+  }
+
+  .kx-cat-probe-button {
+    height: 40px;
+  }
+
+  .kx-cat-parts-name a {
+    display: inline-block;
+    padding: 10px 0;
+  }
+
+  .kx-cat-breadcrumb a {
+    display: inline-block;
+    padding: 12px 0;
+    margin: -12px 0;
+  }
+
+  .kx-cat-backlink a {
+    display: inline-block;
+    padding: 13px 0;
+    margin: -13px 0;
+  }
+}
+
+/* ------------------------------------------------------------------------
+ * MOTION LAYER — the mechanical press.
+ * Fast, linear, decisive; settles like a stamping machine, never a soft
+ * fade. Grammar: 80–180ms, linear timing, transforms bounded to a few px,
+ * no bounces, no infinite or scroll-linked animation, no entrance motion
+ * (content is never hidden waiting for a reveal). Theme switching is the
+ * one slow beat — 180ms — so Light/Dark reads as one change of light.
+ * Everything below is disabled by the reduced-motion kill-switch at EOF.
+ * ----------------------------------------------------------------------*/
+
+/* --- State as atmosphere ----------------------------------------------
+ * Shell surfaces re-ink together under html[data-theme]: canvas, rules,
+ * chips, plates all shift as one coherent change of light. Color
+ * properties only — never layout. Declared first so the interaction
+ * rules below refine specific elements. */
+.kx-cat-shell,
+.kx-cat-shell *,
+.kx-cat-shell *::before,
+.kx-cat-shell *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 180ms;
+  transition-timing-function: linear;
+}
+
+/* --- Press-settle -------------------------------------------------------
+ * Actives sink 1px — a press feel. 80ms linear. The focus outline stays
+ * hard: outline is in no transition list, so it never flickers in/out. */
+.kx-cat-shell a,
+.kx-cat-shell button {
+  transition:
+    transform 80ms linear,
+    background-color 180ms linear,
+    border-color 180ms linear,
+    box-shadow 180ms linear,
+    color 180ms linear;
+}
+
+.kx-cat-shell a:active,
+.kx-cat-shell button:active {
+  transform: translateY(1px);
+}
+
+/* --- Displacement feedback (footer nav) ---------------------------------
+ * Pressing one nav part registers on its neighbors: the hovered/focused
+ * link sinks 1px, sibling links and separators rise half a pixel. ≤2px,
+ * 120ms linear. This is the sheet's only neighbor-nudging effect. */
+.kx-cat-nav a {
+  transition:
+    transform 120ms linear,
+    background-color 180ms linear,
+    border-color 180ms linear,
+    color 180ms linear;
+}
+
+.kx-cat-nav .kx-cat-nav-dot {
+  transition: transform 120ms linear, color 180ms linear;
+}
+
+.kx-cat-nav a:hover,
+.kx-cat-nav a:focus-visible {
+  transform: translateY(1px);
+}
+
+.kx-cat-nav:has(a:hover) a:not(:hover),
+.kx-cat-nav:has(a:hover) .kx-cat-nav-dot,
+.kx-cat-nav:has(a:focus-visible) a:not(:focus-visible),
+.kx-cat-nav:has(a:focus-visible) .kx-cat-nav-dot {
+  transform: translateY(-0.5px);
+}
+
+/* --- Signature interaction — the registration stamp ---------------------
+ * Overview domain rows (.kx-cat-row): hover/focus-visible registers the
+ * row's content 2px right, wipes a 3px stamp bar in from the left rule
+ * (ink → stamp red), and darkens the hairline bottom rule to hair-strong.
+ * 140ms linear, transform origin pinned to the rule so the bar reads as
+ * pressed through it. Invisible at rest — the static sheet is unchanged. */
+.kx-cat-shell .kx-cat-row {
+  position: relative;
+  transition:
+    transform 140ms linear,
+    background-color 140ms linear,
+    border-bottom-color 140ms linear;
+}
+
+.kx-cat-shell .kx-cat-row > * {
+  transition: transform 140ms linear, color 180ms linear;
+}
+
+.kx-cat-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 16px;
+  margin-top: -8px;
+  background: var(--kxcat-ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 140ms linear, background-color 140ms linear;
+}
+
+.kx-cat-row:hover,
+.kx-cat-row:focus-visible {
+  border-bottom-color: var(--kxcat-hair-strong);
+}
+
+.kx-cat-row:hover::before,
+.kx-cat-row:focus-visible::before {
+  background: var(--kxcat-red);
+  transform: scaleX(1);
+}
+
+.kx-cat-row:hover > *,
+.kx-cat-row:focus-visible > * {
+  transform: translateX(2px);
+}
+
+/* Components index part rows carry the same registration stamp, keyed to
+ * their part-number links (the row itself is not a link there). The row
+ * registers as one block; its cells are inline until the index restyle. */
+.kx-cat-parts-row {
+  position: relative;
+  transition: transform 140ms linear;
+}
+
+.kx-cat-parts-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 16px;
+  margin-top: -8px;
+  background: var(--kxcat-ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 140ms linear, background-color 140ms linear;
+}
+
+.kx-cat-parts-row:has(a:hover),
+.kx-cat-parts-row:has(a:focus-visible) {
+  transform: translateX(2px);
+}
+
+.kx-cat-parts-row:has(a:hover)::before,
+.kx-cat-parts-row:has(a:focus-visible)::before {
+  background: var(--kxcat-red);
+  transform: scaleX(1);
+}
+
+/* ------------------------------------------------------------------------
+ * Reduced motion — the kill-switch.
+ * Every transition and every transform this layer introduced is disabled:
+ * the sheet is instant and static. Scoped to the catalog's own motion
+ * selectors so production specimens inside preview frames are untouched.
+ * ----------------------------------------------------------------------*/
+@media (prefers-reduced-motion: reduce) {
+  .kx-cat-shell,
+  .kx-cat-shell *,
+  .kx-cat-shell *::before,
+  .kx-cat-shell *::after {
+    transition: none !important;
+  }
+
+  .kx-cat-shell a:active,
+  .kx-cat-shell button:active,
+  .kx-cat-nav a,
+  .kx-cat-nav .kx-cat-nav-dot,
+  .kx-cat-shell .kx-cat-row,
+  .kx-cat-shell .kx-cat-row > *,
+  .kx-cat-row::before,
+  .kx-cat-parts-row,
+  .kx-cat-parts-row::before {
+    transform: none !important;
+  }
 }

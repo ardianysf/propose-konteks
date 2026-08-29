@@ -5,6 +5,11 @@
  * via getComputedStyle(document.documentElement), so the page reflects
  * tokens.css exactly and updates when the theme toggle flips data-theme.
  *
+ * Visual world: a specimen sheet. A spec-sheet header (mono doc-meta band
+ * over a 2px ink rule), then one ledger per token group —
+ * flat spec-table rows with hairline separators, square swatches, live
+ * type specimens, and mono value chips.
+ *
  * jsdom safety: jsdom does not apply stylesheets, so getComputedStyle
  * returns empty strings there — the page renders the fallback em-dash and
  * never crashes (unit tests mock getComputedStyle instead).
@@ -41,6 +46,11 @@ function readTokenValues(): TokenValues {
   return values
 }
 
+/** 1 → '01' — stable index formatting shared by all catalog tables. */
+function pad2(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
 function ValueChip({ value }: { value: string }) {
   return (
     <span className={`kx-cat-value-chip${value ? '' : ' kx-cat-value-chip--empty'}`}>
@@ -49,74 +59,123 @@ function ValueChip({ value }: { value: string }) {
   )
 }
 
+/* -------------------------------------------------------------------------
+ * Ledger rows — role="table"/"row"/"cell" spec rows on a hairline ground.
+ * ---------------------------------------------------------------------- */
+
 function ColorRow({ token, value }: { token: TokenDef; value: string }) {
   return (
-    <li className="kx-cat-token-row">
-      <span
-        className="kx-cat-swatch"
-        style={value ? { background: `var(${token.name})` } : undefined}
-        aria-hidden="true"
-      />
-      <div className="kx-cat-token-meta">
+    <div className="kx-cat-ledger-row" role="row">
+      <span className="kx-cat-cell-swatch" role="cell">
+        <span
+          className="kx-cat-swatch"
+          style={value ? { background: `var(${token.name})` } : undefined}
+          aria-hidden="true"
+        />
+      </span>
+      <span className="kx-cat-cell-name" role="cell">
         <code className="kx-cat-token-name">{token.name}</code>
-        <span className="kx-cat-token-note">{token.note}</span>
-      </div>
-      <ValueChip value={value} />
-    </li>
+      </span>
+      <span className="kx-cat-cell-note" role="cell">
+        {token.note}
+      </span>
+      <span className="kx-cat-cell-value" role="cell">
+        <ValueChip value={value} />
+      </span>
+    </div>
   )
 }
 
 function TextRow({ token, value }: { token: TokenDef; value: string }) {
   const isWeight = token.name.startsWith('--kx-font-') && token.name !== '--kx-font-family'
   return (
-    <li className="kx-cat-token-row">
-      <div className="kx-cat-token-meta">
+    <div className="kx-cat-ledger-row" role="row">
+      <span className="kx-cat-cell-name" role="cell">
         <code className="kx-cat-token-name">{token.name}</code>
-        <span className="kx-cat-token-note">{token.note}</span>
-      </div>
+      </span>
+      <span className="kx-cat-cell-note" role="cell">
+        {token.note}
+      </span>
       {/* Live preview: the sample line itself consumes the token, so the
           rendered size/weight/family follows the current theme. */}
-      <span
-        className="kx-cat-type-sample"
-        style={
-          token.name === '--kx-font-family'
-            ? { fontFamily: `var(${token.name})` }
-            : isWeight
-              ? { fontWeight: `var(${token.name})` }
-              : { fontSize: `var(${token.name})` }
-        }
-      >
-        Konteks session
+      <span className="kx-cat-cell-sample" role="cell">
+        <span
+          className="kx-cat-type-sample"
+          style={
+            token.name === '--kx-font-family'
+              ? { fontFamily: `var(${token.name})` }
+              : isWeight
+                ? { fontWeight: `var(${token.name})` }
+                : { fontSize: `var(${token.name})` }
+          }
+        >
+          Konteks session
+        </span>
       </span>
-      <ValueChip value={value} />
-    </li>
+      <span className="kx-cat-cell-value" role="cell">
+        <ValueChip value={value} />
+      </span>
+    </div>
   )
 }
 
 function ValueRow({ token, value }: { token: TokenDef; value: string }) {
   return (
-    <li className="kx-cat-token-row">
-      <div className="kx-cat-token-meta">
+    <div className="kx-cat-ledger-row" role="row">
+      <span className="kx-cat-cell-name" role="cell">
         <code className="kx-cat-token-name">{token.name}</code>
-        <span className="kx-cat-token-note">{token.note}</span>
-      </div>
-      <ValueChip value={value} />
-    </li>
+      </span>
+      <span className="kx-cat-cell-note" role="cell">
+        {token.note}
+      </span>
+      <span className="kx-cat-cell-value" role="cell">
+        <ValueChip value={value} />
+      </span>
+    </div>
   )
 }
 
 function TokenGroupSection({
   group,
   values,
+  index,
 }: {
   group: TokenGroup
   values: TokenValues
+  index: number
 }) {
   const headingId = `kx-cat-tokens-${group.id}`
+  const columns =
+    group.kind === 'color'
+      ? ['Swatch', 'Token', 'Note', 'Value']
+      : group.kind === 'text'
+        ? ['Token', 'Note', 'Specimen', 'Value']
+        : ['Token', 'Note', 'Value']
   return (
     <section aria-labelledby={headingId} className="kx-cat-section">
-      <h2 id={headingId}>{group.title}</h2>
-      <ul className={`kx-cat-token-list kx-cat-token-list--${group.kind}`}>
+      <div className="kx-cat-grouthead">
+        <span className="kx-cat-grouthead-no" aria-hidden="true">
+          {pad2(index + 1)}
+        </span>
+        <h2 id={headingId} className="kx-cat-grouthead-title">
+          {group.title}
+        </h2>
+        <span className="kx-cat-grouthead-count">
+          {group.tokens.length} tokens
+        </span>
+      </div>
+      <div
+        className={`kx-cat-ledger kx-cat-ledger--${group.kind}`}
+        role="table"
+        aria-label={`${group.title} tokens`}
+      >
+        <div className="kx-cat-ledger-head" role="row">
+          {columns.map((column) => (
+            <span key={column} role="columnheader">
+              {column}
+            </span>
+          ))}
+        </div>
         {group.tokens.map((token) => {
           const value = values[token.name] ?? ''
           if (group.kind === 'color') {
@@ -127,7 +186,7 @@ function TokenGroupSection({
           }
           return <ValueRow key={token.name} token={token} value={value} />
         })}
-      </ul>
+      </div>
     </section>
   )
 }
@@ -145,17 +204,29 @@ export function TokensPage() {
     setValues(readTokenValues())
   }, [theme])
 
+  const tokenCount = TOKEN_GROUPS.reduce((sum, group) => sum + group.tokens.length, 0)
+
   return (
     <section className="kx-cat-page" aria-labelledby="kx-cat-tokens-title">
-      <h1 id="kx-cat-tokens-title" className="kx-cat-title">
-        Tokens
-      </h1>
-      <p className="kx-cat-lede">
-        Warm Enterprise palette, skala tipografi, dan token surface dari{' '}
-        <code>src/styles/tokens.css</code>. Semua nilai dibaca{' '}
-        <strong>live</strong> via <code>getComputedStyle</code> — bukan
-        hardcode — sehingga selalu sinkron dengan stylesheet.
-      </p>
+      <header className="kx-cat-doc-head">
+        <div className="kx-cat-doc-band">
+          <p className="kx-cat-docmeta">KX-CAT/2026-08 · SEC 02 · TOKENS</p>
+        </div>
+        <div className="kx-cat-doc-titlerow">
+          <h1 id="kx-cat-tokens-title" className="kx-cat-doc-title kx-cat-title">
+            Tokens
+          </h1>
+          <p className="kx-cat-doc-count">
+            {tokenCount} tokens · {TOKEN_GROUPS.length} groups
+          </p>
+        </div>
+        <p className="kx-cat-lede">
+          Warm Enterprise palette, skala tipografi, dan token surface dari{' '}
+          <code>src/styles/tokens.css</code>. Semua nilai dibaca{' '}
+          <strong>live</strong> via <code>getComputedStyle</code> — bukan
+          hardcode — sehingga selalu sinkron dengan stylesheet.
+        </p>
+      </header>
 
       <div
         className="kx-cat-theme-toggle"
@@ -176,8 +247,13 @@ export function TokensPage() {
         ))}
       </div>
 
-      {TOKEN_GROUPS.map((group) => (
-        <TokenGroupSection key={group.id} group={group} values={values} />
+      {TOKEN_GROUPS.map((group, index) => (
+        <TokenGroupSection
+          key={group.id}
+          group={group}
+          values={values}
+          index={index}
+        />
       ))}
     </section>
   )

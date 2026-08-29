@@ -44,3 +44,6 @@ artifacts/
 .env
 .env.*
 !.env.example
+
+# Impeccable skill working artifacts (comps, build state, review captures)
+.impeccable/
