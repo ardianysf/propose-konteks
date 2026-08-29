@@ -11,8 +11,10 @@
   border-radius: var(--kx-radius-main);
 }
 
-/* The prompt textarea fills the white box; its focus ring is drawn as an
- * inner outline so it never clips inside the rounded box. */
+/* The prompt textarea fills the white box; it draws no ring of its own —
+ * focusing it (or any control inside the box) lights the :focus-within
+ * ring on the whole rounded input box so the highlight hugs the box's
+ * radius instead of the textarea rectangle (shared by both composers). */
 
 .kx-composer__input {
   display: block;
@@ -33,6 +35,10 @@
 }
 
 .kx-composer__input:focus {
+  outline: none;
+}
+
+.kx-composer__input-box:focus-within {
   outline: none;
   box-shadow: inset 0 0 0 2px var(--kx-accent-strong);
 }

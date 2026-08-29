@@ -5,19 +5,18 @@
  * main page's outer setup/mode composer panel. Enter sends; Shift+Enter
  * retains a newline. Terminal sessions render a compact locked notice.
  */
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, useCallback, type KeyboardEvent } from 'react'
 import { EXECUTION_PROFILES } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 import ExecutionProfileMenu from '../composer/ExecutionProfileMenu'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
-import { PENDING_TOTAL_MS } from './pendingPhases'
+import { pendingDelayMs, PENDING_PROCESS_PHASES } from './pendingPhases'
 import './SessionDetailComposer.css'
 
-/** Simulated assistant latency after each send: the full pending phase
- * sequence (Validating → Analyzing → Synthesizing). Exported so tests can
- * advance fake timers by exactly this amount (and a real API wait can
- * later replace the timeout without UI changes). */
-export const RESPONSE_DELAY_MS = PENDING_TOTAL_MS
+// Simulated assistant latency after each send is variable now — one phase
+// step per label of the pendingPhases slice the reducer drew (see
+// pendingDelayMs). Nothing is exported; tests read the slice from state and
+// advance by pendingDelayMs(pendingPhases).
 
 function AttachmentIcon() {
   return (
@@ -65,42 +64,52 @@ export default function SessionDetailComposer() {
   const { sessionDetail } = state
   const [message, setMessage] = useState('')
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  // Pending assistant-reply timer. On unmount with the reply still in
-  // flight (timer armed), clear it AND land the reply — "reply arrived while
-  // away" — so navigating away and back never leaves a stuck pendingAssistant
-  // (eternal loader + permanently disabled send). When the timer already
-  // fired it nulls its own ref, so unmount is a no-op in that case.
+  // Pending assistant-reply timer. The delay is variable — one phase step
+  // per label of the pendingPhases slice stored in state. On unmount with
+  // the reply still in flight (timer armed), clear it but DO NOT dispatch
+  // receive: the reply must not land "while away". The pending state
+  // (flag + phases) survives; the arming effect below re-arms on any
+  // remount, so nothing can get stuck (eternal loader / locked send).
   const receiveTimeoutRef = useRef<number | null>(null)
   /** Arm the simulated assistant reply timer (dedupes any armed timer). */
-  const armReceiveTimeout = () => {
-    if (receiveTimeoutRef.current !== null) window.clearTimeout(receiveTimeoutRef.current)
-    receiveTimeoutRef.current = window.setTimeout(() => {
-      receiveTimeoutRef.current = null
-      dispatch({ type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
-    }, RESPONSE_DELAY_MS)
-  }
+  const armReceiveTimeout = useCallback(
+    (phases: readonly string[]) => {
+      if (receiveTimeoutRef.current !== null) window.clearTimeout(receiveTimeoutRef.current)
+      receiveTimeoutRef.current = window.setTimeout(() => {
+        receiveTimeoutRef.current = null
+        dispatch({ type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
+      }, pendingDelayMs(phases))
+    },
+    [dispatch],
+  )
   useEffect(() => {
     return () => {
       if (receiveTimeoutRef.current !== null) {
         window.clearTimeout(receiveTimeoutRef.current)
         receiveTimeoutRef.current = null
-        dispatch({ type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
+        // Cancel-only on purpose: no dispatch here.
       }
     }
-  }, [dispatch])
+  }, [])
 
-  // Mount-time recovery: pendingAssistant observed on mount with no timer
-  // armed (stale state from HMR, or a session just created by the main-page
-  // composer) would render an unresolvable loader and a locked composer —
-  // arm the normal receive timeout so the phase sequence plays out and the
-  // reply lands. Mount-only by design: after mount, the send path owns the
-  // pending flag.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Arming recovery: whenever a pending reply has no timer armed — right
+  // after a send (the reducer just generated pendingPhases) or on mount
+  // into a session that is already pending (composer-created session,
+  // HMR-recovered state, or a reply whose timer was cancelled by
+  // navigating away) — arm the receive timeout with the stored phases so
+  // the sequence plays out and the reply lands.
   useEffect(() => {
     if (sessionDetail.pendingAssistant && receiveTimeoutRef.current === null) {
-      armReceiveTimeout()
+      // Fall back to the timeline's first-three canonical phases when the
+      // slice is empty (artificially preseeded state) so the timer always
+      // matches what the bubble displays.
+      const phases =
+        sessionDetail.pendingPhases.length > 0
+          ? sessionDetail.pendingPhases
+          : PENDING_PROCESS_PHASES.slice(0, 3).map((phase) => phase.label)
+      armReceiveTimeout(phases)
     }
-  }, [dispatch])
+  }, [armReceiveTimeout, sessionDetail.pendingAssistant, sessionDetail.pendingPhases])
 
   // Auto-grow: collapse to one line, then expand to fit content (capped by CSS max-height).
   useEffect(() => {
@@ -117,7 +126,9 @@ export default function SessionDetailComposer() {
     if (!trimmedMessage || sessionDetail.pendingAssistant) return
     dispatch({ type: 'SESSION_SEND_DETAIL_MESSAGE', content: trimmedMessage })
     setMessage('')
-    armReceiveTimeout()
+    // No timer arming here: the reducer generates the pendingPhases slice
+    // on SEND, and the arming effect above arms with it once the new state
+    // renders.
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {

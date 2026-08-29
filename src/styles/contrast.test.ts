@@ -36,6 +36,7 @@ const CUSTOMIZE_SHARED = 'src/components/customize/shared.css'
 // SessionStatusBadge.css; never in components.css, so — like
 // CUSTOMIZE_SHARED — the inventory points at the real file).
 const SESSION_BADGES = 'src/components/session/sessionBadges.css'
+const RESPONSE_FOOTER = 'src/components/session/ResponseFooter.css'
 // shell/{Sidebar,SystemMenu,WorkspaceMenu}.css — the single surviving
 // homes of the shell-namespace rules since the T5d shell batch (moved
 // out of components.css by the removal tool; they are NOT transitional
@@ -203,7 +204,7 @@ const accentS = [
 const accentU: Array<[string, string]> = [
   ['.kx-input:focus', 'border-color'],
   ['.kx-history__row-button:focus-visible', 'outline'],
-  ['.kx-composer__input:focus', 'box-shadow'],
+  ['.kx-composer__input-box:focus-within', 'box-shadow'],
   ['.kx-quote-approval-card__header:focus-visible', 'outline'],
   ['.kx-composer__send:hover:not(:disabled)', 'border-color'],
   ['.kx-profile-menu__manage:focus-visible', 'border-color'],
@@ -297,6 +298,13 @@ function entries(): Entry[] {
     { file: SESSION_BADGES, selector: '.kx-badge--failed', property: 'color', token: ACCENT_STRONG, cls: 'A' as Class },
     { file: SESSION_BADGES, selector: '.kx-badge--waiting_approval', property: 'background', token: ACCENT_STRONG, cls: 'S' as Class },
     { file: SESSION_BADGES, selector: '.kx-badge--pending_approval', property: 'background', token: ACCENT_STRONG, cls: 'S' as Class },
+    // ResponseFooter (session/ResponseFooter.css) — the action row under
+    // assistant messages: muted icon actions at rest, AA accent ink while a
+    // reaction is pressed, muted date + stats captions.
+    { file: RESPONSE_FOOTER, selector: '.kx-response-footer__action', property: 'color', token: MUTED_AA, cls: 'M' as Class },
+    { file: RESPONSE_FOOTER, selector: ".kx-response-footer__action[aria-pressed='true']", property: 'color', token: ACCENT_AA, cls: 'A' as Class },
+    { file: RESPONSE_FOOTER, selector: '.kx-response-footer__menu-date', property: 'color', token: MUTED_AA, cls: 'M' as Class },
+    { file: RESPONSE_FOOTER, selector: '.kx-response-footer__stats', property: 'color', token: MUTED_AA, cls: 'M' as Class },
     // Dark-theme ink pin: the active segment's text uses --kx-accent-text-aa
     // in light mode (its dark #4f7044 resolves AA on the #95a547 fill) and
     // a [data-theme='dark'] override switches it to dark --kx-raised ink on
@@ -430,7 +438,7 @@ const KNOWN_INERT_DUPLICATE_SELECTORS = new Set([
   // composer/Composer.css
   '.kx-composer__badge',
   '.kx-composer__input::placeholder',
-  '.kx-composer__input:focus',
+  '.kx-composer__input-box:focus-within',
   '.kx-composer__profile-chevron',
   '.kx-composer__reviews',
   '.kx-composer__send',
@@ -862,16 +870,16 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 166 consumers — 84 muted, 78 accent-strong, 3 accent-text-aa', () => {
-    expect(inventory).toHaveLength(166)
+  it('covers exactly 170 consumers — 84 muted, 78 accent-strong, 4 accent-text-aa', () => {
+    expect(inventory).toHaveLength(170)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(84)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(78)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(3)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(4)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(78)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(39)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(81)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(40)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(5)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(44)
   })

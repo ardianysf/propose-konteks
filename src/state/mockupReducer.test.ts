@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { ASSISTANT_RESPONSES } from '../data/assistantResponses'
 import {
   initialState,
   mockupReducer,
@@ -829,20 +830,31 @@ describe('SESSION_SEND_DETAIL_MESSAGE', () => {
 })
 
 describe('SESSION_RECEIVE_DETAIL_MESSAGE', () => {
-  it('appends the fixed assistant acknowledgment and clears the pending flag', () => {
+  it('appends a natural response from the pool with meta and clears the pending state', () => {
     let state = freshState()
     const beforeTimelineLength = state.sessionDetail.timeline.length
 
     state = mockupReducer(state, { type: 'SESSION_SEND_DETAIL_MESSAGE', content: 'test' })
+    const drawnPhases = state.sessionDetail.pendingPhases
     state = mockupReducer(state, { type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
 
     expect(state.sessionDetail.timeline).toHaveLength(beforeTimelineLength + 2)
     const lastTwo = state.sessionDetail.timeline.slice(-2)
     expect(lastTwo[0].type).toBe('USER_MESSAGE')
     expect(lastTwo[1].type).toBe('ASSISTANT_MESSAGE')
-    expect(lastTwo[1].content).toContain('Noted — added to the working context')
+    expect(ASSISTANT_RESPONSES).toContain(lastTwo[1].content)
     expect(lastTwo[1].actorType).toBe('ASSISTANT')
+    // Response meta (duration/tokens) rides on the message for the footer.
+    expect(lastTwo[1].meta).toBeDefined()
+    expect(lastTwo[1].meta?.durationMs).toBeGreaterThanOrEqual(12_000)
+    expect(lastTwo[1].meta?.durationMs).toBeLessThanOrEqual(45_000)
+    expect(lastTwo[1].meta?.tokensIn).toBeGreaterThanOrEqual(80_000)
+    expect(lastTwo[1].meta?.tokensIn).toBeLessThanOrEqual(140_000)
+    expect(lastTwo[1].meta?.tokensOut).toBeGreaterThanOrEqual(300)
+    expect(lastTwo[1].meta?.tokensOut).toBeLessThanOrEqual(900)
     expect(state.sessionDetail.pendingAssistant).toBe(false)
+    expect(state.sessionDetail.pendingPhases).toEqual([])
+    expect(drawnPhases.length).toBeGreaterThanOrEqual(3)
   })
 
   it('acknowledgment timestamp is not earlier than the send timestamp', () => {
@@ -902,7 +914,7 @@ describe('SESSION_CREATE_FROM_COMPOSER', () => {
     expect(state.sessionDetail.timeline[0].content).toBe(longPrompt)
   })
 
-  it('receive lands the acknowledgment on the new session and clears pending', () => {
+  it('receive lands a natural response on the new session and clears pending', () => {
     let state = freshState()
 
     state = mockupReducer(state, { type: 'SESSION_CREATE_FROM_COMPOSER', content: 'New idea' })
@@ -911,7 +923,8 @@ describe('SESSION_CREATE_FROM_COMPOSER', () => {
     expect(state.sessionDetail.pendingAssistant).toBe(false)
     expect(state.sessionDetail.timeline).toHaveLength(2)
     expect(state.sessionDetail.timeline[1].type).toBe('ASSISTANT_MESSAGE')
-    expect(state.sessionDetail.timeline[1].content).toContain('Noted — added to the working context')
+    expect(ASSISTANT_RESPONSES).toContain(state.sessionDetail.timeline[1].content)
+    expect(state.sessionDetail.timeline[1].meta).toBeDefined()
   })
 })
 

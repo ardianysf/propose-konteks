@@ -1,5 +1,7 @@
 // ILLUSTRATIVE DATA — all names/counts/timestamps are placeholders, not production facts (spec AC46)
 
+import type { ResponseMeta } from './assistantResponses'
+
 export const ILLUSTRATIVE_DATA_NOTE = 'Illustrative data'
 
 // ---------------------------------------------------------------------------
@@ -85,6 +87,8 @@ export interface DetailTimelineItem {
   quoteId?: string
   deliveryId?: string
   artifact?: SessionArtifact
+  /** Simulated usage telemetry attached to received assistant replies. */
+  meta?: ResponseMeta
 }
 
 export interface SessionStage {
@@ -113,6 +117,10 @@ export interface SessionDetailData {
   updatedAt: string
   /** True while the assistant reply is pending after a send (two-phase chat flow). */
   pendingAssistant: boolean
+  /** Process labels for the pending reply ([] when not pending): the random
+   * contiguous canonical slice drawn at send/create, consumed by the
+   * pending bubble and the pending-delay computation. */
+  pendingPhases: string[]
   currentCycle: number
   totalCycles: number
   stages: SessionStage[]
@@ -864,6 +872,7 @@ export const SESSION_DETAIL: SessionDetailData = {
   createdAt: '2026-08-15T09:12:00Z',
   updatedAt: '2026-08-16T14:40:00Z',
   pendingAssistant: false,
+  pendingPhases: [],
   currentCycle: 2,
   totalCycles: 3,
   stages: [

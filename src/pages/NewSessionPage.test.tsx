@@ -1,6 +1,7 @@
 import { useEffect, useReducer } from 'react'
 import { fireEvent, render, screen, waitFor, within, act } from '@testing-library/react'
 import { vi } from 'vitest'
+import { ASSISTANT_RESPONSES } from '../data/assistantResponses'
 import NewSessionPage from './NewSessionPage'
 import AppShell from '../components/shell/AppShell'
 import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
@@ -688,25 +689,23 @@ describe('main composer send flow', () => {
       // measure — the session composer takes over.
       expect(screen.queryByTestId('composer-input')).not.toBeInTheDocument()
 
-      // The pending bubble shows the first phase beside the 12px loader.
-      expect(screen.getByText('Validating')).toBeVisible()
+      // The pending bubble shows the first drawn phase beside the 12px
+      // loader; the phase slice is 3-6 contiguous canonical labels.
+      const phases = bucket.current?.sessionDetail.pendingPhases ?? []
+      expect(phases.length).toBeGreaterThanOrEqual(3)
+      expect(phases.length).toBeLessThanOrEqual(6)
+      expect(screen.getByText(phases[0])).toBeVisible()
       expect(
-        screen.getByRole('status', { name: 'Menyusun jawaban — Validating' }),
-      ).toHaveClass('kx-dmx--ripple')
+        screen.getByRole('status', { name: `Menyusun jawaban — ${phases[0]}` }),
+      ).toBeInTheDocument()
 
-      // Phases advance; the reply lands after the full sequence.
-      act(() => {
-        vi.advanceTimersByTime(900)
-      })
-      expect(screen.getByRole('status', { name: 'Menyusun jawaban — Analyzing' })).toHaveClass(
-        'kx-dmx--drift',
-      )
-      act(() => {
-        vi.advanceTimersByTime(900)
-      })
-      expect(screen.getByRole('status', { name: 'Menyusun jawaban — Synthesizing' })).toHaveClass(
-        'kx-dmx--glyph',
-      )
+      // Phases advance; the reply lands after the full drawn sequence.
+      for (let index = 1; index < phases.length; index += 1) {
+        act(() => {
+          vi.advanceTimersByTime(900)
+        })
+        expect(screen.getByText(phases[index])).toBeVisible()
+      }
       act(() => {
         vi.advanceTimersByTime(900)
       })
@@ -714,6 +713,7 @@ describe('main composer send flow', () => {
       expect(bucket.current?.sessionDetail.pendingAssistant).toBe(false)
       const timeline = bucket.current?.sessionDetail.timeline ?? []
       expect(timeline[timeline.length - 1].type).toBe('ASSISTANT_MESSAGE')
+      expect(ASSISTANT_RESPONSES).toContain(timeline[timeline.length - 1].content)
     } finally {
       vi.useRealTimers()
     }
