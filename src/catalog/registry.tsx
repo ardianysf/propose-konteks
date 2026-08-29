@@ -1,6 +1,6 @@
 /*
  * registry.tsx (Task T3a, extended T4 + T6) — the runtime registry
- * mirroring src/catalog/components.json 1:1 (34 entries).
+ * mirroring src/catalog/components.json 1:1 (35 entries).
  *
  * Each entry lazy-imports its source module from src/components/ so the
  * catalog can load implementations on demand without copying them.
@@ -426,6 +426,21 @@ function responseFooterPreview(mod: LoadedModule): ReactNode {
   ])
 }
 
+/** feedback-modal (adoptable): good vs bad preset option sets. */
+function feedbackModalPreview(mod: LoadedModule): ReactNode {
+  const FeedbackModal = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>good</code>,
+      node: <FeedbackModal kind="good" embedded onClose={() => undefined} />,
+    },
+    {
+      label: <code>bad</code>,
+      node: <FeedbackModal kind="bad" embedded onClose={() => undefined} />,
+    },
+  ])
+}
+
 /** session-detail-composer: active session (send enabled) vs terminal
  *  (locked notice). */
 function sessionDetailComposerPreview(mod: LoadedModule): ReactNode {
@@ -827,6 +842,12 @@ export const registry: RegistryEntry[] = [
     kind: 'component',
     load: () => import('../components/session/ResponseFooter'),
     preview: responseFooterPreview,
+  },
+  {
+    id: 'feedback-modal',
+    kind: 'component',
+    load: () => import('../components/session/FeedbackModal'),
+    preview: feedbackModalPreview,
   },
   {
     id: 'session-detail-composer',

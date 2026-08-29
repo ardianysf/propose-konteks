@@ -37,6 +37,7 @@ const CUSTOMIZE_SHARED = 'src/components/customize/shared.css'
 // CUSTOMIZE_SHARED — the inventory points at the real file).
 const SESSION_BADGES = 'src/components/session/sessionBadges.css'
 const RESPONSE_FOOTER = 'src/components/session/ResponseFooter.css'
+const FEEDBACK_MODAL = 'src/components/session/FeedbackModal.css'
 // shell/{Sidebar,SystemMenu,WorkspaceMenu}.css — the single surviving
 // homes of the shell-namespace rules since the T5d shell batch (moved
 // out of components.css by the removal tool; they are NOT transitional
@@ -305,6 +306,12 @@ function entries(): Entry[] {
     { file: RESPONSE_FOOTER, selector: ".kx-response-footer__action[aria-pressed='true']", property: 'color', token: ACCENT_AA, cls: 'A' as Class },
     { file: RESPONSE_FOOTER, selector: '.kx-response-footer__menu-date', property: 'color', token: MUTED_AA, cls: 'M' as Class },
     { file: RESPONSE_FOOTER, selector: '.kx-response-footer__stats', property: 'color', token: MUTED_AA, cls: 'M' as Class },
+    // FeedbackModal (session/FeedbackModal.tsx) — muted captions (subtitle,
+    // field label, close icon) and the textarea's accent focus border.
+    { file: FEEDBACK_MODAL, selector: '.kx-feedback-modal__close', property: 'color', token: MUTED_AA, cls: 'M' as Class },
+    { file: FEEDBACK_MODAL, selector: '.kx-feedback-modal__subtitle', property: 'color', token: MUTED_AA, cls: 'M' as Class },
+    { file: FEEDBACK_MODAL, selector: '.kx-feedback-modal__label', property: 'color', token: MUTED_AA, cls: 'M' as Class },
+    { file: FEEDBACK_MODAL, selector: '.kx-feedback-modal__input:focus', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
     // Dark-theme ink pin: the active segment's text uses --kx-accent-text-aa
     // in light mode (its dark #4f7044 resolves AA on the #95a547 fill) and
     // a [data-theme='dark'] override switches it to dark --kx-raised ink on
@@ -870,18 +877,18 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 170 consumers — 84 muted, 78 accent-strong, 4 accent-text-aa', () => {
-    expect(inventory).toHaveLength(170)
+  it('covers exactly 174 consumers — 84 muted, 79 accent-strong, 4 accent-text-aa', () => {
+    expect(inventory).toHaveLength(174)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(84)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(78)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(79)
     expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(4)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(81)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(84)
     expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(40)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(5)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(44)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(45)
   })
 
   it('has no duplicate inventory selectors', () => {

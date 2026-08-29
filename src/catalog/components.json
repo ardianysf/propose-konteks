@@ -722,7 +722,7 @@
       "sourcePath": "src/components/session/ResponseFooter.tsx",
       "exportName": "default",
       "classification": "adoptable",
-      "description": "Per-response action row rendered under every assistant message: copy, thumbs up/down reactions, and a three-dot more menu with the response date plus Retry / Fork / Share; hovering or focusing the row reveals response stats (duration and tokens in/out) when the message carries meta.",
+      "description": "Per-response action row rendered under every assistant message: copy, thumbs up/down reactions, and a three-dot more menu with the response date plus Retry / Fork / Share; hovering or focusing the row reveals response stats (duration and tokens in/out) when the message carries meta. Selecting a reaction fills its icon and opens the Share-feedback dialog (FeedbackModal) with kind-specific preset options.",
       "propDocs": {
         "item": "required, DetailTimelineItem — the assistant message (content, createdAt, optional meta { durationMs, tokensIn, tokensOut })",
         "onRetry": "optional, () => void — invoked from the more menu's Retry action; the timeline re-asks the nearest preceding user message",
@@ -748,7 +748,42 @@
         "without stats (no meta)"
       ],
       "fixtureRef": "specimen row: default with stats | thumbs active | menu open | no meta",
-      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext; stats muncul saat hover/focus (CSS) dengan fallback title; tombol salin memakai navigator.clipboard dengan feedback transien 'Copied'."
+      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext; stats muncul saat hover/focus (CSS) dengan fallback title; tombol salin memakai navigator.clipboard dengan fallback execCommand; reaksi terpilih membuka FeedbackModal (komponen terpisah, juga adoptable)."
+    },
+    {
+      "id": "feedback-modal",
+      "name": "FeedbackModal",
+      "domain": "session",
+      "sourcePath": "src/components/session/FeedbackModal.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Share-feedback dialog opened when a response gets a thumbs reaction: a free-form feedback textarea plus preset option chips that autofill it — good and bad reactions offer different option sets (FEEDBACK_OPTIONS). Uses the shared .kx-modal shell and .kx-btn buttons; the embedded prop renders the card inline for catalog specimens.",
+      "propDocs": {
+        "kind": "required, 'good' | 'bad' — which reaction opened the dialog; drives the subtitle and preset options",
+        "onSubmit": "optional, (feedback: string) => void — invoked with the trimmed feedback text on submit",
+        "onClose": "required, () => void — closes the dialog (cancel, backdrop, Escape, close icon, or after submit)",
+        "embedded": "optional, boolean (default false) — render inline without overlay chrome (catalog specimens)",
+        "children": "optional, ReactNode — extra content rendered under the textarea (host customisation)"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/FeedbackModal.css"
+      ],
+      "tokenDeps": [
+        "--kx-raised",
+        "--kx-border",
+        "--kx-primary",
+        "--kx-pale",
+        "--kx-muted-text-aa",
+        "--kx-accent-strong",
+        "--kx-radius-main"
+      ],
+      "variants": [
+        "good",
+        "bad"
+      ],
+      "fixtureRef": "embedded specimen pair: good (helpful options) | bad (what-went-wrong options)",
+      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext; opsi preset diekspor sebagai FEEDBACK_OPTIONS untuk dihost/di-customize; submit terkunci sampai ada teks; Escape/backdrop/close icon menutup dialog."
     },
     {
       "id": "session-detail-composer",

@@ -5,18 +5,18 @@ import AxeBuilder from '@axe-core/playwright'
  * Catalog component-detail smoke (R1 of the dual-output replan, spec
  * AC5/AC6/AC7).
  *
- * - ONE smoke test opens all 30 /catalog/components/<slug> routes inside a
+ * - ONE smoke test opens all 31 /catalog/components/<slug> routes inside a
  *   single reused page (clean URL navigation never reloads the catalog SPA)
  *   and asserts, per slug: detail heading, resolved live preview (placeholder
  *   gone, real content present), the API contract / Contoh pemakaian /
  *   Meta sections, and zero console errors / pageerrors.
- * - The slug list is a frozen snapshot of the 30 visual manifest entries
+ * - The slug list is a frozen snapshot of the 31 visual manifest entries
  *   (adoptable + mockup-coupled); the unit suite
  *   (src/catalog/registryPreviews.test.tsx) enforces the live
  *   registry↔manifest 1:1 contract, so drift fails loudly there.
  * - Axe WCAG2AA runs on ONE representative detail per component domain
  *   (account/composer/context/customize/reviews/session/shell/system) —
- *   not on all 30 — plus the overview/tokens/index coverage that already
+ *   not on all 31 — plus the overview/tokens/index coverage that already
  *   lives in catalog-content.spec.ts. Violations on the shared shell are
  *   filtered to frame-content issues only once per test run.
  */
@@ -35,7 +35,7 @@ async function gotoCatalog(page: Page, path = '/catalog') {
   await expect(nav(page)).toBeVisible()
 }
 
-/** The 30 visual manifest entries (adoptable + mockup-coupled), frozen
+/** The 31 visual manifest entries (adoptable + mockup-coupled), frozen
  *  from components.json at R1 time — see header comment for the drift
  *  guard. Domain-leading entries double as the axe representatives. */
 const VISUAL_SLUGS: ReadonlyArray<{ slug: string; name: string; domain: string }> = [
@@ -63,6 +63,7 @@ const VISUAL_SLUGS: ReadonlyArray<{ slug: string; name: string; domain: string }
   // session
   { slug: 'dot-matrix-loader', name: 'DotMatrixLoader', domain: 'session' },
   { slug: 'response-footer', name: 'ResponseFooter', domain: 'session' },
+  { slug: 'feedback-modal', name: 'FeedbackModal', domain: 'session' },
   { slug: 'session-detail-composer', name: 'SessionDetailComposer', domain: 'session' },
   { slug: 'session-header', name: 'SessionHeader', domain: 'session' },
   { slug: 'session-quote-card', name: 'SessionQuoteCard', domain: 'session' },
@@ -133,15 +134,15 @@ async function expectRequiredDetailSections(page: Page) {
   )
 }
 
-test.describe('catalog component detail smoke (30 visual entries)', () => {
-  // 30 sequential detail renders in one reused page; previews lazy-load
+test.describe('catalog component detail smoke (31 visual entries)', () => {
+  // 31 sequential detail renders in one reused page; previews lazy-load
   // real components. Generous but bounded timeout.
   test.setTimeout(180_000)
 
-  test('all 30 /catalog/components/<slug> routes render heading, preview, and sections without console errors', async ({
+  test('all 31 /catalog/components/<slug> routes render heading, preview, and sections without console errors', async ({
     page,
   }) => {
-    test.skip(VISUAL_SLUGS.length !== 30, 'visual slug snapshot drifted')
+    test.skip(VISUAL_SLUGS.length !== 31, 'visual slug snapshot drifted')
 
     const errors: string[] = []
     page.on('console', (msg) => {
