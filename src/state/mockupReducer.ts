@@ -7,6 +7,8 @@ import {
   type SessionMode,
   type System,
   type SessionDetailData,
+  type SessionStage,
+  type DeliveryInfo,
 } from '../data/mockData'
 
 export type { SessionMode } from '../data/mockData'
@@ -122,6 +124,7 @@ export type MockupAction =
   | { type: 'SESSION_REQUEST_QUOTE_REVISION'; quoteId: string }
   | { type: 'SESSION_SEND_DETAIL_MESSAGE'; content: string }
   | { type: 'SESSION_RECEIVE_DETAIL_MESSAGE' }
+  | { type: 'SESSION_CREATE_FROM_COMPOSER'; content: string }
 
 /**
  * Builds the initial mockup state. The `mock` query parameter
@@ -486,9 +489,9 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
     }
 
     // Two-phase pending chat flow: the send lands only the user message and
-    // flags the assistant reply as pending (with a rotation counter for the
-    // loading indicator); the fixed acknowledgment arrives via
-    // SESSION_RECEIVE_DETAIL_MESSAGE once the (simulated) wait elapses.
+    // flags the assistant reply as pending; the fixed acknowledgment arrives
+    // via SESSION_RECEIVE_DETAIL_MESSAGE once the (simulated) wait elapses
+    // (the pending bubble cycles its process phases meanwhile).
     case 'SESSION_SEND_DETAIL_MESSAGE': {
       const now = new Date().toISOString()
       const userMessage = {
@@ -505,8 +508,61 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
           ...state.sessionDetail,
           updatedAt: now,
           pendingAssistant: true,
-          loadCount: state.sessionDetail.loadCount + 1,
           timeline: [...state.sessionDetail.timeline, userMessage],
+        },
+      }
+    }
+
+    // Main-page composer send: start a fresh session seeded with the prompt
+    // as its first user message, already pending its assistant reply (the
+    // phase-driven loader plays out in the session detail the composer
+    // routes to). Derived from the SESSION_DETAIL fixture so every metadata
+    // block the detail page renders still exists; workflow progress resets
+    // to a just-started session.
+    case 'SESSION_CREATE_FROM_COMPOSER': {
+      const now = new Date().toISOString()
+      const content = action.content.trim()
+      const title =
+        content.length > 48 ? `${content.slice(0, 48).trimEnd()}…` : content || 'New session'
+      const activeSystem =
+        state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
+      const userMessage = {
+        id: `T-${Date.now()}-user`,
+        type: 'USER_MESSAGE' as const,
+        content,
+        actorType: 'USER' as const,
+        createdAt: now,
+      }
+
+      return {
+        ...state,
+        route: 'session-detail',
+        sessionDetail: {
+          ...structuredClone(SESSION_DETAIL),
+          sessionId: `S-${Date.now()}`,
+          title,
+          status: 'IN_PROGRESS',
+          systemId: activeSystem.id,
+          systemName: activeSystem.name,
+          createdAt: now,
+          updatedAt: now,
+          pendingAssistant: true,
+          currentCycle: 1,
+          stages: SESSION_DETAIL.stages.map((stage, index) => ({
+            ...stage,
+            status: (index === 0 ? 'IN_PROGRESS' : 'NOT_STARTED') as SessionStage['status'],
+          })),
+          quotes: [],
+          delivery: {
+            ...SESSION_DETAIL.delivery,
+            status: 'NOT_STARTED' as DeliveryInfo['status'],
+            deliveredStoryPoints: undefined,
+            progressPercentage: undefined,
+            summary: undefined,
+            knownLimitations: undefined,
+            artifacts: [],
+          },
+          timeline: [userMessage],
         },
       }
     }

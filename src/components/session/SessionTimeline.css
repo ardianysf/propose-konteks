@@ -48,12 +48,22 @@
   line-height: 1.5;
 }
 
-/* Pending assistant reply — same bubble family, hugging the dot-matrix
- * loader (dots take their color from --kx-primary via the cascade). */
+/* Pending assistant reply — same bubble family: compact 12px dot-matrix
+ * loader with the running process label beside it (dots take their color
+ * from --kx-primary via the cascade). */
 .kx-session-timeline__bubble--pending {
   display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 12px;
-  line-height: 0;
+  line-height: normal;
+}
+
+/* Running process status beside the loader (Validating/Analyzing/…). */
+.kx-session-timeline__pending-phase {
+  color: var(--kx-primary);
+  font-size: var(--kx-text-md);
+  line-height: 1.5;
 }
 
 .kx-session-timeline__item--system {

@@ -10,12 +10,14 @@ import { EXECUTION_PROFILES } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 import ExecutionProfileMenu from '../composer/ExecutionProfileMenu'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
+import { PENDING_TOTAL_MS } from './pendingPhases'
 import './SessionDetailComposer.css'
 
-/** Simulated assistant latency after each send. Exported so tests can
- * advance fake timers by exactly this amount (and a real API wait can later
- * replace the timeout without UI changes). */
-export const RESPONSE_DELAY_MS = 1600
+/** Simulated assistant latency after each send: the full pending phase
+ * sequence (Validating → Analyzing → Synthesizing). Exported so tests can
+ * advance fake timers by exactly this amount (and a real API wait can
+ * later replace the timeout without UI changes). */
+export const RESPONSE_DELAY_MS = PENDING_TOTAL_MS
 
 function AttachmentIcon() {
   return (
@@ -69,6 +71,14 @@ export default function SessionDetailComposer() {
   // (eternal loader + permanently disabled send). When the timer already
   // fired it nulls its own ref, so unmount is a no-op in that case.
   const receiveTimeoutRef = useRef<number | null>(null)
+  /** Arm the simulated assistant reply timer (dedupes any armed timer). */
+  const armReceiveTimeout = () => {
+    if (receiveTimeoutRef.current !== null) window.clearTimeout(receiveTimeoutRef.current)
+    receiveTimeoutRef.current = window.setTimeout(() => {
+      receiveTimeoutRef.current = null
+      dispatch({ type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
+    }, RESPONSE_DELAY_MS)
+  }
   useEffect(() => {
     return () => {
       if (receiveTimeoutRef.current !== null) {
@@ -80,13 +90,15 @@ export default function SessionDetailComposer() {
   }, [dispatch])
 
   // Mount-time recovery: pendingAssistant observed on mount with no timer
-  // armed (stale state from HMR or a future caller) would render an
-  // unresolvable loader and a locked composer — resolve it on arrival.
-  // Mount-only by design: after mount, the send path owns the pending flag.
+  // armed (stale state from HMR, or a session just created by the main-page
+  // composer) would render an unresolvable loader and a locked composer —
+  // arm the normal receive timeout so the phase sequence plays out and the
+  // reply lands. Mount-only by design: after mount, the send path owns the
+  // pending flag.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (sessionDetail.pendingAssistant && receiveTimeoutRef.current === null) {
-      dispatch({ type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
+      armReceiveTimeout()
     }
   }, [dispatch])
 
@@ -105,11 +117,7 @@ export default function SessionDetailComposer() {
     if (!trimmedMessage || sessionDetail.pendingAssistant) return
     dispatch({ type: 'SESSION_SEND_DETAIL_MESSAGE', content: trimmedMessage })
     setMessage('')
-    if (receiveTimeoutRef.current !== null) window.clearTimeout(receiveTimeoutRef.current)
-    receiveTimeoutRef.current = window.setTimeout(() => {
-      receiveTimeoutRef.current = null
-      dispatch({ type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
-    }, RESPONSE_DELAY_MS)
+    armReceiveTimeout()
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {

@@ -11,7 +11,7 @@
  * The page-level disclaimer and Reviews-waiting pill live OUTSIDE this
  * component (NewSessionPage's external footer).
  */
-import { useState } from 'react'
+import { useState, type KeyboardEvent } from 'react'
 import { COMPONENTS, EXECUTION_PROFILES } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
@@ -177,6 +177,25 @@ export default function Composer() {
   const qa = state.sessionMode === 'qa'
   const canSubmit = value.trim().length > 0
 
+  // Send creates a fresh session seeded with the prompt as its first user
+  // message and routes to the session detail, where the pending assistant
+  // reply plays out its phase sequence (Validating → Analyzing → …).
+  const send = () => {
+    if (!canSubmit) return
+    // Close any open composer menu (execution profile / component) so its
+    // overlay state never leaks into the new session's route.
+    if (state.overlay.kind !== 'none') dismissOverlay()
+    dispatch({ type: 'SESSION_CREATE_FROM_COMPOSER', content: value.trim() })
+    setValue('')
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      send()
+    }
+  }
+
   const activeProfile =
     EXECUTION_PROFILES.find((profile) => profile.id === state.activeProfileId) ??
     EXECUTION_PROFILES[0]
@@ -284,6 +303,7 @@ export default function Composer() {
           placeholder={planning ? PLANNING_PLACEHOLDER : qa ? QA_PLACEHOLDER : ENGINEERING_PLACEHOLDER}
           value={value}
           onChange={(event) => setValue(event.target.value)}
+          onKeyDown={handleKeyDown}
         />
 
         <div
@@ -355,6 +375,7 @@ export default function Composer() {
               aria-label={planning ? 'Start planning' : 'Send'}
               data-testid="composer-send"
               disabled={!canSubmit}
+              onClick={send}
             >
               <SendIcon />
               {planning && <span>Start planning</span>}

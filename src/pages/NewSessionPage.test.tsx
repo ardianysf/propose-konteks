@@ -1,5 +1,6 @@
 import { useEffect, useReducer } from 'react'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within, act } from '@testing-library/react'
+import { vi } from 'vitest'
 import NewSessionPage from './NewSessionPage'
 import AppShell from '../components/shell/AppShell'
 import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
@@ -654,5 +655,67 @@ describe('NewSessionPage — AppShell integration + hygiene', () => {
     const planning = within(group).getByRole('radio', { name: 'Planning' })
     expect(engineering).toHaveAttribute('tabindex', '0')
     expect(planning).toHaveAttribute('tabindex', '-1')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Main-composer send → new session → pending phase flow (AppShell-level,
+// so the route switch to the session detail runs exactly as in the app).
+// ---------------------------------------------------------------------------
+
+describe('main composer send flow', () => {
+  it('send creates a new pending session, routes to session detail, and plays the phase sequence', () => {
+    vi.useFakeTimers()
+    try {
+      const { bucket } = renderAppShell()
+
+      const textarea = screen.getByTestId('composer-input') as HTMLTextAreaElement
+      const sendButton = screen.getByTestId('composer-send')
+      expect(sendButton).toBeDisabled()
+
+      fireEvent.change(textarea, { target: { value: 'Build a renewal reminder dashboard widget' } })
+      expect(sendButton).toBeEnabled()
+      fireEvent.click(sendButton)
+
+      // New session created and routed to the detail page.
+      expect(bucket.current?.route).toBe('session-detail')
+      expect(bucket.current?.sessionDetail.pendingAssistant).toBe(true)
+      expect(bucket.current?.sessionDetail.timeline).toHaveLength(1)
+      expect(bucket.current?.sessionDetail.timeline[0].content).toBe(
+        'Build a renewal reminder dashboard widget',
+      )
+      // The main composer is unmounted with its input cleared for good
+      // measure — the session composer takes over.
+      expect(screen.queryByTestId('composer-input')).not.toBeInTheDocument()
+
+      // The pending bubble shows the first phase beside the 12px loader.
+      expect(screen.getByText('Validating')).toBeVisible()
+      expect(
+        screen.getByRole('status', { name: 'Menyusun jawaban — Validating' }),
+      ).toHaveClass('kx-dmx--ripple')
+
+      // Phases advance; the reply lands after the full sequence.
+      act(() => {
+        vi.advanceTimersByTime(900)
+      })
+      expect(screen.getByRole('status', { name: 'Menyusun jawaban — Analyzing' })).toHaveClass(
+        'kx-dmx--drift',
+      )
+      act(() => {
+        vi.advanceTimersByTime(900)
+      })
+      expect(screen.getByRole('status', { name: 'Menyusun jawaban — Synthesizing' })).toHaveClass(
+        'kx-dmx--glyph',
+      )
+      act(() => {
+        vi.advanceTimersByTime(900)
+      })
+      expect(screen.queryByRole('status', { name: /menyusun jawaban/i })).not.toBeInTheDocument()
+      expect(bucket.current?.sessionDetail.pendingAssistant).toBe(false)
+      const timeline = bucket.current?.sessionDetail.timeline ?? []
+      expect(timeline[timeline.length - 1].type).toBe('ASSISTANT_MESSAGE')
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

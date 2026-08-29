@@ -113,8 +113,6 @@ export interface SessionDetailData {
   updatedAt: string
   /** True while the assistant reply is pending after a send (two-phase chat flow). */
   pendingAssistant: boolean
-  /** Number of sends this session has handled; rotates the loader variant. */
-  loadCount: number
   currentCycle: number
   totalCycles: number
   stages: SessionStage[]
@@ -866,7 +864,6 @@ export const SESSION_DETAIL: SessionDetailData = {
   createdAt: '2026-08-15T09:12:00Z',
   updatedAt: '2026-08-16T14:40:00Z',
   pendingAssistant: false,
-  loadCount: 0,
   currentCycle: 2,
   totalCycles: 3,
   stages: [

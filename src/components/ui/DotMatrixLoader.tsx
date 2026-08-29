@@ -15,7 +15,8 @@ import './DotMatrixLoader.css'
 
 export type DotMatrixVariant = 'spiral' | 'drift' | 'ripple' | 'echo' | 'glyph'
 
-/** Deterministic rotation order — consumers index with loadCount % length. */
+/** Deterministic rotation order — the session timeline cycles its pending
+ * phases through these variants (see session/pendingPhases.ts). */
 export const DOT_MATRIX_VARIANTS: readonly DotMatrixVariant[] = [
   'spiral',
   'drift',

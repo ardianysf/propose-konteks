@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import SessionDetailPage from './SessionDetailPage'
 import { RESPONSE_DELAY_MS } from '../components/session/SessionDetailComposer'
+import { PENDING_PHASES, PENDING_PHASE_DURATION_MS } from '../components/session/pendingPhases'
 import { MockupContext, useMockup } from '../state/MockupContext'
 import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
 import { initialState, mockupReducer, type MockupState } from '../state/mockupReducer'
@@ -729,11 +730,14 @@ describe('SessionDetailComposer — message composer', () => {
       fireEvent.change(textarea, { target: { value: 'First question' } })
       fireEvent.click(sendButton)
 
-      // Exactly +1 user message; loader up; composer locked while pending.
+      // Exactly +1 user message; loader up in its first phase; composer
+      // locked while pending. The compact loader (12px) is accompanied by
+      // the visible process label.
       const pendingTimeline = bucket.current?.sessionDetail.timeline ?? []
       expect(pendingTimeline.length).toBe(initialTimelineLength + 1)
       expect(pendingTimeline[pendingTimeline.length - 1].type).toBe('USER_MESSAGE')
-      expect(screen.getByRole('status', { name: 'Menyusun jawaban' })).toHaveClass('kx-dmx--spiral')
+      expect(screen.getByRole('status', { name: 'Menyusun jawaban — Validating' })).toHaveClass('kx-dmx--ripple')
+      expect(screen.getByText('Validating')).toBeVisible()
       expect(sendButton).toBeDisabled()
 
       act(() => {
@@ -745,7 +749,7 @@ describe('SessionDetailComposer — message composer', () => {
       expect(timeline.length).toBe(initialTimelineLength + 2)
       expect(timeline[timeline.length - 1].type).toBe('ASSISTANT_MESSAGE')
       expect(timeline[timeline.length - 1].content).toContain('Noted — added to the working context')
-      expect(screen.queryByRole('status', { name: 'Menyusun jawaban' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('status', { name: /menyusun jawaban/i })).not.toBeInTheDocument()
       // Composer unlocked: the send guard (pendingAssistant) is cleared; the
       // button itself stays disabled only because the input is empty again.
       expect(bucket.current?.sessionDetail.pendingAssistant).toBe(false)
@@ -758,7 +762,7 @@ describe('SessionDetailComposer — message composer', () => {
     }
   })
 
-  it('second send renders the drift variant (variant rotates per send)', () => {
+  it('pending process label and loader variant advance through the phases, then the reply lands', () => {
     vi.useFakeTimers()
     try {
       const bucket: StateBucket = { current: null }
@@ -766,53 +770,32 @@ describe('SessionDetailComposer — message composer', () => {
       const textarea = container.querySelector('textarea') as HTMLTextAreaElement
       const sendButton = screen.getByRole('button', { name: /send message/i })
 
-      // Send #1 → spiral; resolve it so the composer unblocks for send #2.
-      fireEvent.change(textarea, { target: { value: 'First' } })
+      fireEvent.change(textarea, { target: { value: 'First question' } })
       fireEvent.click(sendButton)
-      expect(screen.getByRole('status', { name: 'Menyusun jawaban' })).toHaveClass('kx-dmx--spiral')
-      act(() => {
-        vi.advanceTimersByTime(RESPONSE_DELAY_MS)
+
+      // Every phase: visible label beside the loader, its own variant, and
+      // an aria-label that tracks the running process.
+      PENDING_PHASES.forEach((phase, index) => {
+        expect(screen.getByText(phase.label)).toBeVisible()
+        expect(screen.getByRole('status', { name: `Menyusun jawaban — ${phase.label}` })).toHaveClass(
+          `kx-dmx--${phase.variant}`,
+        )
+        // Not the last phase yet → the next phase is still ahead.
+        if (index < PENDING_PHASES.length - 1) {
+          act(() => {
+            vi.advanceTimersByTime(PENDING_PHASE_DURATION_MS)
+          })
+        }
       })
 
-      // Send #2 → drift.
-      fireEvent.change(textarea, { target: { value: 'Second' } })
-      fireEvent.click(sendButton)
-      expect(screen.getByRole('status', { name: 'Menyusun jawaban' })).toHaveClass('kx-dmx--drift')
-    } finally {
-      vi.useRealTimers()
-    }
-  })
-
-  it('sixth send wraps the rotation back to spiral (#5 glyph → #6 spiral)', () => {
-    vi.useFakeTimers()
-    try {
-      const bucket: StateBucket = { current: null }
-      const { container } = renderComposerHarness(bucket)
-      const textarea = container.querySelector('textarea') as HTMLTextAreaElement
-      const sendButton = screen.getByRole('button', { name: /send message/i })
-
-      // Sends #1–#4 rotate spiral → drift → ripple → echo.
-      for (const variant of ['spiral', 'drift', 'ripple', 'echo'] as const) {
-        fireEvent.change(textarea, { target: { value: `Message ${variant}` } })
-        fireEvent.click(sendButton)
-        expect(screen.getByRole('status', { name: 'Menyusun jawaban' })).toHaveClass(`kx-dmx--${variant}`)
-        act(() => {
-          vi.advanceTimersByTime(RESPONSE_DELAY_MS)
-        })
-      }
-
-      // Send #5 → glyph.
-      fireEvent.change(textarea, { target: { value: 'Message glyph' } })
-      fireEvent.click(sendButton)
-      expect(screen.getByRole('status', { name: 'Menyusun jawaban' })).toHaveClass('kx-dmx--glyph')
+      // The last phase holds until the full wait elapses, then resolves.
       act(() => {
-        vi.advanceTimersByTime(RESPONSE_DELAY_MS)
+        vi.advanceTimersByTime(PENDING_PHASE_DURATION_MS)
       })
-
-      // Send #6 wraps: spiral again.
-      fireEvent.change(textarea, { target: { value: 'Message wrap' } })
-      fireEvent.click(sendButton)
-      expect(screen.getByRole('status', { name: 'Menyusun jawaban' })).toHaveClass('kx-dmx--spiral')
+      expect(screen.queryByRole('status', { name: /menyusun jawaban/i })).not.toBeInTheDocument()
+      expect(screen.queryByText('Synthesizing')).not.toBeInTheDocument()
+      const timeline = bucket.current?.sessionDetail.timeline ?? []
+      expect(timeline[timeline.length - 1].type).toBe('ASSISTANT_MESSAGE')
     } finally {
       vi.useRealTimers()
     }
@@ -858,7 +841,7 @@ describe('SessionDetailComposer — message composer', () => {
       fireEvent.change(textarea, { target: { value: 'Asked before navigating' } })
       fireEvent.click(sendButton)
       expect(bucket.current?.sessionDetail.pendingAssistant).toBe(true)
-      expect(screen.getByRole('status', { name: 'Menyusun jawaban' })).toHaveClass('kx-dmx--spiral')
+      expect(screen.getByRole('status', { name: 'Menyusun jawaban — Validating' })).toHaveClass('kx-dmx--ripple')
 
       // Navigate away before RESPONSE_DELAY_MS elapses — the composer unmounts.
       fireEvent.click(screen.getByTestId('route-toggle'))
@@ -873,11 +856,11 @@ describe('SessionDetailComposer — message composer', () => {
       // Back on the route: no eternal loader, and the abandoned timer is
       // gone — advancing time adds no duplicate ack.
       fireEvent.click(screen.getByTestId('route-toggle'))
-      expect(screen.queryByRole('status', { name: 'Menyusun jawaban' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('status', { name: /menyusun jawaban/i })).not.toBeInTheDocument()
       act(() => {
         vi.advanceTimersByTime(RESPONSE_DELAY_MS * 2)
       })
-      expect(screen.queryByRole('status', { name: 'Menyusun jawaban' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('status', { name: /menyusun jawaban/i })).not.toBeInTheDocument()
       const timelineAfter = bucket.current?.sessionDetail.timeline ?? []
       expect(timelineAfter.filter((item) => item.type === 'ASSISTANT_MESSAGE')).toHaveLength(ackCount)
 
@@ -890,36 +873,48 @@ describe('SessionDetailComposer — message composer', () => {
     }
   })
 
-  it('recovers stale pendingAssistant state on mount when no timer is scheduled', () => {
-    const bucket: StateBucket = { current: null }
-    // Seed the store as if a send happened but the reply never landed
-    // (stale state from HMR or a future caller): pendingAssistant true and
-    // no composer timer armed.
-    const preseeded = initialState()
-    preseeded.sessionDetail.pendingAssistant = true
+  it('recovers pendingAssistant state on mount by arming the phase timeout (stale state or a composer-created session)', () => {
+    vi.useFakeTimers()
+    try {
+      const bucket: StateBucket = { current: null }
+      // Seed the store as if a send happened but the reply never landed
+      // (stale state from HMR, or a session created by the main-page
+      // composer): pendingAssistant true and no composer timer armed.
+      const preseeded = initialState()
+      preseeded.sessionDetail.pendingAssistant = true
 
-    function PreseededHarness() {
-      const [state, dispatch] = useReducer(mockupReducer, preseeded)
-      useEffect(() => {
-        dispatch({ type: 'NAVIGATE', route: 'session-detail' })
-      }, [dispatch])
-      return (
-        <MockupContext.Provider value={{ state, dispatch }}>
-          <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
-            <StateProbe bucket={bucket} />
-            {state.route === 'session-detail' && <SessionDetailPage />}
-          </OverlayLifecycleProvider>
-        </MockupContext.Provider>
-      )
+      function PreseededHarness() {
+        const [state, dispatch] = useReducer(mockupReducer, preseeded)
+        useEffect(() => {
+          dispatch({ type: 'NAVIGATE', route: 'session-detail' })
+        }, [dispatch])
+        return (
+          <MockupContext.Provider value={{ state, dispatch }}>
+            <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
+              <StateProbe bucket={bucket} />
+              {state.route === 'session-detail' && <SessionDetailPage />}
+            </OverlayLifecycleProvider>
+          </MockupContext.Provider>
+        )
+      }
+      render(<PreseededHarness />)
+
+      // Mount-time recovery now ARMS the receive timeout instead of
+      // resolving instantly: the loader shows with its first phase.
+      expect(bucket.current?.sessionDetail.pendingAssistant).toBe(true)
+      expect(screen.getByRole('status', { name: 'Menyusun jawaban — Validating' })).toHaveClass('kx-dmx--ripple')
+
+      // The full phase sequence plays out, then the reply lands.
+      act(() => {
+        vi.advanceTimersByTime(RESPONSE_DELAY_MS)
+      })
+      expect(bucket.current?.sessionDetail.pendingAssistant).toBe(false)
+      expect(screen.queryByRole('status', { name: /menyusun jawaban/i })).not.toBeInTheDocument()
+      const timeline = bucket.current?.sessionDetail.timeline ?? []
+      expect(timeline[timeline.length - 1].type).toBe('ASSISTANT_MESSAGE')
+    } finally {
+      vi.useRealTimers()
     }
-    render(<PreseededHarness />)
-
-    // Mount-time recovery: the pending reply resolves immediately — no
-    // loader rendered, pending flag cleared, assistant ack appended.
-    expect(bucket.current?.sessionDetail.pendingAssistant).toBe(false)
-    expect(screen.queryByRole('status', { name: 'Menyusun jawaban' })).not.toBeInTheDocument()
-    const timeline = bucket.current?.sessionDetail.timeline ?? []
-    expect(timeline[timeline.length - 1].type).toBe('ASSISTANT_MESSAGE')
   })
 
   it('shows locked notice when session is COMPLETED', () => {

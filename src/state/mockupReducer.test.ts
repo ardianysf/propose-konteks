@@ -801,16 +801,18 @@ describe('SESSION_SEND_DETAIL_MESSAGE', () => {
     expect(state.sessionDetail.updatedAt).toBeDefined()
   })
 
-  it('increments loadCount on every send — #2 → 2 (drift), #6 → 6 (wraps to spiral via (loadCount − 1) % 5)', () => {
+  it('keeps the pending flag set across consecutive sends until a receive lands', () => {
     let state = freshState()
     expect(state.sessionDetail.pendingAssistant).toBe(false)
-    expect(state.sessionDetail.loadCount).toBe(0)
 
-    for (let sends = 1; sends <= 6; sends += 1) {
-      state = mockupReducer(state, { type: 'SESSION_SEND_DETAIL_MESSAGE', content: 'test' })
-      expect(state.sessionDetail.loadCount).toBe(sends)
-      expect(state.sessionDetail.pendingAssistant).toBe(true)
-    }
+    state = mockupReducer(state, { type: 'SESSION_SEND_DETAIL_MESSAGE', content: 'test' })
+    expect(state.sessionDetail.pendingAssistant).toBe(true)
+
+    state = mockupReducer(state, { type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
+    expect(state.sessionDetail.pendingAssistant).toBe(false)
+
+    state = mockupReducer(state, { type: 'SESSION_SEND_DETAIL_MESSAGE', content: 'again' })
+    expect(state.sessionDetail.pendingAssistant).toBe(true)
   })
 
   it('user message appears with bumped timestamp', () => {
@@ -841,7 +843,6 @@ describe('SESSION_RECEIVE_DETAIL_MESSAGE', () => {
     expect(lastTwo[1].content).toContain('Noted — added to the working context')
     expect(lastTwo[1].actorType).toBe('ASSISTANT')
     expect(state.sessionDetail.pendingAssistant).toBe(false)
-    expect(state.sessionDetail.loadCount).toBe(1)
   })
 
   it('acknowledgment timestamp is not earlier than the send timestamp', () => {
@@ -853,6 +854,64 @@ describe('SESSION_RECEIVE_DETAIL_MESSAGE', () => {
 
     const ack = state.sessionDetail.timeline[state.sessionDetail.timeline.length - 1]
     expect(new Date(ack.createdAt).getTime()).toBeGreaterThanOrEqual(new Date(sentAt).getTime())
+  })
+})
+
+// ---------------------------------------------------------------------------
+// SESSION_CREATE_FROM_COMPOSER — main-page composer send starts a fresh
+// pending session and routes to the session detail.
+// ---------------------------------------------------------------------------
+
+describe('SESSION_CREATE_FROM_COMPOSER', () => {
+  it('creates a fresh pending session seeded with the prompt and routes to session detail', () => {
+    let state = freshState()
+    const fixtureSessionId = state.sessionDetail.sessionId
+
+    state = mockupReducer(state, {
+      type: 'SESSION_CREATE_FROM_COMPOSER',
+      content: 'Build a renewal reminder dashboard widget',
+    })
+
+    expect(state.route).toBe('session-detail')
+    expect(state.sessionDetail.pendingAssistant).toBe(true)
+    expect(state.sessionDetail.sessionId).not.toBe(fixtureSessionId)
+    expect(state.sessionDetail.title).toBe('Build a renewal reminder dashboard widget')
+    expect(state.sessionDetail.status).toBe('IN_PROGRESS')
+    expect(state.sessionDetail.currentCycle).toBe(1)
+    expect(state.sessionDetail.systemId).toBe(state.activeSystemId)
+    expect(state.sessionDetail.timeline).toHaveLength(1)
+    expect(state.sessionDetail.timeline[0].type).toBe('USER_MESSAGE')
+    expect(state.sessionDetail.timeline[0].content).toBe('Build a renewal reminder dashboard widget')
+    expect(state.sessionDetail.timeline[0].actorType).toBe('USER')
+    // Workflow progress resets: first stage in progress, nothing delivered.
+    expect(state.sessionDetail.stages[0].status).toBe('IN_PROGRESS')
+    expect(state.sessionDetail.stages.slice(1).every((stage) => stage.status === 'NOT_STARTED')).toBe(true)
+    expect(state.sessionDetail.quotes).toHaveLength(0)
+    expect(state.sessionDetail.delivery.status).toBe('NOT_STARTED')
+  })
+
+  it('truncates long prompts to a clean session title', () => {
+    let state = freshState()
+    const longPrompt = 'Investigate and fix the error when get list approval exception that list not showing'
+
+    state = mockupReducer(state, { type: 'SESSION_CREATE_FROM_COMPOSER', content: longPrompt })
+
+    expect(state.sessionDetail.title).toBe(`${longPrompt.slice(0, 48).trimEnd()}…`)
+    expect(state.sessionDetail.title.endsWith('…')).toBe(true)
+    // The full prompt is preserved verbatim in the timeline message.
+    expect(state.sessionDetail.timeline[0].content).toBe(longPrompt)
+  })
+
+  it('receive lands the acknowledgment on the new session and clears pending', () => {
+    let state = freshState()
+
+    state = mockupReducer(state, { type: 'SESSION_CREATE_FROM_COMPOSER', content: 'New idea' })
+    state = mockupReducer(state, { type: 'SESSION_RECEIVE_DETAIL_MESSAGE' })
+
+    expect(state.sessionDetail.pendingAssistant).toBe(false)
+    expect(state.sessionDetail.timeline).toHaveLength(2)
+    expect(state.sessionDetail.timeline[1].type).toBe('ASSISTANT_MESSAGE')
+    expect(state.sessionDetail.timeline[1].content).toContain('Noted — added to the working context')
   })
 })
 
