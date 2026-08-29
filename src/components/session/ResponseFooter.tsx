@@ -7,6 +7,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import type { DetailTimelineItem } from '../../data/mockData'
+import FeedbackModal from './FeedbackModal'
 import './ResponseFooter.css'
 
 export interface ResponseFooterProps {
@@ -38,8 +39,13 @@ function CheckIcon() {
   )
 }
 
-function ThumbUpIcon() {
-  return (
+function ThumbUpIcon({ filled = false }: { filled?: boolean }) {
+  return filled ? (
+    <svg data-icon="thumb-up-filled" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+      <path d="M5.5 14V7l3-4.5c.8-.2 1.5.4 1.3 1.2L9.2 6.5h3.1c.9 0 1.5.8 1.3 1.6l-1.1 4.6c-.2.8-.9 1.3-1.7 1.3H5.5z" fill="currentColor" />
+      <path d="M5.5 7H3.2c-.7 0-1.2.5-1.2 1.2v4.6c0 .7.5 1.2 1.2 1.2h2.3V7z" fill="currentColor" />
+    </svg>
+  ) : (
     <svg data-icon="thumb-up" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
       <path d="M5.5 14V7l3-4.5c.8-.2 1.5.4 1.3 1.2L9.2 6.5h3.1c.9 0 1.5.8 1.3 1.6l-1.1 4.6c-.2.8-.9 1.3-1.7 1.3H5.5z" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
       <path d="M5.5 7H3.2c-.7 0-1.2.5-1.2 1.2v4.6c0 .7.5 1.2 1.2 1.2h2.3" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
@@ -47,8 +53,13 @@ function ThumbUpIcon() {
   )
 }
 
-function ThumbDownIcon() {
-  return (
+function ThumbDownIcon({ filled = false }: { filled?: boolean }) {
+  return filled ? (
+    <svg data-icon="thumb-down-filled" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+      <path d="M10.5 2v7l-3 4.5c-.8.2-1.5-.4-1.3-1.2l.6-2.8H3.7c-.9 0-1.5-.8-1.3-1.6l1.1-4.6C3.7 2.5 4.4 2 5.2 2h5.3z" fill="currentColor" />
+      <path d="M10.5 9h2.3c.7 0 1.2-.5 1.2-1.2V3.2c0-.7-.5-1.2-1.2-1.2h-2.3V9z" fill="currentColor" />
+    </svg>
+  ) : (
     <svg data-icon="thumb-down" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
       <path d="M10.5 2v7l-3 4.5c-.8.2-1.5-.4-1.3-1.2l.6-2.8H3.7c-.9 0-1.5-.8-1.3-1.6l1.1-4.6C3.7 2.5 4.4 2 5.2 2h5.3z" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
       <path d="M10.5 9h2.3c.7 0 1.2-.5 1.2-1.2V3.2c0-.7-.5-1.2-1.2-1.2h-2.3" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
@@ -144,6 +155,11 @@ export default function ResponseFooter({
   const [copied, setCopied] = useState(false)
   const [reaction, setReaction] = useState<'up' | 'down' | null>(initialReaction)
   const [menuOpen, setMenuOpen] = useState(initialMenuOpen)
+  // Selecting a reaction opens the Share-feedback dialog (deselecting does
+  // not); switching reactions switches the dialog to the other option set.
+  const [feedbackKind, setFeedbackKind] = useState<'good' | 'bad' | null>(null)
+  const thumbUpRef = useRef<HTMLButtonElement>(null)
+  const thumbDownRef = useRef<HTMLButtonElement>(null)
   const copiedTimerRef = useRef<number | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
 
@@ -173,7 +189,32 @@ export default function ResponseFooter({
   }
 
   const toggleReaction = (next: 'up' | 'down') => {
+    const selecting = reaction !== next
     setReaction((current) => (current === next ? null : next))
+    if (selecting) {
+      setFeedbackKind(next === 'up' ? 'good' : 'bad')
+      setMenuOpen(false)
+    } else {
+      setFeedbackKind(null)
+    }
+  }
+
+  // Closing the dialog returns focus to the (still pressed) reaction so
+  // keyboard users are not dropped at the document root — done in an
+  // effect after the modal has unmounted, because the focus-containment
+  // hook would immediately pull focus back while it is still mounted.
+  const prevFeedbackKindRef = useRef<'good' | 'bad' | null>(null)
+  useEffect(() => {
+    const previous = prevFeedbackKindRef.current
+    prevFeedbackKindRef.current = feedbackKind
+    if (previous !== null && feedbackKind === null) {
+      const thumb = reaction === 'up' ? thumbUpRef.current : thumbDownRef.current
+      thumb?.focus()
+    }
+  }, [feedbackKind, reaction])
+
+  const closeFeedback = () => {
+    setFeedbackKind(null)
   }
 
   return (
@@ -193,9 +234,10 @@ export default function ResponseFooter({
         aria-label="Good response"
         aria-pressed={reaction === 'up'}
         data-testid="response-thumb-up"
+        ref={thumbUpRef}
         onClick={() => toggleReaction('up')}
       >
-        <ThumbUpIcon />
+        <ThumbUpIcon filled={reaction === 'up'} />
       </button>
       <button
         type="button"
@@ -203,9 +245,10 @@ export default function ResponseFooter({
         aria-label="Bad response"
         aria-pressed={reaction === 'down'}
         data-testid="response-thumb-down"
+        ref={thumbDownRef}
         onClick={() => toggleReaction('down')}
       >
-        <ThumbDownIcon />
+        <ThumbDownIcon filled={reaction === 'down'} />
       </button>
       <div className="kx-response-footer__more-anchor">
         <button
@@ -259,6 +302,9 @@ export default function ResponseFooter({
         <span className="kx-response-footer__stats" aria-hidden="true" title={formatStats(item.meta)}>
           {formatStats(item.meta)}
         </span>
+      ) : null}
+      {feedbackKind ? (
+        <FeedbackModal kind={feedbackKind} onClose={closeFeedback} onSubmit={() => undefined} />
       ) : null}
     </div>
   )

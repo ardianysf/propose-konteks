@@ -1,0 +1,111 @@
+/* FeedbackModal — the shared modal shell (.kx-modal-backdrop + .kx-modal)
+ * and buttons (.kx-btn) come from the global stylesheet; this file only
+ * adds the dialog's inner layout and typography. */
+
+.kx-feedback-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(420px, calc(100vw - 32px));
+  padding: 20px;
+}
+
+/* Embedded (catalog specimens): inline card without overlay chrome. */
+.kx-feedback-modal--embedded {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  border: 1px solid var(--kx-border);
+  border-radius: var(--kx-radius-main);
+  background: var(--kx-raised);
+}
+
+.kx-feedback-modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--kx-muted-text-aa);
+  cursor: pointer;
+}
+
+.kx-feedback-modal__close:hover,
+.kx-feedback-modal__close:focus-visible {
+  color: var(--kx-primary);
+  background: var(--kx-pale);
+}
+
+.kx-feedback-modal__title {
+  margin: 0;
+  padding-right: 28px;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+.kx-feedback-modal__subtitle {
+  margin: 4px 0 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-feedback-modal__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.kx-feedback-modal__option {
+  padding: 5px 10px;
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+  cursor: pointer;
+}
+
+.kx-feedback-modal__option:hover,
+.kx-feedback-modal__option:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-feedback-modal__label {
+  margin-top: 14px;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-feedback-modal__input {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--kx-border);
+  border-radius: 10px;
+  background: var(--kx-raised);
+  font-family: inherit;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  resize: vertical;
+}
+
+.kx-feedback-modal__input:focus {
+  outline: none;
+  border-color: var(--kx-accent-strong);
+}
+
+.kx-feedback-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}

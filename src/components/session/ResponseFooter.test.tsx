@@ -103,26 +103,51 @@ describe('ResponseFooter', () => {
   it('supports initial reaction and menu-open states (catalog specimens)', () => {
     render(<ResponseFooter item={baseItem} initialReaction="up" initialMenuOpen />)
     expect(screen.getByTestId('response-thumb-up')).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByTestId('response-thumb-up').querySelector('svg[data-icon="thumb-up-filled"]')).toBeInTheDocument()
     expect(screen.getByTestId('response-more')).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByTestId('response-menu')).toBeInTheDocument()
+    // Initial state does NOT open the dialog — only a user click does.
+    expect(screen.queryByTestId('feedback-modal')).not.toBeInTheDocument()
   })
 
-  it('thumbs toggle with mutual exclusion', () => {
+  it('thumbs toggle with mutual exclusion; selecting opens the feedback modal, switching swaps its options', () => {
     render(<ResponseFooter item={baseItem} />)
     const up = screen.getByTestId('response-thumb-up')
     const down = screen.getByTestId('response-thumb-down')
 
+    // Selecting up: pressed + filled icon + good feedback options.
     fireEvent.click(up)
     expect(up).toHaveAttribute('aria-pressed', 'true')
-    expect(down).toHaveAttribute('aria-pressed', 'false')
+    expect(up.querySelector('svg[data-icon="thumb-up-filled"]')).toBeInTheDocument()
+    expect(screen.getByTestId('feedback-subtitle')).toHaveTextContent(
+      'What made this response helpful?',
+    )
 
+    // Switching to down swaps the modal to the bad option set.
     fireEvent.click(down)
     expect(up).toHaveAttribute('aria-pressed', 'false')
     expect(down).toHaveAttribute('aria-pressed', 'true')
+    expect(down.querySelector('svg[data-icon="thumb-down-filled"]')).toBeInTheDocument()
+    expect(screen.getByTestId('feedback-subtitle')).toHaveTextContent(
+      'What went wrong with this response?',
+    )
 
-    // Clicking the active reaction again clears it.
+    // Clicking the active reaction again deselects it and closes the modal.
     fireEvent.click(down)
     expect(down).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.queryByTestId('feedback-modal')).not.toBeInTheDocument()
+  })
+
+  it('submitting the feedback dialog closes it while keeping the reaction pressed', () => {
+    render(<ResponseFooter item={baseItem} />)
+    fireEvent.click(screen.getByTestId('response-thumb-up'))
+    fireEvent.click(screen.getAllByTestId('feedback-option')[0])
+    fireEvent.click(screen.getByTestId('feedback-submit'))
+
+    expect(screen.queryByTestId('feedback-modal')).not.toBeInTheDocument()
+    expect(screen.getByTestId('response-thumb-up')).toHaveAttribute('aria-pressed', 'true')
+    // Focus returns to the reaction button after the dialog closes.
+    expect(screen.getByTestId('response-thumb-up')).toHaveFocus()
   })
 
   it('more menu shows the response date and Retry/Fork/Share; Retry invokes the callback', () => {
