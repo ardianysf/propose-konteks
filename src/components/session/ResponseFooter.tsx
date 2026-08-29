@@ -66,6 +66,36 @@ function MoreIcon() {
   )
 }
 
+function RetryIcon() {
+  return (
+    <svg data-icon="retry" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+      <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M13.7 1.8v2.9h-2.9" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function ForkIcon() {
+  return (
+    <svg data-icon="fork" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+      <circle cx="4" cy="3.5" r="1.6" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <circle cx="12" cy="3.5" r="1.6" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <circle cx="8" cy="12.5" r="1.6" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M4 5.1v1.2c0 1 .8 1.8 1.8 1.8h4.4c1 0 1.8-.8 1.8-1.8V5.1M8 8.1v2.8" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function ShareIcon() {
+  return (
+    <svg data-icon="share" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+      <path d="M8 10.5V2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M5.2 5.1L8 2.3l2.8 2.8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3 9v3.6c0 .8.6 1.4 1.4 1.4h7.2c.8 0 1.4-.6 1.4-1.4V9" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 function formatResponseDate(iso: string): string {
   const date = new Date(iso)
   const day = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -201,6 +231,7 @@ export default function ResponseFooter({
                 onRetry?.()
               }}
             >
+              <RetryIcon />
               Retry
             </button>
             <button
@@ -209,6 +240,7 @@ export default function ResponseFooter({
               className="kx-response-footer__menu-item"
               onClick={() => setMenuOpen(false)}
             >
+              <ForkIcon />
               Fork
             </button>
             <button
@@ -217,6 +249,7 @@ export default function ResponseFooter({
               className="kx-response-footer__menu-item"
               onClick={() => setMenuOpen(false)}
             >
+              <ShareIcon />
               Share
             </button>
           </div>
