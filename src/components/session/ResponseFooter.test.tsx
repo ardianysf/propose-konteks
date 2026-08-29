@@ -140,6 +140,10 @@ describe('ResponseFooter', () => {
     expect(within(menu).getByRole('menuitem', { name: 'Retry' })).toBeInTheDocument()
     expect(within(menu).getByRole('menuitem', { name: 'Fork' })).toBeInTheDocument()
     expect(within(menu).getByRole('menuitem', { name: 'Share' })).toBeInTheDocument()
+    // Each menu item carries its icon (aria-hidden, so names stay text-only).
+    expect(within(menu).getByRole('menuitem', { name: 'Retry' }).querySelector('svg[data-icon="retry"]')).toBeInTheDocument()
+    expect(within(menu).getByRole('menuitem', { name: 'Fork' }).querySelector('svg[data-icon="fork"]')).toBeInTheDocument()
+    expect(within(menu).getByRole('menuitem', { name: 'Share' }).querySelector('svg[data-icon="share"]')).toBeInTheDocument()
 
     fireEvent.click(within(menu).getByRole('menuitem', { name: 'Retry' }))
     expect(onRetry).toHaveBeenCalledTimes(1)
