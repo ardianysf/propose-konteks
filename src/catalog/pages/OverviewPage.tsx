@@ -1,183 +1,129 @@
 /*
- * Overview — catalog landing page (T4 real content, spec §6 T4 + AC5/6).
- * Explains the dual-output repo, the classification system, how AI agents
- * consume components.json, and shows the mockup pages as composition
- * consumers of the catalogued components.
+ * Overview — the catalog hero spread ("Industrial Parts Catalog", comp A):
+ * a 38% identity column (brand, doc meta, 72px title, counter stack, intro,
+ * Source-First stamp), a domain index table, and a 26px ruler margin.
+ *
+ * Every number is computed at runtime: component and domain counts come from
+ * the manifest (components.json via manifest.ts), the token count from the
+ * typed token structures in tokens.ts, outputs is the dual-output contract.
  */
 import { entriesByDomain, manifestEntries } from '../manifest'
+import { TOKEN_GROUPS } from '../tokens'
 import { getPathnameFor, navigateTo } from '../router'
 
-const CLASSIFICATIONS: Array<{
-  id: string
-  label: string
-  meaning: string
-}> = [
-  {
-    id: 'adoptable',
-    label: 'Adoptable',
-    meaning:
-      'Presentational — copy the source file (plus its CSS) and use it. No MockupContext required, but an entry may still need a lightweight provider contract (e.g. WorkspaceMenu needs OverlayLifecycleProvider) — always check the entry\'s adoptionNotes.',
-  },
-  {
-    id: 'mockup-coupled',
-    label: 'Mockup-coupled',
-    meaning:
-      'State Y — the component reads a MockupContext slice and/or dispatches actions. Preview via the fixture pattern (real mockupReducer + controlled initial state); adopt by copying the reducer contract too.',
-  },
-  {
-    id: 'internal',
-    label: 'Internal',
-    meaning:
-      'Not meaningful outside the mockup app (route/page orchestrator). Catalogued with a reason, without an adoption detail page.',
-  },
-  {
-    id: 'utility',
-    label: 'Utility',
-    meaning:
-      'Pure .ts helper (adapter, formatter, hook). Manifest entry only — no live preview.',
-  },
+/** Dual-output repo: the mockup app + this catalog. */
+const OUTPUT_COUNT = 2
+
+/** How many sample part names to show before the ellipsis. */
+const MAX_SAMPLES = 4
+
+const componentCount = manifestEntries.length
+const domainGroups = entriesByDomain()
+const domainCount = domainGroups.length
+const tokenCount = TOKEN_GROUPS.reduce((sum, group) => sum + group.tokens.length, 0)
+
+const COUNTERS: Array<{ value: number; label: string }> = [
+  { value: componentCount, label: 'Components' },
+  { value: domainCount, label: 'Domains' },
+  { value: tokenCount, label: 'Tokens' },
+  { value: OUTPUT_COUNT, label: 'Outputs' },
 ]
 
-const counts = {
-  total: manifestEntries.length,
-  adoptable: manifestEntries.filter((e) => e.classification === 'adoptable').length,
-  coupled: manifestEntries.filter((e) => e.classification === 'mockup-coupled').length,
-  internal: manifestEntries.filter((e) => e.classification === 'internal').length,
-  utility: manifestEntries.filter((e) => e.classification === 'utility').length,
-}
+/** Domain index rows in components.json order (first appearance). */
+const INDEX_ROWS = domainGroups.map((group, index) => {
+  const samples = group.entries.slice(0, MAX_SAMPLES).map((entry) => entry.name)
+  if (group.entries.length > MAX_SAMPLES) samples.push('…')
+  return {
+    no: String(index + 1).padStart(2, '0'),
+    domain: group.domain,
+    samples: samples.join(' · '),
+    count: group.entries.length,
+  }
+})
 
-const domainGroups = entriesByDomain()
+function handleRowClick(e: React.MouseEvent<HTMLAnchorElement>) {
+  e.preventDefault()
+  navigateTo({ name: 'components' })
+}
 
 export function OverviewPage() {
   return (
-    <section className="kx-cat-page" aria-labelledby="kx-cat-overview-title">
-      <h1 id="kx-cat-overview-title" className="kx-cat-title">
-        Konteks Design System
-      </h1>
-      <p className="kx-cat-lede">
-        Referensi hidup untuk design system Konteks: token, komponen, kontrak
-        API, dan panduan adopsi — dioptimalkan untuk dikonsumsi AI agent lain
-        (source-first, bukan npm package).
-      </p>
-
-      <section aria-labelledby="kx-cat-dual-title" className="kx-cat-section">
-        <h2 id="kx-cat-dual-title">Dual-output repository</h2>
-        <p>
-          Satu codebase menghasilkan dua artefak: <strong>mockup clickable</strong>{' '}
-          (<code>index.html</code>) dan <strong>katalog referensi ini</strong> (
-          <code>catalog.html</code>). Katalog adalah <em>konsumer</em> komponen
-          produksi dari <code>src/components/</code> — live preview mengimpor
-          implementasi aslinya, tanpa salinan (single source of truth).
-        </p>
-        <p>
-          Cara pakai: navigasi via clean URL router (lihat nav di atas). Deep-link (
-          <code>/catalog/components/&lt;slug&gt;</code>), reload, dan back/forward
-          browser bekerja alami.
-        </p>
-      </section>
-
-      <section aria-labelledby="kx-cat-class-title" className="kx-cat-section">
-        <h2 id="kx-cat-class-title">Klasifikasi komponen</h2>
-        <p>
-          {counts.total} entri manifest: {counts.adoptable} adoptable,{' '}
-          {counts.coupled} mockup-coupled, {counts.internal} internal,{' '}
-          {counts.utility} utility.
-        </p>
-        <div className="kx-cat-card-grid">
-          {CLASSIFICATIONS.map((c) => (
-            <article key={c.id} className="kx-cat-card">
-              <h3>
-                <span className={`kx-cat-badge kx-cat-badge--${c.id}`}>{c.label}</span>
-              </h3>
-              <p>{c.meaning}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section aria-labelledby="kx-cat-ai-title" className="kx-cat-section">
-        <h2 id="kx-cat-ai-title">Cara AI memakai katalog ini</h2>
-        <ol className="kx-cat-steps">
-          <li>
-            Baca <code>src/catalog/components.json</code> — manifest
-            machine-readable: id, domain, <code>sourcePath</code>,{' '}
-            <code>exportName</code>, klasifikasi, <code>propDocs</code>,{' '}
-            <code>contextContract</code> (state yang dibaca + action yang
-            dikirim), <code>cssFiles</code>, dan <code>tokenDeps</code>.
-          </li>
-          <li>
-            Salin file sumber komponen beserta <code>cssFiles</code>-nya;
-            untuk komponen coupled, salin juga kontrak reducer
-            (<code>src/state/mockupReducer.ts</code>) yang dirujuk{' '}
-            <code>contextContract</code>.
-          </li>
-          <li>
-            Untuk preview/uji, pakai pola fixture{' '}
-            <code>MockupFixtureProvider</code>: reducer asli + initial state
-            terkontrol — bukan salinan implementasi.
-          </li>
-          <li>
-            Validasi struktur dengan <code>npm run verify:manifest</code>{' '}
-            (path, ekspor, nama prop, manifest↔registry 1:1).
-          </li>
-        </ol>
-      </section>
-
-      <section aria-labelledby="kx-cat-composition-title" className="kx-cat-section">
-        <h2 id="kx-cat-composition-title">Contoh komposisi</h2>
-        <p>
-          Tiga pages mockup (<code>src/pages/</code>: new-session,
-          session-history, session-detail) adalah konsumen komponen-komponen
-          ini. Ringkasan domain → komponen dari manifest:
-        </p>
-        <table className="kx-cat-table">
-          <thead>
-            <tr>
-              <th scope="col">Domain</th>
-              <th scope="col">Components</th>
-            </tr>
-          </thead>
-          <tbody>
-            {domainGroups.map((group) => (
-              <tr key={group.domain}>
-                <th scope="row">
-                  <code>{group.domain}</code>
-                </th>
-                <td>
-                  {group.entries.map((entry) => (
-                    <span key={entry.id} className="kx-cat-chip">
-                      {entry.name}
-                    </span>
-                  ))}
-                </td>
-              </tr>
+    <section
+      className="kx-cat-page kx-cat-hero"
+      aria-labelledby="kx-cat-overview-title"
+    >
+      <div className="kx-cat-hero-grid">
+        <aside className="kx-cat-hero-left">
+          <header>
+            <p id="kx-cat-overview-brand" className="kx-cat-brand">
+              Konteks{' '}
+              <span className="kx-cat-sep" aria-hidden="true" />
+              <span className="kx-cat-brand-ds">Design System</span>
+            </p>
+            <p className="kx-cat-docmeta">KX-CAT/2026-08 · REV A</p>
+          </header>
+          <h1 id="kx-cat-overview-title" className="kx-cat-hero-title kx-cat-title">
+            Component
+            <br />
+            Catalog
+          </h1>
+          <div className="kx-cat-counters">
+            {COUNTERS.map((counter) => (
+              <div key={counter.label} className="kx-cat-counter">
+                <div className="kx-cat-counter-big">{counter.value}</div>
+                <div className="kx-cat-counter-lbl">{counter.label}</div>
+              </div>
             ))}
-          </tbody>
-        </table>
-        <p>
-          Lihat{' '}
-          <a
-            href={getPathnameFor({ name: 'tokens' })}
-            onClick={(e) => {
-              e.preventDefault()
-              navigateTo({ name: 'tokens' })
-            }}
-          >
-            token live
-          </a>{' '}
-          dan{' '}
-          <a
-            href={getPathnameFor({ name: 'components' })}
-            onClick={(e) => {
-              e.preventDefault()
-              navigateTo({ name: 'components' })
-            }}
-          >
-            indeks komponen
-          </a>{' '}
-          untuk detailnya.
-        </p>
-      </section>
+          </div>
+          <p className="kx-cat-hero-intro">
+            A living parts book for the Konteks dual-output system. Every entry
+            renders the production component — source-first, never a wrapper.
+          </p>
+          <p className="kx-cat-stamp">Source-First</p>
+        </aside>
+
+        <section className="kx-cat-hero-right" aria-label="Domain index">
+          <div className="kx-cat-thead" aria-hidden="true">
+            <span className="kx-cat-cell-no">No.</span>
+            <span className="kx-cat-cell-dom">Domain</span>
+            <span className="kx-cat-cell-parts">Sample Parts</span>
+            <span className="kx-cat-cell-count">Count</span>
+          </div>
+          <div className="kx-cat-rows">
+            {INDEX_ROWS.map((row) => (
+              <a
+                key={row.domain}
+                className="kx-cat-row"
+                href={getPathnameFor({ name: 'components' })}
+                onClick={handleRowClick}
+              >
+                <span className="kx-cat-cell-no">{row.no}</span>
+                <span className="kx-cat-cell-dom">{row.domain}</span>
+                <span className="kx-cat-cell-parts">{row.samples}</span>
+                <span className="kx-cat-cell-count">{row.count}</span>
+              </a>
+            ))}
+          </div>
+          <p className="kx-cat-legend">
+            <span className="kx-cat-legend-label">Classification</span>
+            <span>Adoptable</span>
+            <span className="kx-cat-legend-sep" aria-hidden="true">
+              ·
+            </span>
+            <span>Mockup-coupled</span>
+            <span className="kx-cat-legend-sep" aria-hidden="true">
+              ·
+            </span>
+            <span>Utility</span>
+            <span className="kx-cat-legend-sep" aria-hidden="true">
+              ·
+            </span>
+            <span>Internal</span>
+          </p>
+        </section>
+
+        <div className="kx-cat-ruler" aria-hidden="true" />
+      </div>
     </section>
   )
 }

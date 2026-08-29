@@ -25,7 +25,7 @@ test.describe('catalog shell', () => {
     await gotoCatalog(page)
     await expect(page).toHaveTitle('Konteks Design System')
     await expect(
-      main(page).getByRole('heading', { name: 'Konteks Design System' }),
+      main(page).getByRole('heading', { name: 'Component Catalog' }),
     ).toBeVisible()
     await expect(nav(page).getByRole('link', { name: 'Overview' })).toHaveAttribute(
       'aria-current',

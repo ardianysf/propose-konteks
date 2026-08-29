@@ -171,7 +171,7 @@ describe('CatalogApp', () => {
 
     // Overview renders by default (/catalog path).
     expect(
-      screen.getByRole('heading', { name: 'Konteks Design System' }),
+      screen.getByRole('heading', { name: 'Component Catalog' }),
     ).toBeInTheDocument()
 
     // Nav reflects the active route.
