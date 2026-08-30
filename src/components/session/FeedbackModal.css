@@ -109,3 +109,17 @@
   gap: 8px;
   margin-top: 16px;
 }
+
+/* ── Narrow viewport (≤760px): the dialog must fit the phone viewport ─
+ * The shared .kx-modal shell centers with fixed top/left 50% + transform;
+ * on phones, cap the card to the dynamic viewport (dvh) so it never
+ * overflows the visible area, and let its content scroll if tall. The
+ * embedded catalog variant is inline content — excluded so its geometry
+ * stays untouched. */
+@media (max-width: 760px) {
+  .kx-feedback-modal:not(.kx-feedback-modal--embedded) {
+    width: min(420px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+}

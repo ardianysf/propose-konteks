@@ -235,7 +235,9 @@
 
 /* One-column composer top row on phones: setup pills stack above the mode
  * cluster, everything left-aligned in a clean vertical flow — no
- * space-between stretching and no orphaned overflow when pills wrap. */
+ * space-between stretching and no orphaned overflow when pills wrap.
+ * align-items: flex-start (column ⇒ left-align) keeps each wrapped row
+ * anchored to the shared left edge instead of stretching full-width. */
 .kx-panel {
   gap: 10px;
 }
@@ -243,14 +245,36 @@
 .kx-panel__top-row {
   flex-direction: column;
   flex-wrap: wrap;
-  align-items: stretch;
+  align-items: flex-start;
   justify-content: flex-start;
+  gap: 8px;
 }
 
 .kx-panel__setup-cluster,
 
 .kx-panel__mode-cluster {
   flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* Input toolbar — drop the desktop space-between so no wrapped row gets
+ * a hole punched mid-row: the Execution Profile pill stays inline with
+ * the attach/document icons in reading order (consistent 6px gaps), and
+ * the voice/send controls follow directly after instead of stranding a
+ * spread gap around the profile control. Pills keep their natural
+ * heights, top-aligned when rows wrap. */
+.kx-panel__toolbar {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.kx-panel__toolbar-left,
+.kx-panel__toolbar-right {
+  align-items: flex-start;
+  gap: 6px;
 }
 }
 
