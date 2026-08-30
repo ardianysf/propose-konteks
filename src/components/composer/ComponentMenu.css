@@ -191,3 +191,23 @@
   font-size: var(--kx-text-sm);
   color: var(--kx-muted-text-aa);
 }
+
+/* ── Mobile (≤760px) ───────────────────────────────────────────────
+ * The menu's mid-toolbar anchor (after the System pill) sits too far
+ * right on phones for a 320px dropdown — it would overflow the right
+ * edge. Re-anchor to the composer panel (nearest positioned ancestor
+ * once the trigger wrapper goes static) so the menu opens flush with
+ * the panel's left edge and caps at the viewport width. */
+@media (max-width: 760px) {
+  .kx-composer {
+    position: relative;
+  }
+
+  .kx-setup-row__component-anchor {
+    position: static;
+  }
+
+  .kx-component-menu {
+    max-width: calc(100vw - 32px);
+  }
+}

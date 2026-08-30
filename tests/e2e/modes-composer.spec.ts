@@ -75,7 +75,7 @@ test.describe('modes + composer', () => {
           return `${s.backgroundColor} ${s.color}`
         }),
       )
-      .toBe('rgb(149, 165, 71) rgb(79, 112, 68)') // --kx-accent-segment-aa #95A547 / --kx-accent-text-aa #4F7044
+      .toBe('rgb(79, 112, 68) rgb(255, 255, 255)') // --kx-accent-solid-aa #4F7044 fill / white text — AA 5.6:1 (replaced the 2.08:1 #95A547/#4F7044 pairing)
 
     // Switching moves the active styling to QA, then Planning.
     await page.getByRole('radio', { name: 'QA' }).click()
@@ -87,7 +87,7 @@ test.describe('modes + composer', () => {
           return `${s.backgroundColor} ${s.color}`
         }),
       )
-      .toBe('rgb(149, 165, 71) rgb(79, 112, 68)')
+      .toBe('rgb(79, 112, 68) rgb(255, 255, 255)')
 
     await page.getByRole('radio', { name: 'Planning' }).click()
     const planning = page.getByRole('radio', { name: 'Planning' })
@@ -98,7 +98,7 @@ test.describe('modes + composer', () => {
           return `${s.backgroundColor} ${s.color}`
         }),
       )
-      .toBe('rgb(149, 165, 71) rgb(79, 112, 68)')
+      .toBe('rgb(79, 112, 68) rgb(255, 255, 255)')
   })
 
   test('setup pills render as compact fully-rounded pills (999px radius, 12px side padding)', async ({ page }) => {

@@ -73,6 +73,16 @@
 
 @media (max-width: 760px) {
 
+/* Reading column goes full-width on phones: the 740px desktop cap (and its
+ * 64px side reserve) no longer binds the composer. The reading blocks keep
+ * their own 680px max-width cap, so only the composer area benefits from
+ * the extra width — it now spans the full main width with ~12px gutters
+ * (12px content padding + compensating -12px sticky margins). */
+.kx-session-detail__content {
+    width: 100%;
+    padding: 24px 12px 32px;
+  }
+
 .kx-session-detail__composer-area {
     bottom: 0;
     margin: 16px -12px 0;

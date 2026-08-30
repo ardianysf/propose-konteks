@@ -50,6 +50,7 @@ describe('initialState', () => {
     expect(state.demoVariant).toBe('ready')
     expect(state.overlay).toEqual({ kind: 'none' })
     expect(state.sidebarCollapsed).toBe(false)
+    expect(state.sidebarMobileOpen).toBe(false)
   })
 
   it('initializes systems from mock data with the default active system and profile', () => {
@@ -620,6 +621,35 @@ describe('TOGGLE_SIDEBAR', () => {
     state = mockupReducer(state, { type: 'TOGGLE_SIDEBAR' })
     expect(state.sidebarCollapsed).toBe(false)
   })
+
+  it('leaves the mobile drawer state untouched', () => {
+    let state = mockupReducer(freshState(), { type: 'TOGGLE_SIDEBAR' })
+    expect(state.sidebarMobileOpen).toBe(false)
+    state = mockupReducer(state, { type: 'TOGGLE_SIDEBAR_MOBILE' })
+    expect(state.sidebarMobileOpen).toBe(true)
+    state = mockupReducer(state, { type: 'TOGGLE_SIDEBAR' })
+    expect(state.sidebarCollapsed).toBe(false)
+    expect(state.sidebarMobileOpen).toBe(true)
+  })
+})
+
+describe('TOGGLE_SIDEBAR_MOBILE', () => {
+  it('opens and closes the mobile drawer, independent of the collapse state', () => {
+    let state = freshState()
+    expect(state.sidebarMobileOpen).toBe(false)
+    state = mockupReducer(state, { type: 'TOGGLE_SIDEBAR_MOBILE' })
+    expect(state.sidebarMobileOpen).toBe(true)
+    state = mockupReducer(state, { type: 'TOGGLE_SIDEBAR_MOBILE' })
+    expect(state.sidebarMobileOpen).toBe(false)
+    expect(state.sidebarCollapsed).toBe(false)
+  })
+
+  it('is payload-less and composes with a collapsed sidebar', () => {
+    let state = mockupReducer(freshState(), { type: 'TOGGLE_SIDEBAR' })
+    state = mockupReducer(state, { type: 'TOGGLE_SIDEBAR_MOBILE' })
+    expect(state.sidebarCollapsed).toBe(true)
+    expect(state.sidebarMobileOpen).toBe(true)
+  })
 })
 
 describe('SET_SEARCH', () => {
@@ -955,6 +985,7 @@ describe('immutability', () => {
       { type: 'CLEAR_COMPONENTS' },
       { type: 'SET_ACTIVE_PROFILE', profileId: 'profile-commerce-platform' },
       { type: 'TOGGLE_SIDEBAR' },
+      { type: 'TOGGLE_SIDEBAR_MOBILE' },
       { type: 'SET_SEARCH', list: 'sessions', value: 'edp' },
       // Session-context draft actions (composer correction) — the transient
       // draft edits and commits must also return new objects without mutating

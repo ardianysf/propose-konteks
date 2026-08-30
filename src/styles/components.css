@@ -233,7 +233,19 @@
 
 @media (max-width: 760px) {
 
-.kx-panel__top-row,
+/* One-column composer top row on phones: setup pills stack above the mode
+ * cluster, everything left-aligned in a clean vertical flow — no
+ * space-between stretching and no orphaned overflow when pills wrap. */
+.kx-panel {
+  gap: 10px;
+}
+
+.kx-panel__top-row {
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: flex-start;
+}
 
 .kx-panel__setup-cluster,
 
@@ -433,15 +445,13 @@
  * values in both themes: --kx-accent-text-aa resolves to #4f7044 (light) /
  * #1a231b (dark, via --kx-raised) — both AA on their #95a547 / #a8c883
  * fills, while --kx-primary would flip to a near-white in dark mode. */
+/* Active segment: solid accent fill (#4f7044) with white text — AA 5.6:1 in
+   both themes. The previous #95a547 fill with --kx-accent-text-aa text
+   shipped 2.08:1 and failed AA, so the fill token moved to accent-solid-aa. */
 .kx-segmented__btn--active,
 .kx-segmented__btn--active:hover {
-  background: var(--kx-accent-segment-aa);
-  color: var(--kx-accent-text-aa);
-}
-
-[data-theme='dark'] .kx-segmented__btn--active,
-[data-theme='dark'] .kx-segmented__btn--active:hover {
-  color: var(--kx-raised); /* dark ink #1a231b — AA on the #a8c883 fill */
+  background: var(--kx-accent-solid-aa);
+  color: #ffffff;
 }
 
 /* Session Mode cluster — uppercase caption above the segmented control,

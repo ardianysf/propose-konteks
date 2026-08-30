@@ -255,20 +255,17 @@ describe('New Session semantic layout (composer correction)', () => {
     )
   })
 
-  it('renders the active segment on the tokenized #95A547 pairing, with the dark override to #a8c883', () => {
+  it('renders the active segment on the tokenized solid-accent fill with white text', () => {
     const css = flat(components)
-    // Active segment fill + text ride the AA tokens in both themes: light
-    // resolves the fill to #95a547 with the #4f7044 AA text…
+    // Active segment rides --kx-accent-solid-aa (#4f7044, identical in both
+    // themes) with white text — AA 5.6:1; the earlier #95a547 fill with
+    // --kx-accent-text-aa text shipped 2.08:1 and was replaced.
     expect(css).toContain(
-      '.kx-segmented__btn--active, .kx-segmented__btn--active:hover { background: var(--kx-accent-segment-aa); color: var(--kx-accent-text-aa); }',
+      '.kx-segmented__btn--active, .kx-segmented__btn--active:hover { background: var(--kx-accent-solid-aa); color: #ffffff; }',
     )
-    // …while dark mode keeps the same token-driven fill (now #a8c883) and
-    // pins the dark --kx-raised ink on top.
-    expect(css).toContain(
-      "[data-theme='dark'] .kx-segmented__btn--active, [data-theme='dark'] .kx-segmented__btn--active:hover { color: var(--kx-raised);",
-    )
-    // The token carries the user-directed fill: #95a547 in light, with the
-    // dark block overriding to #a8c883.
+    // The segment fill token still carries the user-directed fill values:
+    // #95a547 in light, with the dark block overriding to #a8c883 (kept for
+    // any other consumer of the pale-active pattern).
     expect(tokens).toContain('--kx-accent-segment-aa: #95a547')
     const darkBlock = tokens.slice(tokens.indexOf("[data-theme='dark']"))
     expect(darkBlock).toContain('--kx-accent-segment-aa: #a8c883')

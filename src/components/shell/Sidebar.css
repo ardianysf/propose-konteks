@@ -537,17 +537,20 @@
   flex: 0 0 auto;
 }
 
-/* ── Forced rail at ≤1280px (Task 13, AC12/AC43/AC44) ────────────────
- * At ≤1280px the sidebar renders as the existing 64px icon rail regardless
- * of the stored collapse preference, reclaiming the extra 176px for the
- * main canvas. No reducer state is touched: crossing back above 1280px
- * restores the stored expanded/collapsed preference untouched. The
- * collapse toggle is display:none here because expansion is unavailable,
- * preventing an aria-state that contradicts the effective layout.
- * (The .kx-app grid track lives in AppShell.css; the anchored-menu rail
- *  anchoring lives in shared.css.) */
+/* ── Forced rail at 761–1280px (Task 13, AC12/AC43/AC44) ─────────────
+ * In the 761–1280px band the sidebar renders as the existing 64px icon
+ * rail regardless of the stored collapse preference, reclaiming the extra
+ * 176px for the main canvas. No reducer state is touched: crossing back
+ * above 1280px restores the stored expanded/collapsed preference
+ * untouched. The floor matters: below 760px the sidebar is the AppShell
+ * mobile reveal drawer and must render its EXPANDED look (see the
+ * ≤760px block at the end of this file). The collapse toggle is
+ * display:none here because expansion is unavailable, preventing an
+ * aria-state that contradicts the effective layout. (The .kx-app grid
+ * track lives in AppShell.css; the anchored-menu rail anchoring lives in
+ * shared.css.) */
 
-@media (max-width: 1280px) {
+@media (min-width: 761px) and (max-width: 1280px) {
 
   .kx-sidebar {
     width: var(--kx-sidebar-rail);
@@ -617,4 +620,92 @@
     display: none;
   }
 
+}
+
+/* ── Mobile drawer (≤760px) — expanded look, always ─────────────
+ * Below 760px the sidebar IS the AppShell reveal drawer (AppShell.css).
+ * It always renders the full expanded nav regardless of the stored
+ * collapse preference: the forced-rail contract above is scoped to
+ * 761–1280px, and the manual-rail (.kx-sidebar--rail) geometry and label
+ * hiding are undone here, since AppShell keeps applying the rail class
+ * from stored state. The internal collapse toggles stand down — opening
+ * and closing is the hamburger's job. */
+@media (max-width: 760px) {
+  /* Full expanded geometry, even when the rail class is present. */
+  .kx-sidebar {
+    width: var(--kx-sidebar-w);
+    min-width: var(--kx-sidebar-w);
+    padding: 14px 12px 10px;
+  }
+
+  .kx-sidebar--rail .kx-sidebar__logo {
+    width: auto;
+    justify-content: flex-start;
+  }
+
+  .kx-sidebar--rail .kx-sidebar__logo-img {
+    height: 26px;
+    width: auto;
+  }
+
+  .kx-sidebar--rail .kx-sidebar__control,
+  .kx-sidebar--rail .kx-sidebar__new-session {
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 9px 10px;
+  }
+
+  /* Undo the rail's label/content hiding with explicit base displays —
+   * display:revert would fall through to UA defaults, losing flex/grid. */
+  .kx-sidebar--rail .kx-sidebar__control-copy {
+    display: grid;
+  }
+
+  .kx-sidebar--rail .kx-sidebar__chevron {
+    display: block;
+  }
+
+  .kx-sidebar--rail .kx-sidebar__recent {
+    display: flex;
+  }
+
+  .kx-sidebar--rail .kx-sidebar__user-name,
+  .kx-sidebar--rail .kx-sidebar__new-session-label {
+    display: block;
+  }
+
+  /* User row returns to the horizontal expanded arrangement. */
+  .kx-sidebar--rail .kx-sidebar__user {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 4px;
+    padding: 10px 4px 2px;
+  }
+
+  .kx-sidebar--rail .kx-sidebar__customize {
+    order: 0;
+  }
+
+  .kx-sidebar--rail .kx-sidebar__user-trigger {
+    flex: 1;
+  }
+
+  /* When the stored state is collapsed, the rail renders the logo as the
+   * "Expand sidebar" button — on mobile the drawer is always expanded, so
+   * it degrades to a static brand mark (expand overlay hidden, inert to
+   * pointer). */
+  .kx-sidebar__logo--expand {
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .kx-sidebar__logo-expand-icon {
+    display: none;
+  }
+
+  /* Internal collapse toggle stands down — the hamburger owns open/close. */
+  .kx-sidebar__toggle {
+    display: none;
+  }
 }

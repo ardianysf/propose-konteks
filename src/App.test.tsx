@@ -20,8 +20,10 @@ it('frames the AppShell — one .kx-app grid with a single sidebar and one main 
   const app = container.querySelector('.kx-app')
   expect(app).not.toBeNull()
   expect(app).not.toHaveClass('kx-app--rail')
-  expect(app!.children[0]).toHaveClass('kx-sidebar')
-  expect(app!.children[1]).toHaveClass('kx-main')
+  // The fixed mobile hamburger precedes the sidebar in DOM order; the
+  // shell proper is still exactly one sidebar + one main region.
+  expect(container.querySelector('.kx-sidebar')).not.toBeNull()
+  expect(container.querySelector('.kx-app__mobile-toggle')).not.toBeNull()
   expect(container.querySelectorAll('.kx-sidebar')).toHaveLength(1)
   expect(container.querySelectorAll('main.kx-main')).toHaveLength(1)
 })
