@@ -73,6 +73,12 @@
   /* Single column — the grid track rules above stop applying. */
   .kx-app {
     display: block;
+    /* Track the DYNAMIC viewport: on mobile browsers whose address bar
+     * collapses, 100dvh is the actually-visible height, so the
+     * bottom-anchored composers keep their gap below the fold. The base
+     * rule's 100vh stays the desktop/fallback value; this override is
+     * scoped to the ≤760px block only. */
+    height: 100dvh;
   }
 
   /* Hamburger — fixed warm-enterprise chrome sitting above BOTH the main
