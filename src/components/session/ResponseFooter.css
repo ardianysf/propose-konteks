@@ -99,3 +99,20 @@
 .kx-response-footer:focus-within .kx-response-footer__stats {
   opacity: 1;
 }
+
+/* ── Narrow viewport (≤760px): keep the anchored menu on-screen ──────
+ * Desktop anchors the menu from the trigger's right edge (right: 0),
+ * which on phones swings the 180px menu past the LEFT viewport edge
+ * (the response footer sits at the far left under assistant bubbles).
+ * Anchor from the trigger's left edge instead so the menu opens to the
+ * right, inside the viewport, and clamp width/height so it can never
+ * overflow horizontally or run off the bottom (it scrolls if tall). */
+@media (max-width: 760px) {
+  .kx-response-footer__menu {
+    right: auto;
+    left: 0;
+    max-width: calc(100vw - 16px);
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
