@@ -158,6 +158,12 @@ export default function AccountMenu() {
         }
       }}
     >
+      {/* Mobile sheet chrome (≤760px): backdrop (tap closes), handle,
+          title. Desktop hides them; the body wrapper is display:contents. */}
+      <div className="kx-menu__sheet-backdrop" aria-hidden="true" onClick={dismissOverlay} />
+      <div className="kx-menu__sheet-handle" aria-hidden="true" />
+      <div className="kx-menu__sheet-title">Account</div>
+      <div className="kx-menu__sheet-body">
       {/* Theme preference — grouped section before the actions list, same
           divider + section-label pattern as the profile menu (AC24). The
           head row pairs the section label with the active preference name;
@@ -208,6 +214,7 @@ export default function AccountMenu() {
           {action.label}
         </button>
       ))}
+      </div>
     </div>
   )
 }

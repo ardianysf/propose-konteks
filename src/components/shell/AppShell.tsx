@@ -44,11 +44,13 @@ export default function AppShell() {
   }, [mobileOpen, dispatch])
 
   // The app classes compose independently: rail (collapse state),
-  // mobile-open (reveal drawer). Desktop styling ignores the latter.
+  // mobile-open (reveal drawer), sheet-open (a full-screen overlay like
+  // the Learned drawer hides the mobile chrome). Desktop ignores all.
   const appClassName = [
     'kx-app',
     state.sidebarCollapsed && 'kx-app--rail',
     mobileOpen && 'kx-app--mobile-open',
+    state.overlay.kind === 'learned' && 'kx-app--sheet-open',
   ]
     .filter(Boolean)
     .join(' ')

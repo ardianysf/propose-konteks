@@ -88,7 +88,10 @@ describe('SystemMenu', () => {
   it('pins the All systems row above the list in every state — search region, pinned row, scrolling list, sticky footer (§6.2)', () => {
     renderSystemMenu({ kind: 'system-menu' })
     const menu = getMenu()
-    const regions = Array.from(menu.children)
+    // The menu's layout children live inside the mobile sheet-body wrapper
+    // (backdrop/handle/title chrome precedes it — display:contents on
+    // desktop, so the wrapper is layout-neutral there).
+    const regions = Array.from(menu.querySelector('.kx-menu__sheet-body')!.children)
     expect(regions).toHaveLength(4)
     expect(regions[0]).toHaveClass('kx-system-menu__search')
     expect(regions[1]).toHaveClass('kx-system-menu__all')
@@ -184,7 +187,9 @@ describe('SystemMenu', () => {
     const create = within(menu).getByRole('menuitem', { name: /create new system/i })
     // The footer is a sibling of the scrolling list — it never scrolls away.
     expect(create.closest('.kx-system-menu__list')).toBeNull()
-    expect(create.closest('.kx-system-menu__footer')).toBe(menu.lastElementChild)
+    expect(create.closest('.kx-system-menu__footer')).toBe(
+      menu.querySelector('.kx-menu__sheet-body')!.lastElementChild,
+    )
 
     // Still mounted while the list is filtered empty.
     fireEvent.change(screen.getByRole('searchbox', { name: 'Search systems' }), {

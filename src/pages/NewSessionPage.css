@@ -152,6 +152,12 @@
  * goes edge-to-edge, and the composer's top-row groups wrap without
  * overflow. The ≤1280px sidebar rail rules further below are untouched. */
 @media (max-width: 760px) {
+  /* Planning mode drops its generic 'Start planning' heading here (the
+   * segmented control already names the mode); engineering/QA keep theirs. */
+  .kx-new-session__intro-heading--planning {
+    display: none;
+  }
+
   /* One-screen contract: at phone widths the whole page — header, intro,
    * reviews pill, composer, disclaimer — must fit inside the viewport
    * without scrolling the main canvas. The intro's auto margins collapse

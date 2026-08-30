@@ -306,3 +306,12 @@
   background: var(--kx-pale);
   border-color: var(--kx-accent-strong);
 }
+
+/* ── Mobile (≤760px): hover-only row actions don't translate ──────────
+ * The three-dot action is a hover/focus affordance; phones have no
+ * hover and the persistent reveal would clutter the row — hide it. */
+@media (max-width: 760px) {
+  .kx-history__action {
+    display: none;
+  }
+}

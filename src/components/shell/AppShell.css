@@ -114,6 +114,12 @@
     display: none;
   }
 
+  /* Full-screen overlay sheets (the Learned drawer) cover the mobile
+   * chrome too — the hamburger has nothing to reveal behind them. */
+  .kx-app--sheet-open .kx-app__mobile-toggle {
+    display: none;
+  }
+
   /* Tap-outside closer: a transparent fixed layer spanning the viewport,
    * BELOW the drawer (z 45 < 50) so the sidebar itself stays tappable,
    * but ABOVE the transformed main canvas — any tap outside the sidebar
