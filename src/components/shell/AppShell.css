@@ -50,3 +50,83 @@
     grid-template-columns: var(--kx-sidebar-rail) 1fr;
   }
 }
+
+/* ── Mobile reveal drawer (≤760px) ────────────────────────────────────
+ * The grid collapses to a single block column; the sidebar becomes a
+ * fixed off-canvas drawer revealed by transform (no scrim, no reflow).
+ * The main canvas never resizes — it only SHIFTS right by the sidebar
+ * width via transform while the drawer is open (user spec), so its
+ * dimensions and scrolling stay untouched. ≥761px sees none of this. */
+
+/* Scope guard: the hamburger is desktop-invisible. */
+.kx-app__mobile-toggle {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  /* Single column — the grid track rules above stop applying. */
+  .kx-app {
+    display: block;
+  }
+
+  /* Hamburger — fixed warm-enterprise chrome sitting above BOTH the main
+   * canvas and the drawer (z 60 > 50), so the same button toggles the
+   * drawer closed while it overlaps the open sidebar. */
+  .kx-app__mobile-toggle {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 60;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: var(--kx-raised);
+    border: 1px solid var(--kx-border);
+    border-radius: 14px;
+    color: var(--kx-secondary);
+    cursor: pointer;
+  }
+
+  .kx-app__mobile-toggle:hover,
+  .kx-app__mobile-toggle:focus-visible {
+    color: var(--kx-primary);
+  }
+
+  /* Sidebar → fixed off-canvas drawer. Off-canvas by default, slides in
+   * when .kx-app--mobile-open is set (see AppShell.tsx). */
+  .kx-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--kx-sidebar-w);
+    transform: translateX(-100%);
+    transition: transform 200ms ease-out;
+    z-index: 50;
+  }
+
+  .kx-app--mobile-open .kx-sidebar {
+    transform: translateX(0);
+  }
+
+  /* Main shifts, never resizes: transform-only push. As a block child it
+   * no longer stretches via the grid row, so give it the full height it
+   * had — its own overflow-y scrolling stays intact when closed. */
+  .kx-main {
+    height: 100%;
+    transition: transform 200ms ease-out;
+  }
+
+  .kx-app--mobile-open .kx-main {
+    transform: translateX(var(--kx-sidebar-w));
+  }
+}
+
+/* Reduced motion — the drawer snaps without sliding. */
+@media (prefers-reduced-motion: reduce) {
+  .kx-sidebar,
+  .kx-main {
+    transition: none;
+  }
+}

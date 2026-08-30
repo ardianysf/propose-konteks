@@ -249,3 +249,34 @@
   align-items: stretch;
   gap: 10px;
 }
+
+/* ── Mobile (≤760px) ─────────────────────────────────────────────
+ * The mid-toolbar anchor (after the attach/document buttons) sits too
+ * far right on phones for the 560px menu+sidecar cluster — it would
+ * overflow the viewport. Re-anchor the cluster to the input box
+ * (nearest positioned ancestor once the trigger wrapper goes static)
+ * and stack the sidecar below the main menu, everything capped to the
+ * viewport width with gutters. */
+@media (max-width: 760px) {
+  .kx-composer__input-box {
+    position: relative;
+  }
+
+  /* Two-class selector so the override wins over Composer.css's base
+   * `position: relative` regardless of stylesheet order. */
+  .kx-panel__toolbar-left .kx-composer__profile-anchor {
+    position: static;
+  }
+
+  .kx-profile-menu-cluster {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: calc(100vw - 48px);
+  }
+
+  .kx-profile-menu,
+
+  .kx-profile-menu__sidecar {
+    max-width: 100%;
+  }
+}

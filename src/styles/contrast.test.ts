@@ -317,7 +317,7 @@ function entries(): Entry[] {
     // a [data-theme='dark'] override switches it to dark --kx-raised ink on
     // the #a8c883 fill. Property is 'color' — the extractor keys each
     // selector to its single tracked-token line.
-    { file: COMPONENTS, selector: '.kx-segmented__btn--active:hover', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
+    { file: COMPONENTS, selector: '.kx-segmented__btn--active:hover', property: 'background', token: ACCENT_SOLID_AA, cls: 'S' as Class },
     // Account menu theme segmented buttons follow the sidebar-v2
     // hover-reveal pattern (see the shell batch above): muted icon at
     // rest (U), AA accent on hover and while active.
@@ -749,10 +749,11 @@ describe('candidate ratios against white/canvas/pale (AC9)', () => {
     expect(contrast('#ffffff', '#4f7044')).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('records the active segment --kx-accent-text-aa on #95a547 (shipped rule)', () => {
-    // The shipped rule uses --kx-accent-text-aa (#4f7044) text on
-    // the #95a547 active segment fill. The pairing is recorded as-is.
-    expect(contrast('#4f7044', '#95a547')).toBeCloseTo(2.076, 3)
+  it('records the active segment white text on --kx-accent-solid-aa (shipped rule)', () => {
+    // The shipped rule fills the active segment with --kx-accent-solid-aa
+    // (#4f7044) and sets white text — AA 5.6:1 in both themes. The previous
+    // --kx-accent-text-aa-on-#95a547 pairing shipped 2.076:1 and was replaced.
+    expect(contrast('#ffffff', '#4f7044')).toBeGreaterThanOrEqual(4.5)
   })
 
   it('reports the exact approved ratios for the durable appendix', () => {
@@ -762,7 +763,7 @@ describe('candidate ratios against white/canvas/pale (AC9)', () => {
     expect(contrast('#4f7044', '#ffffff')).toBeCloseTo(5.625, 3)
     expect(contrast('#4f7044', '#faf8ef')).toBeCloseTo(5.287, 3)
     expect(contrast('#4f7044', '#f4f8ee')).toBeCloseTo(5.225, 3)
-    expect(contrast('#4f7044', '#95a547')).toBeCloseTo(2.076, 3) // active segment --kx-accent-text-aa (shipped rule)
+    expect(contrast('#ffffff', '#4f7044')).toBeGreaterThanOrEqual(4.5) // active segment white on --kx-accent-solid-aa (shipped rule)
   })
 })
 
@@ -877,17 +878,17 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 174 consumers — 84 muted, 79 accent-strong, 4 accent-text-aa', () => {
+  it('covers exactly 174 consumers — 84 muted, 79 accent-strong, 3 accent-text-aa', () => {
     expect(inventory).toHaveLength(174)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(84)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(79)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(4)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(3)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
     expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(84)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(40)
-    expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(5)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(39)
+    expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(6)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(45)
   })
 

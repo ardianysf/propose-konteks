@@ -9,7 +9,7 @@
  * backdrop (§6.2). The new-session page (Task 5) and the Session
  * History page (Task 11) render here, swapped by the route.
  */
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import Sidebar from './Sidebar'
 import SystemMenu from './SystemMenu'
 import WorkspaceMenu from './WorkspaceMenu'
@@ -30,6 +30,28 @@ import './AppShell.css'
 
 export default function AppShell() {
   const { state, dispatch } = useMockup()
+  const mobileOpen = state.sidebarMobileOpen
+
+  // Escape closes the mobile reveal drawer while it is open. Window-level
+  // listener so it works wherever focus sits; mounted only while open.
+  useEffect(() => {
+    if (!mobileOpen) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') dispatch({ type: 'TOGGLE_SIDEBAR_MOBILE' })
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [mobileOpen, dispatch])
+
+  // The app classes compose independently: rail (collapse state),
+  // mobile-open (reveal drawer). Desktop styling ignores the latter.
+  const appClassName = [
+    'kx-app',
+    state.sidebarCollapsed && 'kx-app--rail',
+    mobileOpen && 'kx-app--mobile-open',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   // The repository-sourced Create System modal nests above the still-
   // mounted (suspended) repository selector instead of replacing it.
@@ -41,7 +63,28 @@ export default function AppShell() {
 
   return (
     <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
-      <div className={state.sidebarCollapsed ? 'kx-app kx-app--rail' : 'kx-app'}>
+      <div className={appClassName}>
+        {/* Hamburger — mobile-only chrome (≤760px per AppShell.css; hidden
+            on desktop). aria-expanded mirrors the reveal drawer; the icon
+            is a decorative 3-line glyph (aria-hidden). */}
+        <button
+          type="button"
+          className="kx-app__mobile-toggle"
+          aria-label="Toggle sidebar"
+          aria-expanded={mobileOpen}
+          data-testid="mobile-sidebar-toggle"
+          onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR_MOBILE' })}
+        >
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+            <path
+              d="M2 4h12M2 8h12M2 12h12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
         <Sidebar />
         <main className="kx-main">
           {/* Route switch — the new-session page (Task 5), the dedicated

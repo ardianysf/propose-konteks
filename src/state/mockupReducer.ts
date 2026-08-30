@@ -88,6 +88,8 @@ export interface SessionContext {
 export interface MockupState {
   route: MockupRoute
   sidebarCollapsed: boolean
+  /** Mobile (≤760px) reveal drawer — independent of the collapse state. */
+  sidebarMobileOpen: boolean
   sessionMode: SessionMode
   systems: System[]
   activeSystemId: string
@@ -120,6 +122,7 @@ export type MockupAction =
   | { type: 'SET_CUSTOMIZE_TAB'; tab: CustomizeTab }
   | { type: 'SET_ACTIVE_PROFILE'; profileId: string }
   | { type: 'TOGGLE_SIDEBAR' }
+  | { type: 'TOGGLE_SIDEBAR_MOBILE' }
   | { type: 'SET_SEARCH'; list: SearchList; value: string }
   | { type: 'SESSION_APPROVE_QUOTE'; quoteId: string }
   | { type: 'SESSION_REJECT_QUOTE'; quoteId: string; reason: string }
@@ -142,6 +145,7 @@ export function initialState(search: string = ''): MockupState {
   return {
     route: 'new-session',
     sidebarCollapsed: false,
+    sidebarMobileOpen: false,
     sessionMode: 'engineering',
     systems: SYSTEMS.map((system) => ({ ...system, repoIds: [...system.repoIds] })),
     activeSystemId: DEFAULT_ACTIVE_SYSTEM_ID,
@@ -330,6 +334,12 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
 
     case 'TOGGLE_SIDEBAR': {
       return { ...state, sidebarCollapsed: !state.sidebarCollapsed }
+    }
+
+    // Payload-less mobile drawer toggle — independent of the desktop
+    // collapse preference (the reveal drawer is CSS-transform driven).
+    case 'TOGGLE_SIDEBAR_MOBILE': {
+      return { ...state, sidebarMobileOpen: !state.sidebarMobileOpen }
     }
 
     case 'SET_SEARCH': {
