@@ -1046,3 +1046,54 @@
 /* ── Responsive: narrow viewport ≤760px ───────────────────────────
  * Timeline bubbles full-ish width, cards reduced padding, composer static. */
 
+
+/* ── Mobile sheet chrome for anchored menus (≤760px) ──────────────────
+ * Account/System/Workspace menus open as bottom sheets on phones: a dark
+ * backdrop (tap dismisses via the menu's own overlay lifecycle), a drag
+ * handle, and a caps title. The body wrapper keeps the sheet content
+ * above the backdrop. Desktop never shows any of this. */
+.kx-menu__sheet-backdrop,
+.kx-menu__sheet-handle,
+.kx-menu__sheet-title {
+  display: none;
+}
+
+.kx-menu__sheet-body {
+  display: contents;
+}
+
+@media (max-width: 760px) {
+  .kx-menu__sheet-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgb(var(--kx-ink-rgb) / 0.44);
+    z-index: 0;
+  }
+
+  .kx-menu__sheet-handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--kx-border);
+    margin: 8px auto 6px;
+  }
+
+  .kx-menu__sheet-title {
+    display: block;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--kx-secondary);
+    margin: 0 0 6px;
+  }
+
+  .kx-menu__sheet-body {
+    display: block;
+    position: relative;
+    z-index: 1;
+  }
+}

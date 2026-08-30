@@ -22,13 +22,23 @@
  * own max-height scrolling. Placed after the base rule so it wins the
  * same-specificity tie at mobile widths. ≥761px is untouched. */
 @media (max-width: 760px) {
+  /* Bottom sheet — same pattern as the account menu: full-width sheet
+   * from the viewport bottom, capped height, safe-area padding. */
   .kx-system-menu {
     position: fixed;
-    top: 64px;
-    left: 12px;
-    right: auto;
-    width: min(320px, calc(100vw - 24px));
-    max-width: calc(100vw - 24px);
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
+    border-radius: 14px 14px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    max-height: min(80dvh, 640px);
+    overflow-y: auto;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     z-index: 70;
   }
 }

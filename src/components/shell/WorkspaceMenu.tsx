@@ -22,6 +22,13 @@ export default function WorkspaceMenu() {
       aria-label="Workspace"
       className="kx-menu kx-workspace-menu"
     >
+      {/* Mobile sheet chrome (≤760px): dark backdrop (tap closes via the
+          overlay lifecycle), drag handle, and a caps title. Desktop hides
+          all three and the body wrapper is display:contents. */}
+      <div className="kx-menu__sheet-backdrop" aria-hidden="true" onClick={dismissOverlay} />
+      <div className="kx-menu__sheet-handle" aria-hidden="true" />
+      <div className="kx-menu__sheet-title">Workspace</div>
+      <div className="kx-menu__sheet-body">
       {/* The current workspace — illustrative row, marked selected.
           Clicking keeps it current and just closes the menu. */}
       <button
@@ -39,6 +46,7 @@ export default function WorkspaceMenu() {
           <span className="kx-workspace-menu__item-plan">{WORKSPACE.plan}</span>
         </span>
       </button>
+      </div>
     </div>
   )
 }

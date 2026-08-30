@@ -90,6 +90,12 @@ export default function SystemMenu() {
 
   return (
     <div role="menu" aria-label="Systems" className="kx-menu kx-system-menu">
+      {/* Mobile sheet chrome (≤760px): backdrop (tap closes), handle,
+          title. Desktop hides them; the body wrapper is display:contents. */}
+      <div className="kx-menu__sheet-backdrop" aria-hidden="true" onClick={dismissOverlay} />
+      <div className="kx-menu__sheet-handle" aria-hidden="true" />
+      <div className="kx-menu__sheet-title">System</div>
+      <div className="kx-menu__sheet-body">
       {/* Labeled search — filters through the store's systems search slot. */}
       <div className="kx-system-menu__search">
         <input
@@ -183,6 +189,7 @@ export default function SystemMenu() {
           <PlusIcon />
           <span className="kx-system-menu__create-label">Create new system</span>
         </button>
+      </div>
       </div>
     </div>
   )
