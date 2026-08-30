@@ -29,7 +29,6 @@ export default function NewSessionPage() {
   const { beginOverlayChain } = useOverlayLifecycle()
   const engineering = state.sessionMode === 'engineering'
   const qa = state.sessionMode === 'qa'
-  const planning = !engineering && !qa
   const pendingCount = PENDING_REVIEWS.length
   const introHeading = engineering
     ? 'What would you like to build?'
@@ -69,14 +68,7 @@ export default function NewSessionPage() {
             alt=""
             aria-hidden="true"
           />
-          {/* Planning mode drops its generic heading on mobile (the
-              segmented control already names the mode); engineering/QA
-              keep theirs. See the ≤760px block in NewSessionPage.css. */}
-          <h2
-            className={`kx-new-session__intro-heading${
-              planning ? ' kx-new-session__intro-heading--planning' : ''
-            }`}
-          >
+          <h2 className="kx-new-session__intro-heading">
             {introHeading}
           </h2>
           <p className="kx-new-session__intro-body">

@@ -25,7 +25,6 @@ export default function WorkspaceMenu() {
       {/* Mobile sheet chrome (≤760px): dark backdrop (tap closes via the
           overlay lifecycle), drag handle, and a caps title. Desktop hides
           all three and the body wrapper is display:contents. */}
-      <div className="kx-menu__sheet-backdrop" aria-hidden="true" onClick={dismissOverlay} />
       <div className="kx-menu__sheet-handle" aria-hidden="true" />
       <div className="kx-menu__sheet-title">Workspace</div>
       <div className="kx-menu__sheet-body">

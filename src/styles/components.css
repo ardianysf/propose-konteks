@@ -1068,7 +1068,9 @@
     position: fixed;
     inset: 0;
     background: rgb(var(--kx-ink-rgb) / 0.44);
-    z-index: 0;
+    /* Between the page content and the sheets: above the shifted canvas
+     * and the sidebar drawer, below the bottom-sheet menus (z 70). */
+    z-index: 65;
   }
 
   .kx-menu__sheet-handle {
@@ -1092,8 +1094,10 @@
   }
 
   .kx-menu__sheet-body {
-    display: block;
+    display: flex;
+    flex-direction: column;
     position: relative;
     z-index: 1;
+    min-height: 0;
   }
 }

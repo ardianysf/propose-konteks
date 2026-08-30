@@ -717,3 +717,12 @@
     display: none;
   }
 }
+
+/* ── Mobile (≤760px): hover tooltips stand down ───────────────────────
+ * Recent-session title tooltips are hover/focus reveals; phones have no
+ * hover and the drawer's cramped rows make them misfire — hide them. */
+@media (max-width: 760px) {
+  .kx-sidebar .kx-tooltip {
+    display: none;
+  }
+}

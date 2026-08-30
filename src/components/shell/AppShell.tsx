@@ -102,6 +102,22 @@ export default function AppShell() {
             onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR_MOBILE' })}
           />
         )}
+        {/* Mobile menu-sheet backdrop (≤760px): a dark layer BETWEEN the
+            page content and the bottom-sheet menus (account/system/
+            workspace) — fixed, below the sheets (z 65 < 70), above the
+            shifted canvas and the sidebar drawer. Tapping it dismisses
+            the menu through the same overlay contract as Escape. Never
+            rendered on desktop (no trigger mounts there without the
+            hamburger, and the CSS hides it anyway). */}
+        {(state.overlay.kind === 'account-menu' ||
+          state.overlay.kind === 'system-menu' ||
+          state.overlay.kind === 'workspace-menu') && (
+          <div
+            className="kx-menu__sheet-backdrop"
+            aria-hidden="true"
+            onClick={() => dispatch({ type: 'CLOSE_OVERLAY' })}
+          />
+        )}
         <Sidebar />
         <main className="kx-main">
           {/* Route switch — the new-session page (Task 5), the dedicated

@@ -160,7 +160,6 @@ export default function AccountMenu() {
     >
       {/* Mobile sheet chrome (≤760px): backdrop (tap closes), handle,
           title. Desktop hides them; the body wrapper is display:contents. */}
-      <div className="kx-menu__sheet-backdrop" aria-hidden="true" onClick={dismissOverlay} />
       <div className="kx-menu__sheet-handle" aria-hidden="true" />
       <div className="kx-menu__sheet-title">Account</div>
       <div className="kx-menu__sheet-body">

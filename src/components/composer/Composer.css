@@ -181,4 +181,10 @@
 .kx-composer__input {
   min-height: 60px;
 }
+
+/* The send button drops its 'Start planning' label on phones — icon-only
+ * (the aria-label carries the action). */
+.kx-composer__send-label {
+  display: none;
+}
 }
