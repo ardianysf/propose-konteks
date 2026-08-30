@@ -247,3 +247,27 @@
   font-size: var(--kx-text-sm);
   color: var(--kx-muted-text-aa);
 }
+
+/* ── Mobile (≤760px): the drawer is a full-screen sheet (see the shared
+ * .kx-drawer rule in components.css), so the fixed desktop paddings clamp
+ * down and inner blocks never exceed the sheet width. min-width: 0 (base
+ * rules on __panel/__copy) keeps long copy wrapping instead of pushing
+ * the sheet wider. ≥761px untouched. */
+@media (max-width: 760px) {
+  .kx-learned__head {
+    padding: 12px 16px;
+  }
+
+  .kx-learned__nav {
+    flex-wrap: wrap;
+    padding: 10px 16px;
+  }
+
+  .kx-learned__content {
+    padding: 14px 16px;
+  }
+
+  .kx-learned__panel {
+    max-width: 100%;
+  }
+}

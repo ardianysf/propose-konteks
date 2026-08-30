@@ -116,25 +116,34 @@
 }
 }
 
-/* ── Mobile (≤760px): open as a card over the main area ───────────────
+/* ── Mobile (≤760px): open as a bottom sheet ──────────────────────────
  * On phones the sidebar is the off-canvas reveal drawer, so the desktop
  * "right of the sidebar, near the bottom user row" anchoring is
- * meaningless. The menu instead opens as a fixed card near the top of
- * the viewport (same 64px top line as the workspace/system menus),
- * ABOVE the drawer (z 70 > 50) so it reads as floating over the main
- * area, sized to never overflow the viewport. bottom flips to auto so
- * the top+bottom pair cannot stretch the card. Placed after the base
- * and rail rules so it wins the same-specificity tie at mobile widths.
- * ≥761px is untouched. */
+ * meaningless. The menu instead opens as a full-width bottom sheet
+ * pinned to the viewport's bottom edge: rounded top corners only (the
+ * base .kx-menu frame's 14px radius + hairline border are kept on the
+ * top edge; side/bottom borders drop so the sheet reads as anchored to
+ * the screen), height-capped at min(80dvh, 640px) with the menu body
+ * scrolling internally, and safe-area padding at the foot for home-
+ * indicator phones. ABOVE every overlay (z 70 > 61) and the reveal
+ * drawer (50). Placed after the base and rail rules so it wins the
+ * same-specificity tie at mobile widths. ≥761px is untouched. */
 @media (max-width: 760px) {
   .kx-account-menu {
     position: fixed;
-    top: 64px;
-    bottom: auto;
-    left: 12px;
-    right: auto;
-    width: min(320px, calc(100vw - 24px));
-    max-width: calc(100vw - 24px);
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
+    border-radius: 14px 14px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    max-height: min(80dvh, 640px);
+    overflow-y: auto;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     z-index: 70;
   }
 }
