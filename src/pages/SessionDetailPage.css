@@ -92,19 +92,29 @@
  * 64px side reserve) no longer binds the composer. The reading blocks keep
  * their own 680px max-width cap, so only the composer area benefits from
  * the extra width — it now spans the full main width with ~12px gutters
- * (12px content padding + compensating -12px sticky margins). */
+ * (12px content padding + compensating -12px sticky margins).
+ * The 64px top padding drops the first content block (quote card) below
+ * the floating fixed menu row (hamburger top-left at (12,12) 40×40, share
+ * top-right) since the header band is height 0 on phones. */
 .kx-session-detail__content {
     width: 100%;
-    padding: 24px 12px 0;
+    padding: 64px 12px 0;
   }
 
 .kx-session-detail__composer-area {
     bottom: 0;
-    margin: auto -12px 0;
-    padding: 8px 12px 12px;
+    /* 8px bottom margin = the visible gap between the composer card and
+     * the viewport bottom; the sticky anchor (bottom: 0) pins the MARGIN
+     * box, so pinning still works with long content. */
+    margin: auto -12px 8px;
+    padding: 8px 12px 8px;
   }
 
 .kx-session-detail__composer-area::before {
-    bottom: -12px;
+    /* With the 8px bottom margin lifting the area off the viewport edge,
+     * no bleed below is needed (and the page clips overflow anyway):
+     * bottom: 0 keeps the paint strictly inside the element box so the
+     * margin gap shows the plain canvas — no phantom scroll. */
+    bottom: 0;
   }
 }

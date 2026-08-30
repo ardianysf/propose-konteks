@@ -155,10 +155,12 @@
   /* One-screen contract: at phone widths the whole page — header, intro,
    * reviews pill, composer, disclaimer — must fit inside the viewport
    * without scrolling the main canvas. The intro's auto margins collapse
-   * to fixed headroom so nothing flexes taller than its content. */
+   * to fixed headroom so nothing flexes taller than its content. The
+   * bottom padding drops to 8px: that IS the breathing room below the
+   * composer (the disclaimer renders above it, see below). */
   .kx-new-session {
     /* Fixed px — zoom-invariant like the base rhythm. */
-    padding: 16px 16px 20px;
+    padding: 16px 16px 8px;
     gap: 14px;
   }
 
@@ -218,15 +220,26 @@
     margin-bottom: 8px;
   }
 
-  /* Composer — pinned to the bottom of the one-screen layout. */
+  /* Composer — pinned to the bottom of the one-screen layout. order: 2
+   * lifts the disclaimer (natural order 0, DOM-before the composer) to
+   * render directly ABOVE the composer on phones: the disclaimer would
+   * otherwise push the composer ~21px off the viewport bottom (8px page
+   * padding + 8px margin + one ~13px text line), breaking the ≥8px /
+   * ≤18px bottom-gap contract. DOM order is untouched — only paint order
+   * in this flex column changes. */
   .kx-new-session__content .kx-composer {
     flex-shrink: 0;
     margin-top: 0;
+    order: 2;
   }
 
+  /* Compact disclaimer strip above the composer: one ~13px line
+   * (10px/1.3) with an 8px margin-top — never the thing that tips the
+   * page past the viewport. */
   .kx-new-session__disclaimer {
-    margin-top: 10px;
-    font-size: var(--kx-text-xs);
+    margin: 8px 0 0;
+    font-size: var(--kx-text-xs); /* 10px */
+    line-height: 1.3;
   }
 
 }
