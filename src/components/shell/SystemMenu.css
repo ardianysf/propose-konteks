@@ -30,8 +30,11 @@
     bottom: 0;
     left: 0;
     right: 0;
-    width: auto;
-    max-width: none;
+    /* Hard full-width: 100vw beats any inherited base width (the desktop
+     * card is 300px) and stretches with the phone's dynamic viewport. */
+    width: 100vw;
+    max-width: 100vw;
+    box-sizing: border-box;
     border-radius: 14px 14px 0 0;
     border-left: none;
     border-right: none;
