@@ -378,7 +378,7 @@ export default function Composer() {
               onClick={send}
             >
               <SendIcon />
-              {planning && <span>Start planning</span>}
+              {planning && <span className="kx-composer__send-label">Start planning</span>}
             </button>
           </div>
         </div>

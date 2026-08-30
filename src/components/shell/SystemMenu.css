@@ -257,3 +257,13 @@
   background: var(--kx-pale);
   border-color: var(--kx-accent-strong);
 }
+
+/* ── Mobile (≤760px): the per-row map action stays visible ────────────
+ * Desktop reveals the map button on row hover/focus; phones have no
+ * hover, and the system map must stay reachable from the bottom sheet.
+ * Placed AFTER the base/reveal rules so source order wins the tie. */
+@media (max-width: 760px) {
+  .kx-system-menu__item-wrap .kx-system-menu__map-btn {
+    opacity: 1;
+  }
+}

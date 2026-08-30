@@ -92,7 +92,6 @@ export default function SystemMenu() {
     <div role="menu" aria-label="Systems" className="kx-menu kx-system-menu">
       {/* Mobile sheet chrome (≤760px): backdrop (tap closes), handle,
           title. Desktop hides them; the body wrapper is display:contents. */}
-      <div className="kx-menu__sheet-backdrop" aria-hidden="true" onClick={dismissOverlay} />
       <div className="kx-menu__sheet-handle" aria-hidden="true" />
       <div className="kx-menu__sheet-title">System</div>
       <div className="kx-menu__sheet-body">
