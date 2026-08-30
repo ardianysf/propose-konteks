@@ -85,6 +85,21 @@ export default function AppShell() {
             />
           </svg>
         </button>
+        {/* Mobile drawer scrim — mounted ONLY while the reveal drawer is
+            open (sidebarMobileOpen), so the desktop DOM never contains it.
+            ≤760px it becomes a transparent fixed layer (AppShell.css) that
+            sits below the drawer (z 45 < 50) but above the shifted main
+            canvas: any tap outside the sidebar closes the drawer. Above
+            760px it would be display:none anyway, but it is never even
+            rendered there — the hamburger that opens the drawer is
+            desktop-hidden and no other control sets the state. */}
+        {mobileOpen && (
+          <div
+            className="kx-app__mobile-scrim"
+            aria-hidden="true"
+            onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR_MOBILE' })}
+          />
+        )}
         <Sidebar />
         <main className="kx-main">
           {/* Route switch — the new-session page (Task 5), the dedicated

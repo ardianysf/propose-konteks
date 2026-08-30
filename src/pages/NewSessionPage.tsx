@@ -44,13 +44,18 @@ export default function NewSessionPage() {
           control lives in the persistent shell sidebar (top-right of the
           brand row; hover/focus the rail logo to expand), not here. */}
       <header className="kx-new-session__header" data-testid="new-session-header">
-        <div className="kx-new-session__header-copy">
-          <h1 className="kx-new-session__title">New session</h1>
-          <p className="kx-new-session__subtitle">
+        {/* Mobile (≤760px): the copy hides behind the shared sr-only
+            utility (global.css scopes it to mobile) so the header band
+            collapses while the h1/subtitle stay in the a11y tree. The
+            utility sits on the wrapper AND the leaves so each element is
+            individually sr-only. */}
+        <div className="kx-new-session__header-copy kx-u-sr-only">
+          <h1 className="kx-new-session__title kx-u-sr-only">New session</h1>
+          <p className="kx-new-session__subtitle kx-u-sr-only">
             Start governed work with the right mode and context.
           </p>
         </div>
-        <p className="kx-new-session__approval">Human approval required for proposals</p>
+        <p className="kx-new-session__approval kx-u-sr-only">Human approval required for proposals</p>
       </header>
 
       {/* Bounded content region — everything below the header band. */}

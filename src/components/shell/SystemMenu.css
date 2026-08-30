@@ -12,6 +12,27 @@
   padding: 8px;
 }
 
+/* ── Mobile (≤760px): open as a card over the main area ───────────────
+ * On phones the sidebar is the off-canvas reveal drawer, so the desktop
+ * "right of the sidebar" anchoring (top 118px under the sidebar control)
+ * is meaningless. The menu instead opens as a fixed card near the top of
+ * the viewport (same 64px top line as the workspace/account menus),
+ * ABOVE the drawer (z 70 > 50) so it reads as floating over the main
+ * area, sized to never overflow the viewport. The inner list keeps its
+ * own max-height scrolling. Placed after the base rule so it wins the
+ * same-specificity tie at mobile widths. ≥761px is untouched. */
+@media (max-width: 760px) {
+  .kx-system-menu {
+    position: fixed;
+    top: 64px;
+    left: 12px;
+    right: auto;
+    width: min(320px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    z-index: 70;
+  }
+}
+
 /* Labeled search region (§6.2) */
 
 .kx-system-menu__search {

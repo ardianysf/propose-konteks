@@ -115,3 +115,26 @@
   left: calc(var(--kx-sidebar-rail) + 12px);
 }
 }
+
+/* ── Mobile (≤760px): open as a card over the main area ───────────────
+ * On phones the sidebar is the off-canvas reveal drawer, so the desktop
+ * "right of the sidebar, near the bottom user row" anchoring is
+ * meaningless. The menu instead opens as a fixed card near the top of
+ * the viewport (same 64px top line as the workspace/system menus),
+ * ABOVE the drawer (z 70 > 50) so it reads as floating over the main
+ * area, sized to never overflow the viewport. bottom flips to auto so
+ * the top+bottom pair cannot stretch the card. Placed after the base
+ * and rail rules so it wins the same-specificity tie at mobile widths.
+ * ≥761px is untouched. */
+@media (max-width: 760px) {
+  .kx-account-menu {
+    position: fixed;
+    top: 64px;
+    bottom: auto;
+    left: 12px;
+    right: auto;
+    width: min(320px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    z-index: 70;
+  }
+}

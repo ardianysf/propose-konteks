@@ -71,3 +71,23 @@
   font-size: var(--kx-text-sm);
   color: var(--kx-muted-text-aa);
 }
+
+/* ── Mobile (≤760px): open as a card over the main area ───────────────
+ * On phones the sidebar is the off-canvas reveal drawer, so the desktop
+ * "right of the sidebar" anchoring is meaningless. The menu instead
+ * opens as a fixed card near the top of the viewport, ABOVE the drawer
+ * (z 70 > 50) so it reads as floating over the main area, and sized to
+ * never overflow the viewport. Placed after the base rules in this file
+ * so it wins the same-specificity tie at mobile widths. ≥761px is
+ * untouched (shared.css anchoring keeps applying there). */
+@media (max-width: 760px) {
+  .kx-workspace-menu {
+    position: fixed;
+    top: 64px;
+    left: 12px;
+    right: auto;
+    width: min(320px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    z-index: 70;
+  }
+}
