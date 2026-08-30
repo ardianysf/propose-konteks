@@ -42,7 +42,7 @@ Compact-height (short desktop) rules, all scoped with the `min-width: 761px` gua
 - `Escape` closes the drawer (window-level listener mounted only while open, `AppShell.tsx`).
 - Reducer state: `sidebarMobileOpen: boolean` + `TOGGLE_SIDEBAR_MOBILE` (`src/state/mockupReducer.ts`, initial value `false`). The scrim element is conditionally rendered only while open; `.kx-app--mobile-open` also guards it in CSS.
 - `prefers-reduced-motion` removes the drawer/main slide transitions.
-- The mobile drawer always renders expanded nav: `Sidebar.css` undoes `.kx-sidebar--rail` geometry below 760px (labels, chevrons, recent list, horizontal user row restored), and the internal collapse toggles and logo expand affordance stand down — the hamburger owns open/close.
+- The mobile drawer always renders expanded nav: `Sidebar.css` undoes `.kx-sidebar--rail` geometry below 760px (labels, chevrons, recent list, horizontal user row restored), and the internal collapse toggles and logo expand affordance stand down — the hamburger owns open/close. While a full-screen overlay sheet is open (`kx-app--sheet-open`, currently the Learned drawer), the hamburger hides too.
 
 ## Page headers (≤760px)
 
@@ -74,8 +74,7 @@ Page composition:
 
 | Overlay | Mobile form | Source |
 |---------|-------------|--------|
-| Workspace / System menus | Fixed cards: `top: 64px; left: 12px`, `width: min(320px, calc(100vw - 24px))`, `z-index: 70` | `WorkspaceMenu.css`, `SystemMenu.css` |
-| Account menu (profile/theme) | Bottom sheet: fixed `bottom: 0`, full width, `border-radius: 14px 14px 0 0`, `max-height: min(80dvh, 640px)`, `padding-bottom: calc(12px + env(safe-area-inset-bottom))`, `z-index: 70`; Light/Dark/System theme radios inside | `AccountMenu.css` |
+| Workspace / System / Account menus | Bottom sheets (shared pattern): fixed `bottom: 0`, full width, `border-radius: 14px 14px 0 0`, `max-height: min(80dvh, 640px)`, `padding-bottom: calc(12px + env(safe-area-inset-bottom))`, `z-index: 70`. Sheet chrome inside each menu root: dark backdrop `rgb(var(--kx-ink-rgb) / 0.44)` (tap dismisses via the overlay lifecycle), drag handle (36×4), caps title — `.kx-menu__sheet-*` classes, desktop `display: none` with a `display: contents` body wrapper (`components.css`) | `WorkspaceMenu.css`, `SystemMenu.css`, `AccountMenu.css`, `components.css` |
 | Konteks Learned drawer | Full-screen sheet: `.kx-drawer` gets `width: 100vw`; internal paddings clamp (`12px 16px` head, `max-width: 100%` panels) | `components.css`, `LearnedDrawer.css` |
 | Response footer more-menu | Left-anchored (`left: 0`), `max-width: calc(100vw - 16px)`, `max-height: 60vh`, scrolls | `ResponseFooter.css` |
 | Feedback modal | `width: min(420px, calc(100vw - 24px))`, `max-height: calc(100dvh - 24px)`, scrolls (embedded variant excluded) | `FeedbackModal.css` |
