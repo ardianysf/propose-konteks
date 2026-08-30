@@ -63,6 +63,12 @@
   display: none;
 }
 
+/* Scope guard: the drawer scrim (rendered only while sidebarMobileOpen,
+ * see AppShell.tsx) is desktop-invisible too. */
+.kx-app__mobile-scrim {
+  display: none;
+}
+
 @media (max-width: 760px) {
   /* Single column — the grid track rules above stop applying. */
   .kx-app {
@@ -93,6 +99,28 @@
   .kx-app__mobile-toggle:hover,
   .kx-app__mobile-toggle:focus-visible {
     color: var(--kx-primary);
+  }
+
+  /* Drawer open: the hamburger would overlap the drawer and duplicate the
+   * close affordance — hide it. The scrim below and Escape take over
+   * closing while the drawer is open. */
+  .kx-app--mobile-open .kx-app__mobile-toggle {
+    display: none;
+  }
+
+  /* Tap-outside closer: a transparent fixed layer spanning the viewport,
+   * BELOW the drawer (z 45 < 50) so the sidebar itself stays tappable,
+   * but ABOVE the transformed main canvas — any tap outside the sidebar
+   * hits the scrim, closes the drawer, and the main transform reverts.
+   * The div exists only while .kx-app--mobile-open is set (conditional
+   * render in AppShell.tsx); the class guard keeps that contract in CSS
+   * too. */
+  .kx-app--mobile-open .kx-app__mobile-scrim {
+    display: block; /* beat the desktop display:none scope guard */
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    background: transparent;
   }
 
   /* Sidebar → fixed off-canvas drawer. Off-canvas by default, slides in

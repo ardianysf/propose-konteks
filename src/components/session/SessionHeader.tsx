@@ -43,7 +43,10 @@ export default function SessionHeader() {
           (mode · system · component). The status badge is intentionally not
           here — it lives above the composer in the sticky composer area. */}
       <div className="kx-session-detail__head-main">
-        <h1 className="kx-session-detail__title">{sessionDetail.title}</h1>
+        {/* ≤760px the title hides behind the shared sr-only utility
+            (global.css scopes it to mobile); the Share button stays
+            visible and the desktop header renders unchanged. */}
+        <h1 className="kx-session-detail__title kx-u-sr-only">{sessionDetail.title}</h1>
         <button
           type="button"
           className="kx-icon-btn kx-session-detail__share"
@@ -59,7 +62,7 @@ export default function SessionHeader() {
       {/* Context row: session context metadata (mode · system · component,
           read-only, stored on sessionDetail — option B). The row wraps
           cleanly on narrow viewports. */}
-      <p className="kx-session-detail__context" data-testid="session-context">
+      <p className="kx-session-detail__context kx-u-sr-only" data-testid="session-context">
         <span className="kx-session-detail__context-items">
           <span>{getModeLabel(sessionDetail.mode)}</span>
           <span aria-hidden="true">·</span>
