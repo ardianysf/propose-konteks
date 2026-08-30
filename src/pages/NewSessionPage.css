@@ -177,24 +177,51 @@
     margin-left: 0;
   }
 
-  /* Intro — compressed vertical rhythm: fixed headroom, tighter internal
-   * gap, and a shortened illustration so the composer stays above the
-   * fold (image hiding is the last resort; not needed at 390×844). */
+  /* One-screen composition: the content column fills the space between
+   * the (sr-only) header and the viewport bottom, the intro becomes its
+   * vertical center, and the composer anchors to the bottom. */
+  .kx-new-session__content {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* Intro — the vertical center: flex-grow absorbs all free height so
+   * heading/image/body sit midway between the hamburger and the composer.
+   * Fixed margin (no auto) — the auto-margin free-space handoff below is
+   * dropped so flex-grow, not an auto margin, owns the slack. */
   .kx-new-session__intro {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: 8px;
-    margin: 12px auto 20px;
+    margin: 0;
   }
 
   .kx-new-session__intro-img {
     max-height: 84px;
   }
 
-  .kx-new-session__content {
-    width: 100%;
+  .kx-new-session__intro-body {
+    max-width: 340px;
   }
 
   .kx-new-session__reviews {
+    /* margin-top: 0 — the base auto margin would steal the free space
+     * from the intro's flex-grow (auto margins win over flex-grow),
+     * breaking the centering; the intro owns all slack instead. */
+    margin-top: 0;
     margin-bottom: 8px;
+  }
+
+  /* Composer — pinned to the bottom of the one-screen layout. */
+  .kx-new-session__content .kx-composer {
+    flex-shrink: 0;
+    margin-top: 0;
   }
 
   .kx-new-session__disclaimer {

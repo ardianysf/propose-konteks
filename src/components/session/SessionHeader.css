@@ -61,11 +61,23 @@
 }
 
 @media (max-width: 760px) {
-  /* Header keeps its own compact padding — it is independent from both the
-     full-width page (no horizontal page padding) and the sticky composer. */
-.kx-session-detail__head {
-    padding: 10px 16px;
-    flex-wrap: wrap;
-    row-gap: 8px;
+  /* Mobile: the band collapses entirely — no sticky chrome, no background,
+     no border, zero height (title/context stay sr-only inside). Share
+     floats as fixed warm chrome mirroring the hamburger (top/left 12),
+     above the content but below nothing it must not overlap (the drawer
+     z 50 / hamburger z 60 keep their own stacking; 65 > content z 1). */
+  .kx-session-detail__head {
+    position: static;
+    height: 0;
+    padding: 0;
+    background: transparent;
+    border-bottom: none;
+  }
+
+  .kx-session-detail__share {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 65;
   }
 }

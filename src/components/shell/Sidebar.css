@@ -45,6 +45,14 @@
   width: auto;
 }
 
+/* Dark theme — the dark wordmark/rail icon is unreadable on the dark
+ * sidebar canvas; repaint it as a white monochrome mark (user-approved).
+ * One rule covers both the expanded wordmark and the rail icon (both use
+ * .kx-sidebar__logo-img). Light theme is unchanged. */
+[data-theme='dark'] .kx-sidebar__logo-img {
+  filter: brightness(0) invert(1);
+}
+
 /* Sidebar minimize control — top-right of the brand row, visible only
  * while the sidebar is expanded (the rail swaps to the logo maximize
  * affordance below). The shared .kx-icon-btn geometry applies. */
