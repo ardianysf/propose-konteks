@@ -3,17 +3,28 @@
  * Migrated from src/styles/components.css (T5b session batch). */
 
 .kx-session-detail {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   min-height: 100%;
+  /* Clip the composer-area's ::before bottom bleed (bottom: -12/-16px):
+   * with the area flush at the viewport bottom (short content) the bleed
+   * would otherwise create a phantom ~12-16px scroll. Sticky pinning is
+   * computed against .kx-main (the scrollport), so it is unaffected. */
+  overflow: clip;
 }
 
 .kx-session-detail__content {
   display: flex;
   flex-direction: column;
+  flex: 1;
   gap: 20px;
   width: min(740px, calc(100% - 64px));
   margin: 0 auto;
-  padding: 24px 0 32px;
+  /* No bottom padding: the composer area is the flex-column tail, so it
+   * sits flush at the viewport bottom when content is short; when long,
+   * the sticky composer covers the scroll end anyway. */
+  padding: 24px 0 0;
 }
 
 .kx-session-detail__blocks {
@@ -55,7 +66,11 @@
   position: sticky;
   bottom: 0;
   z-index: 10;
-  margin: 24px -16px 0;
+  /* margin-top:auto anchors the composer to the bottom of the flex
+   * column when the content is shorter than the viewport; with long
+   * content the auto margin collapses to 0 and sticky bottom keeps it
+   * pinned during scroll. */
+  margin: auto -16px 0;
   padding: 8px 16px 16px;
   background: var(--kx-canvas);
 }
@@ -80,12 +95,12 @@
  * (12px content padding + compensating -12px sticky margins). */
 .kx-session-detail__content {
     width: 100%;
-    padding: 24px 12px 32px;
+    padding: 24px 12px 0;
   }
 
 .kx-session-detail__composer-area {
     bottom: 0;
-    margin: 16px -12px 0;
+    margin: auto -12px 0;
     padding: 8px 12px 12px;
   }
 
