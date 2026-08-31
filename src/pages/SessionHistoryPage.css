@@ -315,3 +315,12 @@
     display: none;
   }
 }
+
+/* ── Mobile (≤760px): the page title clears the floating menu row ──────
+ * The session-history title starts below the hamburger (12,12, 40×40)
+ * instead of colliding with it, mirroring the session detail page. */
+@media (max-width: 760px) {
+  .kx-history {
+    padding-top: 64px;
+  }
+}

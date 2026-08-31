@@ -393,6 +393,19 @@
   background: var(--kx-raised);
   border-left: 1px solid var(--kx-border);
   box-shadow: -16px 0 48px rgb(var(--kx-ink-rgb) / 0.18);
+  /* Enter by sliding from the right edge — on every width. The drawer
+   * mounts only while open, so a mount animation plays the reveal. */
+  animation: kx-drawer-in 260ms ease-out;
+}
+
+@keyframes kx-drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: none;
+  }
 }
 
 /* ── Drawer on phones (≤760px): full-screen sheet ────────────────────

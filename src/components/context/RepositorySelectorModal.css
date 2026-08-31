@@ -316,3 +316,36 @@
   font-size: var(--kx-text-sm);
   color: var(--kx-muted-text-aa);
 }
+
+/* ── Mobile (≤760px): stacks instead of clipping ───────────────────────
+ * The toolbar and footer lose their single-row contract on phones — they
+ * stack vertically with full-width controls — and the groups region can
+ * scroll horizontally so wide repository rows never clip. */
+@media (max-width: 760px) {
+  .kx-repo-modal__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .kx-repo-modal__groups {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .kx-repo-modal__footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .kx-repo-modal__actions {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .kx-repo-modal__actions .kx-btn {
+    flex: 1;
+  }
+}
