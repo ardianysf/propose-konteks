@@ -1,0 +1,1392 @@
+/*
+ * v2.css — the /v2 navigation surface.
+ *
+ * Every V2-specific rule is namespaced under .kx-v2-* (the shell root
+ * carries .kx-v2-root alongside the shared frame classes). Colors come
+ * exclusively from --kx-* tokens; motion is restrained (140ms ease-out
+ * interactive states, 240ms drawer, no entrance/scroll effects) and is
+ * fully disabled under prefers-reduced-motion. The reused anchored
+ * menus keep their own sheets — the only overrides here are scoped
+ * desktop (≥761px) geometry fixes so they align under the V2 context
+ * block; their mobile bottom-sheet behavior is untouched.
+ */
+
+/* ── Sidebar frame ──────────────────────────────────────────────────── */
+
+.kx-v2-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--kx-sidebar-w);
+  min-width: var(--kx-sidebar-w);
+  padding: 12px 12px 10px;
+  background: var(--kx-sidebar-bg);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.kx-v2-sidebar--rail {
+  width: var(--kx-sidebar-rail);
+  min-width: var(--kx-sidebar-rail);
+  padding: 12px 8px 10px;
+}
+
+/* Shared quiet icon-button — ghost at rest, soft fill on hover/focus. */
+.kx-v2-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--kx-muted);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-v2-iconbtn:hover,
+.kx-v2-iconbtn:focus-visible {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-iconbtn:active {
+  transform: translateY(1px);
+}
+
+/* ── 1 · Brand row ──────────────────────────────────────────────────── */
+
+.kx-v2-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  height: 36px;
+  margin-bottom: 14px;
+  padding: 0 2px;
+}
+
+.kx-v2-brand__img {
+  height: 24px;
+  width: auto;
+}
+
+.kx-v2-brand__img--wordmark {
+  height: 24px;
+}
+
+/* Square mark — default-hidden in the expanded sidebar (the wordmark
+ * carries the brand); the forced-rail band swaps visibility. */
+.kx-v2-brand__img--square {
+  display: none;
+  height: 32px;
+  width: 32px;
+}
+
+/* Dark theme — repaint the wordmark/rail icon as a white monochrome
+ * mark, same convention as the production sidebar. */
+[data-theme='dark'] .kx-v2-brand__img {
+  filter: brightness(0) invert(1);
+}
+
+.kx-v2-brand__collapse {
+  flex-shrink: 0;
+}
+
+/* Rail: the brand area becomes the expand trigger — the resting Konteks
+ * icon is swapped for an expand chevron on hover/focus (no layout
+ * shift: the img stays in flow under the overlaying icon layer). */
+.kx-v2-brand__expand {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.kx-v2-brand__expand-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kx-secondary);
+  background: transparent;
+  opacity: 0;
+  border-radius: inherit;
+  transition:
+    opacity 140ms ease-out,
+    background-color 140ms ease-out;
+}
+
+.kx-v2-brand__expand:hover,
+.kx-v2-brand__expand:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-v2-brand__expand:hover .kx-v2-brand__expand-icon,
+.kx-v2-brand__expand:focus-visible .kx-v2-brand__expand-icon {
+  opacity: 1;
+}
+
+.kx-v2-brand__expand:active .kx-v2-brand__expand-icon {
+  transform: translateY(1px);
+}
+
+/* ── 2 · Context block (workspace → system hierarchy) ───────────────── */
+
+.kx-v2-context {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.kx-v2-context__workspace,
+.kx-v2-context__system {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+/* Workspace — the primary row. */
+.kx-v2-context__workspace {
+  min-height: 44px;
+}
+
+.kx-v2-context__workspace:hover,
+.kx-v2-context__workspace:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-v2-context__workspace:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-context__workspace-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+/* System — clearly secondary: indented beneath the workspace label,
+ * quieter type, and a persistent repo count. */
+.kx-v2-context__system {
+  min-height: 36px;
+  margin-top: 2px;
+  /* 40px = workspace avatar (30px) + row gap (10px) — the system copy
+   * aligns under the workspace name, not the avatar. */
+  padding-left: 40px;
+}
+
+.kx-v2-context__system:hover,
+.kx-v2-context__system:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-v2-context__system:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-context__system-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: -30px; /* pulls the icon back to the shared left axis */
+  border-radius: 6px;
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-v2-context__system-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.kx-v2-context__system-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+}
+
+.kx-v2-context__system-count {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-normal);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-chevron {
+  flex-shrink: 0;
+  color: var(--kx-muted);
+}
+
+/* Shared avatar chip. */
+.kx-v2-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+}
+
+/* ── 3 · Primary action — New session ───────────────────────────────── */
+
+.kx-v2-new-session {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--kx-accent-solid-aa);
+  color: var(--kx-accent-solid-ink);
+  font-family: inherit;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-medium);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.kx-v2-new-session:hover,
+.kx-v2-new-session:focus-visible {
+  background: var(--kx-accent-strong);
+}
+
+.kx-v2-new-session:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-new-session__icon {
+  display: inline-flex;
+}
+
+.kx-v2-new-session__label {
+  white-space: nowrap;
+}
+
+/* ── 4 · Recent sessions ────────────────────────────────────────────── */
+
+.kx-v2-recent {
+  margin-top: 16px;
+  min-height: 0;
+}
+
+.kx-v2-recent__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 8px;
+  margin-bottom: 6px;
+}
+
+.kx-v2-recent__label {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-recent__view-all {
+  padding: 2px 4px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+  transition:
+    color 140ms ease-out,
+    background-color 140ms ease-out;
+}
+
+.kx-v2-recent__view-all:hover,
+.kx-v2-recent__view-all:focus-visible {
+  color: var(--kx-accent-strong);
+  background: var(--kx-pale);
+  text-decoration: underline;
+}
+
+.kx-v2-recent__view-all:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-recent__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Rows are static — no hover/click affordance (the reducer has no
+ * select-session navigation); only the pin is interactive. */
+.kx-v2-recent__item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.kx-v2-recent__row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.kx-v2-recent__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+.kx-v2-recent__pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--kx-muted-text-aa);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 140ms ease-out,
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-v2-recent__item:hover .kx-v2-recent__pin,
+.kx-v2-recent__item:focus-within .kx-v2-recent__pin,
+.kx-v2-recent__pin[aria-pressed='true'] {
+  opacity: 1;
+}
+
+.kx-v2-recent__pin:hover,
+.kx-v2-recent__pin:focus-visible {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-recent__pin:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-recent__pin[aria-pressed='true'] {
+  color: var(--kx-accent-text-aa);
+}
+
+/* Persistent secondary line — replaces the old hover-reveal metadata. */
+.kx-v2-recent__meta {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-normal);
+  color: var(--kx-muted-text-aa);
+}
+
+/* ── 5 · Footer cluster ─────────────────────────────────────────────── */
+
+.kx-v2-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--kx-border);
+}
+
+/* Inline theme segmented control — wired to src/theme.ts. */
+.kx-v2-theme {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 2px;
+  margin-bottom: 8px;
+  padding: 3px;
+  border: 1px solid var(--kx-border);
+  border-radius: 10px;
+}
+
+/* In-menu variant (account popover): the track stretches full width
+ * and the three segments share it equally. */
+.kx-v2-theme--menu {
+  align-self: stretch;
+  margin-bottom: 2px;
+}
+
+.kx-v2-theme--menu .kx-v2-theme__btn {
+  flex: 1;
+}
+
+.kx-v2-theme__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--kx-muted-text-aa);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-v2-theme__btn:hover,
+.kx-v2-theme__btn:focus-visible {
+  color: var(--kx-primary);
+}
+
+.kx-v2-theme__btn:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-theme__btn[aria-pressed='true'] {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+/* Account row — opens the reused account menu. */
+.kx-v2-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-v2-account:hover,
+.kx-v2-account:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-v2-account:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-account__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+/* ── Rail mode (manual collapse ≥1281px) ──────────────────────────
+ * The forced 761–1280px band below re-applies the same presentation
+ * without the reducer class. */
+
+.kx-v2-sidebar--rail .kx-v2-brand {
+  justify-content: center;
+  padding: 0;
+}
+
+/* Context trigger collapses to the bare 28px mark. */
+.kx-v2-sidebar--rail .kx-v2-context {
+  align-items: center;
+  width: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+}
+
+.kx-v2-sidebar--rail .kx-v2-context__copy {
+  display: none;
+}
+
+.kx-v2-sidebar--rail .kx-v2-recent {
+  display: none;
+}
+
+.kx-v2-sidebar--rail .kx-v2-new-session {
+  padding: 0;
+}
+
+.kx-v2-sidebar--rail .kx-v2-new-session__label {
+  display: none;
+}
+
+.kx-v2-sidebar--rail .kx-v2-navitem {
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+}
+
+.kx-v2-sidebar--rail .kx-v2-navitem__label {
+  display: none;
+}
+
+.kx-v2-sidebar--rail .kx-v2-footer {
+  align-items: center;
+}
+
+.kx-v2-sidebar--rail .kx-v2-account {
+  width: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  justify-content: center;
+}
+
+.kx-v2-sidebar--rail .kx-v2-account__name,
+.kx-v2-sidebar--rail .kx-v2-account > svg {
+  display: none;
+}
+
+/* ── Forced rail band 761–1280px ──────────────────────────────────
+ * Same presentation as the manual rail, applied without the reducer
+ * class: the sidebar squeezes to the icon rail and the collapse control
+ * disappears (the band is not user-collapsible; the main grid's rail
+ * track comes from AppShell.css's ≤1280px rule). The square brand mark
+ * replaces the wordmark, which cannot survive 64px. */
+@media (min-width: 761px) and (max-width: 1280px) {
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) {
+    width: var(--kx-sidebar-rail);
+    min-width: var(--kx-sidebar-rail);
+    padding: 12px 8px 10px;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-brand {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-brand__collapse {
+    display: none;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-brand__img--wordmark {
+    display: none;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-brand__img--square {
+    display: inline-block;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-context {
+    align-items: center;
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-context__copy {
+    display: none;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-recent {
+    display: none;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-new-session {
+    padding: 0;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-new-session__label {
+    display: none;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-navitem {
+    width: 40px;
+    min-width: 40px;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-navitem__label {
+    display: none;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-footer {
+    align-items: center;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-account {
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-account__name,
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-account > svg {
+    display: none;
+  }
+}
+
+/* ── Mobile ≤760px — off-canvas drawer ──────────────────────────────── */
+
+/* The reused frame classes (hamburger, scrim, sheet-backdrop) come from
+ * AppShell.css / components.css; only the V2 drawer itself is styled
+ * here. The scrim gains a real ink tint + 180ms fade. */
+.kx-v2-root .kx-app__mobile-scrim {
+  background: rgb(var(--kx-ink-rgb) / 0.32);
+}
+
+@media (max-width: 760px) {
+  .kx-v2-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--kx-sidebar-w);
+    min-width: var(--kx-sidebar-w);
+    transform: translateX(-100%);
+    transition: transform 240ms ease-out;
+    z-index: 50;
+  }
+
+  .kx-app--mobile-open .kx-v2-sidebar {
+    transform: translateX(0);
+  }
+
+  .kx-v2-root .kx-app__mobile-scrim {
+    animation: kx-v2-scrim-fade 180ms ease-out;
+  }
+
+  /* Touch targets ≥40px inside the drawer. */
+  .kx-v2-iconbtn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .kx-v2-context__system {
+    min-height: 40px;
+  }
+
+  .kx-v2-new-session {
+    min-height: 44px;
+  }
+
+  .kx-v2-theme__btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* No hover on touch — keep the pin reachable and visible. */
+  .kx-v2-recent__pin {
+    width: 40px;
+    height: 40px;
+    opacity: 1;
+  }
+}
+
+@keyframes kx-v2-scrim-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Overlay geometry overrides (desktop ≥761px only) ──────────────────
+ * The reused menus anchor right of the sidebar with tops tuned for the
+ * old layout (62px workspace / 118px system). The V2 context block puts
+ * the workspace row at y=62 and the system row at y=108 (expanded) or
+ * y=106 (rail), so the menus re-align under them. Scoped to ≥761px so
+ * the mobile bottom-sheet rules in the menus' own CSS stay in charge. */
+@media (min-width: 761px) {
+  .kx-v2-root .kx-workspace-menu {
+    top: 72px;
+  }
+
+  .kx-v2-root .kx-system-menu {
+    top: 118px;
+  }
+
+  .kx-v2-root.kx-app--rail .kx-workspace-menu {
+    top: 72px;
+  }
+
+  .kx-v2-root.kx-app--rail .kx-system-menu {
+    top: 116px;
+  }
+}
+
+/* ── v2 clean pass — one context trigger + quiet nav + popovers ────────
+ * The redesign collapses the old two-row context switcher into ONE
+ * trigger (mark + system/plan copy) that opens V2ContextPopover, adds a
+ * quiet "Sessions" nav row, and moves Customize/catalog into the new
+ * V2AccountPopover. The old rules above that still match (.kx-v2-context,
+ * .kx-v2-context__system) are overridden here; rules for removed nodes
+ * (workspace/system rows, footer rows) are dead but harmless. */
+
+/* 2 · Context trigger — ONE row: 28px mark + name/plan copy. */
+.kx-v2-context {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.kx-v2-context:hover {
+  background: var(--kx-pale);
+}
+
+.kx-v2-context:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-v2-context:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-context__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+}
+
+.kx-v2-context__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* The old __system rules styled a secondary BUTTON; __system is now the
+ * active system's NAME span inside __copy — reset the row chrome and
+ * apply the copy typography. */
+.kx-v2-context__system {
+  display: block;
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  cursor: inherit;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: var(--kx-font-medium);
+  line-height: 1.35;
+  color: var(--kx-primary);
+}
+
+.kx-v2-context__system:hover,
+.kx-v2-context__system:focus-visible {
+  background: transparent;
+}
+
+.kx-v2-context__system:active {
+  transform: none;
+}
+
+.kx-v2-context__plan {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-normal);
+  color: var(--kx-muted-text-aa);
+}
+
+/* 4 · Sessions — quiet nav row (active = tint + medium weight). */
+.kx-v2-navitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 38px;
+  margin-top: 8px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.kx-v2-navitem:hover {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-navitem:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-v2-navitem:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-navitem--active {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-navitem__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--kx-muted);
+}
+
+.kx-v2-navitem:hover .kx-v2-navitem__icon,
+.kx-v2-navitem:focus-visible .kx-v2-navitem__icon,
+.kx-v2-navitem--active .kx-v2-navitem__icon {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-v2-navitem__label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+}
+
+.kx-v2-navitem:hover .kx-v2-navitem__label,
+.kx-v2-navitem:focus-visible .kx-v2-navitem__label,
+.kx-v2-navitem--active .kx-v2-navitem__label {
+  color: var(--kx-primary);
+}
+
+/* Active-route emphasis on the primary action. */
+.kx-v2-new-session--active {
+  background: var(--kx-accent-strong);
+}
+
+/* Rail: the trigger collapses to the bare 28px mark (consolidated in
+ * the rail section above). */
+
+/* ── Popovers (V2ContextPopover / V2AccountPopover) ────────────────────
+ * One panel system, two contents. The wrapper is static; the fixed scrim
+ * and the panel position themselves against the .kx-app grid root
+ * (position: relative). Desktop ≥761px: panel anchored right of the
+ * sidebar (left 76px in rail), account panel anchored near the footer.
+ * ≤760px: full-width bottom sheet sliding over the drawer. Popovers mount
+ * inside .kx-v2-root, so the reduced-motion kill-switch below already
+ * covers every transition/animation added here. */
+
+.kx-v2-pop__panel {
+  position: absolute;
+  left: 332px;
+  top: 56px;
+  z-index: 61;
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  max-height: calc(100vh - 76px);
+  padding: 10px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgb(var(--kx-ink-rgb) / 0.12);
+}
+
+.kx-v2-pop__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgb(var(--kx-ink-rgb) / 0.4);
+  animation: kx-v2-pop-fade 180ms ease-out;
+}
+
+/* Bottom-sheet drag affordance — mobile only. */
+.kx-v2-pop__handle {
+  display: none;
+  flex-shrink: 0;
+  width: 36px;
+  height: 4px;
+  margin: 2px auto 8px;
+  border-radius: 999px;
+  background: var(--kx-border);
+}
+
+.kx-v2-pop__label {
+  margin: 6px 4px 4px;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-pop__divider {
+  height: 1px;
+  margin: 8px 0;
+  background: var(--kx-border);
+}
+
+.kx-v2-pop__search {
+  min-height: 36px;
+  margin-bottom: 6px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+  font-family: inherit;
+  font-size: var(--kx-text-md);
+}
+
+.kx-v2-pop__search::placeholder {
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-pop__search:focus-visible {
+  outline: none;
+  border-color: var(--kx-accent-text-aa);
+}
+
+.kx-v2-pop__all {
+  margin: 0 4px 4px;
+  font-size: var(--kx-text-md);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-pop__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-v2-pop__list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.kx-v2-pop__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.kx-v2-pop__list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--kx-border);
+}
+
+.kx-v2-pop__list::-webkit-scrollbar-thumb:hover {
+  background: var(--kx-muted);
+}
+
+/* Workspace identity row. */
+.kx-v2-pop__workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 140ms ease-out;
+}
+
+.kx-v2-pop__workspace:hover,
+.kx-v2-pop__workspace:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-v2-pop__workspace:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-v2-pop__workspace:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-pop__workspace--selected {
+  background: var(--kx-pale);
+}
+
+.kx-v2-pop__workspace-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+.kx-v2-pop__workspace-plan {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-normal);
+  color: var(--kx-muted-text-aa);
+}
+
+/* System rows — main select + quiet map button (revealed on
+ * row hover / focus-within). */
+.kx-v2-pop__system-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kx-v2-pop__system {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.kx-v2-pop__system:hover,
+.kx-v2-pop__system:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-v2-pop__system:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-v2-pop__system:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-pop__system--active {
+  background: var(--kx-pale);
+}
+
+.kx-v2-pop__system-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--kx-muted);
+}
+
+.kx-v2-pop__system--active .kx-v2-pop__system-icon,
+.kx-v2-pop__system:hover .kx-v2-pop__system-icon,
+.kx-v2-pop__system:focus-visible .kx-v2-pop__system-icon {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-v2-pop__system-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+.kx-v2-pop__system-count {
+  flex-shrink: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-normal);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-pop__map {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--kx-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 140ms ease-out,
+    background-color 140ms ease-out,
+    color 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.kx-v2-pop__system-row:hover .kx-v2-pop__map,
+.kx-v2-pop__system-row:focus-within .kx-v2-pop__map {
+  opacity: 1;
+}
+
+.kx-v2-pop__map:hover,
+.kx-v2-pop__map:focus-visible {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-pop__map:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-v2-pop__map:active {
+  transform: translateY(1px);
+}
+
+/* Quiet rows — account menu entries and the sticky create-system row. */
+.kx-v2-pop__row,
+.kx-v2-pop__create {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.kx-v2-pop__row:hover,
+.kx-v2-pop__row:focus-visible,
+.kx-v2-pop__create:hover,
+.kx-v2-pop__create:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-v2-pop__row:focus-visible,
+.kx-v2-pop__create:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-v2-pop__row:active,
+.kx-v2-pop__create:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-pop__row-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--kx-muted);
+}
+
+.kx-v2-pop__row:hover .kx-v2-pop__row-icon,
+.kx-v2-pop__row:focus-visible .kx-v2-pop__row-icon,
+.kx-v2-pop__create:hover .kx-v2-pop__row-icon,
+.kx-v2-pop__create:focus-visible .kx-v2-pop__row-icon {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-v2-pop__row-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: var(--kx-font-normal);
+  color: var(--kx-primary);
+}
+
+.kx-v2-pop__footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--kx-border);
+}
+
+/* Desktop geometry — the scrim is pointer-transparent on desktop (a
+ * document-level outside-click listener in V2Sidebar owns dismissal, so
+ * clicks pass through to triggers and page content instead of being
+ * eaten); rail anchor and the account panel's footer-side anchor are
+ * scoped here so the mobile sheet rules below stay decisive. */
+@media (min-width: 761px) {
+  .kx-v2-pop__scrim {
+    background: transparent;
+    animation: none;
+    pointer-events: none;
+  }
+
+  .kx-v2-pop--rail .kx-v2-pop__panel {
+    left: 76px;
+  }
+
+  .kx-v2-pop[data-testid='v2-account-popover'] .kx-v2-pop__panel {
+    top: auto;
+    bottom: 76px;
+  }
+}
+
+/* Mobile ≤760px — full-width bottom sheet over the drawer (z 60/61 vs
+ * the drawer's 50). Both wrapper variants are listed so the rail anchor
+ * above cannot win on touch. */
+@media (max-width: 760px) {
+  .kx-v2-pop .kx-v2-pop__panel,
+  .kx-v2-pop--rail .kx-v2-pop__panel {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    max-height: 80vh;
+    border-radius: 10px 10px 0 0;
+    animation: kx-v2-pop-sheet-up 240ms ease-out;
+  }
+
+  .kx-v2-pop__handle {
+    display: block;
+  }
+
+  /* __system is now a text span — the old 40px touch-target rule must
+   * not inflate the copy line. */
+  .kx-v2-context__system {
+    min-height: 0;
+  }
+}
+
+@keyframes kx-v2-pop-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kx-v2-pop-sheet-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ── Reduced motion — kill every V2 transition/animation ────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .kx-v2-root,
+  .kx-v2-root *,
+  .kx-v2-root *::before,
+  .kx-v2-root *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

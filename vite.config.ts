@@ -5,53 +5,58 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import type { Plugin } from 'vite'
 
 /**
- * Vite plugin to enable clean URL routing for the catalog SPA.
+ * Vite plugin to enable clean URL routing for the catalog and /v2 SPAs.
  *
  * This plugin adds middleware to both dev and preview servers that rewrites
- * /catalog/* requests to serve catalog.html, allowing HTML5 History API
- * navigation without hash fragments.
+ * /catalog/* requests to serve catalog.html and /v2 (+ /v2/*) requests to
+ * serve v2.html, allowing HTML5 History API navigation without hash
+ * fragments.
  *
  * Valid routes:
  *   /catalog → serves catalog.html
  *   /catalog/tokens → serves catalog.html
  *   /catalog/components → serves catalog.html
  *   /catalog/components/<slug> → serves catalog.html
+ *   /v2 → serves v2.html
+ *   /v2/anything → serves v2.html
+ *   /v2?query → serves v2.html
+ *
+ * /v2 matches exactly or with a path/query continuation so hypothetical
+ * sibling entries like /v2x are never captured.
  */
-function catalogSpaFallback(): Plugin {
+function multiSpaFallback(): Plugin {
+  const makeSpaFallback = () => (req: any, _res: any, next: any) => {
+    // Only handle /catalog/* paths — blanket rewrite, identical to the
+    // original catalog-only behavior
+    if (req.url?.startsWith('/catalog')) {
+      // Rewrite to catalog.html for SPA routing
+      req.url = '/catalog.html'
+    } else if (
+      req.url === '/v2' ||
+      req.url?.startsWith('/v2/') ||
+      req.url?.startsWith('/v2?')
+    ) {
+      // Rewrite to v2.html for SPA routing
+      req.url = '/v2.html'
+    }
+    next()
+  }
   return {
-    name: 'catalog-spa-fallback',
+    name: 'catalog-v2-spa-fallback',
     configureServer(server) {
       // Insert middleware at the beginning of the stack to catch /catalog/*
-      // requests before Vite's internal middleware (which may throw on
-      // malformed percent-encoding)
-      const spaFallback = (req: any, _res: any, next: any) => {
-        // Only handle /catalog/* paths
-        if (req.url?.startsWith('/catalog')) {
-          // Rewrite to catalog.html for SPA routing
-          req.url = '/catalog.html'
-        }
-        next()
-      }
-      // Prepend to the middleware stack so it runs first
+      // and /v2* requests before Vite's internal middleware (which may throw
+      // on malformed percent-encoding)
       ;(server.middlewares as any).stack?.unshift({
         route: '',
-        handle: spaFallback,
+        handle: makeSpaFallback(),
       })
     },
     configurePreviewServer(server) {
       // Insert middleware at the beginning of the stack for preview server too
-      const spaFallback = (req: any, _res: any, next: any) => {
-        // Only handle /catalog/* paths
-        if (req.url?.startsWith('/catalog')) {
-          // Rewrite to catalog.html for SPA routing
-          req.url = '/catalog.html'
-        }
-        next()
-      }
-      // Prepend to the middleware stack so it runs first
       ;(server.middlewares as any).stack?.unshift({
         route: '',
-        handle: spaFallback,
+        handle: makeSpaFallback(),
       })
     },
   }
@@ -63,7 +68,7 @@ function catalogSpaFallback(): Plugin {
 export default defineConfig({
   plugins: [
     react(),
-    catalogSpaFallback(),
+    multiSpaFallback(),
     visualizer({
       filename: 'dist/stats.html',
       open: false,
@@ -76,6 +81,7 @@ export default defineConfig({
       input: {
         main: fileURLToPath(new URL('./index.html', import.meta.url)),
         catalog: fileURLToPath(new URL('./catalog.html', import.meta.url)),
+        v2: fileURLToPath(new URL('./v2.html', import.meta.url)),
       },
     },
   },

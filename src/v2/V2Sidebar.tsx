@@ -1,0 +1,298 @@
+/*
+ * V2Sidebar — the redesigned /v2 navigation surface (CLEAN pass).
+ *
+ * Same data, same responsive contract as before (320px expanded / 64px
+ * rail / forced rail 761–1280px / ≤760px off-canvas drawer), decluttered
+ * to six resting groups:
+ *   1. Brand row — wordmark + quiet collapse control (rail: logo is the
+ *      expand trigger).
+ *   2. ONE context trigger — active system over "Workspace · plan";
+ *      opens V2ContextPopover (replaces the two stacked switcher rows
+ *      AND the shell-mounted Workspace/System menus).
+ *   3. New session — full-width solid primary action.
+ *   4. Sessions — quiet nav row to the session history.
+ *   5. Recent — static rows with a persistent "system · time" meta
+ *      line; only the pin control is interactive (revealed on hover /
+ *      focus-within; pinned state stays visible).
+ *   6. Footer — account row only, opening V2AccountPopover (the theme
+ *      segmented control, Customize, and the catalog deep-link all live
+ *      in that popover now, not in the resting sidebar).
+ *
+ * The two popovers are mutually exclusive via one local `popover` state
+ * — they no longer route through the reducer overlay union. All classes
+ * are namespaced .kx-v2-* (see v2.css); colors come only from --kx-*
+ * tokens.
+ */
+import { useEffect, useRef, useState } from 'react'
+import { RECENT_SESSIONS, WORKSPACE } from '../data/mockData'
+import { useMockup } from '../state/MockupContext'
+import CollapseIcon from '../components/shell/CollapseIcon'
+import { ChevronDown, NewSessionIcon, PinIcon, SessionsIcon } from './icons'
+import V2ContextPopover from './V2ContextPopover'
+import V2AccountPopover from './V2AccountPopover'
+
+const LOGO_EXPANDED_SRC = '/assets/konteks/logo-text-main.png'
+const LOGO_RAIL_SRC = '/assets/konteks/web-topbar-icon-128.png'
+
+// ILLUSTRATIVE — user identity is placeholder data, not a production fact
+const USER_NAME = 'Refactory Admin'
+const USER_INITIALS = 'RA'
+
+type Popover = 'none' | 'context' | 'account'
+
+export default function V2Sidebar() {
+  const { state, dispatch } = useMockup()
+  const collapsed = state.sidebarCollapsed
+  const activeSystem =
+    state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
+
+  // Popovers are mutually exclusive by construction: one local slot.
+  const [popover, setPopover] = useState<Popover>('none')
+
+  // Focus return: the popover unmounts before the trigger can be
+  // focused safely (its containment would pull focus back while
+  // mounted), so the refocus happens in an effect after unmount.
+  const contextTriggerRef = useRef<HTMLButtonElement>(null)
+  const accountTriggerRef = useRef<HTMLButtonElement>(null)
+  const pendingFocusRef = useRef<Exclude<Popover, 'none'> | null>(null)
+  useEffect(() => {
+    if (!pendingFocusRef.current) return
+    const which = pendingFocusRef.current
+    pendingFocusRef.current = null
+    const trigger = which === 'context' ? contextTriggerRef.current : accountTriggerRef.current
+    trigger?.focus()
+  })
+
+  const closePopover = (which: Exclude<Popover, 'none'>) => {
+    pendingFocusRef.current = which
+    setPopover('none')
+  }
+  const togglePopover = (which: Exclude<Popover, 'none'>) => {
+    setPopover((current) => (current === which ? 'none' : which))
+  }
+
+  // Outside-click dismissal (desktop). The desktop scrim is
+  // pointer-transparent, so dismissal is a document listener instead:
+  // clicking anywhere outside the open popover closes it WITHOUT the
+  // trigger focus-return (focus stays where the user clicked). Clicks
+  // inside the popover root, or on either trigger, are ignored here —
+  // the triggers' own toggle handles open/switch/close, so clicking the
+  // other trigger while one popover is open switches directly to it.
+  useEffect(() => {
+    if (popover === 'none') return
+    const onPointerDown = (event: MouseEvent) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      if (target.closest('.kx-v2-pop')) return
+      if (contextTriggerRef.current?.contains(target)) return
+      if (accountTriggerRef.current?.contains(target)) return
+      setPopover('none')
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    return () => document.removeEventListener('mousedown', onPointerDown)
+  }, [popover])
+
+  // Pinned recent sessions — local UI state: pinned rows float to the top
+  // of the list (keeping their relative order), unpinned follow unchanged.
+  const [pinnedIds, setPinnedIds] = useState<ReadonlySet<string>>(new Set())
+  const togglePinned = (sessionId: string) => {
+    setPinnedIds((previous) => {
+      const next = new Set(previous)
+      if (next.has(sessionId)) next.delete(sessionId)
+      else next.add(sessionId)
+      return next
+    })
+  }
+  const orderedSessions = [
+    ...RECENT_SESSIONS.filter((session) => pinnedIds.has(session.id)),
+    ...RECENT_SESSIONS.filter((session) => !pinnedIds.has(session.id)),
+  ]
+
+  return (
+    <nav
+      aria-label="Sidebar"
+      className={collapsed ? 'kx-v2-sidebar kx-v2-sidebar--rail' : 'kx-v2-sidebar'}
+    >
+      {/* 1 — Brand row: wordmark left, quiet collapse control flush right.
+          In the rail the brand area itself becomes the expand trigger. */}
+      <div className="kx-v2-brand">
+        {collapsed ? (
+          <button
+            type="button"
+            className="kx-v2-brand__expand"
+            aria-label="Expand sidebar"
+            data-testid="v2-sidebar-toggle"
+            onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
+          >
+            <img className="kx-v2-brand__img" src={LOGO_RAIL_SRC} alt="" width={32} height={32} />
+            <span className="kx-v2-brand__expand-icon" aria-hidden="true">
+              <CollapseIcon collapsed />
+            </span>
+          </button>
+        ) : (
+          <>
+            {/* Square mark — hidden in the expanded sidebar (the wordmark
+                carries the brand); the forced-rail band swaps visibility so
+                the 64px rail never shows a squeezed wordmark. */}
+            <img
+              className="kx-v2-brand__img kx-v2-brand__img--square"
+              src={LOGO_RAIL_SRC}
+              alt="Konteks"
+              width={32}
+              height={32}
+            />
+            <img
+              className="kx-v2-brand__img kx-v2-brand__img--wordmark"
+              src={LOGO_EXPANDED_SRC}
+              alt=""
+              width={118}
+              height={26}
+            />
+          </>
+        )}
+        {!collapsed && (
+          <button
+            type="button"
+            className="kx-v2-iconbtn kx-v2-brand__collapse"
+            aria-label="Collapse sidebar"
+            data-testid="v2-sidebar-toggle"
+            onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
+          >
+            <CollapseIcon collapsed={false} />
+          </button>
+        )}
+      </div>
+
+      {/* 2 — One context trigger: active system over the workspace/plan
+          summary. Opens the combined context popover. */}
+      <button
+        ref={contextTriggerRef}
+        type="button"
+        className="kx-v2-context"
+        aria-label={`${activeSystem.name} — open workspace and systems`}
+        aria-haspopup="dialog"
+        aria-expanded={popover === 'context'}
+        data-testid="v2-context-trigger"
+        onClick={() => togglePopover('context')}
+      >
+        <span className="kx-v2-context__mark" aria-hidden="true">
+          {WORKSPACE.name[0]}
+        </span>
+        <span className="kx-v2-context__copy">
+          <span className="kx-v2-context__system">{activeSystem.name}</span>
+          <span className="kx-v2-context__plan">
+            {WORKSPACE.name} · {WORKSPACE.plan}
+          </span>
+        </span>
+        <ChevronDown />
+      </button>
+
+      {/* 3 — Primary action. */}
+      <button
+        type="button"
+        className={
+          state.route === 'new-session'
+            ? 'kx-v2-new-session kx-v2-new-session--active'
+            : 'kx-v2-new-session'
+        }
+        aria-label="New session"
+        aria-current={state.route === 'new-session' ? 'page' : undefined}
+        data-testid="v2-new-session-trigger"
+        onClick={() => dispatch({ type: 'NAVIGATE', route: 'new-session' })}
+      >
+        <span className="kx-v2-new-session__icon" aria-hidden="true">
+          <NewSessionIcon />
+        </span>
+        <span className="kx-v2-new-session__label">New session</span>
+      </button>
+
+      {/* 4 — Sessions nav row (quiet; active = tint + medium weight). */}
+      <button
+        type="button"
+        className={
+          state.route === 'session-history'
+            ? 'kx-v2-navitem kx-v2-navitem--active'
+            : 'kx-v2-navitem'
+        }
+        aria-current={state.route === 'session-history' ? 'page' : undefined}
+        data-testid="v2-sessions-trigger"
+        onClick={() => dispatch({ type: 'NAVIGATE', route: 'session-history' })}
+      >
+        <span className="kx-v2-navitem__icon" aria-hidden="true">
+          <SessionsIcon />
+        </span>
+        <span className="kx-v2-navitem__label">Sessions</span>
+      </button>
+
+      {/* 5 — Recent sessions: static rows, pin is the only control. */}
+      <section className="kx-v2-recent">
+        <div className="kx-v2-recent__head">
+          <span className="kx-v2-recent__label" id="kx-v2-recent-label">
+            Recent
+          </span>
+        </div>
+        <ul className="kx-v2-recent__list" aria-labelledby="kx-v2-recent-label">
+          {orderedSessions.map((session) => {
+            const system = state.systems.find((entry) => entry.id === session.systemId)
+            const pinned = pinnedIds.has(session.id)
+            return (
+              <li key={session.id} className="kx-v2-recent__item">
+                <div className="kx-v2-recent__row">
+                  <span className="kx-v2-recent__title" title={session.title}>
+                    {session.title}
+                  </span>
+                  <button
+                    type="button"
+                    className="kx-v2-recent__pin"
+                    aria-pressed={pinned}
+                    aria-label={pinned ? 'Unpin session' : 'Pin session'}
+                    title={pinned ? 'Unpin session' : 'Pin session'}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      togglePinned(session.id)
+                      // Mouse clicks must not leave focus on the pin —
+                      // :focus-within would freeze the control revealed
+                      // after the pointer leaves. Keyboard activation keeps
+                      // focus so keyboard users retain the reveal.
+                      if (event.detail > 0) event.currentTarget.blur()
+                    }}
+                  >
+                    <PinIcon pinned={pinned} />
+                  </button>
+                </div>
+                <span className="kx-v2-recent__meta">
+                  {system ? system.name : session.systemId} · {session.time}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
+
+      {/* 6 — Footer cluster (hairline divider above): just the account
+          row opening its popover. Theme lives inside the account popover. */}
+      <div className="kx-v2-footer">
+        <button
+          ref={accountTriggerRef}
+          type="button"
+          className="kx-v2-account"
+          aria-label="Open account menu"
+          aria-haspopup="dialog"
+          aria-expanded={popover === 'account'}
+          data-testid="v2-account-trigger"
+          onClick={() => togglePopover('account')}
+        >
+          <span className="kx-v2-avatar kx-v2-avatar--user" aria-hidden="true">
+            {USER_INITIALS}
+          </span>
+          <span className="kx-v2-account__name">{USER_NAME}</span>
+          <ChevronDown />
+        </button>
+      </div>
+
+      {/* Popovers — mounted at the sidebar root, mutually exclusive. */}
+      <V2ContextPopover open={popover === 'context'} onClose={() => closePopover('context')} />
+      <V2AccountPopover open={popover === 'account'} onClose={() => closePopover('account')} />
+    </nav>
+  )
+}
