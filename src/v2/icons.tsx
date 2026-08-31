@@ -33,6 +33,28 @@ export function ChevronRight() {
 }
 
 /** Chevron-down — marks the v2 popover triggers (panels open below/beside). */
+export function CheckIcon() {
+  return (
+    <svg
+      data-icon="check"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M3 8.5 6.2 11.5 13 4.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export function ChevronDown() {
   return (
     <svg

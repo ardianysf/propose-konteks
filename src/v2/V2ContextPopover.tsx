@@ -7,18 +7,25 @@
  * 76px in rail mode). ≤760px: full-width bottom sheet above the drawer.
  */
 import { useEffect, useRef, useState, type MouseEvent } from 'react'
-import { WORKSPACE } from '../data/mockData'
 import { useMockup } from '../state/MockupContext'
 import { useOverlayLifecycle } from '../components/shell/OverlayLifecycle'
 import { useFocusContainment } from '../components/shell/useFocusContainment'
-import { PlusIcon, SystemIcon, SystemMapIcon } from './icons'
+import { resolveV2Workspace, V2_WORKSPACES } from './v2Workspaces'
+import { CheckIcon, PlusIcon, SystemIcon, SystemMapIcon } from './icons'
 
 interface V2ContextPopoverProps {
   open: boolean
   onClose: () => void
+  activeWorkspaceId: string
+  onSelectWorkspace: (workspaceId: string) => void
 }
 
-export default function V2ContextPopover({ open, onClose }: V2ContextPopoverProps) {
+export default function V2ContextPopover({
+  open,
+  onClose,
+  activeWorkspaceId,
+  onSelectWorkspace,
+}: V2ContextPopoverProps) {
   const { state, dispatch } = useMockup()
   const { beginOverlayChain } = useOverlayLifecycle()
   const rootRef = useRef<HTMLDivElement>(null)
@@ -40,12 +47,17 @@ export default function V2ContextPopover({ open, onClose }: V2ContextPopoverProp
 
   if (!open) return null
 
+  const activeWorkspace = resolveV2Workspace(activeWorkspaceId)
+  const workspaceSystems = state.systems.filter((system) =>
+    activeWorkspace.systemIds.includes(system.id),
+  )
   const activeSystem =
-    state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
+    workspaceSystems.find((system) => system.id === state.activeSystemId) ??
+    workspaceSystems[0]
   const needle = query.trim().toLowerCase()
   const systems = needle
-    ? state.systems.filter((system) => system.name.toLowerCase().includes(needle))
-    : state.systems
+    ? workspaceSystems.filter((system) => system.name.toLowerCase().includes(needle))
+    : workspaceSystems
 
   const openOverlayAndClose = (
     event: MouseEvent<HTMLElement>,
@@ -62,6 +74,9 @@ export default function V2ContextPopover({ open, onClose }: V2ContextPopoverProp
     dispatch({ type: 'SET_ACTIVE_SYSTEM', systemId })
     onClose()
   }
+
+  // Switching workspace keeps the panel OPEN so the systems list is seen
+  // re-scoping live; the identity card behind updates in the same frame.
 
   return (
     <div
@@ -80,17 +95,52 @@ export default function V2ContextPopover({ open, onClose }: V2ContextPopoverProp
         <span className="kx-v2-pop__handle" aria-hidden="true" />
 
         <p className="kx-v2-pop__label" id="kx-v2-pop-workspace-label">
-          Workspace
+          Workspaces
         </p>
-        <button
-          type="button"
-          className="kx-v2-pop__workspace kx-v2-pop__workspace--selected"
-          data-testid="v2-popover-workspace"
-          onClick={onClose}
+        {/* A LIST, not a radiogroup: people may handle 5–7 workspaces, so
+         * rows carry identity + meta and the area scrolls independently
+         * of the panel. The active row is marked by a trailing check and
+         * aria-current — switching keeps the panel open. */}
+        <ul
+          className="kx-v2-pop__ws-list"
+          aria-label="Workspaces"
+          data-testid="v2-popover-workspace-list"
         >
-          <span className="kx-v2-pop__workspace-name">{WORKSPACE.name}</span>
-          <span className="kx-v2-pop__workspace-plan">{WORKSPACE.plan}</span>
-        </button>
+          {V2_WORKSPACES.map((workspace) => {
+            const active = workspace.id === activeWorkspaceId
+            const members = state.systems.filter((system) =>
+              workspace.systemIds.includes(system.id),
+            )
+            return (
+              <li key={workspace.id} className="kx-v2-pop__ws-row">
+                <button
+                  type="button"
+                  className={
+                    active ? 'kx-v2-pop__ws kx-v2-pop__ws--active' : 'kx-v2-pop__ws'
+                  }
+                  aria-current={active ? 'true' : undefined}
+                  data-testid={`v2-popover-workspace-${workspace.id}`}
+                  onClick={() => {
+                    if (!active) onSelectWorkspace(workspace.id)
+                  }}
+                >
+                  <span className="kx-v2-pop__ws-avatar" aria-hidden="true">
+                    {workspace.name[0]}
+                  </span>
+                  <span className="kx-v2-pop__ws-name">{workspace.name}</span>
+                  <span className="kx-v2-pop__ws-meta">
+                    {members.length} {members.length === 1 ? 'system' : 'systems'}
+                  </span>
+                  {active && (
+                    <span className="kx-v2-pop__ws-check" aria-hidden="true">
+                      <CheckIcon />
+                    </span>
+                  )}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
 
         <div className="kx-v2-pop__divider" role="presentation" />
 
@@ -106,7 +156,7 @@ export default function V2ContextPopover({ open, onClose }: V2ContextPopoverProp
           onChange={(event) => setQuery(event.target.value)}
         />
         <div className="kx-v2-pop__all" aria-hidden="true">
-          All systems
+          In {activeWorkspace.name}
         </div>
         <ul className="kx-v2-pop__list" aria-label="Systems">
           {systems.map((system) => {

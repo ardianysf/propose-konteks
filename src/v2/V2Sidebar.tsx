@@ -24,7 +24,8 @@
  * tokens.
  */
 import { useEffect, useRef, useState } from 'react'
-import { RECENT_SESSIONS, WORKSPACE } from '../data/mockData'
+import { RECENT_SESSIONS } from '../data/mockData'
+import { resolveV2Workspace, V2_WORKSPACES } from './v2Workspaces'
 import { useMockup } from '../state/MockupContext'
 import CollapseIcon from '../components/shell/CollapseIcon'
 import {
@@ -56,6 +57,26 @@ export default function V2Sidebar() {
 
   // Popovers are mutually exclusive by construction: one local slot.
   const [popover, setPopover] = useState<Popover>('none')
+
+  // v2-only workspace selector state. The shared reducer has no
+  // workspace concept, so the active demo workspace lives here and
+  // flows into the identity card, the rail avatar, and the popover.
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState(V2_WORKSPACES[0].id)
+  const activeWorkspace = resolveV2Workspace(activeWorkspaceId)
+
+  const selectWorkspace = (workspaceId: string) => {
+    setActiveWorkspaceId(workspaceId)
+    // Carry-over: if the active system does not belong to the target
+    // workspace, fall back to that workspace's first known system so the
+    // UI never shows an out-of-scope pairing.
+    const workspace = resolveV2Workspace(workspaceId)
+    if (!workspace.systemIds.includes(state.activeSystemId)) {
+      const first = workspace.systemIds.find((id) =>
+        state.systems.some((system) => system.id === id),
+      )
+      if (first) dispatch({ type: 'SET_ACTIVE_SYSTEM', systemId: first })
+    }
+  }
 
   // Sessions disclosure — the chevron row expands/collapses the recent
   // items beneath it (the standalone "Recent" section is gone).
@@ -213,11 +234,11 @@ export default function V2Sidebar() {
         onClick={() => togglePopover('context')}
       >
         <span className="kx-v2-context__mark" aria-hidden="true">
-          {WORKSPACE.name[0]}
+          {activeWorkspace.name[0]}
         </span>
         <span className="kx-v2-context__copy">
           <span className="kx-v2-context__system">{activeSystem.name}</span>
-          <span className="kx-v2-context__plan">{WORKSPACE.name}</span>
+          <span className="kx-v2-context__plan">{activeWorkspace.name}</span>
         </span>
         <span className="kx-v2-context__chevron" aria-hidden="true">
           <ChevronDown />
@@ -365,7 +386,12 @@ export default function V2Sidebar() {
       </div>
 
       {/* Popovers — mounted at the sidebar root, mutually exclusive. */}
-      <V2ContextPopover open={popover === 'context'} onClose={() => closePopover('context')} />
+      <V2ContextPopover
+        open={popover === 'context'}
+        onClose={() => closePopover('context')}
+        activeWorkspaceId={activeWorkspaceId}
+        onSelectWorkspace={selectWorkspace}
+      />
       <V2AccountPopover open={popover === 'account'} onClose={() => closePopover('account')} />
       <V2SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     </nav>
