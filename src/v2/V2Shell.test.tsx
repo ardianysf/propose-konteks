@@ -229,25 +229,33 @@ describe('V2Sidebar labels', () => {
 // ---------------------------------------------------------------------------
 
 describe('V2ContextPopover', () => {
-  it('opens from the context trigger with a workspace LIST, scoped system list, and the create action', () => {
+  it('opens from the context trigger: workspace row drills into a floating listbox, systems scoped, create sticky', () => {
     render(<V2App />)
     fireEvent.click(screen.getByTestId(TRIGGERS.context))
 
     const popover = getContextPopover()
     expect(screen.getByTestId(TRIGGERS.context)).toHaveAttribute('aria-expanded', 'true')
-    // Workspaces render as a LIST (not a radiogroup) — every row carries
-    // identity + meta; the active one is marked by aria-current + check.
-    const list = within(popover).getByTestId('v2-popover-workspace-list')
-    expect(list.tagName).toBe('UL')
-    const rows = within(list).getAllByRole('listitem')
-    expect(rows).toHaveLength(3)
-    const active = screen.getByTestId('v2-popover-workspace-ws-refactory')
-    expect(active).toHaveAttribute('aria-current', 'true')
-    expect(within(active).getByText('2 systems')).toBeInTheDocument()
-    expect(within(active).getByText('R')).toBeInTheDocument()
-    expect(screen.queryByTestId('v2-popover-workspace-ws-mpm')).not.toHaveAttribute(
-      'aria-current',
+
+    // The workspace identity row is collapsed by default — no list yet.
+    const wsRow = screen.getByTestId('v2-popover-workspace')
+    expect(wsRow).toHaveAttribute('aria-haspopup', 'listbox')
+    expect(wsRow).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByTestId('v2-popover-workspace-list')).not.toBeInTheDocument()
+
+    // Tapping it opens the floating LIST — listbox semantics, not radio.
+    fireEvent.click(wsRow)
+    const list = screen.getByTestId('v2-popover-workspace-list')
+    expect(list).toHaveAttribute('role', 'listbox')
+    const options = within(list).getAllByRole('option')
+    expect(options).toHaveLength(3)
+    expect(within(list).getByRole('option', { name: /Refactory/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
     )
+    expect(
+      within(list).getByRole('option', { name: /MPM Digital/ }),
+    ).toHaveAttribute('aria-selected', 'false')
+
     // ...the systems list is scoped to the active workspace...
     expect(within(popover).getByText('In Refactory')).toBeInTheDocument()
     expect(within(popover).getAllByText('BSI - HRIS').length).toBeGreaterThanOrEqual(1)
@@ -256,23 +264,18 @@ describe('V2ContextPopover', () => {
     expect(within(popover).getByText('Create new system')).toBeInTheDocument()
   })
 
-  it('switches workspace from the list: card + systems re-scope live, panel stays open', () => {
+  it('switches workspace from the floating list: flyout closes, card + systems re-scope, panel stays open', () => {
     render(<V2App />)
     fireEvent.click(screen.getByTestId(TRIGGERS.context))
 
-    // Switch to MPM Digital — the panel stays open.
+    // Open the flyout and switch to MPM Digital.
+    fireEvent.click(screen.getByTestId('v2-popover-workspace'))
     fireEvent.click(screen.getByTestId('v2-popover-workspace-ws-mpm'))
+
+    // The flyout closed; the panel itself stays open.
+    expect(screen.queryByTestId('v2-popover-workspace-list')).not.toBeInTheDocument()
     const popover = getContextPopover()
     expect(popover).toBeInTheDocument()
-
-    // The active mark moved.
-    expect(screen.getByTestId('v2-popover-workspace-ws-mpm')).toHaveAttribute(
-      'aria-current',
-      'true',
-    )
-    expect(screen.queryByTestId('v2-popover-workspace-ws-refactory')).not.toHaveAttribute(
-      'aria-current',
-    )
 
     // The identity card behind the panel now names the new workspace.
     expect(screen.getByTestId(TRIGGERS.context).textContent).toContain('MPM Digital')
@@ -283,13 +286,27 @@ describe('V2ContextPopover', () => {
     expect(within(popover).queryByText('BSI Canteen')).not.toBeInTheDocument()
 
     // Carry-over: the active system moved into the new workspace.
-    fireEvent.click(screen.getByTestId('v2-sessions-toggle'))
     expect(screen.getByTestId(TRIGGERS.context).textContent).toContain('MPM - Mytok')
 
     // Switching back restores the Refactory pairing.
+    fireEvent.click(screen.getByTestId('v2-popover-workspace'))
     fireEvent.click(screen.getByTestId('v2-popover-workspace-ws-refactory'))
     expect(screen.getByTestId(TRIGGERS.context).textContent).toContain('Refactory')
     expect(screen.getByTestId(TRIGGERS.context).textContent).toContain('BSI - HRIS')
+  })
+
+  it('Escape closes the flyout first, the panel only on the second press', () => {
+    render(<V2App />)
+    fireEvent.click(screen.getByTestId(TRIGGERS.context))
+    fireEvent.click(screen.getByTestId('v2-popover-workspace'))
+    expect(screen.getByTestId('v2-popover-workspace-list')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByTestId('v2-popover-workspace-list')).not.toBeInTheDocument()
+    expect(getContextPopover()).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByTestId('v2-context-popover')).not.toBeInTheDocument()
   })
 
   it('filters the system list from the local search field', () => {
