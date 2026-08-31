@@ -199,12 +199,10 @@
     justify-content: center;
   }
 
-  /* Hero presence: a soft two-step elevation lifts the composer card
-   * off the canvas — offset + blur, ink-tinted, no color. */
+  /* Flat hero presence: the composer is separated by its raised surface
+   * and hairline border only — no elevation shadow. */
   .kx-v2-root .kx-composer {
-    box-shadow:
-      0 1px 2px rgb(var(--kx-ink-rgb) / 0.05),
-      0 12px 32px rgb(var(--kx-ink-rgb) / 0.08);
+    box-shadow: none;
   }
 }
 
@@ -249,4 +247,32 @@
 .kx-v2-root .kx-session-detail .kx-chip,
 .kx-v2-root .kx-session-detail__cycle-pill {
   border-radius: 10px;
+}
+
+/* ── 11. Flat shell seam + larger main-canvas curvature ───────────────
+ * The shell root carries both classes on the same node. Painting that
+ * node with the sidebar surface makes the space BEHIND the main's curved
+ * left edge exactly match the sidebar — the radius reads intentional,
+ * never as a canvas-colored gap. */
+.kx-v2-root.kx-app {
+  background: var(--kx-sidebar-bg);
+}
+
+.kx-v2-root .kx-main {
+  border-radius: 32px 0 0 32px;
+  box-shadow: none;
+}
+
+/* Shared composer focus used an inset box-shadow; v2 keeps the flat
+ * rule and expresses focus as an outline instead. */
+.kx-v2-root .kx-panel__input-box:focus-within {
+  box-shadow: none;
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: -2px;
+}
+
+@media (max-width: 760px) {
+  .kx-v2-root .kx-main {
+    border-radius: 24px 0 0 24px;
+  }
 }

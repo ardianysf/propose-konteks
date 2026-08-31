@@ -130,24 +130,24 @@ describe('V2Shell frame', () => {
     expect(container.querySelector('.kx-app__mobile-toggle')).not.toBeNull()
   })
 
-  it('renders the new-session page by default, session-history after View all, and session-detail from a history row', () => {
+  it('renders new-session by default; Sessions navigates while its chevron independently toggles children', () => {
     render(<V2App />)
 
     // Default route: the New Session page inside <main>.
     expect(newSessionHeading()).toBeInTheDocument()
 
-    // Sessions is now a disclosure: tapping it collapses/expands the
-    // nested recent items; "View all" navigates to session-history.
-    const sessions = screen.getByTestId(TRIGGERS.sessions)
-    expect(sessions).toHaveAttribute('aria-expanded', 'true')
+    // Chevron owns disclosure — label/navigation is a separate control.
+    const toggle = screen.getByTestId('v2-sessions-toggle')
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByText('EDP Integration Fix - Mobile')).toBeInTheDocument()
-    fireEvent.click(sessions)
-    expect(sessions).toHaveAttribute('aria-expanded', 'false')
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
     expect(screen.queryByText('EDP Integration Fix - Mobile')).not.toBeInTheDocument()
-    fireEvent.click(sessions)
-    expect(sessions).toHaveAttribute('aria-expanded', 'true')
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
 
-    fireEvent.click(screen.getByTestId('v2-view-all-trigger'))
+    // The Sessions text/area navigates to session-history.
+    fireEvent.click(screen.getByTestId(TRIGGERS.sessions))
     expect(historyHeading()).toBeInTheDocument()
 
     // A history row -> session-detail.
@@ -172,7 +172,7 @@ describe('V2Sidebar labels', () => {
     render(<V2App />)
     expect(screen.getByRole('button', { name: 'New session' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sessions' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'View all sessions' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Collapse sessions' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Customize' })).toBeInTheDocument()
     expect(screen.getByText('Component catalog')).toBeInTheDocument()
     expect(screen.queryByText('Recent')).not.toBeInTheDocument()
@@ -180,20 +180,20 @@ describe('V2Sidebar labels', () => {
     // The context trigger names the active system over the workspace/plan
     // summary; the account row names the user.
     expect(screen.getByText('BSI - HRIS')).toBeInTheDocument()
-    expect(screen.getByText('Refactory · Team plan')).toBeInTheDocument()
+    expect(screen.getByText('Refactory')).toBeInTheDocument()
     expect(screen.getByText('Refactory Admin')).toBeInTheDocument()
   })
 
-  it('marks New session as the current page on the default route and moves aria-current to View all after navigating', () => {
+  it('marks New session as current by default and moves aria-current to Sessions after navigating', () => {
     render(<V2App />)
     const newSession = screen.getByTestId(TRIGGERS.newSession)
-    const viewAll = screen.getByTestId('v2-view-all-trigger')
+    const sessions = screen.getByTestId(TRIGGERS.sessions)
     expect(newSession).toHaveAttribute('aria-current', 'page')
-    expect(viewAll).not.toHaveAttribute('aria-current')
+    expect(sessions).not.toHaveAttribute('aria-current')
 
-    fireEvent.click(viewAll)
+    fireEvent.click(sessions)
     expect(newSession).not.toHaveAttribute('aria-current')
-    expect(viewAll).toHaveAttribute('aria-current', 'page')
+    expect(sessions).toHaveAttribute('aria-current', 'page')
   })
 
   it('renders the popover triggers with dialog semantics and collapsed state', () => {
@@ -478,7 +478,7 @@ describe('V2Sidebar craft floor', () => {
     // The mark carries the workspace initial.
     expect(within(trigger).getByText(WORKSPACE.name[0])).toBeInTheDocument()
     const systemName = within(trigger).getByText('BSI - HRIS')
-    const planLine = within(trigger).getByText('Refactory · Team plan')
+    const planLine = within(trigger).getByText('Refactory')
     const follows = (a: Element, b: Element) =>
       (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0
     expect(follows(systemName, planLine)).toBe(true)
