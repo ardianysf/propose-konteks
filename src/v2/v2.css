@@ -997,6 +997,8 @@
   font-size: var(--kx-text-md);
   font-weight: var(--kx-font-medium);
   color: var(--kx-muted-text-aa);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .kx-v2-pop__divider {
@@ -1038,6 +1040,8 @@
   margin: 8px 4px 6px;
   font-size: var(--kx-text-md);
   color: var(--kx-muted-text-aa);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .kx-v2-pop__list {
