@@ -15,8 +15,17 @@ try {
   await d.click('[data-testid="v2-context-trigger"]'); await d.waitForTimeout(300)
   const pop = await d.locator('.kx-v2-pop__panel').first().boundingBox()
   console.log('context popover box:', JSON.stringify(pop))
-  const popVisible = pop && pop.x >= 330 && pop.x <= 340 && pop.y > 0 && pop.y < 120
+  const popVisible = pop && pop.x >= 266 && pop.x <= 276 && pop.y > 0 && pop.y < 120
   console.log('popover anchored right of sidebar near trigger:', popVisible)
+  const newSessionBg = await d.evaluate(() => getComputedStyle(document.querySelector('.kx-v2-new-session')).backgroundColor)
+  console.log('new-session row is quiet (transparent):', newSessionBg === 'rgba(0, 0, 0, 0)' || newSessionBg === 'transparent')
+  const composerY = await d.evaluate(() => {
+    const c = document.querySelector('.kx-composer')
+    return c ? c.getBoundingClientRect().top : -1
+  })
+  console.log('composer top (centered band, expect >100 <700 at 900vh):', Math.round(composerY))
+  const sendBg = await d.evaluate(() => getComputedStyle(document.querySelector('.kx-composer__send')).backgroundColor)
+  console.log('send is the single accent-solid action:', sendBg !== 'rgba(0, 0, 0, 0)')
   // Direct switch: click account trigger while context popover is open
   await d.click('[data-testid="v2-account-trigger"]'); await d.waitForTimeout(300)
   const acc = await d.locator('[data-testid="v2-account-popover"] .kx-v2-pop__panel').boundingBox()

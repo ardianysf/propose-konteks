@@ -173,8 +173,37 @@
   color: var(--kx-primary);
 }
 
-/* ── 7. Disclaimer — one step quieter ──────────────────────────────── */
+/* ── 7. Disclaimer — one step quieter ─────────────────────────────── */
 
 .kx-v2-root .kx-new-session__disclaimer {
   letter-spacing: 0.01em;
+}
+
+/* ── 8. Hierarchy: the composer is the focal object ────────────────────
+ * On the desktop canvas the intro + reviews + composer group centers
+ * vertically instead of pinning to the bottom: the eye lands on the
+ * composer first (Comet pattern — the composer is the product, the
+ * chrome recedes). The sidebar no longer carries a primary button, so
+ * the composer's send control is the single accent-solid action on the
+ * whole surface. Mobile (≤760px) keeps the tuned one-screen contract. */
+@media (min-width: 761px) {
+  .kx-v2-root .kx-new-session__intro {
+    margin: 0 auto 24px;
+  }
+
+  .kx-v2-root .kx-new-session__reviews {
+    margin-top: 0;
+  }
+
+  .kx-v2-root .kx-new-session__content {
+    justify-content: center;
+  }
+
+  /* Hero presence: a soft two-step elevation lifts the composer card
+   * off the canvas — offset + blur, ink-tinted, no color. */
+  .kx-v2-root .kx-composer {
+    box-shadow:
+      0 1px 2px rgb(var(--kx-ink-rgb) / 0.05),
+      0 12px 32px rgb(var(--kx-ink-rgb) / 0.08);
+  }
 }

@@ -269,38 +269,55 @@
 
 /* ── 3 · Primary action — New session ───────────────────────────────── */
 
+/* New session — a quiet nav row like every other row (Comet pattern):
+ * the ONLY special affordance is the plus in a small filled circle.
+ * The composer in the canvas owns the primary hierarchy; this row
+ * just navigates. */
 .kx-v2-new-session {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  min-height: 38px;
-  padding: 0 12px;
+  min-height: 36px;
+  padding: 0 8px;
   border: none;
-  border-radius: 8px;
-  background: var(--kx-accent-solid-aa);
-  color: var(--kx-accent-solid-ink);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--kx-secondary);
   font-family: inherit;
   font-size: var(--kx-text-l);
   font-weight: var(--kx-font-medium);
   cursor: pointer;
   transition:
     background-color 140ms ease-out,
-    transform 140ms ease-out;
+    color 140ms ease-out;
 }
 
 .kx-v2-new-session:hover,
 .kx-v2-new-session:focus-visible {
-  background: var(--kx-accent-strong);
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-new-session:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
 }
 
 .kx-v2-new-session:active {
   transform: translateY(1px);
 }
 
+/* Plus in a small filled circle — the one filled mark among quiet rows. */
 .kx-v2-new-session__icon {
-  display: inline-flex;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 999px;
+  background: var(--kx-primary);
+  color: var(--kx-accent-solid-ink);
 }
 
 .kx-v2-new-session__label {
@@ -576,6 +593,7 @@
 
 .kx-v2-sidebar--rail .kx-v2-new-session {
   padding: 0;
+  justify-content: center;
 }
 
 .kx-v2-sidebar--rail .kx-v2-new-session__label {
@@ -661,6 +679,7 @@
 
   .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-new-session {
     padding: 0;
+    justify-content: center;
   }
 
   .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-new-session__label {
@@ -952,9 +971,10 @@
   color: var(--kx-primary);
 }
 
-/* Active-route emphasis on the primary action. */
+/* Active-route emphasis — same quiet pill as every active row. */
 .kx-v2-new-session--active {
-  background: var(--kx-accent-strong);
+  background: var(--kx-pale);
+  color: var(--kx-primary);
 }
 
 /* Rail: the trigger collapses to the bare 28px mark (consolidated in
@@ -971,7 +991,7 @@
 
 .kx-v2-pop__panel {
   position: absolute;
-  left: 332px;
+  left: 268px;
   top: 56px;
   z-index: 61;
   display: flex;
@@ -1388,5 +1408,31 @@
   .kx-v2-root *::after {
     transition: none !important;
     animation: none !important;
+  }
+}
+
+/* ── Comet-proportioned expanded rail (≥1281px) ──────────────────────
+ * The expanded sidebar drops from the shared 320px to a lighter 256px
+ * (≈16-17% of a 1470px canvas — Comet's rail proportion). Scoped to the
+ * expanded desktop band only: the forced-rail band and the mobile
+ * drawer keep the shared shell geometry. The popover anchor follows
+ * (base left is 268px = 256 + 12px gutter). */
+@media (min-width: 1281px) {
+  .kx-v2-root .kx-app {
+    grid-template-columns: 256px 1fr;
+  }
+
+  .kx-v2-sidebar {
+    width: 256px;
+    min-width: 256px;
+  }
+}
+
+/* Forced-rail band popover anchor — the wrapper carries the --rail
+ * class only for MANUAL collapse; in the forced band the panel must
+ * still hug the 64px rail, so anchor it here unconditionally. */
+@media (min-width: 761px) and (max-width: 1280px) {
+  .kx-v2-pop__panel {
+    left: 76px;
   }
 }
