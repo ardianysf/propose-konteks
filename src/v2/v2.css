@@ -1098,6 +1098,96 @@
   background: var(--kx-pale);
 }
 
+.kx-v2-pop__ws-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* The list scrolls on its own so 5–7 workspaces never stretch the
+   * panel — roughly four rows stay visible. */
+  max-height: 168px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* One row per workspace — the same list language as the systems below:
+ * identity tile, name, meta, trailing state mark. */
+.kx-v2-pop__ws {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--kx-secondary);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-v2-pop__ws:hover,
+.kx-v2-pop__ws:focus-visible {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-pop__ws:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-v2-pop__ws--active {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-pop__ws-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--kx-accent-solid-aa);
+  color: var(--kx-accent-solid-ink);
+  font-size: 11px;
+  font-weight: var(--kx-font-bold);
+}
+
+.kx-v2-pop__ws-name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: var(--kx-font-medium);
+}
+
+.kx-v2-pop__ws-meta {
+  flex-shrink: 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-pop__ws-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  color: var(--kx-accent-text-aa);
+}
+
 .kx-v2-pop__workspace-name {
   overflow: hidden;
   white-space: nowrap;

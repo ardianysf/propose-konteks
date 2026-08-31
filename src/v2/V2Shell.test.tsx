@@ -25,7 +25,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import V2App from './V2App'
 import { initTheme } from '../theme'
-import { SYSTEMS, WORKSPACE } from '../data/mockData'
+import { SYSTEMS } from '../data/mockData'
 
 // ---------------------------------------------------------------------------
 // Shared matchMedia stub (jsdom lacks window.matchMedia)
@@ -229,20 +229,67 @@ describe('V2Sidebar labels', () => {
 // ---------------------------------------------------------------------------
 
 describe('V2ContextPopover', () => {
-  it('opens from the context trigger with workspace identity, system list, and the create action', () => {
+  it('opens from the context trigger with a workspace LIST, scoped system list, and the create action', () => {
     render(<V2App />)
     fireEvent.click(screen.getByTestId(TRIGGERS.context))
 
     const popover = getContextPopover()
     expect(screen.getByTestId(TRIGGERS.context)).toHaveAttribute('aria-expanded', 'true')
-    // Workspace identity...
-    expect(within(popover).getByText('Refactory')).toBeInTheDocument()
-    expect(within(popover).getByText(WORKSPACE.plan)).toBeInTheDocument()
-    // ...the locally-searchable system list...
-    expect(within(popover).getByText('All systems')).toBeInTheDocument()
+    // Workspaces render as a LIST (not a radiogroup) — every row carries
+    // identity + meta; the active one is marked by aria-current + check.
+    const list = within(popover).getByTestId('v2-popover-workspace-list')
+    expect(list.tagName).toBe('UL')
+    const rows = within(list).getAllByRole('listitem')
+    expect(rows).toHaveLength(3)
+    const active = screen.getByTestId('v2-popover-workspace-ws-refactory')
+    expect(active).toHaveAttribute('aria-current', 'true')
+    expect(within(active).getByText('2 systems')).toBeInTheDocument()
+    expect(within(active).getByText('R')).toBeInTheDocument()
+    expect(screen.queryByTestId('v2-popover-workspace-ws-mpm')).not.toHaveAttribute(
+      'aria-current',
+    )
+    // ...the systems list is scoped to the active workspace...
+    expect(within(popover).getByText('In Refactory')).toBeInTheDocument()
     expect(within(popover).getAllByText('BSI - HRIS').length).toBeGreaterThanOrEqual(1)
+    expect(within(popover).queryByText('Hanoman')).not.toBeInTheDocument()
     // ...and the sticky create-system action.
     expect(within(popover).getByText('Create new system')).toBeInTheDocument()
+  })
+
+  it('switches workspace from the list: card + systems re-scope live, panel stays open', () => {
+    render(<V2App />)
+    fireEvent.click(screen.getByTestId(TRIGGERS.context))
+
+    // Switch to MPM Digital — the panel stays open.
+    fireEvent.click(screen.getByTestId('v2-popover-workspace-ws-mpm'))
+    const popover = getContextPopover()
+    expect(popover).toBeInTheDocument()
+
+    // The active mark moved.
+    expect(screen.getByTestId('v2-popover-workspace-ws-mpm')).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+    expect(screen.queryByTestId('v2-popover-workspace-ws-refactory')).not.toHaveAttribute(
+      'aria-current',
+    )
+
+    // The identity card behind the panel now names the new workspace.
+    expect(screen.getByTestId(TRIGGERS.context).textContent).toContain('MPM Digital')
+
+    // The systems list re-scoped: MPM systems in, BSI out.
+    expect(within(popover).getByText('In MPM Digital')).toBeInTheDocument()
+    expect(within(popover).getByText('MPM - Mytok')).toBeInTheDocument()
+    expect(within(popover).queryByText('BSI Canteen')).not.toBeInTheDocument()
+
+    // Carry-over: the active system moved into the new workspace.
+    fireEvent.click(screen.getByTestId('v2-sessions-toggle'))
+    expect(screen.getByTestId(TRIGGERS.context).textContent).toContain('MPM - Mytok')
+
+    // Switching back restores the Refactory pairing.
+    fireEvent.click(screen.getByTestId('v2-popover-workspace-ws-refactory'))
+    expect(screen.getByTestId(TRIGGERS.context).textContent).toContain('Refactory')
+    expect(screen.getByTestId(TRIGGERS.context).textContent).toContain('BSI - HRIS')
   })
 
   it('filters the system list from the local search field', () => {
@@ -476,7 +523,7 @@ describe('V2Sidebar craft floor', () => {
     render(<V2App />)
     const trigger = screen.getByTestId(TRIGGERS.context)
     // The mark carries the workspace initial.
-    expect(within(trigger).getByText(WORKSPACE.name[0])).toBeInTheDocument()
+    expect(within(trigger).getByText('R')).toBeInTheDocument()
     const systemName = within(trigger).getByText('BSI - HRIS')
     const planLine = within(trigger).getByText('Refactory')
     const follows = (a: Element, b: Element) =>
