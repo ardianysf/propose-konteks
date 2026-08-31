@@ -27,9 +27,10 @@ import { useEffect, useRef, useState } from 'react'
 import { RECENT_SESSIONS, WORKSPACE } from '../data/mockData'
 import { useMockup } from '../state/MockupContext'
 import CollapseIcon from '../components/shell/CollapseIcon'
-import { ChevronDown, NewSessionIcon, PinIcon, SessionsIcon } from './icons'
+import { ChevronDown, NewSessionIcon, PinIcon, SearchIcon, SessionsIcon } from './icons'
 import V2ContextPopover from './V2ContextPopover'
 import V2AccountPopover from './V2AccountPopover'
+import V2SearchPalette from './V2SearchPalette'
 
 const LOGO_EXPANDED_SRC = '/assets/konteks/logo-text-main.png'
 const LOGO_RAIL_SRC = '/assets/konteks/web-topbar-icon-128.png'
@@ -48,6 +49,23 @@ export default function V2Sidebar() {
 
   // Popovers are mutually exclusive by construction: one local slot.
   const [popover, setPopover] = useState<Popover>('none')
+
+  // Sessions disclosure — the chevron row expands/collapses the recent
+  // items beneath it (the standalone "Recent" section is gone).
+  const [sessionsOpen, setSessionsOpen] = useState(true)
+
+  // Search palette — opened from the brand-row search button or ⌘K.
+  const [searchOpen, setSearchOpen] = useState(false)
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setSearchOpen((open) => !open)
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   // Focus return: the popover unmounts before the trigger can be
   // focused safely (its containment would pull focus back while
@@ -153,6 +171,18 @@ export default function V2Sidebar() {
         {!collapsed && (
           <button
             type="button"
+            className="kx-v2-iconbtn kx-v2-brand__search"
+            aria-label="Search"
+            aria-keyshortcuts="Meta+K Control+K"
+            data-testid="v2-search-trigger"
+            onClick={() => setSearchOpen(true)}
+          >
+            <SearchIcon />
+          </button>
+        )}
+        {!collapsed && (
+          <button
+            type="button"
             className="kx-v2-iconbtn kx-v2-brand__collapse"
             aria-label="Collapse sidebar"
             data-testid="v2-sidebar-toggle"
@@ -206,7 +236,9 @@ export default function V2Sidebar() {
         <span className="kx-v2-new-session__label">New session</span>
       </button>
 
-      {/* 4 — Sessions nav row (quiet; active = tint + medium weight). */}
+      {/* 4 — Sessions disclosure: tapping the row expands/collapses the
+          recent items nested beneath it; "View all" (inside the group)
+          navigates to the session-history route. */}
       <button
         type="button"
         className={
@@ -214,60 +246,76 @@ export default function V2Sidebar() {
             ? 'kx-v2-navitem kx-v2-navitem--active'
             : 'kx-v2-navitem'
         }
-        aria-current={state.route === 'session-history' ? 'page' : undefined}
+        aria-expanded={sessionsOpen}
+        aria-controls="kx-v2-sessions-group"
         data-testid="v2-sessions-trigger"
-        onClick={() => dispatch({ type: 'NAVIGATE', route: 'session-history' })}
+        onClick={() => setSessionsOpen((open) => !open)}
       >
         <span className="kx-v2-navitem__icon" aria-hidden="true">
           <SessionsIcon />
         </span>
         <span className="kx-v2-navitem__label">Sessions</span>
+        <span
+          className={
+            sessionsOpen
+              ? 'kx-v2-navitem__chevron kx-v2-navitem__chevron--open'
+              : 'kx-v2-navitem__chevron'
+          }
+          aria-hidden="true"
+        >
+          <ChevronDown />
+        </span>
       </button>
 
-      {/* 5 — Recent sessions: static rows, pin is the only control. */}
-      <section className="kx-v2-recent">
-        <div className="kx-v2-recent__head">
-          <span className="kx-v2-recent__label" id="kx-v2-recent-label">
-            Recent
-          </span>
-        </div>
-        <ul className="kx-v2-recent__list" aria-labelledby="kx-v2-recent-label">
-          {orderedSessions.map((session) => {
-            const system = state.systems.find((entry) => entry.id === session.systemId)
-            const pinned = pinnedIds.has(session.id)
-            return (
-              <li key={session.id} className="kx-v2-recent__item">
-                <div className="kx-v2-recent__row">
-                  <span className="kx-v2-recent__title" title={session.title}>
-                    {session.title}
+      {sessionsOpen && (
+        <div id="kx-v2-sessions-group" className="kx-v2-sessions-group">
+          <ul className="kx-v2-recent__list">
+            {orderedSessions.map((session) => {
+              const system = state.systems.find((entry) => entry.id === session.systemId)
+              const pinned = pinnedIds.has(session.id)
+              return (
+                <li key={session.id} className="kx-v2-recent__item">
+                  <div className="kx-v2-recent__row">
+                    <span className="kx-v2-recent__title" title={session.title}>
+                      {session.title}
+                    </span>
+                    <button
+                      type="button"
+                      className="kx-v2-recent__pin"
+                      aria-pressed={pinned}
+                      aria-label={pinned ? 'Unpin session' : 'Pin session'}
+                      title={pinned ? 'Unpin session' : 'Pin session'}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        togglePinned(session.id)
+                        // Mouse clicks must not leave focus on the pin —
+                        // :focus-within would freeze the control revealed
+                        // after the pointer leaves. Keyboard activation keeps
+                        // focus so keyboard users retain the reveal.
+                        if (event.detail > 0) event.currentTarget.blur()
+                      }}
+                    >
+                      <PinIcon pinned={pinned} />
+                    </button>
+                  </div>
+                  <span className="kx-v2-recent__meta">
+                    {system ? system.name : session.systemId} · {session.time}
                   </span>
-                  <button
-                    type="button"
-                    className="kx-v2-recent__pin"
-                    aria-pressed={pinned}
-                    aria-label={pinned ? 'Unpin session' : 'Pin session'}
-                    title={pinned ? 'Unpin session' : 'Pin session'}
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      togglePinned(session.id)
-                      // Mouse clicks must not leave focus on the pin —
-                      // :focus-within would freeze the control revealed
-                      // after the pointer leaves. Keyboard activation keeps
-                      // focus so keyboard users retain the reveal.
-                      if (event.detail > 0) event.currentTarget.blur()
-                    }}
-                  >
-                    <PinIcon pinned={pinned} />
-                  </button>
-                </div>
-                <span className="kx-v2-recent__meta">
-                  {system ? system.name : session.systemId} · {session.time}
-                </span>
-              </li>
-            )
-          })}
-        </ul>
-      </section>
+                </li>
+              )
+            })}
+          </ul>
+          <button
+            type="button"
+            className="kx-v2-sessions-view-all"
+            aria-current={state.route === 'session-history' ? 'page' : undefined}
+            data-testid="v2-view-all-trigger"
+            onClick={() => dispatch({ type: 'NAVIGATE', route: 'session-history' })}
+          >
+            View all
+          </button>
+        </div>
+      )}
 
       {/* 6 — Footer cluster (hairline divider above): just the account
           row opening its popover. Theme lives inside the account popover. */}
@@ -293,6 +341,7 @@ export default function V2Sidebar() {
       {/* Popovers — mounted at the sidebar root, mutually exclusive. */}
       <V2ContextPopover open={popover === 'context'} onClose={() => closePopover('context')} />
       <V2AccountPopover open={popover === 'account'} onClose={() => closePopover('account')} />
+      <V2SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     </nav>
   )
 }

@@ -93,6 +93,11 @@
   filter: brightness(0) invert(1);
 }
 
+.kx-v2-brand__search {
+  margin-left: auto;
+  margin-right: 2px;
+}
+
 .kx-v2-brand__collapse {
   flex-shrink: 0;
 }
@@ -141,110 +146,6 @@
 
 .kx-v2-brand__expand:active .kx-v2-brand__expand-icon {
   transform: translateY(1px);
-}
-
-/* ── 2 · Context block (workspace → system hierarchy) ───────────────── */
-
-.kx-v2-context {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 14px;
-}
-
-.kx-v2-context__workspace,
-.kx-v2-context__system {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 6px 8px;
-  border: none;
-  border-radius: 10px;
-  background: transparent;
-  text-align: left;
-  font-family: inherit;
-  cursor: pointer;
-  transition:
-    background-color 140ms ease-out,
-    color 140ms ease-out;
-}
-
-/* Workspace — the primary row. */
-.kx-v2-context__workspace {
-  min-height: 44px;
-}
-
-.kx-v2-context__workspace:hover,
-.kx-v2-context__workspace:focus-visible {
-  background: var(--kx-pale);
-}
-
-.kx-v2-context__workspace:active {
-  transform: translateY(1px);
-}
-
-.kx-v2-context__workspace-name {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-size: var(--kx-text-l);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-primary);
-}
-
-/* System — clearly secondary: indented beneath the workspace label,
- * quieter type, and a persistent repo count. */
-.kx-v2-context__system {
-  min-height: 36px;
-  margin-top: 2px;
-  /* 40px = workspace avatar (30px) + row gap (10px) — the system copy
-   * aligns under the workspace name, not the avatar. */
-  padding-left: 40px;
-}
-
-.kx-v2-context__system:hover,
-.kx-v2-context__system:focus-visible {
-  background: var(--kx-pale);
-}
-
-.kx-v2-context__system:active {
-  transform: translateY(1px);
-}
-
-.kx-v2-context__system-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  margin-left: -30px; /* pulls the icon back to the shared left axis */
-  border-radius: 6px;
-  color: var(--kx-accent-text-aa);
-}
-
-.kx-v2-context__system-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  flex: 1;
-  min-width: 0;
-}
-
-.kx-v2-context__system-name {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-secondary);
-}
-
-.kx-v2-context__system-count {
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-normal);
-  color: var(--kx-muted-text-aa);
 }
 
 .kx-v2-chevron {
@@ -308,16 +209,21 @@
   transform: translateY(1px);
 }
 
-/* Plus in a small filled circle — the one filled mark among quiet rows. */
+/* Plus — a plain glyph like every other row icon; no fill, no circle.
+ * The row carries no background at rest — hover/focus/active brings the
+ * pale pill, exactly like every other row. */
 .kx-v2-new-session__icon {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  min-width: 22px;
-  border-radius: 999px;
-  background: var(--kx-primary);
-  color: var(--kx-accent-solid-ink);
+  display: inline-flex;
+  width: 20px;
+  min-width: 20px;
+  justify-content: center;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-new-session:hover .kx-v2-new-session__icon,
+.kx-v2-new-session:focus-visible .kx-v2-new-session__icon,
+.kx-v2-new-session--active .kx-v2-new-session__icon {
+  color: var(--kx-primary);
 }
 
 .kx-v2-new-session__label {
@@ -572,15 +478,29 @@
   padding: 0;
 }
 
-/* Context trigger collapses to the bare 28px mark. */
+/* Context trigger collapses to the bare mark — the card chrome resets. */
 .kx-v2-sidebar--rail .kx-v2-context {
   align-items: center;
   width: 40px;
   min-width: 40px;
   min-height: 40px;
+  margin-bottom: 10px;
   padding: 0;
   justify-content: center;
   gap: 0;
+  border-color: transparent;
+  background: transparent;
+}
+
+.kx-v2-sidebar--rail .kx-v2-context__mark {
+  width: 28px;
+  height: 28px;
+  border-color: transparent;
+  background: var(--kx-pale);
+}
+
+.kx-v2-sidebar--rail .kx-v2-sessions-group {
+  display: none;
 }
 
 .kx-v2-sidebar--rail .kx-v2-context__copy {
@@ -816,23 +736,26 @@
 .kx-v2-context {
   flex-direction: row;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  min-height: 44px;
-  padding: 6px 8px;
-  border: none;
-  border-radius: 10px;
-  background: transparent;
+  min-height: 64px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  /* Identity CARD, not a menu row: a pale raised surface with a hairline
+   * sets it apart from the quiet rows below while staying in-token. */
+  border: 1px solid var(--kx-border);
+  border-radius: 16px;
+  background: var(--kx-pale);
   text-align: left;
   font-family: inherit;
   cursor: pointer;
   transition:
-    background-color 140ms ease-out,
+    border-color 140ms ease-out,
     transform 140ms ease-out;
 }
 
 .kx-v2-context:hover {
-  background: var(--kx-pale);
+  border-color: var(--kx-accent);
 }
 
 .kx-v2-context:focus-visible {
@@ -849,10 +772,11 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: var(--kx-pale);
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--kx-border);
+  border-radius: 10px;
+  background: var(--kx-raised);
   color: var(--kx-accent-text-aa);
   font-size: var(--kx-text-md);
   font-weight: var(--kx-font-bold);
@@ -880,8 +804,8 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: 13px;
-  font-weight: var(--kx-font-medium);
+  font-size: 14px;
+  font-weight: var(--kx-font-bold);
   line-height: 1.35;
   color: var(--kx-primary);
 }
@@ -1418,11 +1342,17 @@
  * drawer keep the shared shell geometry. The popover anchor follows
  * (base left is 268px = 256 + 12px gutter). */
 @media (min-width: 1281px) {
-  .kx-v2-root .kx-app {
+  /* COMPOUND selector — the shell root carries .kx-v2-root and .kx-app on
+   * the SAME element, so a descendant selector never matches and the 320px
+   * track would leave a gap beside the 256px sidebar. */
+  .kx-v2-root.kx-app:not(.kx-app--rail) {
     grid-template-columns: 256px 1fr;
   }
 
-  .kx-v2-sidebar {
+  /* Excludes --rail so manual collapse still wins (a bare .kx-v2-sidebar
+   * rule here would defeat the rail width at equal specificity — the
+   * broken minimize/maximize). */
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) {
     width: 256px;
     min-width: 256px;
   }
@@ -1434,5 +1364,241 @@
 @media (min-width: 761px) and (max-width: 1280px) {
   .kx-v2-pop__panel {
     left: 76px;
+  }
+}
+
+/* ── Sessions disclosure group (nested recents) ─────────────────────── */
+
+.kx-v2-navitem__chevron {
+  display: inline-flex;
+  margin-left: auto;
+  color: var(--kx-muted);
+  transition: transform 140ms ease-out;
+}
+
+.kx-v2-navitem__chevron--open {
+  transform: rotate(180deg);
+}
+
+.kx-v2-sessions-group {
+  margin: 2px 0 4px 20px;
+  padding-left: 8px;
+  /* Indented tree zone under the Sessions row. */
+  border-left: 1px solid var(--kx-border);
+}
+
+.kx-v2-sessions-group .kx-v2-recent__list {
+  gap: 0;
+}
+
+.kx-v2-sessions-group .kx-v2-recent__item {
+  min-height: 32px;
+  padding: 5px 6px;
+  border-radius: 10px;
+}
+
+.kx-v2-sessions-view-all {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 32px;
+  margin-top: 2px;
+  padding: 4px 6px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-muted-text-aa);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-v2-sessions-view-all:hover,
+.kx-v2-sessions-view-all:focus-visible {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-sessions-view-all:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+}
+
+/* ── Search palette (⌘K) ────────────────────────────────────────────── */
+
+.kx-v2-search__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgb(var(--kx-ink-rgb) / 0.4);
+  animation: kx-v2-pop-fade 180ms ease-out;
+}
+
+.kx-v2-search__panel {
+  position: fixed;
+  top: 15vh;
+  left: 50%;
+  z-index: 81;
+  display: flex;
+  flex-direction: column;
+  width: min(560px, calc(100vw - 32px));
+  max-height: 60vh;
+  overflow: hidden;
+  border: 1px solid var(--kx-border);
+  border-radius: 16px;
+  background: var(--kx-raised);
+  box-shadow:
+    0 2px 6px rgb(var(--kx-ink-rgb) / 0.06),
+    0 24px 56px rgb(var(--kx-ink-rgb) / 0.16);
+  transform: translateX(-50%);
+}
+
+.kx-v2-search__input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 6px 16px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-v2-search__glyph {
+  display: inline-flex;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-search__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-l);
+  color: var(--kx-primary);
+}
+
+.kx-v2-search__input::placeholder {
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-search__input:focus {
+  outline: none;
+}
+
+.kx-v2-search__results {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.kx-v2-search__label {
+  display: block;
+  padding: 6px 8px 4px;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-search__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kx-v2-search__row--active,
+.kx-v2-search__row:hover {
+  background: var(--kx-pale);
+}
+
+.kx-v2-search__row:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: -2px;
+}
+
+.kx-v2-search__row-icon {
+  display: inline-flex;
+  width: 18px;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-search__row-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+}
+
+.kx-v2-search__row-meta {
+  flex-shrink: 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-search__empty {
+  margin: 0;
+  padding: 16px 8px;
+  font-size: var(--kx-text-l);
+  color: var(--kx-muted-text-aa);
+  text-align: center;
+}
+
+/* ── Rounded-theme bumps ──────────────────────────────────────────────
+ * The owner asked for a rounder overall theme: quiet rows and small
+ * controls step from 8-10px to 12px; cards and overlay panels from
+ * 10-12px to 14-16px. One consistent scale, tokens only. */
+
+.kx-v2-navitem,
+.kx-v2-new-session,
+.kx-v2-account {
+  border-radius: 12px;
+}
+
+.kx-v2-theme {
+  border-radius: 12px;
+}
+
+.kx-v2-pop__panel {
+  border-radius: 14px;
+}
+
+.kx-v2-pop__row,
+.kx-v2-pop__workspace,
+.kx-v2-pop__system-row,
+.kx-v2-pop__search {
+  border-radius: 10px;
+}
+
+@media (min-width: 761px) and (max-width: 1280px) {
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-context {
+    min-height: 40px;
+    margin-bottom: 10px;
+    padding: 0;
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-context__mark {
+    width: 28px;
+    height: 28px;
+    border-color: transparent;
+    background: var(--kx-pale);
   }
 }

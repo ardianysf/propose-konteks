@@ -207,3 +207,56 @@
       0 12px 32px rgb(var(--kx-ink-rgb) / 0.08);
   }
 }
+
+/* ── 9. Intro copy removed; illustration stays ──────────────────────────
+ * The owner removed the intro heading/body text ("New session / Start
+ * governed work…"): the spans stay in the accessibility tree (screen
+ * readers keep the context) but paint nothing. The illustration keeps
+ * its place above the composer. */
+.kx-v2-root .kx-new-session__intro-heading,
+.kx-v2-root .kx-new-session__intro-body {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Defensive: clipped sr-only chrome in the canvas must never intercept
+ * pointer events (this exact bug blocked the sidebar expand control). */
+.kx-v2-root .kx-main .kx-u-sr-only {
+  pointer-events: none;
+}
+
+/* ── 10. Rounder content theme ─────────────────────────────────────────── */
+
+.kx-v2-root .kx-composer,
+.kx-v2-root .kx-panel__input-box {
+  border-radius: 16px;
+}
+
+.kx-v2-root .kx-panel__pill {
+  border-radius: 12px;
+}
+
+.kx-v2-root .kx-composer__send,
+.kx-v2-root .kx-composer__reviews,
+.kx-v2-root .kx-history__search,
+.kx-v2-root .kx-history__select {
+  border-radius: 10px;
+}
+
+.kx-v2-root .kx-history__row:hover,
+.kx-v2-root .kx-history__row-button:focus-visible {
+  border-radius: 12px;
+}
+
+.kx-v2-root .kx-session-detail .kx-chip,
+.kx-v2-root .kx-session-detail__cycle-pill {
+  border-radius: 10px;
+}
