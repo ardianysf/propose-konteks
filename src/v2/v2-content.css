@@ -1,0 +1,180 @@
+/*
+ * v2-content.css — clean redesign of the /v2 main canvas CONTENT.
+ *
+ * Architecture: the production page components (src/pages/**,
+ * src/components/**) are shared with the `/` app and stay untouched.
+ * Every rule here is scoped under `.kx-v2-root` (the class V2Shell puts
+ * on the app root), so `/` never sees any of it.
+ *
+ * Direction (Operate, clean): de-box the canvas — one radius language
+ * (cards 12px, controls 8-10px), one primary-action language (solid
+ * accent, matching the sidebar's New session button), spacing instead
+ * of border soup, ghost chrome for secondary pills. Colors stay 100%
+ * --kx-* tokens; light and dark both resolve through them. No vertical
+ * metrics of the tuned responsive contracts (one-screen mobile,
+ * short-height desktop) are altered — only surfaces, radii, borders,
+ * and state treatments.
+ */
+
+/* ── 1. Composer card + input box — unified card radius ────────────── */
+
+.kx-v2-root .kx-composer {
+  border-radius: 12px;
+}
+
+.kx-v2-root .kx-panel__input-box {
+  border-radius: 12px;
+}
+
+/* ── 2. Primary action — one language with the sidebar's New session ──
+ * Solid accent fill, accent ink, weight 500, quiet 8px radius. Replaces
+ * the rgba-tint pill (bg wash + accent border + bold) whose three
+ * competing signals read busy next to the calm canvas. */
+
+.kx-v2-root .kx-composer__send {
+  padding: 8px 16px;
+  background: var(--kx-accent-solid-aa);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-accent-solid-ink);
+  transition:
+    background-color 0.14s ease-out,
+    transform 0.14s ease-out;
+}
+
+.kx-v2-root .kx-composer__send:hover:not(:disabled) {
+  background: var(--kx-accent-strong);
+  border-color: transparent;
+  color: var(--kx-accent-solid-ink);
+}
+
+.kx-v2-root .kx-composer__send:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.kx-v2-root .kx-composer__send:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+}
+
+.kx-v2-root .kx-composer__send:disabled {
+  opacity: 0.45;
+}
+
+/* ── 3. Setup pills — soft rectangles, not capsules ───────────────────
+ * The top row's system/component/mode pills are setup controls, not
+ * status: 10px radius, 36px height, quiet hover. Kills the pill-soup
+ * without losing the affordance. */
+
+.kx-v2-root .kx-panel__pill {
+  min-height: 36px;
+  border-radius: 10px;
+}
+
+.kx-v2-root .kx-panel__pill:hover {
+  background: var(--kx-pale);
+  border-color: var(--kx-accent);
+}
+
+.kx-v2-root .kx-panel__pill:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+}
+
+/* ── 4. Reviews pill — ghost, weight down ────────────────────────────
+ * Secondary reference, not an action: transparent at rest, badge keeps
+ * the accent count. */
+
+.kx-v2-root .kx-composer__reviews {
+  min-height: 36px;
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+  transition:
+    background-color 0.14s ease-out,
+    color 0.14s ease-out;
+}
+
+.kx-v2-root .kx-composer__reviews:hover {
+  background: var(--kx-pale);
+  border-color: transparent;
+  color: var(--kx-primary);
+}
+
+.kx-v2-root .kx-composer__reviews:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+}
+
+/* ── 5. History — flat list, spacing over rules, quiet filters ─────── */
+
+/* Filter inputs: pale fill, invisible border until focus. */
+
+.kx-v2-root .kx-history__search,
+.kx-v2-root .kx-history__select {
+  border-color: transparent;
+  border-radius: 8px;
+  background: var(--kx-pale);
+  transition:
+    background-color 0.14s ease-out,
+    border-color 0.14s ease-out;
+}
+
+.kx-v2-root .kx-history__search:hover,
+.kx-v2-root .kx-history__select:hover {
+  border-color: var(--kx-border);
+}
+
+.kx-v2-root .kx-history__search:focus,
+.kx-v2-root .kx-history__select:focus {
+  border-color: var(--kx-accent-strong);
+}
+
+/* Rows: no per-row hairlines — hover tint + radius carries the row.
+ * The list's top rule goes too; the page title band already separates. */
+
+.kx-v2-root .kx-history__list {
+  border-top: 0;
+}
+
+.kx-v2-root .kx-history__row {
+  padding: 12px 10px;
+  border-bottom: 0;
+}
+
+.kx-v2-root .kx-history__row:hover {
+  background: var(--kx-pale);
+  border-radius: 10px;
+}
+
+.kx-v2-root .kx-history__row-button:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+/* ── 6. Detail — meta chips become quiet fills ─────────────────────── */
+
+.kx-v2-root .kx-session-detail .kx-chip,
+.kx-v2-root .kx-session-detail__cycle-pill {
+  background: var(--kx-pale);
+  border-color: transparent;
+  border-radius: 8px;
+  color: var(--kx-secondary);
+}
+
+.kx-v2-root .kx-session-detail .kx-chip:hover {
+  border-color: transparent;
+  background: var(--kx-accent-segment-aa);
+  color: var(--kx-primary);
+}
+
+/* ── 7. Disclaimer — one step quieter ──────────────────────────────── */
+
+.kx-v2-root .kx-new-session__disclaimer {
+  letter-spacing: 0.01em;
+}
