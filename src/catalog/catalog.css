@@ -1224,9 +1224,33 @@ html.kx-catalog-page {
 }
 
 /* Neutralize the production .kx-menu absolute anchoring inside the
- * workspace-menu preview frame only (see registry.tsx WorkspaceMenuPreview). */
+ * workspace-menu preview frame only (see registry.tsx WorkspaceMenuPreview).
+ * The execution-profile cluster carries its own absolute anchoring
+ * (bottom: calc(100% + 10px)) — neutralize it too, or the whole menu
+ * floats out of the preview frame and clips to the label strip. */
 .kx-cat-preview-static-menu .kx-menu {
   position: static;
+}
+
+.kx-cat-preview-static-menu .kx-profile-menu-cluster {
+  position: static;
+}
+
+/* Anchored-menu fixture (composer menu-open variant): keep the menu's
+ * production absolute anchoring; the wrapper is the positioning context
+ * with headroom, so the pill rows keep their natural height and the
+ * opened menu renders beside/below its trigger like in the product. */
+.kx-cat-preview-anchored-menu {
+  position: relative;
+  min-height: 430px;
+}
+
+/* The production menu opens ABOVE its trigger (bottom: calc(100% + 8px));
+ * inside the catalog plate that lands on the previous variant's row.
+ * Flip it below the trigger for the fixture only. */
+.kx-cat-preview-anchored-menu .kx-component-menu {
+  bottom: auto;
+  top: calc(100% + 8px);
 }
 
 /* Overlay/modal fixtures (T6): render dialogs + drawers statically inside

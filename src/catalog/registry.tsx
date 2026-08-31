@@ -162,7 +162,10 @@ function composerPreview(mod: LoadedModule): ReactNode {
       label: <code>component menu terbuka</code>,
       node: (
         <Fixture overrides={{ overlay: { kind: 'component-menu' } }}>
-          <div className="kx-cat-preview-static-menu">
+          {/* Anchored container: the composer's menu keeps its production
+           * absolute anchoring (unlike the static-menu fixtures); the
+           * wrapper supplies the positioning context and headroom. */}
+          <div className="kx-cat-preview-anchored-menu">
             <Composer />
           </div>
         </Fixture>
