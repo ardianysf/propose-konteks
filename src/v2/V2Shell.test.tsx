@@ -309,6 +309,38 @@ describe('V2ContextPopover', () => {
     expect(screen.queryByTestId('v2-context-popover')).not.toBeInTheDocument()
   })
 
+  it('scopes systems to the workspace or to every system via the All systems chip', () => {
+    render(<V2App />)
+    fireEvent.click(screen.getByTestId(TRIGGERS.context))
+    const popover = getContextPopover()
+
+    // Default: workspace-scoped — Hanoman (another workspace) is hidden.
+    expect(screen.getByTestId('v2-popover-scope-workspace')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(within(popover).queryByText('Hanoman')).not.toBeInTheDocument()
+
+    // All systems: every system across all workspaces appears.
+    fireEvent.click(screen.getByTestId('v2-popover-scope-all'))
+    expect(screen.getByTestId('v2-popover-scope-all')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(within(popover).getByText('Hanoman')).toBeInTheDocument()
+    expect(within(popover).getByText('BSI - HRIS')).toBeInTheDocument()
+
+    // Switching workspace resets the scope to the chosen workspace.
+    fireEvent.click(screen.getByTestId('v2-popover-workspace'))
+    fireEvent.click(screen.getByTestId('v2-popover-workspace-ws-mpm'))
+    expect(screen.getByTestId('v2-popover-scope-workspace')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(within(popover).queryByText('Hanoman')).not.toBeInTheDocument()
+    expect(within(popover).getByText('MPM - Mytok')).toBeInTheDocument()
+  })
+
   it('filters the system list from the local search field', () => {
     render(<V2App />)
     fireEvent.click(screen.getByTestId(TRIGGERS.context))
