@@ -596,12 +596,36 @@
   align-items: center;
 }
 
-/* Rail search — parks at the bottom of the rail, above the account
- * avatar (the quiet utility spot under every icon). */
-.kx-v2-footer__search {
+/* Rail search — directly below the brand, matching the top slot it
+ * holds beside the wordmark in the expanded sidebar. */
+.kx-v2-rail-search {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+}
+
+/* One rail geometry: every icon row is the SAME 40px rounded tile so
+ * brand, search, avatar, menu actions, and the sessions clock align on
+ * one axis — no nested 28px chip floating inside a 40px row. */
+.kx-v2-sidebar--rail .kx-v2-menuitem,
+.kx-v2-sidebar--rail .kx-v2-context,
+.kx-v2-sidebar--rail .kx-v2-rail-search {
+  margin-inline: auto;
+}
+
+.kx-v2-sidebar--rail .kx-v2-menuitem {
+  width: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  justify-content: center;
+}
+
+.kx-v2-sidebar--rail .kx-v2-menuitem__icon {
   width: 40px;
   height: 40px;
-  margin-bottom: 6px;
   border-radius: 12px;
 }
 
@@ -1856,9 +1880,9 @@
  * elevation make it an identity object before it is an affordance. */
 .kx-v2-context {
   display: flex;
-  min-height: 72px;
-  gap: 12px;
-  padding: 12px;
+  min-height: 58px;
+  gap: 10px;
+  padding: 7px 8px;
   border-color: var(--kx-border);
   border-radius: 16px;
   background: var(--kx-raised);
@@ -1874,13 +1898,13 @@
 }
 
 .kx-v2-context__mark {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: 999px;
   background: var(--kx-accent-solid-aa);
   color: var(--kx-accent-solid-ink);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: var(--kx-font-bold);
 }
 
@@ -1889,7 +1913,7 @@
 }
 
 .kx-v2-context__system {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: var(--kx-font-bold);
   line-height: 1.25;
 }
@@ -1906,9 +1930,9 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
   background: var(--kx-pale);
   color: var(--kx-muted-text-aa);
 }
@@ -2012,14 +2036,13 @@
   display: none;
 }
 
-.kx-v2-sidebar--rail .kx-v2-menuitem {
-  width: 40px;
-  min-width: 40px;
-  padding: 0;
-  justify-content: center;
-}
-
 @media (min-width: 761px) and (max-width: 1280px) {
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-menuitem,
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-context,
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-rail-search {
+    margin-inline: auto;
+  }
+
   .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-context__chevron,
   .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-menuitem__label {
     display: none;
@@ -2028,7 +2051,14 @@
   .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-menuitem {
     width: 40px;
     min-width: 40px;
+    min-height: 40px;
     padding: 0;
     justify-content: center;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-menuitem__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
   }
 }

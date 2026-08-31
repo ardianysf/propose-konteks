@@ -74,6 +74,53 @@ export function ClockIcon() {
   )
 }
 
+/* Proper sidebar-collapse glyph: a panel with its own divider and a
+ * directional chevron — left when the sidebar can collapse, right when
+ * the rail can expand. */
+export function PanelCollapseIcon({ collapsed }: { collapsed: boolean }) {
+  return (
+    <svg
+      data-icon="panel-collapse"
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect
+        x="1.75"
+        y="3"
+        width="12.5"
+        height="10"
+        rx="2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.3"
+      />
+      <line x1="5.25" y1="3" x2="5.25" y2="13" stroke="currentColor" strokeWidth="1.3" />
+      {collapsed ? (
+        <path
+          d="M9.6 6.2 11.4 8l-1.8 1.8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ) : (
+        <path
+          d="M11.4 6.2 9.6 8l1.8 1.8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      )}
+    </svg>
+  )
+}
+
 export function CheckIcon() {
   return (
     <svg
