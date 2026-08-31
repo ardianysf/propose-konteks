@@ -27,12 +27,12 @@ import { useEffect, useRef, useState } from 'react'
 import { RECENT_SESSIONS } from '../data/mockData'
 import { resolveV2Workspace, V2_WORKSPACES } from './v2Workspaces'
 import { useMockup } from '../state/MockupContext'
-import CollapseIcon from '../components/shell/CollapseIcon'
 import {
   CatalogIcon,
   ChevronDown,
   ClockIcon,
   NewSessionIcon,
+  PanelCollapseIcon,
   PinIcon,
   SearchIcon,
   SlidersIcon,
@@ -206,7 +206,7 @@ export default function V2Sidebar() {
           >
             <img className="kx-v2-brand__img" src={LOGO_RAIL_SRC} alt="" width={32} height={32} />
             <span className="kx-v2-brand__expand-icon" aria-hidden="true">
-              <CollapseIcon collapsed />
+              <PanelCollapseIcon collapsed />
             </span>
           </button>
         ) : (
@@ -230,7 +230,7 @@ export default function V2Sidebar() {
             />
           </>
         )}
-        {!collapsed && (
+        {!railLayout && (
           <button
             type="button"
             className="kx-v2-iconbtn kx-v2-brand__search"
@@ -242,7 +242,7 @@ export default function V2Sidebar() {
             <SearchIcon />
           </button>
         )}
-        {!collapsed && (
+        {!railLayout && (
           <button
             type="button"
             className="kx-v2-iconbtn kx-v2-brand__collapse"
@@ -250,10 +250,25 @@ export default function V2Sidebar() {
             data-testid="v2-sidebar-toggle"
             onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
           >
-            <CollapseIcon collapsed={false} />
+            <PanelCollapseIcon collapsed={false} />
           </button>
         )}
       </div>
+
+      {/* Rail: Search sits directly BELOW the brand — the same top slot
+          it occupies next to the wordmark in the expanded sidebar. */}
+      {railLayout && (
+        <button
+          type="button"
+          className="kx-v2-iconbtn kx-v2-rail-search"
+          aria-label="Search"
+          aria-keyshortcuts="Meta+K Control+K"
+          data-testid="v2-search-rail-trigger"
+          onClick={() => setSearchOpen(true)}
+        >
+          <SearchIcon />
+        </button>
+      )}
 
       {/* 2 — One context trigger: active system over the workspace/plan
           summary. Opens the combined context popover. */}
@@ -418,20 +433,6 @@ export default function V2Sidebar() {
       {/* 6 — Footer cluster (hairline divider above): just the account
           row opening its popover. Theme lives inside the account popover. */}
       <div className="kx-v2-footer">
-        {/* Rail: Search parks at the bottom of the rail, above the
-            account avatar — the quiet utility spot under every icon. */}
-        {railLayout && (
-          <button
-            type="button"
-            className="kx-v2-iconbtn kx-v2-footer__search"
-            aria-label="Search"
-            aria-keyshortcuts="Meta+K Control+K"
-            data-testid="v2-search-rail-trigger"
-            onClick={() => setSearchOpen(true)}
-          >
-            <SearchIcon />
-          </button>
-        )}
         <button
           ref={accountTriggerRef}
           type="button"

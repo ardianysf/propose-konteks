@@ -191,6 +191,17 @@ describe('V2Sidebar labels', () => {
     // Bottom search opens the palette from the rail.
     fireEvent.click(screen.getByTestId('v2-search-rail-trigger'))
     expect(screen.getByTestId('v2-search-palette')).toBeInTheDocument()
+
+    // Rail search sits directly BELOW the brand and ABOVE the context
+    // card — the same top slot it holds beside the wordmark when
+    // expanded.
+    const railSearch = screen.getByTestId('v2-search-rail-trigger')
+    const brand = screen.getByTestId('v2-sidebar-toggle')
+    const context = screen.getByTestId(TRIGGERS.context)
+    const follows = (a: Element, b: Element) =>
+      (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0
+    expect(follows(brand, railSearch)).toBe(true)
+    expect(follows(railSearch, context)).toBe(true)
   })
 
   it('renders the exact navigation labels', () => {
