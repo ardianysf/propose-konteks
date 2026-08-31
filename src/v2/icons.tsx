@@ -80,6 +80,29 @@ export function SessionsIcon() {
   )
 }
 
+/** Magnifier — the search trigger and palette input glyph. */
+export function SearchIcon() {
+  return (
+    <svg
+      data-icon="search"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="7" cy="7" r="4.75" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M10.6 10.6L14 14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 /** Plus — the rail-mode New session control and the create-system row. */
 export function PlusIcon() {
   return (

@@ -130,14 +130,24 @@ describe('V2Shell frame', () => {
     expect(container.querySelector('.kx-app__mobile-toggle')).not.toBeNull()
   })
 
-  it('renders the new-session page by default, session-history after Sessions, and session-detail from a history row', () => {
+  it('renders the new-session page by default, session-history after View all, and session-detail from a history row', () => {
     render(<V2App />)
 
     // Default route: the New Session page inside <main>.
     expect(newSessionHeading()).toBeInTheDocument()
 
-    // Sessions -> session-history.
-    fireEvent.click(screen.getByTestId(TRIGGERS.sessions))
+    // Sessions is now a disclosure: tapping it collapses/expands the
+    // nested recent items; "View all" navigates to session-history.
+    const sessions = screen.getByTestId(TRIGGERS.sessions)
+    expect(sessions).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('EDP Integration Fix - Mobile')).toBeInTheDocument()
+    fireEvent.click(sessions)
+    expect(sessions).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText('EDP Integration Fix - Mobile')).not.toBeInTheDocument()
+    fireEvent.click(sessions)
+    expect(sessions).toHaveAttribute('aria-expanded', 'true')
+
+    fireEvent.click(screen.getByTestId('v2-view-all-trigger'))
     expect(historyHeading()).toBeInTheDocument()
 
     // A history row -> session-detail.
@@ -162,7 +172,8 @@ describe('V2Sidebar labels', () => {
     render(<V2App />)
     expect(screen.getByRole('button', { name: 'New session' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sessions' })).toBeInTheDocument()
-    expect(screen.getByText('Recent')).toBeInTheDocument()
+    expect(screen.getByText('View all')).toBeInTheDocument()
+    expect(screen.queryByText('Recent')).not.toBeInTheDocument()
     // The context trigger names the active system over the workspace/plan
     // summary; the account row names the user.
     expect(screen.getByText('BSI - HRIS')).toBeInTheDocument()
@@ -170,16 +181,16 @@ describe('V2Sidebar labels', () => {
     expect(screen.getByText('Refactory Admin')).toBeInTheDocument()
   })
 
-  it('marks New session as the current page on the default route and moves aria-current to Sessions after navigating', () => {
+  it('marks New session as the current page on the default route and moves aria-current to View all after navigating', () => {
     render(<V2App />)
     const newSession = screen.getByTestId(TRIGGERS.newSession)
-    const sessions = screen.getByTestId(TRIGGERS.sessions)
+    const viewAll = screen.getByTestId('v2-view-all-trigger')
     expect(newSession).toHaveAttribute('aria-current', 'page')
-    expect(sessions).not.toHaveAttribute('aria-current')
+    expect(viewAll).not.toHaveAttribute('aria-current')
 
-    fireEvent.click(sessions)
+    fireEvent.click(viewAll)
     expect(newSession).not.toHaveAttribute('aria-current')
-    expect(sessions).toHaveAttribute('aria-current', 'page')
+    expect(viewAll).toHaveAttribute('aria-current', 'page')
   })
 
   it('renders the popover triggers with dialog semantics and collapsed state', () => {
@@ -194,7 +205,7 @@ describe('V2Sidebar labels', () => {
 
   it('renders recent sessions with the persistent "system - time" secondary line', () => {
     render(<V2App />)
-    const list = screen.getByRole('list', { name: 'Recent' })
+    const list = screen.getByRole('list')
     const rows = within(list).getAllByRole('listitem')
     // The full recent-sessions set renders (pins only reorder, never drop).
     expect(rows).toHaveLength(5)
@@ -473,5 +484,46 @@ describe('V2Sidebar craft floor', () => {
     expect(systemName.closest('.kx-v2-context__copy')).toBe(
       planLine.closest('.kx-v2-context__copy'),
     )
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Search palette (⌘K) — the brand-row search button
+// ---------------------------------------------------------------------------
+
+describe('V2SearchPalette', () => {
+  it('opens from the search button, filters sessions and systems, and closes on Escape', () => {
+    render(<V2App />)
+    expect(screen.queryByTestId('v2-search-palette')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('v2-search-trigger'))
+    const palette = screen.getByTestId('v2-search-palette')
+    const inPalette = within(palette)
+    expect(palette).toBeInTheDocument()
+    expect(screen.getByLabelText('Search sessions and systems')).toHaveFocus()
+
+    // Unfiltered: both groups render.
+    expect(inPalette.getByText('Sessions', { selector: '.kx-v2-search__label' })).toBeInTheDocument()
+    expect(inPalette.getByText('Systems', { selector: '.kx-v2-search__label' })).toBeInTheDocument()
+    expect(inPalette.getByText('EDP Integration Fix - Mobile')).toBeInTheDocument()
+    expect(inPalette.getByText('BSI - HRIS')).toBeInTheDocument()
+
+    // Type a query: filtering applies.
+    fireEvent.change(screen.getByLabelText('Search sessions and systems'), {
+      target: { value: 'canteen' },
+    })
+    expect(inPalette.queryByText('EDP Integration Fix - Mobile')).not.toBeInTheDocument()
+    expect(inPalette.getByText('BSI Canteen')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByTestId('v2-search-palette')).not.toBeInTheDocument()
+  })
+
+  it('activating a session result navigates to session-history with the search applied', () => {
+    render(<V2App />)
+    fireEvent.click(screen.getByTestId('v2-search-trigger'))
+    fireEvent.click(within(screen.getByTestId('v2-search-palette')).getByText('EDP Integration Fix - Mobile'))
+    expect(screen.getByRole('heading', { name: 'Session history', level: 1 })).toBeInTheDocument()
+    expect(screen.queryByTestId('v2-search-palette')).not.toBeInTheDocument()
   })
 })
