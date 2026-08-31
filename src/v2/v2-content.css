@@ -208,23 +208,13 @@
   }
 }
 
-/* ── 9. Intro copy removed; illustration stays ──────────────────────────
- * The owner removed the intro heading/body text ("New session / Start
- * governed work…"): the spans stay in the accessibility tree (screen
- * readers keep the context) but paint nothing. The illustration keeps
- * its place above the composer. */
-.kx-v2-root .kx-new-session__intro-heading,
-.kx-v2-root .kx-new-session__intro-body {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  pointer-events: none;
+/* ── 9. Header text removed — intro copy stays ───────────────────────────
+ * Owner correction: the text that disappears is the page HEADER band's
+ * copy (h1 "New session", subtitle, approval note), not the intro
+ * heading/body above the composer. The header is removed outright
+ * (including from assistive tech); the intro keeps speaking. */
+.kx-v2-root .kx-new-session__header {
+  display: none;
 }
 
 /* Defensive: clipped sr-only chrome in the canvas must never intercept

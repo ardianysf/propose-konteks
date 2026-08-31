@@ -6,7 +6,7 @@
  *   - the frame is exactly one <nav> landmark + one <main>, and each
  *     route's page renders inside it;
  *   - the exact navigation labels ("New session", "Sessions", "Recent",
- *     "Refactory · Team plan (illustrative)", "Refactory Admin");
+ *     "Refactory · Team plan", "Refactory Admin");
  *   - NAVIGATE dispatches proven through rendered page changes;
  *   - the sidebar's own V2ContextPopover / V2AccountPopover (the shell
  *     mounts no Workspace/System/Account menus anymore) open exclusively
@@ -172,12 +172,15 @@ describe('V2Sidebar labels', () => {
     render(<V2App />)
     expect(screen.getByRole('button', { name: 'New session' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sessions' })).toBeInTheDocument()
-    expect(screen.getByText('View all')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View all sessions' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Customize' })).toBeInTheDocument()
+    expect(screen.getByText('Component catalog')).toBeInTheDocument()
     expect(screen.queryByText('Recent')).not.toBeInTheDocument()
+    expect(screen.queryByText('View all')).not.toBeInTheDocument()
     // The context trigger names the active system over the workspace/plan
     // summary; the account row names the user.
     expect(screen.getByText('BSI - HRIS')).toBeInTheDocument()
-    expect(screen.getByText('Refactory · Team plan (illustrative)')).toBeInTheDocument()
+    expect(screen.getByText('Refactory · Team plan')).toBeInTheDocument()
     expect(screen.getByText('Refactory Admin')).toBeInTheDocument()
   })
 
@@ -309,30 +312,29 @@ describe('V2ContextPopover', () => {
 // ---------------------------------------------------------------------------
 
 describe('V2AccountPopover', () => {
-  it('opens from the footer account row with the customize/settings/logout rows', () => {
+  it('opens from the footer account row with the settings/logout rows (customize and catalog moved to the sidebar)', () => {
     render(<V2App />)
     fireEvent.click(screen.getByTestId(TRIGGERS.account))
 
     const popover = getAccountPopover()
     expect(screen.getByTestId(TRIGGERS.account)).toHaveAttribute('aria-expanded', 'true')
-    for (const label of [
-      'Customize',
-      'Component catalog',
-      'Settings',
-      'Billing',
-      'Log out',
-    ]) {
+    for (const label of ['Settings', 'Billing', 'Integrations', 'Keyboard shortcuts', 'Log out']) {
       expect(within(popover).getAllByText(label).length).toBeGreaterThanOrEqual(1)
     }
+    expect(within(popover).queryByText('Customize')).not.toBeInTheDocument()
+    expect(within(popover).queryByText('Component catalog')).not.toBeInTheDocument()
   })
 
-  it('links Component catalog to /catalog in a new tab', () => {
+  it('sidebar menu rows: Customize opens the customize modal, Component catalog links to /catalog', async () => {
     render(<V2App />)
-    fireEvent.click(screen.getByTestId(TRIGGERS.account))
-    const link = within(getAccountPopover()).getByTestId('v2-popover-catalog')
-    expect(link).toHaveAttribute('href', '/catalog')
-    expect(link).toHaveAttribute('target', '_blank')
-    expect(link).toHaveAttribute('rel', 'noreferrer')
+
+    // Catalog — plain anchor to the catalog page.
+    const catalog = screen.getByTestId('v2-catalog-trigger')
+    expect(catalog).toHaveAttribute('href', '/catalog')
+
+    // Customize — dispatches the customize overlay and the modal mounts.
+    fireEvent.click(screen.getByTestId('v2-customize-trigger'))
+    expect(await screen.findByTestId('customize-modal')).toBeInTheDocument()
   })
 
   it('closes on Escape and restores trigger focus', async () => {
@@ -476,7 +478,7 @@ describe('V2Sidebar craft floor', () => {
     // The mark carries the workspace initial.
     expect(within(trigger).getByText(WORKSPACE.name[0])).toBeInTheDocument()
     const systemName = within(trigger).getByText('BSI - HRIS')
-    const planLine = within(trigger).getByText('Refactory · Team plan (illustrative)')
+    const planLine = within(trigger).getByText('Refactory · Team plan')
     const follows = (a: Element, b: Element) =>
       (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0
     expect(follows(systemName, planLine)).toBe(true)
