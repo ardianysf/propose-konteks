@@ -322,10 +322,26 @@
  * stack vertically with full-width controls — and the groups region can
  * scroll horizontally so wide repository rows never clip. */
 @media (max-width: 760px) {
+  /* The stacked toolbar/footer are taller than their single-row desktop
+   * forms; without a floor on the middle track the grid's minmax(0, 1fr)
+   * collapses the groups region to nothing (content "disappears"). Give
+   * the list a 180px floor and track the dynamic viewport height. */
+  .kx-repo-modal {
+    height: min(570px, calc(100dvh - 48px));
+    grid-template-rows: auto minmax(180px, 1fr) auto;
+  }
+
   .kx-repo-modal__toolbar {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
+  }
+
+  /* The search's desktop flex-basis (340px) is a HEIGHT in the stacked
+   * column flow — reset it so the input sizes to its content again. */
+  .kx-repo-modal__search {
+    flex: none;
+    max-width: none;
   }
 
   .kx-repo-modal__groups {
