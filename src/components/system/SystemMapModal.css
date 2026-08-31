@@ -587,3 +587,26 @@
 .kx-system-map__graph-container:not(.has-selection) .react-flow__node {
   opacity: 1;
 }
+
+/* ── Mobile (≤760px): the map modal fills the phone width ─────────────
+ * Phones get a tighter gutter (24px total) and a dynamic-viewport height
+ * so the address bar never clips the modal; the graph container's fixed
+ * 480px height yields to the remaining space. */
+@media (max-width: 760px) {
+  .kx-system-map {
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+
+  .kx-system-map__empty,
+  .kx-system-map__graph-container {
+    min-height: 0;
+    height: auto;
+    flex: 1 1 auto;
+  }
+
+  .kx-system-map__graph-container {
+    min-height: 320px;
+  }
+}
