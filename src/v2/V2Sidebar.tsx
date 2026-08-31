@@ -31,6 +31,7 @@ import CollapseIcon from '../components/shell/CollapseIcon'
 import {
   CatalogIcon,
   ChevronDown,
+  ClockIcon,
   NewSessionIcon,
   PinIcon,
   SearchIcon,
@@ -98,6 +99,22 @@ export default function V2Sidebar() {
   // Sessions disclosure — the chevron row expands/collapses the recent
   // items beneath it (the standalone "Recent" section is gone).
   const [sessionsOpen, setSessionsOpen] = useState(true)
+
+  // Rail layout: the manual toggle OR the forced 761–1280px band. Both
+  // switch the DOM (not just CSS) so the rail affordances — clock-icon
+  // Sessions navigation and the bottom Search — behave identically
+  // everywhere. (jsdom has no real matchMedia; the guard keeps tests on
+  // the expanded layout.)
+  const [forcedBand, setForcedBand] = useState(false)
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
+    const query = window.matchMedia('(min-width: 761px) and (max-width: 1280px)')
+    const sync = () => setForcedBand(query.matches)
+    sync()
+    query.addEventListener('change', sync)
+    return () => query.removeEventListener('change', sync)
+  }, [])
+  const railLayout = collapsed || forcedBand
 
   // Search palette — opened from the brand-row search button or ⌘K.
   const [searchOpen, setSearchOpen] = useState(false)
@@ -305,38 +322,55 @@ export default function V2Sidebar() {
 
       {/* Sessions has exactly one chevron at the far right. The text area
           navigates to the session list; the chevron independently toggles
-          the child sessions and rotates to reflect the disclosure state. */}
+          the child sessions and rotates to reflect the disclosure state.
+          In the rail it collapses to a single CLOCK icon that navigates
+          straight to the session list. */}
       <div className="kx-v2-sessions-block">
-        <div className="kx-v2-sessions-row">
-          <button
-            type="button"
-            className="kx-v2-sessions-label"
-            aria-current={state.route === 'session-history' ? 'page' : undefined}
-            data-testid="v2-sessions-trigger"
-            onClick={() => dispatch({ type: 'NAVIGATE', route: 'session-history' })}
-          >
-            Sessions
-          </button>
-          <button
-            type="button"
-            className="kx-v2-sessions-toggle"
-            aria-label={sessionsOpen ? 'Collapse sessions' : 'Expand sessions'}
-            aria-expanded={sessionsOpen}
-            aria-controls="kx-v2-sessions-group"
-            data-testid="v2-sessions-toggle"
-            onClick={() => setSessionsOpen((open) => !open)}
-          >
-            <span
-              className={
-                sessionsOpen
-                  ? 'kx-v2-sessions-toggle__icon kx-v2-sessions-toggle__icon--open'
-                  : 'kx-v2-sessions-toggle__icon'
-              }
-              aria-hidden="true"
+        <div className={railLayout ? 'kx-v2-sessions-row kx-v2-sessions-row--rail' : 'kx-v2-sessions-row'}>
+          {railLayout ? (
+            <button
+              type="button"
+              className="kx-v2-sessions-rail"
+              aria-label="Sessions"
+              aria-current={state.route === 'session-history' ? 'page' : undefined}
+              data-testid="v2-sessions-rail"
+              onClick={() => dispatch({ type: 'NAVIGATE', route: 'session-history' })}
             >
-              <ChevronDown />
-            </span>
-          </button>
+              <ClockIcon />
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="kx-v2-sessions-label"
+                aria-current={state.route === 'session-history' ? 'page' : undefined}
+                data-testid="v2-sessions-trigger"
+                onClick={() => dispatch({ type: 'NAVIGATE', route: 'session-history' })}
+              >
+                Sessions
+              </button>
+              <button
+                type="button"
+                className="kx-v2-sessions-toggle"
+                aria-label={sessionsOpen ? 'Collapse sessions' : 'Expand sessions'}
+                aria-expanded={sessionsOpen}
+                aria-controls="kx-v2-sessions-group"
+                data-testid="v2-sessions-toggle"
+                onClick={() => setSessionsOpen((open) => !open)}
+              >
+                <span
+                  className={
+                    sessionsOpen
+                      ? 'kx-v2-sessions-toggle__icon kx-v2-sessions-toggle__icon--open'
+                      : 'kx-v2-sessions-toggle__icon'
+                  }
+                  aria-hidden="true"
+                >
+                  <ChevronDown />
+                </span>
+              </button>
+            </>
+          )}
         </div>
 
       {sessionsOpen && (
@@ -384,6 +418,20 @@ export default function V2Sidebar() {
       {/* 6 — Footer cluster (hairline divider above): just the account
           row opening its popover. Theme lives inside the account popover. */}
       <div className="kx-v2-footer">
+        {/* Rail: Search parks at the bottom of the rail, above the
+            account avatar — the quiet utility spot under every icon. */}
+        {railLayout && (
+          <button
+            type="button"
+            className="kx-v2-iconbtn kx-v2-footer__search"
+            aria-label="Search"
+            aria-keyshortcuts="Meta+K Control+K"
+            data-testid="v2-search-rail-trigger"
+            onClick={() => setSearchOpen(true)}
+          >
+            <SearchIcon />
+          </button>
+        )}
         <button
           ref={accountTriggerRef}
           type="button"
