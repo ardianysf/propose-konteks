@@ -521,9 +521,46 @@
   display: none;
 }
 
-.kx-v2-sidebar--rail .kx-v2-sessions-toggle {
+/* Rail sessions — ONE clock glyph navigating to the session list. */
+.kx-v2-sessions-row--rail {
+  justify-content: center;
+}
+
+.kx-v2-sessions-rail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--kx-secondary);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.kx-v2-sessions-rail:hover,
+.kx-v2-sessions-rail:focus-visible {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-sessions-rail:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+}
+
+.kx-v2-sessions-rail:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-sidebar--rail .kx-v2-sessions-toggle {
+  display: none;
 }
 
 .kx-v2-sidebar--rail .kx-v2-context__copy {
@@ -557,6 +594,15 @@
 
 .kx-v2-sidebar--rail .kx-v2-footer {
   align-items: center;
+}
+
+/* Rail search — parks at the bottom of the rail, above the account
+ * avatar (the quiet utility spot under every icon). */
+.kx-v2-footer__search {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 6px;
+  border-radius: 12px;
 }
 
 .kx-v2-sidebar--rail .kx-v2-account {
@@ -660,23 +706,6 @@
 
   .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-group {
     display: none;
-  }
-
-  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-block {
-    margin-top: 10px;
-  }
-
-  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-row {
-    justify-content: center;
-  }
-
-  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-label {
-    display: none;
-  }
-
-  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-toggle {
-    width: 40px;
-    height: 40px;
   }
 }
 

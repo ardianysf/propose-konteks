@@ -168,6 +168,31 @@ describe('V2Shell frame', () => {
 // ---------------------------------------------------------------------------
 
 describe('V2Sidebar labels', () => {
+  it('rail layout swaps Sessions to a clock that navigates and parks Search at the bottom', () => {
+    render(<V2App />)
+
+    // Expanded: label + toggle, no rail pieces.
+    expect(screen.getByTestId(TRIGGERS.sessions)).toBeInTheDocument()
+    expect(screen.queryByTestId('v2-sessions-rail')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('v2-search-rail-trigger')).not.toBeInTheDocument()
+
+    // Collapse into the rail.
+    fireEvent.click(screen.getByTestId('v2-sidebar-toggle'))
+    const railSessions = screen.getByTestId('v2-sessions-rail')
+    expect(railSessions).toHaveAccessibleName('Sessions')
+    expect(screen.queryByTestId(TRIGGERS.sessions)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('v2-sessions-toggle')).not.toBeInTheDocument()
+
+    // The clock navigates straight to the session list.
+    fireEvent.click(railSessions)
+    expect(historyHeading()).toBeInTheDocument()
+    expect(railSessions).toHaveAttribute('aria-current', 'page')
+
+    // Bottom search opens the palette from the rail.
+    fireEvent.click(screen.getByTestId('v2-search-rail-trigger'))
+    expect(screen.getByTestId('v2-search-palette')).toBeInTheDocument()
+  })
+
   it('renders the exact navigation labels', () => {
     render(<V2App />)
     expect(screen.getByRole('button', { name: 'New session' })).toBeInTheDocument()
