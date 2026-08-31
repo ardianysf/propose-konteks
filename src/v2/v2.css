@@ -1031,10 +1031,47 @@
   border-color: var(--kx-accent-text-aa);
 }
 
-.kx-v2-pop__all {
-  margin: 0 4px 4px;
-  font-size: var(--kx-text-md);
+/* Scope chips — the systems list can follow the active workspace or
+ * show EVERY system; chips sit clear of the search field above. */
+.kx-v2-pop__scope {
+  display: flex;
+  gap: 6px;
+  margin: 8px 4px 10px;
+}
+
+.kx-v2-pop__scope-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  background: transparent;
   color: var(--kx-muted-text-aa);
+  font-family: inherit;
+  font-size: var(--kx-text-md);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    border-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-v2-pop__scope-btn:hover {
+  border-color: var(--kx-accent);
+  color: var(--kx-primary);
+}
+
+.kx-v2-pop__scope-btn:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-v2-pop__scope-btn--active {
+  border-color: var(--kx-accent);
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+  font-weight: var(--kx-font-medium);
 }
 
 .kx-v2-pop__list {
@@ -1334,17 +1371,10 @@
   background: transparent;
   color: var(--kx-muted);
   cursor: pointer;
-  opacity: 0;
   transition:
-    opacity 140ms ease-out,
     background-color 140ms ease-out,
     color 140ms ease-out,
     transform 140ms ease-out;
-}
-
-.kx-v2-pop__system-row:hover .kx-v2-pop__map,
-.kx-v2-pop__system-row:focus-within .kx-v2-pop__map {
-  opacity: 1;
 }
 
 .kx-v2-pop__map:hover,

@@ -32,6 +32,8 @@ export default function V2ContextPopover({
   const [query, setQuery] = useState('')
   // Drill-in workspace list: tapping the workspace identity row opens a
   // floating list; its height is capped so many workspaces scroll.
+  // Systems scope: the active workspace, or every system when 'all'.
+  const [scope, setScope] = useState<'workspace' | 'all'>('workspace')
 
   // Focus is contained inside the panel while it is mounted (no-op when
   // closed: the hook skips an unconnected root).
@@ -61,19 +63,19 @@ export default function V2ContextPopover({
   const selectWorkspace = (workspaceId: string) => {
     onSelectWorkspace(workspaceId)
     setWorkspaceListOpen(false)
+    // Choosing a workspace implies browsing ITS systems again.
+    setScope('workspace')
   }
 
   const activeWorkspace = resolveV2Workspace(activeWorkspaceId)
   const workspaceSystems = state.systems.filter((system) =>
     activeWorkspace.systemIds.includes(system.id),
   )
-  const activeSystem =
-    workspaceSystems.find((system) => system.id === state.activeSystemId) ??
-    workspaceSystems[0]
+  const displaySystems = scope === 'all' ? state.systems : workspaceSystems
   const needle = query.trim().toLowerCase()
   const systems = needle
-    ? workspaceSystems.filter((system) => system.name.toLowerCase().includes(needle))
-    : workspaceSystems
+    ? displaySystems.filter((system) => system.name.toLowerCase().includes(needle))
+    : displaySystems
 
   const openOverlayAndClose = (
     event: MouseEvent<HTMLElement>,
@@ -212,12 +214,42 @@ export default function V2ContextPopover({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
-        <div className="kx-v2-pop__all" aria-hidden="true">
-          In {activeWorkspace.name}
+        <div
+          className="kx-v2-pop__scope"
+          role="group"
+          aria-label="System scope"
+          data-testid="v2-popover-scope"
+        >
+          <button
+            type="button"
+            className={
+              scope === 'workspace'
+                ? 'kx-v2-pop__scope-btn kx-v2-pop__scope-btn--active'
+                : 'kx-v2-pop__scope-btn'
+            }
+            aria-pressed={scope === 'workspace'}
+            data-testid="v2-popover-scope-workspace"
+            onClick={() => setScope('workspace')}
+          >
+            In {activeWorkspace.name}
+          </button>
+          <button
+            type="button"
+            className={
+              scope === 'all'
+                ? 'kx-v2-pop__scope-btn kx-v2-pop__scope-btn--active'
+                : 'kx-v2-pop__scope-btn'
+            }
+            aria-pressed={scope === 'all'}
+            data-testid="v2-popover-scope-all"
+            onClick={() => setScope('all')}
+          >
+            All systems
+          </button>
         </div>
         <ul className="kx-v2-pop__list" aria-label="Systems">
           {systems.map((system) => {
-            const active = system.id === activeSystem.id
+            const active = system.id === state.activeSystemId
             const count = system.repoIds.length
             return (
               <li key={system.id} className="kx-v2-pop__system-row">
