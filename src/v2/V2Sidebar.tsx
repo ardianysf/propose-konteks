@@ -30,7 +30,6 @@ import CollapseIcon from '../components/shell/CollapseIcon'
 import {
   CatalogIcon,
   ChevronDown,
-  ChevronRight,
   NewSessionIcon,
   PinIcon,
   SearchIcon,
@@ -218,92 +217,87 @@ export default function V2Sidebar() {
         </span>
         <span className="kx-v2-context__copy">
           <span className="kx-v2-context__system">{activeSystem.name}</span>
-          <span className="kx-v2-context__plan">
-            {WORKSPACE.name} · {WORKSPACE.plan.replace(' (illustrative)', '')}
-          </span>
+          <span className="kx-v2-context__plan">{WORKSPACE.name}</span>
         </span>
-        <ChevronDown />
+        <span className="kx-v2-context__chevron" aria-hidden="true">
+          <ChevronDown />
+        </span>
       </button>
 
-      {/* 3 — Primary action. */}
+      {/* One visual menu language: identical row height, icon tile,
+          gap, color, and label position for all three actions. */}
       <button
         type="button"
         className={
           state.route === 'new-session'
-            ? 'kx-v2-new-session kx-v2-new-session--active'
-            : 'kx-v2-new-session'
+            ? 'kx-v2-menuitem kx-v2-menuitem--active'
+            : 'kx-v2-menuitem'
         }
         aria-label="New session"
         aria-current={state.route === 'new-session' ? 'page' : undefined}
         data-testid="v2-new-session-trigger"
         onClick={() => dispatch({ type: 'NAVIGATE', route: 'new-session' })}
       >
-        <span className="kx-v2-new-session__icon" aria-hidden="true">
+        <span className="kx-v2-menuitem__icon" aria-hidden="true">
           <NewSessionIcon />
         </span>
-        <span className="kx-v2-new-session__label">New session</span>
+        <span className="kx-v2-menuitem__label">New session</span>
       </button>
 
-      {/* Menu rows directly under New session: Customize (modal) and the
-          Component catalog deep-link. */}
       <button
         type="button"
-        className="kx-v2-navitem"
+        className="kx-v2-menuitem"
         data-testid="v2-customize-trigger"
-        onClick={() => dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', tab: 'agents' } })}
+        onClick={() =>
+          dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', tab: 'agents' } })
+        }
       >
-        <span className="kx-v2-navitem__icon" aria-hidden="true">
+        <span className="kx-v2-menuitem__icon" aria-hidden="true">
           <SlidersIcon />
         </span>
-        <span className="kx-v2-navitem__label">Customize</span>
+        <span className="kx-v2-menuitem__label">Customize</span>
       </button>
 
-      <a
-        className="kx-v2-navitem kx-v2-navitem--link"
-        href="/catalog"
-        data-testid="v2-catalog-trigger"
-      >
-        <span className="kx-v2-navitem__icon" aria-hidden="true">
+      <a className="kx-v2-menuitem" href="/catalog" data-testid="v2-catalog-trigger">
+        <span className="kx-v2-menuitem__icon" aria-hidden="true">
           <CatalogIcon />
         </span>
-        <span className="kx-v2-navitem__label">Component catalog</span>
+        <span className="kx-v2-menuitem__label">Component catalog</span>
       </a>
 
-      {/* 4 — Sessions block (separated from the menu above by space):
-          tapping the LABEL expands/collapses the nested recent items;
-          the trailing arrow is the only icon and it navigates to the
-          session-history page. */}
+      {/* Sessions has exactly one chevron at the far right. The text area
+          navigates to the session list; the chevron independently toggles
+          the child sessions and rotates to reflect the disclosure state. */}
       <div className="kx-v2-sessions-block">
         <div className="kx-v2-sessions-row">
           <button
             type="button"
             className="kx-v2-sessions-label"
+            aria-current={state.route === 'session-history' ? 'page' : undefined}
+            data-testid="v2-sessions-trigger"
+            onClick={() => dispatch({ type: 'NAVIGATE', route: 'session-history' })}
+          >
+            Sessions
+          </button>
+          <button
+            type="button"
+            className="kx-v2-sessions-toggle"
+            aria-label={sessionsOpen ? 'Collapse sessions' : 'Expand sessions'}
             aria-expanded={sessionsOpen}
             aria-controls="kx-v2-sessions-group"
-            data-testid="v2-sessions-trigger"
+            data-testid="v2-sessions-toggle"
             onClick={() => setSessionsOpen((open) => !open)}
           >
-            <span className="kx-v2-sessions-label__text">Sessions</span>
             <span
               className={
                 sessionsOpen
-                  ? 'kx-v2-sessions-label__chevron kx-v2-sessions-label__chevron--open'
-                  : 'kx-v2-sessions-label__chevron'
+                  ? 'kx-v2-sessions-toggle__icon kx-v2-sessions-toggle__icon--open'
+                  : 'kx-v2-sessions-toggle__icon'
               }
               aria-hidden="true"
             >
               <ChevronDown />
             </span>
-          </button>
-          <button
-            type="button"
-            className="kx-v2-sessions-nav"
-            aria-label="View all sessions"
-            aria-current={state.route === 'session-history' ? 'page' : undefined}
-            data-testid="v2-view-all-trigger"
-            onClick={() => dispatch({ type: 'NAVIGATE', route: 'session-history' })}
-          >
-            <ChevronRight />
           </button>
         </div>
 

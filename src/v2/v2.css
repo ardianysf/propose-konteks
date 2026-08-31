@@ -521,7 +521,7 @@
   display: none;
 }
 
-.kx-v2-sidebar--rail .kx-v2-sessions-nav {
+.kx-v2-sidebar--rail .kx-v2-sessions-toggle {
   width: 40px;
   height: 40px;
 }
@@ -674,7 +674,7 @@
     display: none;
   }
 
-  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-nav {
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-toggle {
     width: 40px;
     height: 40px;
   }
@@ -970,7 +970,7 @@
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgb(var(--kx-ink-rgb) / 0.12);
+  box-shadow: none;
 }
 
 .kx-v2-pop__scrim {
@@ -1473,7 +1473,7 @@
   transform: rotate(180deg);
 }
 
-.kx-v2-sessions-nav {
+.kx-v2-sessions-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1491,13 +1491,13 @@
     color 140ms ease-out;
 }
 
-.kx-v2-sessions-nav:hover,
-.kx-v2-sessions-nav:focus-visible {
+.kx-v2-sessions-toggle:hover,
+.kx-v2-sessions-toggle:focus-visible {
   background: var(--kx-pale);
   color: var(--kx-primary);
 }
 
-.kx-v2-sessions-nav:focus-visible {
+.kx-v2-sessions-toggle:focus-visible {
   outline: 2px solid var(--kx-accent-text-aa);
   outline-offset: 2px;
 }
@@ -1541,9 +1541,7 @@
   border: 1px solid var(--kx-border);
   border-radius: 16px;
   background: var(--kx-raised);
-  box-shadow:
-    0 2px 6px rgb(var(--kx-ink-rgb) / 0.06),
-    0 24px 56px rgb(var(--kx-ink-rgb) / 0.16);
+  box-shadow: none;
   transform: translateX(-50%);
 }
 
@@ -1690,5 +1688,189 @@
     height: 28px;
     border-color: transparent;
     background: var(--kx-pale);
+  }
+}
+
+/* ── Final sidebar language: identity card + unified menu rows ────────── */
+
+/* Workspace/system identity CARD — deliberately not a menu row. The
+ * solid circular avatar, raised surface, two-line type stack and quiet
+ * elevation make it an identity object before it is an affordance. */
+.kx-v2-context {
+  display: flex;
+  min-height: 72px;
+  gap: 12px;
+  padding: 12px;
+  border-color: var(--kx-border);
+  border-radius: 16px;
+  background: var(--kx-raised);
+  box-shadow: none;
+  transition:
+    border-color 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.kx-v2-context:hover {
+  border-color: var(--kx-accent);
+  box-shadow: none;
+}
+
+.kx-v2-context__mark {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 999px;
+  background: var(--kx-accent-solid-aa);
+  color: var(--kx-accent-solid-ink);
+  font-size: 14px;
+  font-weight: var(--kx-font-bold);
+}
+
+.kx-v2-context__copy {
+  gap: 3px;
+}
+
+.kx-v2-context__system {
+  font-size: 14px;
+  font-weight: var(--kx-font-bold);
+  line-height: 1.25;
+}
+
+.kx-v2-context__plan {
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-normal);
+  line-height: 1.25;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-context__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  background: var(--kx-pale);
+  color: var(--kx-muted-text-aa);
+}
+
+/* New session / Customize / Component catalog — exactly ONE component
+ * anatomy: 40px row, 28px icon tile, 10px gap, identical type/color.
+ * Row surfaces stay transparent; hover sharpens the tile + text only. */
+.kx-v2-menuitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--kx-secondary);
+  font-family: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.kx-v2-menuitem:hover,
+.kx-v2-menuitem:focus-visible {
+  background: transparent;
+  color: var(--kx-primary);
+}
+
+/* Active route is semantic only (aria-current): the three menu rows keep
+ * exactly the same resting color and weight. */
+.kx-v2-menuitem--active {
+  background: transparent;
+  color: var(--kx-secondary);
+}
+
+.kx-v2-menuitem:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+}
+
+.kx-v2-menuitem:active {
+  transform: translateY(1px);
+}
+
+.kx-v2-menuitem__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-v2-menuitem:hover .kx-v2-menuitem__icon,
+.kx-v2-menuitem:focus-visible .kx-v2-menuitem__icon {
+  background: var(--kx-border);
+  color: var(--kx-primary);
+}
+
+.kx-v2-menuitem__label {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-medium);
+  line-height: 1.25;
+  color: inherit;
+}
+
+/* Sessions: the text is navigation; the ONE far-right chevron is the
+ * separate disclosure control. */
+.kx-v2-sessions-label {
+  justify-content: flex-start;
+}
+
+.kx-v2-sessions-toggle__icon {
+  display: inline-flex;
+  transition: transform 160ms ease-out;
+}
+
+.kx-v2-sessions-toggle__icon--open {
+  transform: rotate(180deg);
+}
+
+/* Manual rail: card reduces to the avatar; menu rows reduce to the exact
+ * same centered icon tile; Sessions keeps only its disclosure chevron. */
+.kx-v2-sidebar--rail .kx-v2-context__chevron,
+.kx-v2-sidebar--rail .kx-v2-menuitem__label {
+  display: none;
+}
+
+.kx-v2-sidebar--rail .kx-v2-menuitem {
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+  justify-content: center;
+}
+
+@media (min-width: 761px) and (max-width: 1280px) {
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-context__chevron,
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-menuitem__label {
+    display: none;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-menuitem {
+    width: 40px;
+    min-width: 40px;
+    padding: 0;
+    justify-content: center;
   }
 }
