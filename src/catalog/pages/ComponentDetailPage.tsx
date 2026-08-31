@@ -269,6 +269,12 @@ function MetaList({ entry }: { entry: ManifestEntry }) {
         <dt>adoptionNotes</dt>
         <dd>{entry.adoptionNotes}</dd>
       </div>
+      {entry.responsive && (
+        <div className="kx-cat-meta-item">
+          <dt>Responsive (mobile)</dt>
+          <dd>{entry.responsive}</dd>
+        </div>
+      )}
     </dl>
   )
 }

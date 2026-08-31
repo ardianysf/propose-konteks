@@ -23,7 +23,12 @@
  * same-specificity tie at mobile widths. ≥761px is untouched. */
 @media (max-width: 760px) {
   /* Bottom sheet — same pattern as the account menu: full-width sheet
-   * from the viewport bottom, capped height, safe-area padding. */
+   * from the viewport bottom, capped height, safe-area padding. The
+   * .kx-app/--rail prefixed selectors outrank the rail anchoring rules
+   * in shared.css (a stored collapsed sidebar keeps --rail on the shell
+   * at phone widths; without this the sheet opens 76px from the left). */
+  .kx-app .kx-system-menu,
+  .kx-app--rail .kx-system-menu,
   .kx-system-menu {
     position: fixed;
     top: auto;

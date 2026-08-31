@@ -82,7 +82,10 @@
  * untouched (shared.css anchoring keeps applying there). */
 @media (max-width: 760px) {
   /* Bottom sheet — same pattern as the account/system menus: full-width
-   * sheet from the viewport bottom, capped height, safe-area padding. */
+   * sheet from the viewport bottom, capped height, safe-area padding.
+   * The .kx-app/--rail prefixes outrank shared.css's rail anchoring. */
+  .kx-app .kx-workspace-menu,
+  .kx-app--rail .kx-workspace-menu,
   .kx-workspace-menu {
     position: fixed;
     top: auto;

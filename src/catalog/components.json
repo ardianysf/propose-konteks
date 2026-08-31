@@ -37,7 +37,8 @@
       ],
       "variants": [],
       "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'account-menu' } }}",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "Bottom sheet at <=760px: full width from the viewport bottom (radius 14px top, max-height min(80dvh, 640px), safe-area padding) with a drag handle, caps title, and a dark backdrop that dismisses on tap. Desktop keeps the sidebar-anchored card."
     },
     {
       "id": "settings-modal",
@@ -123,7 +124,8 @@
       ],
       "variants": [],
       "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'component-menu' } }}",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "At <=760px the menu clamps to calc(100vw - 32px) so it never overflows the phone."
     },
     {
       "id": "composer",
@@ -177,7 +179,8 @@
         "component menu terbuka"
       ],
       "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'component-menu' } }}",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "Column top row at <=760px: the mode cluster spans the composer width, the toolbar right group (mic/send) pins right with auto spacing, the textarea drops to 60px, and the send button becomes icon-only (aria-label intact). On the new-session page the composer anchors 8px above the viewport bottom; in a running session it pins to the bottom full-width."
     },
     {
       "id": "execution-profile-menu",
@@ -220,7 +223,8 @@
       ],
       "variants": [],
       "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'execution-profile-menu' } }}",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "At <=760px the cluster stacks vertically with the sidecar first and the flat menu below; both clamp to the viewport width and never overflow."
     },
     {
       "id": "session-mode",
@@ -254,7 +258,8 @@
         "planning"
       ],
       "fixtureRef": "MockupFixtureProvider overrides={{ sessionMode }}",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "Aligns left at <=760px instead of right. Active segment uses the solid accent fill (#4f7044) with white text — AA 5.6:1 in both themes."
     },
     {
       "id": "create-system-modal",
@@ -397,7 +402,8 @@
         "suspended=true"
       ],
       "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'repository-modal' } }}",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "At <=760px the toolbar and footer stack vertically with full-width controls; the groups region scrolls horizontally for wide repository rows and keeps a 180px floor so content never collapses."
     },
     {
       "id": "agents-tab",
@@ -683,7 +689,8 @@
         "tab=audit"
       ],
       "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'learned', tab } }}",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "Full-screen sheet at <=760px (width 100vw, internal clamps). Enters by sliding from the right edge on every width (260ms, reduced-motion safe)."
     },
     {
       "id": "dot-matrix-loader",
@@ -748,7 +755,8 @@
         "without stats (no meta)"
       ],
       "fixtureRef": "specimen row: default with stats | thumbs active | menu open | no meta",
-      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext; stats muncul saat hover/focus (CSS) dengan fallback title; tombol salin memakai navigator.clipboard dengan fallback execCommand; reaksi terpilih membuka FeedbackModal (komponen terpisah, juga adoptable)."
+      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext; stats muncul saat hover/focus (CSS) dengan fallback title; tombol salin memakai navigator.clipboard dengan fallback execCommand; reaksi terpilih membuka FeedbackModal (komponen terpisah, juga adoptable).",
+      "responsive": "At <=760px the anchored more-menu opens from the trigger left edge, clamps to viewport width and 60vh with internal scroll."
     },
     {
       "id": "feedback-modal",
@@ -783,7 +791,8 @@
         "bad"
       ],
       "fixtureRef": "embedded specimen pair: good (helpful options) | bad (what-went-wrong options)",
-      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext; opsi preset diekspor sebagai FEEDBACK_OPTIONS untuk dihost/di-customize; submit terkunci sampai ada teks; Escape/backdrop/close icon menutup dialog."
+      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext; opsi preset diekspor sebagai FEEDBACK_OPTIONS untuk dihost/di-customize; submit terkunci sampai ada teks; Escape/backdrop/close icon menutup dialog.",
+      "responsive": "At <=760px the modal fits the dynamic viewport (100dvh-aware max-height, width min(420px, 100vw - 24px)) and scrolls internally."
     },
     {
       "id": "session-detail-composer",
@@ -836,7 +845,8 @@
         "terminal (completed — locked)"
       ],
       "fixtureRef": "MockupFixtureProvider overrides={{ sessionDetail: { ...baseDetail, status } }} (variant grid)",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "Sticky-bottom composer in the running session; at <=760px it fills the full main width and sits 8px above the viewport bottom (100dvh-aware)."
     },
     {
       "id": "session-header",
@@ -869,7 +879,8 @@
       ],
       "variants": [],
       "fixtureRef": "MockupFixtureProvider",
-      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "At <=760px the header band collapses to zero height (title stays screen-reader accessible); the Share control floats fixed top-right (12px inset) above the content."
     },
     {
       "id": "session-quote-card",
@@ -1078,7 +1089,8 @@
       ],
       "variants": [],
       "fixtureRef": null,
-      "adoptionNotes": "Internal — orkestrator route/page mockup, tidak bermakna di luar aplikasi."
+      "adoptionNotes": "Internal — orkestrator route/page mockup, tidak bermakna di luar aplikasi.",
+      "responsive": "At <=760px the grid becomes a single column with a 100dvh shell; a fixed hamburger (12,12) opens the sidebar drawer, a transparent scrim closes it on outside tap, and Escape works. Full-screen sheet overlays (learned drawer) hide the hamburger chrome."
     },
     {
       "id": "collapse-icon",
@@ -1182,7 +1194,8 @@
         "collapsed rail"
       ],
       "fixtureRef": "MockupFixtureProvider (variant grid: expanded | collapsed rail with sidebarCollapsed=true)",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "Off-canvas reveal drawer at <=760px: fixed, slides in from the left behind the hamburger trigger; the shifted main canvas keeps its dimensions (transform-only). Always renders the expanded nav look on phones; internal collapse toggles stand down."
     },
     {
       "id": "system-menu",
@@ -1228,7 +1241,8 @@
       ],
       "variants": [],
       "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'system-menu' } }}",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "Bottom sheet at <=760px (handle + title + tap-dismiss backdrop); per-row system-map buttons stay visible on phones instead of the hover reveal. 761-1280px re-anchors from the 64px rail."
     },
     {
       "id": "use-focus-containment",
@@ -1280,7 +1294,8 @@
         "dengan overlay terbuka"
       ],
       "fixtureRef": "MockupFixtureProvider overlay=workspace-menu (overrides={{ overlay: { kind: 'workspace-menu' } }})",
-      "adoptionNotes": "Adoptable dengan provider contract: butuh OverlayLifecycleProvider (props overlay + dispatch; komponen memanggil useOverlayLifecycle untuk Escape/dismiss → CLOSE_OVERLAY); tanpa MockupContext — contextContract tetap null."
+      "adoptionNotes": "Adoptable dengan provider contract: butuh OverlayLifecycleProvider (props overlay + dispatch; komponen memanggil useOverlayLifecycle untuk Escape/dismiss → CLOSE_OVERLAY); tanpa MockupContext — contextContract tetap null.",
+      "responsive": "Bottom sheet at <=760px (handle + title + tap-dismiss backdrop). 761-1280px re-anchors from the 64px rail."
     },
     {
       "id": "system-map-modal",
@@ -1315,7 +1330,8 @@
       ],
       "variants": [],
       "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'system-map', systemId: activeSystemId } }}",
-      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md."
+      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md.",
+      "responsive": "At <=760px the modal uses a 12px gutter, a 100dvh-aware max-height with internal scrolling, and the graph container yields its fixed 480px height to the remaining space (320px floor)."
     }
   ]
 }

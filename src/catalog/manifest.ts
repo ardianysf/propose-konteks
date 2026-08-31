@@ -31,6 +31,9 @@ export interface ManifestEntry {
   variants: string[]
   fixtureRef: string | null
   adoptionNotes: string
+  /** Mobile (≤760px) behavior notes — present only for components with
+   * responsive adaptations; the catalog surfaces them as guidelines. */
+  responsive?: string
 }
 
 export interface Manifest {
