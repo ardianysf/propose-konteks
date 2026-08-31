@@ -33,6 +33,24 @@ export function ChevronRight() {
 }
 
 /** Chevron-down — marks the v2 popover triggers (panels open below/beside). */
+export function GridIcon() {
+  return (
+    <svg
+      data-icon="grid"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor" />
+      <rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" />
+      <rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" />
+      <rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" />
+    </svg>
+  )
+}
+
 export function CheckIcon() {
   return (
     <svg

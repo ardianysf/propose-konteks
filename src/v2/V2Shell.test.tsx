@@ -309,36 +309,29 @@ describe('V2ContextPopover', () => {
     expect(screen.queryByTestId('v2-context-popover')).not.toBeInTheDocument()
   })
 
-  it('scopes systems to the workspace or to every system via the All systems chip', () => {
+  it('selects All systems within the workspace as the context, and a system row re-narrows', () => {
     render(<V2App />)
     fireEvent.click(screen.getByTestId(TRIGGERS.context))
     const popover = getContextPopover()
 
-    // Default: workspace-scoped — Hanoman (another workspace) is hidden.
-    expect(screen.getByTestId('v2-popover-scope-workspace')).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
+    // The All-systems row leads the list, scoped to the workspace only —
+    // Hanoman (another workspace) never appears.
+    const allRow = within(popover).getByTestId('v2-popover-all-systems')
+    expect(within(allRow).getByText('2 systems')).toBeInTheDocument()
     expect(within(popover).queryByText('Hanoman')).not.toBeInTheDocument()
 
-    // All systems: every system across all workspaces appears.
-    fireEvent.click(screen.getByTestId('v2-popover-scope-all'))
-    expect(screen.getByTestId('v2-popover-scope-all')).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
-    expect(within(popover).getByText('Hanoman')).toBeInTheDocument()
-    expect(within(popover).getByText('BSI - HRIS')).toBeInTheDocument()
+    // Selecting it makes it current and the identity card follows.
+    fireEvent.click(allRow)
+    expect(allRow).toHaveAttribute('aria-current', 'true')
+    expect(screen.getByTestId(TRIGGERS.context).textContent).toContain('All systems')
+    // The specific-system mark is released.
+    expect(
+      within(popover).getByRole('button', { name: 'BSI - HRIS 3 repos' }),
+    ).not.toHaveAttribute('aria-current')
 
-    // Switching workspace resets the scope to the chosen workspace.
-    fireEvent.click(screen.getByTestId('v2-popover-workspace'))
-    fireEvent.click(screen.getByTestId('v2-popover-workspace-ws-mpm'))
-    expect(screen.getByTestId('v2-popover-scope-workspace')).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
-    expect(within(popover).queryByText('Hanoman')).not.toBeInTheDocument()
-    expect(within(popover).getByText('MPM - Mytok')).toBeInTheDocument()
+    // Choosing a concrete system again re-narrows the card.
+    fireEvent.click(within(popover).getByRole('button', { name: 'BSI Canteen 2 repos' }))
+    expect(screen.getByTestId(TRIGGERS.context).textContent).toContain('BSI Canteen')
   })
 
   it('filters the system list from the local search field', () => {
