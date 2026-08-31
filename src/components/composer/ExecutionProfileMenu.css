@@ -274,6 +274,16 @@
     max-width: calc(100vw - 48px);
   }
 
+  /* Stacked order on phones: the sidecar previews FIRST (its hovered/
+   * focused row is the reading context), the flat menu lands below it. */
+  .kx-profile-menu__sidecar {
+    order: 1;
+  }
+
+  .kx-profile-menu {
+    order: 2;
+  }
+
   .kx-profile-menu,
 
   .kx-profile-menu__sidecar {
