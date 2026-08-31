@@ -55,6 +55,23 @@ export default function V2Sidebar() {
   const activeSystem =
     state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
 
+  // "All systems" context: the whole active workspace is selected
+  // instead of one system. Any real SET_ACTIVE_SYSTEM (popover row,
+  // search palette, session flows) clears it — the effect below keeps
+  // the flag honest no matter where the dispatch came from.
+  const [allSystemsActive, setAllSystemsActive] = useState(false)
+  const prevSystemRef = useRef(state.activeSystemId)
+  useEffect(() => {
+    if (state.activeSystemId !== prevSystemRef.current) {
+      prevSystemRef.current = state.activeSystemId
+      setAllSystemsActive(false)
+    }
+  }, [state.activeSystemId])
+
+  // Context shown on the identity card: either one system or the whole
+  // active workspace.
+  const contextName = allSystemsActive ? 'All systems' : activeSystem.name
+
   // Popovers are mutually exclusive by construction: one local slot.
   const [popover, setPopover] = useState<Popover>('none')
 
@@ -227,7 +244,7 @@ export default function V2Sidebar() {
         ref={contextTriggerRef}
         type="button"
         className="kx-v2-context"
-        aria-label={`${activeSystem.name} — open workspace and systems`}
+        aria-label={`${contextName} — open workspace and systems`}
         aria-haspopup="dialog"
         aria-expanded={popover === 'context'}
         data-testid="v2-context-trigger"
@@ -237,7 +254,7 @@ export default function V2Sidebar() {
           {activeWorkspace.name[0]}
         </span>
         <span className="kx-v2-context__copy">
-          <span className="kx-v2-context__system">{activeSystem.name}</span>
+          <span className="kx-v2-context__system">{contextName}</span>
           <span className="kx-v2-context__plan">{activeWorkspace.name}</span>
         </span>
         <span className="kx-v2-context__chevron" aria-hidden="true">
@@ -391,6 +408,8 @@ export default function V2Sidebar() {
         onClose={() => closePopover('context')}
         activeWorkspaceId={activeWorkspaceId}
         onSelectWorkspace={selectWorkspace}
+        allSystemsActive={allSystemsActive}
+        onSelectAllSystems={() => setAllSystemsActive(true)}
       />
       <V2AccountPopover open={popover === 'account'} onClose={() => closePopover('account')} />
       <V2SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
