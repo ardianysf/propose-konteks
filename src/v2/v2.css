@@ -196,7 +196,8 @@
 
 .kx-v2-new-session:hover,
 .kx-v2-new-session:focus-visible {
-  background: var(--kx-pale);
+  /* No row background at any state — the label just sharpens. */
+  background: transparent;
   color: var(--kx-primary);
 }
 
@@ -214,10 +215,15 @@
  * pale pill, exactly like every other row. */
 .kx-v2-new-session__icon {
   display: inline-flex;
-  width: 20px;
-  min-width: 20px;
+  align-items: center;
   justify-content: center;
-  color: var(--kx-muted-text-aa);
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 8px;
+  /* The row's ONLY background — a quiet accent-tinted tile. */
+  background: var(--kx-pale);
+  color: var(--kx-accent-text-aa);
 }
 
 .kx-v2-new-session:hover .kx-v2-new-session__icon,
@@ -503,6 +509,23 @@
   display: none;
 }
 
+.kx-v2-sidebar--rail .kx-v2-sessions-block {
+  margin-top: 10px;
+}
+
+.kx-v2-sidebar--rail .kx-v2-sessions-row {
+  justify-content: center;
+}
+
+.kx-v2-sidebar--rail .kx-v2-sessions-label {
+  display: none;
+}
+
+.kx-v2-sidebar--rail .kx-v2-sessions-nav {
+  width: 40px;
+  height: 40px;
+}
+
 .kx-v2-sidebar--rail .kx-v2-context__copy {
   display: none;
 }
@@ -633,6 +656,27 @@
   .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-account__name,
   .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-account > svg {
     display: none;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-group {
+    display: none;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-block {
+    margin-top: 10px;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-row {
+    justify-content: center;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-label {
+    display: none;
+  }
+
+  .kx-v2-sidebar:not(.kx-v2-sidebar--rail) .kx-v2-sessions-nav {
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -895,9 +939,9 @@
   color: var(--kx-primary);
 }
 
-/* Active-route emphasis — same quiet pill as every active row. */
+/* Active-route emphasis — label color only; never a row background. */
 .kx-v2-new-session--active {
-  background: var(--kx-pale);
+  background: transparent;
   color: var(--kx-primary);
 }
 
@@ -1369,22 +1413,99 @@
 
 /* ── Sessions disclosure group (nested recents) ─────────────────────── */
 
-.kx-v2-navitem__chevron {
+/* Anchor-flavored menu row (Component catalog) — same anatomy as the
+ * button rows, minus pointer semantics. */
+.kx-v2-navitem--link {
+  text-decoration: none;
+}
+
+/* ── Sessions block ────────────────────────────────────────────────
+ * A separate AREA from the menu above: generous top margin, no leading
+ * icon on the row; the label toggles the nested items, the trailing
+ * arrow (the row's only icon) navigates to the history page. */
+
+.kx-v2-sessions-block {
+  margin-top: 22px;
+}
+
+.kx-v2-sessions-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kx-v2-sessions-label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+  cursor: pointer;
+  transition: color 140ms ease-out;
+}
+
+.kx-v2-sessions-label:hover,
+.kx-v2-sessions-label:focus-visible {
+  color: var(--kx-primary);
+}
+
+.kx-v2-sessions-label:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+}
+
+.kx-v2-sessions-label__chevron {
   display: inline-flex;
-  margin-left: auto;
   color: var(--kx-muted);
   transition: transform 140ms ease-out;
 }
 
-.kx-v2-navitem__chevron--open {
+.kx-v2-sessions-label__chevron--open {
   transform: rotate(180deg);
 }
 
+.kx-v2-sessions-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--kx-muted-text-aa);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-v2-sessions-nav:hover,
+.kx-v2-sessions-nav:focus-visible {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-sessions-nav:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+}
+
+/* Nested items align flush LEFT with the menu labels — no tree line,
+ * no indent rail; spacing alone ties them to the Sessions row. */
 .kx-v2-sessions-group {
-  margin: 2px 0 4px 20px;
-  padding-left: 8px;
-  /* Indented tree zone under the Sessions row. */
-  border-left: 1px solid var(--kx-border);
+  margin: 2px 0 4px;
 }
 
 .kx-v2-sessions-group .kx-v2-recent__list {
@@ -1395,37 +1516,6 @@
   min-height: 32px;
   padding: 5px 6px;
   border-radius: 10px;
-}
-
-.kx-v2-sessions-view-all {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 32px;
-  margin-top: 2px;
-  padding: 4px 6px;
-  border: none;
-  border-radius: 10px;
-  background: transparent;
-  font-family: inherit;
-  font-size: var(--kx-text-md);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-muted-text-aa);
-  cursor: pointer;
-  transition:
-    background-color 140ms ease-out,
-    color 140ms ease-out;
-}
-
-.kx-v2-sessions-view-all:hover,
-.kx-v2-sessions-view-all:focus-visible {
-  background: var(--kx-pale);
-  color: var(--kx-primary);
-}
-
-.kx-v2-sessions-view-all:focus-visible {
-  outline: 2px solid var(--kx-accent-text-aa);
-  outline-offset: 2px;
 }
 
 /* ── Search palette (⌘K) ────────────────────────────────────────────── */

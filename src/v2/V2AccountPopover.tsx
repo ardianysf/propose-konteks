@@ -17,14 +17,12 @@ import {
 } from '../theme'
 import {
   BillingIcon,
-  CatalogIcon,
   GearIcon,
   IntegrationsIcon,
   KeyboardIcon,
   LogoutIcon,
   MonitorIcon,
   MoonIcon,
-  SlidersIcon,
   SunIcon,
 } from './icons'
 
@@ -117,35 +115,6 @@ export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProp
             )
           })}
         </div>
-
-        <div className="kx-v2-pop__divider" role="presentation" />
-
-        <button
-          type="button"
-          className="kx-v2-pop__row"
-          data-testid="v2-popover-customize"
-          onClick={(event) => openOverlayAndClose(event, { kind: 'customize', tab: 'agents' })}
-        >
-          <span className="kx-v2-pop__row-icon" aria-hidden="true">
-            <SlidersIcon />
-          </span>
-          <span className="kx-v2-pop__row-label">Customize</span>
-        </button>
-        {/* Catalog deep-link — separate /catalog Vite entry, new tab. */}
-        <a
-          className="kx-v2-pop__row"
-          href="/catalog"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Component catalog"
-          data-testid="v2-popover-catalog"
-          onClick={onClose}
-        >
-          <span className="kx-v2-pop__row-icon" aria-hidden="true">
-            <CatalogIcon />
-          </span>
-          <span className="kx-v2-pop__row-label">Component catalog</span>
-        </a>
 
         <div className="kx-v2-pop__divider" role="presentation" />
 

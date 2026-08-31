@@ -27,7 +27,15 @@ import { useEffect, useRef, useState } from 'react'
 import { RECENT_SESSIONS, WORKSPACE } from '../data/mockData'
 import { useMockup } from '../state/MockupContext'
 import CollapseIcon from '../components/shell/CollapseIcon'
-import { ChevronDown, NewSessionIcon, PinIcon, SearchIcon, SessionsIcon } from './icons'
+import {
+  CatalogIcon,
+  ChevronDown,
+  ChevronRight,
+  NewSessionIcon,
+  PinIcon,
+  SearchIcon,
+  SlidersIcon,
+} from './icons'
 import V2ContextPopover from './V2ContextPopover'
 import V2AccountPopover from './V2AccountPopover'
 import V2SearchPalette from './V2SearchPalette'
@@ -211,7 +219,7 @@ export default function V2Sidebar() {
         <span className="kx-v2-context__copy">
           <span className="kx-v2-context__system">{activeSystem.name}</span>
           <span className="kx-v2-context__plan">
-            {WORKSPACE.name} · {WORKSPACE.plan}
+            {WORKSPACE.name} · {WORKSPACE.plan.replace(' (illustrative)', '')}
           </span>
         </span>
         <ChevronDown />
@@ -236,36 +244,68 @@ export default function V2Sidebar() {
         <span className="kx-v2-new-session__label">New session</span>
       </button>
 
-      {/* 4 — Sessions disclosure: tapping the row expands/collapses the
-          recent items nested beneath it; "View all" (inside the group)
-          navigates to the session-history route. */}
+      {/* Menu rows directly under New session: Customize (modal) and the
+          Component catalog deep-link. */}
       <button
         type="button"
-        className={
-          state.route === 'session-history'
-            ? 'kx-v2-navitem kx-v2-navitem--active'
-            : 'kx-v2-navitem'
-        }
-        aria-expanded={sessionsOpen}
-        aria-controls="kx-v2-sessions-group"
-        data-testid="v2-sessions-trigger"
-        onClick={() => setSessionsOpen((open) => !open)}
+        className="kx-v2-navitem"
+        data-testid="v2-customize-trigger"
+        onClick={() => dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', tab: 'agents' } })}
       >
         <span className="kx-v2-navitem__icon" aria-hidden="true">
-          <SessionsIcon />
+          <SlidersIcon />
         </span>
-        <span className="kx-v2-navitem__label">Sessions</span>
-        <span
-          className={
-            sessionsOpen
-              ? 'kx-v2-navitem__chevron kx-v2-navitem__chevron--open'
-              : 'kx-v2-navitem__chevron'
-          }
-          aria-hidden="true"
-        >
-          <ChevronDown />
-        </span>
+        <span className="kx-v2-navitem__label">Customize</span>
       </button>
+
+      <a
+        className="kx-v2-navitem kx-v2-navitem--link"
+        href="/catalog"
+        data-testid="v2-catalog-trigger"
+      >
+        <span className="kx-v2-navitem__icon" aria-hidden="true">
+          <CatalogIcon />
+        </span>
+        <span className="kx-v2-navitem__label">Component catalog</span>
+      </a>
+
+      {/* 4 — Sessions block (separated from the menu above by space):
+          tapping the LABEL expands/collapses the nested recent items;
+          the trailing arrow is the only icon and it navigates to the
+          session-history page. */}
+      <div className="kx-v2-sessions-block">
+        <div className="kx-v2-sessions-row">
+          <button
+            type="button"
+            className="kx-v2-sessions-label"
+            aria-expanded={sessionsOpen}
+            aria-controls="kx-v2-sessions-group"
+            data-testid="v2-sessions-trigger"
+            onClick={() => setSessionsOpen((open) => !open)}
+          >
+            <span className="kx-v2-sessions-label__text">Sessions</span>
+            <span
+              className={
+                sessionsOpen
+                  ? 'kx-v2-sessions-label__chevron kx-v2-sessions-label__chevron--open'
+                  : 'kx-v2-sessions-label__chevron'
+              }
+              aria-hidden="true"
+            >
+              <ChevronDown />
+            </span>
+          </button>
+          <button
+            type="button"
+            className="kx-v2-sessions-nav"
+            aria-label="View all sessions"
+            aria-current={state.route === 'session-history' ? 'page' : undefined}
+            data-testid="v2-view-all-trigger"
+            onClick={() => dispatch({ type: 'NAVIGATE', route: 'session-history' })}
+          >
+            <ChevronRight />
+          </button>
+        </div>
 
       {sessionsOpen && (
         <div id="kx-v2-sessions-group" className="kx-v2-sessions-group">
@@ -305,17 +345,9 @@ export default function V2Sidebar() {
               )
             })}
           </ul>
-          <button
-            type="button"
-            className="kx-v2-sessions-view-all"
-            aria-current={state.route === 'session-history' ? 'page' : undefined}
-            data-testid="v2-view-all-trigger"
-            onClick={() => dispatch({ type: 'NAVIGATE', route: 'session-history' })}
-          >
-            View all
-          </button>
         </div>
       )}
+      </div>
 
       {/* 6 — Footer cluster (hairline divider above): just the account
           row opening its popover. Theme lives inside the account popover. */}
