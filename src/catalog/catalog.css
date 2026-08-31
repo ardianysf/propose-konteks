@@ -4,9 +4,9 @@
  * mockup selectors, and no catalog selectors live under src/styles/
  * (CSS ownership rule, spec §2).
  *
- * The language: flat paper canvas, hairline rules, stamp-red actives,
- * stencil-blue indices. Sarabun for display/UI, ui-monospace for part
- * numbers and data. No radii, no shadows.
+ * The language: flat paper canvas, hairline rules, accent actives,
+ * secondary-ink references. DM Sans (production stack) for display/UI,
+ * ui-monospace for part numbers and data. No radii, no shadows.
  * Motion is "mechanical press": fast, linear, decisive, settles — 80–180ms,
  * linear timing, transforms bounded to a few px, color-only theme shifts,
  * all disabled under prefers-reduced-motion (see MOTION LAYER at EOF).
@@ -29,49 +29,48 @@ html.kx-catalog-page body {
   overflow-x: hidden;
 }
 
-/* Browser-surface re-ink (catalog pages only): thin scrollbar whose colors
- * mirror the shell's --kxcat-hair-strong/--kxcat-canvas tokens. Literal
- * values because the scrollbar lives on <html>, outside .kx-cat-shell
- * where the custom properties are defined. */
+/* Browser-surface re-ink (catalog pages only): thin scrollbar riding the
+ * production --kx-* tokens (thumb --kx-muted, track --kx-canvas). The
+ * scrollbar lives on <html>, outside .kx-cat-shell, but the source tokens
+ * are defined at :root and flip under html[data-theme='dark'], so one rule
+ * covers both themes. */
 html.kx-catalog-page {
   scrollbar-width: thin;
-  scrollbar-color: rgba(22, 24, 29, 0.5) #f5f6f4;
-}
-
-html.kx-catalog-page[data-theme='dark'] {
-  scrollbar-color: rgba(232, 234, 229, 0.5) #12151a;
+  scrollbar-color: var(--kx-muted) var(--kx-canvas);
 }
 
 /* Selection + caret resolve the shell's tokens per element, so both themes
- * re-ink as one (stamp-red wash behind full ink). */
+ * re-ink as one (accent wash behind full ink). */
 .kx-cat-shell ::selection {
   background: color-mix(in srgb, var(--kxcat-red) 24%, transparent);
   color: var(--kxcat-ink);
 }
 
 /* ------------------------------------------------------------------------
- * Shell custom properties — the industrial parts-catalog palette.
- * Light is the default; dark re-inks under html[data-theme='dark'].
+ * Shell custom properties — the production Warm Enterprise tokens.
+ * Every --kxcat-* alias maps to a --kx-* source token; both themes inherit
+ * from the source of truth (tokens.css flips under html[data-theme='dark']),
+ * so no catalog-side dark overrides exist.
  * ----------------------------------------------------------------------*/
 
 .kx-cat-shell {
-  --kxcat-canvas: #f5f6f4;
-  --kxcat-ink: #16181d;
-  --kxcat-red: #d0342c;
-  --kxcat-blue: #2f6f8f;
-  --kxcat-hair: rgba(22, 24, 29, 0.2);
-  --kxcat-hair-strong: rgba(22, 24, 29, 0.5);
-  /* Derived dims: secondary/tertiary ink, soft row hairlines, ruler ticks. */
-  --kxcat-ink-2: rgba(22, 24, 29, 0.72);
-  --kxcat-ink-3: rgba(22, 24, 29, 0.62);
-  --kxcat-ink-4: rgba(22, 24, 29, 0.4);
-  --kxcat-ink-soft: rgba(22, 24, 29, 0.85);
-  --kxcat-hair-soft: rgba(22, 24, 29, 0.18);
-  --kxcat-rule: rgba(22, 24, 29, 0.25);
-  --kxcat-tick: rgba(22, 24, 29, 0.4);
-  --kxcat-tick-strong: rgba(22, 24, 29, 0.6);
-  --kxcat-wash: rgba(22, 24, 29, 0.03);
-  --kxcat-font: 'Sarabun', system-ui, sans-serif;
+  --kxcat-canvas: var(--kx-canvas);
+  --kxcat-raised: var(--kx-raised);
+  --kxcat-ink: var(--kx-primary);
+  --kxcat-ink-2: var(--kx-secondary);
+  --kxcat-ink-3: var(--kx-muted-text-aa);
+  --kxcat-ink-4: var(--kx-muted);
+  --kxcat-ink-soft: var(--kx-secondary);
+  --kxcat-red: var(--kx-accent-solid-aa);
+  --kxcat-blue: var(--kx-secondary);
+  --kxcat-hair: var(--kx-border);
+  --kxcat-hair-soft: var(--kx-border);
+  --kxcat-hair-strong: var(--kx-muted);
+  --kxcat-rule: var(--kx-border);
+  --kxcat-tick: var(--kx-border);
+  --kxcat-tick-strong: var(--kx-muted);
+  --kxcat-wash: var(--kx-pale);
+  --kxcat-font: var(--kx-font-family);
   --kxcat-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 
   min-height: 100vh;
@@ -83,24 +82,6 @@ html.kx-catalog-page[data-theme='dark'] {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   caret-color: var(--kxcat-red);
-}
-
-html[data-theme='dark'] .kx-cat-shell {
-  --kxcat-canvas: #12151a;
-  --kxcat-ink: #e8eae5;
-  --kxcat-red: #e0493a;
-  --kxcat-blue: #6fa8d4;
-  --kxcat-hair: rgba(232, 234, 229, 0.18);
-  --kxcat-hair-strong: rgba(232, 234, 229, 0.5);
-  --kxcat-ink-2: rgba(232, 234, 229, 0.72);
-  --kxcat-ink-3: rgba(232, 234, 229, 0.62);
-  --kxcat-ink-4: rgba(232, 234, 229, 0.4);
-  --kxcat-ink-soft: rgba(232, 234, 229, 0.85);
-  --kxcat-hair-soft: rgba(232, 234, 229, 0.16);
-  --kxcat-rule: rgba(232, 234, 229, 0.22);
-  --kxcat-tick: rgba(232, 234, 229, 0.4);
-  --kxcat-tick-strong: rgba(232, 234, 229, 0.55);
-  --kxcat-wash: rgba(232, 234, 229, 0.04);
 }
 
 /* Keyboard focus is a hard ink outline, everywhere in the catalog. */
@@ -1415,10 +1396,10 @@ html[data-theme='dark'] .kx-cat-shell {
 /* ------------------------------------------------------------------------
  * Component detail — datasheet restyle. Same industrial language as the
  * overview/index: caps labels, mono part numbers, hairlines + 2px ink
- * rules, literal specimen ground inside the preview plate.
+ * rules, token-driven specimen ground inside the preview plate.
  * ---------------------------------------------------------------------- */
 
-/* Spec-sheet header: 44px Sarabun 700 name over the chips row. */
+/* Spec-sheet header: 44px DM Sans 700 name over the chips row. */
 .kx-cat-page .kx-cat-detail-title {
   font-size: 44px;
   line-height: 1.02;
@@ -1485,8 +1466,8 @@ html[data-theme='dark'] .kx-cat-shell {
   color: var(--kxcat-ink);
 }
 
-/* Plate — hairline frame, caps label strip, literal specimen ground so
- * production component tokens resolve inside the frame. */
+/* Plate — hairline frame, caps label strip, token-driven specimen ground
+ * (--kx-canvas) so production component tokens resolve inside the frame. */
 .kx-cat-plate {
   border: 1px solid var(--kxcat-hair);
 }
@@ -1504,11 +1485,7 @@ html[data-theme='dark'] .kx-cat-shell {
 }
 
 .kx-cat-plate-ground {
-  background: #faf8ef;
-}
-
-html[data-theme='dark'] .kx-cat-plate-ground {
-  background: #0f1510;
+  background: var(--kx-canvas);
 }
 
 /* The ground carries the plate's interior; drop the generic frame border. */
@@ -1536,7 +1513,7 @@ html[data-theme='dark'] .kx-cat-plate-ground {
   border-bottom: 1px solid var(--kxcat-hair-soft);
 }
 
-/* Breadcrumb — caps mono reference row; link stays stencil blue. */
+/* Breadcrumb — caps mono reference row; link stays secondary-ink reference. */
 .kx-cat-page .kx-cat-breadcrumb {
   margin-bottom: 20px;
   font-size: 11px;

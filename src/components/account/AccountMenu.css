@@ -129,6 +129,11 @@
  * drawer (50). Placed after the base and rail rules so it wins the
  * same-specificity tie at mobile widths. ≥761px is untouched. */
 @media (max-width: 760px) {
+  /* The .kx-app/--rail prefixes outrank AccountMenu.css's own rail
+   * anchoring copy (a stored collapsed sidebar keeps --rail on the shell
+   * at phone widths). */
+  .kx-app .kx-account-menu,
+  .kx-app--rail .kx-account-menu,
   .kx-account-menu {
     position: fixed;
     top: auto;

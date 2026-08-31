@@ -7,10 +7,12 @@ The design language of the catalog surface at `/catalog`. Written from the built
 ## 1. World
 
 **Industrial Parts Catalog.** A procurement-grade industrial parts book: every component is a
-machined part with a part number, spec rows, and precision rules. Flat technical-white paper,
-hairlines and 2px ink rules, one stamp red for action, stencil blue for references, Sarabun
+machined part with a part number, spec rows, and precision rules. The palette and type ride
+the production Warm Enterprise tokens (`--kx-*`, DM Sans): matcha paper canvas, ink hairlines
+and 2px rules, one accent for action (accent-solid-aa), secondary ink for references, DM Sans
 display numerals, mono part numbers, ruler ticks and registration marks. Light and dark are
-one change of light. It refuses the sidebar-plus-cards Storybook default. Direction contract:
+one change of light, inherited from `tokens.css` — the shell defines no colors of its own.
+It refuses the sidebar-plus-cards Storybook default. Direction contract:
 the comment block in `catalog.html` (seed `0f0acb7e`, kind: pick; comp A "Index Spread"
 approved 2026-08-29).
 
@@ -25,37 +27,42 @@ approved 2026-08-29).
 
 ## 3. Shell tokens
 
-Defined on `.kx-cat-shell`; dark re-inks under `html[data-theme='dark'] .kx-cat-shell`.
+Defined on `.kx-cat-shell` as aliases of the production tokens; **no dark overrides exist** —
+both themes come from `src/styles/tokens.css` flipping under `html[data-theme='dark']`.
 The theme attribute is stamped pre-paint by the inline script in `catalog.html`
 (`konteks-theme` storage → `system` fallback → `documentElement.dataset.theme`), so the
 shell never flashes the wrong theme.
 
-| Token | Light | Dark | Usage |
-|---|---|---|---|
-| `--kxcat-canvas` | `#f5f6f4` | `#12151a` | paper ground |
-| `--kxcat-ink` | `#16181d` | `#e8eae5` | primary ink: text, 2px rules, inverted blocks |
-| `--kxcat-red` | `#d0342c` | `#e0493a` | stamp red — action/active only |
-| `--kxcat-blue` | `#2f6f8f` | `#6fa8d4` | stencil blue — references only |
-| `--kxcat-hair` | ink 20% | 18% | standard hairline borders |
-| `--kxcat-hair-soft` | ink 18% | 16% | row rules |
-| `--kxcat-hair-strong` | ink 50% | 50% | badges, dashed placeholders, hover rules |
-| `--kxcat-rule` | ink 25% | 22% | ruler-margin border |
-| `--kxcat-ink-2` | ink 72% | 72% | secondary text (body, lede) |
-| `--kxcat-ink-3` | ink 62% | 62% | tertiary (labels, notes, thead) |
-| `--kxcat-ink-4` | ink 40% | 40% | quaternary (nav dots, separators) |
-| `--kxcat-ink-soft` | ink 85% | 85% | hero intro body |
-| `--kxcat-tick` | ink 40% | 40% | ruler minor ticks |
-| `--kxcat-tick-strong` | ink 60% | 55% | ruler major ticks |
-| `--kxcat-wash` | ink 3% | 4% | hover wash, paper code block |
-| `--kxcat-font` | `'Sarabun', system-ui, sans-serif` | same | display + UI |
-| `--kxcat-mono` | `ui-monospace, 'SF Mono', Menlo, monospace` | same | part numbers, data |
+| Shell alias | Source token | Usage |
+|---|---|---|
+| `--kxcat-canvas` | `--kx-canvas` | paper ground |
+| `--kxcat-raised` | `--kx-raised` | raised surfaces |
+| `--kxcat-ink` | `--kx-primary` | primary ink: text, 2px rules, inverted blocks |
+| `--kxcat-red` | `--kx-accent-solid-aa` | accent — action/active only |
+| `--kxcat-blue` | `--kx-secondary` | references only |
+| `--kxcat-hair` | `--kx-border` | standard hairline borders |
+| `--kxcat-hair-soft` | `--kx-border` | row rules |
+| `--kxcat-hair-strong` | `--kx-muted` | badges, dashed placeholders, hover rules |
+| `--kxcat-rule` | `--kx-border` | ruler-margin border |
+| `--kxcat-ink-2` | `--kx-secondary` | secondary text (body, lede) |
+| `--kxcat-ink-3` | `--kx-muted-text-aa` | tertiary (labels, notes, thead) |
+| `--kxcat-ink-4` | `--kx-muted` | quaternary (nav dots, separators) |
+| `--kxcat-ink-soft` | `--kx-secondary` | hero intro body |
+| `--kxcat-tick` | `--kx-border` | ruler minor ticks |
+| `--kxcat-tick-strong` | `--kx-muted` | ruler major ticks |
+| `--kxcat-wash` | `--kx-pale` | hover wash, paper code block |
+| `--kxcat-font` | `--kx-font-family` | display + UI (DM Sans) |
+| `--kxcat-mono` | `ui-monospace, 'SF Mono', Menlo, monospace` | part numbers, data |
 
-Percentages are `rgba()` over the theme ink (22,24,29 light / 232,234,229 dark).
+The alias layer keeps the structural CSS readable while the values stay single-sourced;
+`--kx-raised` is aliased for plate/raised-surface work even though the current shell uses
+`--kxcat-canvas` for grounds.
 
 ## 4. Typography
 
-- **Sarabun 400/500/600/700** via `@fontsource/sarabun` (loaded in `src/catalog/main.tsx`);
-  display + UI face. Mono stack for part numbers, meta, data, code.
+- **DM Sans 400/500/700** — the production stack (`--kx-font-family`, loaded in
+  `src/catalog/main.tsx` via `@fontsource/dm-sans`); display + UI face. Mono stack for part
+  numbers, meta, data, code. Sarabun retired 2026-08-31.
 - Scale (all from `catalog.css`): counters `clamp(64px, 6.9vw, 100px)` /0.88; hero title
   `clamp(48px, 5.2vw, 76px)` /0.94, -0.03em (72px comp scale); doc & detail titles 44px /1.02,
   -0.02em; page titles 28px; domain cells 19px; index counts 30px; body 14px/1.65; lede 15px;
@@ -75,8 +82,8 @@ Percentages are `rgba()` over the theme ink (22,24,29 light / 232,234,229 dark).
   hairline rules (`.kx-cat-table`, `.kx-cat-ledger-*`, `.kx-cat-parts-*` grids). Hairline/2px
   hierarchy everywhere; `grouthead`/`ds-sechead` repeat the idiom per section.
 - **Plate frames** (`.kx-cat-plate`): hairline frame + caps mono strip; the interior ground
-  is **literal** `#faf8ef` (light) / `#0f1510` (dark) — `.kx-cat-plate-ground` — so production
-  `--kx-*` specimens resolve inside the frame on both themes.
+  is token-driven `var(--kx-canvas)` — `.kx-cat-plate-ground` — so production `--kx-*`
+  specimens resolve inside the frame on both themes (flips with the theme automatically).
 - **Stamps:** 1px red border, red 10px caps at .16em (`.kx-cat-stamp`, "SOURCE-FIRST").
 - **Part numbers:** `KX-<DOM>-<NN>` — three-letter domain code (ACC, CMP, CTX, CST, REV, SES,
   SHL, SYS) + 1-based position in the **full** manifest domain group, so numbers agree across
@@ -86,10 +93,10 @@ Percentages are `rgba()` over the theme ink (22,24,29 light / 232,234,229 dark).
 
 ## 6. Color discipline
 
-- **Stamp red = action/active only:** current nav item, the stamp, mockup-coupled badge,
-  row-hover stamp bar, selection wash, caret.
-- **Stencil blue = references only:** part numbers, section indices, links, adoptable badge,
-  index arrows, classification legend label.
+- **Accent = action/active only** (`--kxcat-red` ← `--kx-accent-solid-aa`): current nav item,
+  the stamp, mockup-coupled badge, row-hover stamp bar, selection wash, caret.
+- **References = secondary ink** (`--kxcat-blue` ← `--kx-secondary`): part numbers, section
+  indices, links, adoptable badge, index arrows, classification legend label.
 - **Ink hierarchy** (ink → ink-2 → ink-3 → ink-4 → wash) carries everything else.
 - WCAG 2 AA is the enforced floor in both themes (Playwright Axe at 1440×900 and 1200×720).
 
@@ -122,10 +129,10 @@ bounce, no entrance/scroll-linked animation.
 ## 9. Do / Don't
 
 - **DON'T** restyle production previews with shell tokens — specimens keep `--kx-*`; the
-  plate provides only frame, strip, and literal ground.
+  plate provides only frame, strip, and token ground.
 - **DON'T** introduce radii, drop shadows, or color gradients (the only gradients are the
   ruler tick patterns).
-- **DON'T** use red or blue outside their disciplines (§6).
+- **DON'T** use the accent or reference roles outside their disciplines (§6).
 - **DON'T** add animations beyond the grammar (§7) — no entrances, no loops.
 - **DON'T** hardcode counts — derive them from the manifest/`tokens.ts` at runtime
   (as `OverviewPage` does).
@@ -141,3 +148,4 @@ bounce, no entrance/scroll-linked animation.
 - Disposition: **ship** (2026-08-29). Residuals documented in the finish review: face-metric
   drift on the thead, stamp, and title regions, and a non-material 3px row shift — none
   material to the read of the spread.
+- 2026-08-31 owner decision: shell re-tinted to production tokens; Sarabun retired.
