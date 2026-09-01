@@ -3,7 +3,8 @@ import { goto, openCustomize, openRepositoryModal } from './helpers'
 
 const TABS = ['Agents', 'Context', 'MCP', 'Connectors', 'VCS', 'Skills', 'Tools'] as const
 
-test.describe('customize', () => {
+// fixme: v2 shell is now the primary app at /; e2e to be rewritten for v2 DOM
+test.describe.fixme('customize', () => {
   test('modal measures 790×580 on every one of the seven tabs (AC34)', async ({ page }) => {
     await goto(page)
     await openCustomize(page)

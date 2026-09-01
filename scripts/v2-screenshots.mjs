@@ -1,5 +1,5 @@
 /*
- * V2 visual capture — screenshots for the /v2 navigation surface.
+ * V2 visual capture — screenshots for the v2 navigation surface (now the root app at /).
  * Run: node scripts/v2-screenshots.mjs (serves dist/ via `vite preview`).
  */
 import { chromium } from '@playwright/test'
@@ -26,12 +26,12 @@ async function waitForServer(url, tries = 40) {
 }
 
 try {
-  await waitForServer('http://localhost:4173/v2')
+  await waitForServer('http://localhost:4173/')
   const browser = await chromium.launch()
 
   // Desktop 1440x900 — light
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } })
-  await desktop.goto('http://localhost:4173/v2')
+  await desktop.goto('http://localhost:4173/')
   await desktop.waitForLoadState('networkidle')
   await desktop.waitForTimeout(400)
   await desktop.screenshot({ path: `${OUT}/v2-desktop-light.png` })
@@ -51,7 +51,7 @@ try {
 
   // Mobile 390x844 — light, drawer closed
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } })
-  await mobile.goto('http://localhost:4173/v2')
+  await mobile.goto('http://localhost:4173/')
   await mobile.waitForLoadState('networkidle')
   await mobile.waitForTimeout(400)
   await mobile.screenshot({ path: `${OUT}/v2-mobile-light-closed.png` })

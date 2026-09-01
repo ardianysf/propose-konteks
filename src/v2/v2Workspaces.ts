@@ -9,11 +9,16 @@
  * drop out.
  */
 
+/* Membership role of the demo user inside a workspace — surfaces as the
+ * OWNER/ADMIN/MEMBER chip on every workspace row. */
+export type V2WorkspaceRole = 'owner' | 'admin' | 'member'
+
 export interface V2Workspace {
   id: string
   name: string
   plan: string
   systemIds: string[]
+  role: V2WorkspaceRole
 }
 
 export const V2_WORKSPACES: V2Workspace[] = [
@@ -22,18 +27,21 @@ export const V2_WORKSPACES: V2Workspace[] = [
     name: 'Refactory',
     plan: 'Team plan',
     systemIds: ['bsi-hris', 'bsi-canteen'],
+    role: 'owner',
   },
   {
     id: 'ws-mpm',
     name: 'MPM Digital',
     plan: 'Team plan',
     systemIds: ['mpm-mytok', 'mpm-portal-vendor'],
+    role: 'admin',
   },
   {
     id: 'ws-ardian-labs',
     name: 'Ardian Labs',
     plan: 'Free plan',
     systemIds: ['hanoman', 'kookree', 'richapp', 'online-store', 'personal-blogspot'],
+    role: 'member',
   },
 ]
 
@@ -57,6 +65,7 @@ export const resolveV2WorkspaceIn = (
  * Id is 'ws-' + slugified name (empty slug falls back to Date.now);
  * a slug collision with an existing id is disambiguated with a
  * timestamp suffix. Empty/blank names fall back to 'New Workspace'.
+ * The creator owns the workspace, so role is always 'owner'.
  */
 const slugifyV2WorkspaceName = (name: string): string =>
   name
@@ -76,5 +85,6 @@ export const createV2Workspace = (
     name: trimmed || 'New Workspace',
     plan: 'Starter',
     systemIds: [],
+    role: 'owner',
   }
 }

@@ -44,9 +44,10 @@ export default function V2ContextPopover({
   // floating list; its height is capped so many workspaces scroll.
   const [workspaceListOpen, setWorkspaceListOpen] = useState(false)
 
-  // Add-workspace draft row — swaps the footer's create rows for an
-  // inline name input. Confirm (Enter / check) creates + activates the
-  // workspace; cancel (Escape / X) discards the draft.
+  // Add-workspace draft row — swaps the END-OF-LIST "Add new workspace"
+  // row in the workspace flyout for an inline name input. Confirm (Enter /
+  // check) creates + activates the workspace; cancel (Escape / X) discards
+  // the draft and returns the Add row.
   const [addingWorkspace, setAddingWorkspace] = useState(false)
   const [draftName, setDraftName] = useState('')
   const draftInputRef = useRef<HTMLInputElement>(null)
@@ -63,6 +64,13 @@ export default function V2ContextPopover({
     setAddingWorkspace(false)
     setDraftName('')
   }
+
+  // Any way the flyout CLOSES — outside-click, the identity-row toggle,
+  // Escape, or selecting a row — cancels an open add-workspace draft, so
+  // reopening shows the Add row instead of resurrecting stale draft text.
+  useEffect(() => {
+    if (!workspaceListOpen) cancelAddWorkspace()
+  }, [workspaceListOpen])
 
   // Focus is contained inside the panel while it is mounted (no-op when
   // closed: the hook skips an unconnected root).
@@ -95,6 +103,9 @@ export default function V2ContextPopover({
   const selectWorkspace = (workspaceId: string) => {
     onSelectWorkspace(workspaceId)
     setWorkspaceListOpen(false)
+    // Selecting a row while a draft is open discards the draft — the
+    // flyout must never reopen mid-draft after a switch.
+    cancelAddWorkspace()
   }
 
   const activeWorkspace = resolveV2WorkspaceIn(workspaces, activeWorkspaceId)
@@ -144,7 +155,7 @@ export default function V2ContextPopover({
           const target = event.target as HTMLElement
           if (
             workspaceListOpen &&
-            !target.closest('.kx-v2-pop__ws-list') &&
+            !target.closest('.kx-v2-pop__ws-flyout') &&
             !target.closest('[data-testid="v2-popover-workspace"]')
           ) {
             setWorkspaceListOpen(false)
@@ -170,7 +181,10 @@ export default function V2ContextPopover({
             </span>
             <span className="kx-v2-pop__workspace-copy">
               <span className="kx-v2-pop__workspace-name">{activeWorkspace.name}</span>
-              <span className="kx-v2-pop__workspace-plan">{activeWorkspace.plan}</span>
+              <span className="kx-v2-pop__workspace-planline">
+                <span className="kx-v2-pop__workspace-plan">{activeWorkspace.plan}</span>
+                <span className="kx-v2-pop__ws-role">{activeWorkspace.role.toUpperCase()}</span>
+              </span>
             </span>
             <span
               className={
@@ -184,49 +198,105 @@ export default function V2ContextPopover({
             </span>
           </button>
           {workspaceListOpen && (
-            <ul
-              className="kx-v2-pop__ws-list"
-              role="listbox"
-              aria-label="Workspaces"
-              data-testid="v2-popover-workspace-list"
-            >
-              {workspaces.map((workspace) => {
-                const active = workspace.id === activeWorkspaceId
-                const members = state.systems.filter((system) =>
-                  workspace.systemIds.includes(system.id),
-                )
-                return (
-                  <li
-                    key={workspace.id}
-                    role="option"
-                    aria-selected={active}
-                    className="kx-v2-pop__ws-row"
-                  >
-                    <button
-                      type="button"
-                      className={
-                        active ? 'kx-v2-pop__ws kx-v2-pop__ws--active' : 'kx-v2-pop__ws'
-                      }
-                      data-testid={`v2-popover-workspace-${workspace.id}`}
-                      onClick={() => selectWorkspace(workspace.id)}
+            <div className="kx-v2-pop__ws-flyout">
+              <ul
+                className="kx-v2-pop__ws-list"
+                role="listbox"
+                aria-label="Workspaces"
+                data-testid="v2-popover-workspace-list"
+              >
+                {workspaces.map((workspace) => {
+                  const active = workspace.id === activeWorkspaceId
+                  const members = state.systems.filter((system) =>
+                    workspace.systemIds.includes(system.id),
+                  )
+                  return (
+                    <li
+                      key={workspace.id}
+                      role="option"
+                      aria-selected={active}
+                      className="kx-v2-pop__ws-row"
                     >
-                      <span className="kx-v2-pop__ws-avatar" aria-hidden="true">
-                        {workspace.name[0]}
-                      </span>
-                      <span className="kx-v2-pop__ws-name">{workspace.name}</span>
-                      <span className="kx-v2-pop__ws-meta">
-                        {members.length} {members.length === 1 ? 'system' : 'systems'}
-                      </span>
-                      {active && (
-                        <span className="kx-v2-pop__ws-check" aria-hidden="true">
-                          <CheckIcon />
+                      <button
+                        type="button"
+                        className={
+                          active ? 'kx-v2-pop__ws kx-v2-pop__ws--active' : 'kx-v2-pop__ws'
+                        }
+                        data-testid={`v2-popover-workspace-${workspace.id}`}
+                        onClick={() => selectWorkspace(workspace.id)}
+                      >
+                        <span className="kx-v2-pop__ws-avatar" aria-hidden="true">
+                          {workspace.name[0]}
                         </span>
-                      )}
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
+                        <span className="kx-v2-pop__ws-name">{workspace.name}</span>
+                        <span className="kx-v2-pop__ws-role">{workspace.role.toUpperCase()}</span>
+                        <span className="kx-v2-pop__ws-meta">
+                          {members.length} {members.length === 1 ? 'system' : 'systems'}
+                        </span>
+                        {active && (
+                          <span className="kx-v2-pop__ws-check" aria-hidden="true">
+                            <CheckIcon />
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+              {/* End-of-list action row: "Add new workspace" is the last
+                  row of the workspace list itself. In draft mode the same
+                  position swaps for the inline name input; the panel footer
+                  below keeps only "Create new system". */}
+              {addingWorkspace ? (
+                <div className="kx-v2-pop__add" data-testid="v2-popover-add-workspace-form">
+                  <input
+                    ref={draftInputRef}
+                    type="text"
+                    className="kx-v2-pop__search"
+                    placeholder="Workspace name…"
+                    aria-label="New workspace name"
+                    value={draftName}
+                    onChange={(event) => setDraftName(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault()
+                        confirmAddWorkspace()
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="kx-v2-pop__add-btn kx-v2-pop__add-btn--confirm"
+                    aria-label="Add workspace"
+                    data-testid="v2-popover-add-workspace-confirm"
+                    onClick={confirmAddWorkspace}
+                  >
+                    <CheckIcon />
+                  </button>
+                  <button
+                    type="button"
+                    className="kx-v2-pop__add-btn"
+                    aria-label="Cancel adding workspace"
+                    data-testid="v2-popover-add-workspace-cancel"
+                    onClick={cancelAddWorkspace}
+                  >
+                    <XIcon />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="kx-v2-pop__ws-add"
+                  data-testid="v2-popover-add-workspace"
+                  onClick={() => setAddingWorkspace(true)}
+                >
+                  <span className="kx-v2-pop__ws-add-icon" aria-hidden="true">
+                    <PlusIcon />
+                  </span>
+                  <span className="kx-v2-pop__ws-add-label">Add new workspace</span>
+                </button>
+              )}
+            </div>
           )}
         </div>
 
@@ -310,70 +380,19 @@ export default function V2ContextPopover({
         </ul>
 
         <div className="kx-v2-pop__footer">
-          {addingWorkspace ? (
-            <div className="kx-v2-pop__add" data-testid="v2-popover-add-workspace-form">
-              <input
-                ref={draftInputRef}
-                type="text"
-                className="kx-v2-pop__search"
-                placeholder="Workspace name…"
-                aria-label="New workspace name"
-                value={draftName}
-                onChange={(event) => setDraftName(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault()
-                    confirmAddWorkspace()
-                  }
-                }}
-              />
-              <button
-                type="button"
-                className="kx-v2-pop__add-btn kx-v2-pop__add-btn--confirm"
-                aria-label="Add workspace"
-                data-testid="v2-popover-add-workspace-confirm"
-                onClick={confirmAddWorkspace}
-              >
-                <CheckIcon />
-              </button>
-              <button
-                type="button"
-                className="kx-v2-pop__add-btn"
-                aria-label="Cancel adding workspace"
-                data-testid="v2-popover-add-workspace-cancel"
-                onClick={cancelAddWorkspace}
-              >
-                <XIcon />
-              </button>
-            </div>
-          ) : (
-            <>
-              <button
-                type="button"
-                className="kx-v2-pop__create"
-                data-testid="v2-popover-create-system"
-                onClick={(event) =>
-                  openOverlayAndClose(event, { kind: 'create-system-modal', source: 'system-menu' })
-                }
-              >
-                <span className="kx-v2-pop__row-icon" aria-hidden="true">
-                  <PlusIcon />
-                </span>
-                <span className="kx-v2-pop__row-label">Create new system</span>
-              </button>
-              <button
-                type="button"
-                className="kx-v2-pop__create"
-                data-testid="v2-popover-add-workspace"
-                onClick={() => setAddingWorkspace(true)}
-              >
-                <span className="kx-v2-pop__row-icon" aria-hidden="true">
-                  <PlusIcon />
-                </span>
-                <span className="kx-v2-pop__row-label">Add new workspace</span>
-              </button>
-            </>
-          )}
+          <button
+            type="button"
+            className="kx-v2-pop__create"
+            data-testid="v2-popover-create-system"
+            onClick={(event) =>
+              openOverlayAndClose(event, { kind: 'create-system-modal', source: 'system-menu' })
+            }
+          >
+            <span className="kx-v2-pop__row-icon" aria-hidden="true">
+              <PlusIcon />
+            </span>
+            <span className="kx-v2-pop__row-label">Create new system</span>
+          </button>
         </div>
       </div>
     </div>

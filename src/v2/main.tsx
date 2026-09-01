@@ -23,8 +23,9 @@ import './v2.css'
 // surface layers read shell → content in source order.
 import './v2-content.css'
 
-// Resolve + stamp the stored theme before first paint (v2.html's inline
-// script already set data-theme; this persists/attaches the system listener).
+// Resolve + stamp the stored theme before first paint (index.html's
+// inline script already set data-theme; this persists/attaches the
+// system listener).
 initTheme()
 
 createRoot(document.getElementById('root')!).render(

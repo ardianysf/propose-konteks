@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process'
 const preview=spawn('npx',['vite','preview','--port','4177','--strictPort'],{stdio:'ignore',detached:true})
 async function wait(url,n=40){for(let i=0;i<n;i++){try{if((await fetch(url)).ok)return}catch{}await new Promise(r=>setTimeout(r,500))}throw new Error('no server')}
 try{
- await wait('http://localhost:4177/v2');const b=await chromium.launch();const p=await b.newPage({viewport:{width:1440,height:900}});await p.goto('http://localhost:4177/v2');await p.waitForLoadState('networkidle')
+ await wait('http://localhost:4177/');const b=await chromium.launch();const p=await b.newPage({viewport:{width:1440,height:900}});await p.goto('http://localhost:4177/');await p.waitForLoadState('networkidle')
  const out=await p.evaluate(()=>{
   const qs=s=>document.querySelector(s), css=(s,p)=>getComputedStyle(qs(s))[p]
   return {

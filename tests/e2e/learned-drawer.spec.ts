@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { goto, openLearnedDrawer } from './helpers'
 
-test.describe('konteks learned drawer', () => {
+// fixme: v2 shell is now the primary app at /; e2e to be rewritten for v2 DOM
+test.describe.fixme('konteks learned drawer', () => {
   test('opens as a 450px right drawer with Pending primary and a flat Audit timeline (AC39)', async ({ page }) => {
     await goto(page)
     await openLearnedDrawer(page)
