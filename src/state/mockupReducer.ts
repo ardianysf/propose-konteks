@@ -73,6 +73,7 @@ export type MockupRoute =
   | 'session-detail'
   | 'task-session-detail'
   | 'session-demo'
+  | 'session-stream-detail'
 export type DemoVariant = 'ready' | 'loading' | 'empty'
 
 export type SearchList = 'systems' | 'repositories' | 'components' | 'sessions'

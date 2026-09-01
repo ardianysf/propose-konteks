@@ -2,6 +2,9 @@
  * SessionHeader — compact sticky header for the Session Detail timeline.
  * Shows the session title, share affordance, and the session context
  * metadata (mode · system · component) stored on `sessionDetail` itself.
+ * All display values are overridable through optional props (fallback:
+ * the fixture), so the stream-detail page can mount the same chrome for
+ * its own session without touching the classic page's behavior.
  * Supporting metadata (repo/branch/issue/agent) belongs to the session
  * metadata section below the timeline. The session status badge no longer
  * lives here — it sits above the composer inside the sticky composer area
@@ -10,6 +13,17 @@
 import { useMockup } from '../../state/MockupContext'
 import type { SessionMode } from '../../data/mockData'
 import './SessionHeader.css'
+
+/** Optional display overrides. Every prop falls back to the fixture
+ * value on `state.sessionDetail`, so the classic SessionDetailPage
+ * (which passes nothing) renders identically; the stream variant of the
+ * page passes its own session's title and context line. */
+export interface SessionHeaderProps {
+  title?: string
+  mode?: SessionMode
+  systemName?: string
+  componentName?: string
+}
 
 function getModeLabel(mode: SessionMode): string {
   switch (mode) {
@@ -33,9 +47,15 @@ function ShareIcon() {
   )
 }
 
-export default function SessionHeader() {
+export default function SessionHeader({
+  title,
+  mode,
+  systemName,
+  componentName,
+}: SessionHeaderProps = {}) {
   const { state } = useMockup()
   const { sessionDetail } = state
+  const headerTitle = title ?? sessionDetail.title
 
   return (
     <header className="kx-session-detail__head" data-testid="session-detail-header">
@@ -46,7 +66,7 @@ export default function SessionHeader() {
         {/* ≤760px the title hides behind the shared sr-only utility
             (global.css scopes it to mobile); the Share button stays
             visible and the desktop header renders unchanged. */}
-        <h1 className="kx-session-detail__title kx-u-sr-only">{sessionDetail.title}</h1>
+        <h1 className="kx-session-detail__title kx-u-sr-only">{headerTitle}</h1>
         <button
           type="button"
           className="kx-icon-btn kx-session-detail__share"
@@ -64,11 +84,11 @@ export default function SessionHeader() {
           cleanly on narrow viewports. */}
       <p className="kx-session-detail__context kx-u-sr-only" data-testid="session-context">
         <span className="kx-session-detail__context-items">
-          <span>{getModeLabel(sessionDetail.mode)}</span>
+          <span>{getModeLabel(mode ?? sessionDetail.mode)}</span>
           <span aria-hidden="true">·</span>
-          <span>{sessionDetail.systemName}</span>
+          <span>{systemName ?? sessionDetail.systemName}</span>
           <span aria-hidden="true">·</span>
-          <span>{sessionDetail.componentName}</span>
+          <span>{componentName ?? sessionDetail.componentName}</span>
         </span>
       </p>
     </header>

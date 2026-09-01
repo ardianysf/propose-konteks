@@ -24,6 +24,7 @@ import SessionHistoryPage from '../pages/SessionHistoryPage'
 import SessionDetailPage from '../pages/SessionDetailPage'
 import TaskSessionDetailPage from '../pages/TaskSessionDetailPage'
 import SessionStreamDemoPage from '../pages/SessionStreamDemoPage'
+import SessionStreamDetailPage from '../pages/SessionStreamDetailPage'
 import SystemMapSkeleton from '../components/system/SystemMapSkeleton'
 import { useMockup } from '../state/MockupContext'
 import '../components/shell/AppShell.css'
@@ -106,6 +107,8 @@ export default function V2Shell() {
             <TaskSessionDetailPage />
           ) : state.route === 'session-demo' ? (
             <SessionStreamDemoPage />
+          ) : state.route === 'session-stream-detail' ? (
+            <SessionStreamDetailPage />
           ) : (
             <SessionHistoryPage />
           )}
