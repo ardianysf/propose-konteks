@@ -143,6 +143,28 @@ export function CheckIcon() {
   )
 }
 
+/** X — cancels the add-workspace draft row in the context popover. */
+export function XIcon() {
+  return (
+    <svg
+      data-icon="x"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M4 4l8 8M12 4l-8 8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export function ChevronDown() {
   return (
     <svg
@@ -162,6 +184,50 @@ export function ChevronDown() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  )
+}
+
+/** Chevron-right — doubles as the per-session task-children disclosure
+ * glyph (rotated 90° by CSS when open). */
+export function TaskChevronIcon() {
+  return (
+    <svg
+      className="kx-v2-chevron"
+      data-icon="task-chevron"
+      viewBox="0 0 16 16"
+      width="12"
+      height="12"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M6 3.5 10.5 8 6 12.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+/** Ticket — the task-session row glyph (same drawing as the task session
+ * page banner icon). */
+export function TicketIcon() {
+  return (
+    <svg
+      className="kx-v2-chevron"
+      data-icon="ticket"
+      viewBox="0 0 16 16"
+      width="13"
+      height="13"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="2" y="4" width="12" height="8" rx="2" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M10 4v8" fill="none" stroke="currentColor" strokeWidth="1.2" strokeDasharray="1.6 1.6" strokeLinecap="round" />
     </svg>
   )
 }

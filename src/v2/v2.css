@@ -372,6 +372,117 @@
   color: var(--kx-muted-text-aa);
 }
 
+/* ── Task-session children (tickets) ────────────────────────────────
+ * Sessions carrying taskSessions render their own disclosure chevron
+ * (always visible — discoverable, unlike the hover-revealed pin) and,
+ * when expanded, nested ticket rows beneath the meta line. Clicking a
+ * task row dispatches NAVIGATE_TASK_SESSION. The rows are buttons, not
+ * list items, so the five-row listitem contract stays intact. */
+
+.kx-v2-recent__tasks {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--kx-muted-text-aa);
+  cursor: pointer;
+  transition:
+    transform 140ms ease-out,
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-v2-recent__tasks:hover,
+.kx-v2-recent__tasks:focus-visible {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-recent__tasks:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+}
+
+.kx-v2-recent__tasks--open {
+  transform: rotate(90deg);
+}
+
+/* Parent row association — stays tied to the open task session page. */
+.kx-v2-recent__item--task-active {
+  background: var(--kx-pale);
+}
+
+.kx-v2-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 2px;
+  padding-left: 16px;
+}
+
+.kx-v2-task-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  min-height: 28px;
+  padding: 3px 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 140ms ease-out;
+}
+
+.kx-v2-task-row:hover,
+.kx-v2-task-row:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-v2-task-row:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+}
+
+.kx-v2-task-row[aria-current='page'] {
+  background: var(--kx-pale);
+}
+
+.kx-v2-task-row__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-v2-task-row__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-normal);
+  color: var(--kx-primary);
+}
+
+/* Attention dot — the in-progress ticket marker (attention token). */
+.kx-v2-task-row__dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--kx-attention);
+}
+
 /* ── 5 · Footer cluster ─────────────────────────────────────────────── */
 
 .kx-v2-footer {
@@ -1477,10 +1588,62 @@
 }
 
 .kx-v2-pop__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   flex-shrink: 0;
   margin-top: auto;
   padding-top: 8px;
   border-top: 1px solid var(--kx-border);
+}
+
+/* Add-workspace draft row — while active, the footer's two create rows
+ * swap for this inline form: name field (reusing the systems search
+ * input style) plus quiet confirm/cancel icon buttons. */
+.kx-v2-pop__add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 2px;
+}
+
+.kx-v2-pop__add .kx-v2-pop__search {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.kx-v2-pop__add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--kx-muted);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-v2-pop__add-btn:hover,
+.kx-v2-pop__add-btn:focus-visible {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-pop__add-btn:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-v2-pop__add-btn--confirm {
+  color: var(--kx-accent-text-aa);
 }
 
 /* Desktop geometry — the scrim is pointer-transparent on desktop (a

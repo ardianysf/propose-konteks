@@ -1,0 +1,149 @@
+/* TaskTimeline — assistant narrative bubbles, summary work report, retry
+ * event pills, finished line. Surfaces derive from the same token family
+ * as SessionTimeline (pale assistant bubbles, muted event chrome), so both
+ * themes stay on-palette. */
+
+.kx-task-timeline {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+}
+
+/* ── Narrative — assistant-bubble family, full column width (the
+ * structured report below carries the card look). ─────────────────── */
+.kx-task-timeline__narrative {
+  display: grid;
+  gap: 10px;
+}
+
+.kx-task-timeline__paragraph {
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--kx-pale);
+  border-radius: 14px 4px 14px 14px;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  line-height: 1.6;
+}
+
+/* Mono code chip — same family as TicketRequestCard's dependsOn chip. */
+.kx-task-timeline__chip {
+  padding: 1px 6px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 6px;
+  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+  white-space: nowrap;
+}
+
+/* ── Summary work report block. ────────────────────────────────────── */
+.kx-task-timeline__report {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 14px;
+}
+
+.kx-task-timeline__report-heading {
+  margin: 0;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  line-height: 1.3;
+}
+
+.kx-task-timeline__report-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.kx-task-timeline__report-bullet {
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+  line-height: 1.55;
+}
+
+/* ── Retry event pills — centered rounded rows, time right-aligned. ── */
+.kx-task-timeline__retries {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kx-task-timeline__retry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 92%;
+  box-sizing: border-box;
+  padding: 6px 14px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-secondary);
+  line-height: 1.4;
+}
+
+.kx-task-timeline__retry-text {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.kx-task-timeline__retry-time {
+  flex-shrink: 0;
+  color: var(--kx-muted-text-aa);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stopped retry — stronger attention outline + exclamation icon. */
+.kx-task-timeline__retry--stopped {
+  background: var(--kx-raised);
+  border: 1.5px solid var(--kx-attention);
+  color: var(--kx-primary);
+}
+
+.kx-task-timeline__retry-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--kx-attention);
+}
+
+/* ── Finished line — muted meta row with a leading dot. ────────────── */
+.kx-task-timeline__finished {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-task-timeline__finished-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--kx-accent-strong);
+}
+
+.kx-task-timeline__finished-duration {
+  color: var(--kx-muted-text-aa);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 760px) {
+  .kx-task-timeline__retry {
+    max-width: 100%;
+  }
+}

@@ -4,6 +4,7 @@ import {
   EXECUTION_PROFILES,
   SESSION_DETAIL,
   SYSTEMS,
+  TASK_SESSION_DETAIL,
   type SessionMode,
   type System,
   type SessionDetailData,
@@ -66,7 +67,7 @@ export const DEFAULT_SETTINGS_SECTION: SettingsSection = 'general'
 // State
 // ---------------------------------------------------------------------------
 
-export type MockupRoute = 'new-session' | 'session-history' | 'session-detail'
+export type MockupRoute = 'new-session' | 'session-history' | 'session-detail' | 'task-session-detail'
 export type DemoVariant = 'ready' | 'loading' | 'empty'
 
 export type SearchList = 'systems' | 'repositories' | 'components' | 'sessions'
@@ -102,6 +103,9 @@ export interface MockupState {
   search: MockupSearchState
   demoVariant: DemoVariant
   sessionDetail: SessionDetailData
+  /** The task session (ticket) whose detail page route `task-session-detail`
+   * renders — set by NAVIGATE_TASK_SESSION (default: the TKT-3 fixture). */
+  activeTaskSessionId: string
 }
 
 export type MockupAction =
@@ -109,6 +113,7 @@ export type MockupAction =
   | { type: 'TOGGLE_REPO'; repoId: string }
   | { type: 'CREATE_SYSTEM'; name: string; description?: string }
   | { type: 'NAVIGATE'; route: MockupRoute }
+  | { type: 'NAVIGATE_TASK_SESSION'; taskSessionId: string }
   | { type: 'OPEN_OVERLAY'; overlay: OpenOverlayPayload }
   | { type: 'CLOSE_OVERLAY' }
   | { type: 'SET_MODE'; mode: SessionMode }
@@ -158,6 +163,7 @@ export function initialState(search: string = ''): MockupState {
     search: { systems: '', repositories: '', components: '', sessions: '' },
     demoVariant,
     sessionDetail: structuredClone(SESSION_DETAIL),
+    activeTaskSessionId: TASK_SESSION_DETAIL.id,
   }
 }
 
@@ -239,6 +245,17 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
 
     case 'NAVIGATE': {
       return { ...state, route: action.route }
+    }
+
+    // Sidebar task-row click / task deep link: select the task session and
+    // route to its detail page in one transition. "Back to plan" returns
+    // via plain NAVIGATE to 'session-detail'.
+    case 'NAVIGATE_TASK_SESSION': {
+      return {
+        ...state,
+        route: 'task-session-detail',
+        activeTaskSessionId: action.taskSessionId,
+      }
     }
 
     case 'OPEN_OVERLAY': {

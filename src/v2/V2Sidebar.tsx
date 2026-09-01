@@ -25,7 +25,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { RECENT_SESSIONS } from '../data/mockData'
-import { resolveV2Workspace, V2_WORKSPACES } from './v2Workspaces'
+import { createV2Workspace, resolveV2WorkspaceIn, V2_WORKSPACES, type V2Workspace } from './v2Workspaces'
 import { useMockup } from '../state/MockupContext'
 import {
   CatalogIcon,
@@ -36,6 +36,8 @@ import {
   PinIcon,
   SearchIcon,
   SlidersIcon,
+  TaskChevronIcon,
+  TicketIcon,
 } from './icons'
 import V2ContextPopover from './V2ContextPopover'
 import V2AccountPopover from './V2AccountPopover'
@@ -53,8 +55,6 @@ type Popover = 'none' | 'context' | 'account'
 export default function V2Sidebar() {
   const { state, dispatch } = useMockup()
   const collapsed = state.sidebarCollapsed
-  const activeSystem =
-    state.systems.find((system) => system.id === state.activeSystemId) ?? state.systems[0]
 
   // "All systems" context: the whole active workspace is selected
   // instead of one system. Any real SET_ACTIVE_SYSTEM (popover row,
@@ -69,25 +69,26 @@ export default function V2Sidebar() {
     }
   }, [state.activeSystemId])
 
-  // Context shown on the identity card: either one system or the whole
-  // active workspace.
-  const contextName = allSystemsActive ? 'All systems' : activeSystem.name
-
   // Popovers are mutually exclusive by construction: one local slot.
   const [popover, setPopover] = useState<Popover>('none')
 
   // v2-only workspace selector state. The shared reducer has no
-  // workspace concept, so the active demo workspace lives here and
-  // flows into the identity card, the rail avatar, and the popover.
+  // workspace concept, so the demo workspace list (static seed +
+  // workspaces created through the popover's add-workspace flow) and
+  // the active id live HERE — one owner keeps the identity card, the
+  // rail avatar, and the popover list consistent. V2ContextPopover is
+  // this sidebar's direct child, so the shared state flows through the
+  // existing props (no context needed).
+  const [workspaces, setWorkspaces] = useState<V2Workspace[]>(V2_WORKSPACES)
   const [activeWorkspaceId, setActiveWorkspaceId] = useState(V2_WORKSPACES[0].id)
-  const activeWorkspace = resolveV2Workspace(activeWorkspaceId)
+  const activeWorkspace = resolveV2WorkspaceIn(workspaces, activeWorkspaceId)
 
   const selectWorkspace = (workspaceId: string) => {
     setActiveWorkspaceId(workspaceId)
     // Carry-over: if the active system does not belong to the target
     // workspace, fall back to that workspace's first known system so the
     // UI never shows an out-of-scope pairing.
-    const workspace = resolveV2Workspace(workspaceId)
+    const workspace = resolveV2WorkspaceIn(workspaces, workspaceId)
     if (!workspace.systemIds.includes(state.activeSystemId)) {
       const first = workspace.systemIds.find((id) =>
         state.systems.some((system) => system.id === id),
@@ -95,6 +96,29 @@ export default function V2Sidebar() {
       if (first) dispatch({ type: 'SET_ACTIVE_SYSTEM', systemId: first })
     }
   }
+
+  // Append a workspace and make it active. New workspaces start with
+  // zero systems — no carry-over dispatch happens, so the identity
+  // card falls to its no-system placeholder instead of an out-of-scope
+  // system pairing.
+  const createWorkspace = (name: string) => {
+    const workspace = createV2Workspace(name, workspaces)
+    setWorkspaces((previous) => [...previous, workspace])
+    setActiveWorkspaceId(workspace.id)
+  }
+
+  // Context shown on the identity card: either one system or the whole
+  // active workspace. The system line is scoped to the workspace — a
+  // workspace with zero known systems (e.g. a freshly created one)
+  // shows a placeholder rather than an out-of-scope system name.
+  const workspaceSystems = state.systems.filter((system) =>
+    activeWorkspace.systemIds.includes(system.id),
+  )
+  const contextName =
+    (allSystemsActive
+      ? 'All systems'
+      : (workspaceSystems.find((system) => system.id === state.activeSystemId) ??
+        workspaceSystems[0])?.name) ?? 'No systems yet'
 
   // Sessions disclosure — the chevron row expands/collapses the recent
   // items beneath it (the standalone "Recent" section is gone).
@@ -187,6 +211,19 @@ export default function V2Sidebar() {
     ...RECENT_SESSIONS.filter((session) => pinnedIds.has(session.id)),
     ...RECENT_SESSIONS.filter((session) => !pinnedIds.has(session.id)),
   ]
+
+  // Per-session task-children disclosure — sessions carrying taskSessions
+  // show their own chevron; expanded state persists across route changes.
+  // The rail hides the whole sessions group, so the rows hide with it.
+  const [expandedTaskIds, setExpandedTaskIds] = useState<ReadonlySet<string>>(new Set())
+  const toggleTaskExpanded = (sessionId: string) => {
+    setExpandedTaskIds((previous) => {
+      const next = new Set(previous)
+      if (next.has(sessionId)) next.delete(sessionId)
+      else next.add(sessionId)
+      return next
+    })
+  }
 
   return (
     <nav
@@ -394,12 +431,50 @@ export default function V2Sidebar() {
             {orderedSessions.map((session) => {
               const system = state.systems.find((entry) => entry.id === session.systemId)
               const pinned = pinnedIds.has(session.id)
+              const tasks = session.taskSessions
+              const tasksExpanded = expandedTaskIds.has(session.id)
+              // The parent row stays visually associated with the open
+              // task session page while one of its children is active.
+              const ownsActiveTask =
+                state.route === 'task-session-detail' &&
+                (tasks?.some((task) => task.id === state.activeTaskSessionId) ?? false)
               return (
-                <li key={session.id} className="kx-v2-recent__item">
+                <li
+                  key={session.id}
+                  className={
+                    ownsActiveTask
+                      ? 'kx-v2-recent__item kx-v2-recent__item--task-active'
+                      : 'kx-v2-recent__item'
+                  }
+                >
                   <div className="kx-v2-recent__row">
                     <span className="kx-v2-recent__title" title={session.title}>
                       {session.title}
                     </span>
+                    {tasks && tasks.length > 0 && (
+                      <button
+                        type="button"
+                        className={
+                          tasksExpanded
+                            ? 'kx-v2-recent__tasks kx-v2-recent__tasks--open'
+                            : 'kx-v2-recent__tasks'
+                        }
+                        aria-expanded={tasksExpanded}
+                        aria-label={
+                          tasksExpanded
+                            ? `Collapse task sessions for ${session.title}`
+                            : `Expand task sessions for ${session.title}`
+                        }
+                        data-testid="v2-session-tasks-toggle"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          toggleTaskExpanded(session.id)
+                          if (event.detail > 0) event.currentTarget.blur()
+                        }}
+                      >
+                        <TaskChevronIcon />
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="kx-v2-recent__pin"
@@ -422,6 +497,42 @@ export default function V2Sidebar() {
                   <span className="kx-v2-recent__meta">
                     {system ? system.name : session.systemId} · {session.time}
                   </span>
+                  {/* Nested task-session rows (tickets) — children of their
+                      parent session row. Clicking one dispatches
+                      NAVIGATE_TASK_SESSION; the in-progress ticket carries
+                      the attention dot. Buttons (not list items) keep the
+                      five-row listitem contract intact. */}
+                  {tasks && tasks.length > 0 && tasksExpanded && (
+                    <div className="kx-v2-task-list">
+                      {tasks.map((task) => (
+                        <button
+                          key={task.id}
+                          type="button"
+                          className="kx-v2-task-row"
+                          aria-current={
+                            state.route === 'task-session-detail' &&
+                            state.activeTaskSessionId === task.id
+                              ? 'page'
+                              : undefined
+                          }
+                          data-testid="v2-task-row"
+                          onClick={() =>
+                            dispatch({ type: 'NAVIGATE_TASK_SESSION', taskSessionId: task.id })
+                          }
+                        >
+                          <span className="kx-v2-task-row__icon" aria-hidden="true">
+                            <TicketIcon />
+                          </span>
+                          <span className="kx-v2-task-row__label">
+                            {task.code} · {task.title}
+                          </span>
+                          {task.status === 'IN_PROGRESS' && (
+                            <span className="kx-v2-task-row__dot" aria-hidden="true" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </li>
               )
             })}
@@ -455,8 +566,10 @@ export default function V2Sidebar() {
       <V2ContextPopover
         open={popover === 'context'}
         onClose={() => closePopover('context')}
+        workspaces={workspaces}
         activeWorkspaceId={activeWorkspaceId}
         onSelectWorkspace={selectWorkspace}
+        onCreateWorkspace={createWorkspace}
         allSystemsActive={allSystemsActive}
         onSelectAllSystems={() => setAllSystemsActive(true)}
       />

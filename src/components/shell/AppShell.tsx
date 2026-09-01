@@ -24,6 +24,7 @@ import SettingsModal from '../account/SettingsModal'
 import NewSessionPage from '../../pages/NewSessionPage'
 import SessionHistoryPage from '../../pages/SessionHistoryPage'
 import SessionDetailPage from '../../pages/SessionDetailPage'
+import TaskSessionDetailPage from '../../pages/TaskSessionDetailPage'
 import { useMockup } from '../../state/MockupContext'
 import SystemMapSkeleton from '../system/SystemMapSkeleton'
 import './AppShell.css'
@@ -121,11 +122,15 @@ export default function AppShell() {
         <Sidebar />
         <main className="kx-main">
           {/* Route switch — the new-session page (Task 5), the dedicated
-              Session History page (Task 11), and the Session Detail page (Task 13). Overlays mount on top of this. */}
+              Session History page (Task 11), the Session Detail page (Task 13),
+              and the Task Session detail page (ticket sessions). Overlays mount
+              on top of this. */}
           {state.route === 'new-session' ? (
             <NewSessionPage />
           ) : state.route === 'session-detail' ? (
             <SessionDetailPage />
+          ) : state.route === 'task-session-detail' ? (
+            <TaskSessionDetailPage />
           ) : (
             <SessionHistoryPage />
           )}

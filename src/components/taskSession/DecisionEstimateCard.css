@@ -1,0 +1,141 @@
+/* DecisionEstimateCard — decision/estimate block with dotted-leader rows
+ * and the three-tier action row. The primary action reuses the shared
+ * .kx-btn--primary primitive; the quiet text and decline actions are
+ * card-local (decline uses --kx-attention, the token's documented
+ * decline-affordance color). */
+
+.kx-decision-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 14px;
+}
+
+.kx-decision-card__label {
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kx-attention);
+}
+
+.kx-decision-card__heading {
+  margin: 0;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  line-height: 1.3;
+}
+
+/* ── Dotted-leader rows: label left, value right, dotted flex leader ── */
+.kx-decision-card__rows {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 0;
+}
+
+.kx-decision-card__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.kx-decision-card__row-label {
+  flex-shrink: 0;
+  max-width: 60%;
+  font-size: var(--kx-text-md);
+  color: var(--kx-secondary);
+}
+
+.kx-decision-card__leader {
+  flex: 1;
+  min-width: 16px;
+  border-bottom: 1.5px dotted var(--kx-border);
+  transform: translateY(-3px);
+}
+
+.kx-decision-card__row-value {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.kx-decision-card__validity {
+  margin: 2px 0 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-decision-card__note {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  font-style: italic;
+  color: var(--kx-secondary);
+}
+
+/* ── Actions — primary (shared filled button), text (quiet), decline ── */
+.kx-decision-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 4px;
+}
+
+.kx-decision-card__action {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.kx-decision-card__action--text {
+  padding: 6px 4px;
+  border: none;
+  background: none;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.kx-decision-card__action--text:hover {
+  color: var(--kx-primary);
+}
+
+/* Decline — attention token per tokens.css (decline affordances). */
+.kx-decision-card__action--danger {
+  padding: 6px 4px;
+  border: none;
+  background: none;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-attention);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.kx-decision-card__action--danger:hover {
+  opacity: 0.85;
+}
+
+.kx-decision-card__actions .kx-btn {
+  /* The filled primary reads a size smaller than the panel-scale buttons
+     so it matches the card's compact row rhythm. */
+  padding: 8px 14px;
+  font-size: var(--kx-text-md);
+}
+
+.kx-decision-card__action--text:focus-visible,
+.kx-decision-card__action--danger:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
