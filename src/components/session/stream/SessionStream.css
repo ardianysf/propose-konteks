@@ -1392,6 +1392,19 @@
   color: var(--kx-muted-text-aa);
 }
 
+/* ── Stream detail page (session-detail layout variant) ─────────── */
+
+/* The alternative session detail page reuses the SessionDetailPage chrome
+ * (sticky header, bounded reading column, sticky composer area) with the
+ * stream story as the body — the reused classes cover the whole layout.
+ * The one page-specific adjustment is the anchor scroll offset: the sticky
+ * session header (~60px tall) lives above the scrollport here (the demo
+ * page has no sticky header, hence its smaller 24px slot margin), so slot
+ * anchors must clear it when jumped to. Geometry only — no tokens. */
+.kx-session-detail .kx-stream-slot {
+  scroll-margin-top: 72px;
+}
+
 /* ── Keyframes + motion kill ────────────────────────────────────────── */
 
 @keyframes kx-stream-pulse {

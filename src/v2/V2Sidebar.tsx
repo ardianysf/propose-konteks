@@ -25,6 +25,9 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { RECENT_SESSIONS } from '../data/mockData'
+import {
+  ATTENDANCE_REVIEW_RECENT_ID,
+} from '../components/session/stream/attendanceReviewStory'
 import { createV2Workspace, resolveV2WorkspaceIn, V2_WORKSPACES, type V2Workspace } from './v2Workspaces'
 import V2CreateWorkspaceModal, {
   type V2CreateWorkspaceFormValues,
@@ -467,14 +470,22 @@ export default function V2Sidebar() {
                     {/* The title is the row's navigation affordance — a
                         text button dispatching NAVIGATE to session-detail,
                         mirroring the "Sessions" label row. The disclosure
-                        chevron and pin beside it keep their own behavior. */}
+                        chevron and pin beside it keep their own behavior.
+                        The attendance-review session is the mockup-level
+                        exception: it opens its stream-variant detail page. */}
                     <button
                       type="button"
                       className="kx-v2-recent__title"
                       title={session.title}
                       data-testid="v2-recent-title"
                       onClick={(event) => {
-                        dispatch({ type: 'NAVIGATE', route: 'session-detail' })
+                        dispatch({
+                          type: 'NAVIGATE',
+                          route:
+                            session.id === ATTENDANCE_REVIEW_RECENT_ID
+                              ? 'session-stream-detail'
+                              : 'session-detail',
+                        })
                         // Mouse clicks must not leave focus on the title —
                         // :focus-within would freeze the row's pale fill
                         // after the pointer leaves. Keyboard activation

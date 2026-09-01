@@ -12,6 +12,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { ILLUSTRATIVE_DATA_NOTE, SESSION_HISTORY, type SessionMode } from '../data/mockData'
+import { ATTENDANCE_REVIEW_HISTORY_ID } from '../components/session/stream/attendanceReviewStory'
 import { useMockup } from '../state/MockupContext'
 import type { MockupAction } from '../state/mockupReducer'
 import './SessionHistoryPage.css'
@@ -203,7 +204,15 @@ export default function SessionHistoryPage() {
                     className="kx-history__row-button"
                     data-testid="history-row"
                     onClick={() => {
-                      dispatch({ type: 'NAVIGATE', route: 'session-detail' } as MockupAction)
+                      // The attendance-review entry opens its stream-variant
+                      // detail page; every other session stays classic.
+                      dispatch({
+                        type: 'NAVIGATE',
+                        route:
+                          entry.id === ATTENDANCE_REVIEW_HISTORY_ID
+                            ? 'session-stream-detail'
+                            : 'session-detail',
+                      } as MockupAction)
                     }}
                   >
                     <div className="kx-history__row-main">
