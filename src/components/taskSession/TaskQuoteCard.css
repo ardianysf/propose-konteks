@@ -1,0 +1,34 @@
+/* TaskQuoteCard — compact quote notice: overline label, body text, and
+ * expiry meta. Raised surface + border like the summary report block. */
+
+.kx-task-quote {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 14px;
+}
+
+.kx-task-quote__label {
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kx-secondary);
+}
+
+.kx-task-quote__text {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+  line-height: 1.5;
+}
+
+.kx-task-quote__expires {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}

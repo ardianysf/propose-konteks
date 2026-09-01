@@ -1,0 +1,85 @@
+/* StageChips — horizontal wrap of workflow stage pills. Attention chips
+ * carry the amber marker + tinted outline; pending chips a hollow muted
+ * dot; the done "Konteks learned" chip the book glyph in accent ink. */
+
+.kx-stage-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kx-stage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 5px 12px;
+  background: var(--kx-pale);
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-secondary);
+  line-height: 1.3;
+}
+
+.kx-stage-chip__label {
+  font-weight: var(--kx-font-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-stage-chip__detail {
+  color: var(--kx-muted-text-aa);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Markers ── */
+.kx-stage-chip__marker {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  box-sizing: border-box;
+  border-radius: 50%;
+}
+
+/* Attention — filled amber dot. */
+.kx-stage-chip__marker--attention {
+  background: var(--kx-attention);
+}
+
+/* Pending — hollow muted dot. */
+.kx-stage-chip__marker--pending {
+  border: 1.5px solid var(--kx-muted);
+}
+
+/* Done — book glyph instead of a dot (auto width). */
+.kx-stage-chip__marker--done {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  color: var(--kx-accent-text-aa);
+}
+
+/* ── State skins ── */
+.kx-stage-chip--attention {
+  border-color: var(--kx-attention);
+  color: var(--kx-primary);
+}
+
+.kx-stage-chip--pending {
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-stage-chip--done {
+  color: var(--kx-accent-text-aa);
+}

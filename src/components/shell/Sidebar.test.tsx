@@ -618,3 +618,66 @@ describe('Sidebar', () => {
     expect(tooltip).not.toBeVisible()
   })
 })
+
+// ---------------------------------------------------------------------------
+// Task-session children (tickets) — nested rows under their parent session
+// ---------------------------------------------------------------------------
+
+describe('Sidebar task sessions', () => {
+  it('expands the session task children via the chevron; clicking a task row routes to task-session-detail and sets activeTaskSessionId', () => {
+    const { bucket } = renderSidebar()
+    const list = screen.getByRole('list', { name: 'Recent sessions' })
+    const rows = within(list).getAllByRole('listitem')
+    // The five-row listitem contract is untouched — task rows are buttons
+    // inside the parent li, never nested list items.
+    expect(rows).toHaveLength(RECENT_SESSIONS.length)
+
+    // Only the parent carrying taskSessions (Validate delivery evidence,
+    // the last row) renders the disclosure chevron.
+    for (const row of rows.slice(0, -1)) {
+      expect(within(row).queryByTestId('sidebar-session-tasks-toggle')).not.toBeInTheDocument()
+    }
+    const parent = rows.at(-1)!
+    const toggle = within(parent).getByTestId('sidebar-session-tasks-toggle')
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByTestId('sidebar-task-row')).not.toBeInTheDocument()
+
+    // Expanding reveals the nested ticket rows: ticket icon, code · title
+    // (truncated like other rows), and the attention dot for IN_PROGRESS.
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    const taskRows = within(parent).getAllByTestId('sidebar-task-row')
+    expect(taskRows).toHaveLength(3)
+    const tkt3 = taskRows[2]
+    expect(tkt3).toHaveTextContent('TKT-3 · Persist discount on completed orders')
+    expect(tkt3.querySelector('svg[data-icon="ticket"]')).not.toBeNull()
+    expect(tkt3.querySelector('.kx-sidebar__task-dot')).not.toBeNull()
+    // Completed tasks carry no attention dot.
+    expect(taskRows[0].querySelector('.kx-sidebar__task-dot')).toBeNull()
+
+    // Clicking TKT-3 dispatches NAVIGATE_TASK_SESSION — route + active id
+    // land in one transition; the active row carries aria-current=page and
+    // the parent row stays visually associated with the open task page.
+    fireEvent.click(tkt3)
+    expect(bucket.current?.route).toBe('task-session-detail')
+    expect(bucket.current?.activeTaskSessionId).toBe('task-tkt-3')
+    expect(tkt3).toHaveAttribute('aria-current', 'page')
+    expect(parent).toHaveClass('kx-sidebar__session--task-active')
+
+    // The disclosure is independent state — collapsing hides the rows
+    // again (expanded state persists across route changes otherwise).
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByTestId('sidebar-task-row')).not.toBeInTheDocument()
+  })
+
+  it('keeps the nested rows hidden in the collapsed rail the same way the Recent labels hide (CSS contract)', () => {
+    // The rail hides the whole Recent section (display: none) — the task
+    // rows hide with it, exactly like the labels; no rail rule ever
+    // re-surfaces the task list on its own. (The rail hiding rule is a
+    // comma-grouped selector list, so the pattern allows intervening
+    // co-selectors before the declaration block.)
+    expect(css).toMatch(/\.kx-sidebar--rail [^{}]*\.kx-sidebar__recent[^{]*\{[^}]*display: none/)
+    expect(css).not.toMatch(/\.kx-sidebar--rail [^{]*\.kx-sidebar__task-list[^{]*\{[^}]*display: (flex|grid|block)/)
+  })
+})

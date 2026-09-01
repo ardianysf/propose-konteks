@@ -258,6 +258,50 @@ describe('V2Sidebar labels', () => {
       expect(row.textContent).toMatch(/\u00B7/)
     }
   })
+
+  it('expands task-session children and a task-row click opens the task session page with the active id set', () => {
+    render(<V2App />)
+    const list = screen.getByRole('list')
+    const rows = within(list).getAllByRole('listitem')
+    // The five-row listitem contract is untouched — task rows are buttons
+    // inside the parent li, never nested list items.
+    expect(rows).toHaveLength(5)
+
+    // Only the parent carrying taskSessions (Validate delivery evidence,
+    // the last row) renders the per-session disclosure.
+    for (const row of rows.slice(0, -1)) {
+      expect(within(row).queryByTestId('v2-session-tasks-toggle')).not.toBeInTheDocument()
+    }
+    const parent = rows.at(-1)!
+    const toggle = within(parent).getByTestId('v2-session-tasks-toggle')
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByTestId('v2-task-row')).not.toBeInTheDocument()
+
+    // Expanding reveals the nested ticket rows; TKT-3 carries the
+    // attention dot (IN_PROGRESS), the completed ones do not.
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    const taskRows = within(parent).getAllByTestId('v2-task-row')
+    expect(taskRows).toHaveLength(3)
+    const tkt3 = taskRows[2]
+    expect(tkt3).toHaveTextContent('TKT-3 · Persist discount on completed orders')
+    expect(tkt3.querySelector('svg[data-icon="ticket"]')).not.toBeNull()
+    expect(tkt3.querySelector('.kx-v2-task-row__dot')).not.toBeNull()
+    expect(taskRows[0].querySelector('.kx-v2-task-row__dot')).toBeNull()
+
+    // Clicking TKT-3 routes to the shared task session page with the
+    // active task id set; the active row carries aria-current=page and
+    // the parent row stays visually associated with the open task page.
+    fireEvent.click(tkt3)
+    expect(screen.getByTestId('task-session-detail')).toBeInTheDocument()
+    expect(tkt3).toHaveAttribute('aria-current', 'page')
+    expect(parent).toHaveClass('kx-v2-recent__item--task-active')
+
+    // "Back to plan" returns to the regular session-detail route.
+    fireEvent.click(screen.getByTestId('task-back-to-plan'))
+    expect(screen.getByTestId('session-detail')).toBeInTheDocument()
+    expect(screen.queryByTestId('task-session-detail')).not.toBeInTheDocument()
+  })
 })
 
 // ---------------------------------------------------------------------------

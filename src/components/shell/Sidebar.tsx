@@ -46,6 +46,48 @@ function PinIcon({ pinned }: { pinned: boolean }) {
   )
 }
 
+/** Ticket — the task-session row glyph (same drawing as the task
+ * session page banner). */
+function TicketIcon() {
+  return (
+    <svg
+      data-icon="ticket"
+      viewBox="0 0 16 16"
+      width="13"
+      height="13"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="2" y="4" width="12" height="8" rx="2" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M10 4v8" fill="none" stroke="currentColor" strokeWidth="1.2" strokeDasharray="1.6 1.6" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/** Chevron-right — doubles as the task-children disclosure glyph; the
+ * open state rotates it 90° via the CSS class on its wrapping button. */
+function TaskChevronIcon() {
+  return (
+    <svg
+      data-icon="task-chevron"
+      viewBox="0 0 16 16"
+      width="12"
+      height="12"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M6 3.5 10.5 8 6 12.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 const LOGO_EXPANDED_SRC = '/assets/konteks/logo-text-main.png'
 const LOGO_RAIL_SRC = '/assets/konteks/web-topbar-icon-128.png'
 
@@ -185,6 +227,20 @@ export default function Sidebar() {
     ...RECENT_SESSIONS.filter((session) => pinnedIds.has(session.id)),
     ...RECENT_SESSIONS.filter((session) => !pinnedIds.has(session.id)),
   ]
+
+  // Task-session children disclosure — local UI state: sessions carrying
+  // taskSessions render a chevron control that expands their nested ticket
+  // rows. The state persists across route changes (never auto-collapsed),
+  // and the rail hides the whole Recent section so the rows hide with it.
+  const [expandedTaskIds, setExpandedTaskIds] = useState<ReadonlySet<string>>(new Set())
+  const toggleTaskExpanded = (sessionId: string) => {
+    setExpandedTaskIds((previous) => {
+      const next = new Set(previous)
+      if (next.has(sessionId)) next.delete(sessionId)
+      else next.add(sessionId)
+      return next
+    })
+  }
 
   /** Toggle contract shared by the reducer-overlay menu triggers: a second
    * click on the same trigger dismisses its own overlay (restoring focus to
@@ -350,8 +406,22 @@ export default function Sidebar() {
           {orderedSessions.map((session) => {
             const system = state.systems.find((entry) => entry.id === session.systemId)
             const pinned = pinnedIds.has(session.id)
+            const tasks = session.taskSessions
+            const tasksExpanded = expandedTaskIds.has(session.id)
+            // The parent row stays visually associated with the open task
+            // session page while one of its children is the active task.
+            const ownsActiveTask =
+              state.route === 'task-session-detail' &&
+              (tasks?.some((task) => task.id === state.activeTaskSessionId) ?? false)
             return (
-              <li key={session.id} className="kx-sidebar__session kx-tooltip-host">
+              <li
+                key={session.id}
+                className={
+                  ownsActiveTask
+                    ? 'kx-sidebar__session kx-sidebar__session--task-active kx-tooltip-host'
+                    : 'kx-sidebar__session kx-tooltip-host'
+                }
+              >
                 {/* Full-title tooltip — CSS reveals it on hover/focus-within;
                     aria-hidden so screen readers hear the row text only once. */}
                 <span className="kx-tooltip kx-sidebar__session-tooltip" aria-hidden="true">
@@ -359,6 +429,32 @@ export default function Sidebar() {
                 </span>
                 <div className="kx-sidebar__session-title-row">
                   <span className="kx-sidebar__session-title">{session.title}</span>
+                  {tasks && tasks.length > 0 && (
+                    <button
+                      type="button"
+                      className={
+                        tasksExpanded
+                          ? 'kx-sidebar__session-tasks kx-sidebar__session-tasks--open'
+                          : 'kx-sidebar__session-tasks'
+                      }
+                      aria-expanded={tasksExpanded}
+                      aria-label={
+                        tasksExpanded
+                          ? `Collapse task sessions for ${session.title}`
+                          : `Expand task sessions for ${session.title}`
+                      }
+                      data-testid="sidebar-session-tasks-toggle"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        toggleTaskExpanded(session.id)
+                        // Same focus contract as the pin: a mouse click must
+                        // not strand :focus-within and freeze the row open.
+                        if (event.detail > 0) event.currentTarget.blur()
+                      }}
+                    >
+                      <TaskChevronIcon />
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="kx-sidebar__session-pin"
@@ -391,6 +487,43 @@ export default function Sidebar() {
                     </span>
                   </div>
                 </div>
+                {/* Nested task-session rows (tickets) — indented beneath the
+                    parent session. Clicking one selects that task session and
+                    routes to its detail page in a single NAVIGATE_TASK_SESSION
+                    transition; the in-progress ticket carries the attention
+                    dot. Hidden in the rail together with the whole Recent
+                    section. */}
+                {tasks && tasks.length > 0 && tasksExpanded && (
+                  <div className="kx-sidebar__task-list">
+                    {tasks.map((task) => (
+                      <button
+                        key={task.id}
+                        type="button"
+                        className="kx-sidebar__task-row"
+                        aria-current={
+                          state.route === 'task-session-detail' &&
+                          state.activeTaskSessionId === task.id
+                            ? 'page'
+                            : undefined
+                        }
+                        data-testid="sidebar-task-row"
+                        onClick={() =>
+                          dispatch({ type: 'NAVIGATE_TASK_SESSION', taskSessionId: task.id })
+                        }
+                      >
+                        <span className="kx-sidebar__task-icon" aria-hidden="true">
+                          <TicketIcon />
+                        </span>
+                        <span className="kx-sidebar__task-label">
+                          {task.code} · {task.title}
+                        </span>
+                        {task.status === 'IN_PROGRESS' && (
+                          <span className="kx-sidebar__task-dot" aria-hidden="true" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </li>
             )
           })}

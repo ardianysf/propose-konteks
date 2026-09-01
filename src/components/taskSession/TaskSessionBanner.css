@@ -1,0 +1,91 @@
+/* TaskSessionBanner — full-width context strip directly under the task
+ * session header. Same horizontal rhythm as the sticky header band
+ * (10px 32px) so the two read as one chrome unit. */
+
+.kx-task-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 24px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 32px;
+  background: var(--kx-pale);
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-task-banner__origin {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--kx-primary);
+}
+
+.kx-task-banner__context {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-task-banner__aside {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px 16px;
+  min-width: 0;
+}
+
+.kx-task-banner__help {
+  margin: 0;
+  max-width: 52ch;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-secondary);
+  line-height: 1.4;
+}
+
+.kx-task-banner__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.kx-task-banner__back:hover {
+  color: var(--kx-attention);
+}
+
+.kx-task-banner__back:focus-visible {
+  outline: 2px solid var(--kx-attention);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (max-width: 760px) {
+  .kx-task-banner {
+    padding: 10px 12px;
+  }
+
+  .kx-task-banner__aside {
+    justify-content: flex-start;
+  }
+
+  .kx-task-banner__help {
+    max-width: 100%;
+  }
+}

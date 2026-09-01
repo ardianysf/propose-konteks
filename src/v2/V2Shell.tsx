@@ -22,6 +22,7 @@ import SettingsModal from '../components/account/SettingsModal'
 import NewSessionPage from '../pages/NewSessionPage'
 import SessionHistoryPage from '../pages/SessionHistoryPage'
 import SessionDetailPage from '../pages/SessionDetailPage'
+import TaskSessionDetailPage from '../pages/TaskSessionDetailPage'
 import SystemMapSkeleton from '../components/system/SystemMapSkeleton'
 import { useMockup } from '../state/MockupContext'
 import '../components/shell/AppShell.css'
@@ -94,11 +95,14 @@ export default function V2Shell() {
         )}
         <V2Sidebar />
         <main className="kx-main">
-          {/* Route switch — the page components render unchanged. */}
+          {/* Route switch — the page components render unchanged; the
+              task-session route renders the shared TaskSessionDetailPage. */}
           {state.route === 'new-session' ? (
             <NewSessionPage />
           ) : state.route === 'session-detail' ? (
             <SessionDetailPage />
+          ) : state.route === 'task-session-detail' ? (
+            <TaskSessionDetailPage />
           ) : (
             <SessionHistoryPage />
           )}

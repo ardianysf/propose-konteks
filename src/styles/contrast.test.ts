@@ -78,7 +78,7 @@ function contrast(a: string, b: string): number {
 }
 
 // ---------------------------------------------------------------------------
-// Complete 150-consumer inventory.
+// Complete 190-consumer inventory.
 // cls: M = enabled muted text/placeholder, A = enabled accent text/glyph,
 //      S = white-text solid background, U = unchanged (decorative/disabled).
 // token is the ORIGINAL token each consumer started from.
@@ -260,6 +260,15 @@ function shellEntries(): Entry[] {
     { file: SIDEBAR, selector: ".kx-sidebar__session-pin[aria-pressed='true']", property: 'color', token: ACCENT_AA, cls: 'A' },
     { file: SYSTEM_MENU, selector: '.kx-system-menu__map-btn', property: 'color', token: MUTED, cls: 'U' },
     { file: SYSTEM_MENU, selector: '.kx-system-menu__map-btn:hover', property: 'color', token: ACCENT_AA, cls: 'A' },
+    // Task-session children disclosure (Task Session Page feature): the
+    // resting chevron reads the decorative muted token (U — sibling of
+    // .kx-sidebar__chevron), its revealed hover/focus state maps to the
+    // AA accent token, and the ticket glyph is an accent icon (sibling of
+    // .kx-sidebar__system-icon). The nested task rows live in v2.css
+    // outside the aggregate, so only these sidebar entries are needed.
+    { file: SIDEBAR, selector: '.kx-sidebar__session-tasks', property: 'color', token: MUTED, cls: 'U' },
+    { file: SIDEBAR, selector: '.kx-sidebar__session-tasks:focus-visible', property: 'color', token: ACCENT_AA, cls: 'A' },
+    { file: SIDEBAR, selector: '.kx-sidebar__task-icon', property: 'color', token: ACCENT_STRONG, cls: 'A' },
   ]
 }
 
@@ -337,6 +346,28 @@ function entries(): Entry[] {
     { file: 'src/components/system/SystemMapModal.css', selector: '.component-node__cta:focus', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.react-flow__edge-path.highlighted', property: 'stroke', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.react-flow__controls-button:hover', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
+    // Task Session Page feature (taskSession/* + pages/TaskSessionDetailPage.css
+    // — the ticket-session composition: context banner, ticket request,
+    // retry-pill timeline, quote + decision/estimate cards, stage chips).
+    // Muted M — validity note, chip detail/pending ink, expiry + finished-line
+    // captions (all read the AA muted token, like the session-detail batch).
+    { file: 'src/components/taskSession/DecisionEstimateCard.css', selector: '.kx-decision-card__validity', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: 'src/components/taskSession/StageChips.css', selector: '.kx-stage-chip__detail', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: 'src/components/taskSession/StageChips.css', selector: '.kx-stage-chip--pending', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: 'src/components/taskSession/TaskQuoteCard.css', selector: '.kx-task-quote__expires', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: 'src/components/taskSession/TaskTimeline.css', selector: '.kx-task-timeline__retry-time', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: 'src/components/taskSession/TaskTimeline.css', selector: '.kx-task-timeline__finished', property: 'color', token: MUTED, cls: 'M' as Class },
+    { file: 'src/components/taskSession/TaskTimeline.css', selector: '.kx-task-timeline__finished-duration', property: 'color', token: MUTED, cls: 'M' as Class },
+    // Accent A — done-state ink (book glyph marker + done chip label) reads
+    // the AA accent token, like the session stage-pill badge.
+    { file: 'src/components/taskSession/StageChips.css', selector: '.kx-stage-chip__marker--done', property: 'color', token: ACCENT_STRONG, cls: 'A' as Class },
+    { file: 'src/components/taskSession/StageChips.css', selector: '.kx-stage-chip--done', property: 'color', token: ACCENT_STRONG, cls: 'A' as Class },
+    // U — decorative: danger-action focus outline, pending dot border,
+    // finished leading dot fill, and the header separator glyph.
+    { file: 'src/components/taskSession/DecisionEstimateCard.css', selector: '.kx-decision-card__action--danger:focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/components/taskSession/StageChips.css', selector: '.kx-stage-chip__marker--pending', property: 'border', token: MUTED, cls: 'U' as Class },
+    { file: 'src/components/taskSession/TaskTimeline.css', selector: '.kx-task-timeline__finished-dot', property: 'background', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: 'src/pages/TaskSessionDetailPage.css', selector: '.kx-task-session__sep', property: 'color', token: MUTED, cls: 'U' as Class },
     // System map banners and controls — decorative borders.
     { file: 'src/components/system/SystemMapModal.css', selector: '.kx-system-map__banner--warning', property: 'border-left', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.kx-system-map__reset-btn:hover:not(:disabled)', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
@@ -878,18 +909,18 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 174 consumers — 84 muted, 79 accent-strong, 3 accent-text-aa', () => {
-    expect(inventory).toHaveLength(174)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(84)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(79)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(3)
+  it('covers exactly 190 consumers — 94 muted, 84 accent-strong, 4 accent-text-aa', () => {
+    expect(inventory).toHaveLength(190)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(94)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(84)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(4)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(84)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(39)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(91)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(43)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(6)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(45)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(50)
   })
 
   it('has no duplicate inventory selectors', () => {

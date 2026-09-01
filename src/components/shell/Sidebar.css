@@ -417,6 +417,99 @@
   white-space: nowrap;
 }
 
+/* ── Task-session children (tickets) ─────────────────────────────
+ * Sessions carrying taskSessions render a disclosure chevron in the
+ * title row and, when expanded, nested ticket rows indented beneath
+ * the hover-reveal meta line. Clicking a task row dispatches
+ * NAVIGATE_TASK_SESSION (the rows are buttons, not list items, so the
+ * AC10 five-row listitem contract is untouched). */
+
+/* Disclosure chevron — always visible (the affordance must be
+ * discoverable, unlike the hover-revealed pin); rotates 90° when open. */
+.kx-sidebar__session-tasks {
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: 2px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--kx-muted);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.kx-sidebar__session-tasks:hover,
+.kx-sidebar__session-tasks:focus-visible {
+  color: var(--kx-accent-text-aa);
+  background: var(--kx-pale);
+}
+
+.kx-sidebar__session-tasks--open {
+  transform: rotate(90deg);
+}
+
+/* Parent row association — stays visually tied to the open task page. */
+.kx-sidebar__session--task-active {
+  background: var(--kx-pale);
+}
+
+/* Nested ticket rows — indented under the parent, full-width buttons. */
+.kx-sidebar__task-list {
+  display: grid;
+  gap: 1px;
+  margin-top: 3px;
+  padding-left: 18px;
+}
+
+.kx-sidebar__task-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  padding: 3px 6px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.kx-sidebar__task-row:hover,
+.kx-sidebar__task-row:focus-visible {
+  background: var(--kx-pale);
+}
+
+.kx-sidebar__task-row[aria-current='page'] {
+  background: var(--kx-pale);
+}
+
+.kx-sidebar__task-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-sidebar__task-label {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Attention dot — the in-progress ticket marker (attention token). */
+.kx-sidebar__task-dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--kx-attention);
+}
+
 /* User row + sliders → Customize (AC9) */
 
 .kx-sidebar__user {

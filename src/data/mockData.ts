@@ -198,6 +198,19 @@ export interface RecentSession {
   systemId: string
   time: string
   timestamp: string
+  /** Optional child task sessions (tickets) delivered inside this session —
+   * rendered as expandable nested rows by the sidebars. */
+  taskSessions?: TaskSessionSummary[]
+}
+
+/** Sidebar-facing summary of a child task session (ticket) attached to a
+ * parent session — `TKT-3` and friends (Task Session Page feature). */
+export interface TaskSessionSummary {
+  id: string
+  code: string
+  title: string
+  status: 'IN_PROGRESS' | 'COMPLETED'
+  timestamp: string
 }
 
 export interface SessionHistoryEntry {
@@ -446,6 +459,34 @@ export const COMPONENTS: ComponentEntry[] = [
 // Sessions — recent (sidebar) and full history, newest first
 // ---------------------------------------------------------------------------
 
+// Child task sessions (tickets) attached to the "Validate delivery
+// evidence" parent session below — every value illustrative like the rest of
+// this file (spec AC46). TKT-3 is the in-progress ticket whose session
+// detail page TASK_SESSION_DETAIL transcribes.
+export const TASK_SESSIONS: TaskSessionSummary[] = [
+  {
+    id: 'task-tkt-1',
+    code: 'TKT-1',
+    title: 'Checkout promo code redemption',
+    status: 'COMPLETED',
+    timestamp: '2026-08-30T10:12:00Z',
+  },
+  {
+    id: 'task-tkt-2',
+    code: 'TKT-2',
+    title: 'Checkout promo code validation',
+    status: 'COMPLETED',
+    timestamp: '2026-08-30T15:40:00Z',
+  },
+  {
+    id: 'task-tkt-3',
+    code: 'TKT-3',
+    title: 'Persist discount on completed orders',
+    status: 'IN_PROGRESS',
+    timestamp: '2026-08-31T23:45:00Z',
+  },
+]
+
 export const RECENT_SESSIONS: RecentSession[] = [
   {
     id: 'recent-edp-mobile',
@@ -481,6 +522,7 @@ export const RECENT_SESSIONS: RecentSession[] = [
     systemId: 'online-store',
     time: 'Aug 14 · 14:32',
     timestamp: '2026-08-14T14:32:00Z',
+    taskSessions: TASK_SESSIONS,
   },
 ]
 
@@ -1040,5 +1082,154 @@ export const SESSION_DETAIL: SessionDetailData = {
       actorType: 'SYSTEM',
       createdAt: '2026-08-16T14:40:00Z',
     },
+  ],
+}
+
+// ---------------------------------------------------------------------------
+// Task Session Detail — illustrative dataset for a ticket (TKT-3) session
+// page (Task Session Page feature; content transcribed from the reference).
+// ---------------------------------------------------------------------------
+
+/** Full detail record driving the TaskSessionDetailPage composition. */
+export interface TaskSessionDetailData {
+  id: string
+  code: string
+  title: string
+  parentSessionTitle: string
+  systemName: string
+  status: 'IN_PROGRESS' | 'COMPLETED'
+  /** Help text in the context banner (right side). */
+  bannerText: string
+  ticketRequest: {
+    title: string
+    description: string
+    acceptanceCriteria: string[]
+    dependsOn: string
+    instruction: string
+  }
+  /** Condensed assistant narrative paragraphs (ids/repo names render as
+   * mono code chips — see TaskTimeline). */
+  assistantNarrative: string[]
+  summaryReport: {
+    heading: string
+    bullets: string[]
+  }
+  retryEvents: {
+    text: string
+    time: string
+    stopped?: boolean
+  }[]
+  finishedMeta: {
+    label: string
+    duration: string
+  }
+  quote: {
+    label: string
+    text: string
+    expires: string
+  }
+  decision: {
+    label: string
+    heading: string
+    rows: { label: string; value: string }[]
+    validUntil: string
+    note: string
+    actions: { label: string; kind: 'primary' | 'text' | 'danger' }[]
+  }
+  stages: {
+    label: string
+    state: 'attention' | 'pending' | 'done'
+    detail?: string
+  }[]
+}
+
+export const TASK_SESSION_DETAIL: TaskSessionDetailData = {
+  id: 'task-tkt-3',
+  code: 'TKT-3',
+  title: 'Persist discount on completed orders',
+  parentSessionTitle: 'Validate delivery evidence',
+  systemName: 'Online Store',
+  status: 'IN_PROGRESS',
+  bannerText:
+    'This session delivers ticket TKT-3. Approving its costed proposal here reports the decision back to the plan.',
+  ticketRequest: {
+    title: 'Ticket TKT-3: Persist discount on completed orders',
+    description:
+      'Completed orders store the promo code and discount amount applied, so the reduction is reproducible in order history.',
+    acceptanceCriteria: [
+      'A completed order records the promo code that was applied.',
+      'A completed order records the discount amount applied.',
+      "The discount is visible in the order's history/confirmation so the reduction is reproducible.",
+    ],
+    dependsOn: 'TKT-2',
+    instruction: 'Analyze the affected scope and produce a costed change proposal for this ticket.',
+  },
+  assistantNarrative: [
+    'Working ticket TKT-3 — Persist discount on completed orders. The request builds on TKT-2 (Checkout promo code redemption), so I start by loading that delivered change and tracing how a completed order is written today.',
+    'Grounding ideation in the Online Store authority scope: orders-api, inventory-worker, and storefront-web. The promo code and the discount amount must be persisted on the order record at completion, then surfaced again in the order history and confirmation views.',
+    'The result is a non-executable, costed change proposal: nothing runs until you review and approve it here. Scope, risks, and the delivery estimate are summarized below for your review.',
+  ],
+  summaryReport: {
+    heading: 'Summary',
+    bullets: [
+      'Builds on TKT-2 — Checkout promo code redemption; the redemption flow is already delivered.',
+      'Authority scope: Online Store across orders-api, inventory-worker, and storefront-web.',
+      'Non-executable proposal — nothing runs until the costed proposal is reviewed and approved in Assistant.',
+    ],
+  },
+  retryEvents: [
+    {
+      text: 'Still preparing the proposal — attempt 2 did not get through (core unavailable)',
+      time: '11:45 PM',
+    },
+    {
+      text: 'Still preparing the proposal — attempt 4 did not get through (core unavailable)',
+      time: '11:46 PM',
+    },
+    {
+      text: 'This stopped retrying — core unavailable. You can start it again from here.',
+      time: '11:56 PM',
+      stopped: true,
+    },
+    {
+      text: 'Still preparing the proposal — attempt 8 did not get through (core unavailable)',
+      time: '11:56 PM',
+    },
+  ],
+  finishedMeta: {
+    label: 'Konteks finished responding',
+    duration: '35s',
+  },
+  quote: {
+    label: 'QUOTE PREPARED',
+    text: 'A quote is ready — 4.80 Story Points, up to 4.80 Story Points',
+    expires: 'Expires Sep 1, 2026, 12:45 AM',
+  },
+  decision: {
+    label: 'DECISION NEEDED',
+    heading: 'Review delivery estimate',
+    rows: [
+      { label: 'Konteks · Story Points', value: '4.80 Story Points' },
+      { label: 'Provider likely', value: '$0.78' },
+      { label: 'Provider expected range', value: '$0.00–$3.92' },
+      { label: 'Provider modeled ceiling', value: '$3.92' },
+      { label: 'Spent reaching the proposal', value: '$0.0078' },
+    ],
+    validUntil: 'Valid until Sep 1, 2026, 12:45 AM',
+    note: 'Review the estimate. Nothing runs until you approve.',
+    actions: [
+      { label: 'Review execution estimate', kind: 'primary' },
+      { label: 'Revise', kind: 'text' },
+      { label: 'View details', kind: 'text' },
+      { label: 'Decline', kind: 'danger' },
+    ],
+  },
+  stages: [
+    { label: 'Ideation', state: 'attention' },
+    { label: 'Quote', state: 'attention', detail: '4.802 SP · provider $0.78–$3.92' },
+    { label: 'Plan', state: 'pending' },
+    { label: 'Delivery', state: 'pending' },
+    { label: 'Receipt', state: 'pending' },
+    { label: 'Konteks learned', state: 'done' },
   ],
 }

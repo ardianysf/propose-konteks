@@ -31,6 +31,10 @@
    * (which flips to near-black in dark mode and sinks the contrast). */
   --kx-accent-solid-ink: #ffffff; /* Text on --kx-accent-solid-aa #4f7044 fills — white stays AA (5.6:1) in both themes */
   --kx-accent-fill-ink: #243025; /* Text on --kx-accent #8fbf6a fills (6.4:1) */
+  /* Attention/amber semantic — in-progress ticket dots, retry warnings,
+   * attention stage chips, and decline affordances (Task Session Page).
+   * Deep amber reads ≥4.5:1 as text on white/canvas/pale. */
+  --kx-attention: #9a6212;
   /* Ink as an RGB triplet so shadows/backdrops can compose it with
    * per-use alpha: rgb(var(--kx-ink-rgb) / 0.14). Equals #243025.
    * The triplet MUST stay space-separated (no commas): it substitutes
@@ -109,6 +113,9 @@
    * flip in dark mode, so neither does the ink that sits on them. */
   --kx-accent-solid-ink: #ffffff; /* White on #4f7044 stays AA (5.6:1) in dark */
   --kx-accent-fill-ink: #0f1510; /* Near-black ink on the light #8fbf6a fill (≈8.7:1) */
+  /* Bright amber for the ink-900 canvas — text-grade on dark surfaces
+   * (≈9.8:1 on --kx-canvas). */
+  --kx-attention: #e6b366;
   --kx-border: #35502c; /* Dividers, input borders, hairlines */
   --kx-pale: #152618; /* Hover fills, selected states, subtle washes */
   /* --kx-accent #8fbf6a and --kx-accent-strong #5f8d4e are unchanged. */

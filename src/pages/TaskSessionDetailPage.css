@@ -1,0 +1,35 @@
+/* TaskSessionDetailPage — task-specific additions on top of the shared
+ * SessionDetailPage layout classes (imported alongside this file): the
+ * header band's code · title + status badge row and the system subtitle.
+ * The band geometry itself comes from SessionHeader.css via the shared
+ * kx-session-detail__head class. */
+
+.kx-task-session__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kx-task-session__code {
+  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+  color: var(--kx-secondary);
+}
+
+.kx-task-session__sep {
+  color: var(--kx-muted);
+}
+
+.kx-task-session__heading {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-task-session__status {
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.kx-task-session__subtitle {
+  margin-top: 4px;
+}
