@@ -67,7 +67,12 @@ export const DEFAULT_SETTINGS_SECTION: SettingsSection = 'general'
 // State
 // ---------------------------------------------------------------------------
 
-export type MockupRoute = 'new-session' | 'session-history' | 'session-detail' | 'task-session-detail'
+export type MockupRoute =
+  | 'new-session'
+  | 'session-history'
+  | 'session-detail'
+  | 'task-session-detail'
+  | 'session-demo'
 export type DemoVariant = 'ready' | 'loading' | 'empty'
 
 export type SearchList = 'systems' | 'repositories' | 'components' | 'sessions'

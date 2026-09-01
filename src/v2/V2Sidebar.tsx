@@ -11,9 +11,9 @@
  *      AND the shell-mounted Workspace/System menus).
  *   3. New session — full-width solid primary action.
  *   4. Sessions — quiet nav row to the session history.
- *   5. Recent — static rows with a persistent "system · time" meta
- *      line; only the pin control is interactive (revealed on hover /
- *      focus-within; pinned state stays visible).
+ *   5. Recent — navigable rows (the title opens the session detail)
+ *      with a persistent "system · time" meta line; the pin control is
+ *      revealed on hover / focus-within (pinned state stays visible).
  *   6. Footer — account row only, opening V2AccountPopover (the theme
  *      segmented control, Customize, and the catalog deep-link all live
  *      in that popover now, not in the resting sidebar).
@@ -464,9 +464,26 @@ export default function V2Sidebar() {
                   }
                 >
                   <div className="kx-v2-recent__row">
-                    <span className="kx-v2-recent__title" title={session.title}>
+                    {/* The title is the row's navigation affordance — a
+                        text button dispatching NAVIGATE to session-detail,
+                        mirroring the "Sessions" label row. The disclosure
+                        chevron and pin beside it keep their own behavior. */}
+                    <button
+                      type="button"
+                      className="kx-v2-recent__title"
+                      title={session.title}
+                      data-testid="v2-recent-title"
+                      onClick={(event) => {
+                        dispatch({ type: 'NAVIGATE', route: 'session-detail' })
+                        // Mouse clicks must not leave focus on the title —
+                        // :focus-within would freeze the row's pale fill
+                        // after the pointer leaves. Keyboard activation
+                        // keeps focus so the focus-visible ring survives.
+                        if (event.detail > 0) event.currentTarget.blur()
+                      }}
+                    >
                       {session.title}
-                    </span>
+                    </button>
                     {tasks && tasks.length > 0 && (
                       <button
                         type="button"
