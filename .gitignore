@@ -11,6 +11,11 @@ BRAINSTORMING-RESUME.md
 # Root reference videos
 /*.mp4
 
+# Local reference materials (docs, images for design reference)
+/Reference/
+/WhatsApp Image*
+
+
 # Root screenshots
 /Screenshot*.png
 
