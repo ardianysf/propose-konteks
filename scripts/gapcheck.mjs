@@ -3,10 +3,10 @@ import { spawn } from 'node:child_process'
 const preview = spawn('npx', ['vite', 'preview', '--port', '4175', '--strictPort'], { stdio: 'ignore', detached: true })
 async function wait(url, tries = 40) { for (let i = 0; i < tries; i++) { try { const r = await fetch(url); if (r.ok) return } catch {} await new Promise(r => setTimeout(r, 500)) } throw new Error('no server') }
 try {
-  await wait('http://localhost:4175/v2')
+  await wait('http://localhost:4175/')
   const b = await chromium.launch()
   const d = await b.newPage({ viewport: { width: 1440, height: 900 } })
-  await d.goto('http://localhost:4175/v2'); await d.waitForLoadState('networkidle'); await d.waitForTimeout(300)
+  await d.goto('http://localhost:4175/'); await d.waitForLoadState('networkidle'); await d.waitForTimeout(300)
 
   // rail cycle
   const sb1 = await d.locator('.kx-v2-sidebar').boundingBox()

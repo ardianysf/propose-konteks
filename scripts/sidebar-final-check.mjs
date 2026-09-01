@@ -3,9 +3,9 @@ import { spawn } from 'node:child_process'
 const preview = spawn('npx', ['vite', 'preview', '--port', '4176', '--strictPort'], { stdio: 'ignore', detached: true })
 async function wait(url, tries=40){for(let i=0;i<tries;i++){try{const r=await fetch(url);if(r.ok)return}catch{}await new Promise(r=>setTimeout(r,500))}throw new Error('no server')}
 try {
-  await wait('http://localhost:4176/v2')
+  await wait('http://localhost:4176/')
   const b=await chromium.launch(); const p=await b.newPage({viewport:{width:1440,height:900}})
-  await p.goto('http://localhost:4176/v2'); await p.waitForLoadState('networkidle'); await p.waitForTimeout(250)
+  await p.goto('http://localhost:4176/'); await p.waitForLoadState('networkidle'); await p.waitForTimeout(250)
 
   const menu = await p.locator('.kx-v2-menuitem').evaluateAll(els => els.map(el => {
     const r=el.getBoundingClientRect(); const icon=el.querySelector('.kx-v2-menuitem__icon')?.getBoundingClientRect(); const label=el.querySelector('.kx-v2-menuitem__label')?.getBoundingClientRect(); const s=getComputedStyle(el)

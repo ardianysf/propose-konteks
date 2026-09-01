@@ -43,6 +43,10 @@
  * by @playwright/test (devDependency).
  *
  * CLI: node scripts/capture-mockup.mjs <label> --port 4173 [--base-url http://localhost:4173]
+ *
+ * NOTE: the v2 shell is now the primary app at / — this script's route
+ * gestures ("View all", history-row, session-detail) target the retired old
+ * shell DOM and no longer match the root page.
  */
 import { chromium } from 'playwright'
 import { mkdir } from 'node:fs/promises'

@@ -1300,12 +1300,24 @@
   background: var(--kx-pale);
 }
 
-.kx-v2-pop__ws-list {
+/* Workspace flyout — anchored below the identity row. The wrapper is
+ * the floating surface (border + raised bg); the options list inside
+ * scrolls on its own so the end-of-list "Add new workspace" action row
+ * stays pinned below it. */
+.kx-v2-pop__ws-flyout {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
   right: 0;
   z-index: 5;
+  display: flex;
+  flex-direction: column;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 12px;
+}
+
+.kx-v2-pop__ws-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1317,9 +1329,6 @@
   list-style: none;
   overflow-y: auto;
   scrollbar-width: thin;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 12px;
 }
 
 /* One row per workspace — the same list language as the systems below:
@@ -1389,6 +1398,85 @@
   color: var(--kx-muted-text-aa);
 }
 
+/* Role chip — uppercase micro-label naming the user's membership role
+ * on every workspace row and the identity row above. Sits between the
+ * name and the system count, clear of the active check mark. */
+.kx-v2-pop__ws-role {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--kx-muted-text-aa);
+}
+
+/* "Add new workspace" — the LAST row of the workspace flyout: shaped
+ * like a workspace row but a muted, dashed action affordance. */
+.kx-v2-pop__ws-add {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  margin: 0 6px 6px;
+  padding: 6px 8px;
+  border: 1px dashed var(--kx-border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--kx-muted-text-aa);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    border-color 140ms ease-out,
+    color 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.kx-v2-pop__ws-add:hover,
+.kx-v2-pop__ws-add:focus-visible {
+  border-color: var(--kx-accent);
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-v2-pop__ws-add:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-v2-pop__ws-add:active {
+  transform: translateY(1px);
+}
+
+/* 26px icon slot — same rhythm as the rows' avatar tiles above. */
+.kx-v2-pop__ws-add-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-pop__ws-add:hover .kx-v2-pop__ws-add-icon,
+.kx-v2-pop__ws-add:focus-visible .kx-v2-pop__ws-add-icon {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-v2-pop__ws-add-label {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: var(--kx-font-normal);
+}
+
 .kx-v2-pop__ws-check {
   display: inline-flex;
   align-items: center;
@@ -1407,7 +1495,15 @@
   color: var(--kx-primary);
 }
 
+.kx-v2-pop__workspace-planline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
 .kx-v2-pop__workspace-plan {
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -1597,13 +1693,15 @@
   border-top: 1px solid var(--kx-border);
 }
 
-/* Add-workspace draft row — while active, the footer's two create rows
- * swap for this inline form: name field (reusing the systems search
- * input style) plus quiet confirm/cancel icon buttons. */
+/* Add-workspace draft row — while active, the flyout's end-of-list
+ * "Add new workspace" row swaps for this inline form in the SAME
+ * position: name field (reusing the systems search input style) plus
+ * quiet confirm/cancel icon buttons. */
 .kx-v2-pop__add {
   display: flex;
   align-items: center;
   gap: 6px;
+  margin: 0 6px 6px;
   padding: 0 2px;
 }
 

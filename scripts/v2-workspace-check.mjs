@@ -3,8 +3,8 @@ import { spawn } from 'node:child_process'
 const preview=spawn('npx',['vite','preview','--port','4179','--strictPort'],{stdio:'ignore',detached:true})
 async function wait(url,n=40){for(let i=0;i<n;i++){try{if((await fetch(url)).ok)return}catch{}await new Promise(r=>setTimeout(r,500))}throw new Error('no server')}
 try{
- await wait('http://localhost:4179/v2');const b=await chromium.launch();const p=await b.newPage({viewport:{width:1440,height:900}})
- await p.goto('http://localhost:4179/v2');await p.waitForLoadState('networkidle')
+ await wait('http://localhost:4179/');const b=await chromium.launch();const p=await b.newPage({viewport:{width:1440,height:900}})
+ await p.goto('http://localhost:4179/');await p.waitForLoadState('networkidle')
  await p.click('[data-testid="v2-context-trigger"]');await p.waitForTimeout(300)
 
  // Flyout hidden until the workspace row is tapped

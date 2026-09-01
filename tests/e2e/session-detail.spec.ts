@@ -22,7 +22,8 @@ async function gotoSessionDetail(page: Parameters<typeof goto>[0]) {
   await expect(page.getByTestId('session-detail')).toBeVisible()
 }
 
-test.describe('session detail', () => {
+// fixme: v2 shell is now the primary app at /; e2e to be rewritten for v2 DOM
+test.describe.fixme('session detail', () => {
   test('sticky full-width header carries title, status, and share — and no back control', async ({ page }) => {
     await gotoSessionDetail(page)
 

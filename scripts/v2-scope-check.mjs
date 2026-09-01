@@ -3,8 +3,8 @@ import { spawn } from 'node:child_process'
 const preview=spawn('npx',['vite','preview','--port','4182','--strictPort'],{stdio:'ignore',detached:true})
 async function wait(u,n=40){for(let i=0;i<n;i++){try{if((await fetch(u)).ok)return}catch{}await new Promise(r=>setTimeout(r,500))}throw new Error('x')}
 try{
- await wait('http://localhost:4182/v2');const b=await chromium.launch();const p=await b.newPage({viewport:{width:1440,height:900}})
- await p.goto('http://localhost:4182/v2');await p.waitForLoadState('networkidle')
+ await wait('http://localhost:4182/');const b=await chromium.launch();const p=await b.newPage({viewport:{width:1440,height:900}})
+ await p.goto('http://localhost:4182/');await p.waitForLoadState('networkidle')
  await p.click('[data-testid="v2-context-trigger"]');await p.waitForTimeout(300)
  const gap=await p.evaluate(()=>{const a=document.querySelector('.kx-v2-pop__search').getBoundingClientRect();const c=document.querySelector('.kx-v2-pop__all').getBoundingClientRect();return Math.round(c.top-a.bottom)})
  console.log('GAP search → In-label:',gap,'px | label:',JSON.stringify(await p.locator('.kx-v2-pop__all').innerText()))

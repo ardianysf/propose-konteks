@@ -3,11 +3,11 @@ import { spawn } from 'node:child_process'
 const preview = spawn('npx', ['vite', 'preview', '--port', '4174', '--strictPort'], { stdio: 'ignore', detached: true })
 async function wait(url, tries = 40) { for (let i = 0; i < tries; i++) { try { const r = await fetch(url); if (r.ok) return } catch {} await new Promise(r => setTimeout(r, 500)) } throw new Error('no server') }
 try {
-  await wait('http://localhost:4174/v2')
+  await wait('http://localhost:4174/')
   const browser = await chromium.launch()
   // Desktop checks
   const d = await browser.newPage({ viewport: { width: 1440, height: 900 } })
-  await d.goto('http://localhost:4174/v2'); await d.waitForLoadState('networkidle'); await d.waitForTimeout(300)
+  await d.goto('http://localhost:4174/'); await d.waitForLoadState('networkidle'); await d.waitForTimeout(300)
   const sidebar = await d.locator('.kx-v2-sidebar').boundingBox()
   console.log('sidebar box:', JSON.stringify(sidebar))
   console.log('h-overflow desktop:', await d.evaluate(() => document.documentElement.scrollWidth > 1440))
@@ -50,9 +50,10 @@ try {
   console.log('h-overflow @1000px:', await d.evaluate(() => document.documentElement.scrollWidth > 1000))
   // Mobile checks
   const m = await browser.newPage({ viewport: { width: 390, height: 844 } })
-  await m.goto('http://localhost:4174/v2'); await m.waitForLoadState('networkidle'); await m.waitForTimeout(300)
+  await m.goto('http://localhost:4174/'); await m.waitForLoadState('networkidle'); await m.waitForTimeout(300)
   console.log('h-overflow mobile:', await m.evaluate(() => document.documentElement.scrollWidth > 390))
   // Old app untouched
+  // NOTE: the old shell is retired — / now serves the v2 app, so these "old app" selectors no longer match the old shell DOM.
   const o = await browser.newPage({ viewport: { width: 1440, height: 900 } })
   await o.goto('http://localhost:4174/'); await o.waitForLoadState('networkidle'); await o.waitForTimeout(300)
   const oldSidebar = await o.locator('.kx-sidebar, aside, nav').count()

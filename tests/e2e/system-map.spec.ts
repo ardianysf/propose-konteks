@@ -242,7 +242,9 @@ test.describe('accent button ink contrast (both themes)', () => {
     return done
   }
 
-  test('primary button keeps AA white ink on the solid fill; hover swaps to dark ink on #8fbf6a', async ({ page }) => {
+  test.fixme('primary button keeps AA white ink on the solid fill; hover swaps to dark ink on #8fbf6a', {
+    annotation: { type: 'fixme', description: 'v2 shell is now the primary app at /; e2e to be rewritten for v2 DOM' },
+  }, async ({ page }) => {
     const done = await openPrimaryButton(page)
 
     const base = await done.evaluate((el) => getComputedStyle(el).color)
@@ -258,7 +260,9 @@ test.describe('accent button ink contrast (both themes)', () => {
     expect(hovered.color).toBe('rgb(36, 48, 37)') // --kx-accent-fill-ink (light)
   })
 
-  test('dark theme: primary button ink stays AA on both fills', async ({ page }) => {
+  test.fixme('dark theme: primary button ink stays AA on both fills', {
+    annotation: { type: 'fixme', description: 'v2 shell is now the primary app at /; e2e to be rewritten for v2 DOM' },
+  }, async ({ page }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem('konteks-theme', 'dark')
     })
