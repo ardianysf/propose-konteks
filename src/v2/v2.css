@@ -1392,15 +1392,10 @@
   font-weight: var(--kx-font-medium);
 }
 
-.kx-v2-pop__ws-meta {
-  flex-shrink: 0;
-  font-size: var(--kx-text-md);
-  color: var(--kx-muted-text-aa);
-}
-
 /* Role chip — uppercase micro-label naming the user's membership role
- * on every workspace row and the identity row above. Sits between the
- * name and the system count, clear of the active check mark. */
+ * on every workspace row and the identity row above. Sits after the
+ * name on rows, and inside the identity meta line (plan · ROLE · count)
+ * above — clear of the active check mark. */
 .kx-v2-pop__ws-role {
   flex-shrink: 0;
   padding: 1px 6px;
@@ -1509,6 +1504,31 @@
   text-overflow: ellipsis;
   font-size: var(--kx-text-md);
   font-weight: var(--kx-font-normal);
+  color: var(--kx-muted-text-aa);
+}
+
+/* Separator dot inside the identity meta line — plan · ROLE · count. */
+.kx-v2-pop__plan-sep {
+  flex-shrink: 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-muted-text-aa);
+}
+
+/* System count at the END of the identity meta line — the one place a
+ * count appears in the workspace UI (the flyout rows stay lean). */
+.kx-v2-pop__workspace-count {
+  flex-shrink: 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-muted-text-aa);
+}
+
+/* Muted one-line description under the identity meta line — shown only
+ * when the workspace has one; truncated to a single line. */
+.kx-v2-pop__workspace-desc {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--kx-text-md);
   color: var(--kx-muted-text-aa);
 }
 
@@ -1691,57 +1711,6 @@
   margin-top: auto;
   padding-top: 8px;
   border-top: 1px solid var(--kx-border);
-}
-
-/* Add-workspace draft row — while active, the flyout's end-of-list
- * "Add new workspace" row swaps for this inline form in the SAME
- * position: name field (reusing the systems search input style) plus
- * quiet confirm/cancel icon buttons. */
-.kx-v2-pop__add {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0 6px 6px;
-  padding: 0 2px;
-}
-
-.kx-v2-pop__add .kx-v2-pop__search {
-  flex: 1;
-  min-width: 0;
-  margin-bottom: 0;
-}
-
-.kx-v2-pop__add-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--kx-muted);
-  cursor: pointer;
-  transition:
-    background-color 140ms ease-out,
-    color 140ms ease-out;
-}
-
-.kx-v2-pop__add-btn:hover,
-.kx-v2-pop__add-btn:focus-visible {
-  background: var(--kx-pale);
-  color: var(--kx-primary);
-}
-
-.kx-v2-pop__add-btn:focus-visible {
-  outline: 2px solid var(--kx-accent-strong);
-  outline-offset: 2px;
-}
-
-.kx-v2-pop__add-btn--confirm {
-  color: var(--kx-accent-text-aa);
 }
 
 /* Desktop geometry — the scrim is pointer-transparent on desktop (a
@@ -2322,4 +2291,161 @@
     height: 40px;
     border-radius: 12px;
   }
+}
+
+/* ── Create-workspace modal ──────────────────────────────────────────
+ * Layer overrides: the context popover's panel sits at z 60/61, above
+ * the base .kx-modal layer (50/51), so the modal stacks at 70/71 —
+ * above the popover it suspends, below the ⌘K search palette (80/81).
+ * Everything else follows the shared .kx-modal / kx-create-modal
+ * conventions (head / scrollable body / single-row footer). */
+
+.kx-v2-ws-modal-backdrop {
+  z-index: 70;
+}
+
+.kx-v2-ws-modal {
+  z-index: 71;
+  display: flex;
+  flex-direction: column;
+  width: min(500px, calc(100vw - 48px));
+  max-height: min(560px, calc(100vh - 48px));
+}
+
+.kx-v2-ws-modal__head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-v2-ws-modal__head-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.kx-v2-ws-modal__title {
+  margin: 0;
+  font-size: var(--kx-text-xl);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-v2-ws-modal__subtitle {
+  margin: 2px 0 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-v2-ws-modal__form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.kx-v2-ws-modal__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px 22px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kx-border) transparent;
+}
+
+.kx-v2-ws-modal__body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kx-v2-ws-modal__body::-webkit-scrollbar-thumb {
+  background: var(--kx-border);
+  border-radius: 999px;
+}
+
+.kx-v2-ws-modal__field {
+  display: grid;
+  gap: 7px;
+}
+
+.kx-v2-ws-modal__label {
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-secondary);
+}
+
+.kx-v2-ws-modal__req {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-v2-ws-modal__opt {
+  color: var(--kx-muted-text-aa);
+  font-weight: var(--kx-font-normal);
+}
+
+.kx-v2-ws-modal__id,
+.kx-v2-ws-modal__display,
+.kx-v2-ws-modal__description {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
+}
+
+/* Mono ID — the identifier reads as code, same mono stack as the app's
+ * other code chips (task timeline, quote cards). */
+.kx-v2-ws-modal__id {
+  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+}
+
+.kx-v2-ws-modal__hint {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  color: var(--kx-muted-text-aa);
+}
+
+/* Inline collision error — same conventions as the manual repository
+ * modal's field error (accent-aa, bold, 2xs). */
+.kx-v2-ws-modal__error {
+  margin: 0;
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-v2-ws-modal__description {
+  resize: vertical;
+  min-height: 72px;
+  max-height: 180px;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+.kx-v2-ws-modal__footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--kx-border);
+  background: var(--kx-raised);
+  border-radius: 0 0 var(--kx-radius-main) var(--kx-radius-main);
+}
+
+.kx-v2-ws-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.kx-v2-ws-modal__actions .kx-btn {
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: var(--kx-text-sm);
 }
