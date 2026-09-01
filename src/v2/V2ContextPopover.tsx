@@ -2,16 +2,24 @@
  * V2ContextPopover — ONE calm panel replacing the old workspace + system
  * menus: a workspace identity row, a locally-searchable system list, and
  * a sticky create-system action. Mounted at V2Sidebar's root; the parent
- * owns the open state, the panel owns Escape, scrim dismissal, and focus
- * containment. Desktop ≥761px: anchored panel right of the sidebar (left
- * 76px in rail mode). ≤760px: full-width bottom sheet above the drawer.
+ * owns the open state (and the workspace flyout's open state), the panel
+ * owns Escape, scrim dismissal, and focus containment. Desktop ≥761px:
+ * anchored panel right of the sidebar (left 76px in rail mode). ≤760px:
+ * full-width bottom sheet above the drawer.
+ *
+ * The identity row is the only place a system count appears: its meta
+ * line reads "plan · ROLE · N systems" for the ACTIVE workspace (plus a
+ * muted one-line description when the workspace has one). The flyout
+ * rows below stay lean — avatar, name, role chip, active check — and the
+ * end-of-list "Add new workspace" row opens the create-workspace MODAL
+ * (rendered by V2Sidebar) instead of an inline draft.
  */
 import { useEffect, useRef, useState, type MouseEvent } from 'react'
 import { useMockup } from '../state/MockupContext'
 import { useOverlayLifecycle } from '../components/shell/OverlayLifecycle'
 import { useFocusContainment } from '../components/shell/useFocusContainment'
 import { resolveV2WorkspaceIn, type V2Workspace } from './v2Workspaces'
-import { CheckIcon, ChevronDown, GridIcon, PlusIcon, SystemIcon, SystemMapIcon, XIcon } from './icons'
+import { CheckIcon, ChevronDown, GridIcon, PlusIcon, SystemIcon, SystemMapIcon } from './icons'
 
 interface V2ContextPopoverProps {
   open: boolean
@@ -19,9 +27,17 @@ interface V2ContextPopoverProps {
   /** Live workspace list (static seed + created workspaces) — owned by V2Sidebar. */
   workspaces: V2Workspace[]
   activeWorkspaceId: string
+  /** Workspace flyout open state — also owned by V2Sidebar, so the
+   * create-workspace modal can close the flyout on confirm while the
+   * panel itself stays open. */
+  workspaceListOpen: boolean
+  onSetWorkspaceListOpen: (open: boolean) => void
   onSelectWorkspace: (workspaceId: string) => void
-  /** Creates a workspace from a raw name draft and makes it active. */
-  onCreateWorkspace: (name: string) => void
+  /** Opens the create-workspace modal (owned by V2Sidebar). */
+  onOpenCreateWorkspace: () => void
+  /** True while the create-workspace modal is open: the panel's Escape
+   * handling and focus containment stand down so the modal owns both. */
+  createModalOpen: boolean
   allSystemsActive: boolean
   onSelectAllSystems: () => void
 }
@@ -31,8 +47,11 @@ export default function V2ContextPopover({
   onClose,
   workspaces,
   activeWorkspaceId,
+  workspaceListOpen,
+  onSetWorkspaceListOpen,
   onSelectWorkspace,
-  onCreateWorkspace,
+  onOpenCreateWorkspace,
+  createModalOpen,
   allSystemsActive,
   onSelectAllSystems,
 }: V2ContextPopoverProps) {
@@ -40,72 +59,35 @@ export default function V2ContextPopover({
   const { beginOverlayChain } = useOverlayLifecycle()
   const rootRef = useRef<HTMLDivElement>(null)
   const [query, setQuery] = useState('')
-  // Drill-in workspace list: tapping the workspace identity row opens a
-  // floating list; its height is capped so many workspaces scroll.
-  const [workspaceListOpen, setWorkspaceListOpen] = useState(false)
-
-  // Add-workspace draft row — swaps the END-OF-LIST "Add new workspace"
-  // row in the workspace flyout for an inline name input. Confirm (Enter /
-  // check) creates + activates the workspace; cancel (Escape / X) discards
-  // the draft and returns the Add row.
-  const [addingWorkspace, setAddingWorkspace] = useState(false)
-  const [draftName, setDraftName] = useState('')
-  const draftInputRef = useRef<HTMLInputElement>(null)
-  useEffect(() => {
-    if (addingWorkspace) draftInputRef.current?.focus()
-  }, [addingWorkspace])
-
-  const cancelAddWorkspace = () => {
-    setAddingWorkspace(false)
-    setDraftName('')
-  }
-  const confirmAddWorkspace = () => {
-    onCreateWorkspace(draftName)
-    setAddingWorkspace(false)
-    setDraftName('')
-  }
-
-  // Any way the flyout CLOSES — outside-click, the identity-row toggle,
-  // Escape, or selecting a row — cancels an open add-workspace draft, so
-  // reopening shows the Add row instead of resurrecting stale draft text.
-  useEffect(() => {
-    if (!workspaceListOpen) cancelAddWorkspace()
-  }, [workspaceListOpen])
 
   // Focus is contained inside the panel while it is mounted (no-op when
-  // closed: the hook skips an unconnected root).
-  useFocusContainment(rootRef)
+  // closed: the hook skips an unconnected root; stood down while the
+  // create-workspace modal is open above).
+  useFocusContainment(rootRef, { active: !createModalOpen })
 
   // Escape closes — document-level so it works wherever focus sits.
-  // Escape cancels the add-workspace draft FIRST; a second Escape closes
-  // the FLYOUT; only another (or one with neither open) dismisses the
-  // whole popover.
+  // Escape closes the FLYOUT first; another (or one with the flyout
+  // closed) dismisses the whole popover. While the create-workspace
+  // modal is open, the modal owns Escape — this listener stands down.
   useEffect(() => {
-    if (!open) return
+    if (!open || createModalOpen) return
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
-      if (addingWorkspace) {
-        cancelAddWorkspace()
-        return
-      }
       if (workspaceListOpen) {
-        setWorkspaceListOpen(false)
+        onSetWorkspaceListOpen(false)
         return
       }
       onClose()
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open, onClose, workspaceListOpen, addingWorkspace])
+  }, [open, onClose, workspaceListOpen, onSetWorkspaceListOpen, createModalOpen])
 
   if (!open) return null
 
   const selectWorkspace = (workspaceId: string) => {
     onSelectWorkspace(workspaceId)
-    setWorkspaceListOpen(false)
-    // Selecting a row while a draft is open discards the draft — the
-    // flyout must never reopen mid-draft after a switch.
-    cancelAddWorkspace()
+    onSetWorkspaceListOpen(false)
   }
 
   const activeWorkspace = resolveV2WorkspaceIn(workspaces, activeWorkspaceId)
@@ -158,7 +140,7 @@ export default function V2ContextPopover({
             !target.closest('.kx-v2-pop__ws-flyout') &&
             !target.closest('[data-testid="v2-popover-workspace"]')
           ) {
-            setWorkspaceListOpen(false)
+            onSetWorkspaceListOpen(false)
           }
         }}
       >
@@ -174,17 +156,34 @@ export default function V2ContextPopover({
             aria-haspopup="listbox"
             aria-expanded={workspaceListOpen}
             data-testid="v2-popover-workspace"
-            onClick={() => setWorkspaceListOpen((openState) => !openState)}
+            onClick={() => onSetWorkspaceListOpen(!workspaceListOpen)}
           >
             <span className="kx-v2-pop__ws-avatar" aria-hidden="true">
               {activeWorkspace.name[0]}
             </span>
             <span className="kx-v2-pop__workspace-copy">
               <span className="kx-v2-pop__workspace-name">{activeWorkspace.name}</span>
+              {/* Identity meta carries the workspace's system count —
+                  the only place a count appears in the workspace UI. */}
               <span className="kx-v2-pop__workspace-planline">
                 <span className="kx-v2-pop__workspace-plan">{activeWorkspace.plan}</span>
+                <span className="kx-v2-pop__plan-sep" aria-hidden="true">
+                  {' · '}
+                </span>
                 <span className="kx-v2-pop__ws-role">{activeWorkspace.role.toUpperCase()}</span>
+                <span className="kx-v2-pop__plan-sep" aria-hidden="true">
+                  {' · '}
+                </span>
+                <span className="kx-v2-pop__workspace-count">
+                  {workspaceSystems.length}{' '}
+                  {workspaceSystems.length === 1 ? 'system' : 'systems'}
+                </span>
               </span>
+              {activeWorkspace.description.trim() !== '' && (
+                <span className="kx-v2-pop__workspace-desc" title={activeWorkspace.description}>
+                  {activeWorkspace.description}
+                </span>
+              )}
             </span>
             <span
               className={
@@ -207,9 +206,6 @@ export default function V2ContextPopover({
               >
                 {workspaces.map((workspace) => {
                   const active = workspace.id === activeWorkspaceId
-                  const members = state.systems.filter((system) =>
-                    workspace.systemIds.includes(system.id),
-                  )
                   return (
                     <li
                       key={workspace.id}
@@ -230,9 +226,6 @@ export default function V2ContextPopover({
                         </span>
                         <span className="kx-v2-pop__ws-name">{workspace.name}</span>
                         <span className="kx-v2-pop__ws-role">{workspace.role.toUpperCase()}</span>
-                        <span className="kx-v2-pop__ws-meta">
-                          {members.length} {members.length === 1 ? 'system' : 'systems'}
-                        </span>
                         {active && (
                           <span className="kx-v2-pop__ws-check" aria-hidden="true">
                             <CheckIcon />
@@ -244,58 +237,20 @@ export default function V2ContextPopover({
                 })}
               </ul>
               {/* End-of-list action row: "Add new workspace" is the last
-                  row of the workspace list itself. In draft mode the same
-                  position swaps for the inline name input; the panel footer
+                  row of the workspace list itself; it opens the
+                  create-workspace modal (V2Sidebar). The panel footer
                   below keeps only "Create new system". */}
-              {addingWorkspace ? (
-                <div className="kx-v2-pop__add" data-testid="v2-popover-add-workspace-form">
-                  <input
-                    ref={draftInputRef}
-                    type="text"
-                    className="kx-v2-pop__search"
-                    placeholder="Workspace name…"
-                    aria-label="New workspace name"
-                    value={draftName}
-                    onChange={(event) => setDraftName(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter') {
-                        event.preventDefault()
-                        confirmAddWorkspace()
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="kx-v2-pop__add-btn kx-v2-pop__add-btn--confirm"
-                    aria-label="Add workspace"
-                    data-testid="v2-popover-add-workspace-confirm"
-                    onClick={confirmAddWorkspace}
-                  >
-                    <CheckIcon />
-                  </button>
-                  <button
-                    type="button"
-                    className="kx-v2-pop__add-btn"
-                    aria-label="Cancel adding workspace"
-                    data-testid="v2-popover-add-workspace-cancel"
-                    onClick={cancelAddWorkspace}
-                  >
-                    <XIcon />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  className="kx-v2-pop__ws-add"
-                  data-testid="v2-popover-add-workspace"
-                  onClick={() => setAddingWorkspace(true)}
-                >
-                  <span className="kx-v2-pop__ws-add-icon" aria-hidden="true">
-                    <PlusIcon />
-                  </span>
-                  <span className="kx-v2-pop__ws-add-label">Add new workspace</span>
-                </button>
-              )}
+              <button
+                type="button"
+                className="kx-v2-pop__ws-add"
+                data-testid="v2-popover-add-workspace"
+                onClick={onOpenCreateWorkspace}
+              >
+                <span className="kx-v2-pop__ws-add-icon" aria-hidden="true">
+                  <PlusIcon />
+                </span>
+                <span className="kx-v2-pop__ws-add-label">Add new workspace</span>
+              </button>
             </div>
           )}
         </div>

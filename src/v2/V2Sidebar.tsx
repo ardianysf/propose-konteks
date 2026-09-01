@@ -26,6 +26,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { RECENT_SESSIONS } from '../data/mockData'
 import { createV2Workspace, resolveV2WorkspaceIn, V2_WORKSPACES, type V2Workspace } from './v2Workspaces'
+import V2CreateWorkspaceModal, {
+  type V2CreateWorkspaceFormValues,
+} from './V2CreateWorkspaceModal'
 import { useMockup } from '../state/MockupContext'
 import {
   CatalogIcon,
@@ -74,13 +77,17 @@ export default function V2Sidebar() {
 
   // v2-only workspace selector state. The shared reducer has no
   // workspace concept, so the demo workspace list (static seed +
-  // workspaces created through the popover's add-workspace flow) and
-  // the active id live HERE — one owner keeps the identity card, the
-  // rail avatar, and the popover list consistent. V2ContextPopover is
-  // this sidebar's direct child, so the shared state flows through the
-  // existing props (no context needed).
+  // workspaces created through the create-workspace modal) and the
+  // active id live HERE — one owner keeps the identity card, the rail
+  // avatar, and the popover list consistent. V2ContextPopover is this
+  // sidebar's direct child, so the shared state flows through the
+  // existing props (no context needed). The flyout's open state lives
+  // here too, so the modal's confirm can close the flyout while the
+  // panel itself stays open.
   const [workspaces, setWorkspaces] = useState<V2Workspace[]>(V2_WORKSPACES)
   const [activeWorkspaceId, setActiveWorkspaceId] = useState(V2_WORKSPACES[0].id)
+  const [workspaceListOpen, setWorkspaceListOpen] = useState(false)
+  const [createModalOpen, setCreateModalOpen] = useState(false)
   const activeWorkspace = resolveV2WorkspaceIn(workspaces, activeWorkspaceId)
 
   const selectWorkspace = (workspaceId: string) => {
@@ -100,11 +107,15 @@ export default function V2Sidebar() {
   // Append a workspace and make it active. New workspaces start with
   // zero systems — no carry-over dispatch happens, so the identity
   // card falls to its no-system placeholder instead of an out-of-scope
-  // system pairing.
-  const createWorkspace = (name: string) => {
-    const workspace = createV2Workspace(name, workspaces)
+  // system pairing. Confirmed from the create-workspace modal: the
+  // modal and the flyout close, the panel stays open so the re-scoped
+  // systems list is seen live.
+  const confirmCreateWorkspace = (values: V2CreateWorkspaceFormValues) => {
+    const workspace = createV2Workspace(values.id, values.displayName, values.description)
     setWorkspaces((previous) => [...previous, workspace])
     setActiveWorkspaceId(workspace.id)
+    setCreateModalOpen(false)
+    setWorkspaceListOpen(false)
   }
 
   // Context shown on the identity card: either one system or the whole
@@ -170,6 +181,9 @@ export default function V2Sidebar() {
   const closePopover = (which: Exclude<Popover, 'none'>) => {
     pendingFocusRef.current = which
     setPopover('none')
+    // The flyout never survives a closed panel — reopening starts from
+    // the collapsed identity row.
+    setWorkspaceListOpen(false)
   }
   const togglePopover = (which: Exclude<Popover, 'none'>) => {
     setPopover((current) => (current === which ? 'none' : which))
@@ -182,8 +196,10 @@ export default function V2Sidebar() {
   // inside the popover root, or on either trigger, are ignored here —
   // the triggers' own toggle handles open/switch/close, so clicking the
   // other trigger while one popover is open switches directly to it.
+  // While the create-workspace modal is open above, dismissal stands
+  // down entirely — the modal owns every interaction until it closes.
   useEffect(() => {
-    if (popover === 'none') return
+    if (popover === 'none' || createModalOpen) return
     const onPointerDown = (event: MouseEvent) => {
       const target = event.target
       if (!(target instanceof Element)) return
@@ -194,7 +210,7 @@ export default function V2Sidebar() {
     }
     document.addEventListener('mousedown', onPointerDown)
     return () => document.removeEventListener('mousedown', onPointerDown)
-  }, [popover])
+  }, [popover, createModalOpen])
 
   // Pinned recent sessions — local UI state: pinned rows float to the top
   // of the list (keeping their relative order), unpinned follow unchanged.
@@ -568,11 +584,21 @@ export default function V2Sidebar() {
         onClose={() => closePopover('context')}
         workspaces={workspaces}
         activeWorkspaceId={activeWorkspaceId}
+        workspaceListOpen={workspaceListOpen}
+        onSetWorkspaceListOpen={setWorkspaceListOpen}
         onSelectWorkspace={selectWorkspace}
-        onCreateWorkspace={createWorkspace}
+        onOpenCreateWorkspace={() => setCreateModalOpen(true)}
+        createModalOpen={createModalOpen}
         allSystemsActive={allSystemsActive}
         onSelectAllSystems={() => setAllSystemsActive(true)}
       />
+      {createModalOpen && (
+        <V2CreateWorkspaceModal
+          workspaces={workspaces}
+          onCancel={() => setCreateModalOpen(false)}
+          onConfirm={confirmCreateWorkspace}
+        />
+      )}
       <V2AccountPopover open={popover === 'account'} onClose={() => closePopover('account')} />
       <V2SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     </nav>

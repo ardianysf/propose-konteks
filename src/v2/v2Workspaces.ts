@@ -16,6 +16,7 @@ export type V2WorkspaceRole = 'owner' | 'admin' | 'member'
 export interface V2Workspace {
   id: string
   name: string
+  description: string
   plan: string
   systemIds: string[]
   role: V2WorkspaceRole
@@ -25,6 +26,7 @@ export const V2_WORKSPACES: V2Workspace[] = [
   {
     id: 'ws-refactory',
     name: 'Refactory',
+    description: 'Product engineering workspace for the Refactory team',
     plan: 'Team plan',
     systemIds: ['bsi-hris', 'bsi-canteen'],
     role: 'owner',
@@ -32,6 +34,7 @@ export const V2_WORKSPACES: V2Workspace[] = [
   {
     id: 'ws-mpm',
     name: 'MPM Digital',
+    description: 'Client engagement workspace for MPM Digital',
     plan: 'Team plan',
     systemIds: ['mpm-mytok', 'mpm-portal-vendor'],
     role: 'admin',
@@ -39,6 +42,7 @@ export const V2_WORKSPACES: V2Workspace[] = [
   {
     id: 'ws-ardian-labs',
     name: 'Ardian Labs',
+    description: 'Personal lab for experiments and side projects',
     plan: 'Free plan',
     systemIds: ['hanoman', 'kookree', 'richapp', 'online-store', 'personal-blogspot'],
     role: 'member',
@@ -61,30 +65,21 @@ export const resolveV2WorkspaceIn = (
   workspaces.find((workspace) => workspace.id === workspaceId) ?? resolveV2Workspace(workspaceId)
 
 /*
- * createV2Workspace — factory for the popover's add-workspace flow.
- * Id is 'ws-' + slugified name (empty slug falls back to Date.now);
- * a slug collision with an existing id is disambiguated with a
- * timestamp suffix. Empty/blank names fall back to 'New Workspace'.
- * The creator owns the workspace, so role is always 'owner'.
+ * createV2Workspace — factory for the create-workspace modal's values.
+ * The user-entered ID is used VERBATIM (trimmed) as the workspace id —
+ * uniqueness is the modal's validation concern ("This ID is already
+ * used"), not the factory's. The creator owns the workspace, so role is
+ * always 'owner', and new workspaces start with zero systems.
  */
-const slugifyV2WorkspaceName = (name: string): string =>
-  name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-
 export const createV2Workspace = (
-  name: string,
-  existing: readonly V2Workspace[],
-): V2Workspace => {
-  const trimmed = name.trim()
-  const base = `ws-${slugifyV2WorkspaceName(trimmed) || Date.now()}`
-  const id = existing.some((workspace) => workspace.id === base) ? `${base}-${Date.now()}` : base
-  return {
-    id,
-    name: trimmed || 'New Workspace',
-    plan: 'Starter',
-    systemIds: [],
-    role: 'owner',
-  }
-}
+  id: string,
+  displayName: string,
+  description: string,
+): V2Workspace => ({
+  id: id.trim(),
+  name: displayName.trim(),
+  description: description.trim(),
+  plan: 'Starter',
+  role: 'owner',
+  systemIds: [],
+})

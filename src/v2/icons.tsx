@@ -143,28 +143,6 @@ export function CheckIcon() {
   )
 }
 
-/** X — cancels the add-workspace draft row in the context popover. */
-export function XIcon() {
-  return (
-    <svg
-      data-icon="x"
-      viewBox="0 0 16 16"
-      width="14"
-      height="14"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M4 4l8 8M12 4l-8 8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
 export function ChevronDown() {
   return (
     <svg
