@@ -293,8 +293,10 @@
   list-style: none;
 }
 
-/* Rows are static — no hover/click affordance (the reducer has no
- * select-session navigation); only the pin is interactive. */
+/* Navigable rows: the title button routes to the session detail, so
+ * the WHOLE item (title row + meta line) picks up the pale fill on
+ * hover/focus-within — the same token the nested pin/chevron fills
+ * use, nested above the row background without conflict. */
 .kx-v2-recent__item {
   display: flex;
   flex-direction: column;
@@ -302,6 +304,12 @@
   padding: 5px 8px;
   border-radius: 8px;
   min-width: 0;
+  transition: background-color 140ms ease-out;
+}
+
+.kx-v2-recent__item:hover,
+.kx-v2-recent__item:focus-within {
+  background: var(--kx-pale);
 }
 
 .kx-v2-recent__row {
@@ -311,15 +319,29 @@
   min-width: 0;
 }
 
+/* Session title — a text button inheriting the row typography that
+ * navigates to the session detail; no own background (the row hover
+ * carries the affordance). */
 .kx-v2-recent__title {
   flex: 1;
   min-width: 0;
+  padding: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  border: none;
+  background: transparent;
+  font-family: inherit;
   font-size: var(--kx-text-md);
   font-weight: var(--kx-font-medium);
   color: var(--kx-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.kx-v2-recent__title:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
 }
 
 .kx-v2-recent__pin {

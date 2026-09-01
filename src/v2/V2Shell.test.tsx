@@ -259,6 +259,19 @@ describe('V2Sidebar labels', () => {
     }
   })
 
+  it('clicking a recent-session title navigates to the session detail page', () => {
+    render(<V2App />)
+
+    // The title is a real button whose accessible name is the session's.
+    const title = screen.getByRole('button', { name: 'EDP Integration Fix - Mobile' })
+    expect(title).toHaveClass('kx-v2-recent__title')
+
+    // Clicking it dispatches NAVIGATE to session-detail — proven by the
+    // rendered page, the same contract as a history-row click.
+    fireEvent.click(title)
+    expect(screen.getByTestId('session-detail')).toBeInTheDocument()
+  })
+
   it('expands task-session children and a task-row click opens the task session page with the active id set', () => {
     render(<V2App />)
     const list = screen.getByRole('list')

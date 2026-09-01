@@ -307,6 +307,37 @@
   border-color: var(--kx-accent-strong);
 }
 
+/* Title row keeps the demo entry point beside the h1 without disturbing
+ * the filter grid below it. The button follows the secondary-button
+ * convention of kx-history__clear. */
+.kx-history__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.kx-history__demo-link {
+  padding: 6px 12px;
+  border: 1px solid var(--kx-border);
+  border-radius: 8px;
+  background: transparent;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.kx-history__demo-link:hover,
+.kx-history__demo-link:focus-visible {
+  background: var(--kx-pale);
+  border-color: var(--kx-accent-strong);
+}
+
 /* ── Mobile (≤760px): hover-only row actions don't translate ──────────
  * The three-dot action is a hover/focus affordance; phones have no
  * hover and the persistent reveal would clutter the row — hide it. */

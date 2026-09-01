@@ -105,7 +105,17 @@ export default function SessionHistoryPage() {
   return (
     <section className="kx-history" aria-label="Session history">
       <header className="kx-history__head">
-        <h1 className="kx-history__title">Session history</h1>
+        <div className="kx-history__title-row">
+          <h1 className="kx-history__title">Session history</h1>
+          {/* Discrete entry point to the response-stream demo route. */}
+          <button
+            type="button"
+            className="kx-history__demo-link"
+            onClick={() => dispatch({ type: 'NAVIGATE', route: 'session-demo' })}
+          >
+            Response flow demo
+          </button>
+        </div>
         <div className="kx-history__filters" role="search" aria-label="Filter sessions">
           <label className="kx-history__field">
             <span className="kx-history__field-label">Search sessions</span>

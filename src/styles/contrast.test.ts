@@ -38,6 +38,16 @@ const CUSTOMIZE_SHARED = 'src/components/customize/shared.css'
 const SESSION_BADGES = 'src/components/session/sessionBadges.css'
 const RESPONSE_FOOTER = 'src/components/session/ResponseFooter.css'
 const FEEDBACK_MODAL = 'src/components/session/FeedbackModal.css'
+const STREAM = 'src/components/session/stream/SessionStream.css'
+// session/stream/SessionStream.css — the response-stream demo (spec
+// §Bagian B): shared anatomy (rail, header grammar, chips, buttons) plus
+// the ten typed blocks. Same M/A/S/U semantics as the session batch —
+// muted captions read the AA muted token, accent text/glyphs read the AA
+// accent token, white-ink solid fills are S, and decorative hover
+// borders / dots / the focus outline stay on mixed-purpose tokens (U).
+// One hard rule from the extractor: every selector reads at most ONE
+// tracked token (solid fills drop their border overrides for the base
+// hairline instead of restating the token).
 // shell/{Sidebar,SystemMenu,WorkspaceMenu}.css — the single surviving
 // homes of the shell-namespace rules since the T5d shell batch (moved
 // out of components.css by the removal tool; they are NOT transitional
@@ -371,6 +381,82 @@ function entries(): Entry[] {
     // System map banners and controls — decorative borders.
     { file: 'src/components/system/SystemMapModal.css', selector: '.kx-system-map__banner--warning', property: 'border-left', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.kx-system-map__reset-btn:hover:not(:disabled)', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
+    // ── Response stream demo (session/stream/SessionStream.css) ──────
+    // M — muted captions, meta times, micro labels, queued-state ink.
+    ...[
+      '.kx-stream-page__kicker',
+      '.kx-stream-page__anchor',
+      '.kx-stream-block__kind',
+      '.kx-stream-block__sep',
+      '.kx-stream-block__time',
+      '.kx-stream-block__duration',
+      '.kx-stream-request__chip-kind',
+      '.kx-stream-ack__scope-title',
+      '.kx-stream-ack__grounding',
+      '.kx-stream-clar__q-num',
+      '.kx-stream-plan__num',
+      '.kx-stream-plan__meta',
+      '.kx-stream-plan__step-menu-btn',
+      '.kx-stream-gate__row dt',
+      '.kx-stream-phase--queued',
+      '.kx-stream-phase--queued .kx-stream-phase__mark',
+      '.kx-stream-phase--queued .kx-stream-phase__label',
+      '.kx-stream-phase__duration',
+      '.kx-stream-call--queued',
+      '.kx-stream-call--queued .kx-stream-call__verb',
+      '.kx-stream-call__state',
+      '.kx-stream-call__duration',
+      '.kx-stream-io__label',
+      '.kx-stream-artifact__meta',
+      '.kx-stream-review__location',
+      '.kx-stream-completion__section-label',
+      '.kx-stream-completion__next-num',
+      '.kx-stream-completion__receipt',
+      '.kx-stream-answer__num',
+    ].map((selector) => ({ file: STREAM, selector, property: 'color', token: MUTED_AA, cls: 'M' as Class })),
+    // A — accent text/glyphs: tone-colored kind labels + rail icons,
+    // secondary/link actions, resumed notices, done-state marks, diff
+    // additions, artifact badge + links, resolved-gate check.
+    ...[
+      '.kx-stream-block--accent .kx-stream-block__rail-icon',
+      '.kx-stream-block--accent .kx-stream-block__kind',
+      '.kx-stream-btn--secondary',
+      '.kx-stream-btn--link',
+      '.kx-stream-notice--accent',
+      '.kx-stream-plan__approved-note',
+      '.kx-stream-gate__resolved-mark',
+      '.kx-stream-collapse-toggle',
+      '.kx-stream-phase--done .kx-stream-phase__mark',
+      '.kx-stream-call--done .kx-stream-call__mark',
+      '.kx-stream-call__state--done',
+      '.kx-stream-call__io-toggle',
+      '.kx-stream-io__line--add',
+      '.kx-stream-artifact__badge',
+      '.kx-stream-completion__item--done .kx-stream-completion__mark',
+      '.kx-stream-completion__artifact',
+    ].map((selector) => ({ file: STREAM, selector, property: 'color', token: ACCENT_AA, cls: 'A' as Class })),
+    // S — white-ink solid accent fills: accent chips, the primary button,
+    // the selected answer option.
+    ...[
+      '.kx-stream-chip--accent',
+      '.kx-stream-btn--primary',
+      '.kx-stream-option--selected:hover',
+    ].map((selector) => ({ file: STREAM, selector, property: 'background', token: ACCENT_SOLID_AA, cls: 'S' as Class })),
+    // U — decorative: hover border rings, list bullets, hollow dots, the
+    // not-done mark, and the stream's own focus-visible outline.
+    { file: STREAM, selector: '.kx-stream-page__anchor:hover', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-btn--primary:hover:not(:disabled)', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-btn--secondary:hover:not(:disabled)', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-option:hover', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-ack__scope-list li::before', property: 'background', token: MUTED, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-phase__dot', property: 'border', token: MUTED, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-call__dot', property: 'border', token: MUTED, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-completion__mark', property: 'color', token: MUTED, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-page :focus-visible', property: 'outline', token: ACCENT_AA, cls: 'U' as Class },
+    // Session History header — the demo route's discrete entry button
+    // (secondary accent action, same family as .kx-history__clear).
+    { file: 'src/pages/SessionHistoryPage.css', selector: '.kx-history__demo-link', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
+    { file: 'src/pages/SessionHistoryPage.css', selector: '.kx-history__demo-link:focus-visible', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: GLOBAL, selector: ':focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
   ]
 }
@@ -909,18 +995,18 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 190 consumers — 94 muted, 84 accent-strong, 4 accent-text-aa', () => {
-    expect(inventory).toHaveLength(190)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(94)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(84)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(4)
+  it('covers exactly 249 consumers — 98 muted, 89 accent-strong, 22 accent-text-aa', () => {
+    expect(inventory).toHaveLength(249)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(98)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(89)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(22)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(91)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(43)
-    expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(6)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(50)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(120)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(60)
+    expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(9)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(60)
   })
 
   it('has no duplicate inventory selectors', () => {
