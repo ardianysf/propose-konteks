@@ -1884,11 +1884,12 @@
   font-weight: var(--kx-font-medium);
   color: var(--kx-secondary);
   cursor: pointer;
-  transition: color 140ms ease-out;
+  transition: background-color 140ms ease-out, color 140ms ease-out;
 }
 
 .kx-v2-sessions-label:hover,
 .kx-v2-sessions-label:focus-visible {
+  background: var(--kx-pale);
   color: var(--kx-primary);
 }
 
