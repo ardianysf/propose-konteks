@@ -19,6 +19,7 @@
  */
 import ResponseBlock, { CheckIcon, ClarificationIcon } from '../ResponseBlock'
 import StatusBadge from '../../../technical/StatusBadge'
+import { renderTechnicalText } from '../../../technical/renderTechnicalText'
 import type { ClarificationBlockData } from '../sessionStreamTypes'
 
 interface ClarificationBlockProps {
@@ -65,7 +66,7 @@ export default function ClarificationBlock({
               <li key={question.id} className="kx-stream-clar__question">
                 <p className="kx-stream-clar__q-text kx-stream-prose">
                   <span className="kx-stream-clar__q-num kx-stream-tabular">{index + 1}</span>
-                  {question.question}
+                  {renderTechnicalText(question.question)}
                 </p>
                 {settledAnswer !== undefined ? (
                   <p className="kx-stream-clar__settled" data-testid="clar-settled-answer">
@@ -106,7 +107,7 @@ export default function ClarificationBlock({
           }`}
           role="status"
         >
-          {allAnswered ? data.resumedNotice : data.pausedNotice}
+          {allAnswered ? renderTechnicalText(data.resumedNotice) : renderTechnicalText(data.pausedNotice)}
         </p>
       </div>
     </ResponseBlock>

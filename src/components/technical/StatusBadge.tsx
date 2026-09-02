@@ -1,11 +1,11 @@
 /*
  * StatusBadge — spec §4: the canonical 10 execution statuses as a pill.
  * Sans (NEVER mono), 11-12px, weight 600, and ALWAYS icon + label +
- * tone together — color never carries the meaning alone. Tones map onto
- * the existing tokens via the --kx-tech-status-* aliases: success reads
- * the AA accent ink, warning/danger share the attention amber (repo
- * convention: no error token — the icon and label tell them apart,
- * danger pairs amber with a firm ×), neutral reads the AA muted ink.
+ * tone together — color never carries the meaning alone. Fase 3a: each
+ * tone renders a FILLED treatment — tinted fill + tone border + tone ink
+ * via the --kx-tech-status-* tokens (success reads the AA accent ink,
+ * warning/danger share the tuned amber family with the firm × telling
+ * them apart, neutral reads the AA muted ink).
  * Running pulses a live dot (kx-tech-pulse; killed by the stylesheet
  * under prefers-reduced-motion while staying visible). Non-clickable
  * by default; an `onClick` upgrades the pill to real <button>

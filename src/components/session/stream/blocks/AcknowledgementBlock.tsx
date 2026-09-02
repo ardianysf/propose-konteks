@@ -6,6 +6,7 @@
  * prose like the answer turn.
  */
 import ResponseBlock from '../ResponseBlock'
+import { renderTechnicalText } from '../../../technical/renderTechnicalText'
 import type { AcknowledgementBlockData } from '../sessionStreamTypes'
 
 interface AcknowledgementBlockProps {
@@ -20,13 +21,13 @@ export default function AcknowledgementBlock({
   return (
     <ResponseBlock tone="neutral" time={time}>
       <div className="kx-stream-ack">
-        <p className="kx-stream-ack__summary kx-stream-prose">{data.summary}</p>
+        <p className="kx-stream-ack__summary kx-stream-prose">{renderTechnicalText(data.summary)}</p>
         <div className="kx-stream-ack__scope">
           <div className="kx-stream-ack__scope-col">
             <p className="kx-stream-ack__scope-title">In scope</p>
             <ul className="kx-stream-ack__scope-list">
               {data.scopeIn.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}>{renderTechnicalText(item)}</li>
               ))}
             </ul>
           </div>
@@ -34,7 +35,7 @@ export default function AcknowledgementBlock({
             <p className="kx-stream-ack__scope-title">Out of scope</p>
             <ul className="kx-stream-ack__scope-list">
               {data.scopeOut.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}>{renderTechnicalText(item)}</li>
               ))}
             </ul>
           </div>

@@ -12,6 +12,7 @@
 import ResponseBlock, { CheckIcon, CompletionIcon, MinusIcon } from '../ResponseBlock'
 import StatusBadge from '../../../technical/StatusBadge'
 import EntityToken from '../../../technical/EntityToken'
+import { renderTechnicalText } from '../../../technical/renderTechnicalText'
 import type { CompletionBlockData } from '../sessionStreamTypes'
 
 interface CompletionBlockProps {
@@ -45,7 +46,7 @@ export default function CompletionBlock({
                 <span className="kx-stream-completion__mark kx-stream-completion__mark--done" aria-hidden="true">
                   <CheckIcon />
                 </span>
-                <span className="kx-stream-prose">{item}</span>
+                <span className="kx-stream-prose">{renderTechnicalText(item)}</span>
               </li>
             ))}
           </ul>
@@ -58,7 +59,7 @@ export default function CompletionBlock({
                 <span className="kx-stream-completion__mark" aria-hidden="true">
                   <MinusIcon />
                 </span>
-                <span className="kx-stream-prose">{item}</span>
+                <span className="kx-stream-prose">{renderTechnicalText(item)}</span>
               </li>
             ))}
           </ul>
@@ -79,7 +80,7 @@ export default function CompletionBlock({
             {data.nextActions.map((action, index) => (
               <li key={action} className="kx-stream-completion__next-item">
                 <span className="kx-stream-completion__next-num kx-stream-tabular">{index + 1}</span>
-                <span className="kx-stream-prose">{action}</span>
+                <span className="kx-stream-prose">{renderTechnicalText(action)}</span>
               </li>
             ))}
           </ol>

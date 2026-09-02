@@ -33,9 +33,9 @@ export const SESSION_STREAM_STORY: StreamStoryEntry[] = [
     kind: 'acknowledgement',
     data: {
       summary:
-        'You need the invoice tax rounding corrected so printed totals reconcile with stored order amounts, per SOP-FIN-012. I will trace where the divergence enters the invoice pipeline, patch the rounding rule, and verify against the August sample before touching production data.',
+        'You need the invoice tax rounding corrected so printed totals reconcile with stored order amounts, per `SOP-FIN-012`. I will trace where the divergence enters the invoice pipeline, patch the rounding rule, and verify against the August sample before touching production data.',
       scopeIn: [
-        'Tax rounding on invoice lines and totals in canteen-api',
+        'Tax rounding on invoice lines and totals in `canteen-api`',
         'Reconciliation report for the August sample (41 invoices)',
         'Migration for stored invoice totals that diverge',
       ],
@@ -246,7 +246,7 @@ export const SESSION_STREAM_STORY: StreamStoryEntry[] = [
       severity: 'Medium',
       title: 'Contract drift: invoice totals response shape',
       impact:
-        'The rounding patch lets totals.tax serialize as a string in JSON responses whenever the half-up path triggers, silently breaking the mobile client’s sum validation against the documented number contract.',
+        'The rounding patch lets `totals.tax` serialize as a string in JSON responses whenever the half-up path triggers, silently breaking the mobile client’s sum validation against the documented number contract.',
       location: 'src/invoicing/http/serializer.ts:87',
       quote:
         'if (halfUpApplied) totals.tax = totals.tax.toFixed(2) // leaks string into the API contract',
@@ -298,7 +298,7 @@ export const SESSION_STREAM_STORY: StreamStoryEntry[] = [
     kind: 'answer',
     data: {
       paragraphs: [
-        'Here’s where the rounding fix landed. The divergence traced to a single point — src/invoicing/tax.ts truncated the scaled amount with toFixed(2) before the totals split, so every half-cent fell away instead of rounding half up per SOP-FIN-012 §4.2. The patch swaps the helper at all three call sites, the migration restated the 412 August invoices, and the sample now reconciles line for line.',
+        'Here’s where the rounding fix landed. The divergence traced to a single point — `src/invoicing/tax.ts` truncated the scaled amount with `toFixed(2)` before the totals split, so every half-cent fell away instead of rounding half up per `SOP-FIN-012` §4.2. The patch swaps the helper at all three call sites, the migration restated the 412 August invoices, and the sample now reconciles line for line.',
         'The serializer drift the review caught is fixed and locked behind 18 contract tests, and the PRD is ready for finance. Production has been quiet since the snapshot — nothing else needs your attention before sign-off.',
       ],
     },
@@ -307,9 +307,9 @@ export const SESSION_STREAM_STORY: StreamStoryEntry[] = [
     kind: 'completion',
     data: {
       done: [
-        'Tax rounding now follows SOP-FIN-012 §4.2 (round half up) across all three call sites',
-        'Migration 20260901 applied — 412 August invoices restated and reconciled against the sample CSV',
-        'Contract drift on totals.tax fixed and locked behind 18 passing contract tests',
+        'Tax rounding now follows `SOP-FIN-012` §4.2 (round half up) across all three call sites',
+        'Migration `20260901` applied — 412 August invoices restated and reconciled against the sample CSV',
+        'Contract drift on `totals.tax` fixed and locked behind 18 passing contract tests',
         'PRD drafted for the finance review',
       ],
       notDone: [
@@ -324,7 +324,7 @@ export const SESSION_STREAM_STORY: StreamStoryEntry[] = [
       nextActions: [
         'Finance signs off the restated August totals against SOP-FIN-012',
         'Schedule the July restatement as its own session if requested',
-        'Cherry-pick the serializer guard into the release branch (2.14.x)',
+        'Cherry-pick the serializer guard into the release branch (`2.14.x`)',
       ],
       rollback:
         'Restore snapshot invoices-20260831, then revert PR #1289 — stored totals return to pre-migration values; no schema change is involved.',

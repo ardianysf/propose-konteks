@@ -11,6 +11,7 @@
  * page threads `showFooter` to exactly the group-final turns.
  */
 import ResponseBlock from '../ResponseBlock'
+import { renderTechnicalText } from '../../../technical/renderTechnicalText'
 import type { AnswerBlockData } from '../sessionStreamTypes'
 
 interface AnswerBlockProps {
@@ -30,7 +31,7 @@ export default function AnswerBlock({
       <div className="kx-stream-answer-prose">
         {data.paragraphs.map((paragraph, index) => (
           <p key={index} className="kx-stream-prose">
-            {paragraph}
+            {renderTechnicalText(paragraph)}
           </p>
         ))}
       </div>

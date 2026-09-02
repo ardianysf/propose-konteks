@@ -155,6 +155,15 @@ describe('SessionStreamDetailPage — structure', () => {
       within(stream).getByText(/Got it — you need the attendance integration reviewed end to end/),
     ).toBeInTheDocument()
 
+    // Fase 3b — backticked literals in the acknowledgement prose render
+    // as InlineCode (the summary and the first scope-in item both carry
+    // `bsi-hris`): every match is a code.kx-tech-code, never plain text.
+    const ackSlot = document.getElementById('stream-kind-2')!
+    for (const literal of within(ackSlot).getAllByText('bsi-hris')) {
+      expect(literal).toHaveClass('kx-tech-code')
+      expect(literal.tagName).toBe('CODE')
+    }
+
     // The attendance story's own copy leads the stream.
     expect(
       within(stream).getByText(/Review the MyTok ↔ BSI HRIS attendance integration/),
@@ -480,8 +489,10 @@ describe('SessionStreamDetailPage — interactions', () => {
       expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()
       const understanding = screen.getByTestId('stream-live-understanding')
       expect(
-        within(understanding).getByText(/re-verify the overnight-shift boundary fix from PR #1301/),
+        within(understanding).getByText(/re-verify the overnight-shift boundary fix from/),
       ).toBeInTheDocument()
+      // Fase 3b — the literal rides an InlineCode span, not plain text.
+      expect(within(understanding).getByText('PR #1301')).toHaveClass('kx-tech-code')
     } finally {
       vi.useRealTimers()
     }
@@ -636,9 +647,13 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       const understandingSlot = screen.getByTestId('stream-live-understanding')
       expect(
         within(understandingSlot).getByText(
-          /re-verify the overnight-shift boundary fix from PR #1301/,
+          /re-verify the overnight-shift boundary fix from/,
         ),
       ).toBeInTheDocument()
+      // Fase 3b — the `PR #1301` literal renders as InlineCode inside the
+      // answer prose (backticks never leak into the DOM text).
+      expect(within(understandingSlot).getByText('PR #1301')).toHaveClass('kx-tech-code')
+      expect(understandingSlot.textContent).not.toContain('`')
       // Bare conversational prose — no UNDERSTANDING label, no footer.
       expect(within(understandingSlot).queryByText('UNDERSTANDING')).toBeNull()
       expect(within(understandingSlot).queryByTestId('turn-footer')).toBeNull()

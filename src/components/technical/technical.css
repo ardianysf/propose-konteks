@@ -13,12 +13,14 @@
  *
  * Rules of the house (mirrors SessionStream.css):
  *   - every class is kx-tech-*; colors come ONLY from --kx-* tokens /
- *     the --kx-tech-* aliases in tokens.css — light/dark flip via
- *     html[data-theme='dark'] automatically;
+ *     the --kx-tech-* values in tokens.css — light/dark flip via
+ *     html[data-theme='dark'] automatically (Fase 3a: the kx-tech
+ *     surfaces are tuned per-theme literals, no longer pale aliases);
  *   - contrast-test inventory constraint: each selector reads at most
  *     ONE tracked token (muted/muted-text-aa/accent-strong/accent-text-aa/
- *     accent-solid-aa) — alias references (--kx-tech-*) are untracked by
- *     design because their AA-ness is inherited from the aliased token;
+ *     accent-solid-aa) — --kx-tech-* references are untracked by design
+ *     because their AA-ness is verified against the tuned values in
+ *     tokens.css (see the ratio comment block there + contrast.test.ts);
  *   - focus is the 2px --kx-tech-focus-ring outline (v2.css pattern);
  *   - the one animated element (the Running dot) dies under
  *     prefers-reduced-motion while staying visible.
@@ -31,6 +33,7 @@
   font-size: 0.95em;
   font-weight: var(--kx-font-medium);
   padding: 1px 4px;
+  border: 1px solid var(--kx-tech-code-border);
   border-radius: 4px;
   background: var(--kx-tech-code-bg);
   color: var(--kx-tech-code-text);
@@ -153,16 +156,20 @@
 }
 
 /* ── 4. StatusBadge ─────────────────────────────────────────────────── */
-/* Sans (NEVER mono), 600, pill — always icon + label + color together. */
+/* Sans (NEVER mono), 600, pill — always icon + label + color together.
+ * Fase 3a: FILLED treatment — tinted fill + tone border + tone text per
+ * the --kx-tech-status-* tokens (not tone text on transparent). The
+ * base carries the neutral treatment; each tone modifier overrides
+ * fill + border + ink together. */
 
 .kx-tech-badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 3px 6px;
-  border: 1px solid var(--kx-border);
+  border: 1px solid var(--kx-tech-status-neutral-border);
   border-radius: 999px;
-  background: var(--kx-raised);
+  background: var(--kx-tech-status-neutral-bg);
   font-family: inherit; /* sans by contract — mono is a data costume only */
   font-size: var(--kx-text-sm);
   font-weight: 600;
@@ -177,18 +184,26 @@
 
 .kx-tech-badge--neutral {
   color: var(--kx-tech-status-neutral);
+  background: var(--kx-tech-status-neutral-bg);
+  border-color: var(--kx-tech-status-neutral-border);
 }
 
 .kx-tech-badge--success {
   color: var(--kx-tech-status-success);
+  background: var(--kx-tech-status-success-bg);
+  border-color: var(--kx-tech-status-success-border);
 }
 
 .kx-tech-badge--warning {
   color: var(--kx-tech-status-warning);
+  background: var(--kx-tech-status-warning-bg);
+  border-color: var(--kx-tech-status-warning-border);
 }
 
 .kx-tech-badge--danger {
   color: var(--kx-tech-status-danger);
+  background: var(--kx-tech-status-danger-bg);
+  border-color: var(--kx-tech-status-danger-border);
 }
 
 /* The Running glyph: a live dot pulsing on the tone color. */

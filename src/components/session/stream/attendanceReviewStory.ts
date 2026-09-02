@@ -69,9 +69,9 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
     kind: 'acknowledgement',
     data: {
       summary:
-        'Got it — you need the attendance integration reviewed end to end before the release so Monday’s payroll cut-off can trust MyTok check-ins. I’ll trace the sync worker in bsi-hris, audit the timezone and idempotency handling, replay a sample batch in the sandbox, and deliver a findings report. Production stays untouched unless you approve a specific fix.',
+        'Got it — you need the attendance integration reviewed end to end before the release so Monday’s payroll cut-off can trust MyTok check-ins. I’ll trace the sync worker in `bsi-hris`, audit the timezone and idempotency handling, replay a sample batch in the sandbox, and deliver a findings report. Production stays untouched unless you approve a specific fix.',
       scopeIn: [
-        'Attendance sync worker and shift-boundary handling in bsi-hris',
+        'Attendance sync worker and shift-boundary handling in `bsi-hris`',
         'MyTok check-in API contract as the sync consumes it',
         'Reconciliation of the August sample (1,284 records) against HRIS',
       ],
@@ -99,7 +99,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
         {
           id: 'q-boundary',
           question:
-            'Which day owns a MyTok check-in when an overnight shift crosses midnight — the check-in device’s local time, or the HRIS server timezone (Asia/Jakarta)?',
+            'Which day owns a MyTok check-in when an overnight shift crosses midnight — the check-in device’s local time, or the HRIS server timezone (`Asia/Jakarta`)?',
           options: ['Device local time', 'HRIS server time (Asia/Jakarta)', 'Split the record at midnight'],
         },
         {
@@ -275,7 +275,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
       severity: 'High',
       title: 'Timezone drift: overnight shifts land on the wrong attendance day',
       impact:
-        'The shift boundary is derived from UTC while the business day runs on Asia/Jakarta: a check-in at 23:40 Jakarta time on an overnight shift is recorded on the previous day in HRIS. The August sample shows 37 such records — enough to shift overtime and payroll totals for night-shift employees.',
+        'The shift boundary is derived from UTC while the business day runs on `Asia/Jakarta`: a check-in at 23:40 Jakarta time on an overnight shift is recorded on the previous day in HRIS. The August sample shows 37 such records — enough to shift overtime and payroll totals for night-shift employees.',
       location: 'services/attendance-sync/shiftBoundary.ts:47',
       quote: 'const day = utcDateOf(event.checkinAt) // business day derived from UTC, not Asia/Jakarta',
     },
@@ -332,8 +332,8 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
     kind: 'answer',
     data: {
       paragraphs: [
-        'Here’s where the review landed. The sync path itself is sound — the worker is the only writer of attendance records and retries are idempotent, so duplicate check-ins skip cleanly. The real defect is the shift boundary: it derives the business day from UTC while the business runs on Asia/Jakarta, so 37 of the 1,284 August records landed on the wrong attendance day (High — shiftBoundary.ts:47).',
-        'I patched the boundary to derive from Asia/Jakarta per spec rev 4 §3.1 and locked it behind 26 passing regression tests; the sandbox replay then reconciled the full sample with zero mismatches. The Medium retry-window finding is real but separable — I’ve tracked it for the next release rather than widening this session.',
+        'Here’s where the review landed. The sync path itself is sound — the worker is the only writer of attendance records and retries are idempotent, so duplicate check-ins skip cleanly. The real defect is the shift boundary: it derives the business day from UTC while the business runs on `Asia/Jakarta`, so 37 of the 1,284 August records landed on the wrong attendance day (High — `shiftBoundary.ts:47`).',
+        'I patched the boundary to derive from `Asia/Jakarta` per spec rev 4 §3.1 and locked it behind 26 passing regression tests; the sandbox replay then reconciled the full sample with zero mismatches. The Medium retry-window finding is real but separable — I’ve tracked it for the next release rather than widening this session.',
       ],
     },
   },
@@ -343,7 +343,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
     data: {
       done: [
         'Sync path traced end to end — the worker is the only writer of attendance records, and retries are idempotent (duplicate event ids skip cleanly)',
-        'High finding verified and fixed: the shift boundary now derives from Asia/Jakarta per spec rev 4 §3.1, locked behind 26 passing regression tests',
+        'High finding verified and fixed: the shift boundary now derives from `Asia/Jakarta` per spec rev 4 §3.1, locked behind 26 passing regression tests',
         'Sandbox replay of the August sample reconciled — 0 mismatches remain after the boundary fix',
         'Review report drafted for the release sign-off',
       ],
@@ -358,7 +358,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
       ],
       nextActions: [
         'Release owner signs off the review report before Friday’s cut',
-        'Cherry-pick the boundary fix into the release branch (2.9.x)',
+        'Cherry-pick the boundary fix into the release branch (`2.9.x`)',
         'Schedule the pre-July backfill audit as its own session if requested',
       ],
       rollback:
@@ -450,7 +450,7 @@ export const LIVE_TURN_SCRIPT: LiveStagedScript = {
   openDelayMs: 1500,
   understanding: {
     paragraphs: [
-      'Got it — I’ll re-verify the overnight-shift boundary fix from PR #1301 against the August sample: the 37 records that previously landed on the wrong day, plus one fresh sandbox replay to confirm the corrected boundary holds.',
+      'Got it — I’ll re-verify the overnight-shift boundary fix from `PR #1301` against the August sample: the 37 records that previously landed on the wrong day, plus one fresh sandbox replay to confirm the corrected boundary holds.',
       'No production writes this time — the replay stays inside the sandbox, and I’ll ask for your approval before anything runs.',
     ],
   },
@@ -565,7 +565,7 @@ export const LIVE_TURN_SCRIPT: LiveStagedScript = {
     answerDelayMs: 1300,
     answer: {
       paragraphs: [
-        'Verified — the boundary fix holds. All 37 overnight-shift records from the August sample now land on their shift start day, and the replay reconciled 37/37 against attendance_records with zero mismatches. Duplicate check-ins still skip cleanly, so idempotency is intact.',
+        'Verified — the boundary fix holds. All 37 overnight-shift records from the August sample now land on their shift start day, and the replay reconciled 37/37 against `attendance_records` with zero mismatches. Duplicate check-ins still skip cleanly, so idempotency is intact.',
         'The refreshed report (v1.1) is attached above — it supersedes v1 for the sign-off. From my side the release is ready for Friday once you countersign.',
       ],
     },
@@ -889,7 +889,7 @@ export const LIVE_DEEP_CONTINUATION_SCRIPT: LiveDeepContinuationScript = {
     answerDelayMs: 1300,
     answer: {
       paragraphs: [
-        'The deeper pass surfaced a second real defect. The retry dedupe window (30 s) is shorter than MyTok’s 45 s p99 response time, so 3 of the 9 replayed slow responses double-wrote attendance windows — High, syncClient.ts:31. Per your answers I treated the second delivery as a duplicate skip and audited the last 7 days of delivery failures; the fix on pr-1302 widens the window to 60 s and is locked behind 14 regression tests, and the sandbox re-replay now reconciles 9/9.',
+        'The deeper pass surfaced a second real defect. The retry dedupe window (30 s) is shorter than MyTok’s 45 s p99 response time, so 3 of the 9 replayed slow responses double-wrote attendance windows — High, `syncClient.ts:31`. Per your answers I treated the second delivery as a duplicate skip and audited the last 7 days of delivery failures; the fix on `pr-1302` widens the window to 60 s and is locked behind 14 regression tests, and the sandbox re-replay now reconciles 9/9.',
         'The refreshed report (v2) is attached above — it supersedes the previous version for the Friday sign-off and now carries both the boundary finding and this retry finding with the replay evidence.',
       ],
     },
