@@ -119,9 +119,9 @@
   --kx-tech-code-bg: #ecebe0;
   --kx-tech-code-text: var(--kx-primary);
   --kx-tech-code-border: #dddccc;
-  /* EntityToken: openable system objects — accent-tinted fill, clearer
-   * edge, accent-strong border on hover. */
-  --kx-tech-entity-bg: #f2f4ea;
+  /* EntityToken: resting = accent INK only (no box, Fase 3d); hover/
+   * focus reveals the fill + green edge so the connection reads. */
+  --kx-tech-entity-bg: #e9f1da;
   --kx-tech-entity-border: #7d9e63;
   --kx-tech-entity-border-hover: var(--kx-accent-strong);
   /* Entity ink reads as an interactive accent link (5.29:1 on canvas). */
@@ -221,7 +221,7 @@
   --kx-bubble-border: #35502c;
   --kx-tech-code-bg: #242a22;
   --kx-tech-code-border: var(--kx-border);
-  --kx-tech-entity-bg: #1b2418;
+  --kx-tech-entity-bg: #1f3322;
   --kx-tech-entity-border: #6b8c53;
   --kx-tech-status-warning: #e6b366;
   --kx-tech-status-success-bg: #1f2e19;
