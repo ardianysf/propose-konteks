@@ -2,8 +2,9 @@
  * SessionStreamDemoPage tests — the chat-style response-stream demo
  * contract (spec: .pi/orch/plans/chat-session-stream-spec.md):
  *   - chat anatomy: the user request renders as a right-aligned BUBBLE
- *     with attachment cards, agent turns render FLAT (no bubble) with
- *     their hover footer, and every slot keeps its stream-kind anchor;
+ *     with attachment cards, agent turns render FLAT (no bubble) — the
+ *     hover footer rides ONLY the final agent answer turn (spec
+ *     refinements v2 #4) — and every slot keeps its stream-kind anchor;
  *   - the anchor chip row links to real block ids (labels follow the
  *     chat kind labels — PROGRESS, APPROVAL NEEDED chip for the gate);
  *   - the history page's "Response flow demo" button navigates to the
@@ -39,33 +40,38 @@ const ANCHOR_LABELS = [
   'HANDOFF',
 ] as const
 
-/** Kind labels the AGENT turn headers carry inside the stream (the
+/** Kind labels the LABELED agent turn headers carry inside the stream
+ * (spec refinements v2 #1/#5): the conversational understanding/answer
+ * turns and the artifact row render BARE — no header at all. The
  * request is a bubble and carries no label; the gate's header reads
- * APPROVAL while its pending state chip reads APPROVAL NEEDED). */
+ * APPROVAL while its pending state chip reads APPROVAL NEEDED. */
 const AGENT_KIND_LABELS = [
-  'UNDERSTANDING',
   'CLARIFICATION',
   'PLAN',
   'APPROVAL',
   'PROGRESS',
   'TOOL CALL',
-  'ARTIFACT',
   'REVIEW FINDING',
   'HANDOFF',
 ] as const
+
+/** Labels that must NOT render inside the stream — the bare
+ * conversational turns and the badge-less artifact row. */
+const BARE_KIND_LABELS = ['UNDERSTANDING', 'ANSWER', 'ARTIFACT'] as const
 
 // ---------------------------------------------------------------------------
 // Structure
 // ---------------------------------------------------------------------------
 
 describe('SessionStreamDemoPage — structure', () => {
-  it('renders the chat anatomy — one user bubble + ten flat agent turns (11 slots)', () => {
+  it('renders the chat anatomy — one user bubble + eleven flat agent turns (12 slots)', () => {
     render(<SessionStreamDemoPage />)
     const stream = screen.getByTestId('session-stream')
 
-    // The story runs 11 blocks (tool evidence appears twice).
-    expect(stream.querySelectorAll('.kx-stream-slot')).toHaveLength(11)
-    for (let position = 1; position <= 11; position += 1) {
+    // The story runs 12 blocks (tool evidence appears twice; the final
+    // answer turn lands right before the handoff).
+    expect(stream.querySelectorAll('.kx-stream-slot')).toHaveLength(12)
+    for (let position = 1; position <= 12; position += 1) {
       const slot = document.getElementById(`stream-kind-${position}`)
       expect(slot, `stream-kind-${position}`).not.toBeNull()
       expect(slot?.querySelector('.kx-stream-turn, .kx-stream-bubble-row')).not.toBeNull()
@@ -74,12 +80,24 @@ describe('SessionStreamDemoPage — structure', () => {
     // The request is a bubble; agent turns render flat without bubbles.
     expect(within(stream).getAllByTestId('user-bubble')).toHaveLength(1)
     const turns = stream.querySelectorAll('.kx-stream-turn')
-    expect(turns).toHaveLength(10)
+    expect(turns).toHaveLength(11)
     turns.forEach((turn) => expect(turn.querySelector('.kx-stream-bubble')).toBeNull())
 
+    // Every labeled agent kind renders its header inside the stream…
     for (const label of AGENT_KIND_LABELS) {
       expect(within(stream).getAllByText(label).length).toBeGreaterThanOrEqual(1)
     }
+    // …while the conversational turns (understanding, answer) and the
+    // artifact row carry NO kind label (the anchor chips outside the
+    // stream are the only place those words appear).
+    for (const label of BARE_KIND_LABELS) {
+      expect(within(stream).queryByText(label)).toBeNull()
+    }
+
+    // The bare understanding turn is found by its PROSE, not a label.
+    expect(
+      within(stream).getByText(/You need the invoice tax rounding corrected/),
+    ).toBeInTheDocument()
   })
 
   it('renders the request bubble with attachment cards and a hover action bar', () => {
@@ -103,20 +121,35 @@ describe('SessionStreamDemoPage — structure', () => {
     expect(within(bar).getByTestId('bubble-edit')).toHaveAttribute('aria-label', 'Edit message')
   })
 
-  it('renders every agent turn with its hover footer (copy, share, time)', () => {
+  it('renders the hover footer on exactly one turn — the final agent answer (copy, share, time)', () => {
     const { container } = render(<SessionStreamDemoPage />)
 
+    // Exactly ONE turn in the whole conversation carries the footer
+    // (spec refinements v2 #4) — the FINAL agent answer, slot 11.
     const footers = container.querySelectorAll('[data-testid="turn-footer"]')
-    expect(footers).toHaveLength(10)
-    const understanding = container.querySelectorAll('.kx-stream-turn')[0] as HTMLElement
-    expect(within(understanding).getByTestId('turn-copy')).toHaveAttribute(
+    expect(footers).toHaveLength(1)
+    const finalAnswer = document.getElementById('stream-kind-11')!
+    expect(finalAnswer.querySelector('[data-testid="turn-footer"]')).not.toBeNull()
+    expect(
+      within(finalAnswer).getByText(/Here’s where the rounding fix landed/),
+    ).toBeInTheDocument()
+    expect(within(finalAnswer).getByTestId('turn-copy')).toHaveAttribute(
       'aria-label',
       'Copy message',
     )
-    expect(within(understanding).getByTestId('turn-share')).toHaveAttribute(
+    expect(within(finalAnswer).getByTestId('turn-share')).toHaveAttribute(
       'aria-label',
       'Share message',
     )
+    expect(within(finalAnswer).getByTestId('turn-footer')).toHaveTextContent('09:44')
+
+    // Every other agent turn renders bare — the single footer rides the
+    // final answer turn and nothing else.
+    const withFooter = Array.from(container.querySelectorAll('.kx-stream-turn')).filter(
+      (turn) => turn.querySelector('[data-testid="turn-footer"]'),
+    )
+    expect(withFooter).toHaveLength(1)
+    expect(withFooter[0].closest('.kx-stream-slot')).toBe(finalAnswer)
   })
 
   it('renders an anchor chip per kind, each targeting an existing block id', () => {

@@ -1,9 +1,11 @@
 /*
  * AcknowledgementBlock — kind 2 (UNDERSTANDING): flat agent prose.
  * Summary prose, scope in/out as two compact borderless columns,
- * confidence note, and the muted grounding line. No card.
+ * confidence note, and the muted grounding line. No card, and no kind
+ * label or mini header (spec refinements v2 #1) — pure conversational
+ * prose like the answer turn.
  */
-import ResponseBlock, { AckIcon } from '../ResponseBlock'
+import ResponseBlock from '../ResponseBlock'
 import type { AcknowledgementBlockData } from '../sessionStreamTypes'
 
 interface AcknowledgementBlockProps {
@@ -16,7 +18,7 @@ export default function AcknowledgementBlock({
   time = '14:04',
 }: AcknowledgementBlockProps) {
   return (
-    <ResponseBlock kindLabel="UNDERSTANDING" tone="neutral" icon={<AckIcon />} time={time}>
+    <ResponseBlock tone="neutral" time={time}>
       <div className="kx-stream-ack">
         <p className="kx-stream-ack__summary kx-stream-prose">{data.summary}</p>
         <div className="kx-stream-ack__scope">

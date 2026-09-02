@@ -7,9 +7,11 @@
  *     column, asymmetric radius — the outer corner sharper) carrying
  *     prose + attachment CARDS, with a hover / :focus-within action bar
  *     (time + copy + edit) under the bubble.
- *   - AGENT turns are FLAT seamless prose — compact kind header, no
- *     rail, no card — with a hover / :focus-within footer (copy, share,
- *     time) under the message.
+ *   - AGENT turns are FLAT seamless prose — a compact kind header on
+ *     structured turns only (understanding / answer / artifact render
+ *     bare, spec refinements v2 #1/#5) — and the hover /
+ *     :focus-within footer (copy, share, time) exists ONLY on the FINAL
+ *     agent answer turn (spec refinements v2 #4).
  *
  * Rules of the house:
  *   - every class is kx-stream-*; only --kx-* tokens (light/dark flip
@@ -94,12 +96,13 @@
 }
 
 /* ── Dialog column + turn rhythm ────────────────────────────────────── */
-/* Chat spacing between turns — no ledger hairlines; the closing HANDOFF
+/* Chat spacing between turns — very tight (±4px, spec refinements v2
+ * #3): no ledger hairlines, no heavy separators; the closing HANDOFF
  * turn draws its own 2px ink rule above the body. */
 
 .kx-stream {
   display: grid;
-  gap: 26px;
+  gap: 4px;
   color: var(--kx-primary);
   font-size: var(--kx-text-md);
   line-height: 1.55;
@@ -212,8 +215,9 @@
 .kx-stream-bubble {
   max-width: 75%;
   padding: 12px 16px;
+  border: 1px solid var(--kx-border); /* pale-on-canvas tint needs the hairline edge in both themes */
   border-radius: 16px 16px 6px 16px; /* outer (bottom-right) corner sharper */
-  background: var(--kx-raised);
+  background: var(--kx-pale); /* tint token, not white/raised — spec refinements v2 #2 */
   color: var(--kx-primary);
 }
 
@@ -1155,38 +1159,32 @@
   text-decoration-thickness: 1px;
 }
 
-/* ── 8. Artifact — chip only, no big card ───────────────────────────── */
+/* ── 8. Artifact — full-width row, no badge/label ───────────────────── */
 
 .kx-stream-artifact {
   display: grid;
   gap: 8px;
-  justify-items: start;
 }
 
-.kx-stream-artifact-chip {
-  display: inline-flex;
-  align-items: center;
+/* Spec refinements v2 #5: the artifact fills the response column as ONE
+ * full-width row — title + version leading, the small Open / Copy /
+ * Download actions revealed on hover / :focus-within at the row's end.
+ * No type badge, no ARTIFACT kind header, no small chip. */
+.kx-stream-artifact-row {
+  display: flex;
+  align-items: baseline;
   flex-wrap: wrap;
-  gap: 4px 8px;
-  max-width: 100%;
-  padding: 4px 6px;
-  border: 1px solid var(--kx-border);
-  border-radius: 8px;
-  background: var(--kx-raised);
+  gap: 4px 10px;
+  width: 100%;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--kx-border);
 }
 
-.kx-stream-artifact-chip__badge {
-  padding: 2px 8px;
-  border: 1px solid var(--kx-accent);
-  border-radius: 6px;
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--kx-accent-text-aa);
+.kx-stream-artifact-row--full {
+  width: 100%;
 }
 
-.kx-stream-artifact-chip__title {
+.kx-stream-artifact-row__title {
   min-width: 0;
   font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-bold);
@@ -1194,21 +1192,21 @@
   overflow-wrap: anywhere;
 }
 
-.kx-stream-artifact-chip__version {
+.kx-stream-artifact-row__version {
   font-size: var(--kx-text-xs);
   color: var(--kx-muted-text-aa);
 }
 
-/* Small chip actions — revealed on hover / :focus-within of the chip. */
-.kx-stream-artifact-chip__actions {
+.kx-stream-artifact-row__actions {
+  margin-left: auto;
   display: inline-flex;
   gap: 2px;
   opacity: 0;
   transition: opacity 140ms ease-out;
 }
 
-.kx-stream-artifact-chip:hover .kx-stream-artifact-chip__actions,
-.kx-stream-artifact-chip:focus-within .kx-stream-artifact-chip__actions {
+.kx-stream-artifact-row:hover .kx-stream-artifact-row__actions,
+.kx-stream-artifact-row:focus-within .kx-stream-artifact-row__actions {
   opacity: 1;
 }
 
@@ -1529,7 +1527,7 @@
   }
 
   .kx-stream {
-    gap: 20px;
+    gap: 4px;
   }
 
   .kx-stream-bubble {

@@ -285,8 +285,15 @@ export default function SessionStreamDetailPage() {
     }
   }, [liveTurns.length])
 
-  // Only a clarification WITHOUT recorded answers is interactive — the
-  // fixture's own answers already sit in the stream as a user bubble.
+  // The FINAL agent answer of the settled history is the one turn that
+  // carries the hover footer (spec refinements v2 #4) — every other agent
+  // turn renders bare. The live script's final answer step reuses the
+  // same rule below.
+  const finalAnswerPosition = ATTENDANCE_REVIEW_STORY.reduce(
+    (last, entry, index) => (entry.kind === 'answer' ? index + 1 : last),
+    0,
+  )
+
   const interactiveClarification = ATTENDANCE_REVIEW_STORY.find(
     (entry): entry is Extract<StreamStoryEntry, { kind: 'clarification' }> =>
       entry.kind === 'clarification' && entry.data.settledAnswers === undefined,
@@ -349,7 +356,11 @@ export default function SessionStreamDetailPage() {
       case 'review':
         return <ReviewFindingBlock data={entry.data} time={time} />
       case 'answer':
-        return <AnswerBlock data={entry.data} time={time} />
+        // The final agent answer — the ONE turn with the hover footer
+        // (spec refinements v2 #4).
+        return (
+          <AnswerBlock data={entry.data} time={time} showFooter={position === finalAnswerPosition} />
+        )
       case 'completion':
         return <CompletionBlock data={entry.data} time={time} />
     }
@@ -376,7 +387,7 @@ export default function SessionStreamDetailPage() {
           </div>
         )
       case 'understanding':
-        return <AnswerBlock variant="understanding" data={entry.data} time={LIVE_TIME} />
+        return <AnswerBlock data={entry.data} time={LIVE_TIME} />
       case 'tool':
         // Keyed by call state: running → done remounts the row so it
         // collapses exactly like a settled call (expanded initializes
@@ -405,7 +416,9 @@ export default function SessionStreamDetailPage() {
       case 'artifact':
         return <ArtifactBlock data={entry.data} time={LIVE_TIME} />
       case 'answer':
-        return <AnswerBlock data={entry.data} time={LIVE_TIME} />
+        // The live script's final answer lands with the footer — the
+        // same single-turn rule as the settled history's final answer.
+        return <AnswerBlock data={entry.data} time={LIVE_TIME} showFooter />
     }
   }
 

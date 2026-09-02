@@ -28,6 +28,7 @@ import ProgressBlock from '../components/session/stream/blocks/ProgressBlock'
 import ToolEvidenceBlock from '../components/session/stream/blocks/ToolEvidenceBlock'
 import ArtifactBlock from '../components/session/stream/blocks/ArtifactBlock'
 import ReviewFindingBlock from '../components/session/stream/blocks/ReviewFindingBlock'
+import AnswerBlock from '../components/session/stream/blocks/AnswerBlock'
 import CompletionBlock from '../components/session/stream/blocks/CompletionBlock'
 import { ILLUSTRATIVE_DATA_NOTE } from '../data/mockData'
 import '../components/session/stream/SessionStream.css'
@@ -79,6 +80,14 @@ export default function SessionStreamDemoPage() {
     return index === -1 ? 1 : index + 1
   }
 
+  /** The FINAL agent answer is the one turn that carries the hover
+   * footer (spec refinements v2 #4) — every other agent turn renders
+   * bare (the answer renders as pure conversational prose, no label). */
+  const finalAnswerPosition = SESSION_STREAM_STORY.reduce(
+    (last, entry, index) => (entry.kind === 'answer' ? index + 1 : last),
+    0,
+  )
+
   const renderEntry = (entry: StreamStoryEntry, position: number) => {
     switch (entry.kind) {
       case 'request':
@@ -116,6 +125,16 @@ export default function SessionStreamDemoPage() {
         return <ArtifactBlock data={entry.data} />
       case 'review':
         return <ReviewFindingBlock data={entry.data} />
+      case 'answer':
+        // The final agent answer — the ONE turn with the hover footer
+        // (spec refinements v2 #4).
+        return (
+          <AnswerBlock
+            data={entry.data}
+            time="09:44"
+            showFooter={position === finalAnswerPosition}
+          />
+        )
       case 'completion':
         return <CompletionBlock data={entry.data} />
     }

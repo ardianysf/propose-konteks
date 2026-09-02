@@ -412,7 +412,7 @@ function entries(): Entry[] {
       '.kx-stream-call__state',
       '.kx-stream-call__duration',
       '.kx-stream-io__label',
-      '.kx-stream-artifact-chip__version',
+      '.kx-stream-artifact-row__version',
       '.kx-stream-review__location',
       '.kx-stream-completion__section-label',
       '.kx-stream-completion__next-num',
@@ -421,8 +421,9 @@ function entries(): Entry[] {
     ].map((selector) => ({ file: STREAM, selector, property: 'color', token: MUTED_AA, cls: 'M' as Class })),
     // A — accent text/glyphs: tone-colored kind labels + icons on accent
     // turns, secondary/chip actions, resumed notices + settled marks,
-    // done-state marks, diff additions, artifact badge, resolved-gate
-    // check.
+    // done-state marks, diff additions, resolved-gate check. (The
+    // artifact badge is gone — refinements v2 #5 rendered the artifact
+    // as a bare full-width row.)
     ...[
       '.kx-stream-turn--accent .kx-stream-turn__icon',
       '.kx-stream-turn--accent .kx-stream-turn__kind',
@@ -436,7 +437,6 @@ function entries(): Entry[] {
       '.kx-stream-call--done .kx-stream-call__mark',
       '.kx-stream-call__state--done',
       '.kx-stream-io__line--add',
-      '.kx-stream-artifact-chip__badge',
       '.kx-stream-chip-action',
       '.kx-stream-completion__item--done .kx-stream-completion__mark',
       '.kx-stream-completion__artifact',
@@ -1003,16 +1003,16 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 255 consumers — 99 muted, 89 accent-strong, 23 accent-text-aa', () => {
-    expect(inventory).toHaveLength(255)
+  it('covers exactly 254 consumers — 99 muted, 89 accent-strong, 22 accent-text-aa', () => {
+    expect(inventory).toHaveLength(254)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(99)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(89)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(23)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(22)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
     expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(124)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(60)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(59)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(9)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(62)
   })
