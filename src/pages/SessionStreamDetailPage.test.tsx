@@ -187,44 +187,49 @@ describe('SessionStreamDetailPage — structure', () => {
     expect(within(bar).getByTestId('bubble-edit')).toHaveAttribute('aria-label', 'Edit message')
   })
 
-  it('renders the hover footer on exactly one turn — the final agent answer (copy, share, time)', () => {
+  it('renders one hover footer per agent response group (copy, share, time)', () => {
     renderRoute('session-stream-detail')
     const stream = screen.getByTestId('session-stream')
 
-    // Exactly ONE turn in the whole conversation carries the footer
-    // (spec refinements v2 #4) — the FINAL agent answer, slot 11.
+    // TWO response groups in the settled history (spec refinements v3
+    // #2): group 1 = understanding + clarification (ends right before
+    // the user's answer bubble, slot 4); group 2 = plan … completion.
+    // Each group's LAST turn carries the footer — slots 3 and 12.
     const footers = stream.querySelectorAll('[data-testid="turn-footer"]')
-    expect(footers).toHaveLength(1)
-    const finalAnswer = document.getElementById('stream-kind-11')!
-    expect(finalAnswer.querySelector('[data-testid="turn-footer"]')).not.toBeNull()
-    expect(within(finalAnswer).getByTestId('turn-copy')).toHaveAttribute(
+    expect(footers).toHaveLength(2)
+    const groupOneFinal = document.getElementById('stream-kind-3')!
+    const groupTwoFinal = document.getElementById('stream-kind-12')!
+    expect(groupOneFinal.querySelector('[data-testid="turn-footer"]')).not.toBeNull()
+    expect(groupTwoFinal.querySelector('[data-testid="turn-footer"]')).not.toBeNull()
+    expect(within(groupTwoFinal).getByTestId('turn-copy')).toHaveAttribute(
       'aria-label',
       'Copy message',
     )
-    expect(within(finalAnswer).getByTestId('turn-share')).toHaveAttribute(
+    expect(within(groupTwoFinal).getByTestId('turn-share')).toHaveAttribute(
       'aria-label',
       'Share message',
     )
-    expect(within(finalAnswer).getByTestId('turn-footer')).toHaveTextContent('14:58')
 
-    // Every other agent turn renders bare — no footer on the
-    // understanding prose (first agent turn) or even on the handoff
-    // that lands AFTER the final answer.
+    // The final ANSWER (slot 11) renders prose but no footer — the
+    // handoff after it ends the group.
+    const finalAnswer = document.getElementById('stream-kind-11')!
+    expect(finalAnswer.querySelector('[data-testid="turn-footer"]')).toBeNull()
+
+    // Exactly two turns carry a footer and they are the group finals.
     const withFooter = Array.from(stream.querySelectorAll('.kx-stream-turn')).filter((turn) =>
       turn.querySelector('[data-testid="turn-footer"]'),
     )
-    expect(withFooter).toHaveLength(1)
-    expect(withFooter[0].closest('.kx-stream-slot')).toBe(finalAnswer)
+    expect(withFooter).toHaveLength(2)
+    expect(withFooter[0].closest('.kx-stream-slot')).toBe(groupOneFinal)
+    expect(withFooter[1].closest('.kx-stream-slot')).toBe(groupTwoFinal)
     expect(
       within(document.getElementById('stream-kind-2')!).queryByTestId('turn-footer'),
     ).toBeNull()
-    expect(
-      within(document.getElementById('stream-kind-12')!).queryByTestId('turn-footer'),
-    ).toBeNull()
 
-    // Share copies the session link and flashes feedback.
-    fireEvent.click(within(finalAnswer).getByTestId('turn-share'))
-    expect(within(finalAnswer).getByText('Link copied')).toBeInTheDocument()
+    // Share copies the session link and flashes feedback (group-2
+    // footer).
+    fireEvent.click(within(groupTwoFinal).getByTestId('turn-share'))
+    expect(within(groupTwoFinal).getByText('Link copied')).toBeInTheDocument()
   })
 })
 

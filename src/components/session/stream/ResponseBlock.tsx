@@ -11,11 +11,12 @@
  *           (spec refinements v2 #1/#5: no UNDERSTANDING/ANSWER labels,
  *           artifact without its kind header)
  *   body    children — the kind's typed content
- *   footer  ONLY on the FINAL agent answer turn (spec refinements v2
- *           #4, `showFooter`): revealed on hover / :focus-within — copy
- *           icon (clipboard.ts), share icon (mockup: copies a link,
- *           flashes "Link copied"), and the turn's timestamp. Every
- *           other agent turn renders NO footer.
+ *   footer  ONLY on the LAST agent turn of EACH response group (spec
+ *           refinements v3 #2, replacing v2 #4, `showFooter`): revealed
+ *           on hover / :focus-within — copy icon (clipboard.ts), share
+ *           icon (mockup: copies a link, flashes "Link copied"), and
+ *           the turn's timestamp. Every other agent turn renders NO
+ *           footer.
  *
  * USER turns use BubbleBlock (BubbleBlock.tsx) instead — the
  * right-aligned bubble with its own hover action bar (time + copy +
@@ -298,8 +299,9 @@ export interface ResponseBlockProps {
   /** Extra modifier class for the turn root (e.g. --completion). */
   className?: string
   id?: string
-  /** Hover footer (copy / share / time) — the FINAL agent answer turn
-   * only; every other turn renders no footer (spec refinements v2 #4). */
+  /** Hover footer (copy / share / time) — the LAST agent turn of each
+   * response group only (spec refinements v3 #2); every other turn
+   * renders no footer. */
   showFooter?: boolean
 }
 

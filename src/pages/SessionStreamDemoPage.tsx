@@ -19,6 +19,7 @@ import type {
   StreamKind,
   StreamStoryEntry,
 } from '../components/session/stream/sessionStreamTypes'
+import { isLastAgentTurnOfResponse } from '../components/session/stream/responseGroup'
 import UserRequestBlock from '../components/session/stream/blocks/UserRequestBlock'
 import AcknowledgementBlock from '../components/session/stream/blocks/AcknowledgementBlock'
 import ClarificationBlock from '../components/session/stream/blocks/ClarificationBlock'
@@ -80,13 +81,16 @@ export default function SessionStreamDemoPage() {
     return index === -1 ? 1 : index + 1
   }
 
-  /** The FINAL agent answer is the one turn that carries the hover
-   * footer (spec refinements v2 #4) — every other agent turn renders
-   * bare (the answer renders as pure conversational prose, no label). */
-  const finalAnswerPosition = SESSION_STREAM_STORY.reduce(
-    (last, entry, index) => (entry.kind === 'answer' ? index + 1 : last),
-    0,
+  /** One hover footer per agent RESPONSE GROUP (spec refinements v3
+   * #2): the group's last agent turn — the turn right before the next
+   * user turn (request bubble, inserted answer bubble) or the end of
+   * the conversation. The rendered kind sequence mirrors the DOM,
+   * including the user-answer bubble inserted after the interactive
+   * clarification once every question is answered. */
+  const effectiveKinds: string[] = SESSION_STREAM_STORY.flatMap((entry) =>
+    entry.kind === 'clarification' && allAnswered ? ['clarification', 'user'] : [entry.kind],
   )
+  const isGroupFinal = (index: number) => isLastAgentTurnOfResponse(effectiveKinds, index)
 
   const renderEntry = (entry: StreamStoryEntry, position: number) => {
     switch (entry.kind) {
@@ -96,7 +100,12 @@ export default function SessionStreamDemoPage() {
         return <AcknowledgementBlock data={entry.data} />
       case 'clarification':
         return (
-          <ClarificationBlock data={entry.data} answered={answers} onAnswer={handleAnswer} />
+          <ClarificationBlock
+            data={entry.data}
+            answered={answers}
+            onAnswer={handleAnswer}
+            showFooter={isGroupFinal(position - 1)}
+          />
         )
       case 'plan':
         return (
@@ -126,17 +135,11 @@ export default function SessionStreamDemoPage() {
       case 'review':
         return <ReviewFindingBlock data={entry.data} />
       case 'answer':
-        // The final agent answer — the ONE turn with the hover footer
-        // (spec refinements v2 #4).
-        return (
-          <AnswerBlock
-            data={entry.data}
-            time="09:44"
-            showFooter={position === finalAnswerPosition}
-          />
-        )
+        // Conversational prose — footer only when it ends its response
+        // group (spec refinements v3 #2).
+        return <AnswerBlock data={entry.data} time="09:44" showFooter={isGroupFinal(position - 1)} />
       case 'completion':
-        return <CompletionBlock data={entry.data} />
+        return <CompletionBlock data={entry.data} showFooter={isGroupFinal(position - 1)} />
     }
   }
 

@@ -6,9 +6,9 @@
  * understanding step reuses this anatomy (same AnswerBlockData shape)
  * — the history equivalent renders AcknowledgementBlock, equally bare.
  *
- * The hover footer (copy / share / time) exists ONLY on the FINAL agent
- * answer turn of the conversation (spec refinements v2 #4) — the page
- * threads `showFooter` to exactly that turn.
+ * The hover footer (copy / share / time) rides this turn when it is the
+ * LAST agent turn of its response group (spec refinements v3 #2) — the
+ * page threads `showFooter` to exactly the group-final turns.
  */
 import ResponseBlock from '../ResponseBlock'
 import type { AnswerBlockData } from '../sessionStreamTypes'
@@ -16,7 +16,7 @@ import type { AnswerBlockData } from '../sessionStreamTypes'
 interface AnswerBlockProps {
   data: AnswerBlockData
   time?: string
-  /** Hover footer — the final agent answer turn only. */
+  /** Hover footer — when this turn ends its response group. */
   showFooter?: boolean
 }
 

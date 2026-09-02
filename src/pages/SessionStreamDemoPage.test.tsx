@@ -124,32 +124,35 @@ describe('SessionStreamDemoPage — structure', () => {
   it('renders the hover footer on exactly one turn — the final agent answer (copy, share, time)', () => {
     const { container } = render(<SessionStreamDemoPage />)
 
-    // Exactly ONE turn in the whole conversation carries the footer
-    // (spec refinements v2 #4) — the FINAL agent answer, slot 11.
+    // Unanswered clarification → the whole post-request conversation is
+    // ONE response group, so exactly ONE footer rides the group's LAST
+    // turn — the completion handoff, slot 12 (spec refinements v3 #2).
     const footers = container.querySelectorAll('[data-testid="turn-footer"]')
     expect(footers).toHaveLength(1)
+    const groupFinal = document.getElementById('stream-kind-12')!
+    expect(groupFinal.querySelector('[data-testid="turn-footer"]')).not.toBeNull()
+    expect(
+      within(groupFinal).getByTestId('turn-copy'),
+    ).toHaveAttribute('aria-label', 'Copy message')
+    expect(
+      within(groupFinal).getByTestId('turn-share'),
+    ).toHaveAttribute('aria-label', 'Share message')
+
+    // The final ANSWER (slot 11) keeps its prose but carries no footer —
+    // the handoff after it ends the group.
     const finalAnswer = document.getElementById('stream-kind-11')!
-    expect(finalAnswer.querySelector('[data-testid="turn-footer"]')).not.toBeNull()
     expect(
       within(finalAnswer).getByText(/Here’s where the rounding fix landed/),
     ).toBeInTheDocument()
-    expect(within(finalAnswer).getByTestId('turn-copy')).toHaveAttribute(
-      'aria-label',
-      'Copy message',
-    )
-    expect(within(finalAnswer).getByTestId('turn-share')).toHaveAttribute(
-      'aria-label',
-      'Share message',
-    )
-    expect(within(finalAnswer).getByTestId('turn-footer')).toHaveTextContent('09:44')
+    expect(finalAnswer.querySelector('[data-testid="turn-footer"]')).toBeNull()
 
-    // Every other agent turn renders bare — the single footer rides the
-    // final answer turn and nothing else.
+    // Exactly one .kx-stream-turn carries the footer and it is the
+    // group-final handoff.
     const withFooter = Array.from(container.querySelectorAll('.kx-stream-turn')).filter(
       (turn) => turn.querySelector('[data-testid="turn-footer"]'),
     )
     expect(withFooter).toHaveLength(1)
-    expect(withFooter[0].closest('.kx-stream-slot')).toBe(finalAnswer)
+    expect(withFooter[0].closest('.kx-stream-slot')).toBe(groupFinal)
   })
 
   it('renders an anchor chip per kind, each targeting an existing block id', () => {
