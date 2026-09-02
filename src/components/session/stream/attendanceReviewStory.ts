@@ -29,8 +29,10 @@ import type {
   AnswerBlockData,
   ApprovalGateBlockData,
   ArtifactBlockData,
+  ClarificationBlockData,
   PlanBlockData,
   ProgressBlockData,
+  ReviewFindingBlockData,
   StreamStoryEntry,
   ToolCall,
 } from './sessionStreamTypes'
@@ -590,4 +592,357 @@ export const LIVE_TURN_SCRIPT: LiveStagedScript = {
     },
     settleDelayMs: 800,
   },
+}
+
+// ── Live turn scripts v3 — progressive continuation (spec §Live mock v3) ──
+
+/** The execution leg of the DEEP continuation turn: live progress →
+ * MULTI-TOOL execution (two tool rows — the first running→done, the
+ * second queued→running→done) → a fresh REVIEW FINDING → a short fix
+ * tool call → settled progress + the bumped artifact → the final
+ * answer → unlock. */
+export interface LiveDeepExecutionScript {
+  progressDelayMs: number
+  progress: ProgressBlockData
+  tool1RunningDelayMs: number
+  /** Tool row #1 as it first appears — running, open, animated. */
+  tool1Running: ToolCall
+  tool1DoneDelayMs: number
+  /** Tool row #1 once finished — done, collapsed, expandable. */
+  tool1Done: ToolCall
+  tool2QueuedDelayMs: number
+  /** Tool row #2 as it first appears — QUEUED behind the first. */
+  tool2Queued: ToolCall
+  tool2RunningDelayMs: number
+  tool2Running: ToolCall
+  tool2DoneDelayMs: number
+  tool2Done: ToolCall
+  reviewDelayMs: number
+  /** The fresh review finding surfaced mid-execution (High severity). */
+  review: ReviewFindingBlockData
+  fixRunningDelayMs: number
+  /** The short fix tool call — running, open. */
+  fixRunning: ToolCall
+  fixDoneDelayMs: number
+  fixDone: ToolCall
+  artifactDelayMs: number
+  /** Progress once the turn settles — all phases done, collapsed summary. */
+  progressSettled: ProgressBlockData
+  artifact: ArtifactBlockData
+  answerDelayMs: number
+  answer: AnswerBlockData
+  /** After the answer: the turn settles and the composer unlocks. */
+  settleDelayMs: number
+}
+
+/** The SECOND-send DEEP continuation script (spec §Live mock v3): the
+ * agent knows the context now, so the turn is richer — typing → an
+ * INTERACTIVE clarification (two questions, answer chips) that WAITS
+ * with the composer locked (same parking pattern as the gate) → the
+ * chosen answers insert as a user bubble → brief typing → a REVISED
+ * plan that waits (Approve plan / Request changes) → the multi-tool
+ * execution leg above. Request changes closes politely like v2. */
+export interface LiveDeepContinuationScript {
+  /** After send: the bubble flips Sending… → sent + timestamp. */
+  sentDelayMs: number
+  typingDelayMs: number
+  /** After typing: the interactive clarification appears and the run
+   * parks — WAIT POINT (the composer stays locked until every question
+   * is answered via the chips). */
+  clarDelayMs: number
+  clarification: ClarificationBlockData
+  /** All questions answered → the chosen options insert as a USER
+   * BUBBLE (the page's inserted-answer pattern). */
+  answerDelayMs: number
+  briefTypingDelayMs: number
+  planDelayMs: number
+  /** The REVISED plan — waits at its own wait point like the v2 plan. */
+  revisedPlan: PlanBlockData
+  execution: LiveDeepExecutionScript
+  /** Revised plan "Request changes" → polite closing, unlock (like v2). */
+  requestChanges: LiveClosingScript
+}
+
+/** The LIGHT follow-up script (third send and every other one after):
+ * typing → a single tool call running→done → a short answer → unlock.
+ * NO wait points — the whole turn completes on timers alone. */
+export interface LiveLightFollowUpScript {
+  sentDelayMs: number
+  typingDelayMs: number
+  /** After typing: the one tool call appears RUNNING (open, animated). */
+  toolRunningDelayMs: number
+  toolRunning: ToolCall
+  toolDoneDelayMs: number
+  toolDone: ToolCall
+  answerDelayMs: number
+  answer: AnswerBlockData
+  settleDelayMs: number
+}
+
+/** Turn 2 (second send) — DEEP CONTINUATION: the user reports the
+ * night-shift payroll export still looks wrong and asks for a retry-path
+ * audit. The agent asks two targeted questions via answer chips (duplicate
+ * policy + failure window), then brings a REVISED plan; approval runs the
+ * multi-tool audit: a code read, a queued→running→done sandbox replay, a
+ * HIGH review finding (retry dedupe window shorter than the MyTok p99 —
+ * slow responses double-write attendance windows), a short fix call, and
+ * the report refreshed to a new version. */
+export const LIVE_DEEP_CONTINUATION_SCRIPT: LiveDeepContinuationScript = {
+  sentDelayMs: 450,
+  typingDelayMs: 900,
+  clarDelayMs: 1400,
+  clarification: {
+    pausedNotice:
+      'Execution is paused until both answers land — the retry audit does not start in the meantime.',
+    resumedNotice:
+      'Both answers received — the retry audit continues with the confirmed duplicate policy and failure window.',
+    questions: [
+      {
+        id: 'q-retry-policy',
+        question:
+          'When the same MyTok check-in event id is delivered twice — for example after a mobile retry — what should the sync do with the second delivery?',
+        options: ['Skip as duplicate', 'Overwrite with the newest', 'Quarantine for review'],
+      },
+      {
+        id: 'q-failure-window',
+        question: 'Which delivery-failure window should the retry audit cover?',
+        options: ['Last 7 days', 'August sample only (1,284)', 'Full July–August'],
+      },
+    ],
+  },
+  answerDelayMs: 600,
+  briefTypingDelayMs: 500,
+  planDelayMs: 1400,
+  revisedPlan: {
+    steps: [
+      {
+        id: 'deep-step-audit',
+        verb: 'Audit',
+        target: 'services/attendance-sync/syncClient.ts (retry + dedupe)',
+        targetMono: true,
+        agent: 'Engineering',
+        estimate: '~10 min',
+        risk: 'the dedupe helper is shared with the leave-sync importer',
+      },
+      {
+        id: 'deep-step-replay',
+        verb: 'Replay',
+        target: 'sandbox batch att-2026-0816 (slow-response subset · 9 events)',
+        targetMono: true,
+        agent: 'Engineering',
+        estimate: '~3 min',
+      },
+      {
+        id: 'deep-step-fix',
+        verb: 'Patch',
+        target: 'pr-1302 · syncClient.ts dedupe window 30s → 60s',
+        targetMono: true,
+        agent: 'Engineering',
+        estimate: '~10 min',
+      },
+      {
+        id: 'deep-step-report',
+        verb: 'Refresh',
+        target: 'docs/attendance-review-report.md (new version)',
+        targetMono: true,
+        agent: 'PM',
+        estimate: '~5 min',
+      },
+    ],
+    totalEstimate: '~28 min',
+  },
+  execution: {
+    progressDelayMs: 900,
+    progress: {
+      elapsed: '00:00',
+      phases: [
+        { id: 'deep-phase-audit', label: 'Audit the retry + dedupe path', state: 'active' },
+        { id: 'deep-phase-replay', label: 'Replay slow-response subset (9 events)', state: 'queued' },
+        { id: 'deep-phase-fix', label: 'Patch + regression-test the dedupe window', state: 'queued' },
+      ],
+    },
+    tool1RunningDelayMs: 1300,
+    tool1Running: {
+      id: 'deep-read-syncclient',
+      verb: 'read',
+      target: 'services/attendance-sync/syncClient.ts:24-38',
+      state: 'running',
+    },
+    tool1DoneDelayMs: 1400,
+    tool1Done: {
+      id: 'deep-read-syncclient',
+      verb: 'read',
+      target: 'services/attendance-sync/syncClient.ts:24-38',
+      state: 'done',
+      duration: '0.3s',
+      result:
+        'Dedupe window is 30 s while the MyTok p99 response time is 45 s — slow responses double-write attendance windows',
+      io: {
+        input: 'sed -n 24,38p services/attendance-sync/syncClient.ts',
+        output: [
+          'const DEDUPE_WINDOW_MS = 30_000;',
+          'async function ingest(event: CheckinEvent) {',
+          '  if (seen(event.id)) return SKIP; // dedupe window: 30s',
+          '  const window = await mytokFetchWindow(event.windowId);',
+          '  await writeAttendance(window); // no idempotency key on re-ingest',
+        ],
+      },
+    },
+    tool2QueuedDelayMs: 700,
+    tool2Queued: {
+      id: 'deep-replay-retries',
+      verb: 'replay',
+      target: 'sandbox batch att-2026-0816 (slow-response subset · 9 events)',
+      state: 'queued',
+    },
+    tool2RunningDelayMs: 900,
+    tool2Running: {
+      id: 'deep-replay-retries',
+      verb: 'replay',
+      target: 'sandbox batch att-2026-0816 (slow-response subset · 9 events)',
+      state: 'running',
+    },
+    tool2DoneDelayMs: 1500,
+    tool2Done: {
+      id: 'deep-replay-retries',
+      verb: 'replay',
+      target: 'sandbox batch att-2026-0816 (slow-response subset · 9 events)',
+      state: 'done',
+      duration: '1m 06s',
+      result: '9/9 slow events replayed — 3 double-wrote attendance windows before the fix',
+      io: {
+        input: 'att-replay run --batch att-2026-0816 --filter slow-response --env sandbox',
+        output: [
+          'replayed 9 events (responses > 30 s, 2026-08-08 .. 2026-08-14)',
+          'double-writes observed: 3 (windows 0811-A, 0812-C, 0814-F)',
+          'duplicate event ids skipped inside the window: 6',
+        ],
+      },
+    },
+    reviewDelayMs: 1000,
+    review: {
+      severity: 'High',
+      title: 'Retry dedupe window shorter than the MyTok p99 SLA: slow responses double-write attendance',
+      impact:
+        'The sync dedupes by event id for only 30 s, while MyTok’s p99 response time is 45 s — a slow response that eventually succeeds after the window closes writes the same check-in window twice. The replay shows 3 of 9 slow events double-writing attendance windows, inflating night-shift totals in the payroll export.',
+      location: 'services/attendance-sync/syncClient.ts:31',
+      quote: 'if (seen(event.id)) return SKIP // dedupe window: 30s (MyTok p99: 45s)',
+    },
+    fixRunningDelayMs: 800,
+    fixRunning: {
+      id: 'deep-patch-window',
+      verb: 'patch',
+      target: 'pr-1302 · syncClient.ts dedupe window 30s → 60s',
+      state: 'running',
+    },
+    fixDoneDelayMs: 1200,
+    fixDone: {
+      id: 'deep-patch-window',
+      verb: 'patch',
+      target: 'pr-1302 · syncClient.ts dedupe window 30s → 60s',
+      state: 'done',
+      duration: '3m 18s',
+      result: 'Dedupe window widened to 60 s · 14 regression tests pass · sandbox re-replay reconciles 9/9',
+      io: {
+        input: 'patch pr-1302 --window 60s --test attendance.boundary+retry',
+        output: [
+          '- const DEDUPE_WINDOW_MS = 30_000;',
+          '+ const DEDUPE_WINDOW_MS = 60_000; // MyTok p99 SLA: 45s',
+          'tests: 14 passed (0 failed) · re-replay: 9/9 reconciled',
+        ],
+      },
+    },
+    artifactDelayMs: 1000,
+    progressSettled: {
+      elapsed: '15m 12s',
+      phases: [
+        { id: 'deep-phase-audit', label: 'Audit the retry + dedupe path', state: 'done', duration: '8m 44s' },
+        { id: 'deep-phase-replay', label: 'Replay slow-response subset (9 events)', state: 'done', duration: '1m 06s' },
+        { id: 'deep-phase-fix', label: 'Patch + regression-test the dedupe window', state: 'done', duration: '5m 22s' },
+      ],
+    },
+    artifact: {
+      badge: 'REPORT',
+      title: 'Review report — attendance integration',
+      excerpt:
+        'Refreshed with the retry-path audit: the slow-response replay, the double-write finding, and the verified dedupe-window fix — supersedes the previous version for the Friday sign-off.',
+      schema: [
+        '## Retry-path audit',
+        '+ replay att-2026-0816 — 9/9 slow events, 3 double-writes observed',
+        '## Findings',
+        '+ High — dedupe window 30 s < MyTok p99 45 s (syncClient.ts:31), fixed on pr-1302',
+        '## Sign-off',
+        '+ both findings verified; report supersedes the previous version',
+      ],
+      version: 'v2',
+      time: '15:31',
+      copyPayload: [
+        '# Review report — attendance integration (retry audit)',
+        '',
+        '## Retry-path audit',
+        'Replay batch att-2026-0816 (slow-response subset, 9 events):',
+        '3 events double-wrote attendance windows before the fix;',
+        'after pr-1302 widens the dedupe window to 60 s, the re-replay',
+        'reconciles 9/9 and 14 regression tests pass.',
+      ].join('\n'),
+    },
+    answerDelayMs: 1300,
+    answer: {
+      paragraphs: [
+        'The deeper pass surfaced a second real defect. The retry dedupe window (30 s) is shorter than MyTok’s 45 s p99 response time, so 3 of the 9 replayed slow responses double-wrote attendance windows — High, syncClient.ts:31. Per your answers I treated the second delivery as a duplicate skip and audited the last 7 days of delivery failures; the fix on pr-1302 widens the window to 60 s and is locked behind 14 regression tests, and the sandbox re-replay now reconciles 9/9.',
+        'The refreshed report (v2) is attached above — it supersedes the previous version for the Friday sign-off and now carries both the boundary finding and this retry finding with the replay evidence.',
+      ],
+    },
+    settleDelayMs: 900,
+  },
+  requestChanges: {
+    typingDelayMs: 600,
+    answerDelayMs: 1000,
+    answer: {
+      paragraphs: [
+        'Happy to rework the revised plan — tell me which steps to change (audit scope, replay subset, or the fix approach) and I’ll bring it back for your approval before anything runs. Nothing has executed yet.',
+      ],
+    },
+    settleDelayMs: 800,
+  },
+}
+
+/** Turn 3 (third send, then every other one) — LIGHT FOLLOW-UP: a quick
+ * sanity question about leftover duplicate check-ins gets one tool call
+ * and a short answer. No waits, no plan, no gate — the turn completes on
+ * timers alone. */
+export const LIVE_LIGHT_FOLLOWUP_SCRIPT: LiveLightFollowUpScript = {
+  sentDelayMs: 450,
+  typingDelayMs: 800,
+  toolRunningDelayMs: 1200,
+  toolRunning: {
+    id: 'light-scan-dupes',
+    verb: 'scan',
+    target: 'mytok-sync-logs-aug.csv (duplicate event ids)',
+    state: 'running',
+  },
+  toolDoneDelayMs: 1300,
+  toolDone: {
+    id: 'light-scan-dupes',
+    verb: 'scan',
+    target: 'mytok-sync-logs-aug.csv (duplicate event ids)',
+    state: 'done',
+    duration: '0.9s',
+    result: '4 duplicate event ids — all skipped cleanly after the window fix; idempotency holds',
+    io: {
+      input: 'scan mytok-sync-logs-aug.csv --report duplicates',
+      output: [
+        'rows scanned: 1,284',
+        'duplicate event ids: 4 (all inside the widened 60 s window)',
+        'double-writes: 0',
+      ],
+    },
+  },
+  answerDelayMs: 1000,
+  answer: {
+    paragraphs: [
+      'Quick check done — the August sample still contains 4 duplicate event ids, and every one of them now skips cleanly inside the widened 60 s window. No double-writes remain, so idempotency holds and nothing else needs attention before Friday.',
+    ],
+  },
+  settleDelayMs: 700,
 }

@@ -31,7 +31,11 @@ import { useEffect, useReducer } from 'react'
 import SessionStreamDetailPage from './SessionStreamDetailPage'
 import SessionDetailPage from './SessionDetailPage'
 import V2App from '../v2/V2App'
-import { LIVE_TURN_SCRIPT } from '../components/session/stream/attendanceReviewStory'
+import {
+  LIVE_DEEP_CONTINUATION_SCRIPT,
+  LIVE_LIGHT_FOLLOWUP_SCRIPT,
+  LIVE_TURN_SCRIPT,
+} from '../components/session/stream/attendanceReviewStory'
 import { MockupContext } from '../state/MockupContext'
 import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
 import { initialState, mockupReducer, type MockupRoute } from '../state/mockupReducer'
@@ -498,6 +502,79 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       vi.advanceTimersByTime(ms)
     })
 
+  const deep = LIVE_DEEP_CONTINUATION_SCRIPT
+  const light = LIVE_LIGHT_FOLLOWUP_SCRIPT
+
+  /** Sends a message through the composer (input + send button). */
+  const send = (text: string) => {
+    fireEvent.change(screen.getByTestId('session-composer-input'), { target: { value: text } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send message' }))
+  }
+
+  /** Plays the FIRST-send staged cycle end to end (gate Allow once →
+   * plan Approve → execution → unlock) — the v2 flow, untouched. */
+  const completeStagedTurn = (text: string) => {
+    send(text)
+    step(
+      LIVE_TURN_SCRIPT.sentDelayMs +
+        LIVE_TURN_SCRIPT.typingDelayMs +
+        LIVE_TURN_SCRIPT.openDelayMs +
+        LIVE_TURN_SCRIPT.gateDelayMs,
+    )
+    fireEvent.click(
+      within(screen.getByTestId('stream-live-gate')).getByRole('button', { name: 'Allow once' }),
+    )
+    step(LIVE_TURN_SCRIPT.allowTypingDelayMs + LIVE_TURN_SCRIPT.planDelayMs)
+    fireEvent.click(
+      within(screen.getByTestId('stream-live-plan')).getByRole('button', { name: 'Approve plan' }),
+    )
+    step(
+      LIVE_TURN_SCRIPT.execution.progressDelayMs +
+        LIVE_TURN_SCRIPT.execution.toolRunningDelayMs +
+        LIVE_TURN_SCRIPT.execution.toolDoneDelayMs +
+        LIVE_TURN_SCRIPT.execution.artifactDelayMs +
+        LIVE_TURN_SCRIPT.execution.answerDelayMs +
+        LIVE_TURN_SCRIPT.execution.settleDelayMs,
+    )
+    expect(screen.getByTestId('session-composer-input')).toBeEnabled()
+  }
+
+  /** Sends the deep-continuation message (send #2) and answers BOTH
+   * clarification questions via chips, advancing up to the REVISED plan
+   * (parked, pending approval). Returns that plan's slot. */
+  const reachDeepPlan = (text: string) => {
+    send(text)
+    step(deep.sentDelayMs + deep.typingDelayMs + deep.clarDelayMs)
+    const clarSlot = screen.getByTestId('stream-live-clarification')
+    fireEvent.click(within(clarSlot).getByRole('button', { name: 'Skip as duplicate' }))
+    fireEvent.click(within(clarSlot).getByRole('button', { name: 'Last 7 days' }))
+    step(deep.answerDelayMs + deep.briefTypingDelayMs + deep.planDelayMs)
+    const plans = screen.getAllByTestId('stream-live-plan')
+    return plans[plans.length - 1]
+  }
+
+  /** Approves the most recent plan and runs the deep execution leg to
+   * completion (multi-tool → finding → fix → artifact → answer). */
+  const completeDeepTurn = () => {
+    const plans = screen.getAllByTestId('stream-live-plan')
+    fireEvent.click(within(plans[plans.length - 1]).getByRole('button', { name: 'Approve plan' }))
+    step(
+      deep.execution.progressDelayMs +
+        deep.execution.tool1RunningDelayMs +
+        deep.execution.tool1DoneDelayMs +
+        deep.execution.tool2QueuedDelayMs +
+        deep.execution.tool2RunningDelayMs +
+        deep.execution.tool2DoneDelayMs +
+        deep.execution.reviewDelayMs +
+        deep.execution.fixRunningDelayMs +
+        deep.execution.fixDoneDelayMs +
+        deep.execution.artifactDelayMs +
+        deep.execution.answerDelayMs +
+        deep.execution.settleDelayMs,
+    )
+    expect(screen.getByTestId('session-composer-input')).toBeEnabled()
+  }
+
   it('sending appends a user bubble (Sending… → sent), locks the composer, and shows the typing indicator', () => {
     vi.useFakeTimers()
     try {
@@ -782,6 +859,237 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       // requested changes as a new message.
       step(LIVE_TURN_SCRIPT.requestChanges.settleDelayMs)
       expect(screen.getByTestId('session-composer-input')).toBeEnabled()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('turn 2 deepens — clarification WAITS with locked composer, chip answers insert as a user bubble, revised plan waits, then multi-tool execution → review finding → artifact v2 → answer → unlock', () => {
+    vi.useFakeTimers()
+    try {
+      renderRoute('session-stream-detail')
+
+      // Turn 1 — the staged v2 cycle, completed and settled.
+      completeStagedTurn('Re-verify the overnight-shift fix from PR #1301.')
+
+      // Turn 2 (second send) — DEEP continuation: typing, then the
+      // interactive clarification replaces the indicator.
+      send('Night-shift team says check-ins still look wrong in the payroll export — audit the retry path too.')
+      step(deep.sentDelayMs + deep.typingDelayMs)
+      expect(screen.getByTestId('typing-indicator')).toBeInTheDocument()
+      step(deep.clarDelayMs)
+      expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()
+
+      // Two questions with answer chips — the turn WAITS here: composer
+      // locked, the chips are the only way forward (same parking pattern
+      // as the gate).
+      const clarSlot = screen.getByTestId('stream-live-clarification')
+      expect(within(clarSlot).getByText('awaiting answer')).toBeInTheDocument()
+      expect(within(clarSlot).getByRole('group', { name: 'Answer options for question 1' })).toBeInTheDocument()
+      expect(within(clarSlot).getByRole('group', { name: 'Answer options for question 2' })).toBeInTheDocument()
+      expect(within(clarSlot).getByRole('button', { name: 'Skip as duplicate' })).toBeInTheDocument()
+      expect(within(clarSlot).getByRole('button', { name: 'Overwrite with the newest' })).toBeInTheDocument()
+      expect(within(clarSlot).getByRole('button', { name: 'Last 7 days' })).toBeInTheDocument()
+      expect(screen.getByTestId('session-composer-input')).toBeDisabled()
+
+      // While parked NOTHING beyond appears — zero pending timers, so a
+      // generous advance changes nothing (only turn 1's settled turns
+      // remain below the new bubble).
+      step(60_000)
+      expect(screen.queryByTestId('stream-live-answer-bubble')).not.toBeInTheDocument()
+      expect(screen.getAllByTestId('stream-live-plan')).toHaveLength(1)
+      expect(screen.getAllByTestId('stream-live-tool')).toHaveLength(1)
+      expect(screen.queryByTestId('stream-live-review')).not.toBeInTheDocument()
+      expect(screen.getAllByTestId('stream-live-artifact')).toHaveLength(1)
+      expect(screen.getAllByTestId('stream-live-answer')).toHaveLength(1)
+
+      // First chip answers Q1 — the chip reads selected, but the turn
+      // still waits for Q2 (one answer is not enough).
+      fireEvent.click(within(clarSlot).getByRole('button', { name: 'Skip as duplicate' }))
+      expect(within(clarSlot).getByRole('button', { name: 'Skip as duplicate' })).toHaveAttribute('aria-pressed', 'true')
+      expect(within(clarSlot).getByText('awaiting answer')).toBeInTheDocument()
+      step(60_000)
+      expect(screen.queryByTestId('stream-live-answer-bubble')).not.toBeInTheDocument()
+
+      // Second chip completes the answers → the clarification flips to
+      // answered/resumed and the choices insert as a USER BUBBLE…
+      fireEvent.click(within(clarSlot).getByRole('button', { name: 'Last 7 days' }))
+      expect(within(clarSlot).getByText('answered')).toBeInTheDocument()
+      step(deep.answerDelayMs)
+      const bubble = within(screen.getByTestId('stream-live-answer-bubble')).getByTestId('user-bubble')
+      expect(bubble).toHaveTextContent('1. Skip as duplicate')
+      expect(bubble).toHaveTextContent('2. Last 7 days')
+
+      // …brief typing, then the REVISED plan — the deep turn's wait point.
+      step(deep.briefTypingDelayMs)
+      expect(screen.getByTestId('typing-indicator')).toBeInTheDocument()
+      step(deep.planDelayMs)
+      expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()
+      const plans = screen.getAllByTestId('stream-live-plan')
+      expect(plans).toHaveLength(2)
+      const revised = plans[1]
+      expect(within(revised).getByRole('button', { name: 'Approve plan' })).toBeInTheDocument()
+      expect(within(revised).getByRole('button', { name: 'Request changes' })).toBeInTheDocument()
+      expect(within(revised).getByText('pending approval')).toBeInTheDocument()
+      expect(within(revised).getByText('pr-1302 · syncClient.ts dedupe window 30s → 60s')).toBeInTheDocument()
+
+      // The revised plan waits too — no execution while parked.
+      step(60_000)
+      expect(screen.getAllByTestId('stream-live-tool')).toHaveLength(1)
+      expect(screen.queryByTestId('stream-live-review')).not.toBeInTheDocument()
+      expect(screen.getByTestId('session-composer-input')).toBeDisabled()
+
+      // Approve → live progress boots EXPANDED with the ticking clock.
+      fireEvent.click(within(revised).getByRole('button', { name: 'Approve plan' }))
+      expect(within(revised).getByText('approved')).toBeInTheDocument()
+      step(deep.execution.progressDelayMs)
+      const progressSlots = screen.getAllByTestId('stream-live-progress')
+      expect(progressSlots).toHaveLength(2)
+      expect(within(progressSlots[1]).getByTestId('progress-summary')).toHaveAttribute('aria-expanded', 'true')
+      expect(within(progressSlots[1]).getByText('Audit the retry + dedupe path')).toBeInTheDocument()
+
+      // MULTI-TOOL execution — tool #1 runs open, then finishes and
+      // collapses (duration visible, evidence hidden).
+      step(deep.execution.tool1RunningDelayMs)
+      let toolSlots = screen.getAllByTestId('stream-live-tool')
+      expect(toolSlots).toHaveLength(2)
+      expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveTextContent('running')
+      expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveTextContent('services/attendance-sync/syncClient.ts:24-38')
+      step(deep.execution.tool1DoneDelayMs)
+      expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveAttribute('aria-expanded', 'false')
+      expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveTextContent('done')
+      expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveTextContent('0.3s')
+
+      // …tool #2 lands QUEUED behind it, then flips running → done.
+      step(deep.execution.tool2QueuedDelayMs)
+      toolSlots = screen.getAllByTestId('stream-live-tool')
+      expect(toolSlots).toHaveLength(3)
+      expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('queued')
+      expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('sandbox batch att-2026-0816 (slow-response subset · 9 events)')
+      step(deep.execution.tool2RunningDelayMs)
+      expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('running')
+      step(deep.execution.tool2DoneDelayMs)
+      expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('done')
+      expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('1m 06s')
+
+      // The REVIEW FINDING lands — High severity, tied to the attendance
+      // domain, with the file:line evidence.
+      step(deep.execution.reviewDelayMs)
+      const reviewSlot = screen.getByTestId('stream-live-review')
+      expect(within(reviewSlot).getByText('High')).toBeInTheDocument()
+      expect(within(reviewSlot).getByText(/double-write attendance/)).toBeInTheDocument()
+      expect(within(reviewSlot).getByText('services/attendance-sync/syncClient.ts:31')).toBeInTheDocument()
+
+      // A short FIX tool call follows…
+      step(deep.execution.fixRunningDelayMs)
+      toolSlots = screen.getAllByTestId('stream-live-tool')
+      expect(toolSlots).toHaveLength(4)
+      expect(within(toolSlots[3]).getByTestId('tool-row')).toHaveTextContent('running')
+      expect(within(toolSlots[3]).getByTestId('tool-row')).toHaveTextContent('pr-1302 · syncClient.ts dedupe window 30s → 60s')
+      step(deep.execution.fixDoneDelayMs)
+      expect(within(toolSlots[3]).getByTestId('tool-row')).toHaveTextContent('done')
+
+      // …progress settles collapsed and the ARTIFACT lands as v2.
+      step(deep.execution.artifactDelayMs)
+      expect(within(progressSlots[1]).getByTestId('progress-summary')).toHaveAttribute('aria-expanded', 'false')
+      const artifactSlots = screen.getAllByTestId('stream-live-artifact')
+      expect(artifactSlots).toHaveLength(2)
+      expect(within(artifactSlots[1]).getByTestId('artifact-row')).toHaveTextContent('Review report — attendance integration')
+      expect(within(artifactSlots[1]).getByTestId('artifact-row')).toHaveTextContent('v2 · 15:31')
+
+      // The final answer references the finding AND the artifact, and
+      // carries the response's single hover footer.
+      step(deep.execution.answerDelayMs)
+      const answerSlots = screen.getAllByTestId('stream-live-answer')
+      expect(answerSlots).toHaveLength(2)
+      expect(within(answerSlots[1]).getByText(/retry dedupe window \(30 s\) is shorter/)).toBeInTheDocument()
+      expect(within(answerSlots[1]).getByText(/refreshed report \(v2\)/)).toBeInTheDocument()
+      expect(within(answerSlots[1]).getByTestId('turn-footer')).toBeInTheDocument()
+
+      // Settle → unlock: the composer accepts a third message.
+      step(deep.execution.settleDelayMs)
+      expect(screen.getByTestId('session-composer-input')).toBeEnabled()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('turn 2 revised plan Request changes closes the deep turn politely — no execution — and unlocks', () => {
+    vi.useFakeTimers()
+    try {
+      renderRoute('session-stream-detail')
+
+      // Turn 1 staged, then turn 2 up to its revised plan.
+      completeStagedTurn('Re-verify the overnight-shift fix from PR #1301.')
+      const revised = reachDeepPlan('Audit the retry path before the sign-off.')
+
+      // Request changes → the plan stays pending…
+      fireEvent.click(within(revised).getByRole('button', { name: 'Request changes' }))
+      expect(within(revised).getByText('pending approval')).toBeInTheDocument()
+
+      // …brief typing, then short polite prose — NO execution: still only
+      // turn 1's single tool call, and no finding or new artifact.
+      step(deep.requestChanges.typingDelayMs)
+      expect(screen.getByTestId('typing-indicator')).toBeInTheDocument()
+      step(deep.requestChanges.answerDelayMs)
+      const closings = screen.getAllByTestId('stream-live-answer')
+      expect(within(closings[closings.length - 1]).getByText(/rework the revised plan/)).toBeInTheDocument()
+      expect(screen.getAllByTestId('stream-live-tool')).toHaveLength(1)
+      expect(screen.queryByTestId('stream-live-review')).not.toBeInTheDocument()
+      expect(screen.getAllByTestId('stream-live-artifact')).toHaveLength(1)
+
+      // The turn ends and the composer unlocks.
+      step(deep.requestChanges.settleDelayMs)
+      expect(screen.getByTestId('session-composer-input')).toBeEnabled()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('turn 3 stays light — typing → one tool → short answer → unlock, no wait points (completes on timers alone), and send 4 alternates back to deep', () => {
+    vi.useFakeTimers()
+    try {
+      renderRoute('session-stream-detail')
+
+      // Turns 1–2 complete and settled (staged, then deep).
+      completeStagedTurn('Re-verify the overnight-shift fix from PR #1301.')
+      reachDeepPlan('Night-shift check-ins still look wrong — audit the retry path too.')
+      completeDeepTurn()
+
+      // Turn 3 (third send) — LIGHT follow-up: typing → ONE tool call →
+      // short answer → unlock. No clicks anywhere: timers alone carry it.
+      send('Quick check — any duplicate check-ins left after the window fix?')
+      step(light.sentDelayMs + light.typingDelayMs)
+      expect(screen.getByTestId('typing-indicator')).toBeInTheDocument()
+      step(light.toolRunningDelayMs)
+      expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()
+      let toolSlots = screen.getAllByTestId('stream-live-tool')
+      expect(toolSlots).toHaveLength(5) // turn 1 (1) + deep turn (3) + this one
+      expect(within(toolSlots[4]).getByTestId('tool-row')).toHaveTextContent('running')
+      expect(within(toolSlots[4]).getByTestId('tool-row')).toHaveTextContent('mytok-sync-logs-aug.csv (duplicate event ids)')
+      step(light.toolDoneDelayMs)
+      expect(within(toolSlots[4]).getByTestId('tool-row')).toHaveTextContent('done')
+
+      // Short answer, then unlock — and NO wait-point kind ever appears
+      // in the light turn (no NEW clarification/plan/gate/review).
+      step(light.answerDelayMs)
+      const answers = screen.getAllByTestId('stream-live-answer')
+      expect(within(answers[answers.length - 1]).getByText(/Quick check done/)).toBeInTheDocument()
+      expect(screen.getByTestId('session-composer-input')).toBeDisabled()
+      step(light.settleDelayMs)
+      expect(screen.getByTestId('session-composer-input')).toBeEnabled()
+      expect(screen.getAllByTestId('stream-live-clarification')).toHaveLength(1) // deep turn's
+      expect(screen.getAllByTestId('stream-live-plan')).toHaveLength(2) // staged + revised
+      expect(screen.getAllByTestId('stream-live-gate')).toHaveLength(1) // staged turn's
+      expect(screen.getAllByTestId('stream-live-review')).toHaveLength(1) // deep turn's
+      expect(screen.getAllByTestId('stream-live-artifact')).toHaveLength(2) // v1.1 + v2
+
+      // Send 4 alternates back to DEEP — the interactive clarification
+      // wait returns with the composer locked.
+      send('One more sweep of the retry path before the sign-off.')
+      step(deep.sentDelayMs + deep.typingDelayMs + deep.clarDelayMs)
+      expect(screen.getAllByTestId('stream-live-clarification')).toHaveLength(2)
+      expect(screen.getByTestId('session-composer-input')).toBeDisabled()
     } finally {
       vi.useRealTimers()
     }
