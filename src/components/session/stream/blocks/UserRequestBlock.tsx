@@ -50,9 +50,13 @@ function AttachmentCard({ name, meta, type }: RequestAttachment) {
 interface UserRequestBlockProps {
   data: RequestBlockData
   time?: string
+  /** Phase-2 save-and-resend: Save updates the bubble text locally and
+   * notifies the caller to truncate the following turns and re-run the
+   * live sequence. Without it Save stays local-only (phase 1). */
+  onResend?: (nextText: string) => void
 }
 
-export default function UserRequestBlock({ data, time = '14:02' }: UserRequestBlockProps) {
+export default function UserRequestBlock({ data, time = '14:02', onResend }: UserRequestBlockProps) {
   const initialText = data.message ?? data.intent
   const [text, setText] = useState(initialText)
   const [draft, setDraft] = useState(initialText)
@@ -77,7 +81,12 @@ export default function UserRequestBlock({ data, time = '14:02' }: UserRequestBl
 
   const saveEdit = () => {
     const next = draft.trim()
-    if (next !== '') setText(next)
+    if (next !== '') {
+      setText(next)
+      setEditing(false)
+      onResend?.(next)
+      return
+    }
     setEditing(false)
   }
 
@@ -104,7 +113,7 @@ export default function UserRequestBlock({ data, time = '14:02' }: UserRequestBl
           />
           <div className="kx-stream-bubble__edit-actions">
             <button type="button" className="kx-stream-btn kx-stream-btn--primary" onClick={saveEdit}>
-              Save
+              {onResend !== undefined ? 'Save & resend' : 'Save'}
             </button>
             <button
               type="button"

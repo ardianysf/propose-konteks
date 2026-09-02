@@ -21,11 +21,13 @@
  *     every other session still opens the classic SessionDetailPage
  *     (regression).
  */
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { vi } from 'vitest'
 import { useEffect, useReducer } from 'react'
 import SessionStreamDetailPage from './SessionStreamDetailPage'
 import SessionDetailPage from './SessionDetailPage'
 import V2App from '../v2/V2App'
+import { LIVE_TURN_SCRIPT } from '../components/session/stream/attendanceReviewStory'
 import { MockupContext } from '../state/MockupContext'
 import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
 import { initialState, mockupReducer, type MockupRoute } from '../state/mockupReducer'
@@ -385,22 +387,193 @@ describe('SessionStreamDetailPage — interactions', () => {
     expect(screen.queryByText('## Sign-off')).not.toBeInTheDocument()
   })
 
-  it('edits a user bubble inline and saves the new text locally', () => {
-    renderRoute('session-stream-detail')
+  it('edits a user bubble — Save & resend keeps the new text, truncates the turns after it, and replays the live script', () => {
+    vi.useFakeTimers()
+    try {
+      renderRoute('session-stream-detail')
 
-    const request = screen.getAllByTestId('user-bubble')[0]
-    fireEvent.click(within(request).getByTestId('bubble-edit'))
+      const request = screen.getAllByTestId('user-bubble')[0]
+      fireEvent.click(within(request).getByTestId('bubble-edit'))
 
-    const editor = within(request).getByTestId('bubble-editor')
-    const input = within(editor).getByTestId('bubble-edit-input')
-    expect(input).toHaveDisplayValue(/Review the MyTok ↔ BSI HRIS attendance integration/)
+      const editor = within(request).getByTestId('bubble-editor')
+      const input = within(editor).getByTestId('bubble-edit-input')
+      expect(input).toHaveDisplayValue(/Review the MyTok ↔ BSI HRIS attendance integration/)
 
-    fireEvent.change(input, { target: { value: 'Review the integration again after the fix.' } })
-    fireEvent.click(within(editor).getByRole('button', { name: 'Save' }))
+      fireEvent.change(input, { target: { value: 'Review the integration again after the fix.' } })
+      // Phase 2: the primary action is save-and-RESEND, not local-only save.
+      fireEvent.click(within(editor).getByRole('button', { name: 'Save & resend' }))
 
-    expect(within(request).getByTestId('bubble-text')).toHaveTextContent(
-      'Review the integration again after the fix.',
-    )
-    expect(within(request).queryByTestId('bubble-editor')).not.toBeInTheDocument()
+      // The edited bubble keeps its new text and closes the editor…
+      expect(within(request).getByTestId('bubble-text')).toHaveTextContent(
+        'Review the integration again after the fix.',
+      )
+      expect(within(request).queryByTestId('bubble-editor')).not.toBeInTheDocument()
+
+      // …every turn after it is truncated (mockup regeneration): only the
+      // edited bubble slot survives; the settled agent history is gone.
+      const stream = screen.getByTestId('session-stream')
+      expect(stream.querySelectorAll('.kx-stream-slot')).toHaveLength(1)
+      expect(screen.queryByTestId('stream-turn-2')).not.toBeInTheDocument()
+      expect(screen.queryByText('UNDERSTANDING')).not.toBeInTheDocument()
+
+      // …the composer locks while the replay runs…
+      expect(screen.getByTestId('session-composer-input')).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled()
+
+      // …and the live script restarts: the typing indicator reappears,
+      // then hands off to the scripted understanding turn below the edit.
+      act(() => {
+        vi.advanceTimersByTime(LIVE_TURN_SCRIPT.typingDelayMs)
+      })
+      expect(screen.getByTestId('typing-indicator')).toBeInTheDocument()
+
+      act(() => {
+        vi.advanceTimersByTime(LIVE_TURN_SCRIPT.openDelayMs)
+      })
+      expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()
+      const understanding = screen.getByTestId('stream-live-understanding')
+      expect(
+        within(understanding).getByText(/re-verify the overnight-shift boundary fix from PR #1301/),
+      ).toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Live mock composer flow (phase 2) — send → locked composer + scripted turn
+// ---------------------------------------------------------------------------
+
+describe('SessionStreamDetailPage — live mock composer flow', () => {
+  /** Advances the fake clock one script gap inside act(). */
+  const step = (ms: number) =>
+    act(() => {
+      vi.advanceTimersByTime(ms)
+    })
+
+  it('sending appends a user bubble (Sending… → sent), locks the composer, and shows the typing indicator', () => {
+    vi.useFakeTimers()
+    try {
+      renderRoute('session-stream-detail')
+
+      const input = screen.getByTestId('session-composer-input')
+      const send = screen.getByRole('button', { name: 'Send message' })
+
+      fireEvent.change(input, {
+        target: { value: 'Please re-verify the overnight-shift fix from PR #1301.' },
+      })
+      fireEvent.click(send)
+
+      // The typed text lands immediately as a NEW user bubble below the
+      // settled history — initially marked "Sending…".
+      const bubble = within(screen.getByTestId('stream-live-user')).getByTestId('user-bubble')
+      expect(within(bubble).getByTestId('bubble-text')).toHaveTextContent(
+        'Please re-verify the overnight-shift fix from PR #1301.',
+      )
+      expect(within(bubble).getByTestId('bubble-actions')).toHaveTextContent('Sending…')
+
+      // After the sent delay the bubble flips to sent "just now".
+      step(LIVE_TURN_SCRIPT.sentDelayMs)
+      expect(within(bubble).getByTestId('bubble-actions')).toHaveTextContent('just now')
+
+      // The composer cleared the input and locked it while the scripted
+      // agent turn runs (input disabled + send disabled + aria-busy).
+      expect(input).toHaveValue('')
+      expect(input).toBeDisabled()
+      expect(send).toBeDisabled()
+      expect(send).toHaveAttribute('aria-busy', 'true')
+
+      // The typing indicator appears as a polite live region.
+      step(LIVE_TURN_SCRIPT.typingDelayMs)
+      const typing = screen.getByTestId('typing-indicator')
+      expect(typing).toHaveAttribute('aria-live', 'polite')
+      expect(typing).toHaveTextContent('Thinking…')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('plays the scripted turn in order — understanding, tool running→done, progress, artifact chip, final answer — then unlocks the composer', () => {
+    vi.useFakeTimers()
+    try {
+      renderRoute('session-stream-detail')
+
+      fireEvent.change(screen.getByTestId('session-composer-input'), {
+        target: { value: 'Re-verify the overnight-shift fix from PR #1301.' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Send message' }))
+
+      // Typing indicator appears, then hands off to the scripted
+      // understanding turn.
+      step(LIVE_TURN_SCRIPT.sentDelayMs + LIVE_TURN_SCRIPT.typingDelayMs)
+      expect(screen.getByTestId('typing-indicator')).toBeInTheDocument()
+      step(LIVE_TURN_SCRIPT.openDelayMs)
+      expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()
+      expect(
+        within(screen.getByTestId('stream-live-understanding')).getByText(
+          /re-verify the overnight-shift boundary fix from PR #1301/,
+        ),
+      ).toBeInTheDocument()
+
+      // The scripted tool call first appears RUNNING (open status row)…
+      step(LIVE_TURN_SCRIPT.toolRunningDelayMs)
+      const toolSlot = screen.getByTestId('stream-live-tool')
+      const running = within(toolSlot).getByTestId('tool-row')
+      expect(running).toHaveTextContent('running')
+      expect(running).toHaveTextContent('sandbox batch att-2026-0815 (overnight subset · 37 records)')
+
+      // …then flips to DONE and collapses: duration + state visible, the
+      // evidence detail hidden behind aria-expanded=false.
+      step(LIVE_TURN_SCRIPT.toolDoneDelayMs)
+      const done = within(toolSlot).getByTestId('tool-row')
+      expect(done).toHaveAttribute('aria-expanded', 'false')
+      expect(done).toHaveTextContent('done')
+      expect(done).toHaveTextContent('1m 12s')
+      expect(within(toolSlot).queryByText(/37\/37 overnight records/)).not.toBeInTheDocument()
+
+      // Live progress boots EXPANDED with the active reconcile phase…
+      step(LIVE_TURN_SCRIPT.progressDelayMs)
+      const progressSlot = screen.getByTestId('stream-live-progress')
+      expect(within(progressSlot).getByTestId('progress-summary')).toHaveAttribute(
+        'aria-expanded',
+        'true',
+      )
+      expect(
+        within(progressSlot).getByText('Reconcile against attendance_records'),
+      ).toBeInTheDocument()
+
+      // …settles collapsed to the one-line summary, and the refreshed
+      // artifact chip lands with its v1.1 version.
+      step(LIVE_TURN_SCRIPT.artifactDelayMs)
+      const settled = within(progressSlot).getByTestId('progress-summary')
+      expect(settled).toHaveAttribute('aria-expanded', 'false')
+      expect(settled).toHaveTextContent('2 phases · 2m 05s · Completed')
+      const chip = within(screen.getByTestId('stream-live-artifact')).getByTestId('artifact-chip')
+      expect(chip).toHaveTextContent('Review report — attendance integration')
+      expect(chip).toHaveTextContent('v1.1 · 15:12')
+
+      // The scripted final answer arrives (composer still locked until the
+      // settle delay elapses)…
+      step(LIVE_TURN_SCRIPT.answerDelayMs)
+      expect(
+        within(screen.getByTestId('stream-live-answer')).getByText(
+          /Verified — the boundary fix holds\./,
+        ),
+      ).toBeInTheDocument()
+      expect(screen.getByTestId('session-composer-input')).toBeDisabled()
+
+      // …then the composer unlocks: input enabled and a fresh message can
+      // be typed and sent again.
+      step(LIVE_TURN_SCRIPT.settleDelayMs)
+      const input = screen.getByTestId('session-composer-input')
+      expect(input).toBeEnabled()
+      const send = screen.getByRole('button', { name: 'Send message' })
+      expect(send).toHaveAttribute('aria-busy', 'false')
+      fireEvent.change(input, { target: { value: 'Thanks — ready for Friday.' } })
+      expect(send).toBeEnabled()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
