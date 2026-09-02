@@ -9,7 +9,9 @@
  * (spec refinements v3 #2) it is the turn that carries the hover footer
  * in both fixtures.
  */
-import ResponseBlock, { CheckIcon, CompletionIcon, MinusIcon, StreamChip } from '../ResponseBlock'
+import ResponseBlock, { CheckIcon, CompletionIcon, MinusIcon } from '../ResponseBlock'
+import StatusBadge from '../../../technical/StatusBadge'
+import EntityToken from '../../../technical/EntityToken'
 import type { CompletionBlockData } from '../sessionStreamTypes'
 
 interface CompletionBlockProps {
@@ -32,7 +34,7 @@ export default function CompletionBlock({
       time={time}
       className="kx-stream-turn--completion"
       showFooter={showFooter}
-      stateChip={<StreamChip tone="accent">completed</StreamChip>}
+      stateChip={<StatusBadge status="completed" />}
     >
       <div className="kx-stream-completion">
         <section className="kx-stream-completion__section">
@@ -65,11 +67,8 @@ export default function CompletionBlock({
           <p className="kx-stream-completion__section-label">Artifacts</p>
           <ul className="kx-stream-completion__artifacts">
             {data.artifacts.map((artifact) => (
-              <li
-                key={artifact.label}
-                className={`kx-stream-completion__artifact${artifact.mono ? ' kx-stream-completion__artifact--mono' : ''}`}
-              >
-                {artifact.label}
+              <li key={artifact.label}>
+                <EntityToken kind="artifact" label={artifact.label} mono={artifact.mono} />
               </li>
             ))}
           </ul>

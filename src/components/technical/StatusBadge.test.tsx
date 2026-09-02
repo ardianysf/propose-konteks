@@ -57,6 +57,16 @@ describe('StatusBadge', () => {
     expect(container.querySelector('.kx-tech-badge')).toHaveClass(`kx-tech-badge--${tone}`)
   })
 
+  it('lets an optional label override the canonical text while keeping tone + glyph', () => {
+    const { container } = render(<StatusBadge status="completed" label="Answered" />)
+    // The settled stream clarification reads "Answered" on the completed
+    // tone — the status vocabulary itself stays canonical.
+    expect(screen.getByText('Answered')).toBeInTheDocument()
+    expect(container.querySelector('.kx-tech-badge')).toHaveClass('kx-tech-badge--success')
+    expect(container.querySelector('.kx-tech-badge__label')).toHaveTextContent('Answered')
+    expect(screen.queryByText('Completed')).not.toBeInTheDocument()
+  })
+
   it('renders a distinct drawn glyph per status (aria-hidden)', () => {
     const { container } = render(<StatusBadge status="failed" />)
     const glyph = container.querySelector('[data-icon="tech-status-failed"]')!

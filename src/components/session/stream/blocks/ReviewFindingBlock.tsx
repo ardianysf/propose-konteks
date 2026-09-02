@@ -5,6 +5,7 @@
  * location in mono, and the quoted snippet.
  */
 import ResponseBlock, { ReviewIcon } from '../ResponseBlock'
+import InlineCode from '../../../technical/InlineCode'
 import type { ReviewFindingBlockData } from '../sessionStreamTypes'
 
 interface ReviewFindingBlockProps {
@@ -33,7 +34,9 @@ export default function ReviewFindingBlock({
           <p className="kx-stream-review__title">{data.title}</p>
         </header>
         <p className="kx-stream-review__impact kx-stream-prose">{data.impact}</p>
-        <p className="kx-stream-review__location kx-stream-mono">{data.location}</p>
+        <p className="kx-stream-review__location">
+          <InlineCode>{data.location}</InlineCode>
+        </p>
         <blockquote className="kx-stream-review__quote">
           <p>{data.quote}</p>
         </blockquote>

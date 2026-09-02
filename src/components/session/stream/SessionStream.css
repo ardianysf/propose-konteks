@@ -829,27 +829,13 @@
   gap: 6px;
 }
 
-.kx-stream-gate__row {
-  display: grid;
+/* Technical-text integration: each spec row is a MetadataPair. The
+ * usage-site layout keeps the gate's original 150px label column —
+ * the compound selector outranks .kx-tech-meta__pair's own grid. */
+.kx-stream-gate__rows .kx-stream-gate__row {
   grid-template-columns: 150px 1fr;
   gap: 12px;
   align-items: baseline;
-}
-
-.kx-stream-gate__row dt {
-  font-size: var(--kx-text-xs);
-  font-weight: var(--kx-font-bold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-stream-gate__row dd {
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-primary);
-  min-width: 0;
-  overflow-wrap: anywhere;
 }
 
 .kx-stream-gate__consequence {
@@ -1068,21 +1054,15 @@
   overflow-wrap: anywhere;
 }
 
-.kx-stream-call__state {
+/* State label → StatusBadge (technical-text spec §Integration):
+ * queued/running/done read Draft/Running/Completed. The compact-size
+ * class keeps the ledger row's density without a size prop on the
+ * primitive — geometry only, tones stay on the badge. */
+.kx-stream-call__badge.kx-tech-badge {
   flex: 0 0 auto;
   font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-stream-call__state--done {
-  color: var(--kx-accent-text-aa);
-}
-
-.kx-stream-call__state--running {
-  color: var(--kx-attention);
+  padding: 2px 6px;
+  gap: 4px;
 }
 
 .kx-stream-call__duration {
@@ -1117,37 +1097,20 @@
   border: 1px solid var(--kx-muted);
 }
 
-/* Mono evidence block (tool io + artifact preview share this family). */
+/* Mono evidence detail (tool io): the input/output bodies are
+ * CodeBlocks (header meta + Copy); the wrapper keeps the ledger's
+ * left indent, and the +/- diff tints below ride CodeBlock's
+ * lineClassName hook. */
 .kx-stream-io {
   margin: 8px 0 0 26px;
   display: grid;
-  gap: 4px;
+  gap: 8px;
 }
 
-.kx-stream-io__label {
-  margin: 4px 0 0;
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-stream-io__block {
-  margin: 0;
-  padding: 10px 12px;
-  border: 1px solid var(--kx-border);
-  border-radius: 8px;
-  background: var(--kx-raised);
-  overflow-x: auto;
-  font-size: var(--kx-text-sm);
-  line-height: 1.6;
-}
-
-.kx-stream-io__block code {
-  white-space: pre;
-}
-
+/* Base diff-line geometry — the artifact schema preview rides these
+ * classes directly; the tool io reuses only the tint modifiers through
+ * CodeBlock's lineClassName hook (its own line class carries the
+ * geometry there). */
 .kx-stream-io__line {
   display: inline-block;
   min-width: 100%;
@@ -1197,9 +1160,22 @@
   overflow-wrap: anywhere;
 }
 
-.kx-stream-artifact-row__version {
+/* Technical-text integration: the version/time meta is a MetadataPair
+ * riding the same baseline row (label + value side by side, compact). */
+.kx-stream-artifact-row__meta.kx-tech-meta__pair {
+  grid-auto-flow: column;
+  justify-content: start;
+  align-items: baseline;
+  column-gap: 6px;
+}
+
+.kx-stream-artifact-row__meta .kx-tech-meta__label,
+.kx-stream-artifact-row__meta .kx-tech-meta__value {
   font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
+}
+
+.kx-stream-artifact-row__meta .kx-tech-meta__value {
+  font-variant-numeric: tabular-nums;
 }
 
 .kx-stream-artifact-row__actions {
@@ -1395,22 +1371,6 @@
   list-style: none;
 }
 
-.kx-stream-completion__artifact {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border: 1px solid var(--kx-border);
-  border-radius: 6px;
-  background: var(--kx-pale);
-  font-size: var(--kx-text-sm);
-  color: var(--kx-accent-text-aa);
-}
-
-.kx-stream-completion__artifact--mono {
-  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
-  font-size: var(--kx-text-xs);
-}
-
 .kx-stream-completion__next {
   margin: 0;
   padding: 0;
@@ -1539,7 +1499,7 @@
     max-width: 88%;
   }
 
-  .kx-stream-gate__row {
+  .kx-stream-gate__rows .kx-stream-gate__row {
     grid-template-columns: 1fr;
     gap: 2px;
   }

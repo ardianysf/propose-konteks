@@ -10,6 +10,8 @@
  * echoing it — settled state unaffected).
  */
 import ResponseBlock, { AlertIcon, CheckIcon, GateIcon, StreamChip } from '../ResponseBlock'
+import MetadataPair from '../../../technical/MetadataPair'
+import StatusBadge from '../../../technical/StatusBadge'
 import type { ApprovalGateBlockData, GateDecision } from '../sessionStreamTypes'
 
 const DECISION_LABELS: Record<GateDecision, string> = {
@@ -58,19 +60,24 @@ export default function ApprovalGateBlock({
       ) : (
         <div className="kx-stream-gate" data-testid="gate-pending">
           {/* The status chip rides INSIDE the frame, top area (spec
-              refinements v3 #3) — not outside/above the strong box. */}
+              refinements v3 #3) — not outside/above the strong box.
+              Technical-text integration: the outstanding chip is the
+              canonical "Waiting approval" StatusBadge. */}
           <p className="kx-stream-gate__status">
-            <StreamChip tone="attention">APPROVAL NEEDED</StreamChip>
+            <StatusBadge status="waiting-approval" testId="gate-waiting-badge" />
           </p>
           <p className="kx-stream-gate__action">{data.action}</p>
-          <dl className="kx-stream-gate__rows">
+          <div className="kx-stream-gate__rows">
             {data.rows.map((row) => (
-              <div className="kx-stream-gate__row" key={row.label}>
-                <dt>{row.label}</dt>
-                <dd className={row.mono ? 'kx-stream-mono' : undefined}>{row.value}</dd>
-              </div>
+              <MetadataPair
+                key={row.label}
+                label={row.label}
+                value={row.value}
+                mono={row.mono}
+                className="kx-stream-gate__row"
+              />
             ))}
-          </dl>
+          </div>
           <p className="kx-stream-gate__consequence">
             <AlertIcon />
             <span>{data.consequence}</span>

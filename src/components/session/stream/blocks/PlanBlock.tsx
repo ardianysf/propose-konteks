@@ -6,6 +6,7 @@
  * "Approved" chip, actions retired.
  */
 import ResponseBlock, { CheckIcon, PlanIcon, StreamChip } from '../ResponseBlock'
+import InlineCode from '../../../technical/InlineCode'
 import type { PlanBlockData } from '../sessionStreamTypes'
 
 interface PlanBlockProps {
@@ -45,9 +46,11 @@ export default function PlanBlock({
               <div className="kx-stream-plan__step-main">
                 <p className="kx-stream-plan__line">
                   <span className="kx-stream-plan__verb">{step.verb}</span>{' '}
-                  <span className={step.targetMono ? 'kx-stream-mono' : undefined}>
-                    {step.target}
-                  </span>
+                  {step.targetMono ? (
+                    <InlineCode>{step.target}</InlineCode>
+                  ) : (
+                    <span>{step.target}</span>
+                  )}
                 </p>
                 <p className="kx-stream-plan__meta">
                   {step.agent} · est. {step.estimate}

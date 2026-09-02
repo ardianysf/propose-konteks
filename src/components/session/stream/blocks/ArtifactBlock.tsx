@@ -10,6 +10,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import ResponseBlock from '../ResponseBlock'
+import MetadataPair from '../../../technical/MetadataPair'
 import { copyToClipboard } from '../clipboard'
 import type { ArtifactBlockData } from '../sessionStreamTypes'
 
@@ -68,9 +69,12 @@ export default function ArtifactBlock({ data, time = '14:46' }: ArtifactBlockPro
           data-testid="artifact-row"
         >
           <span className="kx-stream-artifact-row__title">{data.title}</span>
-          <span className="kx-stream-artifact-row__version kx-stream-tabular">
-            {data.version} · {data.time}
-          </span>
+          <MetadataPair
+            label="Version"
+            value={`${data.version} · ${data.time}`}
+            className="kx-stream-artifact-row__meta"
+            testId="artifact-meta"
+          />
           <span className="kx-stream-artifact-row__actions" data-testid="artifact-actions">
             <button
               type="button"

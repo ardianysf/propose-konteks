@@ -145,13 +145,17 @@ export interface StatusBadgeProps {
   status: TechStatus
   /** Optional click behavior — upgrades the pill to a <button>. */
   onClick?: () => void
+  /** Overrides the canonical label with a settled-state reading that
+   * keeps the status' tone + glyph (e.g. completed → "Answered" on the
+   * stream clarification). The status set itself stays canonical. */
+  label?: string
   className?: string
   testId?: string
 }
 
-export default function StatusBadge({ status, onClick, className, testId }: StatusBadgeProps) {
+export default function StatusBadge({ status, onClick, label, className, testId }: StatusBadgeProps) {
   const { tone, icon } = STATUS_CONFIG[status]
-  const label = TECH_STATUS_LABELS[status]
+  const text = label ?? TECH_STATUS_LABELS[status]
   const classes = ['kx-tech-badge', `kx-tech-badge--${tone}`]
   if (onClick !== undefined) classes.push('kx-tech-badge--button')
   if (className !== undefined) classes.push(className)
@@ -161,7 +165,7 @@ export default function StatusBadge({ status, onClick, className, testId }: Stat
       <span className="kx-tech-badge__icon" aria-hidden="true">
         {status === 'running' ? <span className="kx-tech-badge__dot" /> : icon}
       </span>
-      <span className="kx-tech-badge__label">{label}</span>
+      <span className="kx-tech-badge__label">{text}</span>
     </>
   )
 
