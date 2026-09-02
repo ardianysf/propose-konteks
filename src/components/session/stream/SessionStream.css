@@ -215,9 +215,9 @@
 .kx-stream-bubble {
   max-width: 75%;
   padding: 12px 16px;
-  border: 1px solid var(--kx-border); /* pale-on-canvas tint needs the hairline edge in both themes */
+  border: 1px solid var(--kx-bubble-border); /* sage bubble panel with its own hairline (Fase 3c) */
   border-radius: 16px 16px 6px 16px; /* outer (bottom-right) corner sharper */
-  background: var(--kx-pale); /* tint token, not white/raised — spec refinements v2 #2 */
+  background: var(--kx-bubble-bg); /* dedicated bubble tint — distinct from canvas, code wash, and entity fills */
   color: var(--kx-primary);
 }
 
@@ -294,7 +294,7 @@
   padding: 3px 10px;
   border: 1px solid var(--kx-border);
   border-radius: 6px;
-  background: var(--kx-pale);
+  background: var(--kx-tech-code-bg); /* quiet neutral chip on the sage bubble — no pale-on-pale */
   font-size: var(--kx-text-sm);
   color: var(--kx-primary);
 }
