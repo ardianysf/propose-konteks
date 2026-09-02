@@ -5,11 +5,17 @@
  *
  * Agent turns render as FLAT prose — no bubble, no rail, no card:
  *
- *   header  compact: kind icon + muted label (+ optional state chip)
+ *   header  compact: kind icon + muted label (+ optional state chip) —
+ *           OMITTED on conversational turns (understanding / answer)
+ *           and the artifact row, which render as pure content
+ *           (spec refinements v2 #1/#5: no UNDERSTANDING/ANSWER labels,
+ *           artifact without its kind header)
  *   body    children — the kind's typed content
- *   footer  revealed on hover / :focus-within: copy icon (clipboard.ts),
- *           share icon (mockup: copies a link, flashes "Link copied"),
- *           and the turn's timestamp
+ *   footer  ONLY on the FINAL agent answer turn (spec refinements v2
+ *           #4, `showFooter`): revealed on hover / :focus-within — copy
+ *           icon (clipboard.ts), share icon (mockup: copies a link,
+ *           flashes "Link copied"), and the turn's timestamp. Every
+ *           other agent turn renders NO footer.
  *
  * USER turns use BubbleBlock (BubbleBlock.tsx) instead — the
  * right-aligned bubble with its own hover action bar (time + copy +
@@ -78,15 +84,6 @@ export function RequestIcon() {
   )
 }
 
-export function AckIcon() {
-  return (
-    <Svg width={16} height={16}>
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="m8.4 12.2 2.5 2.5 4.7-5.2" />
-    </Svg>
-  )
-}
-
 export function ClarificationIcon() {
   return (
     <Svg width={16} height={16}>
@@ -138,17 +135,6 @@ export function ToolIcon() {
   )
 }
 
-export function ArtifactIcon() {
-  return (
-    <Svg width={16} height={16}>
-      <path d="M14 3H7.2A1.7 1.7 0 0 0 5.5 4.7v14.6A1.7 1.7 0 0 0 7.2 21h9.6a1.7 1.7 0 0 0 1.7-1.7V7.5L14 3z" />
-      <path d="M14 3v4.5h4.5" />
-      <path d="M9 13h6" />
-      <path d="M9 16.5h4.5" />
-    </Svg>
-  )
-}
-
 export function ReviewIcon() {
   return (
     <Svg width={16} height={16}>
@@ -165,14 +151,6 @@ export function CompletionIcon() {
       <path d="M5.5 21V4" />
       <path d="M5.5 4.6c4.4-2.1 7.9 2 12.3.4v8.2c-4.4 1.6-7.9-2.5-12.3-.4" />
       <path d="m9.2 7.9 1.3 1.3 2.5-2.7" />
-    </Svg>
-  )
-}
-
-export function MessageIcon() {
-  return (
-    <Svg width={16} height={16}>
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </Svg>
   )
 }
@@ -305,11 +283,13 @@ export function StreamChip({
 // ── Shared agent-turn anatomy ─────────────────────────────────────────────
 
 export interface ResponseBlockProps {
-  /** Caps kind label, e.g. UNDERSTANDING / PLAN / ANSWER. */
-  kindLabel: string
+  /** Caps kind label, e.g. PLAN / APPROVAL. When omitted the turn
+   * renders BARE — no header at all (conversational turns and the
+   * artifact row; spec refinements v2 #1/#5). */
+  kindLabel?: string
   tone?: StreamTone
-  /** 16px stroke icon from the family above. */
-  icon: ReactElement
+  /** 16px stroke icon from the family above (header turns only). */
+  icon?: ReactElement
   /** The turn's timestamp — shown in the hover footer. */
   time: string
   /** Optional status chip riding the compact header row. */
@@ -318,6 +298,9 @@ export interface ResponseBlockProps {
   /** Extra modifier class for the turn root (e.g. --completion). */
   className?: string
   id?: string
+  /** Hover footer (copy / share / time) — the FINAL agent answer turn
+   * only; every other turn renders no footer (spec refinements v2 #4). */
+  showFooter?: boolean
 }
 
 type FooterFeedback = 'idle' | 'copied' | 'linked'
@@ -331,6 +314,7 @@ export default function ResponseBlock({
   children,
   className,
   id,
+  showFooter = false,
 }: ResponseBlockProps) {
   const bodyRef = useRef<HTMLDivElement>(null)
   const [feedback, setFeedback] = useState<FooterFeedback>('idle')
@@ -363,44 +347,50 @@ export default function ResponseBlock({
   if (className) classes.push(className)
   return (
     <article id={id} className={classes.join(' ')}>
-      <header className="kx-stream-turn__head">
-        <p className="kx-stream-turn__ident">
-          <span className="kx-stream-turn__icon" aria-hidden="true">
-            {icon}
-          </span>
-          <span className="kx-stream-turn__kind">{kindLabel}</span>
-        </p>
-        {stateChip !== undefined && stateChip}
-      </header>
+      {kindLabel !== undefined && (
+        <header className="kx-stream-turn__head">
+          <p className="kx-stream-turn__ident">
+            {icon !== undefined && (
+              <span className="kx-stream-turn__icon" aria-hidden="true">
+                {icon}
+              </span>
+            )}
+            <span className="kx-stream-turn__kind">{kindLabel}</span>
+          </p>
+          {stateChip !== undefined && stateChip}
+        </header>
+      )}
       <div className="kx-stream-turn__body" ref={bodyRef}>
         {children}
       </div>
-      <footer className="kx-stream-turn__footer" data-testid="turn-footer">
-        <button
-          type="button"
-          className="kx-stream-icon-action"
-          aria-label="Copy message"
-          data-testid="turn-copy"
-          onClick={handleCopy}
-        >
-          <CopyIcon />
-        </button>
-        <button
-          type="button"
-          className="kx-stream-icon-action"
-          aria-label="Share message"
-          data-testid="turn-share"
-          onClick={handleShare}
-        >
-          <ShareIcon />
-        </button>
-        {feedback !== 'idle' && (
-          <span className="kx-stream-turn__feedback" role="status">
-            {feedback === 'copied' ? 'Copied' : 'Link copied'}
-          </span>
-        )}
-        <span className="kx-stream-turn__time kx-stream-tabular">{time}</span>
-      </footer>
+      {showFooter && (
+        <footer className="kx-stream-turn__footer" data-testid="turn-footer">
+          <button
+            type="button"
+            className="kx-stream-icon-action"
+            aria-label="Copy message"
+            data-testid="turn-copy"
+            onClick={handleCopy}
+          >
+            <CopyIcon />
+          </button>
+          <button
+            type="button"
+            className="kx-stream-icon-action"
+            aria-label="Share message"
+            data-testid="turn-share"
+            onClick={handleShare}
+          >
+            <ShareIcon />
+          </button>
+          {feedback !== 'idle' && (
+            <span className="kx-stream-turn__feedback" role="status">
+              {feedback === 'copied' ? 'Copied' : 'Link copied'}
+            </span>
+          )}
+          <span className="kx-stream-turn__time kx-stream-tabular">{time}</span>
+        </footer>
+      )}
     </article>
   )
 }

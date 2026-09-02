@@ -7,8 +7,12 @@
  *     session `recent-attendance` / `hist-attendance`, system bsi-hris);
  *   - chat anatomy: the user request renders as a right-aligned BUBBLE
  *     with attachment CARDS and a hover action bar (time + copy + edit),
- *     while agent turns render FLAT (no bubble) with their hover footer
- *     (copy + share + time) — 12 settled turns total;
+ *     while agent turns render FLAT (no bubble) — the hover footer
+ *     (copy + share + time) rides ONLY the final agent answer turn
+ *     (spec refinements v2 #4) — 12 settled turns total; the
+ *     understanding/answer turns render as pure prose with NO kind
+ *     label (v2 #1) and the artifact as a full-width row with no
+ *     badge (v2 #5);
  *   - the fixture is settled history: the clarification shows its
  *     recorded answers (no live chips), the plan boots approved, the
  *     gate boots decided ("Allow once"), progress collapses to one
@@ -32,20 +36,23 @@ import { MockupContext } from '../state/MockupContext'
 import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
 import { initialState, mockupReducer, type MockupRoute } from '../state/mockupReducer'
 
-/** Kind labels the AGENT turns carry in their compact headers. The two
- * user turns are bubbles and intentionally carry NO kind label. */
+/** Kind labels the LABELED agent turns carry in their compact headers
+ * (spec refinements v2 #1/#5): the conversational understanding/answer
+ * turns and the artifact row render BARE — no header at all. The two
+ * user turns are bubbles and intentionally carry NO kind label either. */
 const AGENT_KIND_LABELS = [
-  'UNDERSTANDING',
   'CLARIFICATION',
   'PLAN',
   'APPROVAL',
   'PROGRESS',
   'TOOL CALL',
-  'ARTIFACT',
   'REVIEW FINDING',
-  'ANSWER',
   'HANDOFF',
 ] as const
+
+/** Labels that must NOT render anywhere in the stream — the bare
+ * conversational turns and the badge-less artifact row. */
+const BARE_KIND_LABELS = ['UNDERSTANDING', 'ANSWER', 'ARTIFACT'] as const
 
 // ---------------------------------------------------------------------------
 // Harness — the page under the real reducer via the mockup context, with
@@ -129,12 +136,20 @@ describe('SessionStreamDetailPage — structure', () => {
       expect(turn.querySelector('.kx-stream-bubble-row')).toBeNull()
     })
 
-    // Every agent kind label renders inside the stream…
+    // Every labeled agent kind renders inside the stream…
     for (const label of AGENT_KIND_LABELS) {
       expect(within(stream).getAllByText(label).length).toBeGreaterThanOrEqual(1)
     }
-    // …while the user bubbles carry no REQUEST label at all.
-    expect(within(stream).queryByText('REQUEST')).toBeNull()
+    // …while the bare turns (understanding, answer) and the artifact
+    // row carry NO kind label, and the user bubbles no REQUEST label.
+    for (const label of [...BARE_KIND_LABELS, 'REQUEST'] as const) {
+      expect(within(stream).queryByText(label)).toBeNull()
+    }
+
+    // The bare understanding turn is found by its PROSE, not a label.
+    expect(
+      within(stream).getByText(/Got it — you need the attendance integration reviewed end to end/),
+    ).toBeInTheDocument()
 
     // The attendance story's own copy leads the stream.
     expect(
@@ -172,28 +187,44 @@ describe('SessionStreamDetailPage — structure', () => {
     expect(within(bar).getByTestId('bubble-edit')).toHaveAttribute('aria-label', 'Edit message')
   })
 
-  it('renders every agent turn with its hover footer (copy, share, response time)', () => {
+  it('renders the hover footer on exactly one turn — the final agent answer (copy, share, time)', () => {
     renderRoute('session-stream-detail')
     const stream = screen.getByTestId('session-stream')
 
+    // Exactly ONE turn in the whole conversation carries the footer
+    // (spec refinements v2 #4) — the FINAL agent answer, slot 11.
     const footers = stream.querySelectorAll('[data-testid="turn-footer"]')
-    expect(footers).toHaveLength(10)
-
-    // The understanding turn — first agent turn — exposes all three.
-    const understanding = stream.querySelectorAll('.kx-stream-turn')[0] as HTMLElement
-    expect(within(understanding).getByTestId('turn-copy')).toHaveAttribute(
+    expect(footers).toHaveLength(1)
+    const finalAnswer = document.getElementById('stream-kind-11')!
+    expect(finalAnswer.querySelector('[data-testid="turn-footer"]')).not.toBeNull()
+    expect(within(finalAnswer).getByTestId('turn-copy')).toHaveAttribute(
       'aria-label',
       'Copy message',
     )
-    expect(within(understanding).getByTestId('turn-share')).toHaveAttribute(
+    expect(within(finalAnswer).getByTestId('turn-share')).toHaveAttribute(
       'aria-label',
       'Share message',
     )
-    expect(within(understanding).getByTestId('turn-footer')).toHaveTextContent('14:04')
+    expect(within(finalAnswer).getByTestId('turn-footer')).toHaveTextContent('14:58')
+
+    // Every other agent turn renders bare — no footer on the
+    // understanding prose (first agent turn) or even on the handoff
+    // that lands AFTER the final answer.
+    const withFooter = Array.from(stream.querySelectorAll('.kx-stream-turn')).filter((turn) =>
+      turn.querySelector('[data-testid="turn-footer"]'),
+    )
+    expect(withFooter).toHaveLength(1)
+    expect(withFooter[0].closest('.kx-stream-slot')).toBe(finalAnswer)
+    expect(
+      within(document.getElementById('stream-kind-2')!).queryByTestId('turn-footer'),
+    ).toBeNull()
+    expect(
+      within(document.getElementById('stream-kind-12')!).queryByTestId('turn-footer'),
+    ).toBeNull()
 
     // Share copies the session link and flashes feedback.
-    fireEvent.click(within(understanding).getByTestId('turn-share'))
-    expect(within(understanding).getByText('Link copied')).toBeInTheDocument()
+    fireEvent.click(within(finalAnswer).getByTestId('turn-share'))
+    expect(within(finalAnswer).getByText('Link copied')).toBeInTheDocument()
   })
 })
 
@@ -363,20 +394,27 @@ describe('SessionStreamDetailPage — interactions', () => {
     expect(rows[0]).toHaveAttribute('aria-expanded', 'false')
   })
 
-  it('renders the artifact as a chip with small hover actions', () => {
+  it('renders the artifact as a full-width row with hover actions and no badge', () => {
     renderRoute('session-stream-detail')
 
-    const chip = screen.getByTestId('artifact-chip')
-    expect(chip).toHaveTextContent('REPORT')
-    expect(chip).toHaveTextContent('Review report — attendance integration')
-    expect(chip).toHaveTextContent('v1')
+    // The artifact is a FULL-WIDTH row (spec refinements v2 #5) — title +
+    // version + hover/focus actions, not a small chip.
+    const row = screen.getByTestId('artifact-row')
+    expect(row).toHaveClass('kx-stream-artifact-row--full')
+    expect(row).toHaveTextContent('Review report — attendance integration')
+    expect(row).toHaveTextContent('v1 · 14:46')
+    // No type badge rides the row, and the turn carries no ARTIFACT kind
+    // header at all — the row is bare.
+    expect(within(row).queryByText('REPORT')).toBeNull()
+    const artifactTurn = row.closest('.kx-stream-turn') as HTMLElement
+    expect(artifactTurn.querySelector('.kx-stream-turn__head')).toBeNull()
     // No big-card body while collapsed — the preview only opens on demand.
     expect(screen.queryByText('## Sign-off')).not.toBeInTheDocument()
 
     const actions = within(screen.getByTestId('artifact-actions')).getAllByRole('button')
     expect(actions.map((action) => action.textContent)).toEqual(['Open', 'Copy', 'Download'])
 
-    // Copy flashes feedback inside the chip.
+    // Copy flashes feedback inside the row.
     fireEvent.click(screen.getByRole('button', { name: 'Copy' }))
     expect(screen.getByRole('button', { name: 'Copied' })).toBeInTheDocument()
 
@@ -494,7 +532,7 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
     }
   })
 
-  it('plays the scripted turn in order — understanding, tool running→done, progress, artifact chip, final answer — then unlocks the composer', () => {
+  it('plays the scripted turn in order — understanding, tool running→done, progress, artifact row, final answer — then unlocks the composer', () => {
     vi.useFakeTimers()
     try {
       renderRoute('session-stream-detail')
@@ -510,11 +548,15 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       expect(screen.getByTestId('typing-indicator')).toBeInTheDocument()
       step(LIVE_TURN_SCRIPT.openDelayMs)
       expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()
+      const understandingSlot = screen.getByTestId('stream-live-understanding')
       expect(
-        within(screen.getByTestId('stream-live-understanding')).getByText(
+        within(understandingSlot).getByText(
           /re-verify the overnight-shift boundary fix from PR #1301/,
         ),
       ).toBeInTheDocument()
+      // Bare conversational prose — no UNDERSTANDING label, no footer.
+      expect(within(understandingSlot).queryByText('UNDERSTANDING')).toBeNull()
+      expect(within(understandingSlot).queryByTestId('turn-footer')).toBeNull()
 
       // The scripted tool call first appears RUNNING (open status row)…
       step(LIVE_TURN_SCRIPT.toolRunningDelayMs)
@@ -549,18 +591,27 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       const settled = within(progressSlot).getByTestId('progress-summary')
       expect(settled).toHaveAttribute('aria-expanded', 'false')
       expect(settled).toHaveTextContent('2 phases · 2m 05s · Completed')
-      const chip = within(screen.getByTestId('stream-live-artifact')).getByTestId('artifact-chip')
-      expect(chip).toHaveTextContent('Review report — attendance integration')
-      expect(chip).toHaveTextContent('v1.1 · 15:12')
+      // The refreshed artifact lands as a FULL-WIDTH row with its v1.1
+      // version — no badge, not a chip.
+      const artifactSlot = screen.getByTestId('stream-live-artifact')
+      const row = within(artifactSlot).getByTestId('artifact-row')
+      expect(row).toHaveTextContent('Review report — attendance integration')
+      expect(row).toHaveTextContent('v1.1 · 15:12')
+      expect(within(artifactSlot).queryByText('REPORT')).toBeNull()
 
-      // The scripted final answer arrives (composer still locked until the
-      // settle delay elapses)…
+      // The scripted final answer arrives with the conversation's ONE
+      // hover footer (footer-on-final-answer rule; composer still locked
+      // until the settle delay elapses)…
       step(LIVE_TURN_SCRIPT.answerDelayMs)
+      const answerSlot = screen.getByTestId('stream-live-answer')
       expect(
-        within(screen.getByTestId('stream-live-answer')).getByText(
-          /Verified — the boundary fix holds\./,
-        ),
+        within(answerSlot).getByText(/Verified — the boundary fix holds\./),
       ).toBeInTheDocument()
+      expect(within(answerSlot).getByTestId('turn-footer')).toHaveTextContent('just now')
+      expect(within(answerSlot).getByTestId('turn-share')).toHaveAttribute(
+        'aria-label',
+        'Share message',
+      )
       expect(screen.getByTestId('session-composer-input')).toBeDisabled()
 
       // …then the composer unlocks: input enabled and a fresh message can

@@ -6,7 +6,8 @@
  * approval gate (migration with cost + irreversibility) → live progress
  * (5 phases, middle active) → tool evidence batch 1 (2 done with io,
  * 1 running, 1 queued) → artifact (PRD draft) → review finding (medium,
- * contract drift) → tool evidence batch 2 (the fix, done) → completion.
+ * contract drift) → tool evidence batch 2 (the fix, done) → agent final
+ * answer (conversational prose) → completion.
  *
  * Domain and copy language follow src/data/mockData.ts (English, internal
  * ops world: BSI Canteen, canteen-api, SOP references, Refactory Admin
@@ -288,6 +289,17 @@ export const SESSION_STREAM_STORY: StreamStoryEntry[] = [
             ],
           },
         },
+      ],
+    },
+  },
+  // 11 — Agent final answer (conversational prose — the turn that
+  // carries the hover footer; spec refinements v2 #4).
+  {
+    kind: 'answer',
+    data: {
+      paragraphs: [
+        'Here’s where the rounding fix landed. The divergence traced to a single point — src/invoicing/tax.ts truncated the scaled amount with toFixed(2) before the totals split, so every half-cent fell away instead of rounding half up per SOP-FIN-012 §4.2. The patch swaps the helper at all three call sites, the migration restated the 412 August invoices, and the sample now reconciles line for line.',
+        'The serializer drift the review caught is fixed and locked behind 18 contract tests, and the PRD is ready for finance. Production has been quiet since the snapshot — nothing else needs your attention before sign-off.',
       ],
     },
   },
