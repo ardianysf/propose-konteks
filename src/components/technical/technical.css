@@ -54,7 +54,7 @@
   font-family: inherit;
   font-size: var(--kx-text-md);
   font-weight: var(--kx-font-medium);
-  color: var(--kx-primary);
+  color: var(--kx-tech-entity-text);
   text-align: left;
   cursor: pointer;
   transition:
