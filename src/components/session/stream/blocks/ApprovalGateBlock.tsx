@@ -1,11 +1,13 @@
 /*
  * ApprovalGateBlock — kind 5 (APPROVAL GATE).
  * While pending this is the most prominent block on the page: a 2px
- * solid ink frame, the `APPROVAL NEEDED` status chip, the action
+ * solid ink frame carrying the `APPROVAL NEEDED` status chip INSIDE
+ * the box at its top (spec refinements v3 #3), the action
  * specification rows, the MANDATORY irreversible-consequence line, and
  * three explicit decisions — Allow once (primary), Always this session
  * (secondary), Deny (ghost). Once decided it settles quiet: a single
- * resolved line with the recorded decision.
+ * resolved line with the recorded decision (and the quiet header chip
+ * echoing it — settled state unaffected).
  */
 import ResponseBlock, { AlertIcon, CheckIcon, GateIcon, StreamChip } from '../ResponseBlock'
 import type { ApprovalGateBlockData, GateDecision } from '../sessionStreamTypes'
@@ -41,9 +43,7 @@ export default function ApprovalGateBlock({
       stateChip={
         resolved ? (
           <StreamChip tone={allowed ? 'accent' : 'neutral'}>{DECISION_LABELS[decision]}</StreamChip>
-        ) : (
-          <StreamChip tone="attention">APPROVAL NEEDED</StreamChip>
-        )
+        ) : undefined
       }
     >
       {resolved ? (
@@ -57,6 +57,11 @@ export default function ApprovalGateBlock({
         </div>
       ) : (
         <div className="kx-stream-gate" data-testid="gate-pending">
+          {/* The status chip rides INSIDE the frame, top area (spec
+              refinements v3 #3) — not outside/above the strong box. */}
+          <p className="kx-stream-gate__status">
+            <StreamChip tone="attention">APPROVAL NEEDED</StreamChip>
+          </p>
           <p className="kx-stream-gate__action">{data.action}</p>
           <dl className="kx-stream-gate__rows">
             {data.rows.map((row) => (

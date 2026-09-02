@@ -4,6 +4,10 @@
  * "not done / out of scope" list, artifact links (mono option),
  * numbered next actions, the rollback path, and the tabular receipt.
  * Flat — no card.
+ *
+ * As the closing agent turn of the conversation's final response group
+ * (spec refinements v3 #2) it is the turn that carries the hover footer
+ * in both fixtures.
  */
 import ResponseBlock, { CheckIcon, CompletionIcon, MinusIcon, StreamChip } from '../ResponseBlock'
 import type { CompletionBlockData } from '../sessionStreamTypes'
@@ -11,11 +15,14 @@ import type { CompletionBlockData } from '../sessionStreamTypes'
 interface CompletionBlockProps {
   data: CompletionBlockData
   time?: string
+  /** Hover footer — when this turn ends its response group. */
+  showFooter?: boolean
 }
 
 export default function CompletionBlock({
   data,
   time = '15:03',
+  showFooter = false,
 }: CompletionBlockProps) {
   return (
     <ResponseBlock
@@ -24,6 +31,7 @@ export default function CompletionBlock({
       icon={<CompletionIcon />}
       time={time}
       className="kx-stream-turn--completion"
+      showFooter={showFooter}
       stateChip={<StreamChip tone="accent">completed</StreamChip>}
     >
       <div className="kx-stream-completion">

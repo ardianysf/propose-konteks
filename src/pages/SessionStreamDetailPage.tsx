@@ -34,6 +34,7 @@ import {
   ATTENDANCE_REVIEW_TITLE,
   LIVE_TURN_SCRIPT,
 } from '../components/session/stream/attendanceReviewStory'
+import { isLastAgentTurnOfResponse } from '../components/session/stream/responseGroup'
 import BubbleBlock from '../components/session/stream/BubbleBlock'
 import type {
   AnswerBlockData,
@@ -285,14 +286,16 @@ export default function SessionStreamDetailPage() {
     }
   }, [liveTurns.length])
 
-  // The FINAL agent answer of the settled history is the one turn that
-  // carries the hover footer (spec refinements v2 #4) — every other agent
-  // turn renders bare. The live script's final answer step reuses the
-  // same rule below.
-  const finalAnswerPosition = ATTENDANCE_REVIEW_STORY.reduce(
-    (last, entry, index) => (entry.kind === 'answer' ? index + 1 : last),
-    0,
+  // One hover footer per agent RESPONSE GROUP (spec refinements v3
+  // #2): a group is a run of agent turns ending right before the next
+  // user turn (or the conversation end) — the footer rides the group's
+  // LAST turn, whatever kind it is. The rendered kind sequence mirrors
+  // visibleHistory (this fixture's clarification is settled, so no
+  // inserted answer bubble shifts the positions).
+  const historyKinds = ATTENDANCE_REVIEW_STORY.slice(0, historyCutoff).map(
+    (entry) => entry.kind,
   )
+  const isGroupFinal = (index: number) => isLastAgentTurnOfResponse(historyKinds, index)
 
   const interactiveClarification = ATTENDANCE_REVIEW_STORY.find(
     (entry): entry is Extract<StreamStoryEntry, { kind: 'clarification' }> =>
@@ -326,6 +329,7 @@ export default function SessionStreamDetailPage() {
             answered={answers}
             onAnswer={handleAnswer}
             time={time}
+            showFooter={isGroupFinal(position - 1)}
           />
         )
       case 'plan':
@@ -356,13 +360,11 @@ export default function SessionStreamDetailPage() {
       case 'review':
         return <ReviewFindingBlock data={entry.data} time={time} />
       case 'answer':
-        // The final agent answer — the ONE turn with the hover footer
-        // (spec refinements v2 #4).
-        return (
-          <AnswerBlock data={entry.data} time={time} showFooter={position === finalAnswerPosition} />
-        )
+        // Conversational prose — carries the footer only when it ends
+        // its response group (spec refinements v3 #2).
+        return <AnswerBlock data={entry.data} time={time} showFooter={isGroupFinal(position - 1)} />
       case 'completion':
-        return <CompletionBlock data={entry.data} time={time} />
+        return <CompletionBlock data={entry.data} time={time} showFooter={isGroupFinal(position - 1)} />
     }
   }
 

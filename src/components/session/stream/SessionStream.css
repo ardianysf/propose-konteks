@@ -102,7 +102,7 @@
 
 .kx-stream {
   display: grid;
-  gap: 4px;
+  gap: 12px;
   color: var(--kx-primary);
   font-size: var(--kx-text-md);
   line-height: 1.55;
@@ -1527,7 +1527,7 @@
   }
 
   .kx-stream {
-    gap: 4px;
+    gap: 12px;
   }
 
   .kx-stream-bubble {

@@ -11,6 +11,11 @@
  * clicking one calls the page-level callback (the page inserts the user
  * bubble). While any answer is outstanding the notice reads paused
  * (attention); once every question is answered it flips to resumed.
+ *
+ * The hover footer (copy / share / time) rides this turn when it is the
+ * LAST agent turn of its response group (spec refinements v3 #2) — in
+ * the fixtures the clarification ends the first response group right
+ * before the user's answer bubble.
  */
 import ResponseBlock, { CheckIcon, ClarificationIcon, StreamChip } from '../ResponseBlock'
 import type { ClarificationBlockData } from '../sessionStreamTypes'
@@ -21,6 +26,8 @@ interface ClarificationBlockProps {
   answered?: Record<string, string>
   onAnswer?: (questionId: string, option: string) => void
   time?: string
+  /** Hover footer — when this turn ends its response group. */
+  showFooter?: boolean
 }
 
 export default function ClarificationBlock({
@@ -28,6 +35,7 @@ export default function ClarificationBlock({
   answered = {},
   onAnswer,
   time = '14:05',
+  showFooter = false,
 }: ClarificationBlockProps) {
   const settled = data.settledAnswers !== undefined
   const allAnswered =
@@ -39,6 +47,7 @@ export default function ClarificationBlock({
       tone={allAnswered ? 'accent' : 'attention'}
       icon={<ClarificationIcon />}
       time={time}
+      showFooter={showFooter}
       stateChip={
         allAnswered ? (
           <StreamChip tone="accent">answered</StreamChip>
