@@ -85,9 +85,10 @@
 
   /* ── Technical text (kx-tech-*) — mono stack + tuned fills ─────────
    * Source of truth: .pi/orch/plans/technical-text-spec.md §Aturan
-   * dasar + §Fase 3a. --kx-font-mono lifts the exact ui-monospace stack
-   * already used by .kx-stream-mono (SessionStream.css now reads this
-   * token) so every technical-text primitive shares one mono family.
+   * dasar + §Fase 3a. --kx-font-mono leads with
+   * JetBrains Mono (the technical-text spec recommendation, loaded via
+   * @fontsource in main.tsx + catalog/main.tsx) and falls back to the
+   * system mono stack — every technical-text primitive shares it.
    *
    * FASE 3a — the --kx-tech-* surfaces are NO LONGER pale aliases: each
    * is a TUNED value defined once per theme block, clearly distinct from
@@ -107,8 +108,8 @@
  *     entity border #7d9e63 = 2.84 — the ENTITY identity is its green
  *     edge + green ink; CODE is the quiet neutral wash. Bubbles are
  *     large panels (perceptual contrast) with their own hairline.
- */ */
-  --kx-font-mono: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+ */
+  --kx-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
   /* Chat bubble (session stream user turns) — sage-tinted panel with its
    * own hairline; distinct from canvas, code wash, and entity fills. */
   --kx-bubble-bg: #e5ecda;
