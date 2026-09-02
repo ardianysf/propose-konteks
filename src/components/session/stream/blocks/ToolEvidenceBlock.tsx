@@ -1,10 +1,12 @@
 /*
  * ToolEvidenceBlock — kind 7 (TOOL CALL).
- * Compact ledger rows: verb + target (mono) + duration + state. The core
- * of this kind is the explicit three-state distinction — queued ("will
- * do", dim), running (animated indicator), done ("did", check + one-line
- * result, expandable into the mono input/output evidence with diff-tinted
- * lines: additions accent, deletions attention).
+ * Each call is ONE compact ledger row: state mark + verb + mono target +
+ * duration + state label + chevron. Rows with evidence (result / io)
+ * are COLLAPSED by default — clicking the row toggles the detail
+ * (aria-expanded / aria-controls). Only state==='running' rows render
+ * open, highlighted with the active pulse (dead under
+ * prefers-reduced-motion); running rows without evidence are
+ * non-interactive status rows.
  */
 import { useId, useState } from 'react'
 import ResponseBlock, { CheckIcon, ChevronIcon, ToolIcon } from '../ResponseBlock'
@@ -23,63 +25,77 @@ function ioLineClass(line: string): string {
 }
 
 function ToolCallRow({ call }: { call: ToolCall }) {
-  const [expanded, setExpanded] = useState(false)
-  const ioId = useId()
-  const expandable = call.state === 'done' && call.io !== undefined
+  const [expanded, setExpanded] = useState(call.state === 'running')
+  const detailId = useId()
+  const hasDetail = call.result !== undefined || call.io !== undefined
+  const open = expanded && hasDetail
+
+  const row = (
+    <>
+      <span className="kx-stream-call__mark" aria-hidden="true">
+        {call.state === 'done' && <CheckIcon />}
+        {call.state === 'running' && <span className="kx-stream-call__pulse" />}
+        {call.state === 'queued' && <span className="kx-stream-call__dot" />}
+      </span>
+      <span className="kx-stream-call__verb">{call.verb}</span>
+      <span className="kx-stream-call__target kx-stream-mono">{call.target}</span>
+      {call.duration && (
+        <span className="kx-stream-call__duration kx-stream-tabular">{call.duration}</span>
+      )}
+      <span className={`kx-stream-call__state kx-stream-call__state--${call.state}`}>
+        {STATE_LABELS[call.state]}
+      </span>
+      <span
+        className={`kx-stream-collapse-chevron${open ? ' kx-stream-collapse-chevron--open' : ''}`}
+        aria-hidden="true"
+      >
+        <ChevronIcon />
+      </span>
+    </>
+  )
 
   return (
     <li className={`kx-stream-call kx-stream-call--${call.state}`}>
-      <div className="kx-stream-call__row">
-        <span className="kx-stream-call__mark" aria-hidden="true">
-          {call.state === 'done' && <CheckIcon />}
-          {call.state === 'running' && <span className="kx-stream-call__pulse" />}
-          {call.state === 'queued' && <span className="kx-stream-call__dot" />}
-        </span>
-        <span className="kx-stream-call__verb">{call.verb}</span>
-        <span className="kx-stream-call__target kx-stream-mono">{call.target}</span>
-        <span className={`kx-stream-call__state kx-stream-call__state--${call.state}`}>
-          {STATE_LABELS[call.state]}
-        </span>
-        {call.duration && (
-          <span className="kx-stream-call__duration kx-stream-tabular">{call.duration}</span>
-        )}
-        {expandable && (
-          <button
-            type="button"
-            className="kx-stream-call__io-toggle"
-            aria-expanded={expanded}
-            aria-controls={expanded ? ioId : undefined}
-            onClick={() => setExpanded((value) => !value)}
-          >
-            <span
-              className={`kx-stream-collapse-chevron${expanded ? ' kx-stream-collapse-chevron--open' : ''}`}
-            >
-              <ChevronIcon />
-            </span>
-            Evidence
-          </button>
-        )}
-      </div>
-      {call.state === 'done' && call.result && (
-        <p className="kx-stream-call__result kx-stream-prose">{call.result}</p>
+      {hasDetail ? (
+        <button
+          type="button"
+          className="kx-stream-call__row"
+          data-testid="tool-row"
+          aria-expanded={open}
+          aria-controls={open ? detailId : undefined}
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {row}
+        </button>
+      ) : (
+        <div className="kx-stream-call__row" data-testid="tool-row" role="status">
+          {row}
+        </div>
       )}
-      {expandable && expanded && (
-        <div id={ioId} className="kx-stream-io">
-          <p className="kx-stream-io__label">input</p>
-          <pre className="kx-stream-io__block kx-stream-mono">
-            <code>{call.io!.input}</code>
-          </pre>
-          <p className="kx-stream-io__label">output</p>
-          <pre className="kx-stream-io__block kx-stream-mono">
-            <code>
-              {call.io!.output.map((line, index) => (
-                <span key={index} className={ioLineClass(line)}>
-                  {line}
-                  {'\n'}
-                </span>
-              ))}
-            </code>
-          </pre>
+      {open && (
+        <div id={detailId} className="kx-stream-call__detail">
+          {call.state === 'done' && call.result && (
+            <p className="kx-stream-call__result kx-stream-prose">{call.result}</p>
+          )}
+          {call.io && (
+            <div className="kx-stream-io">
+              <p className="kx-stream-io__label">input</p>
+              <pre className="kx-stream-io__block kx-stream-mono">
+                <code>{call.io.input}</code>
+              </pre>
+              <p className="kx-stream-io__label">output</p>
+              <pre className="kx-stream-io__block kx-stream-mono">
+                <code>
+                  {call.io.output.map((line, index) => (
+                    <span key={index} className={ioLineClass(line)}>
+                      {line}
+                      {'\n'}
+                    </span>
+                  ))}
+                </code>
+              </pre>
+            </div>
+          )}
         </div>
       )}
     </li>
@@ -88,17 +104,15 @@ function ToolCallRow({ call }: { call: ToolCall }) {
 
 interface ToolEvidenceBlockProps {
   data: ToolEvidenceBlockData
-  actor?: string
   time?: string
 }
 
 export default function ToolEvidenceBlock({
   data,
-  actor = 'Konteks Engineering Agent',
-  time = '09:17',
+  time = '14:20',
 }: ToolEvidenceBlockProps) {
   return (
-    <ResponseBlock kindLabel="TOOL CALL" tone="neutral" icon={<ToolIcon />} actor={actor} time={time}>
+    <ResponseBlock kindLabel="TOOL CALL" tone="neutral" icon={<ToolIcon />} time={time}>
       <ul className="kx-stream-tool__calls">
         {data.calls.map((call) => (
           <ToolCallRow key={call.id} call={call} />

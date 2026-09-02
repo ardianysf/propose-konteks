@@ -1,13 +1,11 @@
 /*
- * ApprovalGateBlock — kind 5 (APPROVAL NEEDED).
- * The interstitial: a 2px solid ink frame that must read as a hard stop —
- * action specification rows (what / scope / cost / rollback), a mandatory
- * irreversible-consequence line (attention), and three explicit
- * permission decisions: Allow once (primary), Always this session
- * (secondary), Deny (ghost). Once decided, the whole frame collapses to
- * a quiet resolved summary row. Visually and verbally distinct from
- * ClarificationBlock: strong frame + permission language, never
- * question language.
+ * ApprovalGateBlock — kind 5 (APPROVAL GATE).
+ * While pending this is the most prominent block on the page: a 2px
+ * solid ink frame, the `APPROVAL NEEDED` status chip, the action
+ * specification rows, the MANDATORY irreversible-consequence line, and
+ * three explicit decisions — Allow once (primary), Always this session
+ * (secondary), Deny (ghost). Once decided it settles quiet: a single
+ * resolved line with the recorded decision.
  */
 import ResponseBlock, { AlertIcon, CheckIcon, GateIcon, StreamChip } from '../ResponseBlock'
 import type { ApprovalGateBlockData, GateDecision } from '../sessionStreamTypes'
@@ -22,7 +20,6 @@ interface ApprovalGateBlockProps {
   data: ApprovalGateBlockData
   decision?: GateDecision
   onDecision: (decision: GateDecision) => void
-  actor?: string
   time?: string
 }
 
@@ -30,24 +27,22 @@ export default function ApprovalGateBlock({
   data,
   decision,
   onDecision,
-  actor = 'Konteks Engineering Agent',
-  time = '09:14',
+  time = '14:16',
 }: ApprovalGateBlockProps) {
   const resolved = decision !== undefined
   const allowed = decision === 'allow-once' || decision === 'always'
 
   return (
     <ResponseBlock
-      kindLabel="APPROVAL NEEDED"
+      kindLabel="APPROVAL"
       tone={resolved ? (allowed ? 'accent' : 'neutral') : 'attention'}
       icon={<GateIcon />}
-      actor={actor}
       time={time}
       stateChip={
         resolved ? (
           <StreamChip tone={allowed ? 'accent' : 'neutral'}>{DECISION_LABELS[decision]}</StreamChip>
         ) : (
-          <StreamChip tone="attention">blocking</StreamChip>
+          <StreamChip tone="attention">APPROVAL NEEDED</StreamChip>
         )
       }
     >
@@ -61,7 +56,7 @@ export default function ApprovalGateBlock({
           </p>
         </div>
       ) : (
-        <div className="kx-stream-gate">
+        <div className="kx-stream-gate" data-testid="gate-pending">
           <p className="kx-stream-gate__action">{data.action}</p>
           <dl className="kx-stream-gate__rows">
             {data.rows.map((row) => (

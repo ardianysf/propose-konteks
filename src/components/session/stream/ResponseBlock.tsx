@@ -1,44 +1,54 @@
 /*
- * ResponseBlock — the shared anatomy every response-kind block renders
- * (spec §Bagian B, anatomy contract):
+ * ResponseBlock — the shared anatomy for AGENT turns in the chat-style
+ * session stream (spec: .pi/orch/plans/chat-session-stream-spec.md
+ * §Anatomi turn).
  *
- *   rail (40px: kind icon + continuous hairline timeline)
- *   header (KIND LABEL · actor · time — right: state chip OR duration)
- *   body + footer slots (children)
+ * Agent turns render as FLAT prose — no bubble, no rail, no card:
  *
- * Differentiation between the ten kinds happens through body structure,
- * icon and label — never through a different grid or grammar. Tone maps
- * onto the three existing token families only:
+ *   header  compact: kind icon + muted label (+ optional state chip)
+ *   body    children — the kind's typed content
+ *   footer  revealed on hover / :focus-within: copy icon (clipboard.ts),
+ *           share icon (mockup: copies a link, flashes "Link copied"),
+ *           and the turn's timestamp
+ *
+ * USER turns use BubbleBlock (BubbleBlock.tsx) instead — the
+ * right-aligned bubble with its own hover action bar (time + copy +
+ * edit). Tone maps onto the three existing token families only:
  *   neutral    → ink hierarchy
- *   accent     → success / approved / primary action
+ *   accent     → success / approved / settled
  *   attention  → needs input / warning / running
  *
  * The icon family lives here too: one stroke family (viewBox 24,
  * stroke-width 1.75, currentColor, no fill) authored inline — no emoji,
  * no external dependency.
  */
-import type { ReactElement, ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactElement, type ReactNode } from 'react'
 import type { StreamKind, StreamTone } from './sessionStreamTypes'
+import { copyToClipboard } from './clipboard'
 import './SessionStream.css'
 
-/** Caps kind labels from the spec's ten-type table. */
+/** Caps kind labels from the spec's type table (demo-page anchors). */
 export const KIND_LABELS: Record<StreamKind, string> = {
   request: 'REQUEST',
   acknowledgement: 'UNDERSTANDING',
   clarification: 'CLARIFICATION',
   plan: 'PLAN',
   'approval-gate': 'APPROVAL NEEDED',
-  progress: 'IN PROGRESS',
+  progress: 'PROGRESS',
   tool: 'TOOL CALL',
   artifact: 'ARTIFACT',
   review: 'REVIEW FINDING',
   completion: 'HANDOFF',
+  answer: 'ANSWER',
 }
+
+/** Mock share link target — phase 1 copies it to the clipboard. */
+const SHARE_LINK = 'https://konteks.app/sessions/SES-2026-0121'
 
 // ── Icon family ───────────────────────────────────────────────────────────
 // One drawn stroke family: viewBox 24, stroke-width 1.75, round caps,
-// currentColor, no fill. Sized 16px on the rail; smaller utility marks
-// (check, chevron, kebab, alert, minus) stay in the same family.
+// currentColor, no fill. Sized 16px for headers; smaller utility marks
+// (check, chevron, alert, copy, share, edit) stay in the same family.
 
 function Svg({ children, ...size }: { children: ReactNode; width: number; height: number }) {
   return (
@@ -159,6 +169,14 @@ export function CompletionIcon() {
   )
 }
 
+export function MessageIcon() {
+  return (
+    <Svg width={16} height={16}>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </Svg>
+  )
+}
+
 /** Small utility marks — same stroke family, smaller canvas presence. */
 
 export function CheckIcon({ width = 12 }: { width?: number }) {
@@ -185,16 +203,6 @@ export function ChevronIcon({ width = 12 }: { width?: number }) {
   )
 }
 
-export function KebabIcon() {
-  return (
-    <Svg width={14} height={14}>
-      <path d="M12 5.2h.01" />
-      <path d="M12 12h.01" />
-      <path d="M12 18.8h.01" />
-    </Svg>
-  )
-}
-
 export function AlertIcon({ width = 12 }: { width?: number }) {
   return (
     <Svg width={width} height={width}>
@@ -205,10 +213,79 @@ export function AlertIcon({ width = 12 }: { width?: number }) {
   )
 }
 
-export function MessageIcon() {
+export function CopyIcon() {
+  return (
+    <Svg width={14} height={14}>
+      <rect x="8.8" y="8.8" width="11.2" height="11.2" rx="2.2" />
+      <path d="M15.2 8.8V6.4a2.2 2.2 0 0 0-2.2-2.2H6.4a2.2 2.2 0 0 0-2.2 2.2v6.6a2.2 2.2 0 0 0 2.2 2.2h2.4" />
+    </Svg>
+  )
+}
+
+export function ShareIcon() {
+  return (
+    <Svg width={14} height={14}>
+      <circle cx="17.8" cy="5.6" r="2.4" />
+      <circle cx="6.2" cy="12" r="2.4" />
+      <circle cx="17.8" cy="18.4" r="2.4" />
+      <path d="m8.3 10.9 7.4-4.1" />
+      <path d="m8.3 13.1 7.4 4.1" />
+    </Svg>
+  )
+}
+
+export function EditIcon() {
+  return (
+    <Svg width={14} height={14}>
+      <path d="M12.8 5.2l6 6" />
+      <path d="M4 20l1-4.2L15.6 5.2a2.1 2.1 0 0 1 3 0l.2.2a2.1 2.1 0 0 1 0 3L8.2 19 4 20z" />
+    </Svg>
+  )
+}
+
+/** File-type glyphs for attachment cards (same stroke family). */
+
+export function DocIcon() {
   return (
     <Svg width={16} height={16}>
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      <path d="M13.5 3H7a1.7 1.7 0 0 0-1.7 1.7v14.6A1.7 1.7 0 0 0 7 21h10a1.7 1.7 0 0 0 1.7-1.7V8.2L13.5 3z" />
+      <path d="M13.5 3v5.2h5.2" />
+      <path d="M8.8 12.5h6.4" />
+      <path d="M8.8 15.8h4.4" />
+    </Svg>
+  )
+}
+
+export function SheetIcon() {
+  return (
+    <Svg width={16} height={16}>
+      <rect x="4" y="4" width="16" height="16" rx="1.8" />
+      <path d="M4 9.3h16" />
+      <path d="M4 14.7h16" />
+      <path d="M9.3 4v16" />
+      <path d="M14.7 4v16" />
+    </Svg>
+  )
+}
+
+export function DiffIcon() {
+  return (
+    <Svg width={16} height={16}>
+      <path d="M7 4.5v15" />
+      <path d="M17 4.5v15" />
+      <path d="M4.8 7h4.4" />
+      <path d="M14.8 13.5h4.4" />
+      <path d="M17 11.2v4.6" />
+    </Svg>
+  )
+}
+
+export function ArchiveIcon() {
+  return (
+    <Svg width={16} height={16}>
+      <rect x="3.5" y="4.5" width="17" height="4.4" rx="1.2" />
+      <path d="M5.2 8.9v9.4a1.7 1.7 0 0 0 1.7 1.7h10.2a1.7 1.7 0 0 0 1.7-1.7V8.9" />
+      <path d="M9.8 12.8h4.4" />
     </Svg>
   )
 }
@@ -225,67 +302,105 @@ export function StreamChip({
   return <span className={`kx-stream-chip kx-stream-chip--${tone}`}>{children}</span>
 }
 
-// ── Shared anatomy ────────────────────────────────────────────────────────
+// ── Shared agent-turn anatomy ─────────────────────────────────────────────
 
 export interface ResponseBlockProps {
-  /** Caps kind label, e.g. REQUEST / APPROVAL NEEDED. */
+  /** Caps kind label, e.g. UNDERSTANDING / PLAN / ANSWER. */
   kindLabel: string
   tone?: StreamTone
   /** 16px stroke icon from the family above. */
   icon: ReactElement
-  actor: string
-  /** Relative or clock time string. */
+  /** The turn's timestamp — shown in the hover footer. */
   time: string
-  /** Right-header state chip. */
+  /** Optional status chip riding the compact header row. */
   stateChip?: ReactNode
-  /** Right-header tabular duration (mutually present-able with chip). */
-  duration?: string
   children: ReactNode
-  /** Extra modifier class for the block root (e.g. --completion). */
+  /** Extra modifier class for the turn root (e.g. --completion). */
   className?: string
   id?: string
 }
+
+type FooterFeedback = 'idle' | 'copied' | 'linked'
 
 export default function ResponseBlock({
   kindLabel,
   tone = 'neutral',
   icon,
-  actor,
   time,
   stateChip,
-  duration,
   children,
   className,
   id,
 }: ResponseBlockProps) {
-  const classes = ['kx-stream-block', `kx-stream-block--${tone}`]
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const [feedback, setFeedback] = useState<FooterFeedback>('idle')
+  const timerRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current)
+    }
+  }, [])
+
+  const flash = (next: FooterFeedback) => {
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current)
+    setFeedback(next)
+    timerRef.current = window.setTimeout(() => setFeedback('idle'), 1600)
+  }
+
+  const handleCopy = () => {
+    const body = bodyRef.current
+    void copyToClipboard(body?.innerText ?? body?.textContent ?? '')
+    flash('copied')
+  }
+
+  const handleShare = () => {
+    void copyToClipboard(`${SHARE_LINK}${id ? `#${id}` : ''}`)
+    flash('linked')
+  }
+
+  const classes = ['kx-stream-turn', `kx-stream-turn--${tone}`]
   if (className) classes.push(className)
   return (
     <article id={id} className={classes.join(' ')}>
-      <div className="kx-stream-block__rail" aria-hidden="true">
-        <span className="kx-stream-block__rail-line" />
-        <span className="kx-stream-block__rail-icon">{icon}</span>
+      <header className="kx-stream-turn__head">
+        <p className="kx-stream-turn__ident">
+          <span className="kx-stream-turn__icon" aria-hidden="true">
+            {icon}
+          </span>
+          <span className="kx-stream-turn__kind">{kindLabel}</span>
+        </p>
+        {stateChip !== undefined && stateChip}
+      </header>
+      <div className="kx-stream-turn__body" ref={bodyRef}>
+        {children}
       </div>
-      <div className="kx-stream-block__main">
-        <header className="kx-stream-block__header">
-          <p className="kx-stream-block__ident">
-            <span className="kx-stream-block__kind">{kindLabel}</span>
-            <span className="kx-stream-block__sep">·</span>
-            <span className="kx-stream-block__actor">{actor}</span>
-            <span className="kx-stream-block__sep">·</span>
-            <span className="kx-stream-block__time">{time}</span>
-          </p>
-          {(stateChip !== undefined || duration !== undefined) && (
-            <p className="kx-stream-block__meta">
-              {stateChip}
-              {duration !== undefined && (
-                <span className="kx-stream-block__duration kx-stream-tabular">{duration}</span>
-              )}
-            </p>
-          )}
-        </header>
-        <div className="kx-stream-block__body">{children}</div>
-      </div>
+      <footer className="kx-stream-turn__footer" data-testid="turn-footer">
+        <button
+          type="button"
+          className="kx-stream-icon-action"
+          aria-label="Copy message"
+          data-testid="turn-copy"
+          onClick={handleCopy}
+        >
+          <CopyIcon />
+        </button>
+        <button
+          type="button"
+          className="kx-stream-icon-action"
+          aria-label="Share message"
+          data-testid="turn-share"
+          onClick={handleShare}
+        >
+          <ShareIcon />
+        </button>
+        {feedback !== 'idle' && (
+          <span className="kx-stream-turn__feedback" role="status">
+            {feedback === 'copied' ? 'Copied' : 'Link copied'}
+          </span>
+        )}
+        <span className="kx-stream-turn__time kx-stream-tabular">{time}</span>
+      </footer>
     </article>
   )
 }

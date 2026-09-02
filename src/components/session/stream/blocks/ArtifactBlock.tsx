@@ -1,14 +1,15 @@
 /*
- * ArtifactBlock — kind 8 (ARTIFACT).
- * Document card: type badge (PRD / DIFF / TEST REPORT / RESEARCH), title,
- * excerpt, a mono schema/diff preview (additions accent, deletions
- * attention), version/time meta, and Open / Copy / Download actions.
- * Copy reports through the page-provided onCopy (clipboard with
- * fallback); Open expands the full payload preview; Download emits the
- * payload as a file when the environment allows it.
+ * ArtifactBlock — kind 8 (ARTIFACT): CHIP ONLY, no big card.
+ * A single chip — type badge + title + version — attached to the end of
+ * the related agent turn. Hover / :focus-within on the chip reveals the
+ * small Open / Copy / Download actions: Copy writes data.copyPayload
+ * through the shared clipboard helper (clipboard.ts) with brief
+ * feedback, Open expands a compact mono schema preview, Download emits
+ * the payload as a file when the environment allows it.
  */
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ResponseBlock, { ArtifactIcon } from '../ResponseBlock'
+import { copyToClipboard } from '../clipboard'
 import type { ArtifactBlockData } from '../sessionStreamTypes'
 
 function previewLineClass(line: string): string {
@@ -19,24 +20,25 @@ function previewLineClass(line: string): string {
 
 interface ArtifactBlockProps {
   data: ArtifactBlockData
-  onCopy: (payload: string) => void
-  actor?: string
   time?: string
 }
 
-export default function ArtifactBlock({
-  data,
-  onCopy,
-  actor = 'Konteks Engineering Agent',
-  time = '09:33',
-}: ArtifactBlockProps) {
+export default function ArtifactBlock({ data, time = '14:46' }: ArtifactBlockProps) {
   const [copied, setCopied] = useState(false)
   const [open, setOpen] = useState(false)
+  const timerRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current)
+    }
+  }, [])
 
   const handleCopy = () => {
-    onCopy(data.copyPayload)
+    void copyToClipboard(data.copyPayload)
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current)
     setCopied(true)
-    window.setTimeout(() => setCopied(false), 1600)
+    timerRef.current = window.setTimeout(() => setCopied(false), 1600)
   }
 
   const handleDownload = () => {
@@ -58,48 +60,48 @@ export default function ArtifactBlock({
   }
 
   return (
-    <ResponseBlock kindLabel="ARTIFACT" tone="neutral" icon={<ArtifactIcon />} actor={actor} time={time}>
-      <article className="kx-stream-artifact">
-        <header className="kx-stream-artifact__head">
-          <span className="kx-stream-artifact__badge">{data.badge}</span>
-          <p className="kx-stream-artifact__title">{data.title}</p>
-          <p className="kx-stream-artifact__meta">
+    <ResponseBlock kindLabel="ARTIFACT" tone="neutral" icon={<ArtifactIcon />} time={time}>
+      <div className="kx-stream-artifact">
+        <div className="kx-stream-artifact-chip" data-testid="artifact-chip">
+          <span className="kx-stream-artifact-chip__badge">{data.badge}</span>
+          <span className="kx-stream-artifact-chip__title">{data.title}</span>
+          <span className="kx-stream-artifact-chip__version kx-stream-tabular">
             {data.version} · {data.time}
-          </p>
-        </header>
-        <p className="kx-stream-artifact__excerpt kx-stream-prose">{data.excerpt}</p>
-        <pre className="kx-stream-artifact__preview kx-stream-mono">
-          <code>
-            {data.schema.map((line, index) => (
-              <span key={index} className={previewLineClass(line)}>
-                {line}
-                {'\n'}
-              </span>
-            ))}
-          </code>
-        </pre>
+          </span>
+          <span className="kx-stream-artifact-chip__actions" data-testid="artifact-actions">
+            <button
+              type="button"
+              className="kx-stream-chip-action"
+              aria-expanded={open}
+              aria-controls={open ? 'kx-stream-artifact-preview' : undefined}
+              onClick={() => setOpen((value) => !value)}
+            >
+              {open ? 'Close' : 'Open'}
+            </button>
+            <button type="button" className="kx-stream-chip-action" onClick={handleCopy}>
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+            <button type="button" className="kx-stream-chip-action" onClick={handleDownload}>
+              Download
+            </button>
+          </span>
+        </div>
         {open && (
-          <pre className="kx-stream-artifact__preview kx-stream-artifact__preview--full kx-stream-mono">
-            <code>{data.copyPayload}</code>
+          <pre
+            id="kx-stream-artifact-preview"
+            className="kx-stream-artifact__preview kx-stream-mono"
+          >
+            <code>
+              {data.schema.map((line, index) => (
+                <span key={index} className={previewLineClass(line)}>
+                  {line}
+                  {'\n'}
+                </span>
+              ))}
+            </code>
           </pre>
         )}
-        <footer className="kx-stream-artifact__actions">
-          <button
-            type="button"
-            className="kx-stream-btn kx-stream-btn--link"
-            aria-expanded={open}
-            onClick={() => setOpen((value) => !value)}
-          >
-            {open ? 'Close preview' : 'Open'}
-          </button>
-          <button type="button" className="kx-stream-btn kx-stream-btn--secondary" onClick={handleCopy}>
-            {copied ? 'Copied' : 'Copy'}
-          </button>
-          <button type="button" className="kx-stream-btn kx-stream-btn--ghost" onClick={handleDownload}>
-            Download
-          </button>
-        </footer>
-      </article>
+      </div>
     </ResponseBlock>
   )
 }

@@ -1,32 +1,22 @@
 /*
- * AcknowledgementBlock — kind 2 (UNDERSTANDING).
- * Deliberately quiet: ink-2 prose, no card, scope in/out as two mini
- * columns, a confidence note and the grounding line. The accent lives in
- * one place only — the "understood" chip.
+ * AcknowledgementBlock — kind 2 (UNDERSTANDING): flat agent prose.
+ * Summary prose, scope in/out as two compact borderless columns,
+ * confidence note, and the muted grounding line. No card.
  */
-import ResponseBlock, { AckIcon, StreamChip } from '../ResponseBlock'
+import ResponseBlock, { AckIcon } from '../ResponseBlock'
 import type { AcknowledgementBlockData } from '../sessionStreamTypes'
 
 interface AcknowledgementBlockProps {
   data: AcknowledgementBlockData
-  actor?: string
   time?: string
 }
 
 export default function AcknowledgementBlock({
   data,
-  actor = 'Konteks Engineering Agent',
-  time = '09:05',
+  time = '14:04',
 }: AcknowledgementBlockProps) {
   return (
-    <ResponseBlock
-      kindLabel="UNDERSTANDING"
-      tone="neutral"
-      icon={<AckIcon />}
-      actor={actor}
-      time={time}
-      stateChip={<StreamChip tone="accent">understood</StreamChip>}
-    >
+    <ResponseBlock kindLabel="UNDERSTANDING" tone="neutral" icon={<AckIcon />} time={time}>
       <div className="kx-stream-ack">
         <p className="kx-stream-ack__summary kx-stream-prose">{data.summary}</p>
         <div className="kx-stream-ack__scope">

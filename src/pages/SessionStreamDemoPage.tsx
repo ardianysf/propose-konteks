@@ -11,12 +11,10 @@
  */
 import { Fragment, useState } from 'react'
 import { SESSION_STREAM_STORY } from '../components/session/stream/sessionStreamData'
-import ResponseBlock, {
-  KIND_LABELS,
-  MessageIcon,
-  StreamChip,
-} from '../components/session/stream/ResponseBlock'
+import BubbleBlock from '../components/session/stream/BubbleBlock'
+import { KIND_LABELS } from '../components/session/stream/ResponseBlock'
 import type {
+  ClarificationBlockData,
   GateDecision,
   StreamKind,
   StreamStoryEntry,
@@ -34,28 +32,15 @@ import CompletionBlock from '../components/session/stream/blocks/CompletionBlock
 import { ILLUSTRATIVE_DATA_NOTE } from '../data/mockData'
 import '../components/session/stream/SessionStream.css'
 
-/** The demo's own copy handler: async clipboard with a textarea +
- * execCommand fallback for environments without the async clipboard. */
-async function copyToClipboard(payload: string): Promise<void> {
-  try {
-    await navigator.clipboard.writeText(payload)
-    return
-  } catch {
-    /* fall through to the legacy path */
-  }
-  try {
-    const textarea = document.createElement('textarea')
-    textarea.value = payload
-    textarea.setAttribute('readonly', '')
-    textarea.style.position = 'fixed'
-    textarea.style.opacity = '0'
-    document.body.appendChild(textarea)
-    textarea.select()
-    document.execCommand('copy')
-    document.body.removeChild(textarea)
-  } catch {
-    /* clipboard unavailable in this environment — demo tolerates it */
-  }
+/** Composes the inserted user bubble for the interactive clarification:
+ * the chosen options as a numbered chat message. */
+function answerMessage(
+  questions: ClarificationBlockData['questions'],
+  answers: Record<string, string>,
+): string {
+  return questions
+    .map((question, index) => `${index + 1}. ${answers[question.id] ?? ''}`)
+    .join('\n')
 }
 
 const KIND_ORDER: StreamKind[] = [
@@ -127,9 +112,8 @@ export default function SessionStreamDemoPage() {
         // The second tool batch renders later on the story clock.
         return <ToolEvidenceBlock data={entry.data} time={position > 7 ? '09:41' : undefined} />
       case 'artifact':
-        return (
-          <ArtifactBlock data={entry.data} onCopy={(payload) => void copyToClipboard(payload)} />
-        )
+        // Copy/Download ride inside the chip itself (clipboard.ts).
+        return <ArtifactBlock data={entry.data} />
       case 'review':
         return <ReviewFindingBlock data={entry.data} />
       case 'completion':
@@ -169,26 +153,16 @@ export default function SessionStreamDemoPage() {
               </div>
               {entry.kind === 'clarification' && allAnswered && clarification && (
                 <div className="kx-stream-slot">
-                  <ResponseBlock
+                  <BubbleBlock
                     id="stream-user-answer"
-                    kindLabel="ANSWER"
-                    tone="neutral"
-                    icon={<MessageIcon />}
-                    actor="Refactory Admin"
                     time="09:08"
-                    stateChip={<StreamChip>user</StreamChip>}
+                    testId="user-bubble"
+                    copyPayload={answerMessage(clarification.data.questions, answers)}
                   >
-                    <div className="kx-stream-answer">
-                      {clarification.data.questions.map((question, questionIndex) => (
-                        <p key={question.id} className="kx-stream-answer__line">
-                          <span className="kx-stream-answer__num kx-stream-tabular">
-                            {questionIndex + 1}
-                          </span>
-                          {answers[question.id]}
-                        </p>
-                      ))}
-                    </div>
-                  </ResponseBlock>
+                    <p className="kx-stream-bubble__text kx-stream-prose">
+                      {answerMessage(clarification.data.questions, answers)}
+                    </p>
+                  </BubbleBlock>
                 </div>
               )}
             </Fragment>

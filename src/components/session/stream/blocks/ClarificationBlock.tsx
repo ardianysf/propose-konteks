@@ -1,38 +1,43 @@
 /*
- * ClarificationBlock — kind 3 (CLARIFICATION).
- * Numbered specific questions with clickable answer-option chips. While
- * any answer is outstanding the block reads as paused (attention tone +
- * paused notice); once every question is answered it flips to the accent
- * resumed notice. This is a QUESTION block — deliberately no permission
- * language; the permission-framed interstitial is ApprovalGateBlock.
+ * ClarificationBlock — kind 3 (CLARIFICATION): seamless agent prose.
+ * Numbered questions flow inside the agent turn (no separate Q/A card).
+ *
+ * Settled history: when data.settledAnswers is present the block renders
+ * its settled, NON-interactive state — each question shows the recorded
+ * answer and the resumed notice; the answers themselves live in the
+ * stream as user bubbles (fixture order).
+ *
+ * Interactive (live): clickable answer-option chips ride each question;
+ * clicking one calls the page-level callback (the page inserts the user
+ * bubble). While any answer is outstanding the notice reads paused
+ * (attention); once every question is answered it flips to resumed.
  */
-import ResponseBlock, { ClarificationIcon, StreamChip } from '../ResponseBlock'
+import ResponseBlock, { CheckIcon, ClarificationIcon, StreamChip } from '../ResponseBlock'
 import type { ClarificationBlockData } from '../sessionStreamTypes'
 
 interface ClarificationBlockProps {
   data: ClarificationBlockData
-  /** questionId → chosen option label. */
-  answered: Record<string, string>
-  onAnswer: (questionId: string, option: string) => void
-  actor?: string
+  /** questionId → chosen option label (interactive mode only). */
+  answered?: Record<string, string>
+  onAnswer?: (questionId: string, option: string) => void
   time?: string
 }
 
 export default function ClarificationBlock({
   data,
-  answered,
+  answered = {},
   onAnswer,
-  actor = 'Konteks Engineering Agent',
-  time = '09:06',
+  time = '14:05',
 }: ClarificationBlockProps) {
-  const allAnswered = data.questions.every((question) => answered[question.id] !== undefined)
+  const settled = data.settledAnswers !== undefined
+  const allAnswered =
+    settled || data.questions.every((question) => answered[question.id] !== undefined)
 
   return (
     <ResponseBlock
       kindLabel="CLARIFICATION"
       tone={allAnswered ? 'accent' : 'attention'}
       icon={<ClarificationIcon />}
-      actor={actor}
       time={time}
       stateChip={
         allAnswered ? (
@@ -44,34 +49,46 @@ export default function ClarificationBlock({
     >
       <div className="kx-stream-clar">
         <ol className="kx-stream-clar__questions">
-          {data.questions.map((question, index) => (
-            <li key={question.id} className="kx-stream-clar__question">
-              <p className="kx-stream-clar__q-text kx-stream-prose">
-                <span className="kx-stream-clar__q-num kx-stream-tabular">{index + 1}</span>
-                {question.question}
-              </p>
-              <div
-                className="kx-stream-clar__options"
-                role="group"
-                aria-label={`Answer options for question ${index + 1}`}
-              >
-                {question.options.map((option) => {
-                  const selected = answered[question.id] === option
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      className={`kx-stream-option${selected ? ' kx-stream-option--selected' : ''}`}
-                      aria-pressed={selected}
-                      onClick={() => onAnswer(question.id, option)}
-                    >
-                      {option}
-                    </button>
-                  )
-                })}
-              </div>
-            </li>
-          ))}
+          {data.questions.map((question, index) => {
+            const settledAnswer = settled ? data.settledAnswers![index] : undefined
+            return (
+              <li key={question.id} className="kx-stream-clar__question">
+                <p className="kx-stream-clar__q-text kx-stream-prose">
+                  <span className="kx-stream-clar__q-num kx-stream-tabular">{index + 1}</span>
+                  {question.question}
+                </p>
+                {settledAnswer !== undefined ? (
+                  <p className="kx-stream-clar__settled" data-testid="clar-settled-answer">
+                    <span className="kx-stream-clar__settled-mark" aria-hidden="true">
+                      <CheckIcon />
+                    </span>
+                    {settledAnswer}
+                  </p>
+                ) : (
+                  <div
+                    className="kx-stream-clar__options"
+                    role="group"
+                    aria-label={`Answer options for question ${index + 1}`}
+                  >
+                    {question.options.map((option) => {
+                      const selected = answered[question.id] === option
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          className={`kx-stream-option${selected ? ' kx-stream-option--selected' : ''}`}
+                          aria-pressed={selected}
+                          onClick={() => onAnswer?.(question.id, option)}
+                        >
+                          {option}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </li>
+            )
+          })}
         </ol>
         <p
           className={`kx-stream-notice${
