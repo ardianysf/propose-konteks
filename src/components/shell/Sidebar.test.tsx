@@ -557,7 +557,7 @@ describe('Sidebar', () => {
     expect(tooltip).not.toBeVisible()
 
     fireEvent.click(customizeBtn)
-    expect(bucket.current?.overlay).toEqual({ kind: 'customize', tab: 'agents' })
+    expect(bucket.current?.overlay).toEqual({ kind: 'customize', destination: { section: 'agents' } })
   })
 
   it('uses no emoji anywhere in the sidebar chrome', () => {

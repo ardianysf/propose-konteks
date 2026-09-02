@@ -506,6 +506,15 @@ describe('V2AccountPopover', () => {
     expect(await screen.findByTestId('customize-modal')).toBeInTheDocument()
   })
 
+  it('hands Account integrations into Customize Connections', async () => {
+    render(<V2App />)
+    fireEvent.click(screen.getByTestId(TRIGGERS.account))
+    fireEvent.click(within(getAccountPopover()).getByRole('button', { name: 'Integrations' }))
+    expect(await screen.findByRole('dialog', { name: 'Customize' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Connections' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'MCP servers' })).toHaveAttribute('aria-selected', 'true')
+  })
+
   it('closes on Escape and restores trigger focus', async () => {
     render(<V2App />)
     const trigger = screen.getByTestId(TRIGGERS.account)

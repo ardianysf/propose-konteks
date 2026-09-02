@@ -39,6 +39,13 @@ function customizeRule(): string {
   return components.slice(open, close)
 }
 
+function settingsRule(): string {
+  const open = components.indexOf('.kx-settings {')
+  expect(open).toBeGreaterThanOrEqual(0)
+  const close = components.indexOf('}', open)
+  return components.slice(open, close)
+}
+
 describe('responsive rail at max-width 1280px (AC12/AC44)', () => {
   it('declares a max-width 1280px media query', () => {
     expect(components).toContain('@media (max-width: 1280px)')
@@ -131,10 +138,17 @@ describe('desktop short-height compaction (AC44, 1200×720)', () => {
 })
 
 describe('Customize viewport constraints (AC44)', () => {
-  it('keeps the preferred 790x580 shell', () => {
+  it('uses the production-style 896px by 85dvh shell tokens', () => {
     const rule = flat(customizeRule())
     expect(rule).toContain('width: var(--kx-customize-w);')
     expect(rule).toContain('height: var(--kx-customize-h);')
+  })
+
+  it('applies the matching production-style shell tokens to Settings', () => {
+    const rule = flat(settingsRule())
+    expect(rule).toContain('width: var(--kx-settings-w);')
+    expect(rule).toContain('height: var(--kx-settings-h);')
+    expect(rule).toContain('max-width: calc(100vw - 48px);')
   })
 
   it('caps width at calc(100vw - 48px)', () => {
@@ -159,6 +173,18 @@ describe('Customize viewport constraints (AC44)', () => {
     expect(flat(components)).toContain(
       '.kx-customize__body { display: grid; grid-template-columns: 180px minmax(0, 1fr);',
     )
+  })
+
+  it('turns nested form dialogs into full-screen mobile sheets', () => {
+    const mobile = flat(extractMediaBlocks(components, '(max-width: 760px)'))
+    expect(mobile).toContain('.kx-nested-dialog, .kx-nested-dialog--compact, .kx-nested-dialog--wide { width: 100vw; height: 100dvh; max-height: none; border-radius: 0;')
+  })
+
+  it('stacks Billing summaries and forms while preserving horizontal data-table access', () => {
+    const mobile = flat(extractMediaBlocks(components, '(max-width: 760px)'))
+    expect(mobile).toContain('.kx-billing-overview { grid-template-columns: 1fr;')
+    expect(mobile).toContain('.kx-form-columns, .kx-form-columns--two, .kx-form-columns--three { grid-template-columns: 1fr;')
+    expect(flat(components)).toContain('.kx-table-scroll { min-width: 0; overflow-x: auto;')
   })
 })
 

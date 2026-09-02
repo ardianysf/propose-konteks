@@ -59,11 +59,13 @@ const TYPE_TOKENS: TokenDef[] = [
   { name: '--kx-font-bold', note: 'Bold weight (700)' },
 ]
 
-/** Fixed dimensions — 6 tokens (shared across themes). */
+/** Fixed dimensions — 8 tokens (shared across themes). */
 const DIMENSION_TOKENS: TokenDef[] = [
   { name: '--kx-radius-main', note: 'Main canvas corner radius' },
   { name: '--kx-sidebar-w', note: 'Expanded sidebar width' },
   { name: '--kx-sidebar-rail', note: 'Collapsed sidebar icon rail width' },
+  { name: '--kx-settings-w', note: 'Settings modal width' },
+  { name: '--kx-settings-h', note: 'Settings modal viewport height' },
   { name: '--kx-customize-w', note: 'Customize modal width (fixed)' },
   { name: '--kx-customize-h', note: 'Customize modal height (fixed)' },
   { name: '--kx-drawer-w', note: 'Konteks Learned right drawer width' },

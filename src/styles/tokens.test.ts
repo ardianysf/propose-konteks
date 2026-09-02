@@ -28,11 +28,11 @@ it.each([22, 18, 16, 14, 12, 11, 10, 9])('type scale defines %spx', (px) =>
   expect(css).toContain(`${px}px`),
 )
 
-it('defines fixed dimensions (19.5px corners, 320px sidebar, 790x580 customize, 450px drawer)', () => {
+it('defines fixed dimensions including production-style Settings and Customize workspaces', () => {
   expect(css).toContain('19.5px')
   expect(css).toContain('320px')
-  expect(css).toContain('790px')
-  expect(css).toContain('580px')
+  expect(css.match(/896px/g)).toHaveLength(2)
+  expect(css.match(/85dvh/g)).toHaveLength(2)
   expect(css).toContain('450px')
 })
 

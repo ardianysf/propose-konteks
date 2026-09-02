@@ -47,7 +47,7 @@
       "sourcePath": "src/components/account/SettingsModal.tsx",
       "exportName": "default",
       "classification": "mockup-coupled",
-      "description": "Centered Settings modal with General/Billing/Team tablist sections sourced from mockData.settings.sections; content is static illustrative, nothing persists.",
+      "description": "Production-style 896px × 85dvh Settings workspace with General, a complete six-tab billing data workspace, Team, and nested resource/payment dialogs.",
       "propDocs": null,
       "contextContract": {
         "reads": [
@@ -62,15 +62,21 @@
         "src/components/account/SettingsModal.css"
       ],
       "tokenDeps": [
+        "--kx-accent",
+        "--kx-attention",
         "--kx-border",
         "--kx-font-bold",
         "--kx-font-medium",
+        "--kx-font-normal",
         "--kx-muted-text-aa",
         "--kx-pale",
         "--kx-primary",
         "--kx-raised",
         "--kx-secondary",
+        "--kx-settings-h",
+        "--kx-settings-w",
         "--kx-text-l",
+        "--kx-text-2xs",
         "--kx-text-md",
         "--kx-text-sm",
         "--kx-text-xl",
@@ -81,7 +87,7 @@
         "billing",
         "team"
       ],
-      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'settings', section } }}",
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: section === 'billing' ? { kind: 'settings', section, subtab: 'usage' } : { kind: 'settings', section } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {
@@ -489,14 +495,14 @@
       "sourcePath": "src/components/customize/CustomizeModal.tsx",
       "exportName": "default",
       "classification": "mockup-coupled",
-      "description": "Fixed 790×580 Customize shell modal whose frame never resizes across its seven tabs (Agents, Context, MCP, Connectors, VCS, Skills, Tools); only tab content scrolls.",
+      "description": "Production-style 896px × 85dvh Customize workspace with five grouped sections, typed mock mutations, and nested resource form dialogs.",
       "propDocs": null,
       "contextContract": {
         "reads": [
           "overlay"
         ],
         "dispatches": [
-          "SET_CUSTOMIZE_TAB"
+          "SET_CUSTOMIZE_DESTINATION"
         ]
       },
       "cssFiles": [
@@ -519,12 +525,13 @@
         "--kx-text-xl"
       ],
       "variants": [
-        "tab=agents",
-        "tab=context",
-        "tab=mcp",
-        "tab=skills"
+        "agents",
+        "context/files",
+        "capabilities/skills",
+        "connections/mcp",
+        "admin/runtimes"
       ],
-      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'customize', tab } }}",
+      "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'customize', destination } }}",
       "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md."
     },
     {

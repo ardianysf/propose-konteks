@@ -24,6 +24,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ACCOUNT_ACTIONS, type AccountAction } from '../../data/mockData'
 import { useMockup } from '../../state/MockupContext'
+import { usePrototypeLocale } from '../../i18n/prototypeLocale'
 import { useOverlayLifecycle } from '../shell/OverlayLifecycle'
 import {
   applyTheme,
@@ -38,6 +39,14 @@ const THEME_LABELS: Record<ThemePreference, string> = {
   dark: 'Dark',
   system: 'System',
 }
+
+const ACCOUNT_COPY_KEYS = {
+  'account-settings': 'settings',
+  'account-billing': 'billing',
+  'account-integrations': 'integrations',
+  'account-shortcuts': 'shortcuts',
+  'account-logout': 'logout',
+} as const
 
 /** Sun — the Light theme preference glyph, 16×16 currentColor. */
 function SunIcon() {
@@ -103,6 +112,7 @@ const THEME_ICONS: Record<ThemePreference, () => React.JSX.Element> = {
 
 export default function AccountMenu() {
   const { dispatch } = useMockup()
+  const { t } = usePrototypeLocale()
   const { dismissOverlay } = useOverlayLifecycle()
   const menuRef = useRef<HTMLDivElement>(null)
   const [themePref, setThemePref] = useState<ThemePreference>(getStoredPreference)
@@ -117,11 +127,15 @@ export default function AccountMenu() {
 
   const handleAction = (action: AccountAction) => {
     if (action.id === 'account-settings') {
-      dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'settings', section: 'general' } })
+      dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'settings', destination: { section: 'general' } } })
       return
     }
     if (action.id === 'account-billing') {
-      dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'settings', section: 'billing' } })
+      dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'settings', destination: { section: 'billing', subtab: 'usage' } } })
+      return
+    }
+    if (action.id === 'account-integrations') {
+      dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', destination: { section: 'connections', subtab: 'mcp' } } })
       return
     }
     // Illustrative actions stay represented but safely close — no new IA.
@@ -139,7 +153,7 @@ export default function AccountMenu() {
     <div
       ref={menuRef}
       role="menu"
-      aria-label="Account"
+      aria-label={t('account')}
       data-testid="account-menu"
       className="kx-menu kx-account-menu"
       onKeyDown={(event) => {
@@ -161,7 +175,7 @@ export default function AccountMenu() {
       {/* Mobile sheet chrome (≤760px): backdrop (tap closes), handle,
           title. Desktop hides them; the body wrapper is display:contents. */}
       <div className="kx-menu__sheet-handle" aria-hidden="true" />
-      <div className="kx-menu__sheet-title">Account</div>
+      <div className="kx-menu__sheet-title">{t('account')}</div>
       <div className="kx-menu__sheet-body">
       {/* Theme preference — grouped section before the actions list, same
           divider + section-label pattern as the profile menu (AC24). The
@@ -210,7 +224,7 @@ export default function AccountMenu() {
           className="kx-account-menu__item"
           onClick={() => handleAction(action)}
         >
-          {action.label}
+          {t(ACCOUNT_COPY_KEYS[action.id as keyof typeof ACCOUNT_COPY_KEYS] ?? 'account')}
         </button>
       ))}
       </div>

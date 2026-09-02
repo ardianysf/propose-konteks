@@ -180,7 +180,7 @@ describe('ExecutionProfileMenu — flat profile list (AC22)', () => {
     const menu = openMenu()
 
     fireEvent.click(within(menu).getByRole('menuitem', { name: /manage \/ customize profile/i }))
-    expect(bucket.current?.overlay).toEqual({ kind: 'customize', tab: 'agents' })
+    expect(bucket.current?.overlay).toEqual({ kind: 'customize', destination: { section: 'agents' } })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.queryByTestId('execution-profile-menu')).toBeNull()
   })
