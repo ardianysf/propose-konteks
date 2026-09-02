@@ -39,6 +39,10 @@ export interface EntityTokenProps {
   label: string
   /** Identifier label (mono, default) vs human-readable artifact title (sans). */
   mono?: boolean
+  /** Interaction style (Fase 3e): 'pill' (default) rests as a subtle pill
+   * and changes color on hover; 'link' rests as accent ink + underline and
+   * turns INTO a pill (underline removed) on hover/focus. Never combined. */
+  variant?: 'pill' | 'link'
   /** Explicit accessible name, e.g. "Open repository hris-frontend". */
   openLabel?: string
   /** Tooltip text — required for truncated values (full path / SHA / URL). */
@@ -156,6 +160,7 @@ export default function EntityToken({
   kind,
   label,
   mono = true,
+  variant = 'pill',
   openLabel,
   title,
   href,
@@ -163,6 +168,7 @@ export default function EntityToken({
   className,
 }: EntityTokenProps) {
   const classes = ['kx-tech-entity']
+  if (variant === 'link') classes.push('kx-tech-entity--link')
   if (mono) classes.push('kx-tech-entity--mono')
   if (className !== undefined) classes.push(className)
   const accessibleName = openLabel ?? `Open ${kind} ${label}`
