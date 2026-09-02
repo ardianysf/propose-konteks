@@ -485,7 +485,10 @@ describe('SessionStreamDetailPage — interactions', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Live mock composer flow (phase 2) — send → locked composer + scripted turn
+// Live mock composer flow (spec §Live mock v2 — staged interactive):
+// send → locked composer + staged run that PARKS at the approval gate,
+// resumes on the decision, parks again at the plan, and only executes
+// after "Approve plan" (deny / request changes close the turn).
 // ---------------------------------------------------------------------------
 
 describe('SessionStreamDetailPage — live mock composer flow', () => {
@@ -537,7 +540,7 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
     }
   })
 
-  it('plays the scripted turn in order — understanding, tool running→done, progress, artifact row, final answer — then unlocks the composer', () => {
+  it('runs the staged turn — gate WAITS for a decision, plan WAITS for approval, then progress/tool/artifact/answer — then unlocks the composer', () => {
     vi.useFakeTimers()
     try {
       renderRoute('session-stream-detail')
@@ -563,8 +566,75 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       expect(within(understandingSlot).queryByText('UNDERSTANDING')).toBeNull()
       expect(within(understandingSlot).queryByTestId('turn-footer')).toBeNull()
 
-      // The scripted tool call first appears RUNNING (open status row)…
-      step(LIVE_TURN_SCRIPT.toolRunningDelayMs)
+      // The run PARKS at an outstanding approval gate — WAIT point #1.
+      step(LIVE_TURN_SCRIPT.gateDelayMs)
+      const gateSlot = screen.getByTestId('stream-live-gate')
+      expect(within(gateSlot).getByTestId('gate-pending')).toBeInTheDocument()
+      expect(within(gateSlot).getByText('APPROVAL NEEDED')).toBeInTheDocument()
+      expect(within(gateSlot).getByRole('button', { name: 'Allow once' })).toBeInTheDocument()
+      expect(within(gateSlot).getByRole('button', { name: 'Always this session' })).toBeInTheDocument()
+      expect(within(gateSlot).getByRole('button', { name: 'Deny' })).toBeInTheDocument()
+
+      // While the gate waits NOTHING beyond it appears — advance timers
+      // generously: no plan, progress, tool, artifact, or answer. The
+      // composer stays locked; the gate choices are the only way forward.
+      step(60_000)
+      expect(screen.queryByTestId('stream-live-plan')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-progress')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-tool')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-artifact')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-answer')).not.toBeInTheDocument()
+      expect(screen.getByTestId('session-composer-input')).toBeDisabled()
+
+      // Decision: Allow once → the gate settles visibly with the
+      // recorded decision…
+      fireEvent.click(within(gateSlot).getByRole('button', { name: 'Allow once' }))
+      expect(within(gateSlot).queryByTestId('gate-pending')).not.toBeInTheDocument()
+      expect(within(gateSlot).getByText(/Decision recorded:/)).toBeInTheDocument()
+      expect(gateSlot).toHaveTextContent('Allow once')
+
+      // …brief typing, then the interactive plan — WAIT point #2.
+      step(LIVE_TURN_SCRIPT.allowTypingDelayMs)
+      expect(screen.getByTestId('typing-indicator')).toBeInTheDocument()
+      step(LIVE_TURN_SCRIPT.planDelayMs)
+      expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()
+      const planSlot = screen.getByTestId('stream-live-plan')
+      expect(within(planSlot).getByRole('button', { name: 'Approve plan' })).toBeInTheDocument()
+      expect(within(planSlot).getByRole('button', { name: 'Request changes' })).toBeInTheDocument()
+      expect(within(planSlot).getByText('pending approval')).toBeInTheDocument()
+      expect(
+        within(planSlot).getByText('sandbox batch att-2026-0815 (overnight subset)'),
+      ).toBeInTheDocument()
+
+      // The plan waits too — nothing beyond it appears while locked.
+      step(60_000)
+      expect(screen.queryByTestId('stream-live-progress')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-tool')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-artifact')).not.toBeInTheDocument()
+      expect(screen.getByTestId('session-composer-input')).toBeDisabled()
+
+      // Approve plan → the plan settles (chip flips, actions retire)…
+      fireEvent.click(within(planSlot).getByRole('button', { name: 'Approve plan' }))
+      expect(within(planSlot).queryByRole('button', { name: 'Approve plan' })).not.toBeInTheDocument()
+      expect(within(planSlot).getByText('approved')).toBeInTheDocument()
+
+      // …then live progress boots EXPANDED with the active replay phase
+      // and a REAL ticking elapsed clock (mm:ss advances with the fake
+      // clock, tabular on the summary line).
+      step(LIVE_TURN_SCRIPT.execution.progressDelayMs)
+      const progressSlot = screen.getByTestId('stream-live-progress')
+      expect(within(progressSlot).getByTestId('progress-summary')).toHaveAttribute(
+        'aria-expanded',
+        'true',
+      )
+      expect(within(progressSlot).getByTestId('progress-summary')).toHaveTextContent('00:00')
+      expect(within(progressSlot).getByText('Replay overnight subset (37 records)')).toBeInTheDocument()
+      expect(within(progressSlot).getByText('running')).toBeInTheDocument()
+      step(1000)
+      expect(within(progressSlot).getByTestId('progress-summary')).toHaveTextContent('00:01')
+
+      // …the scripted tool call appears RUNNING (open status row)…
+      step(LIVE_TURN_SCRIPT.execution.toolRunningDelayMs - 1000)
       const toolSlot = screen.getByTestId('stream-live-tool')
       const running = within(toolSlot).getByTestId('tool-row')
       expect(running).toHaveTextContent('running')
@@ -572,42 +642,28 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
 
       // …then flips to DONE and collapses: duration + state visible, the
       // evidence detail hidden behind aria-expanded=false.
-      step(LIVE_TURN_SCRIPT.toolDoneDelayMs)
+      step(LIVE_TURN_SCRIPT.execution.toolDoneDelayMs)
       const done = within(toolSlot).getByTestId('tool-row')
       expect(done).toHaveAttribute('aria-expanded', 'false')
       expect(done).toHaveTextContent('done')
       expect(done).toHaveTextContent('1m 12s')
       expect(within(toolSlot).queryByText(/37\/37 overnight records/)).not.toBeInTheDocument()
 
-      // Live progress boots EXPANDED with the active reconcile phase…
-      step(LIVE_TURN_SCRIPT.progressDelayMs)
-      const progressSlot = screen.getByTestId('stream-live-progress')
-      expect(within(progressSlot).getByTestId('progress-summary')).toHaveAttribute(
-        'aria-expanded',
-        'true',
-      )
-      expect(
-        within(progressSlot).getByText('Reconcile against attendance_records'),
-      ).toBeInTheDocument()
-
-      // …settles collapsed to the one-line summary, and the refreshed
-      // artifact chip lands with its v1.1 version.
-      step(LIVE_TURN_SCRIPT.artifactDelayMs)
+      // Progress settles collapsed to the one-line summary, and the
+      // refreshed artifact row lands with its v1.1 version.
+      step(LIVE_TURN_SCRIPT.execution.artifactDelayMs)
       const settled = within(progressSlot).getByTestId('progress-summary')
       expect(settled).toHaveAttribute('aria-expanded', 'false')
       expect(settled).toHaveTextContent('2 phases · 2m 05s · Completed')
-      // The refreshed artifact lands as a FULL-WIDTH row with its v1.1
-      // version — no badge, not a chip.
       const artifactSlot = screen.getByTestId('stream-live-artifact')
       const row = within(artifactSlot).getByTestId('artifact-row')
       expect(row).toHaveTextContent('Review report — attendance integration')
       expect(row).toHaveTextContent('v1.1 · 15:12')
-      expect(within(artifactSlot).queryByText('REPORT')).toBeNull()
 
       // The scripted final answer arrives with the conversation's ONE
       // hover footer (footer-on-final-answer rule; composer still locked
       // until the settle delay elapses)…
-      step(LIVE_TURN_SCRIPT.answerDelayMs)
+      step(LIVE_TURN_SCRIPT.execution.answerDelayMs)
       const answerSlot = screen.getByTestId('stream-live-answer')
       expect(
         within(answerSlot).getByText(/Verified — the boundary fix holds\./),
@@ -621,13 +677,111 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
 
       // …then the composer unlocks: input enabled and a fresh message can
       // be typed and sent again.
-      step(LIVE_TURN_SCRIPT.settleDelayMs)
+      step(LIVE_TURN_SCRIPT.execution.settleDelayMs)
       const input = screen.getByTestId('session-composer-input')
       expect(input).toBeEnabled()
       const send = screen.getByRole('button', { name: 'Send message' })
       expect(send).toHaveAttribute('aria-busy', 'false')
       fireEvent.change(input, { target: { value: 'Thanks — ready for Friday.' } })
       expect(send).toBeEnabled()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('gate Deny closes the turn politely — no plan, progress, tool, or artifact ever appears — and unlocks the composer', () => {
+    vi.useFakeTimers()
+    try {
+      renderRoute('session-stream-detail')
+
+      fireEvent.change(screen.getByTestId('session-composer-input'), {
+        target: { value: 'Re-verify the overnight-shift fix from PR #1301.' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Send message' }))
+
+      // Straight to the outstanding gate (typing + understanding pass by).
+      step(
+        LIVE_TURN_SCRIPT.sentDelayMs +
+          LIVE_TURN_SCRIPT.typingDelayMs +
+          LIVE_TURN_SCRIPT.openDelayMs +
+          LIVE_TURN_SCRIPT.gateDelayMs,
+      )
+      const gateSlot = screen.getByTestId('stream-live-gate')
+      expect(within(gateSlot).getByTestId('gate-pending')).toBeInTheDocument()
+
+      // Deny → the gate settles with the recorded decision…
+      fireEvent.click(within(gateSlot).getByRole('button', { name: 'Deny' }))
+      expect(within(gateSlot).queryByTestId('gate-pending')).not.toBeInTheDocument()
+      expect(within(gateSlot).getByText(/Decision recorded:/)).toBeInTheDocument()
+      expect(gateSlot).toHaveTextContent('Deny')
+
+      // …brief typing, then short polite closing prose — NO execution:
+      // no plan, progress, tool, or artifact ever appears.
+      step(LIVE_TURN_SCRIPT.deny.typingDelayMs)
+      expect(screen.getByTestId('typing-indicator')).toBeInTheDocument()
+      step(LIVE_TURN_SCRIPT.deny.answerDelayMs)
+      expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()
+      const closing = screen.getByTestId('stream-live-answer')
+      expect(within(closing).getByText(/Nothing was executed and nothing was written/)).toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-plan')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-progress')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-tool')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-artifact')).not.toBeInTheDocument()
+
+      // The turn ends and the composer unlocks for the next message.
+      step(LIVE_TURN_SCRIPT.deny.settleDelayMs)
+      expect(screen.getByTestId('session-composer-input')).toBeEnabled()
+      expect(screen.getByRole('button', { name: 'Send message' })).toHaveAttribute(
+        'aria-busy',
+        'false',
+      )
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('plan Request changes closes the turn asking what to change — no execution — and unlocks the composer', () => {
+    vi.useFakeTimers()
+    try {
+      renderRoute('session-stream-detail')
+
+      fireEvent.change(screen.getByTestId('session-composer-input'), {
+        target: { value: 'Re-verify the overnight-shift fix from PR #1301.' },
+      })
+      fireEvent.click(screen.getByRole('button', { name: 'Send message' }))
+
+      // Reach the plan: gate → Allow once → typing → plan.
+      step(
+        LIVE_TURN_SCRIPT.sentDelayMs +
+          LIVE_TURN_SCRIPT.typingDelayMs +
+          LIVE_TURN_SCRIPT.openDelayMs +
+          LIVE_TURN_SCRIPT.gateDelayMs,
+      )
+      fireEvent.click(
+        within(screen.getByTestId('stream-live-gate')).getByRole('button', { name: 'Allow once' }),
+      )
+      step(LIVE_TURN_SCRIPT.allowTypingDelayMs + LIVE_TURN_SCRIPT.planDelayMs)
+      const planSlot = screen.getByTestId('stream-live-plan')
+
+      // Request changes → the plan stays pending…
+      fireEvent.click(within(planSlot).getByRole('button', { name: 'Request changes' }))
+      expect(within(planSlot).getByText('pending approval')).toBeInTheDocument()
+
+      // …brief typing, then short prose asking what to change; no
+      // execution ever starts.
+      step(LIVE_TURN_SCRIPT.requestChanges.typingDelayMs)
+      expect(screen.getByTestId('typing-indicator')).toBeInTheDocument()
+      step(LIVE_TURN_SCRIPT.requestChanges.answerDelayMs)
+      const closing = screen.getByTestId('stream-live-answer')
+      expect(within(closing).getByText(/tell me what to change in the plan/)).toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-progress')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-tool')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('stream-live-artifact')).not.toBeInTheDocument()
+
+      // The turn ends and the composer unlocks — the user can send the
+      // requested changes as a new message.
+      step(LIVE_TURN_SCRIPT.requestChanges.settleDelayMs)
+      expect(screen.getByTestId('session-composer-input')).toBeEnabled()
     } finally {
       vi.useRealTimers()
     }
