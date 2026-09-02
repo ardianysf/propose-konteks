@@ -18,30 +18,49 @@
  * the chip, the gate records a decision, and tool/progress rows expand
  * and collapse locally.
  *
- * LIVE MOCK (spec §Live mock v2 — staged interactive): sending via the
- * composer appends a user bubble (Sending… → sent "just now"), locks
- * the composer, and plays the staged opening on timers — typing
- * indicator → understanding prose — then PARKS at an OUTSTANDING
- * approval gate. The gate choices are the only way forward: deciding
- * settles the gate visibly (decision recorded), brief typing, then an
- * interactive plan WAITS (Approve plan / Request changes). Approving
- * runs the execution leg — live progress with a ticking elapsed clock
- * → tool call RUNNING (open, pulsing) → done (collapses) → settled +
- * artifact chip → final answer → composer unlocks. Deny and Request
- * changes close the turn with short prose and unlock. Every send
- * replays the staged cycle (artifact version bumps v1.1, v1.2, …).
+ * LIVE MOCK (spec §Live mock v2/v3 — staged interactive + progressive
+ * continuation): sending via the composer appends a user bubble
+ * (Sending… → sent "just now"), locks the composer, and plays the
+ * selected script on timers. The FIRST send is the staged v2 cycle,
+ * untouched: typing indicator → understanding prose → PARK at an
+ * OUTSTANDING approval gate (the choices are the only way forward) →
+ * decision settles the gate → typing → interactive plan WAITS (Approve
+ * plan / Request changes) → approving runs the execution leg (live
+ * progress with a ticking elapsed clock → tool call RUNNING → done →
+ * settled + artifact chip → final answer → unlock); Deny / Request
+ * changes close the turn with short prose and unlock.
+ *
+ * Continuation sends get PROGRESSIVELY more complex (v3): the second
+ * send plays the DEEP script — typing → INTERACTIVE clarification with
+ * answer chips (two questions; parked with zero pending timers, same
+ * pattern as the gate) → chip answers insert as a user bubble → typing
+ * → REVISED plan waits → approval runs the MULTI-TOOL leg (two tool
+ * rows: running→done, queued→running→done) → a High REVIEW FINDING → a
+ * short fix tool call → the version-bumped artifact → a final answer
+ * that references the finding. The third send stays LIGHT — one tool
+ * call and a short answer with NO wait points (timers alone) — and
+ * further sends alternate deep/light, artifact versions climbing v2,
+ * v3, … on each deep run.
+ *
  * Editing any user bubble ("Save & resend") updates its text, truncates
- * every turn after it, and replays the staged opening (mockup
- * regeneration). Every timer lives in a page ref and is cleared on
- * unmount — no setState after unmount; while a gate/plan waits there
- * are no pending timers at all (the run resumes from the decision).
+ * every turn after it, and replays the SAME turn-number-appropriate
+ * script from typing (mockup regeneration; history edits replay the
+ * staged cycle). Every timer lives in a page ref and is cleared on
+ * unmount and on resend — no setState after unmount; while a gate,
+ * plan, or clarification waits there are no pending timers at all (the
+ * run resumes from the decision).
  */
 import { Fragment, useEffect, useRef, useState } from 'react'
 import {
   ATTENDANCE_REVIEW_STORY,
   ATTENDANCE_REVIEW_TITLE,
+  LIVE_DEEP_CONTINUATION_SCRIPT,
+  LIVE_LIGHT_FOLLOWUP_SCRIPT,
   LIVE_TURN_SCRIPT,
   type LiveClosingScript,
+  type LiveDeepContinuationScript,
+  type LiveLightFollowUpScript,
+  type LiveStagedScript,
 } from '../components/session/stream/attendanceReviewStory'
 import { isLastAgentTurnOfResponse } from '../components/session/stream/responseGroup'
 import BubbleBlock from '../components/session/stream/BubbleBlock'
@@ -53,6 +72,7 @@ import type {
   GateDecision,
   PlanBlockData,
   ProgressBlockData,
+  ReviewFindingBlockData,
   StreamStoryEntry,
   ToolCall,
 } from '../components/session/stream/sessionStreamTypes'
@@ -98,21 +118,40 @@ const LIVE_CLOCK_MS = 1000
 
 // ── Live-mock state model ─────────────────────────────────────────────────
 
+/** Which scripted turn a send plays (spec §Live mock v3 — progressive
+ * continuation): send #1 = the staged v2 cycle (gate → plan → execution,
+ * UNCHANGED), send #2 = the deep continuation (interactive clarification
+ * chips → revised plan → multi-tool execution → review finding → fix →
+ * artifact bump), send #3 = a light follow-up (one tool → short answer,
+ * no wait points), alternating deep/light afterwards. */
+type LiveRunKind = 'staged' | 'deep' | 'light'
+
+/** The script of the CURRENT live run plus its kind — the decision
+ * handlers branch on it (staged keeps today's legs verbatim). */
+type LiveRunVariant =
+  | { kind: 'staged'; script: LiveStagedScript }
+  | { kind: 'deep'; script: LiveDeepContinuationScript }
+  | { kind: 'light'; script: LiveLightFollowUpScript }
+
 /** One appended live turn. Entries reveal step by step as the staged
  * run advances; `id` is stable per entry, and keying by mutable fields
  * (tool state, progress live/settled) remounts the shared blocks so
  * their collapsed-by-default expansion resets exactly like history.
- * `gate` and `plan` are the interactive WAIT points: they render
- * outstanding/pending until the user's decision settles them in place. */
+ * `gate`, `plan` and `clarification` are the interactive WAIT points:
+ * they render outstanding/pending until the user's decision settles
+ * them in place. */
 type LiveEntry =
-  | { id: string; kind: 'user'; text: string; sending: boolean }
+  | { id: string; kind: 'user'; text: string; sending: boolean; variant: LiveRunKind }
   | { id: string; kind: 'typing' }
   | { id: string; kind: 'understanding'; data: AnswerBlockData }
+  | { id: string; kind: 'clarification'; data: ClarificationBlockData; answers: Record<string, string> }
+  | { id: string; kind: 'answer-bubble'; text: string }
   | { id: string; kind: 'gate'; data: ApprovalGateBlockData; decision?: GateDecision }
   | { id: string; kind: 'plan'; data: PlanBlockData; approved: boolean }
   | { id: string; kind: 'tool'; call: ToolCall }
   | { id: string; kind: 'progress'; data: ProgressBlockData; live: boolean; elapsedSec: number }
   | { id: string; kind: 'artifact'; data: ArtifactBlockData }
+  | { id: string; kind: 'review'; data: ReviewFindingBlockData }
   | { id: string; kind: 'answer'; data: AnswerBlockData }
 
 /** mm:ss for the live elapsed clock (tabular rendering is CSS-side). */
@@ -151,16 +190,24 @@ export default function SessionStreamDetailPage() {
   const [agentBusy, setAgentBusy] = useState(false)
   const [historyCutoff, setHistoryCutoff] = useState(ATTENDANCE_REVIEW_STORY.length)
 
-  // Staged wait points (spec §Live mock v2): while the run parks at the
-  // gate or the plan NO timers are pending — these refs name the entry
-  // currently holding the run, so its decision handler resumes the flow
-  // and stale clicks (an older gate/plan left settled by a resend)
-  // are ignored.
+  // Staged wait points (spec §Live mock v2/v3): while the run parks at
+  // the gate, the plan, or the live clarification NO timers are pending —
+  // these refs name the entry currently holding the run, so its decision
+  // handler resumes the flow and stale clicks (an older gate/plan left
+  // settled by a resend) are ignored.
   const gateWaitRef = useRef<string | null>(null)
   const planWaitRef = useRef<string | null>(null)
-  // The artifact version of the CURRENT staged run (v1.1, v1.2, …) — the
-  // execution leg reads it when the plan is approved, long after the
-  // opening that bumped it.
+  const clarWaitRef = useRef<string | null>(null)
+  // Scratch answers of the CURRENT parked clarification (reset when a
+  // clarification lands) — one clarification waits at a time, so a ref
+  // keeps the resume logic out of the setState updater.
+  const clarAnswersRef = useRef<Record<string, string>>({})
+  // The script + kind of the CURRENT run — the decision handlers branch
+  // on it (staged keeps the v2 legs; deep adds its own continuation).
+  const runVariantRef = useRef<LiveRunVariant>({ kind: 'staged', script: LIVE_TURN_SCRIPT })
+  // The artifact version of the CURRENT run (staged: v1.1, v1.2, … —
+  // deep: v2, v3, …) — the execution legs read it at approval time,
+  // long after the opening that bumped it.
   const versionRef = useRef('v1.1')
 
   // Timer plumbing: every timeout/interval of the current run registers
@@ -168,7 +215,9 @@ export default function SessionStreamDetailPage() {
   const timeoutsRef = useRef<number[]>([])
   const clockRef = useRef<number | null>(null)
   const seqRef = useRef(0)
-  const runCountRef = useRef(0)
+  const runCountRef = useRef(0) // SENDS only — drives the v3 alternation
+  const stagedCountRef = useRef(0) // staged runs started (send or replay)
+  const deepCountRef = useRef(0) // deep runs started (send or replay)
   const tailRef = useRef<HTMLDivElement>(null)
 
   const clearLiveTimers = () => {
@@ -209,45 +258,106 @@ export default function SessionStreamDetailPage() {
     }
   }
 
-  /** Plays the staged OPENING after the last visible user bubble and
-   * parks at the first WAIT point. `userId` flips that bubble Sending… →
-   * sent at sentDelayMs; a resend (edit-save) passes none — the bubble
-   * is already sent. Steps appear on the script delays, each measured
-   * from the previous step: typing → understanding → the OUTSTANDING
-   * approval gate. When the gate lands the run STOPS — nothing further
-   * is scheduled until the user decides (the decision handlers resume
-   * or close the turn). Repeat runs rotate the artifact version
-   * (v1.1, v1.2, …) so a second send reads as a fresh verification. */
-  const runStagedOpen = (userId?: string) => {
-    const script = LIVE_TURN_SCRIPT
+  /** Which script a SEND plays (spec §Live mock v3 — progressive
+   * continuation): the FIRST send is the staged v2 cycle, then odd
+   * sends deepen (interactive clarification → revised plan →
+   * multi-tool execution) and even sends stay light (one tool, no
+   * wait points), alternating. */
+  const runKindForSend = (sendIndex: number): LiveRunKind =>
+    sendIndex === 0 ? 'staged' : sendIndex % 2 === 1 ? 'deep' : 'light'
+
+  /** Binds a run to its script and bumps the artifact version that its
+   * execution leg (if any) will stamp: staged replays rotate v1.x, deep
+   * runs climb v2, v3, … (light runs carry no artifact). */
+  const beginRun = (kind: LiveRunKind): LiveRunVariant => {
+    if (kind === 'deep') {
+      versionRef.current = `v${deepCountRef.current + 2}`
+      deepCountRef.current += 1
+      return { kind: 'deep', script: LIVE_DEEP_CONTINUATION_SCRIPT }
+    }
+    if (kind === 'light') {
+      return { kind: 'light', script: LIVE_LIGHT_FOLLOWUP_SCRIPT }
+    }
+    versionRef.current = `v1.${stagedCountRef.current + 1}`
+    stagedCountRef.current += 1
+    return { kind: 'staged', script: LIVE_TURN_SCRIPT }
+  }
+
+  /** Plays the OPENING of the selected script after the last visible
+   * user bubble and parks at the script's first WAIT point. `userId`
+   * flips that bubble Sending… → sent at sentDelayMs; a resend
+   * (edit-save) passes none — the bubble is already sent.
+   *
+   *   staged (send #1) — typing → understanding → the OUTSTANDING
+   *     approval gate; the run parks there (WAIT #1) — v2 verbatim.
+   *   deep (send #2, #4, …) — typing → the INTERACTIVE clarification
+   *     with answer chips; the run parks there with zero pending timers
+   *     (the same parking pattern as the gate).
+   *   light (send #3, #5, …) — typing → one tool call → short answer →
+   *     unlock; no wait points at all, timers carry the whole turn. */
+  const runOpening = (variant: LiveRunVariant, userId?: string) => {
     const seq = ++seqRef.current
     const entryId = (step: string) => `live-${seq}-${step}`
-    versionRef.current = `v1.${runCountRef.current + 1}`
-    runCountRef.current += 1
+    runVariantRef.current = variant
     gateWaitRef.current = null
     planWaitRef.current = null
+    clarWaitRef.current = null
 
     setAgentBusy(true)
     let clock = 0
     if (userId !== undefined) {
-      clock += script.sentDelayMs
+      clock += variant.script.sentDelayMs
       const id = userId
       schedule(() => patchEntry(id, (entry) => (entry.kind === 'user' ? { ...entry, sending: false } : entry)), clock)
     }
-    clock += script.typingDelayMs
+    clock += variant.script.typingDelayMs
     const typingId = entryId('typing')
     schedule(() => appendEntry({ id: typingId, kind: 'typing' }), clock)
-    clock += script.openDelayMs
+
+    if (variant.kind === 'staged') {
+      const script = variant.script
+      clock += script.openDelayMs
+      schedule(() => {
+        removeEntry(typingId)
+        appendEntry({ id: entryId('understanding'), kind: 'understanding', data: script.understanding })
+      }, clock)
+      clock += script.gateDelayMs
+      const gateId = entryId('gate')
+      schedule(() => {
+        appendEntry({ id: gateId, kind: 'gate', data: script.gate })
+        gateWaitRef.current = gateId // WAIT POINT #1 — the run parks here.
+      }, clock)
+      return
+    }
+
+    if (variant.kind === 'deep') {
+      const script = variant.script
+      clock += script.clarDelayMs
+      const clarId = entryId('clarification')
+      schedule(() => {
+        removeEntry(typingId)
+        clarAnswersRef.current = {}
+        appendEntry({ id: clarId, kind: 'clarification', data: script.clarification, answers: {} })
+        clarWaitRef.current = clarId // WAIT POINT — parked until every question is answered.
+      }, clock)
+      return
+    }
+
+    // Light follow-up — no wait points: typing hands off to the single
+    // tool call, which finishes, then the short answer settles + unlocks.
+    const script = variant.script
+    clock += script.toolRunningDelayMs
+    const toolId = entryId('tool')
     schedule(() => {
       removeEntry(typingId)
-      appendEntry({ id: entryId('understanding'), kind: 'understanding', data: script.understanding })
+      appendEntry({ id: toolId, kind: 'tool', call: script.toolRunning })
     }, clock)
-    clock += script.gateDelayMs
-    const gateId = entryId('gate')
-    schedule(() => {
-      appendEntry({ id: gateId, kind: 'gate', data: script.gate })
-      gateWaitRef.current = gateId // WAIT POINT #1 — the run parks here.
-    }, clock)
+    clock += script.toolDoneDelayMs
+    schedule(() => patchEntry(toolId, (entry) => (entry.kind === 'tool' ? { ...entry, call: script.toolDone } : entry)), clock)
+    clock += script.answerDelayMs
+    schedule(() => appendEntry({ id: entryId('answer'), kind: 'answer', data: script.answer }), clock)
+    clock += script.settleDelayMs
+    schedule(() => setAgentBusy(false), clock)
   }
 
   /** Plays a closing branch (gate denied / plan changes requested):
@@ -268,17 +378,20 @@ export default function SessionStreamDetailPage() {
   /** WAIT POINT #1 resolves: the gate settles visibly (decision recorded
    * in the stream), then the run branches — Allow once / Always this
    * session continues to the interactive plan (WAIT POINT #2), Deny
-   * closes the turn with polite prose and unlocks. */
+   * closes the turn with polite prose and unlocks. Only staged runs
+   * open a gate, so this handler is the v2 leg verbatim. */
   const handleLiveGateDecision = (entryId: string, decision: GateDecision) => {
     if (gateWaitRef.current !== entryId) return // stale click after a resend
+    const variant = runVariantRef.current
+    if (variant.kind !== 'staged') return
     gateWaitRef.current = null
     patchEntry(entryId, (entry) => (entry.kind === 'gate' ? { ...entry, decision } : entry))
 
     if (decision === 'deny') {
-      runClosing(entryId, LIVE_TURN_SCRIPT.deny)
+      runClosing(entryId, variant.script.deny)
       return
     }
-    const script = LIVE_TURN_SCRIPT
+    const script = variant.script
     let clock = script.allowTypingDelayMs
     const typingId = `${entryId}-typing`
     schedule(() => appendEntry({ id: typingId, kind: 'typing' }), clock)
@@ -291,22 +404,137 @@ export default function SessionStreamDetailPage() {
     }, clock)
   }
 
-  /** WAIT POINT #2 resolves: the plan settles (approved chip / stays
+  /** The live clarification's WAIT POINT resolves chip by chip: each
+   * answer lands on the entry (selected chip + resumed notice once all
+   * answered). When the LAST question is answered the run resumes —
+   * the chosen options insert as a USER BUBBLE (the page's
+   * inserted-answer pattern), brief typing follows, then the REVISED
+   * plan appears and parks at its own wait point. Stale chip clicks
+   * (a clarification left behind by a resend) are ignored. */
+  const handleLiveAnswer = (entryId: string, questionId: string, option: string) => {
+    if (clarWaitRef.current !== entryId) return // stale click after a resend
+    const variant = runVariantRef.current
+    if (variant.kind !== 'deep') return
+    const script = variant.script
+
+    clarAnswersRef.current = { ...clarAnswersRef.current, [questionId]: option }
+    const answers = clarAnswersRef.current
+    patchEntry(entryId, (entry) => (entry.kind === 'clarification' ? { ...entry, answers } : entry))
+    const allAnswered = script.clarification.questions.every(
+      (question) => answers[question.id] !== undefined,
+    )
+    if (!allAnswered) return // still parked — at least one answer missing
+    clarWaitRef.current = null
+
+    let clock = script.answerDelayMs
+    schedule(() => {
+      appendEntry({
+        id: `${entryId}-answers`,
+        kind: 'answer-bubble',
+        text: answerMessage(script.clarification.questions, answers),
+      })
+    }, clock)
+    clock += script.briefTypingDelayMs
+    const typingId = `${entryId}-typing`
+    schedule(() => appendEntry({ id: typingId, kind: 'typing' }), clock)
+    clock += script.planDelayMs
+    const planId = `${entryId}-plan`
+    schedule(() => {
+      removeEntry(typingId)
+      appendEntry({ id: planId, kind: 'plan', data: script.revisedPlan, approved: false })
+      planWaitRef.current = planId // WAIT POINT — the revised plan parks here.
+    }, clock)
+  }
+
+  /** The deep continuation's execution leg after "Approve plan": live
+   * progress with the ticking clock → MULTI-TOOL execution (tool #1
+   * running→done, tool #2 queued→running→done) → the REVIEW FINDING →
+   * the short fix tool call → settled progress + the version-bumped
+   * artifact → the final answer → unlock. */
+  const runDeepExecution = (baseId: string, script: LiveDeepContinuationScript['execution']) => {
+    const version = versionRef.current
+    let clock = script.progressDelayMs
+    const progressId = `${baseId}-progress`
+    schedule(() => {
+      appendEntry({ id: progressId, kind: 'progress', data: script.progress, live: true, elapsedSec: 0 })
+      startClock(progressId)
+    }, clock)
+    clock += script.tool1RunningDelayMs
+    const toolAId = `${baseId}-tool-a`
+    schedule(() => appendEntry({ id: toolAId, kind: 'tool', call: script.tool1Running }), clock)
+    clock += script.tool1DoneDelayMs
+    schedule(
+      () => patchEntry(toolAId, (entry) => (entry.kind === 'tool' ? { ...entry, call: script.tool1Done } : entry)),
+      clock,
+    )
+    clock += script.tool2QueuedDelayMs
+    const toolBId = `${baseId}-tool-b`
+    schedule(() => appendEntry({ id: toolBId, kind: 'tool', call: script.tool2Queued }), clock)
+    clock += script.tool2RunningDelayMs
+    schedule(
+      () => patchEntry(toolBId, (entry) => (entry.kind === 'tool' ? { ...entry, call: script.tool2Running } : entry)),
+      clock,
+    )
+    clock += script.tool2DoneDelayMs
+    schedule(
+      () => patchEntry(toolBId, (entry) => (entry.kind === 'tool' ? { ...entry, call: script.tool2Done } : entry)),
+      clock,
+    )
+    clock += script.reviewDelayMs
+    schedule(() => appendEntry({ id: `${baseId}-review`, kind: 'review', data: script.review }), clock)
+    clock += script.fixRunningDelayMs
+    const toolFixId = `${baseId}-tool-fix`
+    schedule(() => appendEntry({ id: toolFixId, kind: 'tool', call: script.fixRunning }), clock)
+    clock += script.fixDoneDelayMs
+    schedule(
+      () => patchEntry(toolFixId, (entry) => (entry.kind === 'tool' ? { ...entry, call: script.fixDone } : entry)),
+      clock,
+    )
+    clock += script.artifactDelayMs
+    schedule(() => {
+      stopClock()
+      patchEntry(progressId, (entry) =>
+        entry.kind === 'progress' ? { ...entry, data: script.progressSettled, live: false } : entry,
+      )
+      appendEntry({ id: `${baseId}-artifact`, kind: 'artifact', data: { ...script.artifact, version } })
+    }, clock)
+    clock += script.answerDelayMs
+    schedule(() => {
+      appendEntry({
+        id: `${baseId}-answer`,
+        kind: 'answer',
+        data: {
+          paragraphs: script.answer.paragraphs.map((paragraph) =>
+            paragraph.replaceAll('v2', version),
+          ),
+        },
+      })
+    }, clock)
+    clock += script.settleDelayMs
+    schedule(() => setAgentBusy(false), clock)
+  }
+
+  /** WAIT POINT resolves: the plan settles (approved chip / stays
    * pending), then the run branches — Approve plan plays the execution
-   * leg (live progress with the ticking elapsed clock → tool call
-   * running→done → artifact chip → final answer → unlock); Request
-   * changes closes the turn asking what to change. */
+   * leg (staged: live progress + one tool call; deep: the multi-tool leg
+   * above); Request changes closes the turn asking what to change. */
   const handleLivePlanDecision = (entryId: string, approved: boolean) => {
     if (planWaitRef.current !== entryId) return // stale click after a resend
+    const variant = runVariantRef.current
+    if (variant.kind !== 'staged' && variant.kind !== 'deep') return
     planWaitRef.current = null
     patchEntry(entryId, (entry) => (entry.kind === 'plan' ? { ...entry, approved } : entry))
 
     if (!approved) {
-      runClosing(entryId, LIVE_TURN_SCRIPT.requestChanges)
+      runClosing(entryId, variant.script.requestChanges)
+      return
+    }
+    if (variant.kind === 'deep') {
+      runDeepExecution(entryId, variant.script.execution)
       return
     }
 
-    const script = LIVE_TURN_SCRIPT.execution
+    const script = variant.script.execution
     const version = versionRef.current
     let clock = script.progressDelayMs
     const progressId = `${entryId}-progress`
@@ -346,32 +574,40 @@ export default function SessionStreamDetailPage() {
   }
 
   /** Composer send: append the user bubble immediately (Sending…), lock
-   * the composer, and play the staged opening below it. */
+   * the composer, and play the selected script's opening below it — the
+   * first send stages (v2), then sends alternate deep/light (v3). */
   const handleSend = (text: string) => {
     clearLiveTimers()
+    const kind = runKindForSend(runCountRef.current)
+    runCountRef.current += 1
     const entryId = `live-${seqRef.current + 1}-user`
-    appendEntry({ id: entryId, kind: 'user', text, sending: true })
-    runStagedOpen(entryId)
+    appendEntry({ id: entryId, kind: 'user', text, sending: true, variant: kind })
+    runOpening(beginRun(kind), entryId)
   }
 
   /** Edit-save on a history bubble: the stream truncates right below the
-   * edited bubble (mockup regeneration) and the staged opening replays. */
+   * edited bubble (mockup regeneration) and the STAGED opening replays
+   * (history edits are turn-1 replays by construction). */
   const handleResendHistory = (position: number) => {
     clearLiveTimers()
     setHistoryCutoff(position)
     setLiveTurns([])
-    runStagedOpen()
+    runOpening(beginRun('staged'))
   }
 
   /** Edit-save on a live-sent bubble: truncate every turn after it and
-   * replay (the bubble keeps its updated text — it stays mounted). */
+   * replay the SAME turn-number-appropriate script from typing (the
+   * bubble keeps its updated text — it stays mounted; its recorded
+   * variant picks deep/light/staged again). */
   const handleResendLive = (entryId: string) => {
     clearLiveTimers()
+    const edited = liveTurns.find((entry) => entry.id === entryId)
+    const kind: LiveRunKind = edited !== undefined && edited.kind === 'user' ? edited.variant : 'staged'
     setLiveTurns((previous) => {
       const index = previous.findIndex((entry) => entry.id === entryId)
       return index === -1 ? previous : previous.slice(0, index + 1)
     })
-    runStagedOpen()
+    runOpening(beginRun(kind))
   }
 
   // Keep the newest turn in view as the run advances. jsdom has no
@@ -488,6 +724,26 @@ export default function SessionStreamDetailPage() {
         )
       case 'understanding':
         return <AnswerBlock data={entry.data} time={LIVE_TIME} />
+      case 'clarification':
+        // Interactive WAIT point: clickable answer chips per question;
+        // the run (and the composer) stays parked until every question
+        // is answered — then the answers insert as a user bubble below.
+        return (
+          <ClarificationBlock
+            data={entry.data}
+            answered={entry.answers}
+            onAnswer={(questionId, option) => handleLiveAnswer(entry.id, questionId, option)}
+            time={LIVE_TIME}
+          />
+        )
+      case 'answer-bubble':
+        // The clarification answers as a user bubble — the same anatomy
+        // as the page's inserted-answer pattern (copy only, no edit).
+        return (
+          <BubbleBlock id={entry.id} time={LIVE_TIME} testId="user-bubble" copyPayload={entry.text}>
+            <p className="kx-stream-bubble__text kx-stream-prose">{entry.text}</p>
+          </BubbleBlock>
+        )
       case 'gate':
         // Outstanding while the run parks (composer locked) — the gate
         // choices are the only way forward; a decision settles the block
@@ -539,6 +795,9 @@ export default function SessionStreamDetailPage() {
         )
       case 'artifact':
         return <ArtifactBlock data={entry.data} time={LIVE_TIME} />
+      case 'review':
+        // The fresh finding the deep continuation surfaces mid-run.
+        return <ReviewFindingBlock data={entry.data} time={LIVE_TIME} />
       case 'answer':
         // The live script's final answer lands with the footer — the
         // same single-turn rule as the settled history's final answer.
