@@ -97,6 +97,9 @@ function TechnicalTextShowcase() {
           <EntityToken kind="document" label="MMKSI-HRD Phase 2.docx" mono={false} />
           <EntityToken kind="task" label="Task 7" mono={false} openLabel="Open Task 7" />
           <EntityToken kind="session" label="ses_01JABC" />
+          {/* The link variant: rests as accent ink + underline; hover/focus
+              becomes a pill without the underline (Fase 3e). */}
+          <EntityToken kind="commit" label="9f3c2a1" variant="link" />
         </div>
       </div>
 

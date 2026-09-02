@@ -77,4 +77,15 @@ describe('EntityToken', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open repository hris-frontend' }))
     expect(onClick).toHaveBeenCalledTimes(1)
   })
+
+  it('defaults to the pill variant and exposes the link variant class (Fase 3e)', () => {
+    const { rerender } = render(<EntityToken kind="repository" label="hris-frontend" />)
+    const pill = screen.getByRole('button', { name: 'Open repository hris-frontend' })
+    expect(pill).not.toHaveClass('kx-tech-entity--link')
+
+    rerender(<EntityToken kind="repository" label="hris-frontend" variant="link" />)
+    expect(screen.getByRole('button', { name: 'Open repository hris-frontend' })).toHaveClass(
+      'kx-tech-entity--link',
+    )
+  })
 })

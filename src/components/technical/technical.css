@@ -29,12 +29,14 @@
 /* ── 1. InlineCode ──────────────────────────────────────────────────── */
 
 .kx-tech-code {
-  /* Fase 3d: NO box — the mono family IS the signal (user feedback:
-   * boxed chips like Asia/Jakarta broke line rhythm and tool rows
-   * looked busy). Calm literal, zero chrome. */
+  /* Fase 3e: calm but VISIBLE — a soft borderless wash; mono at 0.95em
+   * reads unmistakably as code without breaking the line rhythm. */
   font-family: var(--kx-font-mono);
-  font-size: 0.92em;
+  font-size: 0.95em;
   font-weight: var(--kx-font-medium);
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--kx-tech-code-bg);
   color: var(--kx-tech-code-text);
   overflow-wrap: anywhere;
 }
@@ -42,17 +44,19 @@
 /* ── 2. EntityToken ─────────────────────────────────────────────────── */
 
 .kx-tech-entity {
-  /* Fase 3d: resting state is ink-only — mono/ sans + accent ink, no
-   * box. The connection affordance is REVEALED on hover/focus (fill +
-   * green edge + underline) so people learn it leads somewhere. */
+  /* Fase 3e — TWO interaction styles, never combined:
+   *   pill (default): rests as a subtle pill; hover/focus CHANGES COLOR
+   *     (fill + edge deepen). No underline, ever.
+   *   link (kx-tech-entity--link): rests as accent ink + underline;
+   *     hover/focus BECOMES a pill and the underline is REMOVED. */
   display: inline-flex;
   align-items: center;
   gap: 4px;
   max-width: 100%;
-  padding: 0 2px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: transparent;
+  padding: 2px 7px;
+  border: 1px solid var(--kx-tech-entity-border-rest);
+  border-radius: 999px;
+  background: var(--kx-tech-entity-bg-rest);
   font-family: inherit;
   font-size: 0.92em;
   font-weight: var(--kx-font-medium);
@@ -62,6 +66,30 @@
   transition:
     background-color 140ms ease-out,
     border-color 140ms ease-out;
+}
+
+/* Pill hover: the color changes — deeper green fill + clearer edge. */
+.kx-tech-entity:hover,
+.kx-tech-entity:focus-visible {
+  background: var(--kx-tech-entity-bg);
+  border-color: var(--kx-tech-entity-border);
+}
+
+/* Link variant: ink + underline at rest; hover/focus swaps to a pill
+ * WITHOUT the underline (never underline and pill together). */
+.kx-tech-entity--link {
+  padding: 0 2px;
+  border-color: transparent;
+  border-radius: 4px;
+  background: transparent;
+  text-decoration: underline;
+  text-decoration-color: var(--kx-tech-entity-border);
+  text-underline-offset: 3px;
+}
+
+.kx-tech-entity--link:hover,
+.kx-tech-entity--link:focus-visible {
+  text-decoration: none;
 }
 
 .kx-tech-entity__icon {
@@ -78,18 +106,6 @@
 /* Identifier labels render mono; human-readable artifact titles stay sans. */
 .kx-tech-entity--mono .kx-tech-entity__label {
   font-family: var(--kx-font-mono);
-}
-
-.kx-tech-entity:hover,
-.kx-tech-entity:focus-visible {
-  background: var(--kx-tech-entity-bg);
-  border-color: var(--kx-tech-entity-border);
-}
-
-.kx-tech-entity:hover .kx-tech-entity__label,
-.kx-tech-entity:focus-visible .kx-tech-entity__label {
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 .kx-tech-entity:focus-visible {

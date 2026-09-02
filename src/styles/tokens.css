@@ -116,7 +116,7 @@
 
   /* InlineCode: QUIET neutral wash — deliberately not green. Entity carries
    * the accent identity; code is the calm literal (mono + context carry it). */
-  --kx-tech-code-bg: #ecebe0;
+  --kx-tech-code-bg: #e9e9dc;
   --kx-tech-code-text: var(--kx-primary);
   --kx-tech-code-border: #dddccc;
   /* EntityToken: resting = accent INK only (no box, Fase 3d); hover/
@@ -126,6 +126,10 @@
   --kx-tech-entity-border-hover: var(--kx-accent-strong);
   /* Entity ink reads as an interactive accent link (5.29:1 on canvas). */
   --kx-tech-entity-text: var(--kx-accent-text-aa);
+  /* Pill variant REST state (Fase 3e): subtle pill; hover deepens to
+   * entity-bg/entity-border. ink on rest fill = 4.97:1. */
+  --kx-tech-entity-bg-rest: #eef3e3;
+  --kx-tech-entity-border-rest: #cfdcb8;
   /* Keyboard focus ring for every interactive technical-text control
    * (v2.css pattern: 2px accent-strong outline). */
   --kx-tech-focus-ring: var(--kx-accent-strong);
@@ -221,6 +225,8 @@
   --kx-bubble-border: #35502c;
   --kx-tech-code-bg: #242a22;
   --kx-tech-code-border: var(--kx-border);
+  --kx-tech-entity-bg-rest: #1e2b1c;
+  --kx-tech-entity-border-rest: #3f5236;
   --kx-tech-entity-bg: #1f3322;
   --kx-tech-entity-border: #6b8c53;
   --kx-tech-status-warning: #e6b366;
