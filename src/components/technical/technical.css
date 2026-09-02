@@ -1,0 +1,438 @@
+/*
+ * technical.css — the Technical Text design-system primitives
+ * (spec: .pi/orch/plans/technical-text-spec.md).
+ *
+ * Five primitives for LITERAL SYSTEM VALUES (identifiers, entities,
+ * metadata, statuses, code) used across agent responses:
+ *
+ *   InlineCode    non-interactive <code> for short literals in prose
+ *   EntityToken   openable system objects (<button> default, <a> for nav)
+ *   MetadataPair  plain label + value (only the VALUE may be interactive)
+ *   StatusBadge   icon + label + color pill (canonical 10 statuses)
+ *   CodeBlock     header + <pre><code> with copy / line numbers / collapse
+ *
+ * Rules of the house (mirrors SessionStream.css):
+ *   - every class is kx-tech-*; colors come ONLY from --kx-* tokens /
+ *     the --kx-tech-* aliases in tokens.css — light/dark flip via
+ *     html[data-theme='dark'] automatically;
+ *   - contrast-test inventory constraint: each selector reads at most
+ *     ONE tracked token (muted/muted-text-aa/accent-strong/accent-text-aa/
+ *     accent-solid-aa) — alias references (--kx-tech-*) are untracked by
+ *     design because their AA-ness is inherited from the aliased token;
+ *   - focus is the 2px --kx-tech-focus-ring outline (v2.css pattern);
+ *   - the one animated element (the Running dot) dies under
+ *     prefers-reduced-motion while staying visible.
+ */
+
+/* ── 1. InlineCode ──────────────────────────────────────────────────── */
+
+.kx-tech-code {
+  font-family: var(--kx-font-mono);
+  font-size: 0.95em;
+  font-weight: var(--kx-font-medium);
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--kx-tech-code-bg);
+  color: var(--kx-tech-code-text);
+  overflow-wrap: anywhere;
+}
+
+/* ── 2. EntityToken ─────────────────────────────────────────────────── */
+
+.kx-tech-entity {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 3px 6px;
+  border: 1px solid var(--kx-tech-entity-border);
+  border-radius: 6px;
+  background: var(--kx-tech-entity-bg);
+  font-family: inherit;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-primary);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    border-color 140ms ease-out;
+}
+
+.kx-tech-entity__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-tech-entity__label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Identifier labels render mono; human-readable artifact titles stay sans. */
+.kx-tech-entity--mono .kx-tech-entity__label {
+  font-family: var(--kx-font-mono);
+}
+
+.kx-tech-entity:hover {
+  border-color: var(--kx-tech-entity-border-hover);
+  background: var(--kx-raised);
+}
+
+.kx-tech-entity:hover .kx-tech-entity__label {
+  text-decoration: underline;
+}
+
+.kx-tech-entity:focus-visible {
+  outline: 2px solid var(--kx-tech-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── 3. MetadataPair ────────────────────────────────────────────────── */
+/* Grid of pairs lives at the usage site (see .kx-tech-showcase__meta);
+ * one pair = plain label (never interactive) + value (string | InlineCode
+ * | EntityToken). Long string values gain a hover/focus-revealed copy
+ * action. */
+
+.kx-tech-meta__pair {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.kx-tech-meta__label {
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-tech-meta__value {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  font-size: var(--kx-text-md);
+  color: var(--kx-primary);
+}
+
+/* Copy action for long values: revealed on hover AND :focus-within.
+ * Opacity (not visibility) keeps the button keyboard-reachable — the
+ * same contract as the stream hover footers. */
+.kx-tech-meta__copy {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 140ms ease-out,
+    background-color 140ms ease-out;
+}
+
+.kx-tech-meta__pair:hover .kx-tech-meta__copy,
+.kx-tech-meta__pair:focus-within .kx-tech-meta__copy {
+  opacity: 1;
+}
+
+.kx-tech-meta__copy:hover {
+  background: var(--kx-pale);
+}
+
+.kx-tech-meta__copy:focus-visible {
+  outline: 2px solid var(--kx-tech-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── 4. StatusBadge ─────────────────────────────────────────────────── */
+/* Sans (NEVER mono), 600, pill — always icon + label + color together. */
+
+.kx-tech-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px;
+  border: 1px solid var(--kx-border);
+  border-radius: 999px;
+  background: var(--kx-raised);
+  font-family: inherit; /* sans by contract — mono is a data costume only */
+  font-size: var(--kx-text-sm);
+  font-weight: 600;
+  color: var(--kx-tech-status-neutral);
+  white-space: nowrap;
+}
+
+.kx-tech-badge__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+}
+
+.kx-tech-badge--neutral {
+  color: var(--kx-tech-status-neutral);
+}
+
+.kx-tech-badge--success {
+  color: var(--kx-tech-status-success);
+}
+
+.kx-tech-badge--warning {
+  color: var(--kx-tech-status-warning);
+}
+
+.kx-tech-badge--danger {
+  color: var(--kx-tech-status-danger);
+}
+
+/* The Running glyph: a live dot pulsing on the tone color. */
+.kx-tech-badge__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  animation: kx-tech-pulse 1.6s ease-in-out infinite;
+}
+
+/* Clickable variant (onClick) — real button semantics + focus state. */
+.kx-tech-badge--button {
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    border-color 140ms ease-out;
+}
+
+.kx-tech-badge--button:hover {
+  border-color: var(--kx-tech-entity-border-hover);
+}
+
+.kx-tech-badge:focus-visible {
+  outline: 2px solid var(--kx-tech-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── 5. CodeBlock ───────────────────────────────────────────────────── */
+
+.kx-tech-codeblock {
+  display: grid;
+  border: 1px solid var(--kx-border);
+  border-radius: 8px;
+  background: var(--kx-raised);
+  overflow: hidden;
+}
+
+.kx-tech-codeblock__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 6px 10px 6px 14px;
+  border-bottom: 1px solid var(--kx-border);
+  background: var(--kx-canvas);
+}
+
+.kx-tech-codeblock__meta {
+  font-family: var(--kx-font-mono);
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+  overflow-wrap: anywhere;
+}
+
+.kx-tech-copy {
+  padding: 2px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+  transition: background-color 140ms ease-out;
+}
+
+.kx-tech-copy:hover {
+  background: var(--kx-pale);
+}
+
+.kx-tech-copy:focus-visible {
+  outline: 2px solid var(--kx-tech-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Body: horizontal scroll without shrinking the font (mono is fixed). */
+.kx-tech-codeblock__pre {
+  margin: 0;
+  padding: 12px 16px;
+  overflow-x: auto;
+  font-family: var(--kx-font-mono);
+  font-size: var(--kx-text-md);
+  line-height: 1.55;
+  color: var(--kx-primary);
+}
+
+.kx-tech-codeblock__pre:focus-visible {
+  outline: 2px solid var(--kx-tech-focus-ring);
+  outline-offset: -2px;
+}
+
+.kx-tech-codeblock__line {
+  display: block;
+  white-space: pre;
+  min-height: 1em;
+}
+
+.kx-tech-codeblock__ln {
+  display: inline-block;
+  min-width: 2ch;
+  margin-right: 14px;
+  text-align: right;
+  user-select: none;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-tech-codeblock__actions {
+  display: flex;
+  justify-content: center;
+  padding: 6px;
+  border-top: 1px solid var(--kx-border);
+  background: var(--kx-canvas);
+}
+
+.kx-tech-codeblock__expand {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+  transition: background-color 140ms ease-out;
+}
+
+.kx-tech-codeblock__expand:hover {
+  background: var(--kx-pale);
+}
+
+.kx-tech-codeblock__expand:focus-visible {
+  outline: 2px solid var(--kx-tech-focus-ring);
+  outline-offset: 2px;
+}
+
+.kx-tech-codeblock__footer {
+  padding: 6px 14px;
+  border-top: 1px solid var(--kx-border);
+  background: var(--kx-canvas);
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+/* ── Showcase (demo-page section; same namespace, layout only) ──────── */
+
+.kx-tech-showcase {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--kx-border);
+  scroll-margin-top: 24px;
+}
+
+.kx-tech-showcase__title {
+  margin: 0;
+  font-size: var(--kx-text-xl);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-tech-showcase__desc {
+  margin: 0;
+  max-width: 68ch;
+  font-size: var(--kx-text-md);
+  line-height: 1.55;
+  color: var(--kx-secondary);
+}
+
+.kx-tech-showcase__group {
+  display: grid;
+  gap: 8px;
+}
+
+.kx-tech-showcase__label {
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-tech-showcase__prose {
+  margin: 0;
+  font-size: var(--kx-text-md);
+  line-height: 1.6;
+  color: var(--kx-primary);
+}
+
+.kx-tech-showcase__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.kx-tech-showcase__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.kx-tech-note {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  line-height: 1.6;
+  color: var(--kx-muted-text-aa);
+}
+
+/* ── Keyframes + motion kill ────────────────────────────────────────── */
+
+@keyframes kx-tech-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kx-tech-showcase *,
+  .kx-tech-badge,
+  .kx-tech-badge *,
+  .kx-tech-entity,
+  .kx-tech-meta__copy,
+  .kx-tech-copy,
+  .kx-tech-codeblock__expand {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Mobile (≤760px) ────────────────────────────────────────────────── */
+
+@media (max-width: 760px) {
+  .kx-tech-showcase__meta {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
