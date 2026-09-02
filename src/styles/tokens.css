@@ -83,36 +83,86 @@
   /* ── Fixed dimensions (AC2, AC34, AC39, §5.1, §11, §12) ─────────── */
   --kx-radius-main: 19.5px; /* Main canvas corners, top-left/bottom-left */
 
-  /* ── Technical text (kx-tech-*) — mono stack + semantic aliases ──── */
-  /* Source of truth: .pi/orch/plans/technical-text-spec.md §Aturan dasar.
-   * --kx-font-mono lifts the exact ui-monospace stack already used by
-   * .kx-stream-mono (SessionStream.css now reads this token) so every
-   * technical-text primitive shares one mono family. The aliases map the
-   * kx-tech-* semantics onto EXISTING tokens — no new color values. They
-   * are declared here in :root only: every referenced base token
-   * (--kx-pale, --kx-primary, --kx-border, --kx-accent-strong,
-   * --kx-accent-text-aa, --kx-muted-text-aa, --kx-attention) is itself
-   * overridden by the [data-theme='dark'] block below, so the aliases
-   * flip to the dark palette automatically. */
+  /* ── Technical text (kx-tech-*) — mono stack + tuned fills ─────────
+   * Source of truth: .pi/orch/plans/technical-text-spec.md §Aturan
+   * dasar + §Fase 3a. --kx-font-mono lifts the exact ui-monospace stack
+   * already used by .kx-stream-mono (SessionStream.css now reads this
+   * token) so every technical-text primitive shares one mono family.
+   *
+   * FASE 3a — the --kx-tech-* surfaces are NO LONGER pale aliases: each
+   * is a TUNED value defined once per theme block, clearly distinct from
+   * canvas / raised / pale (the primitives also render inside pale chat
+   * bubbles), while every text-on-fill pair keeps ≥4.5:1 in BOTH themes
+   * (ratios below, WCAG relative luminance). This supersedes the old
+   * "aliases only, no new colors" rule for the --kx-tech-* set — the
+   * values still live exclusively in tokens.css, never in components.
+   *
+   * VERIFIED RATIOS — LIGHT (surfaces: canvas #faf8ef · raised #ffffff ·
+   * pale #f4f8ee):
+   *   text-on-fill (≥4.5 required):
+   *     code    #243025 on #d7e4c0 = 10.33 ✓   entity #243025 on #e0edcf = 11.27 ✓
+   *     success #4f7044 on #e3f0d3 =  4.73 ✓   warning #855410 on #f7ecd8 =  5.48 ✓
+   *     neutral #607260 on #eef1e9 =  4.52 ✓   (danger shares warning + × icon)
+   *   fill vs canvas / raised / pale (surface distinctness):
+   *     code    #d7e4c0 → 1.25 / 1.33 / 1.24   entity #e0edcf → 1.15 / 1.22 / 1.14
+   *     success #e3f0d3 → 1.12 / 1.19 / 1.10   warning #f7ecd8 → 1.10 / 1.17 / 1.09
+   *     neutral #eef1e9 → 1.07 / 1.14 / 1.06
+   *   border vs fill: code #c9dcb0 1.16 · entity #c9dcb0 1.20 · success
+   *     #c9dcb0 1.23 · warning #e6cfa0 1.30 · neutral #d3dbc6 1.25 — the
+   *     warning/neutral fills sit closest to pale, so their borders also
+   *     read on pale (1.41 / 1.33) and carry the composite distinction.
+   *   (entity icon #607260 on #e0edcf = 4.22 — decorative, aria-hidden;
+   *     the kind is carried by the accessible name, so 1.4.11 n/a.)
+   *
+   * VERIFIED RATIOS — DARK (surfaces: canvas #0f1510 · raised #1a231b ·
+   * pale #152618; overrides below):
+   *   text-on-fill (≥4.5 required):
+   *     code    #e8ede8 on #2a3d26 = 9.87 ✓   entity #e8ede8 on #1d3220 = 11.58 ✓
+   *     success #c5d9a6 on #24371c =  8.45 ✓   warning #e6b366 on #3a2e14 =  6.96 ✓
+   *     neutral #9ead9f on #262f25 =  5.89 ✓   (danger shares warning + × icon)
+   *   fill vs canvas / raised / pale (surface distinctness):
+   *     code    #2a3d26 → 1.58 / 1.38 / 1.36   entity #1d3220 → 1.35 / 1.18 / 1.16
+   *     success #24371c → 1.44 / 1.26 / 1.24   warning #3a2e14 → 1.39 / 1.22 / 1.20
+   *     neutral #262f25 → 1.34 / 1.17 / 1.15
+   *   border vs fill: code #35502c (--kx-border) 1.55 · entity #4a6b3c
+   *     2.26 · success #4a6b3c 2.11 · warning #6d5423 1.86 · neutral
+   *     #465240 1.68.
+   */
   --kx-font-mono: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
-  /* InlineCode: literal-value wash on pale, ink text. */
-  --kx-tech-code-bg: var(--kx-pale);
+  /* InlineCode: deeper literal-value wash + hairline edge (distinct from
+   * canvas/raised/pale — code also renders inside pale chat bubbles). */
+  --kx-tech-code-bg: #d7e4c0;
   --kx-tech-code-text: var(--kx-primary);
-  /* EntityToken: openable system object chips — pale fill, hairline edge,
-   * accent-strong border on hover. */
-  --kx-tech-entity-bg: var(--kx-pale);
-  --kx-tech-entity-border: var(--kx-border);
+  --kx-tech-code-border: #b9d09c;
+  /* EntityToken: openable system objects — accent-tinted fill, clearer
+   * edge, accent-strong border on hover. */
+  --kx-tech-entity-bg: #e0edcf;
+  --kx-tech-entity-border: #b9d09c;
   --kx-tech-entity-border-hover: var(--kx-accent-strong);
   /* Keyboard focus ring for every interactive technical-text control
    * (v2.css pattern: 2px accent-strong outline). */
   --kx-tech-focus-ring: var(--kx-accent-strong);
-  /* StatusBadge tone inks — AA text tokens; warning and danger share the
-   * attention amber (repo convention: no error token — the icon and label
-   * carry the distinction, e.g. danger pairs amber with a firm ×). */
+  /* StatusBadge tone inks + FILLED treatments (Fase 3a: tinted fill +
+   * border + tone text, not tone text on transparent). Inks that alias
+   * a base AA token (success → accent-text-aa, neutral → muted-text-aa)
+   * are declared here only — the base tokens flip in the dark block, so
+   * the aliases follow. The warning ink is a tuned darker amber (#855410
+   * keeps ≥4.5:1 on the tinted #f7ecd8 fill where the shared #9a6212
+   * attention text would read 4.35:1); danger keeps sharing the warning
+   * styling (repo convention: no error token — the firm × icon and label
+   * carry the distinction). */
   --kx-tech-status-success: var(--kx-accent-text-aa);
-  --kx-tech-status-warning: var(--kx-attention);
-  --kx-tech-status-danger: var(--kx-attention);
+  --kx-tech-status-success-bg: #e3f0d3;
+  --kx-tech-status-success-border: #b9d09c;
+  --kx-tech-status-warning: #855410;
+  --kx-tech-status-warning-bg: #f7ecd8;
+  --kx-tech-status-warning-border: #e6cfa0;
+  --kx-tech-status-danger: var(--kx-tech-status-warning);
+  --kx-tech-status-danger-bg: var(--kx-tech-status-warning-bg);
+  --kx-tech-status-danger-border: var(--kx-tech-status-warning-border);
   --kx-tech-status-neutral: var(--kx-muted-text-aa);
+  --kx-tech-status-neutral-bg: #eef1e9;
+  --kx-tech-status-neutral-border: #d3dbc6;
 
   --kx-sidebar-w: 320px; /* Expanded white sidebar (spec §6.1, AC12) */
   --kx-sidebar-rail: 64px; /* Collapsed sidebar icon rail */
@@ -173,4 +223,22 @@
   --kx-system-map-container: #b9a0e8;
   --kx-system-map-component: #7cc4e0;
   --kx-system-map-icon-ink: #0f1510;
+
+  /* ── Technical text (kx-tech-*) — Fase 3a dark tuned fills ─────────
+   * Only the per-theme literals are restated here; the ink aliases that
+   * follow base tokens (success → accent-text-aa #c5d9a6, neutral →
+   * muted-text-aa #9ead9f, code/entity text → --kx-primary #e8ede8) and
+   * the danger-shares-warning aliases flip automatically. Verified
+   * ratios in the :root comment block above. */
+  --kx-tech-code-bg: #2a3d26;
+  --kx-tech-code-border: var(--kx-border);
+  --kx-tech-entity-bg: #1d3220;
+  --kx-tech-entity-border: #4a6b3c;
+  --kx-tech-status-warning: #e6b366;
+  --kx-tech-status-success-bg: #24371c;
+  --kx-tech-status-success-border: #4a6b3c;
+  --kx-tech-status-warning-bg: #3a2e14;
+  --kx-tech-status-warning-border: #6d5423;
+  --kx-tech-status-neutral-bg: #262f25;
+  --kx-tech-status-neutral-border: #465240;
 }

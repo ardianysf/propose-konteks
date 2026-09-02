@@ -6,6 +6,7 @@
  */
 import ResponseBlock, { ReviewIcon } from '../ResponseBlock'
 import InlineCode from '../../../technical/InlineCode'
+import { renderTechnicalText } from '../../../technical/renderTechnicalText'
 import type { ReviewFindingBlockData } from '../sessionStreamTypes'
 
 interface ReviewFindingBlockProps {
@@ -33,7 +34,7 @@ export default function ReviewFindingBlock({
           </span>
           <p className="kx-stream-review__title">{data.title}</p>
         </header>
-        <p className="kx-stream-review__impact kx-stream-prose">{data.impact}</p>
+        <p className="kx-stream-review__impact kx-stream-prose">{renderTechnicalText(data.impact)}</p>
         <p className="kx-stream-review__location">
           <InlineCode>{data.location}</InlineCode>
         </p>
