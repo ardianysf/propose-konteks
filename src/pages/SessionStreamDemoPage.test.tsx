@@ -216,9 +216,13 @@ describe('SessionStreamDemoPage — interactions', () => {
   it('answering all clarification questions flips to the resumed state and inserts the user-answer bubble', () => {
     render(<SessionStreamDemoPage />)
 
-    // Paused while unanswered — no answer bubble yet.
+    // Paused while unanswered — no answer bubble yet (the chip is the
+    // canonical "Waiting for input" StatusBadge; scoped to the stream
+    // because the showcase above renders the full canonical row too).
     expect(screen.getByText(/Execution is paused/i)).toBeInTheDocument()
-    expect(screen.getByText('awaiting answer')).toBeInTheDocument()
+    expect(
+      within(screen.getByTestId('session-stream')).getByText('Waiting for input'),
+    ).toBeInTheDocument()
     expect(document.getElementById('stream-user-answer')).toBeNull()
     expect(screen.getAllByTestId('user-bubble')).toHaveLength(1)
 
@@ -230,7 +234,7 @@ describe('SessionStreamDemoPage — interactions', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Restate August only' }))
 
     expect(screen.getByText(/execution resumed/i)).toBeInTheDocument()
-    expect(screen.getByText('answered')).toBeInTheDocument()
+    expect(screen.getByText('Answered')).toBeInTheDocument()
     expect(screen.queryByText(/Execution is paused/i)).not.toBeInTheDocument()
 
     // The answers enter the stream as a NEW user bubble right after the
@@ -260,9 +264,10 @@ describe('SessionStreamDemoPage — interactions', () => {
     render(<SessionStreamDemoPage />)
     const stream = screen.getByTestId('session-stream')
 
-    // Outstanding: the APPROVAL NEEDED chip + framed pending block with
-    // the action, consequence line, and the three explicit decisions.
-    expect(within(stream).getAllByText('APPROVAL NEEDED').length).toBeGreaterThanOrEqual(1)
+    // Outstanding: the "Waiting approval" StatusBadge + framed pending
+    // block with the action, consequence line, and the three explicit
+    // decisions.
+    expect(within(stream).getAllByText('Waiting approval').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByTestId('gate-pending')).toBeInTheDocument()
     expect(
       screen.getByText(/This migration rewrites stored invoice totals in place/i),
@@ -274,7 +279,7 @@ describe('SessionStreamDemoPage — interactions', () => {
 
     expect(screen.getByText(/Decision recorded:/i).textContent).toContain('Deny')
     expect(screen.queryByTestId('gate-pending')).not.toBeInTheDocument()
-    expect(within(stream).queryByText('APPROVAL NEEDED')).not.toBeInTheDocument()
+    expect(within(stream).queryByText('Waiting approval')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Allow once' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Always this session' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Deny' })).not.toBeInTheDocument()
@@ -299,14 +304,15 @@ describe('SessionStreamDemoPage — interactions', () => {
     )!
     expect(running).toBeTruthy()
     expect(running).toHaveAttribute('role', 'status')
-    expect(running.textContent).toContain('running')
+    // State labels read the canonical StatusBadge vocabulary.
+    expect(running.textContent).toContain('Running')
     expect(running.querySelector('.kx-stream-call__pulse')).not.toBeNull()
     expect(
       screen.getAllByTestId('tool-row').filter((row) => row.querySelector('.kx-stream-call__pulse')),
     ).toHaveLength(1)
   })
 
-  it('expanding tool evidence reveals the mono input/output block', () => {
+  it('expanding tool evidence reveals CodeBlock input/output with Copy and diff tints', () => {
     render(<SessionStreamDemoPage />)
 
     const expandable = screen
@@ -315,13 +321,33 @@ describe('SessionStreamDemoPage — interactions', () => {
 
     fireEvent.click(expandable[0])
     expect(expandable[0]).toHaveAttribute('aria-expanded', 'true')
+    // The detail is wired through aria-controls to the revealed block,
+    // whose io bodies are now CodeBlocks (header meta + Copy).
+    const detail = document.getElementById(expandable[0].getAttribute('aria-controls')!)!
+    expect(detail).not.toBeNull()
     expect(screen.getByText('rg -n "round(" src/invoicing --type ts')).toBeInTheDocument()
+    expect(within(detail).getAllByTestId('tool-io-input')).toHaveLength(1)
+    expect(within(detail).getAllByTestId('tool-io-output')).toHaveLength(1)
+    expect(within(detail).getAllByText('input')).toHaveLength(1)
+    expect(within(detail).getAllByText('output')).toHaveLength(1)
     expect(screen.getByText(/totals\.ts:112:\s+const tax = round\(base \* rate, 2\)/)).toBeInTheDocument()
 
-    // The second evidence block carries the diff-tinted patch lines.
+    // The second evidence block carries the diff-tinted patch lines via
+    // CodeBlock's line-class hook.
     fireEvent.click(expandable[1])
     expect(expandable[1]).toHaveAttribute('aria-expanded', 'true')
-    expect(screen.getByText(/const rounded = roundHalfUp\(scaled, 2\)/)).toBeInTheDocument()
+    const output = within(expandable[1].parentElement!).getByTestId('tool-io-output')!
+    expect(
+      output.querySelector('.kx-tech-codeblock__line.kx-stream-io__line--add'),
+    ).not.toBeNull()
+    expect(
+      output.querySelector('.kx-tech-codeblock__line.kx-stream-io__line--del'),
+    ).not.toBeNull()
+
+    // Each CodeBlock carries its own Copy action with feedback.
+    const inputBlock = within(detail).getByTestId('tool-io-input')!
+    fireEvent.click(within(inputBlock).getByRole('button', { name: 'Copy' }))
+    expect(within(inputBlock).getByRole('button', { name: 'Copied' })).toBeInTheDocument()
   })
 
   it('collapses progress to the one-line summary; expanding reveals the phase list', () => {
@@ -344,12 +370,13 @@ describe('SessionStreamDemoPage — interactions', () => {
 
   it('copying the artifact shows feedback', () => {
     render(<SessionStreamDemoPage />)
-    const stream = screen.getByTestId('session-stream')
 
-    // Scoped to the stream: the technical-text showcase above it carries
-    // its own Copy actions (CodeBlock headers + long metadata values).
-    fireEvent.click(within(stream).getByRole('button', { name: 'Copy' }))
-    expect(within(stream).getByRole('button', { name: 'Copied' })).toBeInTheDocument()
+    // Scoped to the artifact row: the pending gate's long MetadataPair
+    // values and the technical-text showcase above carry their own Copy
+    // actions (CodeBlock headers + long metadata values).
+    const actions = screen.getByTestId('artifact-actions')
+    fireEvent.click(within(actions).getByRole('button', { name: 'Copy' }))
+    expect(within(actions).getByRole('button', { name: 'Copied' })).toBeInTheDocument()
   })
 })
 

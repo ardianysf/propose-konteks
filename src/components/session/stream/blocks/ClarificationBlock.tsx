@@ -17,7 +17,8 @@
  * the fixtures the clarification ends the first response group right
  * before the user's answer bubble.
  */
-import ResponseBlock, { CheckIcon, ClarificationIcon, StreamChip } from '../ResponseBlock'
+import ResponseBlock, { CheckIcon, ClarificationIcon } from '../ResponseBlock'
+import StatusBadge from '../../../technical/StatusBadge'
 import type { ClarificationBlockData } from '../sessionStreamTypes'
 
 interface ClarificationBlockProps {
@@ -50,9 +51,9 @@ export default function ClarificationBlock({
       showFooter={showFooter}
       stateChip={
         allAnswered ? (
-          <StreamChip tone="accent">answered</StreamChip>
+          <StatusBadge status="completed" label="Answered" />
         ) : (
-          <StreamChip tone="attention">awaiting answer</StreamChip>
+          <StatusBadge status="waiting-input" />
         )
       }
     >

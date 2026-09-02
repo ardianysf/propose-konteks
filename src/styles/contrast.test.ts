@@ -99,7 +99,8 @@ function contrast(a: string, b: string): number {
 }
 
 // ---------------------------------------------------------------------------
-// Complete 190-consumer inventory.
+// Complete consumer inventory (258 entries — technical-text phase 2
+// retired six stream selectors in favor of the kx-tech-* primitives).
 // cls: M = enabled muted text/placeholder, A = enabled accent text/glyph,
 //      S = white-text solid background, U = unchanged (decorative/disabled).
 // token is the ORIGINAL token each consumer started from.
@@ -412,17 +413,13 @@ function entries(): Entry[] {
       '.kx-stream-clar__q-num',
       '.kx-stream-plan__num',
       '.kx-stream-plan__meta',
-      '.kx-stream-gate__row dt',
       '.kx-stream-phase--queued',
       '.kx-stream-phase--queued .kx-stream-phase__mark',
       '.kx-stream-phase--queued .kx-stream-phase__label',
       '.kx-stream-phase__duration',
       '.kx-stream-call--queued',
       '.kx-stream-call--queued .kx-stream-call__verb',
-      '.kx-stream-call__state',
       '.kx-stream-call__duration',
-      '.kx-stream-io__label',
-      '.kx-stream-artifact-row__version',
       '.kx-stream-review__location',
       '.kx-stream-completion__section-label',
       '.kx-stream-completion__next-num',
@@ -445,11 +442,9 @@ function entries(): Entry[] {
       '.kx-stream-gate__resolved-mark',
       '.kx-stream-phase--done .kx-stream-phase__mark',
       '.kx-stream-call--done .kx-stream-call__mark',
-      '.kx-stream-call__state--done',
       '.kx-stream-io__line--add',
       '.kx-stream-chip-action',
       '.kx-stream-completion__item--done .kx-stream-completion__mark',
-      '.kx-stream-completion__artifact',
     ].map((selector) => ({ file: STREAM, selector, property: 'color', token: ACCENT_AA, cls: 'A' as Class })),
     // S — white-ink solid accent fills: accent chips, the primary button,
     // the selected answer option.
@@ -1040,16 +1035,16 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 264 consumers — 99 muted, 89 accent-strong, 25 accent-text-aa', () => {
-    expect(inventory).toHaveLength(264)
+  it('covers exactly 258 consumers — 99 muted, 89 accent-strong, 23 accent-text-aa', () => {
+    expect(inventory).toHaveLength(258)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(99)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(89)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(25)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(23)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(131)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(62)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(127)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(60)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(9)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(62)
   })

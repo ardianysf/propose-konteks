@@ -1,27 +1,35 @@
 /*
  * ToolEvidenceBlock — kind 7 (TOOL CALL).
- * Each call is ONE compact ledger row: state mark + verb + mono target +
- * duration + state label + chevron. Rows with evidence (result / io)
- * are COLLAPSED by default — clicking the row toggles the detail
- * (aria-expanded / aria-controls). Only state==='running' rows render
- * open, highlighted with the active pulse (dead under
+ * Each call is ONE compact ledger row: state mark + verb + InlineCode
+ * target + duration + StatusBadge (Draft/Running/Completed) + chevron.
+ * Rows with evidence (result / io) are COLLAPSED by default — clicking
+ * the row toggles the detail (aria-expanded / aria-controls); the io
+ * bodies are CodeBlocks (header meta + Copy, +/- diff tints via the
+ * line-class hook). Only state==='running' rows render open,
+ * highlighted with the active pulse (dead under
  * prefers-reduced-motion); running rows without evidence are
  * non-interactive status rows.
  */
 import { useId, useState } from 'react'
 import ResponseBlock, { CheckIcon, ChevronIcon, ToolIcon } from '../ResponseBlock'
+import InlineCode from '../../../technical/InlineCode'
+import StatusBadge from '../../../technical/StatusBadge'
+import type { TechStatus } from '../../../technical/StatusBadge'
+import CodeBlock from '../../../technical/CodeBlock'
 import type { ToolCall, ToolEvidenceBlockData } from '../sessionStreamTypes'
 
-const STATE_LABELS: Record<ToolCall['state'], string> = {
-  queued: 'queued',
+/** queued/running/done → the canonical StatusBadge vocabulary
+ * (technical-text spec §Integration: Draft/Running/Completed). */
+const STATE_STATUS: Record<ToolCall['state'], TechStatus> = {
+  queued: 'draft',
   running: 'running',
-  done: 'done',
+  done: 'completed',
 }
 
-function ioLineClass(line: string): string {
-  if (line.startsWith('+')) return 'kx-stream-io__line kx-stream-io__line--add'
-  if (line.startsWith('-')) return 'kx-stream-io__line kx-stream-io__line--del'
-  return 'kx-stream-io__line'
+function ioLineClass(line: string): string | undefined {
+  if (line.startsWith('+')) return 'kx-stream-io__line--add'
+  if (line.startsWith('-')) return 'kx-stream-io__line--del'
+  return undefined
 }
 
 function ToolCallRow({ call }: { call: ToolCall }) {
@@ -38,13 +46,15 @@ function ToolCallRow({ call }: { call: ToolCall }) {
         {call.state === 'queued' && <span className="kx-stream-call__dot" />}
       </span>
       <span className="kx-stream-call__verb">{call.verb}</span>
-      <span className="kx-stream-call__target kx-stream-mono">{call.target}</span>
+      <InlineCode className="kx-stream-call__target">{call.target}</InlineCode>
       {call.duration && (
         <span className="kx-stream-call__duration kx-stream-tabular">{call.duration}</span>
       )}
-      <span className={`kx-stream-call__state kx-stream-call__state--${call.state}`}>
-        {STATE_LABELS[call.state]}
-      </span>
+      <StatusBadge
+        status={STATE_STATUS[call.state]}
+        className="kx-stream-call__badge"
+        testId="tool-state"
+      />
       <span
         className={`kx-stream-collapse-chevron${open ? ' kx-stream-collapse-chevron--open' : ''}`}
         aria-hidden="true"
@@ -79,21 +89,13 @@ function ToolCallRow({ call }: { call: ToolCall }) {
           )}
           {call.io && (
             <div className="kx-stream-io">
-              <p className="kx-stream-io__label">input</p>
-              <pre className="kx-stream-io__block kx-stream-mono">
-                <code>{call.io.input}</code>
-              </pre>
-              <p className="kx-stream-io__label">output</p>
-              <pre className="kx-stream-io__block kx-stream-mono">
-                <code>
-                  {call.io.output.map((line, index) => (
-                    <span key={index} className={ioLineClass(line)}>
-                      {line}
-                      {'\n'}
-                    </span>
-                  ))}
-                </code>
-              </pre>
+              <CodeBlock code={call.io.input} meta="input" testId="tool-io-input" />
+              <CodeBlock
+                code={call.io.output.join('\n')}
+                meta="output"
+                lineClassName={ioLineClass}
+                testId="tool-io-output"
+              />
             </div>
           )}
         </div>

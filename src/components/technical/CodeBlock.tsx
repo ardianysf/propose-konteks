@@ -26,6 +26,9 @@ export interface CodeBlockProps {
   meta?: string
   /** Overrides the >5-line default: true = always numbered, false = never. */
   lineNumbers?: boolean
+  /** Per-line class hook (e.g. diff +/- tinting on tool-evidence output).
+   * Returning undefined renders the line untinted. */
+  lineClassName?: (line: string) => string | undefined
   /** Muted footer line — source or execution result. */
   footer?: ReactNode
   className?: string
@@ -36,6 +39,7 @@ export default function CodeBlock({
   code,
   meta,
   lineNumbers,
+  lineClassName,
   footer,
   className,
   testId,
@@ -76,7 +80,12 @@ export default function CodeBlock({
       <pre className="kx-tech-codeblock__pre" tabIndex={0}>
         <code>
           {visible.map((line, index) => (
-            <span key={index} className="kx-tech-codeblock__line">
+            <span
+              key={index}
+              className={['kx-tech-codeblock__line', lineClassName?.(line)]
+                .filter(Boolean)
+                .join(' ')}
+            >
               {numbered && (
                 <span className="kx-tech-codeblock__ln" aria-hidden="true">
                   {index + 1}

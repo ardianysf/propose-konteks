@@ -308,8 +308,8 @@ describe('SessionStreamDetailPage — settled history', () => {
   it('renders the clarification settled: recorded answers, resumed notice, no live chips', () => {
     renderRoute('session-stream-detail')
 
-    // Settled state: answered chip + resumed notice.
-    expect(screen.getByText('answered')).toBeInTheDocument()
+    // Settled state: answered chip (canonical accent reading) + resumed notice.
+    expect(screen.getByText('Answered')).toBeInTheDocument()
     expect(screen.getByText(/execution resumed/i)).toBeInTheDocument()
     expect(screen.queryByText(/Execution is paused/i)).not.toBeInTheDocument()
 
@@ -349,7 +349,7 @@ describe('SessionStreamDetailPage — settled history', () => {
     expect(resolved.textContent).toContain('Allow once')
     // …the outstanding frame and every decision button are gone…
     expect(screen.queryByTestId('gate-pending')).not.toBeInTheDocument()
-    expect(screen.queryByText('APPROVAL NEEDED')).not.toBeInTheDocument()
+    expect(screen.queryByText('Waiting approval')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Allow once' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Always this session' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Deny' })).not.toBeInTheDocument()
@@ -647,7 +647,7 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       step(LIVE_TURN_SCRIPT.gateDelayMs)
       const gateSlot = screen.getByTestId('stream-live-gate')
       expect(within(gateSlot).getByTestId('gate-pending')).toBeInTheDocument()
-      expect(within(gateSlot).getByText('APPROVAL NEEDED')).toBeInTheDocument()
+      expect(within(gateSlot).getByText('Waiting approval')).toBeInTheDocument()
       expect(within(gateSlot).getByRole('button', { name: 'Allow once' })).toBeInTheDocument()
       expect(within(gateSlot).getByRole('button', { name: 'Always this session' })).toBeInTheDocument()
       expect(within(gateSlot).getByRole('button', { name: 'Deny' })).toBeInTheDocument()
@@ -714,7 +714,7 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       step(LIVE_TURN_SCRIPT.execution.toolRunningDelayMs - 1000)
       const toolSlot = screen.getByTestId('stream-live-tool')
       const running = within(toolSlot).getByTestId('tool-row')
-      expect(running).toHaveTextContent('running')
+      expect(running).toHaveTextContent('Running')
       expect(running).toHaveTextContent('sandbox batch att-2026-0815 (overnight subset · 37 records)')
 
       // …then flips to DONE and collapses: duration + state visible, the
@@ -722,7 +722,7 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       step(LIVE_TURN_SCRIPT.execution.toolDoneDelayMs)
       const done = within(toolSlot).getByTestId('tool-row')
       expect(done).toHaveAttribute('aria-expanded', 'false')
-      expect(done).toHaveTextContent('done')
+      expect(done).toHaveTextContent('Completed')
       expect(done).toHaveTextContent('1m 12s')
       expect(within(toolSlot).queryByText(/37\/37 overnight records/)).not.toBeInTheDocument()
 
@@ -884,7 +884,7 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       // locked, the chips are the only way forward (same parking pattern
       // as the gate).
       const clarSlot = screen.getByTestId('stream-live-clarification')
-      expect(within(clarSlot).getByText('awaiting answer')).toBeInTheDocument()
+      expect(within(clarSlot).getByText('Waiting for input')).toBeInTheDocument()
       expect(within(clarSlot).getByRole('group', { name: 'Answer options for question 1' })).toBeInTheDocument()
       expect(within(clarSlot).getByRole('group', { name: 'Answer options for question 2' })).toBeInTheDocument()
       expect(within(clarSlot).getByRole('button', { name: 'Skip as duplicate' })).toBeInTheDocument()
@@ -907,14 +907,14 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       // still waits for Q2 (one answer is not enough).
       fireEvent.click(within(clarSlot).getByRole('button', { name: 'Skip as duplicate' }))
       expect(within(clarSlot).getByRole('button', { name: 'Skip as duplicate' })).toHaveAttribute('aria-pressed', 'true')
-      expect(within(clarSlot).getByText('awaiting answer')).toBeInTheDocument()
+      expect(within(clarSlot).getByText('Waiting for input')).toBeInTheDocument()
       step(60_000)
       expect(screen.queryByTestId('stream-live-answer-bubble')).not.toBeInTheDocument()
 
       // Second chip completes the answers → the clarification flips to
       // answered/resumed and the choices insert as a USER BUBBLE…
       fireEvent.click(within(clarSlot).getByRole('button', { name: 'Last 7 days' }))
-      expect(within(clarSlot).getByText('answered')).toBeInTheDocument()
+      expect(within(clarSlot).getByText('Answered')).toBeInTheDocument()
       step(deep.answerDelayMs)
       const bubble = within(screen.getByTestId('stream-live-answer-bubble')).getByTestId('user-bubble')
       expect(bubble).toHaveTextContent('1. Skip as duplicate')
@@ -953,23 +953,23 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       step(deep.execution.tool1RunningDelayMs)
       let toolSlots = screen.getAllByTestId('stream-live-tool')
       expect(toolSlots).toHaveLength(2)
-      expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveTextContent('running')
+      expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveTextContent('Running')
       expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveTextContent('services/attendance-sync/syncClient.ts:24-38')
       step(deep.execution.tool1DoneDelayMs)
       expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveAttribute('aria-expanded', 'false')
-      expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveTextContent('done')
+      expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveTextContent('Completed')
       expect(within(toolSlots[1]).getByTestId('tool-row')).toHaveTextContent('0.3s')
 
       // …tool #2 lands QUEUED behind it, then flips running → done.
       step(deep.execution.tool2QueuedDelayMs)
       toolSlots = screen.getAllByTestId('stream-live-tool')
       expect(toolSlots).toHaveLength(3)
-      expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('queued')
+      expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('Draft')
       expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('sandbox batch att-2026-0816 (slow-response subset · 9 events)')
       step(deep.execution.tool2RunningDelayMs)
-      expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('running')
+      expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('Running')
       step(deep.execution.tool2DoneDelayMs)
-      expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('done')
+      expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('Completed')
       expect(within(toolSlots[2]).getByTestId('tool-row')).toHaveTextContent('1m 06s')
 
       // The REVIEW FINDING lands — High severity, tied to the attendance
@@ -984,10 +984,10 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       step(deep.execution.fixRunningDelayMs)
       toolSlots = screen.getAllByTestId('stream-live-tool')
       expect(toolSlots).toHaveLength(4)
-      expect(within(toolSlots[3]).getByTestId('tool-row')).toHaveTextContent('running')
+      expect(within(toolSlots[3]).getByTestId('tool-row')).toHaveTextContent('Running')
       expect(within(toolSlots[3]).getByTestId('tool-row')).toHaveTextContent('pr-1302 · syncClient.ts dedupe window 30s → 60s')
       step(deep.execution.fixDoneDelayMs)
-      expect(within(toolSlots[3]).getByTestId('tool-row')).toHaveTextContent('done')
+      expect(within(toolSlots[3]).getByTestId('tool-row')).toHaveTextContent('Completed')
 
       // …progress settles collapsed and the ARTIFACT lands as v2.
       step(deep.execution.artifactDelayMs)
@@ -1065,10 +1065,10 @@ describe('SessionStreamDetailPage — live mock composer flow', () => {
       expect(screen.queryByTestId('typing-indicator')).not.toBeInTheDocument()
       let toolSlots = screen.getAllByTestId('stream-live-tool')
       expect(toolSlots).toHaveLength(5) // turn 1 (1) + deep turn (3) + this one
-      expect(within(toolSlots[4]).getByTestId('tool-row')).toHaveTextContent('running')
+      expect(within(toolSlots[4]).getByTestId('tool-row')).toHaveTextContent('Running')
       expect(within(toolSlots[4]).getByTestId('tool-row')).toHaveTextContent('mytok-sync-logs-aug.csv (duplicate event ids)')
       step(light.toolDoneDelayMs)
-      expect(within(toolSlots[4]).getByTestId('tool-row')).toHaveTextContent('done')
+      expect(within(toolSlots[4]).getByTestId('tool-row')).toHaveTextContent('Completed')
 
       // Short answer, then unlock — and NO wait-point kind ever appears
       // in the light turn (no NEW clarification/plan/gate/review).

@@ -78,6 +78,28 @@ describe('CodeBlock', () => {
     expect(suppressed.container.querySelector('.kx-tech-codeblock__ln')).toBeNull()
   })
 
+  it('applies the per-line className hook for diff-style tinting', () => {
+    const diff = ['kept line', '- removed line', '+ added line'].join('\n')
+    const { container } = render(
+      <CodeBlock
+        code={diff}
+        meta="output"
+        lineClassName={(line) =>
+          line.startsWith('+')
+            ? 'diff-add'
+            : line.startsWith('-')
+              ? 'diff-del'
+              : undefined
+        }
+      />,
+    )
+    const lines = Array.from(container.querySelectorAll('.kx-tech-codeblock__line'))
+    expect(lines).toHaveLength(3)
+    expect(lines[0].className).toBe('kx-tech-codeblock__line')
+    expect(lines[1].className).toBe('kx-tech-codeblock__line diff-del')
+    expect(lines[2].className).toBe('kx-tech-codeblock__line diff-add')
+  })
+
   it('collapses 16 lines to 10 by default with a Show full code toggle', () => {
     const { container } = render(<CodeBlock code={SIXTEEN_LINE} meta="trace.txt" />)
     expect(lines(container)).toHaveLength(10)
