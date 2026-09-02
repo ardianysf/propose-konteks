@@ -394,7 +394,10 @@
 }
 
 .kx-stream-prose {
-  max-width: 68ch;
+  /* Full column width — the reading-line cap (68ch) was retired with the
+   * ledger anatomy: long paragraphs must fill the whole response area
+   * (only the chat bubbles keep their own 75% width cap). */
+  max-width: none;
 }
 
 .kx-stream :focus-visible,
