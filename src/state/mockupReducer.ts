@@ -20,9 +20,23 @@ export type { SessionMode } from '../data/mockData'
 // Overlay union — exactly one overlay may be open at a time
 // ---------------------------------------------------------------------------
 
-export type CustomizeTab = 'agents' | 'context' | 'mcp' | 'connectors' | 'vcs' | 'skills' | 'tools'
+export type CapabilitySection = 'skills' | 'tools' | 'mcp'
+export type ConnectionSection = 'mcp' | 'vcs' | 'search'
+export type ContextSection = 'files' | 'skills' | 'repositories'
+export type AdminSection = 'runtimes' | 'runtime-config' | 'owner-mappings'
+export type CustomizeDestination =
+  | { section: 'agents' }
+  | { section: 'context'; subtab: ContextSection }
+  | { section: 'capabilities'; subtab: CapabilitySection }
+  | { section: 'connections'; subtab: ConnectionSection }
+  | { section: 'admin'; subtab: AdminSection }
 export type LearnedTab = 'pending' | 'audit'
 export type SettingsSection = 'general' | 'billing' | 'team'
+export type BillingSubtab = 'usage' | 'plans' | 'providers' | 'budgets' | 'topup' | 'transactions'
+export type SettingsDestination =
+  | { section: 'general' }
+  | { section: 'billing'; subtab: BillingSubtab }
+  | { section: 'team' }
 
 /** Where a Create System modal was opened from — the SystemMenu footer
  * (global create) or the repository selector's Add new system affordance
@@ -39,10 +53,10 @@ export type MockupOverlay =
   | { kind: 'manual-repo-modal' }
   | { kind: 'create-system-modal'; source: CreateSystemSource }
   | { kind: 'system-map'; systemId: string }
-  | { kind: 'customize'; tab: CustomizeTab }
+  | { kind: 'customize'; destination: CustomizeDestination }
   | { kind: 'learned'; tab: LearnedTab }
   | { kind: 'account-menu' }
-  | { kind: 'settings'; section: SettingsSection }
+  | ({ kind: 'settings' } & SettingsDestination)
 
 /** Payload for OPEN_OVERLAY; tab/section/source default when omitted. */
 export type OpenOverlayPayload =
@@ -54,21 +68,21 @@ export type OpenOverlayPayload =
   | { kind: 'manual-repo-modal' }
   | { kind: 'create-system-modal'; source?: CreateSystemSource }
   | { kind: 'system-map'; systemId: string }
-  | { kind: 'customize'; tab?: CustomizeTab }
+  | { kind: 'customize'; destination?: CustomizeDestination }
   | { kind: 'learned'; tab?: LearnedTab }
   | { kind: 'account-menu' }
-  | { kind: 'settings'; section?: SettingsSection }
+  | { kind: 'settings'; destination?: SettingsDestination }
 
-export const DEFAULT_CUSTOMIZE_TAB: CustomizeTab = 'agents'
+export const DEFAULT_CUSTOMIZE_DESTINATION: CustomizeDestination = { section: 'agents' }
 export const DEFAULT_LEARNED_TAB: LearnedTab = 'pending'
-export const DEFAULT_SETTINGS_SECTION: SettingsSection = 'general'
+export const DEFAULT_SETTINGS_DESTINATION: SettingsDestination = { section: 'general' }
 
 // ---------------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------------
 
 export type MockupRoute = 'new-session' | 'session-history' | 'session-detail' | 'task-session-detail'
-export type DemoVariant = 'ready' | 'loading' | 'empty'
+export type DemoVariant = 'ready' | 'loading' | 'empty' | 'error'
 
 export type SearchList = 'systems' | 'repositories' | 'components' | 'sessions'
 
@@ -124,7 +138,7 @@ export type MockupAction =
   | { type: 'TOGGLE_SESSION_DRAFT_REPO'; repoId: string }
   | { type: 'COMMIT_SESSION_CONTEXT_DRAFT' }
   | { type: 'CONFIRM_SESSION_CONTEXT'; systemId: string; repoIds?: string[] }
-  | { type: 'SET_CUSTOMIZE_TAB'; tab: CustomizeTab }
+  | { type: 'SET_CUSTOMIZE_DESTINATION'; destination: CustomizeDestination }
   | { type: 'SET_ACTIVE_PROFILE'; profileId: string }
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'TOGGLE_SIDEBAR_MOBILE' }
@@ -145,7 +159,7 @@ export function initialState(search: string = ''): MockupState {
   const query = search.startsWith('?') ? search.slice(1) : search
   const mock = new URLSearchParams(query).get('mock')
   const demoVariant: DemoVariant =
-    mock === 'loading' ? 'loading' : mock === 'empty' ? 'empty' : 'ready'
+    mock === 'loading' ? 'loading' : mock === 'empty' ? 'empty' : mock === 'error' ? 'error' : 'ready'
 
   return {
     route: 'new-session',
@@ -339,9 +353,9 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
       }
     }
 
-    case 'SET_CUSTOMIZE_TAB': {
+    case 'SET_CUSTOMIZE_DESTINATION': {
       if (state.overlay.kind !== 'customize') return state
-      return { ...state, overlay: { kind: 'customize', tab: action.tab } }
+      return { ...state, overlay: { kind: 'customize', destination: action.destination } }
     }
 
     case 'SET_ACTIVE_PROFILE': {
@@ -626,11 +640,11 @@ export function mockupReducer(state: MockupState, action: MockupAction): MockupS
 function resolveOverlay(payload: OpenOverlayPayload): MockupOverlay {
   switch (payload.kind) {
     case 'customize':
-      return { kind: 'customize', tab: payload.tab ?? DEFAULT_CUSTOMIZE_TAB }
+      return { kind: 'customize', destination: payload.destination ?? DEFAULT_CUSTOMIZE_DESTINATION }
     case 'learned':
       return { kind: 'learned', tab: payload.tab ?? DEFAULT_LEARNED_TAB }
     case 'settings':
-      return { kind: 'settings', section: payload.section ?? DEFAULT_SETTINGS_SECTION }
+      return { kind: 'settings', ...(payload.destination ?? DEFAULT_SETTINGS_DESTINATION) }
     case 'workspace-menu':
     case 'system-menu':
     case 'execution-profile-menu':

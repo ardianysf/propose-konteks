@@ -112,15 +112,15 @@ function accountMenuPreview(mod: LoadedModule): ReactNode {
   )
 }
 
-/** settings-modal: one fixture per Settings tab (dialog renders static
- *  inside the frame — the backdrop is neutralized). */
+/** settings-modal: one fixture per primary Settings section. Billing opens
+ *  on its persistent subscription summary and dense Usage workspace. */
 function settingsModalPreview(mod: LoadedModule): ReactNode {
   const SettingsModal = asDefaultComponent(mod)
   return variantRow(
     (['general', 'billing', 'team'] as const).map((section) => ({
       label: <code>{section}</code>,
       node: (
-        <Fixture overrides={{ overlay: { kind: 'settings', section } }}>
+        <Fixture overrides={{ overlay: section === 'billing' ? { kind: 'settings', section, subtab: 'usage' } : { kind: 'settings', section } }}>
           <div className="kx-cat-preview-static-overlay">
             <SettingsModal />
           </div>
@@ -299,15 +299,21 @@ function contextTabPreview(mod: LoadedModule): ReactNode {
   ])
 }
 
-/** customize-modal: the fixed 790×580 frame across a representative set of
- *  its seven tabs (agents, one integrations variant, skills). */
+/** customize-modal: the production-style 896px × 85dvh frame across all five grouped sections. */
 function customizeModalPreview(mod: LoadedModule): ReactNode {
   const CustomizeModal = asDefaultComponent(mod)
+  const destinations = [
+    { section: 'agents' },
+    { section: 'context', subtab: 'files' },
+    { section: 'capabilities', subtab: 'skills' },
+    { section: 'connections', subtab: 'mcp' },
+    { section: 'admin', subtab: 'runtimes' },
+  ] as const
   return variantRow(
-    (['agents', 'context', 'mcp', 'skills'] as const).map((tab) => ({
-      label: <code>tab={tab}</code>,
+    destinations.map((destination) => ({
+      label: <code>{destination.section}</code>,
       node: (
-        <Fixture overrides={{ overlay: { kind: 'customize', tab } }}>
+        <Fixture overrides={{ overlay: { kind: 'customize', destination } }}>
           <div className="kx-cat-preview-static-overlay">
             <CustomizeModal />
           </div>

@@ -554,7 +554,7 @@ export default function Sidebar() {
           aria-label="Customize"
           onClick={(event) => {
             beginOverlayChain(event.currentTarget)
-            dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', tab: 'agents' } })
+            dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', destination: { section: 'agents' } } })
           }}
           onMouseEnter={() => setCustomizeTooltipShown(true)}
           onMouseLeave={() => setCustomizeTooltipShown(false)}
