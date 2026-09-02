@@ -23,6 +23,7 @@ import SessionHistoryPage from './SessionHistoryPage'
 import { MockupContext } from '../state/MockupContext'
 import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
 import { initialState, mockupReducer } from '../state/mockupReducer'
+import { TECH_STATUS_LABELS } from '../components/technical/StatusBadge'
 
 /** The anchor nav labels (KIND_ORDER through KIND_LABELS) — note the
  * gate reads APPROVAL NEEDED and progress reads PROGRESS in the chat
@@ -343,8 +344,151 @@ describe('SessionStreamDemoPage — interactions', () => {
 
   it('copying the artifact shows feedback', () => {
     render(<SessionStreamDemoPage />)
+    const stream = screen.getByTestId('session-stream')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Copy' }))
-    expect(screen.getByRole('button', { name: 'Copied' })).toBeInTheDocument()
+    // Scoped to the stream: the technical-text showcase above it carries
+    // its own Copy actions (CodeBlock headers + long metadata values).
+    fireEvent.click(within(stream).getByRole('button', { name: 'Copy' }))
+    expect(within(stream).getByRole('button', { name: 'Copied' })).toBeInTheDocument()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Technical text showcase (spec §Showcase) — the five kx-tech-* primitives
+// above the stream: InlineCode prose, an EntityToken row, a MetadataPair
+// grid with mixed value types, the full canonical StatusBadge row, two
+// CodeBlocks (short unnumbered SQL + long collapsed config), and the
+// do/don't note. The #technical-text anchor makes it deep-linkable.
+// ---------------------------------------------------------------------------
+
+describe('SessionStreamDemoPage — technical text showcase', () => {
+  it('renders the section under the header, before the stream, with its anchor', () => {
+    render(<SessionStreamDemoPage />)
+
+    const section = document.getElementById('technical-text')
+    expect(section).not.toBeNull()
+    expect(section).toHaveClass('kx-tech-showcase')
+    expect(
+      screen.getByRole('heading', { name: 'Technical text', level: 2 }),
+    ).toBeInTheDocument()
+
+    // Position: after the page header, before the stream slots.
+    const header = document.querySelector('.kx-stream-page__head')!
+    const stream = screen.getByTestId('session-stream')
+    expect(header.compareDocumentPosition(section!)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(section!.compareDocumentPosition(stream)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
+  it('embeds InlineCode literals inside the showcase sentence', () => {
+    render(<SessionStreamDemoPage />)
+    const section = document.getElementById('technical-text')!
+    const prose = section.querySelector('.kx-tech-showcase__prose')!
+
+    expect(prose.textContent).toContain('is on branch')
+    const codes = Array.from(prose.querySelectorAll('code.kx-tech-code'))
+    expect(codes.map((code) => code.textContent)).toEqual(['hris-frontend', 'development'])
+    // The InlineCode spans are non-interactive inside the prose too.
+    codes.forEach((code) => {
+      expect(code.querySelector('button, a')).toBeNull()
+      expect(code).not.toHaveAttribute('tabindex')
+    })
+  })
+
+  it('renders the EntityToken row with varied kinds and explicit aria labels', () => {
+    render(<SessionStreamDemoPage />)
+    const section = document.getElementById('technical-text')!
+    // Scoped to the token ROW — the MetadataPair grid below repeats the
+    // repository/branch tokens as pair values.
+    const row = section.querySelector<HTMLElement>('.kx-tech-showcase__row')!
+
+    expect(within(row).getByRole('button', { name: 'Open repository hris-frontend' })).toBeInTheDocument()
+    expect(within(row).getByRole('button', { name: 'Open branch development' })).toBeInTheDocument()
+    expect(
+      within(row).getByRole('button', { name: 'Open document MMKSI-HRD Phase 2.docx' }),
+    ).toBeInTheDocument()
+    expect(within(row).getByRole('button', { name: 'Open Task 7' })).toBeInTheDocument()
+    expect(within(row).getByRole('button', { name: 'Open session ses_01JABC' })).toBeInTheDocument()
+  })
+
+  it('renders the MetadataPair grid with mixed value types', () => {
+    render(<SessionStreamDemoPage />)
+    const section = document.getElementById('technical-text')!
+    const meta = section.querySelector<HTMLElement>('.kx-tech-showcase__meta')!
+
+    // EntityToken values (Repository, Branch) stay interactive; the long
+    // mono Session ID rides InlineCode + the copy action; Provider is a
+    // plain string.
+    expect(within(meta).getAllByRole('button', { name: /^Open (repository|branch)/ })).toHaveLength(2)
+    const sessionPair = meta.querySelectorAll('.kx-tech-meta__pair')[2]
+    expect(sessionPair.querySelector('code.kx-tech-code')).not.toBeNull()
+    expect(sessionPair.querySelector('.kx-tech-meta__copy')).not.toBeNull()
+    expect(within(meta).getByText('Gitea')).toBeInTheDocument()
+
+    // Labels stay plain — never controls.
+    meta.querySelectorAll('.kx-tech-meta__label').forEach((label) => {
+      expect(label.tagName).toBe('SPAN')
+      expect(label.querySelector('button, a')).toBeNull()
+    })
+  })
+
+  it('renders the full canonical StatusBadge row — icon + label every time', () => {
+    render(<SessionStreamDemoPage />)
+    const section = document.getElementById('technical-text')!
+    const badges = section.querySelectorAll<HTMLElement>('.kx-tech-badge')
+
+    expect(badges).toHaveLength(10)
+    for (const badge of badges) {
+      expect(badge.querySelector('.kx-tech-badge__icon')).not.toBeNull()
+      expect(badge.querySelector('.kx-tech-badge__label')).not.toBeNull()
+    }
+    for (const label of Object.values(TECH_STATUS_LABELS)) {
+      expect(within(section).getByText(label)).toBeInTheDocument()
+    }
+    // Running is the animated-dot variant; the default pills are spans.
+    expect(section.querySelector('.kx-tech-badge__dot')).not.toBeNull()
+    badges.forEach((badge) => expect(badge.tagName).toBe('SPAN'))
+  })
+
+  it('renders both CodeBlocks — short unnumbered SQL and long collapsed config', () => {
+    render(<SessionStreamDemoPage />)
+    const section = document.getElementById('technical-text')!
+    const blocks = section.querySelectorAll<HTMLElement>('.kx-tech-codeblock')
+    expect(blocks).toHaveLength(2)
+
+    const [sql, config] = Array.from(blocks)
+    // Short SQL: 4 lines, no line numbers, with its footer line.
+    expect(within(sql).getByText(/AND clock_out IS NULL;/)).toBeInTheDocument()
+    expect(sql.querySelectorAll('.kx-tech-codeblock__line')).toHaveLength(4)
+    expect(sql.querySelector('.kx-tech-codeblock__ln')).toBeNull()
+    expect(within(sql).getByText(/Executed 09:41 · 3 rows returned/)).toBeInTheDocument()
+
+    // Long config: numbered, collapsed to 10 lines + the expand toggle.
+    expect(config.querySelectorAll('.kx-tech-codeblock__line')).toHaveLength(10)
+    expect(config.querySelectorAll('.kx-tech-codeblock__ln')).toHaveLength(10)
+    const expand = within(config).getByRole('button', { name: 'Show full code' })
+    expect(expand).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('expands the long config CodeBlock to all 16 lines', () => {
+    render(<SessionStreamDemoPage />)
+    const section = document.getElementById('technical-text')!
+    const config = section.querySelectorAll<HTMLElement>('.kx-tech-codeblock')[1]
+
+    fireEvent.click(within(config).getByRole('button', { name: 'Show full code' }))
+
+    expect(config.querySelectorAll('.kx-tech-codeblock__line')).toHaveLength(16)
+    expect(within(config).getByRole('button', { name: 'Hide full code' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    )
+  })
+
+  it('carries the two-line do/don’t note in muted ink', () => {
+    render(<SessionStreamDemoPage />)
+    const section = document.getElementById('technical-text')!
+    const notes = section.querySelectorAll('.kx-tech-note')
+    expect(notes).toHaveLength(2)
+    expect(notes[0].textContent).toMatch(/^Do —/)
+    expect(notes[1].textContent).toMatch(/^Don't —/)
   })
 })

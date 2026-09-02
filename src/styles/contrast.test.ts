@@ -61,6 +61,16 @@ const STREAM = 'src/components/session/stream/SessionStream.css'
 const SIDEBAR = 'src/components/shell/Sidebar.css'
 const SYSTEM_MENU = 'src/components/shell/SystemMenu.css'
 const WORKSPACE_MENU = 'src/components/shell/WorkspaceMenu.css'
+// technical/technical.css — the Technical Text design-system primitives
+// (InlineCode, EntityToken, MetadataPair, StatusBadge, CodeBlock + the
+// demo showcase). Its own home from day one (never in components.css),
+// so — like SESSION_BADGES/CUSTOMIZE_SHARED — the entries point at the
+// real file. Hard rule from the extractor still holds: each selector
+// reads at most ONE tracked token; every other color rides the
+// --kx-tech-* aliases declared in tokens.css, which are skipped by the
+// extractor because alias DEFINITIONS are declarations, not consumer
+// usages (their AA-ness is inherited from the aliased base token).
+const TECHNICAL = 'src/components/technical/technical.css'
 
 const MUTED = '--kx-muted'
 const MUTED_AA = '--kx-muted-text-aa'
@@ -465,6 +475,26 @@ function entries(): Entry[] {
     // (secondary accent action, same family as .kx-history__clear).
     { file: 'src/pages/SessionHistoryPage.css', selector: '.kx-history__demo-link', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
     { file: 'src/pages/SessionHistoryPage.css', selector: '.kx-history__demo-link:focus-visible', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
+    // ── Technical text primitives (technical/technical.css) ──────────
+    // M — muted AA ink: the entity kind icon, the metadata label, the
+    // code header meta + line numbers + footer, and the showcase's
+    // group labels + do/don't note (all enabled muted text).
+    ...[
+      '.kx-tech-entity__icon',
+      '.kx-tech-meta__label',
+      '.kx-tech-codeblock__meta',
+      '.kx-tech-codeblock__ln',
+      '.kx-tech-codeblock__footer',
+      '.kx-tech-showcase__label',
+      '.kx-tech-note',
+    ].map((selector) => ({ file: TECHNICAL, selector, property: 'color', token: MUTED_AA, cls: 'M' as Class })),
+    // A — AA accent ink: the text-like copy/expand actions (metadata
+    // value copy, code header copy, Show full code toggle).
+    ...[
+      '.kx-tech-meta__copy',
+      '.kx-tech-copy',
+      '.kx-tech-codeblock__expand',
+    ].map((selector) => ({ file: TECHNICAL, selector, property: 'color', token: ACCENT_AA, cls: 'A' as Class })),
     { file: GLOBAL, selector: ':focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
   ]
 }
@@ -503,6 +533,13 @@ function extractUsages(css: string, file: string): Usage[] {
   for (let i = 0; i < lines.length; i++) {
     const match = lines[i].match(TOKEN_RE)
     if (!match) continue
+    // Custom-property DEFINITION lines (--kx-tech-status-success:
+    // var(--kx-accent-text-aa) in tokens.css) are alias declarations,
+    // not consumer usages: the alias inherits its AA-ness from the
+    // aliased base token, and consumers reading var(--kx-tech-*) do not
+    // match TOKEN_RE at all. Skipping definition lines keeps the census
+    // a complete inventory of CONSUMER reads (selector::property).
+    if (lines[i].split(':')[0].trim().startsWith('--')) continue
     let selector = ''
     for (let j = i; j >= 0; j--) {
       const t = lines[j].trim()
@@ -1003,16 +1040,16 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 254 consumers — 99 muted, 89 accent-strong, 22 accent-text-aa', () => {
-    expect(inventory).toHaveLength(254)
+  it('covers exactly 264 consumers — 99 muted, 89 accent-strong, 25 accent-text-aa', () => {
+    expect(inventory).toHaveLength(264)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(99)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(89)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(22)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(25)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(124)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(59)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(131)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(62)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(9)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(62)
   })

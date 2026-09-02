@@ -82,6 +82,38 @@
 
   /* ── Fixed dimensions (AC2, AC34, AC39, §5.1, §11, §12) ─────────── */
   --kx-radius-main: 19.5px; /* Main canvas corners, top-left/bottom-left */
+
+  /* ── Technical text (kx-tech-*) — mono stack + semantic aliases ──── */
+  /* Source of truth: .pi/orch/plans/technical-text-spec.md §Aturan dasar.
+   * --kx-font-mono lifts the exact ui-monospace stack already used by
+   * .kx-stream-mono (SessionStream.css now reads this token) so every
+   * technical-text primitive shares one mono family. The aliases map the
+   * kx-tech-* semantics onto EXISTING tokens — no new color values. They
+   * are declared here in :root only: every referenced base token
+   * (--kx-pale, --kx-primary, --kx-border, --kx-accent-strong,
+   * --kx-accent-text-aa, --kx-muted-text-aa, --kx-attention) is itself
+   * overridden by the [data-theme='dark'] block below, so the aliases
+   * flip to the dark palette automatically. */
+  --kx-font-mono: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+  /* InlineCode: literal-value wash on pale, ink text. */
+  --kx-tech-code-bg: var(--kx-pale);
+  --kx-tech-code-text: var(--kx-primary);
+  /* EntityToken: openable system object chips — pale fill, hairline edge,
+   * accent-strong border on hover. */
+  --kx-tech-entity-bg: var(--kx-pale);
+  --kx-tech-entity-border: var(--kx-border);
+  --kx-tech-entity-border-hover: var(--kx-accent-strong);
+  /* Keyboard focus ring for every interactive technical-text control
+   * (v2.css pattern: 2px accent-strong outline). */
+  --kx-tech-focus-ring: var(--kx-accent-strong);
+  /* StatusBadge tone inks — AA text tokens; warning and danger share the
+   * attention amber (repo convention: no error token — the icon and label
+   * carry the distinction, e.g. danger pairs amber with a firm ×). */
+  --kx-tech-status-success: var(--kx-accent-text-aa);
+  --kx-tech-status-warning: var(--kx-attention);
+  --kx-tech-status-danger: var(--kx-attention);
+  --kx-tech-status-neutral: var(--kx-muted-text-aa);
+
   --kx-sidebar-w: 320px; /* Expanded white sidebar (spec §6.1, AC12) */
   --kx-sidebar-rail: 64px; /* Collapsed sidebar icon rail */
   --kx-customize-w: 790px; /* Customize modal width — fixed on every tab */

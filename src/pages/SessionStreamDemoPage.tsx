@@ -32,7 +32,119 @@ import ReviewFindingBlock from '../components/session/stream/blocks/ReviewFindin
 import AnswerBlock from '../components/session/stream/blocks/AnswerBlock'
 import CompletionBlock from '../components/session/stream/blocks/CompletionBlock'
 import { ILLUSTRATIVE_DATA_NOTE } from '../data/mockData'
+import InlineCode from '../components/technical/InlineCode'
+import EntityToken from '../components/technical/EntityToken'
+import MetadataPair from '../components/technical/MetadataPair'
+import StatusBadge, { TECH_STATUSES } from '../components/technical/StatusBadge'
+import CodeBlock from '../components/technical/CodeBlock'
 import '../components/session/stream/SessionStream.css'
+
+/** Showcase snippet 1 — a short (4-line) attendance query: under the
+ * 5-line gate, so it renders WITHOUT line numbers. */
+const ATTENDANCE_SQL = `SELECT employee_id, clock_in, clock_out
+FROM attendance_records
+WHERE work_date = '2026-08-31'
+  AND clock_out IS NULL;`
+
+/** Showcase snippet 2 — a 16-line sync config: past the 12-line collapse
+ * threshold, so it starts collapsed (10 lines) with numbered rows and a
+ * "Show full code" toggle. */
+const ATTENDANCE_SYNC_CONFIG = `source:
+  provider: gitea
+  repository: hris-frontend
+  branch: development
+sync:
+  schedule: "0 7 * * 1-5"
+  timezone: Asia/Jakarta
+  window:
+    opens: "07:30"
+    closes: "09:00"
+rules:
+  late_after: "09:00:59"
+  half_day_after: "13:00:00"
+  overtime:
+    min_minutes: 30
+    requires_approval: true`
+
+/** Technical text showcase (spec §Showcase): one section exercising all
+ * five primitives with real attendance-domain values — the anchor target
+ * for #technical-text. Local presentational composition only. */
+function TechnicalTextShowcase() {
+  return (
+    <section className="kx-tech-showcase" id="technical-text" aria-labelledby="technical-text-title">
+      <h2 className="kx-tech-showcase__title" id="technical-text-title">
+        Technical text
+      </h2>
+      <p className="kx-tech-showcase__desc">
+        Five primitives for literal system values — identifiers, openable objects, metadata,
+        statuses, and code. Every value that represents something the system knows is typed, not
+        prose; only values act, labels never do.
+      </p>
+
+      <div className="kx-tech-showcase__group">
+        <p className="kx-tech-showcase__label">Inline code</p>
+        <p className="kx-tech-showcase__prose">
+          The repository <InlineCode>hris-frontend</InlineCode> is on branch{' '}
+          <InlineCode>development</InlineCode>.
+        </p>
+      </div>
+
+      <div className="kx-tech-showcase__group">
+        <p className="kx-tech-showcase__label">Entity tokens</p>
+        <div className="kx-tech-showcase__row">
+          <EntityToken kind="repository" label="hris-frontend" />
+          <EntityToken kind="branch" label="development" />
+          <EntityToken kind="document" label="MMKSI-HRD Phase 2.docx" mono={false} />
+          <EntityToken kind="task" label="Task 7" mono={false} openLabel="Open Task 7" />
+          <EntityToken kind="session" label="ses_01JABC" />
+        </div>
+      </div>
+
+      <div className="kx-tech-showcase__group">
+        <p className="kx-tech-showcase__label">Metadata pairs</p>
+        <div className="kx-tech-showcase__meta">
+          <MetadataPair
+            label="Repository"
+            value={<EntityToken kind="repository" label="hris-frontend" />}
+          />
+          <MetadataPair label="Branch" value={<EntityToken kind="branch" label="development" />} />
+          <MetadataPair label="Session ID" value="ses_01JG8Z4X7QK2M5RT9W3BV6DHC0LP" mono />
+          <MetadataPair label="Provider" value="Gitea" />
+        </div>
+      </div>
+
+      <div className="kx-tech-showcase__group">
+        <p className="kx-tech-showcase__label">Status badges</p>
+        <div className="kx-tech-showcase__row">
+          {TECH_STATUSES.map((status) => (
+            <StatusBadge key={status} status={status} />
+          ))}
+        </div>
+      </div>
+
+      <div className="kx-tech-showcase__group">
+        <p className="kx-tech-showcase__label">Code blocks</p>
+        <CodeBlock
+          code={ATTENDANCE_SQL}
+          meta="sql"
+          footer="Executed 09:41 · 3 rows returned"
+        />
+        <CodeBlock code={ATTENDANCE_SYNC_CONFIG} meta="config/attendance-sync.yaml" />
+      </div>
+
+      <div className="kx-tech-showcase__group">
+        <p className="kx-tech-note">
+          Do — mark literal values with InlineCode and openable objects with EntityToken; in
+          metadata, only the value ever acts.
+        </p>
+        <p className="kx-tech-note">
+          Don&apos;t — rely on color alone: every status pairs its icon and label with a tone that
+          clears AA contrast in both themes.
+        </p>
+      </div>
+    </section>
+  )
+}
 
 /** Composes the inserted user bubble for the interactive clarification:
  * the chosen options as a numbered chat message. */
@@ -164,6 +276,8 @@ export default function SessionStreamDemoPage() {
           ))}
         </nav>
       </header>
+
+      <TechnicalTextShowcase />
 
       <div className="kx-stream" data-testid="session-stream">
         {SESSION_STREAM_STORY.map((entry, index) => {

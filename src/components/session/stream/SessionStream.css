@@ -389,7 +389,9 @@
 }
 
 .kx-stream-mono {
-  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+  /* The stack was lifted to --kx-font-mono (tokens.css) when the
+   * technical-text primitives adopted the same mono family. */
+  font-family: var(--kx-font-mono);
   font-size: 0.95em;
 }
 
