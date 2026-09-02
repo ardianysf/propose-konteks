@@ -16,14 +16,20 @@
  * finding → artifact chip → agent final answer → completion handoff.
  * Timestamps are monotonic and realistic (14:02 → 15:03).
  *
- * LIVE_TURN_SCRIPT drives the composer flow: when the user sends a
- * message, the page plays it back step by step (typing → understanding →
- * tool call running→done → progress → artifact chip v1.1 → final
- * answer), with per-step delays in the 450–1600ms band.
+ * LIVE_TURN_SCRIPT drives the STAGED composer flow (spec §Live mock
+ * v2): each send plays typing → understanding, then PARKS at an
+ * outstanding approval gate; the user's decision settles the gate and
+ * continues to an interactive plan; approving the plan runs the
+ * execution leg (live progress with a ticking elapsed clock → tool
+ * call running→done → artifact chip → final answer), while Deny or
+ * Request changes close the turn with short prose. All waits are
+ * interactive — nothing advances until the user decides.
  */
 import type {
   AnswerBlockData,
+  ApprovalGateBlockData,
   ArtifactBlockData,
+  PlanBlockData,
   ProgressBlockData,
   StreamStoryEntry,
   ToolCall,
@@ -361,30 +367,37 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
   },
 ]
 
-// ── Live turn script (composer flow) ──────────────────────────────────────
+// ── Live turn script (staged interactive composer flow) ───────────────────
 
-/** One scripted agent turn, played back step by step after a send. Each
- * delay is the gap BEFORE the step appears (spec band: 450–1600ms). */
-export interface LiveTurnScript {
-  /** After send: the bubble flips Sending… → sent + timestamp. */
-  sentDelayMs: number
-  /** After sent: the typing indicator appears. */
+/** A closing branch: the turn ends with short prose and the composer
+ * unlocks — used when the gate is DENIED or the plan gets "Request
+ * changes" (no execution runs). */
+export interface LiveClosingScript {
+  /** Decision recorded → brief typing indicator. */
   typingDelayMs: number
-  /** After typing starts: the agent turn opens with understanding prose. */
-  openDelayMs: number
-  understanding: AnswerBlockData
+  /** After typing starts: the closing prose replaces the indicator. */
+  answerDelayMs: number
+  answer: AnswerBlockData
+  /** After the prose: the turn settles and the composer unlocks. */
+  settleDelayMs: number
+}
+
+/** The execution leg after "Approve plan": live progress with a real
+ * ticking elapsed clock → tool call running→done (collapses) → artifact
+ * chip → final answer → unlock. */
+export interface LiveExecutionScript {
+  progressDelayMs: number
+  /** Live progress (an active phase; elapsed ticks on the page clock). */
+  progress: ProgressBlockData
   toolRunningDelayMs: number
   /** The call as it first appears — running, open, animated. */
   toolRunning: ToolCall
   toolDoneDelayMs: number
   /** The same call once it finishes — done, collapsed, expandable. */
   toolDone: ToolCall
-  progressDelayMs: number
-  /** Live progress (an active phase; elapsed ticks on the page clock). */
-  progress: ProgressBlockData
+  artifactDelayMs: number
   /** Progress once the turn settles — all phases done, collapsed summary. */
   progressSettled: ProgressBlockData
-  artifactDelayMs: number
   artifact: ArtifactBlockData
   answerDelayMs: number
   answer: AnswerBlockData
@@ -392,88 +405,189 @@ export interface LiveTurnScript {
   settleDelayMs: number
 }
 
-/** The scripted follow-up turn for the composer flow (spec §Live mock):
- * the user asks to verify the overnight-shift fix from PR #1301 and the
- * agent replays the subset, refreshes the report to v1.1, and answers. */
-export const LIVE_TURN_SCRIPT: LiveTurnScript = {
+/** One STAGED scripted turn (spec §Live mock v2 — staged interactive):
+ * the run advances on timers up to an explicit WAIT point, then parks —
+ * no further steps are scheduled until the user decides. Wait point #1
+ * is the OUTSTANDING approval gate (the only way forward is choosing);
+ * wait point #2 is the interactive plan (Approve plan / Request
+ * changes). Each decision branches the continuation. */
+export interface LiveStagedScript {
+  /** After send: the bubble flips Sending… → sent + timestamp. */
+  sentDelayMs: number
+  /** After sent: the typing indicator appears. */
+  typingDelayMs: number
+  /** After typing starts: the agent turn opens with understanding prose. */
+  openDelayMs: number
+  understanding: AnswerBlockData
+  /** After understanding: the approval gate appears OUTSTANDING and the
+   * run parks — WAIT POINT #1 (the composer stays locked). */
+  gateDelayMs: number
+  gate: ApprovalGateBlockData
+  /** Gate allowed (once / always): the decision settles visibly, brief
+   * typing, then the interactive plan appears — WAIT POINT #2. */
+  allowTypingDelayMs: number
+  planDelayMs: number
+  plan: PlanBlockData
+  /** Plan approved → the execution leg runs to completion. */
+  execution: LiveExecutionScript
+  /** Gate denied → short polite prose (no execution), turn ends, unlock. */
+  deny: LiveClosingScript
+  /** Plan "Request changes" → agent asks what to change, turn ends,
+   * unlock (the user can send the changes as a new message). */
+  requestChanges: LiveClosingScript
+}
+
+/** The staged follow-up turn for the composer flow (spec §Live mock v2):
+ * the user asks to re-verify the overnight-shift fix from PR #1301, and
+ * the agent PAUSES for approval before touching the sandbox — first at
+ * the approval gate, then at the plan — before replaying the subset,
+ * refreshing the report to v1.1, and answering. */
+export const LIVE_TURN_SCRIPT: LiveStagedScript = {
   sentDelayMs: 450,
   typingDelayMs: 900,
   openDelayMs: 1500,
   understanding: {
     paragraphs: [
       'Got it — I’ll re-verify the overnight-shift boundary fix from PR #1301 against the August sample: the 37 records that previously landed on the wrong day, plus one fresh sandbox replay to confirm the corrected boundary holds.',
-      'No production writes this time — the replay stays inside the sandbox.',
+      'No production writes this time — the replay stays inside the sandbox, and I’ll ask for your approval before anything runs.',
     ],
   },
-  toolRunningDelayMs: 1000,
-  toolRunning: {
-    id: 'live-replay',
-    verb: 'replay',
-    target: 'sandbox batch att-2026-0815 (overnight subset · 37 records)',
-    state: 'running',
+  gateDelayMs: 1000,
+  gate: {
+    action:
+      'Replay sandbox batch att-2026-0815 (overnight subset · 37 records) and write the refreshed verification evidence into the session sandbox',
+    rows: [
+      { label: 'Target', value: 'bsi-hris · sandbox', mono: true },
+      { label: 'Scope', value: '37 overnight-shift records, 2026-08-01 through 2026-08-14' },
+      { label: 'Estimated cost', value: '~2 min replay · no production data touched' },
+      { label: 'Rollback path', value: 'sandbox-attendance-reset.sh runs before every batch', mono: true },
+    ],
+    consequence:
+      'The replay writes attendance payloads into the shared sandbox. Once the batch id is consumed it cannot be replayed — an interrupted run requires resetting the sandbox and re-importing the sample, and partial replay results must not be treated as evidence.',
   },
-  toolDoneDelayMs: 1600,
-  toolDone: {
-    id: 'live-replay',
-    verb: 'replay',
-    target: 'sandbox batch att-2026-0815 (overnight subset · 37 records)',
-    state: 'done',
-    duration: '1m 12s',
-    result: '37/37 overnight records land on their shift start day — 0 boundary mismatches',
-    io: {
-      input: 'att-replay run --batch att-2026-0815 --filter overnight --env sandbox',
-      output: [
-        'replayed 37 records (overnight shifts, 2026-08-01 .. 2026-08-14)',
-        'boundary mismatches: 0 (was 37 before PR #1301)',
-        'duplicate event ids skipped: 4',
-        'PASS',
+  allowTypingDelayMs: 600,
+  planDelayMs: 1400,
+  plan: {
+    steps: [
+      {
+        id: 'live-step-replay',
+        verb: 'Replay',
+        target: 'sandbox batch att-2026-0815 (overnight subset)',
+        targetMono: true,
+        agent: 'Engineering',
+        estimate: '~2 min',
+      },
+      {
+        id: 'live-step-reconcile',
+        verb: 'Reconcile',
+        target: 'replayed records vs attendance_records',
+        targetMono: true,
+        agent: 'Engineering',
+        estimate: '~1 min',
+      },
+      {
+        id: 'live-step-report',
+        verb: 'Refresh',
+        target: 'docs/attendance-review-report.md → v1.1',
+        targetMono: true,
+        agent: 'PM',
+        estimate: '~1 min',
+      },
+    ],
+    totalEstimate: '~4 min',
+  },
+  execution: {
+    progressDelayMs: 900,
+    progress: {
+      elapsed: '00:00',
+      phases: [
+        { id: 'live-phase-replay', label: 'Replay overnight subset (37 records)', state: 'active' },
+        { id: 'live-phase-reconcile', label: 'Reconcile against attendance_records', state: 'queued' },
       ],
     },
+    toolRunningDelayMs: 1400,
+    toolRunning: {
+      id: 'live-replay',
+      verb: 'replay',
+      target: 'sandbox batch att-2026-0815 (overnight subset · 37 records)',
+      state: 'running',
+    },
+    toolDoneDelayMs: 1600,
+    toolDone: {
+      id: 'live-replay',
+      verb: 'replay',
+      target: 'sandbox batch att-2026-0815 (overnight subset · 37 records)',
+      state: 'done',
+      duration: '1m 12s',
+      result: '37/37 overnight records land on their shift start day — 0 boundary mismatches',
+      io: {
+        input: 'att-replay run --batch att-2026-0815 --filter overnight --env sandbox',
+        output: [
+          'replayed 37 records (overnight shifts, 2026-08-01 .. 2026-08-14)',
+          'boundary mismatches: 0 (was 37 before PR #1301)',
+          'duplicate event ids skipped: 4',
+          'PASS',
+        ],
+      },
+    },
+    artifactDelayMs: 1100,
+    progressSettled: {
+      elapsed: '2m 05s',
+      phases: [
+        { id: 'live-phase-replay', label: 'Replay overnight subset (37 records)', state: 'done', duration: '1m 12s' },
+        { id: 'live-phase-reconcile', label: 'Reconcile against attendance_records', state: 'done', duration: '0m 53s' },
+      ],
+    },
+    artifact: {
+      badge: 'REPORT',
+      title: 'Review report — attendance integration',
+      excerpt: 'Refreshed verification evidence: the PR #1301 boundary fix replayed against the 37 affected overnight records.',
+      schema: [
+        '## Verification (v1.1)',
+        '+ replay att-2026-0815 — 37/37 overnight records on the correct day',
+        '+ reconciliation vs attendance_records — 0 mismatches',
+        '## Sign-off',
+        '+ v1 finding closed; report supersedes v1 for the Friday sign-off',
+      ],
+      version: 'v1.1',
+      time: '15:12',
+      copyPayload: [
+        '# Review report — attendance integration (v1.1)',
+        '',
+        '## Verification of PR #1301',
+        'Replay batch att-2026-0815 (overnight subset, 37 records):',
+        '37/37 records now land on their shift start day; reconciliation',
+        'against attendance_records reports 0 mismatches.',
+      ].join('\n'),
+    },
+    answerDelayMs: 1300,
+    answer: {
+      paragraphs: [
+        'Verified — the boundary fix holds. All 37 overnight-shift records from the August sample now land on their shift start day, and the replay reconciled 37/37 against attendance_records with zero mismatches. Duplicate check-ins still skip cleanly, so idempotency is intact.',
+        'The refreshed report (v1.1) is attached above — it supersedes v1 for the sign-off. From my side the release is ready for Friday once you countersign.',
+      ],
+    },
+    settleDelayMs: 900,
   },
-  progressDelayMs: 1000,
-  progress: {
-    elapsed: '00:00',
-    phases: [
-      { id: 'live-phase-replay', label: 'Replay overnight subset (37 records)', state: 'done', duration: '1m 12s' },
-      { id: 'live-phase-reconcile', label: 'Reconcile against attendance_records', state: 'active' },
-    ],
+  deny: {
+    typingDelayMs: 600,
+    answerDelayMs: 1000,
+    answer: {
+      paragraphs: [
+        'Understood — I won’t run the replay. Nothing was executed and nothing was written; the session sandbox is untouched.',
+        'The verification stays ready whenever you want it — send another message and I’ll pick it up from here.',
+      ],
+    },
+    settleDelayMs: 800,
   },
-  progressSettled: {
-    elapsed: '2m 05s',
-    phases: [
-      { id: 'live-phase-replay', label: 'Replay overnight subset (37 records)', state: 'done', duration: '1m 12s' },
-      { id: 'live-phase-reconcile', label: 'Reconcile against attendance_records', state: 'done', duration: '0m 53s' },
-    ],
+  requestChanges: {
+    typingDelayMs: 600,
+    answerDelayMs: 1000,
+    answer: {
+      paragraphs: [
+        'Happy to adjust — tell me what to change in the plan (steps, targets, or estimates) and I’ll bring a revised plan for your approval before anything runs.',
+      ],
+    },
+    settleDelayMs: 800,
   },
-  artifactDelayMs: 1100,
-  artifact: {
-    badge: 'REPORT',
-    title: 'Review report — attendance integration',
-    excerpt: 'Refreshed verification evidence: the PR #1301 boundary fix replayed against the 37 affected overnight records.',
-    schema: [
-      '## Verification (v1.1)',
-      '+ replay att-2026-0815 — 37/37 overnight records on the correct day',
-      '+ reconciliation vs attendance_records — 0 mismatches',
-      '## Sign-off',
-      '+ v1 finding closed; report supersedes v1 for the Friday sign-off',
-    ],
-    version: 'v1.1',
-    time: '15:12',
-    copyPayload: [
-      '# Review report — attendance integration (v1.1)',
-      '',
-      '## Verification of PR #1301',
-      'Replay batch att-2026-0815 (overnight subset, 37 records):',
-      '37/37 records now land on their shift start day; reconciliation',
-      'against attendance_records reports 0 mismatches.',
-    ].join('\n'),
-  },
-  answerDelayMs: 1300,
-  answer: {
-    paragraphs: [
-      'Verified — the boundary fix holds. All 37 overnight-shift records from the August sample now land on their shift start day, and the replay reconciled 37/37 against attendance_records with zero mismatches. Duplicate check-ins still skip cleanly, so idempotency is intact.',
-      'The refreshed report (v1.1) is attached above — it supersedes v1 for the sign-off. From my side the release is ready for Friday once you countersign.',
-    ],
-  },
-  settleDelayMs: 900,
 }

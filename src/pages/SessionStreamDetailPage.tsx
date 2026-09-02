@@ -18,29 +18,40 @@
  * the chip, the gate records a decision, and tool/progress rows expand
  * and collapse locally.
  *
- * LIVE MOCK (spec §Live mock, phase 2): sending via the composer appends
- * a user bubble (Sending… → sent "just now"), locks the composer, and
- * plays LIVE_TURN_SCRIPT step by step on timers — typing indicator →
- * understanding prose → tool call RUNNING (open, pulsing) → done
- * (collapses) → live progress with a ticking elapsed clock → settled →
- * artifact chip → final answer → composer unlocks. Editing any user
- * bubble ("Save & resend") updates its text, truncates every turn after
- * it, and replays the script (mockup regeneration). Every timer lives in
- * a page ref and is cleared on unmount — no setState after unmount.
+ * LIVE MOCK (spec §Live mock v2 — staged interactive): sending via the
+ * composer appends a user bubble (Sending… → sent "just now"), locks
+ * the composer, and plays the staged opening on timers — typing
+ * indicator → understanding prose — then PARKS at an OUTSTANDING
+ * approval gate. The gate choices are the only way forward: deciding
+ * settles the gate visibly (decision recorded), brief typing, then an
+ * interactive plan WAITS (Approve plan / Request changes). Approving
+ * runs the execution leg — live progress with a ticking elapsed clock
+ * → tool call RUNNING (open, pulsing) → done (collapses) → settled +
+ * artifact chip → final answer → composer unlocks. Deny and Request
+ * changes close the turn with short prose and unlock. Every send
+ * replays the staged cycle (artifact version bumps v1.1, v1.2, …).
+ * Editing any user bubble ("Save & resend") updates its text, truncates
+ * every turn after it, and replays the staged opening (mockup
+ * regeneration). Every timer lives in a page ref and is cleared on
+ * unmount — no setState after unmount; while a gate/plan waits there
+ * are no pending timers at all (the run resumes from the decision).
  */
 import { Fragment, useEffect, useRef, useState } from 'react'
 import {
   ATTENDANCE_REVIEW_STORY,
   ATTENDANCE_REVIEW_TITLE,
   LIVE_TURN_SCRIPT,
+  type LiveClosingScript,
 } from '../components/session/stream/attendanceReviewStory'
 import { isLastAgentTurnOfResponse } from '../components/session/stream/responseGroup'
 import BubbleBlock from '../components/session/stream/BubbleBlock'
 import type {
   AnswerBlockData,
+  ApprovalGateBlockData,
   ArtifactBlockData,
   ClarificationBlockData,
   GateDecision,
+  PlanBlockData,
   ProgressBlockData,
   StreamStoryEntry,
   ToolCall,
@@ -87,14 +98,18 @@ const LIVE_CLOCK_MS = 1000
 
 // ── Live-mock state model ─────────────────────────────────────────────────
 
-/** One appended live turn. Entries reveal step by step as the scripted
+/** One appended live turn. Entries reveal step by step as the staged
  * run advances; `id` is stable per entry, and keying by mutable fields
  * (tool state, progress live/settled) remounts the shared blocks so
- * their collapsed-by-default expansion resets exactly like history. */
+ * their collapsed-by-default expansion resets exactly like history.
+ * `gate` and `plan` are the interactive WAIT points: they render
+ * outstanding/pending until the user's decision settles them in place. */
 type LiveEntry =
   | { id: string; kind: 'user'; text: string; sending: boolean }
   | { id: string; kind: 'typing' }
   | { id: string; kind: 'understanding'; data: AnswerBlockData }
+  | { id: string; kind: 'gate'; data: ApprovalGateBlockData; decision?: GateDecision }
+  | { id: string; kind: 'plan'; data: PlanBlockData; approved: boolean }
   | { id: string; kind: 'tool'; call: ToolCall }
   | { id: string; kind: 'progress'; data: ProgressBlockData; live: boolean; elapsedSec: number }
   | { id: string; kind: 'artifact'; data: ArtifactBlockData }
@@ -127,12 +142,26 @@ export default function SessionStreamDetailPage() {
 
   // Live-mock state (page-local only — the reducer is untouched):
   //   liveTurns    the appended conversation after the settled history
-  //   agentBusy    composer lock while a scripted run is in flight
+  //   agentBusy    composer lock while a staged run is in flight (it
+  //                stays locked across BOTH interactive waits — the
+  //                 gate/plan choices are the only way forward)
   //   historyCutoff  how many fixture turns remain visible after an edit
   //   on an old bubble truncated everything below it
   const [liveTurns, setLiveTurns] = useState<LiveEntry[]>([])
   const [agentBusy, setAgentBusy] = useState(false)
   const [historyCutoff, setHistoryCutoff] = useState(ATTENDANCE_REVIEW_STORY.length)
+
+  // Staged wait points (spec §Live mock v2): while the run parks at the
+  // gate or the plan NO timers are pending — these refs name the entry
+  // currently holding the run, so its decision handler resumes the flow
+  // and stale clicks (an older gate/plan left settled by a resend)
+  // are ignored.
+  const gateWaitRef = useRef<string | null>(null)
+  const planWaitRef = useRef<string | null>(null)
+  // The artifact version of the CURRENT staged run (v1.1, v1.2, …) — the
+  // execution leg reads it when the plan is approved, long after the
+  // opening that bumped it.
+  const versionRef = useRef('v1.1')
 
   // Timer plumbing: every timeout/interval of the current run registers
   // here; clearing the refs cancels the whole run (unmount, resend).
@@ -180,20 +209,23 @@ export default function SessionStreamDetailPage() {
     }
   }
 
-  /** Plays one scripted agent run after the last visible user bubble.
-   * `userId` flips that bubble Sending… → sent at sentDelayMs; a resend
-   * (edit-save) passes none — the bubble is already sent. Steps appear on
-   * the LIVE_TURN_SCRIPT delays, each measured from the previous step:
-   *   typing → understanding → tool running → tool done/collapsed →
-   *   live progress (elapsed clock ticking) → settled + artifact chip →
-   *   final answer → unlock. Repeat runs rotate the artifact version
+  /** Plays the staged OPENING after the last visible user bubble and
+   * parks at the first WAIT point. `userId` flips that bubble Sending… →
+   * sent at sentDelayMs; a resend (edit-save) passes none — the bubble
+   * is already sent. Steps appear on the script delays, each measured
+   * from the previous step: typing → understanding → the OUTSTANDING
+   * approval gate. When the gate lands the run STOPS — nothing further
+   * is scheduled until the user decides (the decision handlers resume
+   * or close the turn). Repeat runs rotate the artifact version
    * (v1.1, v1.2, …) so a second send reads as a fresh verification. */
-  const runLiveScript = (userId?: string) => {
+  const runStagedOpen = (userId?: string) => {
     const script = LIVE_TURN_SCRIPT
     const seq = ++seqRef.current
     const entryId = (step: string) => `live-${seq}-${step}`
-    const version = `v1.${runCountRef.current + 1}`
+    versionRef.current = `v1.${runCountRef.current + 1}`
     runCountRef.current += 1
+    gateWaitRef.current = null
+    planWaitRef.current = null
 
     setAgentBusy(true)
     let clock = 0
@@ -210,17 +242,83 @@ export default function SessionStreamDetailPage() {
       removeEntry(typingId)
       appendEntry({ id: entryId('understanding'), kind: 'understanding', data: script.understanding })
     }, clock)
-    clock += script.toolRunningDelayMs
-    const toolId = entryId('tool')
-    schedule(() => appendEntry({ id: toolId, kind: 'tool', call: script.toolRunning }), clock)
-    clock += script.toolDoneDelayMs
-    schedule(() => patchEntry(toolId, (entry) => (entry.kind === 'tool' ? { ...entry, call: script.toolDone } : entry)), clock)
-    clock += script.progressDelayMs
-    const progressId = entryId('progress')
+    clock += script.gateDelayMs
+    const gateId = entryId('gate')
+    schedule(() => {
+      appendEntry({ id: gateId, kind: 'gate', data: script.gate })
+      gateWaitRef.current = gateId // WAIT POINT #1 — the run parks here.
+    }, clock)
+  }
+
+  /** Plays a closing branch (gate denied / plan changes requested):
+   * brief typing → short prose → the turn settles and unlocks. */
+  const runClosing = (baseId: string, closing: LiveClosingScript) => {
+    let clock = closing.typingDelayMs
+    const typingId = `${baseId}-typing`
+    schedule(() => appendEntry({ id: typingId, kind: 'typing' }), clock)
+    clock += closing.answerDelayMs
+    schedule(() => {
+      removeEntry(typingId)
+      appendEntry({ id: `${baseId}-closing`, kind: 'answer', data: closing.answer })
+    }, clock)
+    clock += closing.settleDelayMs
+    schedule(() => setAgentBusy(false), clock)
+  }
+
+  /** WAIT POINT #1 resolves: the gate settles visibly (decision recorded
+   * in the stream), then the run branches — Allow once / Always this
+   * session continues to the interactive plan (WAIT POINT #2), Deny
+   * closes the turn with polite prose and unlocks. */
+  const handleLiveGateDecision = (entryId: string, decision: GateDecision) => {
+    if (gateWaitRef.current !== entryId) return // stale click after a resend
+    gateWaitRef.current = null
+    patchEntry(entryId, (entry) => (entry.kind === 'gate' ? { ...entry, decision } : entry))
+
+    if (decision === 'deny') {
+      runClosing(entryId, LIVE_TURN_SCRIPT.deny)
+      return
+    }
+    const script = LIVE_TURN_SCRIPT
+    let clock = script.allowTypingDelayMs
+    const typingId = `${entryId}-typing`
+    schedule(() => appendEntry({ id: typingId, kind: 'typing' }), clock)
+    clock += script.planDelayMs
+    const planId = `${entryId}-plan`
+    schedule(() => {
+      removeEntry(typingId)
+      appendEntry({ id: planId, kind: 'plan', data: script.plan, approved: false })
+      planWaitRef.current = planId // WAIT POINT #2 — the run parks here.
+    }, clock)
+  }
+
+  /** WAIT POINT #2 resolves: the plan settles (approved chip / stays
+   * pending), then the run branches — Approve plan plays the execution
+   * leg (live progress with the ticking elapsed clock → tool call
+   * running→done → artifact chip → final answer → unlock); Request
+   * changes closes the turn asking what to change. */
+  const handleLivePlanDecision = (entryId: string, approved: boolean) => {
+    if (planWaitRef.current !== entryId) return // stale click after a resend
+    planWaitRef.current = null
+    patchEntry(entryId, (entry) => (entry.kind === 'plan' ? { ...entry, approved } : entry))
+
+    if (!approved) {
+      runClosing(entryId, LIVE_TURN_SCRIPT.requestChanges)
+      return
+    }
+
+    const script = LIVE_TURN_SCRIPT.execution
+    const version = versionRef.current
+    let clock = script.progressDelayMs
+    const progressId = `${entryId}-progress`
     schedule(() => {
       appendEntry({ id: progressId, kind: 'progress', data: script.progress, live: true, elapsedSec: 0 })
       startClock(progressId)
     }, clock)
+    clock += script.toolRunningDelayMs
+    const toolId = `${entryId}-tool`
+    schedule(() => appendEntry({ id: toolId, kind: 'tool', call: script.toolRunning }), clock)
+    clock += script.toolDoneDelayMs
+    schedule(() => patchEntry(toolId, (entry) => (entry.kind === 'tool' ? { ...entry, call: script.toolDone } : entry)), clock)
     clock += script.artifactDelayMs
     schedule(() => {
       stopClock()
@@ -228,7 +326,7 @@ export default function SessionStreamDetailPage() {
         entry.kind === 'progress' ? { ...entry, data: script.progressSettled, live: false } : entry,
       )
       appendEntry({
-        id: entryId('artifact'),
+        id: `${entryId}-artifact`,
         kind: 'artifact',
         data: { ...script.artifact, version },
       })
@@ -236,7 +334,7 @@ export default function SessionStreamDetailPage() {
     clock += script.answerDelayMs
     schedule(() => {
       appendEntry({
-        id: entryId('answer'),
+        id: `${entryId}-answer`,
         kind: 'answer',
         data: {
           paragraphs: script.answer.paragraphs.map((paragraph) => paragraph.replaceAll('v1.1', version)),
@@ -248,21 +346,21 @@ export default function SessionStreamDetailPage() {
   }
 
   /** Composer send: append the user bubble immediately (Sending…), lock
-   * the composer, and play the scripted agent turn below it. */
+   * the composer, and play the staged opening below it. */
   const handleSend = (text: string) => {
     clearLiveTimers()
     const entryId = `live-${seqRef.current + 1}-user`
     appendEntry({ id: entryId, kind: 'user', text, sending: true })
-    runLiveScript(entryId)
+    runStagedOpen(entryId)
   }
 
   /** Edit-save on a history bubble: the stream truncates right below the
-   * edited bubble (mockup regeneration) and the script replays. */
+   * edited bubble (mockup regeneration) and the staged opening replays. */
   const handleResendHistory = (position: number) => {
     clearLiveTimers()
     setHistoryCutoff(position)
     setLiveTurns([])
-    runLiveScript()
+    runStagedOpen()
   }
 
   /** Edit-save on a live-sent bubble: truncate every turn after it and
@@ -273,7 +371,7 @@ export default function SessionStreamDetailPage() {
       const index = previous.findIndex((entry) => entry.id === entryId)
       return index === -1 ? previous : previous.slice(0, index + 1)
     })
-    runLiveScript()
+    runStagedOpen()
   }
 
   // Keep the newest turn in view as the run advances. jsdom has no
@@ -390,6 +488,30 @@ export default function SessionStreamDetailPage() {
         )
       case 'understanding':
         return <AnswerBlock data={entry.data} time={LIVE_TIME} />
+      case 'gate':
+        // Outstanding while the run parks (composer locked) — the gate
+        // choices are the only way forward; a decision settles the block
+        // visibly and resumes (allow) or closes (deny) the staged run.
+        return (
+          <ApprovalGateBlock
+            data={entry.data}
+            decision={entry.decision}
+            onDecision={(decision) => handleLiveGateDecision(entry.id, decision)}
+            time={LIVE_TIME}
+          />
+        )
+      case 'plan':
+        // Interactive while it waits: Approve plan plays the execution
+        // leg; Request changes closes the turn asking what to change.
+        return (
+          <PlanBlock
+            data={entry.data}
+            approved={entry.approved}
+            onApprove={() => handleLivePlanDecision(entry.id, true)}
+            onRequestChanges={() => handleLivePlanDecision(entry.id, false)}
+            time={LIVE_TIME}
+          />
+        )
       case 'tool':
         // Keyed by call state: running → done remounts the row so it
         // collapses exactly like a settled call (expanded initializes
