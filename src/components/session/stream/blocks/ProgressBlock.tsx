@@ -1,56 +1,51 @@
 /*
- * ProgressBlock — kind 6 (IN PROGRESS).
- * Collapsible phase group. Done phases collapse toward a count summary
- * with their tabular durations; the active phase carries the one "alive"
- * moment of the stream (a subtle pulse, disabled under
- * prefers-reduced-motion); queued phases sit dim. Elapsed time rides the
- * shared header's tabular duration slot. "Stop" is a ghost action that
- * acknowledges the request in demo scope.
+ * ProgressBlock — kind 6 (PROGRESS).
+ * In settled history it renders as ONE collapsed summary line:
+ * "N phases · elapsed · Completed" (or "X of N done" while unfinished).
+ * The line is an expandable toggle (aria-expanded / aria-controls) that
+ * reveals the phase list — done phases with tabular durations, an
+ * active phase with the stream's one pulse (dead under
+ * prefers-reduced-motion), queued phases dim.
  */
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import ResponseBlock, { CheckIcon, ChevronIcon, ProgressIcon } from '../ResponseBlock'
 import type { ProgressBlockData } from '../sessionStreamTypes'
 
 interface ProgressBlockProps {
   data: ProgressBlockData
-  actor?: string
   time?: string
   defaultExpanded?: boolean
 }
 
 export default function ProgressBlock({
   data,
-  actor = 'Konteks Engineering Agent',
-  time = '09:16',
-  defaultExpanded = true,
+  time = '14:19',
+  defaultExpanded = false,
 }: ProgressBlockProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
-  const [stopRequested, setStopRequested] = useState(false)
+  const bodyId = useId()
   const doneCount = data.phases.filter((phase) => phase.state === 'done').length
-  const summaryLabel = `${data.phases.length} phases · ${doneCount} done`
-  const bodyId = `kx-stream-progress-${data.phases.length}-${doneCount}`
+  const status =
+    doneCount === data.phases.length ? 'Completed' : `${doneCount} of ${data.phases.length} done`
+  const summary = `${data.phases.length} phases · ${data.elapsed} · ${status}`
 
   return (
-    <ResponseBlock
-      kindLabel="IN PROGRESS"
-      tone="attention"
-      icon={<ProgressIcon />}
-      actor={actor}
-      time={time}
-      duration={data.elapsed}
-    >
+    <ResponseBlock kindLabel="PROGRESS" tone="neutral" icon={<ProgressIcon />} time={time}>
       <div className="kx-stream-progress">
         <button
           type="button"
-          className="kx-stream-collapse-toggle"
+          className="kx-stream-progress__summary"
+          data-testid="progress-summary"
           aria-expanded={expanded}
-          aria-controls={expanded ? bodyId : undefined}
+          aria-controls={bodyId}
           onClick={() => setExpanded((value) => !value)}
         >
-          <span className={`kx-stream-collapse-chevron${expanded ? ' kx-stream-collapse-chevron--open' : ''}`}>
+          <span
+            className={`kx-stream-collapse-chevron${expanded ? ' kx-stream-collapse-chevron--open' : ''}`}
+          >
             <ChevronIcon />
           </span>
-          {expanded ? 'Hide phases' : summaryLabel}
+          <span className="kx-stream-tabular">{summary}</span>
         </button>
         {expanded && (
           <ol id={bodyId} className="kx-stream-progress__phases">
@@ -72,16 +67,6 @@ export default function ProgressBlock({
             ))}
           </ol>
         )}
-        <div className="kx-stream-progress__foot">
-          <button
-            type="button"
-            className="kx-stream-btn kx-stream-btn--ghost"
-            disabled={stopRequested}
-            onClick={() => setStopRequested(true)}
-          >
-            {stopRequested ? 'Stop requested' : 'Stop'}
-          </button>
-        </div>
       </div>
     </ResponseBlock>
   )

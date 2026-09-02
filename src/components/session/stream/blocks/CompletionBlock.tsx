@@ -1,32 +1,29 @@
 /*
- * CompletionBlock — kind 10 (HANDOFF).
- * The closing block of the session: a 2px ink rule above, a COMPLETED
- * badge, an honest done list plus an explicit "not done / out of scope"
- * list, artifact links (mono option), numbered next actions, the rollback
- * path statement, and a tabular receipt line.
+ * CompletionBlock — kind 10 (HANDOFF): the quiet closing turn.
+ * A 2px ink rule above the body, the honest done list plus the explicit
+ * "not done / out of scope" list, artifact links (mono option),
+ * numbered next actions, the rollback path, and the tabular receipt.
+ * Flat — no card.
  */
 import ResponseBlock, { CheckIcon, CompletionIcon, MinusIcon, StreamChip } from '../ResponseBlock'
 import type { CompletionBlockData } from '../sessionStreamTypes'
 
 interface CompletionBlockProps {
   data: CompletionBlockData
-  actor?: string
   time?: string
 }
 
 export default function CompletionBlock({
   data,
-  actor = 'Konteks Engineering Agent',
-  time = '09:52',
+  time = '15:03',
 }: CompletionBlockProps) {
   return (
     <ResponseBlock
       kindLabel="HANDOFF"
       tone="accent"
       icon={<CompletionIcon />}
-      actor={actor}
       time={time}
-      className="kx-stream-block--completion"
+      className="kx-stream-turn--completion"
       stateChip={<StreamChip tone="accent">completed</StreamChip>}
     >
       <div className="kx-stream-completion">
@@ -35,7 +32,7 @@ export default function CompletionBlock({
           <ul className="kx-stream-completion__list">
             {data.done.map((item) => (
               <li key={item} className="kx-stream-completion__item kx-stream-completion__item--done">
-                <span className="kx-stream-completion__mark" aria-hidden="true">
+                <span className="kx-stream-completion__mark kx-stream-completion__mark--done" aria-hidden="true">
                   <CheckIcon />
                 </span>
                 <span className="kx-stream-prose">{item}</span>

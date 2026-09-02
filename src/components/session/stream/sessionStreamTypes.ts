@@ -8,7 +8,9 @@
  * lives in ResponseBlock.tsx — these types only describe per-kind content.
  */
 
-/** The ten response kinds from the spec's type table. */
+/** The response kinds from the spec's type table. `answer` is the
+ * agent's conversational final reply (chat spec) — rendered as flat
+ * prose like every other agent turn. */
 export type StreamKind =
   | 'request'
   | 'acknowledgement'
@@ -20,6 +22,7 @@ export type StreamKind =
   | 'artifact'
   | 'review'
   | 'completion'
+  | 'answer'
 
 /** Semantic tones mapped onto existing --kx-* token families:
  * neutral = ink, accent = success/approved/primary action,
@@ -30,18 +33,34 @@ export type StreamTone = 'neutral' | 'accent' | 'attention'
  * TOOL CALL kind: "will do" (queued) vs "doing" (running) vs "did" (done). */
 export type ToolCallState = 'queued' | 'running' | 'done'
 
-// ── 1. User request ──────────────────────────────────────────────────────
+// ── 1. User request (chat bubble) ────────────────────────────────────────
+
+/** A file attachment rendered as a card inside the user bubble. */
+export interface RequestAttachment {
+  name: string
+  /** Meta line under the name — size/type/rows ("CSV · 1,284 rows · 38 KB"). */
+  meta: string
+  /** File-type glyph from the shared icon family. */
+  type?: 'doc' | 'sheet' | 'diff' | 'archive'
+}
 
 export interface RequestChip {
   label: string
   /** Render the chip label in the mono family (paths, params, files). */
   mono?: boolean
   kind: 'attachment' | 'parameter' | 'context'
+  /** Optional meta line when the chip renders as an attachment card. */
+  meta?: string
 }
 
 export interface RequestBlockData {
   intent: string
   chips: RequestChip[]
+  /** Chat prose for the user bubble (falls back to `intent`). */
+  message?: string
+  /** Explicit attachment cards; when absent, attachment-kind chips render
+   * as cards instead. */
+  attachments?: RequestAttachment[]
 }
 
 // ── 2. Acknowledgement ───────────────────────────────────────────────────
@@ -69,6 +88,11 @@ export interface ClarificationBlockData {
   /** Shown once every question is answered (accent). */
   resumedNotice: string
   questions: ClarificationQuestion[]
+  /** Settled history: the recorded answers (aligned to `questions` by
+   * index). When present the block renders its settled state — no
+   * interactive chips — because the answers already sit in the stream
+   * as user bubbles. */
+  settledAnswers?: string[]
 }
 
 // ── 4. Plan ──────────────────────────────────────────────────────────────
@@ -150,7 +174,7 @@ export interface ToolEvidenceBlockData {
 
 // ── 8. Artifact ──────────────────────────────────────────────────────────
 
-export type ArtifactBadge = 'PRD' | 'DIFF' | 'TEST REPORT' | 'RESEARCH'
+export type ArtifactBadge = 'PRD' | 'DIFF' | 'TEST REPORT' | 'RESEARCH' | 'REPORT'
 
 export interface ArtifactBlockData {
   badge: ArtifactBadge
@@ -188,10 +212,17 @@ export interface CompletionBlockData {
   receipt: string
 }
 
+// ── 11. Agent answer (chat spec) ─────────────────────────────────────────
+
+/** The agent's conversational reply — flat prose paragraphs, no card. */
+export interface AnswerBlockData {
+  paragraphs: string[]
+}
+
 // ── Story array ──────────────────────────────────────────────────────────
 
 /** One entry per response block, in narrative order. The page renders this
- * array top to bottom; the dynamic clarification-answer block is inserted
+ * array top to bottom; the dynamic clarification-answer bubble is inserted
  * by the page between the clarification entry and whatever follows. */
 export type StreamStoryEntry =
   | { kind: 'request'; data: RequestBlockData }
@@ -204,3 +235,4 @@ export type StreamStoryEntry =
   | { kind: 'artifact'; data: ArtifactBlockData }
   | { kind: 'review'; data: ReviewFindingBlockData }
   | { kind: 'completion'; data: CompletionBlockData }
+  | { kind: 'answer'; data: AnswerBlockData }

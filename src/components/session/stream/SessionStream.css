@@ -1,21 +1,32 @@
 /*
- * SessionStream — stylesheet for the session response stream demo
- * (spec §Bagian B, "Operations Ledger" direction).
+ * SessionStream — stylesheet for the CHAT-STYLE session stream
+ * (spec: .pi/orch/plans/chat-session-stream-spec.md §Anatomi turn).
+ *
+ * The session reads like a real conversation:
+ *   - USER turns are right-aligned bubbles (max-width ±75% of the
+ *     column, asymmetric radius — the outer corner sharper) carrying
+ *     prose + attachment CARDS, with a hover / :focus-within action bar
+ *     (time + copy + edit) under the bubble.
+ *   - AGENT turns are FLAT seamless prose — compact kind header, no
+ *     rail, no card — with a hover / :focus-within footer (copy, share,
+ *     time) under the message.
  *
  * Rules of the house:
  *   - every class is kx-stream-*; only --kx-* tokens (light/dark flip
  *     via html[data-theme='dark'] automatically);
- *   - elevation is declared ONCE, as hairline borders — no decorative
- *     gradients, no glass, no offset shadows;
+ *   - elevation is declared as hairline borders — no decorative
+ *     gradients, no glass, no offset shadows; the one taut frame is the
+ *     OUTSTANDING approval gate (2px ink);
  *   - radii follow the existing session-component conventions
- *     (cards 12px, buttons 8px, chips/mono blocks 6-8px);
- *   - transitions are 140ms ease-out; everything animated dies under
- *     prefers-reduced-motion;
+ *     (bubbles 16px with the sharper 6px outer corner, buttons 8px,
+ *     chips/mono blocks 6-8px);
+ *   - transitions are 120-180ms ease-out; everything animated dies
+ *     under prefers-reduced-motion (states stay readable);
  *   - monospace is a data costume only (paths, queries, diffs, io) —
  *     never prose.
  */
 
-/* ── Page frame ─────────────────────────────────────────────────────── */
+/* ── Page frame (demo route header) ─────────────────────────────────── */
 
 .kx-stream-page {
   max-width: 940px;
@@ -82,107 +93,61 @@
   color: var(--kx-primary);
 }
 
-/* ── Stream container + block rhythm ────────────────────────────────── */
+/* ── Dialog column + turn rhythm ────────────────────────────────────── */
+/* Chat spacing between turns — no ledger hairlines; the closing HANDOFF
+ * turn draws its own 2px ink rule above the body. */
 
 .kx-stream {
+  display: grid;
+  gap: 26px;
   color: var(--kx-primary);
   font-size: var(--kx-text-md);
   line-height: 1.55;
 }
 
-.kx-stream > .kx-stream-slot + .kx-stream-slot {
-  border-top: 1px solid var(--kx-border);
-}
-
 .kx-stream-slot {
   scroll-margin-top: 24px;
-}
-
-/* The closing HANDOFF slot replaces the generic hairline separator with
- * its own 2px ink rule (drawn on the main column, above the body). */
-.kx-stream > .kx-stream-slot:last-child {
-  border-top: none;
-}
-
-.kx-stream-block {
-  display: flex;
-  align-items: stretch;
-  padding: 14px 0 18px;
-}
-
-/* ── Left rail: icon + continuous hairline timeline ─────────────────── */
-
-.kx-stream-block__rail {
-  position: relative;
-  flex: 0 0 40px;
-  display: flex;
-  justify-content: center;
-}
-
-.kx-stream-block__rail-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: calc(50% - 0.5px);
-  width: 1px;
-  background: var(--kx-border);
-}
-
-/* The timeline stops shortly below the last block's icon — the ledger
- * ends where the session ends. */
-.kx-stream-slot:last-child .kx-stream-block__rail-line {
-  bottom: auto;
-  height: 36px;
-}
-
-.kx-stream-block__rail-icon {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  margin-top: 1px;
-  border-radius: 8px;
-  background: var(--kx-canvas); /* masks the rail line behind the icon */
-  color: var(--kx-secondary);
-}
-
-.kx-stream-block--accent .kx-stream-block__rail-icon {
-  color: var(--kx-accent-text-aa);
-}
-
-.kx-stream-block--attention .kx-stream-block__rail-icon {
-  color: var(--kx-attention);
-}
-
-/* ── Header grammar (identical for every kind) ──────────────────────── */
-
-.kx-stream-block__main {
-  flex: 1;
   min-width: 0;
 }
 
-.kx-stream-block__header {
+/* ── Agent turn — flat prose anatomy ────────────────────────────────── */
+
+.kx-stream-turn {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.kx-stream-turn__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 6px 12px;
-  margin-bottom: 8px;
 }
 
-.kx-stream-block__ident {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0 6px;
+.kx-stream-turn__ident {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   margin: 0;
   min-width: 0;
 }
 
-.kx-stream-block__kind {
+.kx-stream-turn__icon {
+  display: inline-flex;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-stream-turn--accent .kx-stream-turn__icon {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-stream-turn--attention .kx-stream-turn__icon {
+  color: var(--kx-attention);
+}
+
+.kx-stream-turn__kind {
   font-size: var(--kx-text-xs);
   font-weight: var(--kx-font-bold);
   letter-spacing: 0.08em;
@@ -190,40 +155,227 @@
   color: var(--kx-muted-text-aa);
 }
 
-.kx-stream-block--accent .kx-stream-block__kind {
+.kx-stream-turn--accent .kx-stream-turn__kind {
   color: var(--kx-accent-text-aa);
 }
 
-.kx-stream-block--attention .kx-stream-block__kind {
+.kx-stream-turn--attention .kx-stream-turn__kind {
   color: var(--kx-attention);
 }
 
-.kx-stream-block__sep {
-  color: var(--kx-muted-text-aa);
-  font-size: var(--kx-text-sm);
+.kx-stream-turn__body {
+  min-width: 0;
 }
 
-.kx-stream-block__actor {
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-medium);
-  color: var(--kx-secondary);
-}
-
-.kx-stream-block__time {
-  font-size: var(--kx-text-sm);
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-stream-block__meta {
+/* Footer (copy / share / time) — revealed on hover AND :focus-within;
+ * opacity (not visibility) keeps the buttons keyboard-reachable, so
+ * tabbing into the turn reveals its own affordances. */
+.kx-stream-turn__footer {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 0 auto;
+  opacity: 0;
+  transition: opacity 140ms ease-out;
 }
 
-.kx-stream-block__duration {
-  font-size: var(--kx-text-sm);
+.kx-stream-turn:hover .kx-stream-turn__footer,
+.kx-stream-turn:focus-within .kx-stream-turn__footer {
+  opacity: 1;
+}
+
+.kx-stream-turn__feedback {
+  font-size: var(--kx-text-xs);
   color: var(--kx-muted-text-aa);
+}
+
+.kx-stream-turn__time {
+  margin-left: auto;
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+/* The closing HANDOFF turn: a quiet 2px ink rule above the body. */
+.kx-stream-turn--completion {
+  border-top: 2px solid var(--kx-primary);
+  padding-top: 14px;
+}
+
+/* ── User turn — bubble anatomy ─────────────────────────────────────── */
+
+.kx-stream-bubble-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+}
+
+.kx-stream-bubble {
+  max-width: 75%;
+  padding: 12px 16px;
+  border-radius: 16px 16px 6px 16px; /* outer (bottom-right) corner sharper */
+  background: var(--kx-raised);
+  color: var(--kx-primary);
+}
+
+.kx-stream-bubble__content {
+  min-width: 0;
+}
+
+.kx-stream-bubble__text {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Attachment CARDS inside the bubble — a hairline separates them from
+ * the message text; each card is icon + name + meta. */
+.kx-stream-bubble__files {
+  margin: 10px 0 0;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--kx-border);
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.kx-stream-attachment {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--kx-border);
+  border-radius: 8px;
+  background: var(--kx-canvas);
+}
+
+.kx-stream-attachment__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  margin-top: 1px;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-stream-attachment__main {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.kx-stream-attachment__name {
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  overflow-wrap: anywhere;
+}
+
+.kx-stream-attachment__meta {
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+/* Non-attachment chips (parameters / context) ride inline. */
+.kx-stream-bubble__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kx-stream-bubble__chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--kx-border);
+  border-radius: 6px;
+  background: var(--kx-pale);
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+}
+
+.kx-stream-bubble__chip-kind {
+  font-size: var(--kx-text-2xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+/* Action bar (time + copy + edit) — revealed on hover / :focus-within,
+ * same keyboard contract as the agent footer. */
+.kx-stream-bubble__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  opacity: 0;
+  transition: opacity 140ms ease-out;
+}
+
+.kx-stream-bubble-row:hover .kx-stream-bubble__bar,
+.kx-stream-bubble-row:focus-within .kx-stream-bubble__bar {
+  opacity: 1;
+}
+
+.kx-stream-bubble__time {
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-stream-bubble__feedback {
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
+/* Inline edit state — the prose swaps for a textarea inside the bubble. */
+.kx-stream-bubble__edit {
+  display: grid;
+  gap: 8px;
+  min-width: min(360px, 60vw);
+}
+
+.kx-stream-bubble__edit-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--kx-border);
+  border-radius: 8px;
+  background: var(--kx-canvas);
+  font-family: inherit;
+  font-size: var(--kx-text-sm);
+  line-height: 1.55;
+  color: var(--kx-primary);
+  resize: vertical;
+}
+
+.kx-stream-bubble__edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Small icon buttons (bubble copy/edit, turn copy/share). */
+.kx-stream-icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--kx-muted-text-aa);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-stream-icon-action:hover {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
 }
 
 /* ── Shared utilities ───────────────────────────────────────────────── */
@@ -325,64 +477,7 @@
   color: var(--kx-primary);
 }
 
-.kx-stream-btn--link {
-  padding: 6px 2px;
-  color: var(--kx-accent-text-aa);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.kx-stream-btn--link:hover:not(:disabled) {
-  background: transparent;
-  color: var(--kx-primary);
-}
-
-/* ── 1. Request ─────────────────────────────────────────────────────── */
-
-.kx-stream-request {
-  padding: 14px 16px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 12px;
-  display: grid;
-  gap: 12px;
-}
-
-.kx-stream-request__intent {
-  margin: 0;
-  color: var(--kx-primary);
-}
-
-.kx-stream-request__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.kx-stream-request__chip {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  padding: 3px 10px;
-  border: 1px solid var(--kx-border);
-  border-radius: 6px;
-  background: var(--kx-pale);
-  font-size: var(--kx-text-sm);
-  color: var(--kx-primary);
-}
-
-.kx-stream-request__chip-kind {
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--kx-muted-text-aa);
-}
-
-/* ── 2. Acknowledgement ─────────────────────────────────────────────── */
+/* ── 2. Understanding — flat agent prose ────────────────────────────── */
 
 .kx-stream-ack {
   display: grid;
@@ -402,6 +497,10 @@
   border: 1px solid var(--kx-border);
   border-radius: 12px;
   background: var(--kx-raised);
+}
+
+.kx-stream-ack__scope-col {
+  min-width: 0;
 }
 
 .kx-stream-ack__scope-title {
@@ -450,7 +549,7 @@
   color: var(--kx-muted-text-aa);
 }
 
-/* ── 3. Clarification ───────────────────────────────────────────────── */
+/* ── 3. Clarification — seamless prose + option chips ──────────────── */
 
 .kx-stream-clar {
   display: grid;
@@ -465,10 +564,15 @@
   gap: 14px;
 }
 
+.kx-stream-clar__question {
+  display: grid;
+  gap: 8px;
+}
+
 .kx-stream-clar__q-text {
   display: flex;
   gap: 8px;
-  margin: 0 0 8px;
+  margin: 0;
   color: var(--kx-primary);
 }
 
@@ -485,6 +589,25 @@
   font-size: var(--kx-text-2xs);
   font-weight: var(--kx-font-bold);
   color: var(--kx-muted-text-aa);
+}
+
+/* Settled history: the recorded answer flows under the question — the
+ * answer itself also lives in the stream as a user bubble. */
+.kx-stream-clar__settled {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding-left: 26px;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+}
+
+.kx-stream-clar__settled-mark {
+  flex: 0 0 auto;
+  display: inline-flex;
+  margin-top: 3px;
+  color: var(--kx-accent-text-aa);
 }
 
 .kx-stream-clar__options {
@@ -540,7 +663,7 @@
   color: var(--kx-accent-text-aa);
 }
 
-/* ── 4. Plan ────────────────────────────────────────────────────────── */
+/* ── 4. Plan — numbered steps inside the agent turn ─────────────────── */
 
 .kx-stream-plan {
   display: grid;
@@ -608,57 +731,11 @@
   color: var(--kx-attention);
 }
 
-.kx-stream-plan__step-menu-btn {
+.kx-stream-plan__step-mark {
   flex: 0 0 auto;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  margin-top: 1px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--kx-muted-text-aa);
-  cursor: pointer;
-  transition:
-    background-color 140ms ease-out,
-    color 140ms ease-out;
-}
-
-.kx-stream-plan__step-menu-btn:hover {
-  background: var(--kx-pale);
-  color: var(--kx-primary);
-}
-
-.kx-stream-plan__step-menu {
-  position: absolute;
-  right: 0;
-  top: 36px;
-  z-index: 3;
-  display: grid;
-  min-width: 150px;
-  padding: 4px;
-  border: 1px solid var(--kx-border);
-  border-radius: 8px;
-  background: var(--kx-raised);
-}
-
-.kx-stream-plan__step-menu button {
-  padding: 7px 10px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  font-family: inherit;
-  font-size: var(--kx-text-sm);
-  text-align: left;
-  color: var(--kx-primary);
-  cursor: pointer;
-  transition: background-color 140ms ease-out;
-}
-
-.kx-stream-plan__step-menu button:hover {
-  background: var(--kx-pale);
+  margin-top: 4px;
+  color: var(--kx-accent-text-aa);
 }
 
 .kx-stream-plan__footer {
@@ -694,7 +771,7 @@
   color: var(--kx-accent-text-aa);
 }
 
-/* ── 5. Approval gate ───────────────────────────────────────────────── */
+/* ── 5. Approval gate — the one outstanding frame ───────────────────── */
 
 .kx-stream-gate {
   border: 2px solid var(--kx-primary);
@@ -789,14 +866,14 @@
   gap: 8px;
 }
 
-/* ── 6. Progress ────────────────────────────────────────────────────── */
+/* ── 6. Progress — collapsed one-line summary ───────────────────────── */
 
 .kx-stream-progress {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
-.kx-stream-collapse-toggle {
+.kx-stream-progress__summary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -808,12 +885,12 @@
   font-family: inherit;
   font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
+  color: var(--kx-primary);
   cursor: pointer;
   transition: background-color 140ms ease-out;
 }
 
-.kx-stream-collapse-toggle:hover {
+.kx-stream-progress__summary:hover {
   background: var(--kx-pale);
 }
 
@@ -889,7 +966,8 @@
   color: var(--kx-attention);
 }
 
-/* The one "alive" moment: a subtle pulse on the active-phase dot. */
+/* The one "alive" moment on a running phase: a subtle pulse (dead under
+ * prefers-reduced-motion — the running label stays readable). */
 .kx-stream-phase__pulse {
   width: 8px;
   height: 8px;
@@ -905,12 +983,7 @@
   border: 1px solid var(--kx-muted);
 }
 
-.kx-stream-progress__foot {
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* ── 7. Tool evidence ───────────────────────────────────────────────── */
+/* ── 7. Tool evidence — collapsed ledger rows ───────────────────────── */
 
 .kx-stream-tool__calls {
   margin: 0;
@@ -932,6 +1005,24 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 4px 10px;
+  width: 100%;
+  padding: 2px 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.kx-stream-call__row:focus-visible {
+  outline: 2px solid var(--kx-accent-text-aa);
+  outline-offset: 2px;
+}
+
+.kx-stream-call--running .kx-stream-call__row {
+  cursor: default;
 }
 
 .kx-stream-call__mark {
@@ -991,33 +1082,17 @@
   color: var(--kx-muted-text-aa);
 }
 
-.kx-stream-call__io-toggle {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  font-family: inherit;
-  font-size: var(--kx-text-sm);
-  font-weight: var(--kx-font-bold);
-  color: var(--kx-accent-text-aa);
-  cursor: pointer;
-  transition: background-color 140ms ease-out;
-}
-
-.kx-stream-call__io-toggle:hover {
-  background: var(--kx-pale);
-}
-
 .kx-stream-call__result {
   margin: 4px 0 0 26px;
   font-size: var(--kx-text-sm);
   color: var(--kx-secondary);
 }
 
+.kx-stream-call__detail {
+  margin-top: 4px;
+}
+
+/* Running indicator: the active pulse on an open running row. */
 .kx-stream-call__pulse {
   width: 8px;
   height: 8px;
@@ -1033,7 +1108,7 @@
   border: 1px solid var(--kx-muted);
 }
 
-/* Mono evidence block (io + artifact preview share this family). */
+/* Mono evidence block (tool io + artifact preview share this family). */
 .kx-stream-io {
   margin: 8px 0 0 26px;
   display: grid;
@@ -1080,53 +1155,81 @@
   text-decoration-thickness: 1px;
 }
 
-/* ── 8. Artifact ────────────────────────────────────────────────────── */
+/* ── 8. Artifact — chip only, no big card ───────────────────────────── */
 
 .kx-stream-artifact {
-  padding: 14px 16px;
-  border: 1px solid var(--kx-border);
-  border-radius: 12px;
-  background: var(--kx-raised);
   display: grid;
-  gap: 10px;
+  gap: 8px;
+  justify-items: start;
 }
 
-.kx-stream-artifact__head {
-  display: flex;
+.kx-stream-artifact-chip {
+  display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px 10px;
+  gap: 4px 8px;
+  max-width: 100%;
+  padding: 4px 6px;
+  border: 1px solid var(--kx-border);
+  border-radius: 8px;
+  background: var(--kx-raised);
 }
 
-.kx-stream-artifact__badge {
+.kx-stream-artifact-chip__badge {
   padding: 2px 8px;
   border: 1px solid var(--kx-accent);
   border-radius: 6px;
   font-size: var(--kx-text-2xs);
   font-weight: var(--kx-font-bold);
   letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--kx-accent-text-aa);
 }
 
-.kx-stream-artifact__title {
-  flex: 1 1 auto;
-  margin: 0;
-  min-width: 200px;
-  font-size: var(--kx-text-l);
+.kx-stream-artifact-chip__title {
+  min-width: 0;
+  font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-bold);
   color: var(--kx-primary);
+  overflow-wrap: anywhere;
 }
 
-.kx-stream-artifact__meta {
-  flex: 0 0 auto;
-  margin: 0;
-  font-size: var(--kx-text-sm);
+.kx-stream-artifact-chip__version {
+  font-size: var(--kx-text-xs);
   color: var(--kx-muted-text-aa);
 }
 
-.kx-stream-artifact__excerpt {
-  margin: 0;
-  color: var(--kx-secondary);
+/* Small chip actions — revealed on hover / :focus-within of the chip. */
+.kx-stream-artifact-chip__actions {
+  display: inline-flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 140ms ease-out;
+}
+
+.kx-stream-artifact-chip:hover .kx-stream-artifact-chip__actions,
+.kx-stream-artifact-chip:focus-within .kx-stream-artifact-chip__actions {
+  opacity: 1;
+}
+
+.kx-stream-chip-action {
+  padding: 3px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-accent-text-aa);
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
+}
+
+.kx-stream-chip-action:hover {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
 }
 
 .kx-stream-artifact__preview {
@@ -1138,6 +1241,7 @@
   overflow-x: auto;
   font-size: var(--kx-text-sm);
   line-height: 1.6;
+  max-width: 100%;
 }
 
 .kx-stream-artifact__preview code {
@@ -1145,25 +1249,9 @@
   overflow-wrap: anywhere;
 }
 
-.kx-stream-artifact__preview--full {
-  max-height: 280px;
-  overflow: auto;
-}
-
-.kx-stream-artifact__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ── 9. Review finding ──────────────────────────────────────────────── */
+/* ── 9. Review finding — flat agent content ─────────────────────────── */
 
 .kx-stream-review {
-  padding: 14px 16px;
-  border: 1px solid var(--kx-border);
-  border-radius: 12px;
-  background: var(--kx-raised);
   display: grid;
   gap: 10px;
 }
@@ -1240,18 +1328,15 @@
   color: var(--kx-secondary);
 }
 
-.kx-stream-review__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+/* ── 11. Answer — flat conversational prose ─────────────────────────── */
+
+.kx-stream-answer-prose {
+  display: grid;
+  gap: 10px;
 }
 
-/* ── 10. Completion ─────────────────────────────────────────────────── */
-
-.kx-stream-block--completion .kx-stream-block__main {
-  border-top: 2px solid var(--kx-primary);
-  padding-top: 12px;
-}
+/* ── 10. Completion / handoff — the quiet closing turn ──────────────── */
+/* (The 2px ink rule above the body lives on .kx-stream-turn--completion.) */
 
 .kx-stream-completion {
   display: grid;
@@ -1318,6 +1403,11 @@
   color: var(--kx-accent-text-aa);
 }
 
+.kx-stream-completion__artifact--mono {
+  font-family: ui-monospace, 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', monospace;
+  font-size: var(--kx-text-xs);
+}
+
 .kx-stream-completion__next {
   margin: 0;
   padding: 0;
@@ -1361,46 +1451,52 @@
   color: var(--kx-muted-text-aa);
 }
 
-/* ── Dynamic user-answer block (inserted by the demo page) ──────────── */
+/* ── Typing indicator (phase-2 live-mock placeholder) ───────────────── */
+/* Not referenced by any component yet — the markup phase 2 will mount:
+ *   <div class="kx-stream-typing" aria-live="polite">
+ *     <span class="kx-stream-typing__dot" /> ×3
+ *     <span class="kx-stream-typing__label">Thinking…</span>
+ *   </div>
+ * Kept here so the live-mock phase lands as markup only. Reduced-motion
+ * freezes the dots (still visible) via the global kill below. */
 
-.kx-stream-answer {
-  display: grid;
-  gap: 6px;
-}
-
-.kx-stream-answer__line {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin: 0;
-  font-size: var(--kx-text-sm);
-  color: var(--kx-primary);
-}
-
-.kx-stream-answer__num {
-  flex: 0 0 auto;
-  min-width: 18px;
-  height: 18px;
+.kx-stream-typing {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border: 1px solid var(--kx-border);
-  border-radius: 6px;
-  background: var(--kx-pale);
-  font-size: var(--kx-text-2xs);
-  font-weight: var(--kx-font-bold);
+  gap: 5px;
   color: var(--kx-muted-text-aa);
+}
+
+.kx-stream-typing__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--kx-muted);
+  animation: kx-stream-pulse 1.2s ease-in-out infinite;
+}
+
+.kx-stream-typing__dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.kx-stream-typing__dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.kx-stream-typing__label {
+  margin-left: 4px;
+  font-size: var(--kx-text-sm);
 }
 
 /* ── Stream detail page (session-detail layout variant) ─────────── */
 
-/* The alternative session detail page reuses the SessionDetailPage chrome
- * (sticky header, bounded reading column, sticky composer area) with the
- * stream story as the body — the reused classes cover the whole layout.
- * The one page-specific adjustment is the anchor scroll offset: the sticky
- * session header (~60px tall) lives above the scrollport here (the demo
- * page has no sticky header, hence its smaller 24px slot margin), so slot
- * anchors must clear it when jumped to. Geometry only — no tokens. */
+/* The stream detail page reuses the SessionDetailPage chrome (sticky
+ * header, bounded reading column, sticky composer area) with the story
+ * as the dialog column. The one page-specific adjustment is the anchor
+ * scroll offset: the sticky session header (~60px tall) lives above the
+ * scrollport here (the demo page has no sticky header, hence its smaller
+ * 24px slot margin), so slot anchors must clear it when jumped to.
+ * Geometry only — no tokens. */
 .kx-session-detail .kx-stream-slot {
   scroll-margin-top: 72px;
 }
@@ -1432,12 +1528,12 @@
     padding: 24px 16px 56px;
   }
 
-  .kx-stream-block {
-    padding: 12px 0 16px;
+  .kx-stream {
+    gap: 20px;
   }
 
-  .kx-stream-block__rail {
-    flex-basis: 32px;
+  .kx-stream-bubble {
+    max-width: 88%;
   }
 
   .kx-stream-gate__row {
@@ -1445,11 +1541,13 @@
     gap: 2px;
   }
 
-  .kx-stream-clar__options {
+  .kx-stream-clar__options,
+  .kx-stream-clar__settled {
     padding-left: 0;
   }
 
   .kx-stream-call__result,
+  .kx-stream-call__detail .kx-stream-io,
   .kx-stream-io {
     margin-left: 0;
   }

@@ -39,9 +39,10 @@ const SESSION_BADGES = 'src/components/session/sessionBadges.css'
 const RESPONSE_FOOTER = 'src/components/session/ResponseFooter.css'
 const FEEDBACK_MODAL = 'src/components/session/FeedbackModal.css'
 const STREAM = 'src/components/session/stream/SessionStream.css'
-// session/stream/SessionStream.css — the response-stream demo (spec
-// §Bagian B): shared anatomy (rail, header grammar, chips, buttons) plus
-// the ten typed blocks. Same M/A/S/U semantics as the session batch —
+// session/stream/SessionStream.css — the CHAT-STYLE session stream
+// (spec §Anatomi turn): user bubbles (attachment cards + hover action
+// bar) and flat agent turns (hover footer) plus the typed block bodies.
+// Same M/A/S/U semantics as the session batch —
 // muted captions read the AA muted token, accent text/glyphs read the AA
 // accent token, white-ink solid fills are S, and decorative hover
 // borders / dots / the focus outline stay on mixed-purpose tokens (U).
@@ -381,22 +382,26 @@ function entries(): Entry[] {
     // System map banners and controls — decorative borders.
     { file: 'src/components/system/SystemMapModal.css', selector: '.kx-system-map__banner--warning', property: 'border-left', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: 'src/components/system/SystemMapModal.css', selector: '.kx-system-map__reset-btn:hover:not(:disabled)', property: 'border-color', token: ACCENT_STRONG, cls: 'U' as Class },
-    // ── Response stream demo (session/stream/SessionStream.css) ──────
+    // ── Response stream (session/stream/SessionStream.css) ───────────
     // M — muted captions, meta times, micro labels, queued-state ink.
     ...[
       '.kx-stream-page__kicker',
       '.kx-stream-page__anchor',
-      '.kx-stream-block__kind',
-      '.kx-stream-block__sep',
-      '.kx-stream-block__time',
-      '.kx-stream-block__duration',
-      '.kx-stream-request__chip-kind',
+      '.kx-stream-turn__icon',
+      '.kx-stream-turn__kind',
+      '.kx-stream-turn__feedback',
+      '.kx-stream-turn__time',
+      '.kx-stream-attachment__icon',
+      '.kx-stream-attachment__meta',
+      '.kx-stream-bubble__chip-kind',
+      '.kx-stream-bubble__time',
+      '.kx-stream-bubble__feedback',
+      '.kx-stream-icon-action',
       '.kx-stream-ack__scope-title',
       '.kx-stream-ack__grounding',
       '.kx-stream-clar__q-num',
       '.kx-stream-plan__num',
       '.kx-stream-plan__meta',
-      '.kx-stream-plan__step-menu-btn',
       '.kx-stream-gate__row dt',
       '.kx-stream-phase--queued',
       '.kx-stream-phase--queued .kx-stream-phase__mark',
@@ -407,31 +412,32 @@ function entries(): Entry[] {
       '.kx-stream-call__state',
       '.kx-stream-call__duration',
       '.kx-stream-io__label',
-      '.kx-stream-artifact__meta',
+      '.kx-stream-artifact-chip__version',
       '.kx-stream-review__location',
       '.kx-stream-completion__section-label',
       '.kx-stream-completion__next-num',
       '.kx-stream-completion__receipt',
-      '.kx-stream-answer__num',
+      '.kx-stream-typing',
     ].map((selector) => ({ file: STREAM, selector, property: 'color', token: MUTED_AA, cls: 'M' as Class })),
-    // A — accent text/glyphs: tone-colored kind labels + rail icons,
-    // secondary/link actions, resumed notices, done-state marks, diff
-    // additions, artifact badge + links, resolved-gate check.
+    // A — accent text/glyphs: tone-colored kind labels + icons on accent
+    // turns, secondary/chip actions, resumed notices + settled marks,
+    // done-state marks, diff additions, artifact badge, resolved-gate
+    // check.
     ...[
-      '.kx-stream-block--accent .kx-stream-block__rail-icon',
-      '.kx-stream-block--accent .kx-stream-block__kind',
+      '.kx-stream-turn--accent .kx-stream-turn__icon',
+      '.kx-stream-turn--accent .kx-stream-turn__kind',
       '.kx-stream-btn--secondary',
-      '.kx-stream-btn--link',
       '.kx-stream-notice--accent',
+      '.kx-stream-clar__settled-mark',
+      '.kx-stream-plan__step-mark',
       '.kx-stream-plan__approved-note',
       '.kx-stream-gate__resolved-mark',
-      '.kx-stream-collapse-toggle',
       '.kx-stream-phase--done .kx-stream-phase__mark',
       '.kx-stream-call--done .kx-stream-call__mark',
       '.kx-stream-call__state--done',
-      '.kx-stream-call__io-toggle',
       '.kx-stream-io__line--add',
-      '.kx-stream-artifact__badge',
+      '.kx-stream-artifact-chip__badge',
+      '.kx-stream-chip-action',
       '.kx-stream-completion__item--done .kx-stream-completion__mark',
       '.kx-stream-completion__artifact',
     ].map((selector) => ({ file: STREAM, selector, property: 'color', token: ACCENT_AA, cls: 'A' as Class })),
@@ -452,7 +458,9 @@ function entries(): Entry[] {
     { file: STREAM, selector: '.kx-stream-phase__dot', property: 'border', token: MUTED, cls: 'U' as Class },
     { file: STREAM, selector: '.kx-stream-call__dot', property: 'border', token: MUTED, cls: 'U' as Class },
     { file: STREAM, selector: '.kx-stream-completion__mark', property: 'color', token: MUTED, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-typing__dot', property: 'background', token: MUTED, cls: 'U' as Class },
     { file: STREAM, selector: '.kx-stream-page :focus-visible', property: 'outline', token: ACCENT_AA, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-call__row:focus-visible', property: 'outline', token: ACCENT_AA, cls: 'U' as Class },
     // Session History header — the demo route's discrete entry button
     // (secondary accent action, same family as .kx-history__clear).
     { file: 'src/pages/SessionHistoryPage.css', selector: '.kx-history__demo-link', property: 'color', token: ACCENT_AA, cls: 'A' as Class },
@@ -995,18 +1003,18 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 249 consumers — 98 muted, 89 accent-strong, 22 accent-text-aa', () => {
-    expect(inventory).toHaveLength(249)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(98)
+  it('covers exactly 255 consumers — 99 muted, 89 accent-strong, 23 accent-text-aa', () => {
+    expect(inventory).toHaveLength(255)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(99)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(89)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(22)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(23)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(120)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(124)
     expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(60)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(9)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(60)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(62)
   })
 
   it('has no duplicate inventory selectors', () => {

@@ -1,25 +1,31 @@
 /*
- * SessionStreamDetailPage — the ALTERNATIVE session detail page
- * (spec: .pi/orch/plans/session-stream-detail-spec.md).
+ * SessionStreamDetailPage — the CHAT-STYLE session detail page
+ * (spec: .pi/orch/plans/chat-session-stream-spec.md).
  *
- * Same layout anatomy as SessionDetailPage (sticky full-width header →
- * bounded content column → sticky composer area at the bottom), but the
- * content column renders the session's response-stream story with the
- * shared stream components (ResponseBlock + the ten typed blocks) instead
- * of QuoteCard/Timeline/Tracker. The chrome is reused as-is: SessionHeader
- * (with optional title/context overrides) and SessionDetailComposer.
+ * Layout anatomy: sticky full-width SessionHeader → bounded scrollable
+ * dialog column rendering ATTENDANCE_REVIEW_STORY top-to-bottom as chat
+ * turns (user requests/answers = right-aligned bubbles via
+ * UserRequestBlock/BubbleBlock; every agent kind = flat prose turns via
+ * the typed blocks + ResponseBlock) → sticky composer area
+ * (SessionDetailComposer, unchanged behavior — the live-mock send flow
+ * is a later phase).
  *
- * Interaction model is copied from SessionStreamDemoPage: local state
- * only (no reducer changes) — clarification answers insert the dynamic
- * user-answer block, plan approval flips the chip, the gate records a
- * decision, evidence/progress collapse, and the artifact copies through
- * the clipboard helper. The classic SessionDetailPage is untouched and
- * every other session keeps routing to it.
+ * Interaction model is page-level local state only (no reducer changes):
+ * the fixture story is SETTLED history, so the plan boots approved and
+ * the gate boots decided ("Allow once") — but the model stays wired for
+ * interactive entries exactly like the demo page: answering a
+ * clarification (one without recorded settled answers) inserts the user
+ * bubble, plan approval flips the chip, the gate records a decision,
+ * and tool/progress rows expand and collapse locally.
  */
 import { Fragment, useState } from 'react'
-import { ATTENDANCE_REVIEW_STORY, ATTENDANCE_REVIEW_TITLE } from '../components/session/stream/attendanceReviewStory'
-import ResponseBlock, { MessageIcon, StreamChip } from '../components/session/stream/ResponseBlock'
+import {
+  ATTENDANCE_REVIEW_STORY,
+  ATTENDANCE_REVIEW_TITLE,
+} from '../components/session/stream/attendanceReviewStory'
+import BubbleBlock from '../components/session/stream/BubbleBlock'
 import type {
+  ClarificationBlockData,
   GateDecision,
   StreamStoryEntry,
 } from '../components/session/stream/sessionStreamTypes'
@@ -32,6 +38,7 @@ import ProgressBlock from '../components/session/stream/blocks/ProgressBlock'
 import ToolEvidenceBlock from '../components/session/stream/blocks/ToolEvidenceBlock'
 import ArtifactBlock from '../components/session/stream/blocks/ArtifactBlock'
 import ReviewFindingBlock from '../components/session/stream/blocks/ReviewFindingBlock'
+import AnswerBlock from '../components/session/stream/blocks/AnswerBlock'
 import CompletionBlock from '../components/session/stream/blocks/CompletionBlock'
 import SessionHeader from '../components/session/SessionHeader'
 import SessionDetailComposer from '../components/session/SessionDetailComposer'
@@ -39,60 +46,69 @@ import { ILLUSTRATIVE_DATA_NOTE } from '../data/mockData'
 import '../components/session/stream/SessionStream.css'
 import './SessionDetailPage.css'
 
-/** Same clipboard contract as the demo page: async clipboard with a
- * textarea + execCommand fallback for environments without it. */
-async function copyToClipboard(payload: string): Promise<void> {
-  try {
-    await navigator.clipboard.writeText(payload)
-    return
-  } catch {
-    /* fall through to the legacy path */
-  }
-  try {
-    const textarea = document.createElement('textarea')
-    textarea.value = payload
-    textarea.setAttribute('readonly', '')
-    textarea.style.position = 'fixed'
-    textarea.style.opacity = '0'
-    document.body.appendChild(textarea)
-    textarea.select()
-    document.execCommand('copy')
-    document.body.removeChild(textarea)
-  } catch {
-    /* clipboard unavailable in this environment — mockup tolerates it */
-  }
+/** Turn timestamps aligned to the story order (14:02 → 15:03, monotonic
+ * per the fixture) — the hover footers and bubble action bars show them. */
+const TURN_TIMES: string[] = [
+  '14:02', // 1  — user request bubble
+  '14:04', // 2  — understanding
+  '14:05', // 3  — clarification (settled answers recorded)
+  '14:08', // 4  — user answer bubble
+  '14:09', // 5  — plan (approved 14:12)
+  '14:16', // 6  — approval gate (decided: Allow once)
+  '14:18', // 7  — progress
+  '14:20', // 8  — tool evidence
+  '14:45', // 9  — review finding
+  '14:46', // 10 — artifact chip
+  '14:58', // 11 — final answer
+  '15:03', // 12 — completion handoff
+]
+
+/** Composes the inserted user bubble for an interactive clarification:
+ * the chosen options as a numbered message (same shape as the fixture's
+ * recorded answer bubble). */
+function answerMessage(questions: ClarificationBlockData['questions'], answers: Record<string, string>): string {
+  return questions
+    .map((question, index) => `${index + 1}. ${answers[question.id] ?? ''}`)
+    .join('\n')
 }
 
 export default function SessionStreamDetailPage() {
+  // History is settled — the fixture's plan was approved and the gate
+  // decided "Allow once" mid-session. The state model itself stays
+  // interactive: pending entries (an unanswered clarification, an
+  // unapproved plan) behave exactly like the demo page.
   const [answers, setAnswers] = useState<Record<string, string>>({})
-  const [planApproved, setPlanApproved] = useState(false)
-  const [gateDecision, setGateDecision] = useState<GateDecision | undefined>(undefined)
+  const [planApproved, setPlanApproved] = useState(true)
+  const [gateDecision, setGateDecision] = useState<GateDecision | undefined>('allow-once')
 
-  const clarification = ATTENDANCE_REVIEW_STORY.find(
+  // Only a clarification WITHOUT recorded answers is interactive — the
+  // fixture's own answers already sit in the stream as a user bubble.
+  const interactiveClarification = ATTENDANCE_REVIEW_STORY.find(
     (entry): entry is Extract<StreamStoryEntry, { kind: 'clarification' }> =>
-      entry.kind === 'clarification',
+      entry.kind === 'clarification' && entry.data.settledAnswers === undefined,
   )
   const allAnswered =
-    clarification !== undefined &&
-    clarification.data.questions.every((question) => answers[question.id] !== undefined)
+    interactiveClarification !== undefined &&
+    interactiveClarification.data.questions.every((question) => answers[question.id] !== undefined)
 
   const handleAnswer = (questionId: string, option: string) => {
     setAnswers((previous) => ({ ...previous, [questionId]: option }))
   }
 
   const renderEntry = (entry: StreamStoryEntry, position: number) => {
+    const time = TURN_TIMES[position - 1] ?? '14:00'
     switch (entry.kind) {
       case 'request':
-        return <UserRequestBlock data={entry.data} time="14:02" />
+        return <UserRequestBlock data={entry.data} time={time} />
       case 'acknowledgement':
-        return <AcknowledgementBlock data={entry.data} time="14:04" />
+        return <AcknowledgementBlock data={entry.data} time={time} />
       case 'clarification':
         return (
           <ClarificationBlock
             data={entry.data}
             answered={answers}
             onAnswer={handleAnswer}
-            time="14:05"
+            time={time}
           />
         )
       case 'plan':
@@ -102,7 +118,7 @@ export default function SessionStreamDetailPage() {
             approved={planApproved}
             onApprove={() => setPlanApproved(true)}
             onRequestChanges={() => setPlanApproved(false)}
-            time="14:12"
+            time={time}
           />
         )
       case 'approval-gate':
@@ -111,26 +127,21 @@ export default function SessionStreamDetailPage() {
             data={entry.data}
             decision={gateDecision}
             onDecision={(decision) => setGateDecision(decision)}
-            time="14:16"
+            time={time}
           />
         )
       case 'progress':
-        return <ProgressBlock data={entry.data} time="14:18" />
+        return <ProgressBlock data={entry.data} time={time} />
       case 'tool':
-        // The second tool batch renders later on the story clock.
-        return <ToolEvidenceBlock data={entry.data} time={position > 7 ? '14:52' : '14:19'} />
+        return <ToolEvidenceBlock data={entry.data} time={time} />
       case 'artifact':
-        return (
-          <ArtifactBlock
-            data={entry.data}
-            onCopy={(payload) => void copyToClipboard(payload)}
-            time="14:41"
-          />
-        )
+        return <ArtifactBlock data={entry.data} time={time} />
       case 'review':
-        return <ReviewFindingBlock data={entry.data} time="14:47" />
+        return <ReviewFindingBlock data={entry.data} time={time} />
+      case 'answer':
+        return <AnswerBlock data={entry.data} time={time} />
       case 'completion':
-        return <CompletionBlock data={entry.data} time="15:03" />
+        return <CompletionBlock data={entry.data} time={time} />
     }
   }
 
@@ -151,40 +162,42 @@ export default function SessionStreamDetailPage() {
       />
 
       <div className="kx-session-detail__content">
-        {/* The stream story replaces the quote/timeline blocks: same
-            bounded blocks container (680px reading column), one slot per
-            story entry with the sequential stream-kind anchor ids. */}
+        {/* The dialog column: the settled story reads top-to-bottom as a
+            real conversation — user bubbles right-aligned, agent turns
+            flat. Same bounded blocks container (680px reading column). */}
         <div className="kx-session-detail__blocks" data-testid="session-stream-blocks">
-          <div className="kx-stream" data-testid="session-stream">
+          <div
+            className="kx-stream"
+            data-testid="session-stream"
+            role="log"
+            aria-label="Session conversation"
+          >
             {ATTENDANCE_REVIEW_STORY.map((entry, index) => {
               const position = index + 1
               return (
                 <Fragment key={`${entry.kind}-${position}`}>
-                  <div id={`stream-kind-${position}`} className="kx-stream-slot">
+                  <div
+                    id={`stream-kind-${position}`}
+                    className="kx-stream-slot"
+                    data-testid={`stream-turn-${position}`}
+                  >
                     {renderEntry(entry, position)}
                   </div>
-                  {entry.kind === 'clarification' && allAnswered && clarification && (
-                    <div className="kx-stream-slot">
-                      <ResponseBlock
+                  {/* Interactive clarification answered → the answers
+                      enter the stream as a NEW user bubble right after
+                      the questions. */}
+                  {entry === interactiveClarification && allAnswered && (
+                    <div className="kx-stream-slot" data-testid="stream-turn-user-answer">
+                      <BubbleBlock
                         id="stream-user-answer"
-                        kindLabel="ANSWER"
-                        tone="neutral"
-                        icon={<MessageIcon />}
-                        actor="Refactory Admin"
                         time="14:08"
-                        stateChip={<StreamChip>user</StreamChip>}
+                        testId="user-bubble"
+                        copyPayload={answerMessage(interactiveClarification.data.questions, answers)}
                       >
-                        <div className="kx-stream-answer">
-                          {clarification.data.questions.map((question, questionIndex) => (
-                            <p key={question.id} className="kx-stream-answer__line">
-                              <span className="kx-stream-answer__num kx-stream-tabular">
-                                {questionIndex + 1}
-                              </span>
-                              {answers[question.id]}
-                            </p>
-                          ))}
-                        </div>
-                      </ResponseBlock>
+                        <p className="kx-stream-bubble__text kx-stream-prose">
+                          {answerMessage(interactiveClarification.data.questions, answers)}
+                        </p>
+                      </BubbleBlock>
                     </div>
                   )}
                 </Fragment>
@@ -198,9 +211,8 @@ export default function SessionStreamDetailPage() {
         </div>
 
         {/* Final sticky session interaction — the same composer the
-            classic page pins above the viewport bottom. The tracker is
-            deliberately absent: the stream's progress and handoff blocks
-            carry the live state instead. */}
+            classic page pins above the viewport bottom. Sending stays
+            inert in this phase; the live-mock send flow arrives later. */}
         <div className="kx-session-detail__composer-area" data-testid="session-composer-area">
           <SessionDetailComposer />
         </div>
