@@ -58,7 +58,20 @@ function ChevronDown() {
   )
 }
 
-export default function SessionDetailComposer() {
+/**
+ * Optional live-mock interceptors (chat-style stream page). Both default
+ * to the classic reducer-coupled behavior — the classic SessionDetailPage
+ * passes nothing.
+ */
+export interface SessionDetailComposerProps {
+  /** When provided, sends route here instead of dispatching to the
+   * reducer (the stream page plays its scripted live turn). */
+  onSend?: (text: string) => void
+  /** Locks the input + send button while a scripted agent turn runs. */
+  busy?: boolean
+}
+
+export default function SessionDetailComposer({ onSend, busy = false }: SessionDetailComposerProps) {
   const { state, dispatch } = useMockup()
   const { beginOverlayChain, dismissOverlay } = useOverlayLifecycle()
   const { sessionDetail } = state
@@ -123,7 +136,12 @@ export default function SessionDetailComposer() {
   const trimmedMessage = message.trim()
 
   const send = () => {
-    if (!trimmedMessage || sessionDetail.pendingAssistant) return
+    if (!trimmedMessage || sessionDetail.pendingAssistant || busy) return
+    if (onSend !== undefined) {
+      onSend(trimmedMessage)
+      setMessage('')
+      return
+    }
     dispatch({ type: 'SESSION_SEND_DETAIL_MESSAGE', content: trimmedMessage })
     setMessage('')
     // No timer arming here: the reducer generates the pendingPhases slice
@@ -160,6 +178,7 @@ export default function SessionDetailComposer() {
           ref={inputRef}
           placeholder="Describe the outcome you need…"
           value={message}
+          disabled={busy}
           onChange={(event) => setMessage(event.target.value)}
           onKeyDown={handleKeyDown}
           aria-label="Message input"
@@ -205,8 +224,9 @@ export default function SessionDetailComposer() {
               className="kx-composer__send"
               type="button"
               onClick={send}
-              disabled={!trimmedMessage || sessionDetail.pendingAssistant}
+              disabled={!trimmedMessage || sessionDetail.pendingAssistant || busy}
               aria-label="Send message"
+              aria-busy={busy}
             >
               <SendIcon />
             </button>

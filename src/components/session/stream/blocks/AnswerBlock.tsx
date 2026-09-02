@@ -4,17 +4,31 @@
  * no card, no chrome beyond the compact ANSWER header and the shared
  * hover footer (copy / share / time).
  */
-import ResponseBlock, { MessageIcon } from '../ResponseBlock'
+import ResponseBlock, { AckIcon, MessageIcon } from '../ResponseBlock'
 import type { AnswerBlockData } from '../sessionStreamTypes'
 
 interface AnswerBlockProps {
   data: AnswerBlockData
   time?: string
+  /** Presentation variant: the live-mock understanding step reuses the
+   * answer anatomy (same AnswerBlockData shape) with the UNDERSTANDING
+   * header — the history equivalent renders AcknowledgementBlock. */
+  variant?: 'answer' | 'understanding'
 }
 
-export default function AnswerBlock({ data, time = '14:58' }: AnswerBlockProps) {
+export default function AnswerBlock({
+  data,
+  time = '14:58',
+  variant = 'answer',
+}: AnswerBlockProps) {
+  const understanding = variant === 'understanding'
   return (
-    <ResponseBlock kindLabel="ANSWER" tone="neutral" icon={<MessageIcon />} time={time}>
+    <ResponseBlock
+      kindLabel={understanding ? 'UNDERSTANDING' : 'ANSWER'}
+      tone="neutral"
+      icon={understanding ? <AckIcon /> : <MessageIcon />}
+      time={time}
+    >
       <div className="kx-stream-answer-prose">
         {data.paragraphs.map((paragraph, index) => (
           <p key={index} className="kx-stream-prose">

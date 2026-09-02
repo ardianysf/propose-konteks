@@ -1451,14 +1451,14 @@
   color: var(--kx-muted-text-aa);
 }
 
-/* ── Typing indicator (phase-2 live-mock placeholder) ───────────────── */
-/* Not referenced by any component yet — the markup phase 2 will mount:
+/* ── Typing indicator (live mock, spec §Live mock) ─────────────────── */
+/* Mounted by the stream page while a scripted agent turn is in flight:
  *   <div class="kx-stream-typing" aria-live="polite">
  *     <span class="kx-stream-typing__dot" /> ×3
  *     <span class="kx-stream-typing__label">Thinking…</span>
  *   </div>
- * Kept here so the live-mock phase lands as markup only. Reduced-motion
- * freezes the dots (still visible) via the global kill below. */
+ * Reduced-motion freezes the dots (still visible) via the global kill
+ * below — the Thinking… label always stays readable. */
 
 .kx-stream-typing {
   display: inline-flex;
@@ -1551,4 +1551,15 @@
   .kx-stream-io {
     margin-left: 0;
   }
+}
+
+/* ── Live mock (composer flow, spec §Live mock) ─────────────────── */
+
+/* Composer locked while a scripted agent turn runs: the input box (its
+ * text already cleared by the send) dims slightly as the quiet echo of
+ * the disabled state — the input and send button carry the real
+ * disabled/aria-busy semantics in markup. Page-level marker class on
+ * the composer area. */
+.kx-stream-composer-locked .kx-composer__input-box {
+  opacity: 0.75;
 }
