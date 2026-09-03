@@ -1478,7 +1478,7 @@
   font-weight: var(--kx-font-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--kx-attention);
+  color: var(--kx-danger);
 }
 
 .kx-stream-error__toggle {
@@ -1521,6 +1521,7 @@
 .kx-stream-error {
   display: grid;
   margin-top: 10px; /* breathing room from the element above the block */
+  margin-bottom: 10px; /* …and from the component below the closing line */
   /* No container bottom padding — the summary keeps its own balanced
    * 8px/8px air between the two lines when collapsed, and the expanded
    * detail carries its own bottom spacing before the closing line. */

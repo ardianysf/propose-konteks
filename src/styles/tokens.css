@@ -35,6 +35,9 @@
    * attention stage chips, and decline affordances (Task Session Page).
    * Deep amber reads ≥4.5:1 as text on white/canvas/pale. */
   --kx-attention: #9a6212;
+  /* Danger — failure identity (error turns). Deep red, AA as small text:
+   * 6.14:1 on canvas · 6.54:1 on raised · 5.40:1 on the chat bubble. */
+  --kx-danger: #b3261e;
   /* Ink as an RGB triplet so shadows/backdrops can compose it with
    * per-use alpha: rgb(var(--kx-ink-rgb) / 0.14). Equals #243025.
    * The triplet MUST stay space-separated (no commas): it substitutes
@@ -190,6 +193,9 @@
   /* Bright amber for the ink-900 canvas — text-grade on dark surfaces
    * (≈9.8:1 on --kx-canvas). */
   --kx-attention: #e6b366;
+  /* Danger — failure identity (error turns). Bright coral red, AA as
+   * small text: 8.54:1 on canvas · 7.45:1 on raised · 7.33:1 on pale. */
+  --kx-danger: #ef9a8f;
   --kx-border: #35502c; /* Dividers, input borders, hairlines */
   --kx-pale: #152618; /* Hover fills, selected states, subtle washes */
   /* --kx-accent #8fbf6a and --kx-accent-strong #5f8d4e are unchanged. */
