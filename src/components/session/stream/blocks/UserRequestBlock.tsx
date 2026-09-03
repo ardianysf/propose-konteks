@@ -90,7 +90,10 @@ export default function UserRequestBlock({ data, time = '14:02', onResend }: Use
     element.style.webkitLineClamp = 'unset'
     const natural = element.scrollHeight
     element.style.display = ''
-    element.style.webkitLineClamp = ''
+    // CRITICAL: restore the clamp VALUE explicitly — setting '' removes
+    // the inline property and React never rewrites it (same prop value),
+    // leaving the box unclamped (only overflow trimmed ~1 line).
+    element.style.webkitLineClamp = String(MAX_LINES)
     const computed = window.getComputedStyle(element)
     const lineHeight =
       parseFloat(computed.lineHeight) || parseFloat(computed.fontSize) * 1.55 || 20
