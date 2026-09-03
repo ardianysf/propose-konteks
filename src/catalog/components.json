@@ -723,6 +723,596 @@
       "adoptionNotes": "Presentation-only, tidak butuh MockupContext; drop-in via default export, ukuran via prop size, warna mengikuti token --kx-primary, dan hormat prefers-reduced-motion otomatis. Untuk pola loading bertahap (Validating/Analyzing/…), lihat session/pendingPhases yang memetakan fase proses ke varian."
     },
     {
+      "id": "stream-response-block",
+      "name": "ResponseBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/ResponseBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Shared anatomy for every AGENT turn in the chat-style session stream: an optional compact kind header (stroke icon + caps kindLabel + stateChip), the typed body as children, and — only on the group-final turn (showFooter) — a hover/focus-revealed footer with copy, share (mock link), and the timestamp. Conversational turns render bare (no header). Also exports the stream icon family, KIND_LABELS, and StreamChip.",
+      "propDocs": {
+        "kindLabel": "optional, string — caps kind label (e.g. PLAN / APPROVAL); omit for bare conversational turns (no header at all)",
+        "tone": "optional, 'neutral' | 'accent' | 'attention' (default 'neutral') — semantic tone mapped onto the three --kx-* token families",
+        "icon": "optional, ReactElement — 16px stroke icon from the exported family, rendered in the header",
+        "time": "required, string — the turn's timestamp, shown in the hover footer",
+        "stateChip": "optional, ReactNode — status chip riding the compact header row",
+        "children": "required, ReactNode — the kind's typed content (the body)",
+        "className": "optional, string — extra modifier class for the turn root (e.g. --completion)",
+        "id": "optional, string — anchor id; also suffixes the copied share link",
+        "showFooter": "optional, boolean (default false) — render the hover footer (copy / share / time); the LAST agent turn of each response group only"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-solid-aa",
+        "--kx-accent-solid-ink",
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-attention",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-mono",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "labeled turn",
+        "bare · showFooter"
+      ],
+      "fixtureRef": "variant grid: labeled turn (kindLabel + icon + stateChip) | bare conversational prose with showFooter (hover/focus reveals copy · share · time)",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; hover footer menyalin body ke clipboard, share menyalin link sesi (mock). RESPONSIVE: turn tetap flat full-width; footer tetap hover/focus-only di semua lebar."
+    },
+    {
+      "id": "stream-bubble",
+      "name": "BubbleBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/BubbleBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "The USER-turn anatomy of the chat stream: a right-aligned bubble (max-width 75%, asymmetric radius) with a neutral token tint and a hover/focus-within action bar under it — timestamp, copy (with a Copied flash), and edit when onEdit is provided; editing hides the affordance. The afterBubble slot renders content between the bubble and the bar (the attachment row).",
+      "propDocs": {
+        "time": "required, string — message timestamp shown in the action bar",
+        "copyPayload": "optional, string — payload for the copy action; defaults to the bubble's text",
+        "onEdit": "optional, () => void — enters edit mode when the edit icon is clicked; omit to hide the affordance",
+        "editing": "optional, boolean (default false) — while true the edit affordance is hidden (an editor is open)",
+        "id": "optional, string — row anchor id",
+        "testId": "optional, string — data-testid for the bubble row",
+        "afterBubble": "optional, ReactNode — rendered after the bubble but before the action bar (the attachment row seats here)",
+        "children": "required, ReactNode — bubble content (prose, attachment cards, or the inline editor)"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-border",
+        "--kx-bubble-bg",
+        "--kx-bubble-border",
+        "--kx-bubble-chip-bg",
+        "--kx-canvas",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-text-2xs",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "default",
+        "afterBubble slot"
+      ],
+      "fixtureRef": "variant grid: default bubble (hover/focus reveals the time + copy + edit action bar) | afterBubble slot demo (content between bubble and bar)",
+      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext. RESPONSIVE: bubble 75% / 88% ≤760px; action bar hover/focus-only; afterBubble (attachments) right-aligned below the bubble."
+    },
+    {
+      "id": "stream-user-request",
+      "name": "UserRequestBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/UserRequestBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 1 (REQUEST): the user turn as a BubbleBlock carrying the message prose and the inline non-attachment chips. LONG messages collapse to a 5-line clamp with a soft shading fade and a quiet Read more/less toggle; attachment cards render OUTSIDE the bubble (afterBubble row); the edit icon swaps the prose for an inline textarea with Save / Cancel (Save & resend when onResend is provided).",
+      "propDocs": {
+        "data": "required, RequestBlockData — intent, message prose (falls back to intent), chips (attachment-kind chips promote to cards when no explicit attachments), and explicit attachment cards",
+        "time": "optional, string (default '14:02') — message timestamp in the action bar",
+        "onResend": "optional, (nextText: string) => void — phase-2 save-and-resend: Save updates the bubble and notifies the caller to truncate the following turns and re-run; without it Save stays local-only"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-border",
+        "--kx-bubble-bg",
+        "--kx-bubble-border",
+        "--kx-bubble-chip-bg",
+        "--kx-canvas",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-text-2xs",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "short · no clamp",
+        "long · 5-line clamp"
+      ],
+      "fixtureRef": "variant grid: short fixture message (no clamp/toggle, attachment row outside the bubble, chips inline) | long 6-paragraph message (5-line clamp + fade + Read more/less)",
+      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext. RESPONSIVE: bubble 75% / 88% ≤760px; attachments row right-aligned below the bubble; clamp shows 5 lines with Read more."
+    },
+    {
+      "id": "stream-acknowledgement",
+      "name": "AcknowledgementBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/AcknowledgementBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 2 (UNDERSTANDING): flat agent prose — summary, scope in/out as two compact borderless columns, a bolded confidence note, and the muted grounding line. Renders bare (no kind header), pure conversational prose like the answer turn.",
+      "propDocs": {
+        "data": "required, AcknowledgementBlockData — summary prose, scopeIn/scopeOut lists, confidence label + note, grounding line",
+        "time": "optional, string (default '14:04') — turn timestamp (hover footer)"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-muted",
+        "--kx-muted-text-aa",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "fixture · scope in/out + confidence"
+      ],
+      "fixtureRef": "single fixture specimen: the ATTENDANCE_REVIEW_STORY acknowledgement (scope in/out columns + High confidence + grounding)",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext. RESPONSIVE: kolom scope tetap berdampingan dan menyusut mengikuti lebar kolom stream."
+    },
+    {
+      "id": "stream-answer",
+      "name": "AnswerBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/AnswerBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 11 (ANSWER): the agent's conversational final reply — flat prose paragraphs (renderTechnicalText), no card, no chrome, and no kind header. The hover footer (copy / share / time) rides this turn when it is the LAST agent turn of its response group (showFooter).",
+      "propDocs": {
+        "data": "required, AnswerBlockData — paragraphs of conversational prose",
+        "time": "optional, string (default '14:58') — turn timestamp (shown in the hover footer)",
+        "showFooter": "optional, boolean (default false) — hover footer; set on the group-final turn"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "prose",
+        "showFooter"
+      ],
+      "fixtureRef": "variant grid: bare prose | showFooter (hover/focus reveals copy · share · time)",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext. RESPONSIVE: prose full-width mengikuti kolom stream; footer hover/focus-only di semua lebar."
+    },
+    {
+      "id": "stream-clarification",
+      "name": "ClarificationBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/ClarificationBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 3 (CLARIFICATION): numbered questions flowing inside the agent turn (no separate Q/A card). Live mode renders clickable answer-option chips per question (answered + onAnswer) with a paused/resumed notice; settled history (settledAnswers present) renders the non-interactive recorded answers with the resumed notice. The header carries a waiting-input / completed StatusBadge.",
+      "propDocs": {
+        "data": "required, ClarificationBlockData — paused/resumed notices, questions with options, and optional settledAnswers aligned to questions by index (presence switches to the settled state)",
+        "answered": "optional, Record<questionId, option label> — chosen answers in interactive mode (default {})",
+        "onAnswer": "optional, (questionId: string, option: string) => void — fired when an answer chip is clicked",
+        "time": "optional, string (default '14:05') — turn timestamp",
+        "showFooter": "optional, boolean (default false) — hover footer; set on the group-final turn"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-solid-aa",
+        "--kx-accent-solid-ink",
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-attention",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "interactive · answered={}",
+        "settled"
+      ],
+      "fixtureRef": "variant grid: interactive fixture questions with answer chips (answered={}) | settled history (recorded answers + resumed notice)",
+      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext. RESPONSIVE: ≤760px opsi chip dan jawaban settled kehilangan indent (padding-left 0)."
+    },
+    {
+      "id": "stream-plan",
+      "name": "PlanBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/PlanBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 4 (PLAN): numbered compact steps (verb + mono target + agent · estimate · optional risk) with an estimate-total footer. Pending shows the primary Approve plan action and a ghost Request changes; approved settles quiet — per-step checkmarks, an approved chip, actions retired.",
+      "propDocs": {
+        "data": "required, PlanBlockData — steps (verb/target/targetMono/agent/estimate/risk) and totalEstimate",
+        "approved": "required, boolean — pending (Approve/Request changes visible) vs approved (settled quiet)",
+        "onApprove": "required, () => void — Approve plan action",
+        "onRequestChanges": "required, () => void — Request changes action",
+        "time": "optional, string (default '14:09') — turn timestamp"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-text-aa",
+        "--kx-attention",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "pending",
+        "approved"
+      ],
+      "fixtureRef": "variant grid: pending (Approve plan / Request changes + pending-approval chip) | approved (per-step checkmarks + approved chip)",
+      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext. RESPONSIVE: langkah tetap satu kolom; meta line wrap mengikuti lebar konten."
+    },
+    {
+      "id": "stream-approval-gate",
+      "name": "ApprovalGateBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/ApprovalGateBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 5 (APPROVAL GATE): while outstanding, the most prominent block on the page — a 2px attention frame carrying the Waiting-approval StatusBadge INSIDE the box at its top, the action specification as MetadataPair rows, the MANDATORY irreversible-consequence line, and three explicit decisions (Allow once primary / Always this session secondary / Deny ghost). Once decided it settles to a single quiet resolved line with the recorded decision.",
+      "propDocs": {
+        "data": "required, ApprovalGateBlockData — action statement, GateRow[] spec rows, and the consequence line",
+        "decision": "optional, 'allow-once' | 'always' | 'deny' — recorded decision; presence renders the resolved quiet state",
+        "onDecision": "required, (decision: GateDecision) => void — fired by the three decision buttons",
+        "time": "optional, string (default '14:16') — turn timestamp"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-text-aa",
+        "--kx-attention",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-l",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "outstanding",
+        "resolved · allow-once"
+      ],
+      "fixtureRef": "variant grid: outstanding (attention frame + Waiting approval badge + MetadataPair rows + consequence) | resolved quiet line (allow-once)",
+      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext. RESPONSIVE: ≤760px gate rows jadi satu kolom (label di atas nilai)."
+    },
+    {
+      "id": "stream-progress",
+      "name": "ProgressBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/ProgressBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 6 (PROGRESS): ONE collapsed summary line ('N phases · elapsed · Completed', or 'X of N done' while unfinished) that expands into the phase list — done phases with tabular durations, an active phase with the stream's single pulse (dead under prefers-reduced-motion), queued phases dim.",
+      "propDocs": {
+        "data": "required, ProgressBlockData — elapsed string and phases with done/active/queued state + tabular durations",
+        "time": "optional, string (default '14:19') — turn timestamp",
+        "defaultExpanded": "optional, boolean (default false) — initial expansion of the summary"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-text-aa",
+        "--kx-attention",
+        "--kx-font-bold",
+        "--kx-muted",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-text-2xs",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "live · active phase",
+        "settled · collapsed"
+      ],
+      "fixtureRef": "variant grid: live fixture (active phase pulse, expanded) | settled all-done summary (collapsed, expandable via the summary toggle)",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; ringkasan adalah toggle aria-expanded/aria-controls. RESPONSIVE: baris fase wrap mengikuti lebar kolom; pulse mati under prefers-reduced-motion."
+    },
+    {
+      "id": "stream-tool-evidence",
+      "name": "ToolEvidenceBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/ToolEvidenceBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 7 (TOOL CALL): a compact ledger of tool calls — state mark + verb + mono InlineCode target + duration + StatusBadge (Draft/Running/Completed) + chevron per row. Rows with evidence (result/io) are COLLAPSED by default and toggle open into CodeBlocks (input + output with +/- diff tints and Copy); only running rows render open, highlighted with the active pulse.",
+      "propDocs": {
+        "data": "required, ToolEvidenceBlockData — calls with queued/running/done state, optional result summary, and expandable io (input + output lines)",
+        "time": "optional, string (default '14:20') — turn timestamp"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-text-aa",
+        "--kx-attention",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-muted",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "done · collapsed rows",
+        "running · auto-open",
+        "done · io (expandable)"
+      ],
+      "fixtureRef": "variant grid: settled 4-call batch (collapsed done rows) | a running call (auto-open, pulse) | a done call with io — klik row untuk expand the CodeBlock pair (Copy)",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext. RESPONSIVE: ≤760px detail io & result kehilangan indent (margin-left 0); row wrap mengikuti lebar kolom."
+    },
+    {
+      "id": "stream-artifact",
+      "name": "ArtifactBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/ArtifactBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 8 (ARTIFACT): ONE full-width row of the response column — title + version · time metadata, with Open / Copy / Download chip actions revealed on hover / :focus-within. Copy writes data.copyPayload via the shared clipboard helper; Open expands the compact mono schema preview; Download best-effort emits the payload as a file. No badge and no ARTIFACT kind header.",
+      "propDocs": {
+        "data": "required, ArtifactBlockData — badge, title, excerpt, mono schema lines, version, time, and the plain-text copyPayload for Copy/Download",
+        "time": "optional, string (default '14:46') — turn timestamp"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-border",
+        "--kx-canvas",
+        "--kx-font-bold",
+        "--kx-primary",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "full-width row · hover actions"
+      ],
+      "fixtureRef": "single fixture specimen: the report v1 row — hover reveals Open/Copy/Download; Open expands the mono schema preview (interactive)",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext. RESPONSIVE: row full-width di semua breakpoint; aksi tetap hover/focus-only; preview mono men-scroll horizontal bila perlu."
+    },
+    {
+      "id": "stream-review-finding",
+      "name": "ReviewFindingBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/ReviewFindingBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 9 (REVIEW FINDING): flat agent content — severity chip (High reads strongest with the solid attention fill; Medium outlines attention; Low stays ink), title, impact prose (renderTechnicalText), evidence location as a mono InlineCode, and the quoted snippet.",
+      "propDocs": {
+        "data": "required, ReviewFindingBlockData — severity, title, impact prose, mono file:line location, quoted snippet",
+        "time": "optional, string (default '14:45') — turn timestamp"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-attention",
+        "--kx-border",
+        "--kx-canvas",
+        "--kx-font-bold",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-l",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "High severity fixture"
+      ],
+      "fixtureRef": "single fixture specimen: the High timezone-drift finding (impact + mono location + quoted evidence)",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext. RESPONSIVE: severity chip tetap inline dengan judul; quote wrap mengikuti lebar kolom."
+    },
+    {
+      "id": "stream-completion",
+      "name": "CompletionBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/CompletionBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 10 (HANDOFF): the quiet closing turn under a 2px accent rule — the honest done list plus the explicit not-done / out-of-scope list, artifact links as EntityTokens (mono option), numbered next actions, the rollback path, and the tabular receipt. Carries the hover footer as the conversation's group-final turn.",
+      "propDocs": {
+        "data": "required, CompletionBlockData — done/notDone lists, artifacts, nextActions, rollback statement, receipt line",
+        "time": "optional, string (default '15:03') — turn timestamp (hover footer)",
+        "showFooter": "optional, boolean (default false) — hover footer; set on the group-final turn"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-muted",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-secondary",
+        "--kx-text-2xs",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "fixture · showFooter"
+      ],
+      "fixtureRef": "single fixture specimen: full handoff (done/notDone, artifact EntityTokens, next actions, rollback, receipt) with the hover footer",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; aksen rule 2px di atas body. RESPONSIVE: list & numbered actions wrap mengikuti lebar kolom; EntityToken wrap dengan gap."
+    },
+    {
+      "id": "stream-warning",
+      "name": "WarningBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/WarningBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 12 (WARNING): a SHORT notice row for brief events (session paused / connection lost) — danger icon + one line of prose (renderTechnicalText) inside a hairline 1px frame, radius 8, with an optional trailing StatusBadge ('Blocked' danger tone / 'Waiting for input' pause glyph). Renders bare: the row IS the notice.",
+      "propDocs": {
+        "data": "required, WarningBlockData — notice text and optional badge copy ('Blocked' | 'Waiting for input')",
+        "time": "optional, string (default '14:43') — turn timestamp (hover footer)",
+        "showFooter": "optional, boolean (default false) — hover footer; set on the group-final turn"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-border",
+        "--kx-danger",
+        "--kx-primary",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "notice · Waiting for input"
+      ],
+      "fixtureRef": "single fixture specimen: the connection-lost notice with the Waiting-for-input badge",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext. RESPONSIVE: row wrap bebas; badge tetap di ujung kanan prose."
+    },
+    {
+      "id": "stream-error",
+      "name": "ErrorBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/ErrorBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Kind 13 (ERROR): clear failure information as a flat disclosure — the [×] ERROR kind chip + title + Show-detail toggle always read between two hairlines; expanding reveals the mono code/source literals, the impact prose, and the optional resolution line above the bottom rule (aria-expanded + aria-controls, [hidden]-guarded). No error token exists: the attention tone plus the badge's firm × carry the failure.",
+      "propDocs": {
+        "data": "required, ErrorBlockData — title, optional mono code/source, impact prose, optional resolution (text + accent/attention tone)",
+        "time": "optional, string (default '14:31') — turn timestamp (hover footer)",
+        "showFooter": "optional, boolean (default false) — hover footer; set on the group-final turn"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-accent-text-aa",
+        "--kx-attention",
+        "--kx-border",
+        "--kx-danger",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-text-l",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "collapsed · Show detail toggle"
+      ],
+      "fixtureRef": "single fixture specimen: the 503 verification failure, collapsed between hairlines — the Show-detail toggle expands code/source + impact + resolution live",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; detail id statis (satu instance per halaman). RESPONSIVE: summary row wrap; meta mono wrap dengan overflow aman."
+    },
+    {
+      "id": "stream-estimate",
+      "name": "EstimateBlock",
+      "domain": "session",
+      "sourcePath": "src/components/session/stream/blocks/EstimateBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Delivery-estimate kind (chat spec Fase 4b): the 'Review delivery estimate' disclosure between two hairline rules — the ESTIMATE kind label + Show-breakdown toggle lead, the total row always reads as the collapsed summary, and expanding reveals the bordered card inside: heading, dotted-leader rows (tabular numerals), validity line, and a muted note (aria-expanded + aria-controls).",
+      "propDocs": {
+        "data": "required, EstimateBlockData — label, heading, dotted-leader rows (the last row is the always-visible total), validUntil, note",
+        "time": "optional, string (default '14:00') — turn timestamp (hover footer)",
+        "showFooter": "optional, boolean (default false) — hover footer; set on the group-final turn"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/session/stream/SessionStream.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-strong",
+        "--kx-border",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-secondary",
+        "--kx-text-l",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "collapsed · Show breakdown toggle"
+      ],
+      "fixtureRef": "single fixture specimen: the 2h 53m delivery estimate collapsed (label + toggle + total between rules) — Show breakdown expands the dotted-leader card live",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; baris terakhir rows adalah total yang selalu tampil; detail id statis (satu instance per halaman). RESPONSIVE: leader dots menyusut; row wrap mengikuti lebar kolom."
+    },
+    {
       "id": "feedback-modal",
       "name": "FeedbackModal",
       "domain": "session",
