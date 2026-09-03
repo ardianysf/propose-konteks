@@ -1,15 +1,17 @@
 /*
  * ErrorBlock — kind 13 (ERROR): clear failure information for the user
- * (spec §Fase 4, disclosure pattern per review). The SAME UI family as
- * the estimate card: the error icon + ERROR label ride a disclosure
- * header between two hairline rules, with the Show-details toggle;
- * below it the failure CARD sits centered. The title + Failed badge
- * always read (the collapsed summary); the detail — code & source as
- * mono literals (InlineCode), impact prose (renderTechnicalText), and
- * the optional resolution line — expands on demand (aria-expanded +
- * aria-controls, [hidden]-guarded). No error token exists — the
- * attention tone plus the badge's firm × carry the failure (repo
- * convention).
+ * (spec §Fase 4, flat disclosure per review). NO card:
+ *
+ *   [×] ERROR                       ← attention kind row
+ *   [Failed] title…  Show detail ▾  ← summary row (always visible)
+ *   [detail — code/source, impact, resolution]  ← revealed below
+ *   ────────────────────────────── ← hairline at the BOTTOM
+ *
+ * The summary row (badge + title + toggle) always reads beneath the
+ * hairline; tapping the toggle reveals the detail between the kind row
+ * and the line (aria-expanded + aria-controls, [hidden]-guarded). No
+ * error token exists — the attention tone plus the badge's firm ×
+ * carry the failure (repo convention).
  */
 import { useState } from 'react'
 import ResponseBlock, { ChevronIcon, ErrorIcon, KIND_LABELS } from '../ResponseBlock'
@@ -35,14 +37,17 @@ export default function ErrorBlock({
 
   return (
     <ResponseBlock tone="attention" time={time} showFooter={showFooter}>
-      <div className="kx-stream-error-section">
-        {/* The disclosure header: error icon + ERROR label between two
-         * hairline rules, toggle on the right — the estimate UI family. */}
-        <div className="kx-stream-error-disclosure">
-          <p className="kx-stream-error__kind">
-            <ErrorIcon />
-            {KIND_LABELS.error}
-          </p>
+      <div className="kx-stream-error" data-testid="error-card">
+        <p className="kx-stream-error__kind">
+          <ErrorIcon />
+          {KIND_LABELS.error}
+        </p>
+
+        {/* The summary row: badge + title left, toggle right. Always
+         * visible; tapping reveals the detail BELOW it. */}
+        <div className="kx-stream-error__summary">
+          <StatusBadge status="failed" testId="error-badge" />
+          <p className="kx-stream-error__title">{data.title}</p>
           <button
             type="button"
             className="kx-stream-error__toggle"
@@ -53,33 +58,27 @@ export default function ErrorBlock({
             <span className={`kx-stream-error__chevron${open ? ' kx-stream-error__chevron--open' : ''}`}>
               <ChevronIcon />
             </span>
-            {open ? 'Hide details' : 'Show details'}
+            {open ? 'Hide detail' : 'Show detail'}
           </button>
         </div>
 
-        <article className="kx-stream-error" data-testid="error-card" aria-label={data.title}>
-          <div className="kx-stream-error__summary">
-            <StatusBadge status="failed" testId="error-badge" />
-            <p className="kx-stream-error__title">{data.title}</p>
-          </div>
-
-          <div id={detailId} className="kx-stream-error__detail" hidden={!open}>
-            {(data.code !== undefined || data.source !== undefined) && (
-              <p className="kx-stream-error__meta">
-                {data.code !== undefined && <InlineCode>{data.code}</InlineCode>}
-                {data.source !== undefined && <InlineCode>{data.source}</InlineCode>}
-              </p>
-            )}
-            <p className="kx-stream-error__impact kx-stream-prose">{renderTechnicalText(data.impact)}</p>
-            {data.resolution !== undefined && (
-              <p
-                className={`kx-stream-error__resolution kx-stream-error__resolution--${data.resolution.tone}`}
-              >
-                {data.resolution.text}
-              </p>
-            )}
-          </div>
-        </article>
+        {/* The detail sits between the summary row and the bottom line. */}
+        <div id={detailId} className="kx-stream-error__detail" hidden={!open}>
+          {(data.code !== undefined || data.source !== undefined) && (
+            <p className="kx-stream-error__meta">
+              {data.code !== undefined && <InlineCode>{data.code}</InlineCode>}
+              {data.source !== undefined && <InlineCode>{data.source}</InlineCode>}
+            </p>
+          )}
+          <p className="kx-stream-error__impact kx-stream-prose">{renderTechnicalText(data.impact)}</p>
+          {data.resolution !== undefined && (
+            <p
+              className={`kx-stream-error__resolution kx-stream-error__resolution--${data.resolution.tone}`}
+            >
+              {data.resolution.text}
+            </p>
+          )}
+        </div>
       </div>
     </ResponseBlock>
   )
