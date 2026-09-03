@@ -23,6 +23,9 @@ export type StreamKind =
   | 'review'
   | 'completion'
   | 'answer'
+  | 'warning'
+  | 'error'
+  | 'quote'
 
 /** Semantic tones mapped onto existing --kx-* token families:
  * neutral = ink, accent = success/approved/primary action,
@@ -219,6 +222,44 @@ export interface AnswerBlockData {
   paragraphs: string[]
 }
 
+// ── 12-14. Warning / Error / Quote (spec §Fase 4) ────────────────────────
+
+/** A SHORT notice row for brief events ("session paused / connection
+ * lost"): attention icon + one line of prose in a hairline frame,
+ * with an optional trailing StatusBadge. */
+export interface WarningBlockData {
+  text: string
+  /** Trailing StatusBadge copy — 'Blocked' (danger tone) or
+   * 'Waiting for input' (pause glyph). */
+  badge?: 'Blocked' | 'Waiting for input'
+}
+
+/** Clear failure information: Failed badge + title, the code and the
+ * source as mono literals, impact prose, and an optional resolution
+ * line. No error token exists — attention + the badge's firm × carry
+ * the tone (repo convention). */
+export interface ErrorBlockData {
+  title: string
+  /** Error code / identifier — mono. */
+  code?: string
+  /** file:line or endpoint the failure came from — mono. */
+  source?: string
+  impact: string
+  resolution?: {
+    text: string
+    tone: 'accent' | 'attention'
+  }
+}
+
+/** A session-ticket style quotation: muted overline label, the quoted
+ * prose (the emphasized content), and a muted attribution line
+ * (source · time). Non-interactive. */
+export interface QuoteBlockData {
+  label: string
+  text: string
+  attribution?: string
+}
+
 // ── Story array ──────────────────────────────────────────────────────────
 
 /** One entry per response block, in narrative order. The page renders this
@@ -236,3 +277,6 @@ export type StreamStoryEntry =
   | { kind: 'review'; data: ReviewFindingBlockData }
   | { kind: 'completion'; data: CompletionBlockData }
   | { kind: 'answer'; data: AnswerBlockData }
+  | { kind: 'warning'; data: WarningBlockData }
+  | { kind: 'error'; data: ErrorBlockData }
+  | { kind: 'quote'; data: QuoteBlockData }

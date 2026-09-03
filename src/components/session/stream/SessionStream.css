@@ -1426,6 +1426,123 @@
   color: var(--kx-muted-text-aa);
 }
 
+/* ── 12-14. Warning / Error / Quote (spec §Fase 4) ─────────────────── */
+
+/* WARNING — a SHORT notice row for brief events: attention icon + one
+ * line of prose inside a hairline 1px frame (token border — NO heavy
+ * border-left), radius 8, no card. The optional StatusBadge rides the
+ * row's trailing edge; the tone lives on the icon, the text stays
+ * primary. */
+.kx-stream-warn {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--kx-border);
+  border-radius: 8px;
+}
+
+.kx-stream-warn__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--kx-attention);
+}
+
+.kx-stream-warn__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-primary);
+}
+
+.kx-stream-warn__badge.kx-tech-badge {
+  flex: 0 0 auto;
+}
+
+/* ERROR — clear failure information: bold title, the code/source as
+ * mono InlineCode literals, impact prose, and the optional resolution
+ * line (accent = resolved, attention = needs action). No error token
+ * exists — the attention tone + the Failed badge's firm × carry the
+ * failure (repo convention). */
+.kx-stream-error {
+  display: grid;
+  gap: 8px;
+}
+
+.kx-stream-error__title {
+  margin: 0;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-stream-error__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin: 0;
+}
+
+.kx-stream-error__impact {
+  margin: 0;
+  color: var(--kx-primary);
+}
+
+.kx-stream-error__resolution {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-bold);
+}
+
+.kx-stream-error__resolution--accent {
+  color: var(--kx-accent-text-aa);
+}
+
+.kx-stream-error__resolution--attention {
+  color: var(--kx-attention);
+}
+
+/* QUOTE — a session-ticket quotation (TaskQuoteCard anatomy): muted
+ * overline label, the quoted prose slightly emphasized, muted
+ * attribution. Structural differentiation instead of italics: a 2px
+ * ink rule left of the quote body + indent — the one sanctioned thick
+ * rule besides the completion rule and the gate frame. Non-interactive. */
+.kx-stream-quote {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.kx-stream-quote__label {
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-stream-quote__body {
+  margin: 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--kx-primary);
+}
+
+.kx-stream-quote__text {
+  margin: 0;
+  font-size: var(--kx-text-l);
+  line-height: 1.5;
+  color: var(--kx-primary);
+}
+
+.kx-stream-quote__attribution {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
+}
+
 /* ── Typing indicator (live mock, spec §Live mock) ─────────────────── */
 /* Mounted by the stream page while a scripted agent turn is in flight:
  *   <div class="kx-stream-typing" aria-live="polite">
