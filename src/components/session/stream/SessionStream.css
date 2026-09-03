@@ -1530,6 +1530,11 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  /* The summary row rides BETWEEN two hairlines (collapsed = the whole
+   * block is just this line; expanded = the detail opens beneath it and
+   * the closing line moves down with the content). */
+  padding: 8px 0;
+  border-top: 1px solid var(--kx-border);
 }
 
 .kx-stream-error__title {
@@ -1540,12 +1545,10 @@
 .kx-stream-error__detail {
   display: grid;
   gap: 10px;
-  /* The hairline ABOVE the detail separates it from the summary row;
-     generous breathing room on BOTH sides so the line and the literals
-     never read cramped. */
-  margin-top: 14px;
-  padding: 12px 2px 4px;
-  border-top: 1px solid var(--kx-border);
+  /* No line of its own — the detail opens directly under the summary
+     row with breathing room; the block's closing hairline follows. */
+  margin-top: 12px;
+  padding: 0 2px 2px;
 }
 
 /* The hidden attribute must win over the grid display above. */
