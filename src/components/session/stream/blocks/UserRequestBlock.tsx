@@ -2,19 +2,29 @@
  * UserRequestBlock — kind 1 (REQUEST): the USER turn.
  *
  * Right-aligned bubble (BubbleBlock) carrying the message prose
- * (data.message, falling back to data.intent), attachment CARDS inside
- * the bubble — file-type icon + name + meta under a hairline separator
- * — and the non-attachment chips as subtle inline chips. The hover /
- * focus-within action bar (time + copy + edit) is BubbleBlock's.
+ * (data.message, falling back to data.intent) and the non-attachment
+ * chips. The hover / focus-within action bar (time + copy + edit) is
+ * BubbleBlock's.
  *
- * Edit (phase 1): clicking the edit icon swaps the prose for an inline
- * textarea with Save / Cancel inside the bubble; Save updates the
- * bubble text locally. Phase 2 upgrades this to save-and-resend.
+ * LONG MESSAGES (review): prose taller than MAX_LINES collapses with a
+ * soft shading fade and a quiet Read more button — the fade masks the
+ * clamp edge so the bubble still reads well-designed; Read less folds
+ * it back. Messages under the limit never show the control.
+ *
+ * ATTACHMENTS (review): attachment cards live OUTSIDE the bubble — a
+ * separate row of file cards (icon + name + meta) directly beneath it.
+ *
+ * Edit: clicking the edit icon swaps the prose for an inline textarea
+ * with Save / Cancel inside the bubble; Save & resend truncates the
+ * following turns and re-runs the live sequence (page-provided).
  */
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import BubbleBlock from '../BubbleBlock'
 import { ArchiveIcon, DiffIcon, DocIcon, SheetIcon } from '../ResponseBlock'
 import type { RequestAttachment, RequestBlockData } from '../sessionStreamTypes'
+
+/** Messages taller than this collapse behind the shading fade. */
+const MAX_LINES = 10
 
 /** File-type glyph for an attachment card (fallback: doc). */
 function attachmentIcon(name: string): NonNullable<RequestAttachment['type']> {
@@ -32,17 +42,16 @@ const FILE_ICONS: Record<NonNullable<RequestAttachment['type']>, () => JSX.Eleme
   archive: ArchiveIcon,
 }
 
-function AttachmentCard({ name, meta, type }: RequestAttachment) {
+function AttachmentCard({ name, type }: RequestAttachment) {
   const Glyph = FILE_ICONS[type ?? attachmentIcon(name)]
+  // Review: the card carries ONLY the file-type glyph + title — meta
+  // lives in the data, not the UI.
   return (
     <li className="kx-stream-attachment">
       <span className="kx-stream-attachment__icon" aria-hidden="true">
         <Glyph />
       </span>
-      <span className="kx-stream-attachment__main">
-        <span className="kx-stream-attachment__name">{name}</span>
-        <span className="kx-stream-attachment__meta">{meta}</span>
-      </span>
+      <span className="kx-stream-attachment__name">{name}</span>
     </li>
   )
 }
@@ -61,6 +70,20 @@ export default function UserRequestBlock({ data, time = '14:02', onResend }: Use
   const [text, setText] = useState(initialText)
   const [draft, setDraft] = useState(initialText)
   const [editing, setEditing] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  const [clampable, setClampable] = useState(false)
+  const textRef = useRef<HTMLParagraphElement>(null)
+
+  // Overflow detection (fixed): the clamp class rides from first paint
+  // whenever the message is not expanded — line-clamp is a no-op on
+  // messages under MAX_LINES, so measuring the CLAMPED box is the only
+  // way scrollHeight can exceed clientHeight. Under the limit the
+  // Read-more control never renders.
+  useEffect(() => {
+    const element = textRef.current
+    if (element === null || expanded) return
+    setClampable(element.scrollHeight > element.clientHeight + 1)
+  }, [text, expanded, editing])
 
   // Explicit attachment cards, or attachment-kind chips promoted to cards.
   const attachments: RequestAttachment[] =
@@ -90,6 +113,10 @@ export default function UserRequestBlock({ data, time = '14:02', onResend }: Use
     setEditing(false)
   }
 
+  // The clamp rides whenever the message is collapsed — harmless for
+  // short prose (line-clamp caps nothing) and measurable for long one.
+  const clamped = !expanded && !editing
+
   return (
     <BubbleBlock
       time={time}
@@ -97,57 +124,81 @@ export default function UserRequestBlock({ data, time = '14:02', onResend }: Use
       editing={editing}
       onEdit={editing ? undefined : beginEdit}
       testId="user-bubble"
+      afterBubble={
+        attachments.length > 0 ? (
+          <ul className="kx-stream-request__attachments" aria-label="Attachments">
+            {attachments.map((attachment) => (
+              <AttachmentCard key={attachment.name} {...attachment} />
+            ))}
+          </ul>
+        ) : undefined
+      }
     >
-      {editing ? (
-        <div className="kx-stream-bubble__edit" data-testid="bubble-editor">
-          <label className="kx-visually-hidden" htmlFor="kx-stream-bubble-edit-input">
-            Edit message
-          </label>
-          <textarea
-            id="kx-stream-bubble-edit-input"
-            className="kx-stream-bubble__edit-input"
-            data-testid="bubble-edit-input"
-            value={draft}
-            rows={Math.min(10, Math.max(3, draft.split('\n').length))}
-            onChange={(event) => setDraft(event.target.value)}
-          />
-          <div className="kx-stream-bubble__edit-actions">
-            <button type="button" className="kx-stream-btn kx-stream-btn--primary" onClick={saveEdit}>
-              {onResend !== undefined ? 'Save & resend' : 'Save'}
-            </button>
-            <button
-              type="button"
-              className="kx-stream-btn kx-stream-btn--ghost"
-              onClick={() => setEditing(false)}
-            >
-              Cancel
-            </button>
+        {editing ? (
+          <div className="kx-stream-bubble__edit" data-testid="bubble-editor">
+            <label className="kx-visually-hidden" htmlFor="kx-stream-bubble-edit-input">
+              Edit message
+            </label>
+            <textarea
+              id="kx-stream-bubble-edit-input"
+              className="kx-stream-bubble__edit-input"
+              data-testid="bubble-edit-input"
+              value={draft}
+              rows={Math.min(10, Math.max(3, draft.split('\n').length))}
+              onChange={(event) => setDraft(event.target.value)}
+            />
+            <div className="kx-stream-bubble__edit-actions">
+              <button type="button" className="kx-stream-btn kx-stream-btn--primary" onClick={saveEdit}>
+                {onResend !== undefined ? 'Save & resend' : 'Save'}
+              </button>
+              <button
+                type="button"
+                className="kx-stream-btn kx-stream-btn--ghost"
+                onClick={() => setEditing(false)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <>
-          <p className="kx-stream-bubble__text kx-stream-prose" data-testid="bubble-text">
-            {text}
-          </p>
-          {attachments.length > 0 && (
-            <ul className="kx-stream-bubble__files" aria-label="Attachments">
-              {attachments.map((attachment) => (
-                <AttachmentCard key={attachment.name} {...attachment} />
-              ))}
-            </ul>
-          )}
-          {inlineChips.length > 0 && (
-            <ul className="kx-stream-bubble__chips" aria-label="Request context">
-              {inlineChips.map((chip) => (
-                <li key={chip.label} className="kx-stream-bubble__chip">
-                  <span className="kx-stream-bubble__chip-kind">{chip.kind}</span>
-                  <span className={chip.mono ? 'kx-stream-mono' : undefined}>{chip.label}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
-      )}
+        ) : (
+          <>
+            <div className="kx-stream-bubble__text-wrap">
+              <p
+                ref={textRef}
+                className={`kx-stream-bubble__text kx-stream-prose${clamped ? ' kx-stream-bubble__text--clamped' : ''}`}
+                style={clamped ? { WebkitLineClamp: MAX_LINES } : undefined}
+                data-testid="bubble-text"
+              >
+                {text}
+              </p>
+              {/* The soft shading fade masks the clamp edge — a quiet
+                  gradient into the bubble surface, only while clamped. */}
+              {clamped && (
+                <span className="kx-stream-bubble__text-fade" aria-hidden="true" />
+              )}
+            </div>
+            {clampable && (
+              <button
+                type="button"
+                className="kx-stream-bubble__read-toggle"
+                aria-expanded={expanded}
+                onClick={() => setExpanded((previous) => !previous)}
+              >
+                {expanded ? 'Read less' : 'Read more'}
+              </button>
+            )}
+            {inlineChips.length > 0 && (
+              <ul className="kx-stream-bubble__chips" aria-label="Request context">
+                {inlineChips.map((chip) => (
+                  <li key={chip.label} className="kx-stream-bubble__chip">
+                    <span className="kx-stream-bubble__chip-kind">{chip.kind}</span>
+                    <span className={chip.mono ? 'kx-stream-mono' : undefined}>{chip.label}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        )}
     </BubbleBlock>
   )
 }

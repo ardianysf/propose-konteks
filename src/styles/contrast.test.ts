@@ -319,6 +319,7 @@ function entries(): Entry[] {
     { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__toggle:focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: STREAM, selector: '.kx-stream-estimate__toggle:focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: STREAM, selector: '.kx-stream-error__toggle:focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-bubble__read-toggle:focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
     // Session badge primitive (session/sessionBadges.css — T5b session
     // rework: the .kx-badge modifiers moved out of SessionStatusBadge.css
     // into the shared session stylesheet; components.css never carried
@@ -406,7 +407,6 @@ function entries(): Entry[] {
       '.kx-stream-turn__feedback',
       '.kx-stream-turn__time',
       '.kx-stream-attachment__icon',
-      '.kx-stream-attachment__meta',
       '.kx-stream-bubble__chip-kind',
       '.kx-stream-bubble__time',
       '.kx-stream-bubble__feedback',
@@ -431,6 +431,7 @@ function entries(): Entry[] {
       '.kx-stream-quote__label',
       '.kx-stream-quote__attribution',
       '.kx-stream-estimate__kind',
+      '.kx-stream-bubble__read-toggle',
       '.kx-stream-estimate__note',
       '.kx-stream-error__toggle',
       '.kx-stream-estimate__toggle',
@@ -1044,10 +1045,10 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 266 consumers — 98 muted, 91 accent-strong, 24 accent-text-aa', () => {
-    expect(inventory).toHaveLength(266)
+  it('covers exactly 267 consumers — 98 muted, 92 accent-strong, 24 accent-text-aa', () => {
+    expect(inventory).toHaveLength(267)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(98)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(91)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(92)
     expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(24)
   })
 
@@ -1055,7 +1056,7 @@ describe('inventory completeness and non-duplication (AC9)', () => {
     expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(133)
     expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(61)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(9)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(63)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(64)
   })
 
   it('has no duplicate inventory selectors', () => {

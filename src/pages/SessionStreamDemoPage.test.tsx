@@ -108,7 +108,7 @@ describe('SessionStreamDemoPage — structure', () => {
     expect(request).toHaveClass('kx-stream-bubble-row')
 
     // Attachment-kind chips promote to cards: name + meta per file.
-    const files = within(request).getByLabelText('Attachments')
+    const files = screen.getByLabelText('Attachments')
     expect(within(files).getAllByRole('listitem')).toHaveLength(2)
     expect(within(files).getByText('invoices-aug-sample.csv')).toBeInTheDocument()
     expect(within(files).getByText('SOP-FIN-012 (rev 3)')).toBeInTheDocument()
