@@ -1909,6 +1909,13 @@
     max-width: 88%;
   }
 
+  /* The attachment row stays right-aligned with the wider bubble. */
+  .kx-stream-request__attachments {
+    justify-content: flex-end;
+    align-self: flex-end;
+    max-width: 88%;
+  }
+
   .kx-stream-gate__rows .kx-stream-gate__row {
     grid-template-columns: 1fr;
     gap: 2px;
