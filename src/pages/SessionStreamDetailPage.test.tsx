@@ -218,20 +218,37 @@ describe('SessionStreamDetailPage — structure', () => {
     ).toBeInTheDocument()
     expect(within(warnSlot).getByTestId('warning-badge')).toHaveTextContent('Waiting for input')
 
-    // Fase 4 — the ERROR turn (slot 12): labeled ERROR + Failed badge,
-    // title, mono code/source literals, impact prose, resolution line.
+    // Fase 4 — the ERROR turn (slot 12): the estimate UI family — ERROR
+    // kind label + toggle between hairline rules; the centered card
+    // always reads badge + title; the detail collapses by default.
     const errorSlot = document.getElementById('stream-kind-12')!
     expect(within(errorSlot).getByText('ERROR')).toBeInTheDocument()
-    expect(within(errorSlot).getByTestId('error-badge')).toHaveTextContent('Failed')
+    expect(errorSlot.querySelector('.kx-stream-error-disclosure')).not.toBeNull()
+    const errorCard = within(errorSlot).getByTestId('error-card')
+    expect(within(errorCard).getByTestId('error-badge')).toHaveTextContent('Failed')
     expect(
-      within(errorSlot).getByText(/Initial verification call failed/),
-    ).toBeInTheDocument()
-    expect(within(errorSlot).getByText('HTTP 503')).toHaveClass('kx-tech-code')
-    expect(within(errorSlot).getByText('canteen-api')).toHaveClass('kx-tech-code')
+      within(errorCard).getByText(/Initial verification call failed/),
+    ).toBeVisible()
+    // Collapsed rest: code/source/impact/resolution are hidden.
+    expect(within(errorCard).getByText('HTTP 503')).not.toBeVisible()
+    expect(within(errorCard).getByText('canteen-api')).not.toBeVisible()
     expect(
-      within(errorSlot).getByText(/reconciliation result stayed unconfirmed/),
-    ).toBeInTheDocument()
-    expect(within(errorSlot).getByText('Retried — succeeded')).toBeInTheDocument()
+      within(errorCard).getByText(/reconciliation result stayed unconfirmed/),
+    ).not.toBeVisible()
+    expect(within(errorCard).getByText('Retried — succeeded')).not.toBeVisible()
+    const errorToggle = within(errorSlot).getByRole('button', { name: /Show details/ })
+    expect(errorToggle).toHaveAttribute('aria-expanded', 'false')
+    // Expanding reveals the mono literals + impact + resolution.
+    fireEvent.click(errorToggle)
+    expect(within(errorCard).getByText('HTTP 503')).toBeVisible()
+    expect(within(errorCard).getByText('HTTP 503')).toHaveClass('kx-tech-code')
+    expect(within(errorCard).getByText('canteen-api')).toBeVisible()
+    expect(within(errorCard).getByText('canteen-api')).toHaveClass('kx-tech-code')
+    expect(
+      within(errorCard).getByText(/reconciliation result stayed unconfirmed/),
+    ).toBeVisible()
+    expect(within(errorCard).getByText('Retried — succeeded')).toBeVisible()
+    expect(errorToggle).toHaveAttribute('aria-expanded', 'true')
   })
 
   it('renders the user request as a bubble with attachment cards and a hover action bar', () => {

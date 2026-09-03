@@ -318,6 +318,7 @@ function entries(): Entry[] {
     { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__toggle--on', property: 'background', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: CUSTOMIZE_SHARED, selector: '.kx-preserved__toggle:focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
     { file: STREAM, selector: '.kx-stream-estimate__toggle:focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
+    { file: STREAM, selector: '.kx-stream-error__toggle:focus-visible', property: 'outline', token: ACCENT_STRONG, cls: 'U' as Class },
     // Session badge primitive (session/sessionBadges.css — T5b session
     // rework: the .kx-badge modifiers moved out of SessionStatusBadge.css
     // into the shared session stylesheet; components.css never carried
@@ -431,6 +432,7 @@ function entries(): Entry[] {
       '.kx-stream-quote__attribution',
       '.kx-stream-estimate__kind',
       '.kx-stream-estimate__note',
+      '.kx-stream-error__toggle',
       '.kx-stream-estimate__toggle',
     ].map((selector) => ({ file: STREAM, selector, property: 'color', token: MUTED_AA, cls: 'M' as Class })),
     // A — accent text/glyphs: tone-colored kind labels + icons on accent
@@ -1042,18 +1044,18 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 264 consumers — 98 muted, 90 accent-strong, 24 accent-text-aa', () => {
-    expect(inventory).toHaveLength(264)
+  it('covers exactly 266 consumers — 98 muted, 91 accent-strong, 24 accent-text-aa', () => {
+    expect(inventory).toHaveLength(266)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(98)
-    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(90)
+    expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(91)
     expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(24)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(132)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(133)
     expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(61)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(9)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(62)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(63)
   })
 
   it('has no duplicate inventory selectors', () => {

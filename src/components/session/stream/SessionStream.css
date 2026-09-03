@@ -1466,9 +1466,99 @@
  * line (accent = resolved, attention = needs action). No error token
  * exists — the attention tone + the Failed badge's firm × carry the
  * failure (repo convention). */
+/* The estimate UI family: disclosure header between two hairline rules;
+ * the failure card centered below, title + badge always reading. */
+.kx-stream-error-section {
+  display: grid;
+  gap: 12px;
+}
+
+.kx-stream-error-disclosure {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--kx-border);
+  border-bottom: 1px solid var(--kx-border);
+}
+
+.kx-stream-error__kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kx-attention);
+}
+
+.kx-stream-error__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-muted-text-aa);
+  cursor: pointer;
+  transition: background-color 140ms ease-out, color 140ms ease-out;
+}
+
+.kx-stream-error__toggle:hover,
+.kx-stream-error__toggle:focus-visible {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-stream-error__toggle:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
+}
+
+.kx-stream-error__chevron {
+  display: inline-flex;
+  transition: transform 140ms ease-out;
+}
+
+.kx-stream-error__chevron--open {
+  transform: rotate(180deg);
+}
+
 .kx-stream-error {
   display: grid;
   gap: 8px;
+  width: fit-content;
+  min-width: min(52ch, 100%);
+  margin-inline: auto; /* centered under the disclosure, like estimate */
+  padding: 16px;
+  background: var(--kx-raised);
+  border: 1px solid var(--kx-border);
+  border-radius: 14px;
+}
+
+.kx-stream-error__summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.kx-stream-error__detail {
+  display: grid;
+  gap: 8px;
+}
+
+/* The hidden attribute must win over the grid display above. */
+.kx-stream-error__detail[hidden] {
+  display: none;
 }
 
 .kx-stream-error__title {
