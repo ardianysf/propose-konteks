@@ -81,8 +81,19 @@ export default function UserRequestBlock({ data, time = '14:02', onResend }: Use
   // Read-more control never renders.
   useEffect(() => {
     const element = textRef.current
-    if (element === null || expanded) return
-    setClampable(element.scrollHeight > element.clientHeight + 1)
+    if (element === null || expanded || editing) return
+    // Measure the NATURAL height: -webkit-line-clamp collapses
+    // scrollHeight to the clamped box in real browsers, so the clamp
+    // is lifted for this measurement frame only (same paint — no flash).
+    element.style.display = 'block'
+    element.style.webkitLineClamp = 'unset'
+    const natural = element.scrollHeight
+    element.style.display = ''
+    element.style.webkitLineClamp = ''
+    const computed = window.getComputedStyle(element)
+    const lineHeight =
+      parseFloat(computed.lineHeight) || parseFloat(computed.fontSize) * 1.55 || 20
+    setClampable(natural > lineHeight * MAX_LINES + 1)
   }, [text, expanded, editing])
 
   // Explicit attachment cards, or attachment-kind chips promoted to cards.

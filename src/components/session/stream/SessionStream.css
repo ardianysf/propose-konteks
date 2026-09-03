@@ -300,38 +300,23 @@
   overflow-wrap: anywhere;
 }
 
-/* Attachment CARDS inside the bubble — a hairline separates them from
- * the message text; each card is icon + name + meta. */
-.kx-stream-bubble__files {
-  margin: 10px 0 0;
-  padding: 10px 0 0;
-  border-top: 1px solid var(--kx-border);
-  list-style: none;
-  display: grid;
-  gap: 8px;
-}
-
+/* Attachment cards — OUTSIDE the bubble (review): transparent boxes
+ * whose edge and glyph borrow the bubble's own border tone; harmonious,
+ * not identical. */
 .kx-stream-attachment {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   padding: 5px 10px;
-  border: 1px solid var(--kx-border);
+  border: 1px solid var(--kx-bubble-border);
   border-radius: 8px;
-  background: var(--kx-raised);
+  background: transparent;
 }
 
 .kx-stream-attachment__icon {
   flex: 0 0 auto;
   display: inline-flex;
-  margin-top: 1px;
-  color: var(--kx-muted-text-aa);
-}
-
-.kx-stream-attachment__main {
-  display: grid;
-  gap: 1px;
-  min-width: 0;
+  color: var(--kx-bubble-border); /* the bubble family tone (decorative) */
 }
 
 .kx-stream-attachment__name {
@@ -1759,29 +1744,31 @@
 .kx-stream-estimate {
   display: grid;
   gap: 4px;
-  width: min(52ch, 100%); /* constant — collapsed and expanded match */
-  margin-inline: auto; /* the card sits centered under the disclosure */
-  padding: 16px;
+  padding: 12px 14px;
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
-  border-radius: 14px;
+  border-radius: 12px;
+}
+
+.kx-stream-estimate[hidden] {
+  display: none;
 }
 
 /* The disclosure header rides OUTSIDE the card: label + toggle between
  * two hairline rules; the card below is centered. */
-.kx-stream-estimate-section {
+.kx-stream-estimate-disclosure {
   display: grid;
-  gap: 12px;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px solid var(--kx-border);
+  border-bottom: 1px solid var(--kx-border);
 }
 
-.kx-stream-estimate-disclosure {
+.kx-stream-estimate__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 6px 0;
-  border-top: 1px solid var(--kx-border);
-  border-bottom: 1px solid var(--kx-border);
 }
 
 .kx-stream-estimate__toggle {

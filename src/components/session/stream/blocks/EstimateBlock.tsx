@@ -32,11 +32,11 @@ export default function EstimateBlock({
 
   return (
     <ResponseBlock tone="neutral" time={time} showFooter={showFooter}>
-      <div className="kx-stream-estimate-section">
-        {/* The disclosure header rides OUTSIDE the card: the estimate
-            label + toggle sit between two hairline rules; the card
-            below is centered. */}
-        <div className="kx-stream-estimate-disclosure">
+      {/* ONE disclosure block between two hairline rules (review): the
+       * kind label + toggle lead, the detail card rides INSIDE it when
+       * expanded, and the total row always closes above the bottom rule. */}
+      <div className="kx-stream-estimate-disclosure">
+        <div className="kx-stream-estimate__head">
           <p className="kx-stream-estimate__kind">
             <EstimateIcon />
             {KIND_LABELS.estimate}
@@ -55,11 +55,11 @@ export default function EstimateBlock({
           </button>
         </div>
 
-        <article className="kx-stream-estimate" data-testid="estimate-card" aria-label={data.heading}>
+        <article className="kx-stream-estimate" data-testid="estimate-card" aria-label={data.heading} hidden={!open}>
           <h4 className="kx-stream-estimate__heading">{data.heading}</h4>
 
         {/* Collapsed rest: only the total row reads. */}
-        <div id={detailId} className="kx-stream-estimate__detail" hidden={!open}>
+        <div id={detailId} className="kx-stream-estimate__detail">
           <dl className="kx-stream-estimate__rows">
             {data.rows.slice(0, -1).map((row) => (
               <div className="kx-stream-estimate__row" key={row.label}>
@@ -73,8 +73,10 @@ export default function EstimateBlock({
           <p className="kx-stream-estimate__note">{data.note}</p>
         </div>
 
-        {/* The total row always reads — collapsed summary AND the last
-            line of the expanded breakdown. */}
+        </article>
+
+        {/* The total row always reads — the collapsed summary AND the
+            closing line above the bottom rule when expanded. */}
         <dl className="kx-stream-estimate__rows">
           <div className="kx-stream-estimate__row kx-stream-estimate__row--total">
             <dt className="kx-stream-estimate__row-label">{total.label}</dt>
@@ -82,7 +84,6 @@ export default function EstimateBlock({
             <dd className="kx-stream-estimate__row-value kx-stream-tabular">{total.value}</dd>
           </div>
         </dl>
-        </article>
       </div>
     </ResponseBlock>
   )
