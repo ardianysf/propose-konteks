@@ -1447,7 +1447,7 @@
 .kx-stream-warn__icon {
   flex: 0 0 auto;
   display: inline-flex;
-  color: var(--kx-attention);
+  color: var(--kx-danger); /* review: short failure notices read as danger */
 }
 
 .kx-stream-warn__text {
