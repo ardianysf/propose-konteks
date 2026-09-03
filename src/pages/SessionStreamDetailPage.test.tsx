@@ -225,7 +225,9 @@ describe('SessionStreamDetailPage — structure', () => {
     expect(within(errorSlot).getByText('ERROR')).toBeInTheDocument()
     expect(errorSlot.querySelector('.kx-stream-error__summary')).not.toBeNull()
     const errorCard = within(errorSlot).getByTestId('error-card')
-    expect(within(errorCard).getByTestId('error-badge')).toHaveTextContent('Failed')
+    // The [×] ERROR kind chip rides the summary row — the Failed badge
+    // is retired (review): no error-badge exists anywhere.
+    expect(within(errorCard).queryByTestId('error-badge')).toBeNull()
     expect(
       within(errorCard).getByText(/Initial verification call failed/),
     ).toBeVisible()
