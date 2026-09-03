@@ -429,7 +429,7 @@ function entries(): Entry[] {
       '.kx-stream-typing',
       '.kx-stream-quote__label',
       '.kx-stream-quote__attribution',
-      '.kx-stream-estimate__label',
+      '.kx-stream-estimate__kind',
       '.kx-stream-estimate__note',
       '.kx-stream-estimate__toggle',
     ].map((selector) => ({ file: STREAM, selector, property: 'color', token: MUTED_AA, cls: 'M' as Class })),

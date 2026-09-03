@@ -11,7 +11,7 @@
  * as the tool-evidence rows and the progress summary).
  */
 import { useState } from 'react'
-import ResponseBlock, { ChevronIcon, EstimateIcon } from '../ResponseBlock'
+import ResponseBlock, { ChevronIcon, EstimateIcon, KIND_LABELS } from '../ResponseBlock'
 import type { EstimateBlockData } from '../sessionStreamTypes'
 
 interface EstimateBlockProps {
@@ -31,19 +31,16 @@ export default function EstimateBlock({
   const detailId = 'kx-stream-estimate-detail'
 
   return (
-    <ResponseBlock
-      kindLabel="ESTIMATE"
-      tone="neutral"
-      icon={<EstimateIcon />}
-      time={time}
-      showFooter={showFooter}
-    >
+    <ResponseBlock tone="neutral" time={time} showFooter={showFooter}>
       <div className="kx-stream-estimate-section">
         {/* The disclosure header rides OUTSIDE the card: the estimate
             label + toggle sit between two hairline rules; the card
             below is centered. */}
         <div className="kx-stream-estimate-disclosure">
-          <p className="kx-stream-estimate__label">{data.label}</p>
+          <p className="kx-stream-estimate__kind">
+            <EstimateIcon />
+            {KIND_LABELS.estimate}
+          </p>
           <button
             type="button"
             className="kx-stream-estimate__toggle"
