@@ -187,13 +187,23 @@ describe('SessionStreamDetailPage — structure', () => {
       within(quoteSlot).getByText(/attendance-sync-spec\.md · §3\.1 Shift boundaries · rev 4/),
     ).toBeInTheDocument()
 
-    // Fase 4b — the ESTIMATE card (slot 7, right after the approved
-    // plan): dotted-leader rows + validity + note.
+    // Fase 4b — the ESTIMATE CARD (slot 7, right after the approved
+    // plan): a bordered collapsible card resting on heading + total.
     const estimateSlot = document.getElementById('stream-kind-7')!
     expect(within(estimateSlot).getByText('Review delivery estimate')).toBeInTheDocument()
-    expect(within(estimateSlot).getByText('Sandbox replay (37 overnight records)')).toBeInTheDocument()
-    expect(within(estimateSlot).getByText('2h 53m')).toBeInTheDocument()
-    expect(within(estimateSlot).getByText(/Valid until 15:00/)).toBeInTheDocument()
+    const estimateCard = within(estimateSlot).getByTestId('estimate-card')
+    expect(estimateCard).toHaveClass('kx-stream-estimate')
+    // Collapsed by default: the total row reads, the breakdown is hidden.
+    expect(within(estimateCard).getByText('2h 53m')).toBeVisible()
+    expect(within(estimateCard).getByText('Sandbox replay (37 overnight records)')).not.toBeVisible()
+    expect(within(estimateCard).getByText(/Valid until 15:00/)).not.toBeVisible()
+    const estimateToggle = within(estimateCard).getByRole('button', { name: /Show breakdown/ })
+    expect(estimateToggle).toHaveAttribute('aria-expanded', 'false')
+    // Expanding reveals the full dotted-leader breakdown + validity.
+    fireEvent.click(estimateToggle)
+    expect(within(estimateCard).getByText('Sandbox replay (37 overnight records)')).toBeVisible()
+    expect(within(estimateCard).getByText(/Valid until 15:00/)).toBeVisible()
+    expect(estimateToggle).toHaveAttribute('aria-expanded', 'true')
 
     // Fase 4 — the WARNING turn (slot 11, between the tool batch and the
     // review finding): one notice line + the trailing StatusBadge.
