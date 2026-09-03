@@ -1606,22 +1606,30 @@
 .kx-stream-estimate {
   display: grid;
   gap: 4px;
-  max-width: 52ch;
+  width: fit-content;
+  min-width: min(52ch, 100%);
+  margin-inline: auto; /* the card sits centered under the disclosure */
   padding: 16px;
   background: var(--kx-raised);
   border: 1px solid var(--kx-border);
   border-radius: 14px;
 }
 
-.kx-stream-estimate__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+/* The disclosure header rides OUTSIDE the card: label + toggle between
+ * two hairline rules; the card below is centered. */
+.kx-stream-estimate-section {
+  display: grid;
   gap: 12px;
 }
 
-.kx-stream-estimate__head-copy {
-  min-width: 0;
+.kx-stream-estimate-disclosure {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--kx-border);
+  border-bottom: 1px solid var(--kx-border);
 }
 
 .kx-stream-estimate__toggle {

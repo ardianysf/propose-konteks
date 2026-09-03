@@ -193,11 +193,16 @@ describe('SessionStreamDetailPage — structure', () => {
     expect(within(estimateSlot).getByText('Review delivery estimate')).toBeInTheDocument()
     const estimateCard = within(estimateSlot).getByTestId('estimate-card')
     expect(estimateCard).toHaveClass('kx-stream-estimate')
+    // The toggle rides the disclosure header OUTSIDE the card, between
+    // two hairline rules (label + toggle row).
+    const disclosure = estimateSlot.querySelector('.kx-stream-estimate-disclosure')
+    expect(disclosure).not.toBeNull()
+    expect(within(estimateSlot).getByText('DELIVERY ESTIMATE')).toBeInTheDocument()
     // Collapsed by default: the total row reads, the breakdown is hidden.
     expect(within(estimateCard).getByText('2h 53m')).toBeVisible()
     expect(within(estimateCard).getByText('Sandbox replay (37 overnight records)')).not.toBeVisible()
     expect(within(estimateCard).getByText(/Valid until 15:00/)).not.toBeVisible()
-    const estimateToggle = within(estimateCard).getByRole('button', { name: /Show breakdown/ })
+    const estimateToggle = within(estimateSlot).getByRole('button', { name: /Show breakdown/ })
     expect(estimateToggle).toHaveAttribute('aria-expanded', 'false')
     // Expanding reveals the full dotted-leader breakdown + validity.
     fireEvent.click(estimateToggle)
