@@ -27,6 +27,9 @@ export interface BubbleBlockProps {
   editing?: boolean
   id?: string
   testId?: string
+  /** Rendered AFTER the bubble but BEFORE the action bar (e.g. the
+   * attachment row — review: the bar belongs below the attachments). */
+  afterBubble?: ReactNode
   children: ReactNode
 }
 
@@ -37,6 +40,7 @@ export default function BubbleBlock({
   editing = false,
   id,
   testId,
+  afterBubble,
   children,
 }: BubbleBlockProps) {
   const contentRef = useRef<HTMLDivElement>(null)
@@ -64,6 +68,7 @@ export default function BubbleBlock({
           {children}
         </div>
       </div>
+      {afterBubble}
       <div className="kx-stream-bubble__bar" data-testid="bubble-actions">
         <span className="kx-stream-bubble__time kx-stream-tabular">{time}</span>
         <button

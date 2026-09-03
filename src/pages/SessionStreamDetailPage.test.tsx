@@ -265,13 +265,21 @@ describe('SessionStreamDetailPage — structure', () => {
       'Review the MyTok ↔ BSI HRIS attendance integration before Friday’s release',
     )
 
-    // Attachments render as CARDS inside the bubble: file name + meta.
-    const files = within(request).getByLabelText('Attachments')
-    expect(within(files).getAllByRole('listitem')).toHaveLength(2)
-    expect(within(files).getByText('attendance-sync-spec.md')).toBeInTheDocument()
-    expect(within(files).getByText('Markdown · rev 4 · 18 KB')).toBeInTheDocument()
-    expect(within(files).getByText('mytok-sync-logs-aug.csv')).toBeInTheDocument()
-    expect(within(files).getByText('CSV · 1,284 rows · 38 KB')).toBeInTheDocument()
+    // Attachments render OUTSIDE the bubble surface (review) but inside
+    // the turn row — icon + TITLE only, horizontal; the action bar sits
+    // BELOW the attachment row.
+    const files = request.querySelector('.kx-stream-request__attachments')!
+    expect(files).not.toBeNull()
+    expect(within(files as HTMLElement).getAllByRole('listitem')).toHaveLength(2)
+    expect(within(files as HTMLElement).getByText('attendance-sync-spec.md')).toBeInTheDocument()
+    expect(within(files as HTMLElement).getByText('mytok-sync-logs-aug.csv')).toBeInTheDocument()
+    // Meta is retired from the UI (data only).
+    expect(within(request).queryByText('Markdown · rev 4 · 18 KB')).toBeNull()
+    // The action bar follows the attachments, not between bubble and files.
+    expect(
+      request.querySelector('.kx-stream-bubble__bar')!.compareDocumentPosition(files) &
+        Node.DOCUMENT_POSITION_PRECEDING,
+    ).toBeTruthy()
 
     // Non-attachment chips ride inline under the prose.
     expect(within(request).getByText('environment: staging')).toBeInTheDocument()
@@ -281,6 +289,65 @@ describe('SessionStreamDetailPage — structure', () => {
     expect(bar).toHaveTextContent('14:02')
     expect(within(bar).getByTestId('bubble-copy')).toHaveAttribute('aria-label', 'Copy message')
     expect(within(bar).getByTestId('bubble-edit')).toHaveAttribute('aria-label', 'Edit message')
+  })
+
+  it('clamps the long request behind the shading fade and toggles Read more / Read less', () => {
+    // jsdom measures nothing (scrollHeight/clientHeight = 0), so the
+    // overflow check is driven by mocking the geometry: tall prose =>
+    // scrollHeight far beyond the 10-line box.
+    const originalScroll = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'scrollHeight',
+    )?.get ?? ((): number => 0)
+    const originalClient = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'clientHeight',
+    )?.get ?? ((): number => 0)
+    const scrollDescriptor = {
+      get(this: HTMLElement) {
+        return this.dataset.testid === 'bubble-text' ? 480 : originalScroll.call(this)
+      },
+      configurable: true,
+    }
+    const clientDescriptor = {
+      get(this: HTMLElement) {
+        return this.dataset.testid === 'bubble-text' ? 220 : originalClient.call(this)
+      },
+      configurable: true,
+    }
+    Object.defineProperty(HTMLElement.prototype, 'scrollHeight', scrollDescriptor)
+    Object.defineProperty(HTMLElement.prototype, 'clientHeight', clientDescriptor)
+
+    try {
+      renderRoute('session-stream-detail')
+      const text = screen.getAllByTestId('bubble-text')[0]
+      expect(text).toHaveClass('kx-stream-bubble__text--clamped')
+      // The quiet shading fade rides the clamp edge.
+      expect(text.parentElement!.querySelector('.kx-stream-bubble__text-fade')).not.toBeNull()
+
+      const more = screen.getAllByRole('button', { name: 'Read more' })[0]
+      expect(more).toHaveAttribute('aria-expanded', 'false')
+      fireEvent.click(more)
+      // Expanded: clamp and fade gone, Read less folds it back.
+      expect(screen.getAllByTestId('bubble-text')[0]).not.toHaveClass(
+        'kx-stream-bubble__text--clamped',
+      )
+      const less = screen.getAllByRole('button', { name: 'Read less' })[0]
+      expect(less).toHaveAttribute('aria-expanded', 'true')
+      fireEvent.click(less)
+      expect(screen.getAllByTestId('bubble-text')[0]).toHaveClass(
+        'kx-stream-bubble__text--clamped',
+      )
+    } finally {
+      Object.defineProperty(HTMLElement.prototype, 'scrollHeight', {
+        get: originalScroll,
+        configurable: true,
+      })
+      Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+        get: originalClient,
+        configurable: true,
+      })
+    }
   })
 
   it('renders one hover footer per agent response group (copy, share, time)', () => {

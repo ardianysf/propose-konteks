@@ -212,6 +212,25 @@
   min-width: 0;
 }
 
+.kx-stream-request {
+  display: grid;
+  gap: 6px;
+}
+
+/* Attachments live OUTSIDE the bubble — their own card column directly
+ * beneath it, right-aligned with the bubble, capped at the bubble width. */
+.kx-stream-request__attachments {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-self: end; /* hugs the bubble's right edge */
+  max-width: 75%;
+}
+
 .kx-stream-bubble {
   max-width: 75%;
   padding: 12px 16px;
@@ -223,6 +242,56 @@
 
 .kx-stream-bubble__content {
   min-width: 0;
+}
+
+.kx-stream-bubble__text-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+/* Long messages (>10 lines) clamp behind the shading fade. */
+.kx-stream-bubble__text--clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  /* the clamp count itself comes from the component (MAX_LINES) */
+  overflow: hidden;
+}
+
+/* The quiet fade into the bubble surface masks the clamp edge —
+ * functional readability gradient, only while clamped. */
+.kx-stream-bubble__text-fade {
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: -2px;
+  height: 2.6em;
+  background: linear-gradient(to bottom, transparent, var(--kx-bubble-bg));
+  pointer-events: none;
+}
+
+.kx-stream-bubble__read-toggle {
+  margin-top: 4px;
+  padding: 2px 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--kx-text-sm);
+  font-weight: var(--kx-font-medium);
+  color: var(--kx-muted-text-aa);
+  cursor: pointer;
+  transition: background-color 140ms ease-out, color 140ms ease-out;
+}
+
+.kx-stream-bubble__read-toggle:hover,
+.kx-stream-bubble__read-toggle:focus-visible {
+  background: var(--kx-pale);
+  color: var(--kx-primary);
+}
+
+.kx-stream-bubble__read-toggle:focus-visible {
+  outline: 2px solid var(--kx-accent-strong);
+  outline-offset: 2px;
 }
 
 .kx-stream-bubble__text {
@@ -243,13 +312,13 @@
 }
 
 .kx-stream-attachment {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
   border: 1px solid var(--kx-border);
   border-radius: 8px;
-  background: var(--kx-canvas);
+  background: var(--kx-raised);
 }
 
 .kx-stream-attachment__icon {
@@ -270,11 +339,6 @@
   font-weight: var(--kx-font-bold);
   color: var(--kx-primary);
   overflow-wrap: anywhere;
-}
-
-.kx-stream-attachment__meta {
-  font-size: var(--kx-text-xs);
-  color: var(--kx-muted-text-aa);
 }
 
 /* Non-attachment chips (parameters / context) ride inline. */
@@ -1695,8 +1759,7 @@
 .kx-stream-estimate {
   display: grid;
   gap: 4px;
-  width: fit-content;
-  min-width: min(52ch, 100%);
+  width: min(52ch, 100%); /* constant — collapsed and expanded match */
   margin-inline: auto; /* the card sits centered under the disclosure */
   padding: 16px;
   background: var(--kx-raised);
