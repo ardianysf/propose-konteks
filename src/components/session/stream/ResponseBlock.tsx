@@ -47,6 +47,9 @@ export const KIND_LABELS: Record<StreamKind, string> = {
   review: 'REVIEW FINDING',
   completion: 'HANDOFF',
   answer: 'ANSWER',
+  warning: 'WARNING',
+  error: 'ERROR',
+  quote: 'QUOTE',
 }
 
 /** Mock share link target — phase 1 copies it to the clipboard. */
@@ -152,6 +155,38 @@ export function CompletionIcon() {
       <path d="M5.5 21V4" />
       <path d="M5.5 4.6c4.4-2.1 7.9 2 12.3.4v8.2c-4.4 1.6-7.9-2.5-12.3-.4" />
       <path d="m9.2 7.9 1.3 1.3 2.5-2.7" />
+    </Svg>
+  )
+}
+
+/** Fase 4 kinds (spec §Fase 4): the attention triangle for WARNING,
+ * a firm × for ERROR, and hanging quote strokes for QUOTE — same
+ * stroke family, header-sized. */
+
+export function WarningIcon() {
+  return (
+    <Svg width={16} height={16}>
+      <path d="M10.3 4.4 2.9 17.2A1.9 1.9 0 0 0 4.6 20h14.8a1.9 1.9 0 0 0 1.7-2.8L13.7 4.4a2 2 0 0 0-3.4 0z" />
+      <path d="M12 9.5v4" />
+      <path d="M12 16.8h.01" />
+    </Svg>
+  )
+}
+
+export function ErrorIcon() {
+  return (
+    <Svg width={16} height={16}>
+      <path d="M6.5 6.5l11 11" />
+      <path d="M17.5 6.5l-11 11" />
+    </Svg>
+  )
+}
+
+export function QuoteIcon() {
+  return (
+    <Svg width={16} height={16}>
+      <path d="M10.4 6.2C7.8 7 6.4 8.9 6.4 11.6v5" />
+      <path d="M18.4 6.2c-2.6.8-4 2.7-4 5.4v5" />
     </Svg>
   )
 }

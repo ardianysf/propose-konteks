@@ -25,6 +25,12 @@
   margin-left: auto;
   width: 28px;
   height: 28px;
+  /* Center the glyph vertically inside the fixed square (kx-icon-btn's
+   * default padding offsets the icon otherwise). */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .kx-session-detail__context {
@@ -33,7 +39,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 6px 12px;
-  margin: 2px 0 0;
+  margin: 0 0 0;
   font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-normal);
   color: var(--kx-muted-text-aa);
@@ -56,7 +62,7 @@
   white-space: nowrap;
   font-size: var(--kx-text-l);
   font-weight: var(--kx-font-bold);
-  line-height: 1.2;
+  line-height: 1.25; /* tight title→subtitle rhythm */
   color: var(--kx-primary);
 }
 

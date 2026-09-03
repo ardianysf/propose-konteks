@@ -8,13 +8,17 @@
  * MyTok ↔ BSI HRIS attendance integration.
  *
  * The story reads like a REAL settled conversation (spec §Fixture, 12
- * steps): user request bubble with attachment cards → agent understanding
- * prose → clarification prose (settled, answers recorded) → user answer
- * bubble → plan (approved) → approval gate (settled: Allow once) →
- * progress collapsed to a one-line summary → tool batch collapsed (all
- * done — including the scan that ran live during the session) → review
- * finding → artifact chip → agent final answer → completion handoff.
- * Timestamps are monotonic and realistic (14:02 → 15:03).
+ * steps + the three §Fase 4 kinds): user request bubble with attachment
+ * cards → agent understanding prose → a QUOTE of the spec’s timezone rule
+ * (the basis for the clarification questions) → clarification prose
+ * (settled, answers recorded) → user answer bubble → plan (approved) →
+ * approval gate (settled: Allow once) → progress collapsed to a one-line
+ * summary → tool batch collapsed (all done — including the scan that ran
+ * live during the session) → a WARNING notice (connection lost mid-scan,
+ * resumed) → an ERROR report (initial verification 503, retried and
+ * resolved) → review finding → artifact chip → agent final answer →
+ * completion handoff. Timestamps are monotonic and realistic
+ * (14:02 → 15:03).
  *
  * LIVE_TURN_SCRIPT drives the STAGED composer flow (spec §Live mock
  * v2): each send plays typing → understanding, then PARKS at an
@@ -87,7 +91,17 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
         'Grounded in bsi/hris-attendance@main · attendance-sync-spec.md (rev 4) · mytok-sync-logs-aug.csv',
     },
   },
-  // 3 — Clarification (settled: answers recorded, no live chips).
+  // 3 — Quote: the spec rule the clarification questions hang on
+  // (spec §Fase 4 §Penempatan — cites attendance-sync-spec.md).
+  {
+    kind: 'quote',
+    data: {
+      label: 'From the spec',
+      text: 'The attendance business day follows the HRIS server timezone (Asia/Jakarta). A check-in recorded during an overnight shift belongs to the shift’s start date — never to the device’s local calendar day.',
+      attribution: 'attendance-sync-spec.md · §3.1 Shift boundaries · rev 4',
+    },
+  },
+  // 4 — Clarification (settled: answers recorded, no live chips).
   {
     kind: 'clarification',
     data: {
@@ -111,7 +125,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
       settledAnswers: ['HRIS server time (Asia/Jakarta)', 'August sample only (1,284)'],
     },
   },
-  // 4 — User answer bubble.
+  // 5 — User answer bubble.
   {
     kind: 'request',
     data: {
@@ -121,7 +135,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
       chips: [],
     },
   },
-  // 5 — Plan (settled approved; the page renders it approved).
+  // 6 — Plan (settled approved; the page renders it approved).
   {
     kind: 'plan',
     data: {
@@ -163,7 +177,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
       totalEstimate: '~55 min',
     },
   },
-  // 6 — Approval gate (settled: Allow once; the page renders it decided).
+  // 7 — Approval gate (settled: Allow once; the page renders it decided).
   {
     kind: 'approval-gate',
     data: {
@@ -178,7 +192,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
         'This replay writes real employee attendance payloads into the shared sandbox. Once a batch id is consumed it cannot be replayed — an interrupted run requires resetting the sandbox and re-importing the sample, and partial replay results must not be treated as evidence.',
     },
   },
-  // 7 — Progress (collapsed one-line summary in history).
+  // 8 — Progress (collapsed one-line summary in history).
   {
     kind: 'progress',
     data: {
@@ -192,7 +206,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
       ],
     },
   },
-  // 8 — Tool evidence batch (all settled; the scan ran live mid-session).
+  // 9 — Tool evidence batch (all settled; the scan ran live mid-session).
   {
     kind: 'tool',
     data: {
@@ -268,7 +282,29 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
       ],
     },
   },
-  // 9 — Review finding.
+  // 10 — Warning: the brief mid-scan interruption notice (spec §Fase 4
+  // §Penempatan — between the tool batch and the review finding).
+  {
+    kind: 'warning',
+    data: {
+      text: 'Connection lost during sync check — paused 2m 14s, resumed automatically.',
+      badge: 'Waiting for input',
+    },
+  },
+  // 11 — Error: the initial verification failure, retried and resolved
+  // (spec §Fase 4 §Penempatan — after the tool batch, before the finding).
+  {
+    kind: 'error',
+    data: {
+      title: 'Initial verification call failed — replay evidence stayed unconfirmed',
+      code: 'HTTP 503',
+      source: 'canteen-api',
+      impact:
+        'The first post-replay verification call could not cross-check the 1,284 replayed attendance records against the downstream consumer, so the reconciliation result stayed unconfirmed for four minutes. No data was written and the replay batch itself was unaffected.',
+      resolution: { text: 'Retried — succeeded', tone: 'accent' },
+    },
+  },
+  // 12 — Review finding.
   {
     kind: 'review',
     data: {
@@ -280,7 +316,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
       quote: 'const day = utcDateOf(event.checkinAt) // business day derived from UTC, not Asia/Jakarta',
     },
   },
-  // 10 — Artifact chip (report v1).
+  // 13 — Artifact chip (report v1).
   {
     kind: 'artifact',
     data: {
@@ -327,7 +363,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
       ].join('\n'),
     },
   },
-  // 11 — Agent final answer (conversational prose).
+  // 14 — Agent final answer (conversational prose).
   {
     kind: 'answer',
     data: {
@@ -337,7 +373,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
       ],
     },
   },
-  // 12 — Completion handoff.
+  // 15 — Completion handoff.
   {
     kind: 'completion',
     data: {
