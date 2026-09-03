@@ -31,7 +31,6 @@ import ArtifactBlock from '../components/session/stream/blocks/ArtifactBlock'
 import ReviewFindingBlock from '../components/session/stream/blocks/ReviewFindingBlock'
 import AnswerBlock from '../components/session/stream/blocks/AnswerBlock'
 import CompletionBlock from '../components/session/stream/blocks/CompletionBlock'
-import { ILLUSTRATIVE_DATA_NOTE } from '../data/mockData'
 import InlineCode from '../components/technical/InlineCode'
 import EntityToken from '../components/technical/EntityToken'
 import MetadataPair from '../components/technical/MetadataPair'
@@ -308,10 +307,6 @@ export default function SessionStreamDemoPage() {
           )
         })}
       </div>
-
-      <p className="kx-illustrative-note" data-testid="illustrative-data-note">
-        {ILLUSTRATIVE_DATA_NOTE}
-      </p>
     </section>
   )
 }

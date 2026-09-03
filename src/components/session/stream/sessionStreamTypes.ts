@@ -26,6 +26,7 @@ export type StreamKind =
   | 'warning'
   | 'error'
   | 'quote'
+  | 'estimate'
 
 /** Semantic tones mapped onto existing --kx-* token families:
  * neutral = ink, accent = success/approved/primary action,
@@ -215,6 +216,23 @@ export interface CompletionBlockData {
   receipt: string
 }
 
+// ── 12. Delivery estimate (chat spec Fase 4b) ───────────────────────────
+
+/** The "Review delivery estimate" card (mirrors the task session's
+ * DecisionEstimateCard): dotted-leader rows, validity, and a note. */
+export interface EstimateRow {
+  label: string
+  value: string
+}
+
+export interface EstimateBlockData {
+  label: string
+  heading: string
+  rows: EstimateRow[]
+  validUntil: string
+  note: string
+}
+
 // ── 11. Agent answer (chat spec) ─────────────────────────────────────────
 
 /** The agent's conversational reply — flat prose paragraphs, no card. */
@@ -280,3 +298,4 @@ export type StreamStoryEntry =
   | { kind: 'warning'; data: WarningBlockData }
   | { kind: 'error'; data: ErrorBlockData }
   | { kind: 'quote'; data: QuoteBlockData }
+  | { kind: 'estimate'; data: EstimateBlockData }
