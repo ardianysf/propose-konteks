@@ -66,7 +66,13 @@ export default function ClarificationBlock({
               <li key={question.id} className="kx-stream-clar__question">
                 <p className="kx-stream-clar__q-text kx-stream-prose">
                   <span className="kx-stream-clar__q-num kx-stream-tabular">{index + 1}</span>
-                  {renderTechnicalText(question.question)}
+                  {/* One wrapping body keeps the renderTechnicalText
+                      segments flowing INLINE — as direct children of the
+                      flex q-text they would become separate flex items and
+                      the code wash would stretch to the row height. */}
+                  <span className="kx-stream-clar__q-body">
+                    {renderTechnicalText(question.question)}
+                  </span>
                 </p>
                 {settledAnswer !== undefined ? (
                   <p className="kx-stream-clar__settled" data-testid="clar-settled-answer">

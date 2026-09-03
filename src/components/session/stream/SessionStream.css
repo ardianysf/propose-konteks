@@ -585,6 +585,13 @@
   color: var(--kx-primary);
 }
 
+/* The question body takes the remaining width and lets the technical-text
+ * segments wrap inline as one unit. */
+.kx-stream-clar__q-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .kx-stream-clar__q-num {
   flex: 0 0 auto;
   min-width: 18px;
