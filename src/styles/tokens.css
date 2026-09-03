@@ -117,6 +117,9 @@
    * own hairline; distinct from canvas, code wash, and entity fills. */
   --kx-bubble-bg: #e5ecda;
   --kx-bubble-border: #d6e0c0;
+  /* Chips riding INSIDE the bubble — deeper than the bubble surface so
+   * they stay visible (1.19:1 vs bubble; ink 9.5:1 on the fill). */
+  --kx-bubble-chip-bg: #d8d8c5;
 
   /* InlineCode: QUIET neutral wash — deliberately not green. Entity carries
    * the accent identity; code is the calm literal (mono + context carry it). */
@@ -230,6 +233,8 @@
    * ratios in the :root comment block above. */
   --kx-bubble-bg: #22301f;
   --kx-bubble-border: #35502c;
+  /* Same value the dark chips already used — approved as-is. */
+  --kx-bubble-chip-bg: #242a22;
   --kx-tech-code-bg: #242a22;
   --kx-tech-code-border: var(--kx-border);
   --kx-tech-entity-bg-rest: #1e2b1c;
