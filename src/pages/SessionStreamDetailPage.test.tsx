@@ -223,7 +223,7 @@ describe('SessionStreamDetailPage — structure', () => {
     // always reads badge + title; the detail collapses by default.
     const errorSlot = document.getElementById('stream-kind-12')!
     expect(within(errorSlot).getByText('ERROR')).toBeInTheDocument()
-    expect(errorSlot.querySelector('.kx-stream-error-disclosure')).not.toBeNull()
+    expect(errorSlot.querySelector('.kx-stream-error__summary')).not.toBeNull()
     const errorCard = within(errorSlot).getByTestId('error-card')
     expect(within(errorCard).getByTestId('error-badge')).toHaveTextContent('Failed')
     expect(
@@ -236,7 +236,7 @@ describe('SessionStreamDetailPage — structure', () => {
       within(errorCard).getByText(/reconciliation result stayed unconfirmed/),
     ).not.toBeVisible()
     expect(within(errorCard).getByText('Retried — succeeded')).not.toBeVisible()
-    const errorToggle = within(errorSlot).getByRole('button', { name: /Show details/ })
+    const errorToggle = within(errorSlot).getByRole('button', { name: /Show detail/ })
     expect(errorToggle).toHaveAttribute('aria-expanded', 'false')
     // Expanding reveals the mono literals + impact + resolution.
     fireEvent.click(errorToggle)

@@ -1466,28 +1466,13 @@
  * line (accent = resolved, attention = needs action). No error token
  * exists — the attention tone + the Failed badge's firm × carry the
  * failure (repo convention). */
-/* The estimate UI family: disclosure header between two hairline rules;
- * the failure card centered below, title + badge always reading. */
-.kx-stream-error-section {
-  display: grid;
-  gap: 12px;
-}
-
-.kx-stream-error-disclosure {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 6px 0;
-  border-top: 1px solid var(--kx-border);
-  border-bottom: 1px solid var(--kx-border);
-}
-
+/* Flat error disclosure (review): kind row, detail ABOVE the hairline,
+ * summary row (badge + title + toggle) beneath it. No card. */
 .kx-stream-error__kind {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  margin: 0;
+  margin: 0 0 6px;
   font-size: var(--kx-text-xs);
   font-weight: var(--kx-font-bold);
   letter-spacing: 0.08em;
@@ -1534,14 +1519,8 @@
 
 .kx-stream-error {
   display: grid;
-  gap: 8px;
-  width: fit-content;
-  min-width: min(52ch, 100%);
-  margin-inline: auto; /* centered under the disclosure, like estimate */
-  padding: 16px;
-  background: var(--kx-raised);
-  border: 1px solid var(--kx-border);
-  border-radius: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--kx-border); /* the line closes the block */
 }
 
 .kx-stream-error__summary {
@@ -1549,6 +1528,11 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.kx-stream-error__title {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .kx-stream-error__detail {
