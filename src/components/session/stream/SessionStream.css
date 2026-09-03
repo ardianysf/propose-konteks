@@ -344,7 +344,7 @@
   padding: 3px 10px;
   border: 1px solid var(--kx-border);
   border-radius: 6px;
-  background: var(--kx-tech-code-bg); /* quiet neutral chip on the sage bubble — no pale-on-pale */
+  background: var(--kx-bubble-chip-bg); /* deeper than the bubble surface — visible in light (review) */
   font-size: var(--kx-text-sm);
   color: var(--kx-primary);
 }
