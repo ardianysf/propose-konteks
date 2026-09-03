@@ -197,7 +197,7 @@ describe('SessionStreamDetailPage — structure', () => {
     // two hairline rules (label + toggle row).
     const disclosure = estimateSlot.querySelector('.kx-stream-estimate-disclosure')
     expect(disclosure).not.toBeNull()
-    expect(within(estimateSlot).getByText('DELIVERY ESTIMATE')).toBeInTheDocument()
+    expect(within(estimateSlot).getByText('ESTIMATE')).toBeInTheDocument()
     // Collapsed by default: the total row reads, the breakdown is hidden.
     expect(within(estimateCard).getByText('2h 53m')).toBeVisible()
     expect(within(estimateCard).getByText('Sandbox replay (37 overnight records)')).not.toBeVisible()

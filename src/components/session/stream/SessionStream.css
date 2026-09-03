@@ -1681,7 +1681,10 @@
   display: none;
 }
 
-.kx-stream-estimate__label {
+.kx-stream-estimate__kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   margin: 0;
   font-size: var(--kx-text-xs);
   font-weight: var(--kx-font-bold);
