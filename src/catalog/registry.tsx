@@ -393,42 +393,6 @@ function dotMatrixLoaderPreview(mod: LoadedModule): ReactNode {
   ])
 }
 
-/** response-footer (adoptable): default with hover stats, thumbs active,
- *  menu open, and a no-meta specimen. */
-function responseFooterPreview(mod: LoadedModule): ReactNode {
-  const ResponseFooter = asDefaultComponent(mod)
-  const withMeta = {
-    // Template literal on purpose: verify-manifest's S5 pass collects every
-    // `id: '...'` string literal in this file as a registry id — a plain
-    // string here would register as a phantom registry entry.
-    id: `T-preview-assistant`,
-    type: 'ASSISTANT_MESSAGE',
-    content: 'Noted — added to the working context for this cycle.',
-    actorType: 'ASSISTANT',
-    createdAt: '2026-08-16T14:40:00Z',
-    meta: { durationMs: 25_700, tokensIn: 105_000, tokensOut: 483 },
-  }
-  const { meta: _meta, ...withoutMeta } = withMeta
-  return variantRow([
-    {
-      label: <code>default</code>,
-      node: <ResponseFooter item={withMeta} onRetry={() => undefined} />,
-    },
-    {
-      label: <code>thumbs active</code>,
-      node: <ResponseFooter item={withMeta} initialReaction="up" />,
-    },
-    {
-      label: <code>menu open</code>,
-      node: <ResponseFooter item={withMeta} initialMenuOpen onRetry={() => undefined} />,
-    },
-    {
-      label: <code>no meta</code>,
-      node: <ResponseFooter item={withoutMeta} />,
-    },
-  ])
-}
-
 /** feedback-modal (adoptable): good vs bad preset option sets. */
 function feedbackModalPreview(mod: LoadedModule): ReactNode {
   const FeedbackModal = asDefaultComponent(mod)
@@ -442,44 +406,6 @@ function feedbackModalPreview(mod: LoadedModule): ReactNode {
       node: <FeedbackModal kind="bad" embedded onClose={() => undefined} />,
     },
   ])
-}
-
-/** session-detail-composer: active session (send enabled) vs terminal
- *  (locked notice). */
-function sessionDetailComposerPreview(mod: LoadedModule): ReactNode {
-  const SessionDetailComposer = asDefaultComponent(mod)
-  const baseDetail = makeFixtureState().sessionDetail
-  return variantRow([
-    {
-      label: <code>aktif (in_progress)</code>,
-      node: (
-        <Fixture
-          overrides={{ sessionDetail: { ...baseDetail, status: 'IN_PROGRESS' } }}
-        >
-          <SessionDetailComposer />
-        </Fixture>
-      ),
-    },
-    {
-      label: <code>terminal (completed — locked)</code>,
-      node: (
-        <Fixture
-          overrides={{ sessionDetail: { ...baseDetail, status: 'COMPLETED' } }}
-        >
-          <SessionDetailComposer />
-        </Fixture>
-      ),
-    },
-  ])
-}
-
-function sessionHeaderPreview(mod: LoadedModule): ReactNode {
-  const SessionHeader = asDefaultComponent(mod)
-  return (
-    <Fixture>
-      <SessionHeader />
-    </Fixture>
-  )
 }
 
 /** session-quote-card: the real SESSION_DETAIL fixture already carries a
@@ -841,28 +767,10 @@ export const registry: RegistryEntry[] = [
     preview: dotMatrixLoaderPreview,
   },
   {
-    id: 'response-footer',
-    kind: 'component',
-    load: () => import('../components/session/ResponseFooter'),
-    preview: responseFooterPreview,
-  },
-  {
     id: 'feedback-modal',
     kind: 'component',
     load: () => import('../components/session/FeedbackModal'),
     preview: feedbackModalPreview,
-  },
-  {
-    id: 'session-detail-composer',
-    kind: 'component',
-    load: () => import('../components/session/SessionDetailComposer'),
-    preview: sessionDetailComposerPreview,
-  },
-  {
-    id: 'session-header',
-    kind: 'component',
-    load: () => import('../components/session/SessionHeader'),
-    preview: sessionHeaderPreview,
   },
   {
     id: 'session-quote-card',

@@ -723,42 +723,6 @@
       "adoptionNotes": "Presentation-only, tidak butuh MockupContext; drop-in via default export, ukuran via prop size, warna mengikuti token --kx-primary, dan hormat prefers-reduced-motion otomatis. Untuk pola loading bertahap (Validating/Analyzing/…), lihat session/pendingPhases yang memetakan fase proses ke varian."
     },
     {
-      "id": "response-footer",
-      "name": "ResponseFooter",
-      "domain": "session",
-      "sourcePath": "src/components/session/ResponseFooter.tsx",
-      "exportName": "default",
-      "classification": "adoptable",
-      "description": "Per-response action row rendered under every assistant message: copy, thumbs up/down reactions, and a three-dot more menu with the response date plus Retry / Fork / Share; hovering or focusing the row reveals response stats (duration and tokens in/out) when the message carries meta. Selecting a reaction fills its icon and opens the Share-feedback dialog (FeedbackModal) with kind-specific preset options.",
-      "propDocs": {
-        "item": "required, DetailTimelineItem — the assistant message (content, createdAt, optional meta { durationMs, tokensIn, tokensOut })",
-        "onRetry": "optional, () => void — invoked from the more menu's Retry action; the timeline re-asks the nearest preceding user message",
-        "initialReaction": "optional, 'up' | 'down' | null (default null) — initial reaction state (catalog specimens)",
-        "initialMenuOpen": "optional, boolean (default false) — render with the more menu already open (catalog specimens)"
-      },
-      "contextContract": null,
-      "cssFiles": [
-        "src/components/session/ResponseFooter.css"
-      ],
-      "tokenDeps": [
-        "--kx-primary",
-        "--kx-muted-text-aa",
-        "--kx-pale",
-        "--kx-raised",
-        "--kx-border",
-        "--kx-accent-text-aa"
-      ],
-      "variants": [
-        "default (stats on hover)",
-        "thumbs active",
-        "menu open",
-        "without stats (no meta)"
-      ],
-      "fixtureRef": "specimen row: default with stats | thumbs active | menu open | no meta",
-      "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext; stats muncul saat hover/focus (CSS) dengan fallback title; tombol salin memakai navigator.clipboard dengan fallback execCommand; reaksi terpilih membuka FeedbackModal (komponen terpisah, juga adoptable).",
-      "responsive": "At <=760px the anchored more-menu opens from the trigger left edge, clamps to viewport width and 60vh with internal scroll."
-    },
-    {
       "id": "feedback-modal",
       "name": "FeedbackModal",
       "domain": "session",
@@ -793,94 +757,6 @@
       "fixtureRef": "embedded specimen pair: good (helpful options) | bad (what-went-wrong options)",
       "adoptionNotes": "Presentation-only dan callback-driven, tidak butuh MockupContext; opsi preset diekspor sebagai FEEDBACK_OPTIONS untuk dihost/di-customize; submit terkunci sampai ada teks; Escape/backdrop/close icon menutup dialog.",
       "responsive": "At <=760px the modal fits the dynamic viewport (100dvh-aware max-height, width min(420px, 100vw - 24px)) and scrolls internally."
-    },
-    {
-      "id": "session-detail-composer",
-      "name": "SessionDetailComposer",
-      "domain": "session",
-      "sourcePath": "src/components/session/SessionDetailComposer.tsx",
-      "exportName": "default",
-      "classification": "mockup-coupled",
-      "description": "Sticky session continuation input reusing the main-page input-box and toolbar primitives; Enter sends, Shift+Enter newlines, terminal sessions render a locked notice.",
-      "propDocs": null,
-      "contextContract": {
-        "reads": [
-          "activeProfileId",
-          "overlay",
-          "sessionDetail"
-        ],
-        "dispatches": [
-          "OPEN_OVERLAY",
-          "SESSION_SEND_DETAIL_MESSAGE",
-          "SESSION_RECEIVE_DETAIL_MESSAGE"
-        ]
-      },
-      "cssFiles": [
-        "src/styles/components.css",
-        "src/components/composer/Composer.css",
-        "src/components/composer/ExecutionProfileMenu.css",
-        "src/components/session/SessionDetailComposer.css"
-      ],
-      "tokenDeps": [
-        "--kx-accent",
-        "--kx-accent-solid-aa",
-        "--kx-accent-strong",
-        "--kx-accent-text-aa",
-        "--kx-border",
-        "--kx-font-bold",
-        "--kx-font-medium",
-        "--kx-muted",
-        "--kx-muted-text-aa",
-        "--kx-pale",
-        "--kx-primary",
-        "--kx-radius-main",
-        "--kx-raised",
-        "--kx-secondary",
-        "--kx-text-2xs",
-        "--kx-text-md",
-        "--kx-text-sm"
-      ],
-      "variants": [
-        "aktif (in_progress)",
-        "terminal (completed — locked)"
-      ],
-      "fixtureRef": "MockupFixtureProvider overrides={{ sessionDetail: { ...baseDetail, status } }} (variant grid)",
-      "adoptionNotes": "Butuh MockupContext + dispatch; lihat fixture pattern docs/ai-adoption.md.",
-      "responsive": "Sticky-bottom composer in the running session; at <=760px it fills the full main width and sits 8px above the viewport bottom (100dvh-aware)."
-    },
-    {
-      "id": "session-header",
-      "name": "SessionHeader",
-      "domain": "session",
-      "sourcePath": "src/components/session/SessionHeader.tsx",
-      "exportName": "default",
-      "classification": "mockup-coupled",
-      "description": "Compact sticky header for the Session Detail page showing the session title, share affordance, and session context metadata (mode · system · component).",
-      "propDocs": null,
-      "contextContract": {
-        "reads": [
-          "sessionDetail"
-        ],
-        "dispatches": []
-      },
-      "cssFiles": [
-        "src/styles/components.css",
-        "src/components/session/SessionHeader.css"
-      ],
-      "tokenDeps": [
-        "--kx-border",
-        "--kx-canvas",
-        "--kx-font-bold",
-        "--kx-font-normal",
-        "--kx-muted-text-aa",
-        "--kx-primary",
-        "--kx-text-l",
-        "--kx-text-sm"
-      ],
-      "variants": [],
-      "fixtureRef": "MockupFixtureProvider",
-      "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md.",
-      "responsive": "At <=760px the header band collapses to zero height (title stays screen-reader accessible); the Share control floats fixed top-right (12px inset) above the content."
     },
     {
       "id": "session-quote-card",
