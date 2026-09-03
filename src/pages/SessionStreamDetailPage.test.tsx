@@ -187,27 +187,29 @@ describe('SessionStreamDetailPage — structure', () => {
       within(quoteSlot).getByText(/attendance-sync-spec\.md · §3\.1 Shift boundaries · rev 4/),
     ).toBeInTheDocument()
 
-    // Fase 4b — the ESTIMATE CARD (slot 7, right after the approved
-    // plan): a bordered collapsible card resting on heading + total.
+    // Fase 4b — ONE disclosure block (slot 7): kind label + toggle lead
+    // between two hairline rules, the card rides INSIDE when expanded,
+    // and the total row always closes above the bottom rule.
     const estimateSlot = document.getElementById('stream-kind-7')!
-    expect(within(estimateSlot).getByText('Review delivery estimate')).toBeInTheDocument()
-    const estimateCard = within(estimateSlot).getByTestId('estimate-card')
-    expect(estimateCard).toHaveClass('kx-stream-estimate')
-    // The toggle rides the disclosure header OUTSIDE the card, between
-    // two hairline rules (label + toggle row).
     const disclosure = estimateSlot.querySelector('.kx-stream-estimate-disclosure')
     expect(disclosure).not.toBeNull()
     expect(within(estimateSlot).getByText('ESTIMATE')).toBeInTheDocument()
-    // Collapsed by default: the total row reads, the breakdown is hidden.
-    expect(within(estimateCard).getByText('2h 53m')).toBeVisible()
+    const estimateCard = within(estimateSlot).getByTestId('estimate-card')
+    expect(estimateCard).toHaveClass('kx-stream-estimate')
+    expect(disclosure!.contains(estimateCard)).toBe(true)
+    // Collapsed by default: the total reads, the whole card is hidden.
+    expect(within(estimateSlot).getByText('2h 53m')).toBeVisible()
+    expect(estimateCard).not.toBeVisible()
     expect(within(estimateCard).getByText('Sandbox replay (37 overnight records)')).not.toBeVisible()
-    expect(within(estimateCard).getByText(/Valid until 15:00/)).not.toBeVisible()
     const estimateToggle = within(estimateSlot).getByRole('button', { name: /Show breakdown/ })
     expect(estimateToggle).toHaveAttribute('aria-expanded', 'false')
-    // Expanding reveals the full dotted-leader breakdown + validity.
+    // Expanding reveals the card INSIDE the disclosure.
     fireEvent.click(estimateToggle)
+    expect(estimateCard).toBeVisible()
+    expect(within(estimateCard).getByText('Review delivery estimate')).toBeVisible()
     expect(within(estimateCard).getByText('Sandbox replay (37 overnight records)')).toBeVisible()
     expect(within(estimateCard).getByText(/Valid until 15:00/)).toBeVisible()
+    expect(within(estimateSlot).getByText('2h 53m')).toBeVisible()
     expect(estimateToggle).toHaveAttribute('aria-expanded', 'true')
 
     // Fase 4 — the WARNING turn (slot 11, between the tool batch and the
