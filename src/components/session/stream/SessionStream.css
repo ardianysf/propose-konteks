@@ -1674,6 +1674,13 @@
   gap: 4px;
 }
 
+/* The hidden attribute must win over the grid display above — without
+ * this guard the breakdown stays visible in real browsers (UA hidden
+ * rule loses to author display rules). */
+.kx-stream-estimate__detail[hidden] {
+  display: none;
+}
+
 .kx-stream-estimate__label {
   margin: 0;
   font-size: var(--kx-text-xs);
