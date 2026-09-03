@@ -1,6 +1,6 @@
 /*
  * registry.tsx (Task T3a, extended T4 + T6) — the runtime registry
- * mirroring src/catalog/components.json 1:1 (35 entries).
+ * mirroring src/catalog/components.json 1:1 (51 entries).
  *
  * Each entry lazy-imports its source module from src/components/ so the
  * catalog can load implementations on demand without copying them.
@@ -22,6 +22,11 @@ import type { ReactNode } from 'react'
 import { SESSION_DETAIL_STATUSES, type SessionDetailStatus } from '../data/mockData'
 import { useMockup } from '../state/MockupContext'
 import type { MockupState } from '../state/mockupReducer'
+import {
+  ATTENDANCE_REVIEW_STORY,
+  LIVE_TURN_SCRIPT,
+} from '../components/session/stream/attendanceReviewStory'
+import type { StreamStoryEntry } from '../components/session/stream/sessionStreamTypes'
 import {
   MockupFixtureProvider,
   makeFixtureState,
@@ -389,6 +394,366 @@ function dotMatrixLoaderPreview(mod: LoadedModule): ReactNode {
     {
       label: <code>{`size={32}`}</code>,
       node: <DotMatrixLoader variant="spiral" size={32} />,
+    },
+  ])
+}
+
+// ── session stream blocks (Stage B1) ─────────────────────────────────────
+
+/** Fixture accessor: the first (or indexed) ATTENDANCE_REVIEW_STORY
+ *  entry of `kind`, typed to that entry's data payload. */
+function story<K extends StreamStoryEntry['kind']>(kind: K, index = 0) {
+  const matches = ATTENDANCE_REVIEW_STORY.filter((entry) => entry.kind === kind)
+  const entry = matches[index]
+  if (entry === undefined) {
+    throw new Error(`attendanceReviewStory has no "${kind}" entry #${index}`)
+  }
+  return entry.data as unknown as Extract<StreamStoryEntry, { kind: K }>['data']
+}
+
+/** A 6-paragraph long request message — comfortably past the 5-line
+ *  clamp so the fade + Read more/less toggle show in the live browser
+ *  preview (the fixture's own message stays on the demo page). */
+const LONG_REQUEST_MESSAGE = [
+  'Review the MyTok ↔ BSI HRIS attendance integration before Friday’s release. Monday’s payroll cut-off depends on check-in events from the MyTok mobile app landing in HRIS as attendance records, so the sync path needs an end-to-end trace before anyone signs off.',
+  'Start with the sync worker: it queues events from the mobile check-in API and replays them into the HRIS staging tables every five minutes. Last week’s migration reshuffled the attendance_records schema, and I want certainty that nothing silently dropped or doubled during the cutover window.',
+  'Pay special attention to timezone and overnight-shift handling. The overnight canteen crew reported two shifts landing on the wrong day after the DST discussion, and payroll wants the boundary fix from the pull request actually verified against a replayed batch rather than assumed to hold.',
+  'Please also sanity-check the retry path end to end. The worker is supposed to deduplicate on the mobile event id, but we have seen duplicate rows after connection drops during the August cut-off, which suggests the dedupe window may be shorter than the upstream API’s slowest successful responses.',
+  'If you need a bigger sample, the August export is attached — 1,284 rows including the overnight shifts and the known duplicate deliveries. Reconcile it against the staging tables and call out every mismatch with its evidence, not just the aggregate counts.',
+  'Run everything against staging — production stays read-only for this session. Report findings with file:line references and quoted snippets so the release owner can act on them directly.',
+].join('\n\n')
+
+/** stream-response-block (adoptable): labeled agent turn (kindLabel +
+ *  icon + stateChip) vs bare conversational prose with showFooter. */
+function streamResponseBlockPreview(mod: LoadedModule): ReactNode {
+  const ResponseBlock = asDefaultComponent(mod)
+  const PlanIcon = asNamedComponent(mod, 'PlanIcon')
+  const StreamChip = asNamedComponent(mod, 'StreamChip')
+  return variantRow([
+    {
+      label: <code>labeled turn</code>,
+      node: (
+        <ResponseBlock
+          kindLabel="PLAN"
+          tone="attention"
+          icon={<PlanIcon />}
+          time="14:09"
+          stateChip={<StreamChip tone="attention">pending approval</StreamChip>}
+        >
+          <p className="kx-stream-prose">
+            Labeled agent turns open with the compact kind header — the
+            stroke icon, the caps kind label, and the optional state chip
+            riding the same row. The body below is the kind’s typed content.
+          </p>
+        </ResponseBlock>
+      ),
+    },
+    {
+      label: <code>bare · showFooter</code>,
+      node: (
+        <ResponseBlock tone="neutral" time="14:58" showFooter>
+          <p className="kx-stream-prose">
+            Conversational turns render bare — no header, flat prose. Hover
+            (or focus) this turn to reveal the footer: copy, share, and the
+            turn’s timestamp, the group-final turn anatomy.
+          </p>
+        </ResponseBlock>
+      ),
+    },
+  ])
+}
+
+/** stream-bubble (adoptable): the USER-turn bubble with its hover/focus
+ *  action bar, plus the afterBubble slot demo. */
+function streamBubblePreview(mod: LoadedModule): ReactNode {
+  const BubbleBlock = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>default</code>,
+      node: (
+        <BubbleBlock time="14:02">
+          <p className="kx-stream-prose">
+            The user turn: a right-aligned bubble capped at 75% of the
+            column, with the time + copy + edit action bar revealed on
+            hover / focus-within under the bubble.
+          </p>
+        </BubbleBlock>
+      ),
+    },
+    {
+      label: <code>afterBubble slot</code>,
+      node: (
+        <BubbleBlock
+          time="14:02"
+          afterBubble={
+            <p className="kx-stream-ack__grounding">
+              afterBubble slot — rendered after the bubble, before the
+              action bar (the attachment row seats here).
+            </p>
+          }
+        >
+          <p className="kx-stream-prose">
+            Attachment cards live OUTSIDE the bubble: the caller passes the
+            row through the afterBubble slot so it stays right-aligned
+            beneath the bubble.
+          </p>
+        </BubbleBlock>
+      ),
+    },
+  ])
+}
+
+/** stream-user-request (adoptable): short message (no clamp/toggle,
+ *  attachments outside, chips inline) vs long message (5-line clamp +
+ *  fade + Read more/less). */
+function streamUserRequestPreview(mod: LoadedModule): ReactNode {
+  const UserRequestBlock = asDefaultComponent(mod)
+  const request = story('request')
+  return variantRow([
+    {
+      label: <code>short · no clamp</code>,
+      node: (
+        <UserRequestBlock
+          data={{
+            ...request,
+            message:
+              'Review the attendance integration before Friday’s release — staging only, no production fixes.',
+          }}
+        />
+      ),
+    },
+    {
+      label: <code>long · 5-line clamp</code>,
+      node: <UserRequestBlock data={{ ...request, message: LONG_REQUEST_MESSAGE }} />,
+    },
+  ])
+}
+
+/** stream-acknowledgement (adoptable): the UNDERSTANDING turn — summary
+ *  prose, scope in/out columns, confidence note, grounding line. */
+function streamAcknowledgementPreview(mod: LoadedModule): ReactNode {
+  const AcknowledgementBlock = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>fixture · scope in/out + confidence</code>,
+      node: <AcknowledgementBlock data={story('acknowledgement')} />,
+    },
+  ])
+}
+
+/** stream-answer (adoptable): flat conversational prose, with and without
+ *  the group-final hover footer. */
+function streamAnswerPreview(mod: LoadedModule): ReactNode {
+  const AnswerBlock = asDefaultComponent(mod)
+  const answer = story('answer')
+  return variantRow([
+    {
+      label: <code>prose</code>,
+      node: <AnswerBlock data={answer} />,
+    },
+    {
+      label: <code>showFooter</code>,
+      node: <AnswerBlock data={answer} showFooter />,
+    },
+  ])
+}
+
+/** stream-clarification (adoptable): interactive (answer chips,
+ *  answered={}) vs settled history (recorded answers, resumed notice). */
+function streamClarificationPreview(mod: LoadedModule): ReactNode {
+  const ClarificationBlock = asDefaultComponent(mod)
+  const clarification = story('clarification')
+  return variantRow([
+    {
+      label: <code>{'interactive · answered={}'}</code>,
+      node: (
+        <ClarificationBlock
+          data={{ ...clarification, settledAnswers: undefined }}
+          answered={{}}
+        />
+      ),
+    },
+    {
+      label: <code>settled</code>,
+      node: <ClarificationBlock data={clarification} />,
+    },
+  ])
+}
+
+/** stream-plan (adoptable): pending (Approve plan / Request changes) vs
+ *  approved (checkmarks, actions retired). */
+function streamPlanPreview(mod: LoadedModule): ReactNode {
+  const PlanBlock = asDefaultComponent(mod)
+  const plan = story('plan')
+  return variantRow([
+    {
+      label: <code>pending</code>,
+      node: (
+        <PlanBlock
+          data={plan}
+          approved={false}
+          onApprove={() => undefined}
+          onRequestChanges={() => undefined}
+        />
+      ),
+    },
+    {
+      label: <code>approved</code>,
+      node: (
+        <PlanBlock
+          data={plan}
+          approved
+          onApprove={() => undefined}
+          onRequestChanges={() => undefined}
+        />
+      ),
+    },
+  ])
+}
+
+/** stream-approval-gate (adoptable): OUTSTANDING (attention frame,
+ *  Waiting-approval badge, MetadataPair rows, consequence line) vs the
+ *  resolved quiet line. */
+function streamApprovalGatePreview(mod: LoadedModule): ReactNode {
+  const ApprovalGateBlock = asDefaultComponent(mod)
+  const gate = story('approval-gate')
+  return variantRow([
+    {
+      label: <code>outstanding</code>,
+      node: <ApprovalGateBlock data={gate} onDecision={() => undefined} />,
+    },
+    {
+      label: <code>resolved · allow-once</code>,
+      node: (
+        <ApprovalGateBlock
+          data={gate}
+          decision="allow-once"
+          onDecision={() => undefined}
+        />
+      ),
+    },
+  ])
+}
+
+/** stream-progress (adoptable): live (active phase, expanded by default)
+ *  vs the collapsed settled summary (expandable in the live preview). */
+function streamProgressPreview(mod: LoadedModule): ReactNode {
+  const ProgressBlock = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>live · active phase</code>,
+      node: (
+        <ProgressBlock data={LIVE_TURN_SCRIPT.execution.progress} defaultExpanded />
+      ),
+    },
+    {
+      label: <code>settled · collapsed</code>,
+      node: <ProgressBlock data={story('progress')} />,
+    },
+  ])
+}
+
+/** stream-tool-evidence (adoptable): collapsed done ledger rows vs a
+ *  running row (auto-open, pulse) vs a done call with io (click expands
+ *  the CodeBlock pair with Copy). */
+function streamToolEvidencePreview(mod: LoadedModule): ReactNode {
+  const ToolEvidenceBlock = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>done · collapsed rows</code>,
+      node: <ToolEvidenceBlock data={story('tool')} />,
+    },
+    {
+      label: <code>running · auto-open</code>,
+      node: (
+        <ToolEvidenceBlock
+          data={{ calls: [LIVE_TURN_SCRIPT.execution.toolRunning] }}
+        />
+      ),
+    },
+    {
+      label: <code>done · io (klik row untuk expand)</code>,
+      node: (
+        <ToolEvidenceBlock
+          data={{ calls: [LIVE_TURN_SCRIPT.execution.toolDone] }}
+        />
+      ),
+    },
+  ])
+}
+
+/** stream-artifact (adoptable): the full-width artifact row — hover
+ *  reveals Open / Copy / Download; Open expands the mono schema preview
+ *  (interactive in the live preview). */
+function streamArtifactPreview(mod: LoadedModule): ReactNode {
+  const ArtifactBlock = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>full-width row · hover actions</code>,
+      node: <ArtifactBlock data={story('artifact')} />,
+    },
+  ])
+}
+
+/** stream-review-finding (adoptable): the High-severity fixture — severity
+ *  chip, impact prose, mono location, quoted evidence. */
+function streamReviewFindingPreview(mod: LoadedModule): ReactNode {
+  const ReviewFindingBlock = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>High severity fixture</code>,
+      node: <ReviewFindingBlock data={story('review')} />,
+    },
+  ])
+}
+
+/** stream-completion (adoptable): the HANDOFF turn — done / not-done
+ *  lists, artifact EntityTokens, next actions, rollback + receipt under
+ *  the 2px accent rule, with the hover footer. */
+function streamCompletionPreview(mod: LoadedModule): ReactNode {
+  const CompletionBlock = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>fixture · showFooter</code>,
+      node: <CompletionBlock data={story('completion')} showFooter />,
+    },
+  ])
+}
+
+/** stream-warning (adoptable): the short notice row — danger icon, one
+ *  prose line in a hairline frame, trailing Waiting-for-input badge. */
+function streamWarningPreview(mod: LoadedModule): ReactNode {
+  const WarningBlock = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>notice · Waiting for input</code>,
+      node: <WarningBlock data={story('warning')} />,
+    },
+  ])
+}
+
+/** stream-error (adoptable): the flat disclosure — summary row between
+ *  hairlines; the Show-detail toggle reveals code/source + impact +
+ *  resolution above the bottom line (interactive in the live preview). */
+function streamErrorPreview(mod: LoadedModule): ReactNode {
+  const ErrorBlock = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>collapsed · Show detail toggle</code>,
+      node: <ErrorBlock data={story('error')} />,
+    },
+  ])
+}
+
+/** stream-estimate (adoptable): the estimate disclosure — label + toggle
+ *  + total row between the rules; Show breakdown expands the dotted-leader
+ *  card inside (interactive in the live preview). */
+function streamEstimatePreview(mod: LoadedModule): ReactNode {
+  const EstimateBlock = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>collapsed · Show breakdown toggle</code>,
+      node: <EstimateBlock data={story('estimate')} />,
     },
   ])
 }
@@ -765,6 +1130,102 @@ export const registry: RegistryEntry[] = [
     kind: 'component',
     load: () => import('../components/ui/DotMatrixLoader'),
     preview: dotMatrixLoaderPreview,
+  },
+  {
+    id: 'stream-response-block',
+    kind: 'component',
+    load: () => import('../components/session/stream/ResponseBlock'),
+    preview: streamResponseBlockPreview,
+  },
+  {
+    id: 'stream-bubble',
+    kind: 'component',
+    load: () => import('../components/session/stream/BubbleBlock'),
+    preview: streamBubblePreview,
+  },
+  {
+    id: 'stream-user-request',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/UserRequestBlock'),
+    preview: streamUserRequestPreview,
+  },
+  {
+    id: 'stream-acknowledgement',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/AcknowledgementBlock'),
+    preview: streamAcknowledgementPreview,
+  },
+  {
+    id: 'stream-answer',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/AnswerBlock'),
+    preview: streamAnswerPreview,
+  },
+  {
+    id: 'stream-clarification',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/ClarificationBlock'),
+    preview: streamClarificationPreview,
+  },
+  {
+    id: 'stream-plan',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/PlanBlock'),
+    preview: streamPlanPreview,
+  },
+  {
+    id: 'stream-approval-gate',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/ApprovalGateBlock'),
+    preview: streamApprovalGatePreview,
+  },
+  {
+    id: 'stream-progress',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/ProgressBlock'),
+    preview: streamProgressPreview,
+  },
+  {
+    id: 'stream-tool-evidence',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/ToolEvidenceBlock'),
+    preview: streamToolEvidencePreview,
+  },
+  {
+    id: 'stream-artifact',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/ArtifactBlock'),
+    preview: streamArtifactPreview,
+  },
+  {
+    id: 'stream-review-finding',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/ReviewFindingBlock'),
+    preview: streamReviewFindingPreview,
+  },
+  {
+    id: 'stream-completion',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/CompletionBlock'),
+    preview: streamCompletionPreview,
+  },
+  {
+    id: 'stream-warning',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/WarningBlock'),
+    preview: streamWarningPreview,
+  },
+  {
+    id: 'stream-error',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/ErrorBlock'),
+    preview: streamErrorPreview,
+  },
+  {
+    id: 'stream-estimate',
+    kind: 'component',
+    load: () => import('../components/session/stream/blocks/EstimateBlock'),
+    preview: streamEstimatePreview,
   },
   {
     id: 'feedback-modal',
