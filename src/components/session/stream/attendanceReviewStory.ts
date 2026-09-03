@@ -179,6 +179,22 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
   },
   // 7 — Approval gate (settled: Allow once; the page renders it decided).
   {
+    kind: 'estimate',
+    data: {
+      label: 'DELIVERY ESTIMATE',
+      heading: 'Review delivery estimate',
+      rows: [
+        { label: 'Verification pass · attendance_records', value: '1h 20m' },
+        { label: 'Sandbox replay (37 overnight records)', value: '38m' },
+        { label: 'Report + diff artifacts', value: '25m' },
+        { label: 'Retry buffer', value: '30m' },
+        { label: 'Total', value: '2h 53m' },
+      ],
+      validUntil: 'Valid until 15:00 · this session',
+      note: 'Estimate reviewed with the plan — nothing runs until the sandbox gate below is allowed.',
+    },
+  },
+  {
     kind: 'approval-gate',
     data: {
       action: 'Write replayed attendance records to the BSI HRIS sandbox to run the sample batch end to end',

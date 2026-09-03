@@ -8,8 +8,9 @@
  *   - chat anatomy: the user request renders as a right-aligned BUBBLE
  *     with attachment CARDS and a hover action bar (time + copy + edit),
  *     while agent turns render FLAT (no bubble) — the hover footer
- *     (copy + share + time) rides ONLY the final agent answer turn
- *     (spec refinements v2 #4) — 12 settled turns total; the
+ *     (copy + share + time) rides ONLY the final agent turn of each
+ *     response group (spec refinements v3 #2) — 15 settled turns total;
+ *     the
  *     understanding/answer turns render as pure prose with NO kind
  *     label (v2 #1) and the artifact as a full-width row with no
  *     badge (v2 #5);
@@ -41,9 +42,11 @@ import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
 import { initialState, mockupReducer, type MockupRoute } from '../state/mockupReducer'
 
 /** Kind labels the LABELED agent turns carry in their compact headers
- * (spec refinements v2 #1/#5): the conversational understanding/answer
- * turns and the artifact row render BARE — no header at all. The two
- * user turns are bubbles and intentionally carry NO kind label either. */
+ * (spec refinements v2 #1/#5 + §Fase 4): the conversational
+ * understanding/answer turns, the artifact row, and the bare notice
+ * rows of §Fase 4 (WARNING/QUOTE render as pure content) carry NO kind
+ * label. The two user turns are bubbles and intentionally carry NO kind
+ * label either. */
 const AGENT_KIND_LABELS = [
   'CLARIFICATION',
   'PLAN',
@@ -51,12 +54,16 @@ const AGENT_KIND_LABELS = [
   'PROGRESS',
   'TOOL CALL',
   'REVIEW FINDING',
+  'ERROR',
+  'ESTIMATE',
   'HANDOFF',
 ] as const
 
 /** Labels that must NOT render anywhere in the stream — the bare
- * conversational turns and the badge-less artifact row. */
-const BARE_KIND_LABELS = ['UNDERSTANDING', 'ANSWER', 'ARTIFACT'] as const
+ * conversational turns, the badge-less artifact row, and the two bare
+ * §Fase 4 rows (the warning notice IS the notice; the quotation IS the
+ * content). */
+const BARE_KIND_LABELS = ['UNDERSTANDING', 'ANSWER', 'ARTIFACT', 'WARNING', 'QUOTE'] as const
 
 // ---------------------------------------------------------------------------
 // Harness — the page under the real reducer via the mockup context, with
@@ -112,13 +119,13 @@ describe('SessionStreamDetailPage — structure', () => {
     expect(screen.getByTestId('session-composer')).toBeInTheDocument()
   })
 
-  it('renders the chat anatomy — two user bubbles + ten flat agent turns (12 slots)', () => {
+  it('renders the chat anatomy — two user bubbles + fourteen flat agent turns (16 slots)', () => {
     renderRoute('session-stream-detail')
     const stream = screen.getByTestId('session-stream')
 
-    // The settled story runs 12 turns, each in its own slot.
-    expect(stream.querySelectorAll('.kx-stream-slot')).toHaveLength(12)
-    for (let position = 1; position <= 12; position += 1) {
+    // The settled story runs 16 turns, each in its own slot.
+    expect(stream.querySelectorAll('.kx-stream-slot')).toHaveLength(16)
+    for (let position = 1; position <= 16; position += 1) {
       const slot = document.getElementById(`stream-kind-${position}`)
       expect(slot, `stream-kind-${position}`).not.toBeNull()
       // Every slot carries the shared anatomy: a flat agent turn OR a
@@ -131,10 +138,10 @@ describe('SessionStreamDetailPage — structure', () => {
     expect(bubbles).toHaveLength(2)
     bubbles.forEach((bubble) => expect(bubble).toHaveClass('kx-stream-bubble-row'))
 
-    // The ten agent turns render FLAT — a bubble inside an agent turn
-    // would break the chat anatomy.
+    // The fourteen agent turns render FLAT — a bubble inside an agent
+    // turn would break the chat anatomy.
     const turns = stream.querySelectorAll('.kx-stream-turn')
-    expect(turns).toHaveLength(10)
+    expect(turns).toHaveLength(14)
     turns.forEach((turn) => {
       expect(turn.querySelector('.kx-stream-bubble')).toBeNull()
       expect(turn.querySelector('.kx-stream-bubble-row')).toBeNull()
@@ -168,6 +175,48 @@ describe('SessionStreamDetailPage — structure', () => {
     expect(
       within(stream).getByText(/Review the MyTok ↔ BSI HRIS attendance integration/),
     ).toBeInTheDocument()
+
+    // Fase 4 — the QUOTE turn (slot 3, right after the acknowledgement):
+    // muted overline label + quoted prose + attribution on a bare turn.
+    const quoteSlot = document.getElementById('stream-kind-3')!
+    expect(within(quoteSlot).getByText('From the spec')).toBeInTheDocument()
+    expect(
+      within(quoteSlot).getByText(/attendance business day follows the HRIS server timezone/),
+    ).toBeInTheDocument()
+    expect(
+      within(quoteSlot).getByText(/attendance-sync-spec\.md · §3\.1 Shift boundaries · rev 4/),
+    ).toBeInTheDocument()
+
+    // Fase 4b — the ESTIMATE card (slot 7, right after the approved
+    // plan): dotted-leader rows + validity + note.
+    const estimateSlot = document.getElementById('stream-kind-7')!
+    expect(within(estimateSlot).getByText('Review delivery estimate')).toBeInTheDocument()
+    expect(within(estimateSlot).getByText('Sandbox replay (37 overnight records)')).toBeInTheDocument()
+    expect(within(estimateSlot).getByText('2h 53m')).toBeInTheDocument()
+    expect(within(estimateSlot).getByText(/Valid until 15:00/)).toBeInTheDocument()
+
+    // Fase 4 — the WARNING turn (slot 11, between the tool batch and the
+    // review finding): one notice line + the trailing StatusBadge.
+    const warnSlot = document.getElementById('stream-kind-11')!
+    expect(
+      within(warnSlot).getByText(/Connection lost during sync check — paused 2m 14s/),
+    ).toBeInTheDocument()
+    expect(within(warnSlot).getByTestId('warning-badge')).toHaveTextContent('Waiting for input')
+
+    // Fase 4 — the ERROR turn (slot 12): labeled ERROR + Failed badge,
+    // title, mono code/source literals, impact prose, resolution line.
+    const errorSlot = document.getElementById('stream-kind-12')!
+    expect(within(errorSlot).getByText('ERROR')).toBeInTheDocument()
+    expect(within(errorSlot).getByTestId('error-badge')).toHaveTextContent('Failed')
+    expect(
+      within(errorSlot).getByText(/Initial verification call failed/),
+    ).toBeInTheDocument()
+    expect(within(errorSlot).getByText('HTTP 503')).toHaveClass('kx-tech-code')
+    expect(within(errorSlot).getByText('canteen-api')).toHaveClass('kx-tech-code')
+    expect(
+      within(errorSlot).getByText(/reconciliation result stayed unconfirmed/),
+    ).toBeInTheDocument()
+    expect(within(errorSlot).getByText('Retried — succeeded')).toBeInTheDocument()
   })
 
   it('renders the user request as a bubble with attachment cards and a hover action bar', () => {
@@ -205,13 +254,14 @@ describe('SessionStreamDetailPage — structure', () => {
     const stream = screen.getByTestId('session-stream')
 
     // TWO response groups in the settled history (spec refinements v3
-    // #2): group 1 = understanding + clarification (ends right before
-    // the user's answer bubble, slot 4); group 2 = plan … completion.
-    // Each group's LAST turn carries the footer — slots 3 and 12.
+    // #2): group 1 = understanding + quote + clarification (ends right
+    // before the user's answer bubble, slot 5); group 2 = plan …
+    // completion. Each group's LAST turn carries the footer — slots 4
+    // and 16.
     const footers = stream.querySelectorAll('[data-testid="turn-footer"]')
     expect(footers).toHaveLength(2)
-    const groupOneFinal = document.getElementById('stream-kind-3')!
-    const groupTwoFinal = document.getElementById('stream-kind-12')!
+    const groupOneFinal = document.getElementById('stream-kind-4')!
+    const groupTwoFinal = document.getElementById('stream-kind-16')!
     expect(groupOneFinal.querySelector('[data-testid="turn-footer"]')).not.toBeNull()
     expect(groupTwoFinal.querySelector('[data-testid="turn-footer"]')).not.toBeNull()
     expect(within(groupTwoFinal).getByTestId('turn-copy')).toHaveAttribute(
@@ -223,10 +273,16 @@ describe('SessionStreamDetailPage — structure', () => {
       'Share message',
     )
 
-    // The final ANSWER (slot 11) renders prose but no footer — the
+    // The final ANSWER (slot 15) renders prose but no footer — the
     // handoff after it ends the group.
-    const finalAnswer = document.getElementById('stream-kind-11')!
+    const finalAnswer = document.getElementById('stream-kind-15')!
     expect(finalAnswer.querySelector('[data-testid="turn-footer"]')).toBeNull()
+
+    // The Fase 4 turns (quote slot 3, warning 11, error 12) and the
+    // Fase 4b estimate (slot 7) are mid-group agents — no footer ever.
+    for (const id of ['stream-kind-3', 'stream-kind-7', 'stream-kind-11', 'stream-kind-12']) {
+      expect(document.getElementById(id)!.querySelector('[data-testid="turn-footer"]')).toBeNull()
+    }
 
     // Exactly two turns carry a footer and they are the group finals.
     const withFooter = Array.from(stream.querySelectorAll('.kx-stream-turn')).filter((turn) =>

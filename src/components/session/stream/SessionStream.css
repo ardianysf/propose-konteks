@@ -1546,26 +1546,19 @@
 /* ── Typing indicator (live mock, spec §Live mock) ─────────────────── */
 /* Mounted by the stream page while a scripted agent turn is in flight:
  *   <div class="kx-stream-typing" aria-live="polite">
- *     <span class="kx-stream-typing__dot" /> ×3
+ *     <DotMatrixLoader variant="drift" size={16} />
  *     <span class="kx-stream-typing__label">Thinking…</span>
  *   </div>
- * Reduced-motion freezes the dots (still visible) via the global kill
- * below — the Thinking… label always stays readable. */
+ * The SAME dot-matrix loader the classic session pages use (one loader
+ * family app-wide); its own reduced-motion guard freezes the dots. */
 
 .kx-stream-typing {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   color: var(--kx-muted-text-aa);
 }
 
-.kx-stream-typing__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--kx-muted);
-  animation: kx-stream-pulse 1.2s ease-in-out infinite;
-}
 
 .kx-stream-typing__dot:nth-child(2) {
   animation-delay: 0.15s;
@@ -1603,6 +1596,79 @@
   50% {
     opacity: 1;
   }
+}
+
+
+/* ── Estimate card (kind: estimate — Fase 4b) ──────────────────────────
+ * Mirrors the task session's DecisionEstimateCard: dotted-leader rows
+ * (label …… value), validity line, muted note. Tokens only. */
+
+.kx-stream-estimate {
+  display: grid;
+  gap: 4px;
+  max-width: 52ch;
+}
+
+.kx-stream-estimate__label {
+  margin: 0;
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kx-muted-text-aa);
+}
+
+.kx-stream-estimate__heading {
+  margin: 0 0 4px;
+  font-size: var(--kx-text-l);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+}
+
+.kx-stream-estimate__rows {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.kx-stream-estimate__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.kx-stream-estimate__row-label {
+  flex-shrink: 0;
+  max-width: 60%;
+  font-size: var(--kx-text-md);
+  color: var(--kx-secondary);
+}
+
+.kx-stream-estimate__leader {
+  flex: 1;
+  border-bottom: 1px dotted var(--kx-border);
+  transform: translateY(-3px);
+}
+
+.kx-stream-estimate__row-value {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: var(--kx-text-md);
+  font-weight: var(--kx-font-bold);
+  color: var(--kx-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.kx-stream-estimate__validity {
+  margin: 6px 0 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-secondary);
+}
+
+.kx-stream-estimate__note {
+  margin: 0;
+  font-size: var(--kx-text-sm);
+  color: var(--kx-muted-text-aa);
 }
 
 @media (prefers-reduced-motion: reduce) {

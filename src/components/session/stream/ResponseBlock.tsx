@@ -50,6 +50,7 @@ export const KIND_LABELS: Record<StreamKind, string> = {
   warning: 'WARNING',
   error: 'ERROR',
   quote: 'QUOTE',
+  estimate: 'ESTIMATE',
 }
 
 /** Mock share link target — phase 1 copies it to the clipboard. */
@@ -179,6 +180,15 @@ export function ErrorIcon() {
       <path d="M6.5 6.5l11 11" />
       <path d="M17.5 6.5l-11 11" />
     </Svg>
+  )
+}
+
+export function EstimateIcon() {
+  return (
+    <svg data-icon="estimate" viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false">
+      <path d="M3 2.5h10v11l-1.6-1.2-1.7 1.2-1.7-1.2L6.3 13.5 4.6 12.3 3 13.5z" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M5.5 6h5M5.5 8.5h5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
   )
 }
 

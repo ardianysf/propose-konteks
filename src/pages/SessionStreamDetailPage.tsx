@@ -87,9 +87,13 @@ import ArtifactBlock from '../components/session/stream/blocks/ArtifactBlock'
 import ReviewFindingBlock from '../components/session/stream/blocks/ReviewFindingBlock'
 import AnswerBlock from '../components/session/stream/blocks/AnswerBlock'
 import CompletionBlock from '../components/session/stream/blocks/CompletionBlock'
+import WarningBlock from '../components/session/stream/blocks/WarningBlock'
+import ErrorBlock from '../components/session/stream/blocks/ErrorBlock'
+import QuoteBlock from '../components/session/stream/blocks/QuoteBlock'
+import EstimateBlock from '../components/session/stream/blocks/EstimateBlock'
 import SessionHeader from '../components/session/SessionHeader'
 import SessionDetailComposer from '../components/session/SessionDetailComposer'
-import { ILLUSTRATIVE_DATA_NOTE } from '../data/mockData'
+import DotMatrixLoader from '../components/ui/DotMatrixLoader'
 import '../components/session/stream/SessionStream.css'
 import './SessionDetailPage.css'
 
@@ -98,16 +102,20 @@ import './SessionDetailPage.css'
 const TURN_TIMES: string[] = [
   '14:02', // 1  — user request bubble
   '14:04', // 2  — understanding
-  '14:05', // 3  — clarification (settled answers recorded)
-  '14:08', // 4  — user answer bubble
-  '14:09', // 5  — plan (approved 14:12)
-  '14:16', // 6  — approval gate (decided: Allow once)
-  '14:18', // 7  — progress
-  '14:20', // 8  — tool evidence
-  '14:45', // 9  — review finding
-  '14:46', // 10 — artifact chip
-  '14:58', // 11 — final answer
-  '15:03', // 12 — completion handoff
+  '14:05', // 3  — quote (the spec rule behind the clarification)
+  '14:06', // 4  — clarification (settled answers recorded)
+  '14:09', // 5  — user answer bubble
+  '14:10', // 6  — plan (approved 14:12)
+  '14:13', // 7  — delivery estimate (reviewed with the plan)
+  '14:16', // 8  — approval gate (decided: Allow once)
+  '14:18', // 9  — progress
+  '14:20', // 10 — tool evidence
+  '14:27', // 11 — warning (connection lost mid-scan, resumed)
+  '14:31', // 12 — error (verification 503, retried — succeeded)
+  '14:45', // 13 — review finding
+  '14:46', // 14 — artifact chip
+  '14:58', // 15 — final answer
+  '15:03', // 16 — completion handoff
 ]
 
 /** Timestamp shown by live turns (history carries fixture times). */
@@ -618,7 +626,7 @@ export default function SessionStreamDetailPage() {
     if (tail && typeof tail.scrollIntoView === 'function') {
       tail.scrollIntoView({ block: 'nearest' })
     }
-  }, [liveTurns.length])
+  }, [liveTurns])
 
   // One hover footer per agent RESPONSE GROUP (spec refinements v3
   // #2): a group is a run of agent turns ending right before the next
@@ -697,6 +705,19 @@ export default function SessionStreamDetailPage() {
         // Conversational prose — carries the footer only when it ends
         // its response group (spec refinements v3 #2).
         return <AnswerBlock data={entry.data} time={time} showFooter={isGroupFinal(position - 1)} />
+      case 'warning':
+        // Fase 4 — mid-group notice row; never a group closer (spec
+        // §Penempatan), so no footer.
+        return <WarningBlock data={entry.data} time={time} />
+      case 'error':
+        // Fase 4 — mid-group failure report; never a group closer.
+        return <ErrorBlock data={entry.data} time={time} />
+      case 'quote':
+        // Fase 4 — mid-group quotation; never a group closer.
+        return <QuoteBlock data={entry.data} time={time} />
+      case 'estimate':
+        // Fase 4b — the delivery-estimate card; mid-group, informational.
+        return <EstimateBlock data={entry.data} time={time} />
       case 'completion':
         return <CompletionBlock data={entry.data} time={time} showFooter={isGroupFinal(position - 1)} />
     }
@@ -716,9 +737,9 @@ export default function SessionStreamDetailPage() {
       case 'typing':
         return (
           <div className="kx-stream-typing" aria-live="polite" data-testid="typing-indicator">
-            <span className="kx-stream-typing__dot" />
-            <span className="kx-stream-typing__dot" />
-            <span className="kx-stream-typing__dot" />
+            {/* The SAME dot-matrix loader the classic session pages use
+                (SessionTimeline / pendingPhases) — one loader family app-wide. */}
+            <DotMatrixLoader variant="drift" size={16} label="Agent is thinking" />
             <span className="kx-stream-typing__label">Thinking…</span>
           </div>
         )
@@ -875,10 +896,6 @@ export default function SessionStreamDetailPage() {
             ))}
             <div ref={tailRef} aria-hidden="true" />
           </div>
-
-          <p className="kx-illustrative-note" data-testid="illustrative-data-note">
-            {ILLUSTRATIVE_DATA_NOTE}
-          </p>
         </div>
 
         {/* Final sticky session interaction — the shared composer with

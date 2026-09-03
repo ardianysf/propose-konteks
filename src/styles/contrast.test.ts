@@ -99,8 +99,9 @@ function contrast(a: string, b: string): number {
 }
 
 // ---------------------------------------------------------------------------
-// Complete consumer inventory (258 entries — technical-text phase 2
-// retired six stream selectors in favor of the kx-tech-* primitives).
+// Complete consumer inventory (261 entries — the §Fase 4 stream kinds
+// added the quote's muted label/attribution and the error's accent
+// resolution line).
 // cls: M = enabled muted text/placeholder, A = enabled accent text/glyph,
 //      S = white-text solid background, U = unchanged (decorative/disabled).
 // token is the ORIGINAL token each consumer started from.
@@ -425,6 +426,10 @@ function entries(): Entry[] {
       '.kx-stream-completion__next-num',
       '.kx-stream-completion__receipt',
       '.kx-stream-typing',
+      '.kx-stream-quote__label',
+      '.kx-stream-quote__attribution',
+      '.kx-stream-estimate__label',
+      '.kx-stream-estimate__note',
     ].map((selector) => ({ file: STREAM, selector, property: 'color', token: MUTED_AA, cls: 'M' as Class })),
     // A — accent text/glyphs: tone-colored kind labels + icons on accent
     // turns, secondary/chip actions, resumed notices + settled marks,
@@ -445,6 +450,7 @@ function entries(): Entry[] {
       '.kx-stream-io__line--add',
       '.kx-stream-chip-action',
       '.kx-stream-completion__item--done .kx-stream-completion__mark',
+      '.kx-stream-error__resolution--accent',
     ].map((selector) => ({ file: STREAM, selector, property: 'color', token: ACCENT_AA, cls: 'A' as Class })),
     // S — white-ink solid accent fills: accent chips, the primary button,
     // the selected answer option.
@@ -463,7 +469,6 @@ function entries(): Entry[] {
     { file: STREAM, selector: '.kx-stream-phase__dot', property: 'border', token: MUTED, cls: 'U' as Class },
     { file: STREAM, selector: '.kx-stream-call__dot', property: 'border', token: MUTED, cls: 'U' as Class },
     { file: STREAM, selector: '.kx-stream-completion__mark', property: 'color', token: MUTED, cls: 'U' as Class },
-    { file: STREAM, selector: '.kx-stream-typing__dot', property: 'background', token: MUTED, cls: 'U' as Class },
     { file: STREAM, selector: '.kx-stream-page :focus-visible', property: 'outline', token: ACCENT_AA, cls: 'U' as Class },
     { file: STREAM, selector: '.kx-stream-call__row:focus-visible', property: 'outline', token: ACCENT_AA, cls: 'U' as Class },
     // Session History header — the demo route's discrete entry button
@@ -1035,18 +1040,18 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 258 consumers — 99 muted, 89 accent-strong, 23 accent-text-aa', () => {
-    expect(inventory).toHaveLength(258)
-    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(99)
+  it('covers exactly 262 consumers — 98 muted, 89 accent-strong, 24 accent-text-aa', () => {
+    expect(inventory).toHaveLength(262)
+    expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(98)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(89)
-    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(23)
+    expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(24)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(127)
-    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(60)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(131)
+    expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(61)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(9)
-    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(62)
+    expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(61)
   })
 
   it('has no duplicate inventory selectors', () => {
