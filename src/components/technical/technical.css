@@ -38,7 +38,10 @@
   border-radius: 4px;
   background: var(--kx-tech-code-bg);
   color: var(--kx-tech-code-text);
-  overflow-wrap: anywhere;
+  /* break-word (NOT anywhere): short tokens like Asia/Jakarta wrap to
+   * the next line AS A WHOLE; only genuinely unbreakable long strings
+   * split — anywhere broke tokens eagerly and split them mid-word. */
+  overflow-wrap: break-word;
 }
 
 /* ── 2. EntityToken ─────────────────────────────────────────────────── */
@@ -100,7 +103,7 @@
 
 .kx-tech-entity__label {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* Identifier labels render mono; human-readable artifact titles stay sans. */
@@ -278,7 +281,7 @@
   font-family: var(--kx-font-mono);
   font-size: var(--kx-text-xs);
   color: var(--kx-muted-text-aa);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .kx-tech-copy {
