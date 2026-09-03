@@ -23,8 +23,9 @@ import BubbleBlock from '../BubbleBlock'
 import { ArchiveIcon, DiffIcon, DocIcon, SheetIcon } from '../ResponseBlock'
 import type { RequestAttachment, RequestBlockData } from '../sessionStreamTypes'
 
-/** Messages taller than this collapse behind the shading fade. */
-const MAX_LINES = 10
+/** Collapsed messages show only this many lines; the Read-more
+ * control appears when the message exceeds them (review: 5). */
+const MAX_LINES = 5
 
 /** File-type glyph for an attachment card (fallback: doc). */
 function attachmentIcon(name: string): NonNullable<RequestAttachment['type']> {
@@ -182,9 +183,10 @@ export default function UserRequestBlock({ data, time = '14:02', onResend }: Use
               >
                 {text}
               </p>
-              {/* The soft shading fade masks the clamp edge — a quiet
-                  gradient into the bubble surface, only while clamped. */}
-              {clamped && (
+              {/* The soft shading fade seats the Read-more control —
+                  ONLY on genuinely clamped messages, never on short
+                  ones (review). */}
+              {clampable && !expanded && (
                 <span className="kx-stream-bubble__text-fade" aria-hidden="true" />
               )}
             </div>

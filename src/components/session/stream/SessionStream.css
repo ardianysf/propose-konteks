@@ -220,15 +220,14 @@
 /* Attachments live OUTSIDE the bubble — their own card column directly
  * beneath it, right-aligned with the bubble, capped at the bubble width. */
 .kx-stream-request__attachments {
-  margin: 0;
+  margin: 8px 0 0; /* air between the bubble and the file row (review) */
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   gap: 6px;
-  justify-self: end; /* hugs the bubble's right edge */
-  max-width: 75%;
+  max-width: 100%;
 }
 
 .kx-stream-bubble {
@@ -1758,7 +1757,7 @@
  * two hairline rules; the card below is centered. */
 .kx-stream-estimate-disclosure {
   display: grid;
-  gap: 10px;
+  gap: 6px; /* natural rhythm: label → card → total stay close */
   padding: 6px 0;
   border-top: 1px solid var(--kx-border);
   border-bottom: 1px solid var(--kx-border);
