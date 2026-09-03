@@ -1520,7 +1520,8 @@
 
 .kx-stream-error {
   display: grid;
-  padding-bottom: 8px;
+  margin-top: 10px; /* breathing room from the element above the block */
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--kx-border); /* the line closes the block */
 }
 
@@ -1540,9 +1541,10 @@
   display: grid;
   gap: 10px;
   /* The hairline ABOVE the detail separates it from the summary row;
-     generous breathing room so the literals never read cramped. */
-  margin-top: 8px;
-  padding: 10px 2px 2px;
+     generous breathing room on BOTH sides so the line and the literals
+     never read cramped. */
+  margin-top: 14px;
+  padding: 12px 2px 4px;
   border-top: 1px solid var(--kx-border);
 }
 
