@@ -198,9 +198,10 @@
   color: var(--kx-muted-text-aa);
 }
 
-/* The closing HANDOFF turn: a quiet 2px ink rule above the body. */
+/* The closing HANDOFF turn: a quiet 2px accent rule above the body —
+ * deep sage (accent-strong) reads as the session's success close. */
 .kx-stream-turn--completion {
-  border-top: 2px solid var(--kx-primary);
+  border-top: 2px solid var(--kx-accent-strong);
   padding-top: 14px;
 }
 
