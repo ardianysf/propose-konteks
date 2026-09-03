@@ -2,10 +2,12 @@
  * ErrorBlock — kind 13 (ERROR): clear failure information for the user
  * (spec §Fase 4, flat disclosure per review). NO card:
  *
- *   [×] ERROR                       ← attention kind row
- *   [Failed] title…  Show detail ▾  ← summary row (always visible)
- *   [detail — code/source, impact, resolution]  ← revealed below
- *   ────────────────────────────── ← hairline at the BOTTOM
+ *   [× ERROR] title…  Show detail ▾   ← the kind chip replaces the
+ *                                       Failed badge (always visible)
+ *   ──────────────────────────────    ← hairline above the detail
+ *   HTTP 503 · canteen-api            ← mono literals, breathing room
+ *   impact prose / resolution         ← revealed on tap
+ *   ──────────────────────────────    ← hairline closes the block
  *
  * The summary row (badge + title + toggle) always reads beneath the
  * hairline; tapping the toggle reveals the detail between the kind row
@@ -15,7 +17,6 @@
  */
 import { useState } from 'react'
 import ResponseBlock, { ChevronIcon, ErrorIcon, KIND_LABELS } from '../ResponseBlock'
-import StatusBadge from '../../../technical/StatusBadge'
 import InlineCode from '../../../technical/InlineCode'
 import { renderTechnicalText } from '../../../technical/renderTechnicalText'
 import type { ErrorBlockData } from '../sessionStreamTypes'
@@ -38,15 +39,14 @@ export default function ErrorBlock({
   return (
     <ResponseBlock tone="attention" time={time} showFooter={showFooter}>
       <div className="kx-stream-error" data-testid="error-card">
-        <p className="kx-stream-error__kind">
-          <ErrorIcon />
-          {KIND_LABELS.error}
-        </p>
-
-        {/* The summary row: badge + title left, toggle right. Always
-         * visible; tapping reveals the detail BELOW it. */}
+        {/* The summary row: the [×] ERROR kind chip REPLACES the Failed
+         * badge (review) — title stretches, toggle rides right. Tapping
+         * reveals the detail BELOW the hairline. */}
         <div className="kx-stream-error__summary">
-          <StatusBadge status="failed" testId="error-badge" />
+          <p className="kx-stream-error__kind">
+            <ErrorIcon />
+            {KIND_LABELS.error}
+          </p>
           <p className="kx-stream-error__title">{data.title}</p>
           <button
             type="button"
