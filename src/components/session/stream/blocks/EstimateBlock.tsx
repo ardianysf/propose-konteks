@@ -38,12 +38,12 @@ export default function EstimateBlock({
       time={time}
       showFooter={showFooter}
     >
-      <article className="kx-stream-estimate" data-testid="estimate-card" aria-label={data.heading}>
-        <div className="kx-stream-estimate__head">
-          <div className="kx-stream-estimate__head-copy">
-            <p className="kx-stream-estimate__label">{data.label}</p>
-            <h4 className="kx-stream-estimate__heading">{data.heading}</h4>
-          </div>
+      <div className="kx-stream-estimate-section">
+        {/* The disclosure header rides OUTSIDE the card: the estimate
+            label + toggle sit between two hairline rules; the card
+            below is centered. */}
+        <div className="kx-stream-estimate-disclosure">
+          <p className="kx-stream-estimate__label">{data.label}</p>
           <button
             type="button"
             className="kx-stream-estimate__toggle"
@@ -57,6 +57,9 @@ export default function EstimateBlock({
             {open ? 'Hide breakdown' : 'Show breakdown'}
           </button>
         </div>
+
+        <article className="kx-stream-estimate" data-testid="estimate-card" aria-label={data.heading}>
+          <h4 className="kx-stream-estimate__heading">{data.heading}</h4>
 
         {/* Collapsed rest: only the total row reads. */}
         <div id={detailId} className="kx-stream-estimate__detail" hidden={!open}>
@@ -82,7 +85,8 @@ export default function EstimateBlock({
             <dd className="kx-stream-estimate__row-value kx-stream-tabular">{total.value}</dd>
           </div>
         </dl>
-      </article>
+        </article>
+      </div>
     </ResponseBlock>
   )
 }
