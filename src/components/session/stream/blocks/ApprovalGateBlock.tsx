@@ -25,6 +25,10 @@ interface ApprovalGateBlockProps {
   decision?: GateDecision
   onDecision: (decision: GateDecision) => void
   time?: string
+  /** Hover footer — when this turn ends its response group. */
+  showFooter?: boolean
+  /** Execution stats on the footer (duration · tokens in · out). */
+  stats?: { duration: string; tokensIn: string; tokensOut: string }
 }
 
 export default function ApprovalGateBlock({
@@ -32,6 +36,8 @@ export default function ApprovalGateBlock({
   decision,
   onDecision,
   time = '14:16',
+  showFooter = false,
+  stats,
 }: ApprovalGateBlockProps) {
   const resolved = decision !== undefined
   const allowed = decision === 'allow-once' || decision === 'always'
@@ -42,6 +48,8 @@ export default function ApprovalGateBlock({
       tone={resolved ? (allowed ? 'accent' : 'neutral') : 'attention'}
       icon={<GateIcon />}
       time={time}
+      showFooter={showFooter}
+      stats={stats}
       stateChip={
         resolved ? (
           <StreamChip tone={allowed ? 'accent' : 'neutral'}>{DECISION_LABELS[decision]}</StreamChip>

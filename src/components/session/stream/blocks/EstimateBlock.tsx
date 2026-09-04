@@ -10,7 +10,7 @@
  * validity, and note (aria-expanded + aria-controls, the same pattern
  * as the tool-evidence rows and the progress summary).
  */
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import ResponseBlock, { ChevronIcon, EstimateIcon, KIND_LABELS } from '../ResponseBlock'
 import type { EstimateBlockData } from '../sessionStreamTypes'
 
@@ -19,19 +19,22 @@ interface EstimateBlockProps {
   time?: string
   /** Hover footer — when this turn ends its response group. */
   showFooter?: boolean
+  /** Execution stats on the footer (duration · tokens in · out). */
+  stats?: { duration: string; tokensIn: string; tokensOut: string }
 }
 
 export default function EstimateBlock({
   data,
   time = '14:00',
   showFooter = false,
+  stats,
 }: EstimateBlockProps) {
   const [open, setOpen] = useState(false)
   const total = data.rows[data.rows.length - 1]
-  const detailId = 'kx-stream-estimate-detail'
+  const detailId = `kx-stream-estimate-detail-${useId().replace(/:/g, '-')}`
 
   return (
-    <ResponseBlock tone="neutral" time={time} showFooter={showFooter}>
+    <ResponseBlock tone="neutral" time={time} showFooter={showFooter} stats={stats}>
       {/* ONE disclosure block between two hairline rules (review): the
        * kind label + toggle lead, the detail card rides INSIDE it when
        * expanded, and the total row always closes above the bottom rule. */}

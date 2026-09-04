@@ -8,6 +8,7 @@ import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
 import { MockupContext, useMockup } from '../state/MockupContext'
 import { initialState, mockupReducer, type MockupState } from '../state/mockupReducer'
 import { PENDING_REVIEWS } from '../data/mockData'
+import { PENDING_PHASE_DURATION_MS } from '../components/session/pendingPhases'
 
 // ---------------------------------------------------------------------------
 // Harness — the page under the real reducer via the mockup context, with a
@@ -665,7 +666,7 @@ describe('NewSessionPage — AppShell integration + hygiene', () => {
 // ---------------------------------------------------------------------------
 
 describe('main composer send flow', () => {
-  it('send creates a new pending session, routes to session detail, and plays the phase sequence', () => {
+  it('send creates a new pending session, routes to session detail, and appends the assistant reply after the pending delay', () => {
     vi.useFakeTimers()
     try {
       const { bucket } = renderAppShell()
@@ -689,30 +690,35 @@ describe('main composer send flow', () => {
       // measure — the session composer takes over.
       expect(screen.queryByTestId('composer-input')).not.toBeInTheDocument()
 
-      // The pending bubble shows the first drawn phase beside the 12px
-      // loader; the phase slice is 3-6 contiguous canonical labels.
+      // The migrated detail page keeps the pending state observable through
+      // the submitted user turn: one stream slot, no assistant reply yet.
       const phases = bucket.current?.sessionDetail.pendingPhases ?? []
       expect(phases.length).toBeGreaterThanOrEqual(3)
       expect(phases.length).toBeLessThanOrEqual(6)
-      expect(screen.getByText(phases[0])).toBeVisible()
-      expect(
-        screen.getByRole('status', { name: `Menyusun jawaban — ${phases[0]}` }),
-      ).toBeInTheDocument()
+      const stream = screen.getByTestId('session-stream')
+      expect(stream.querySelectorAll('[data-testid^="session-turn-"]')).toHaveLength(1)
+      expect(screen.getByTestId('session-turn-1')).toHaveTextContent(
+        'Build a renewal reminder dashboard widget',
+      )
+      expect(screen.queryByTestId('session-turn-2')).not.toBeInTheDocument()
 
-      // Phases advance; the reply lands after the full drawn sequence.
+      // The pending cadence holds the stream on that user turn until the
+      // final phase duration resolves the assistant reply.
       for (let index = 1; index < phases.length; index += 1) {
         act(() => {
-          vi.advanceTimersByTime(900)
+          vi.advanceTimersByTime(PENDING_PHASE_DURATION_MS)
         })
-        expect(screen.getByText(phases[index])).toBeVisible()
+        expect(stream.querySelectorAll('[data-testid^="session-turn-"]')).toHaveLength(1)
+        expect(screen.queryByTestId('session-turn-2')).not.toBeInTheDocument()
       }
       act(() => {
-        vi.advanceTimersByTime(900)
+        vi.advanceTimersByTime(PENDING_PHASE_DURATION_MS)
       })
-      expect(screen.queryByRole('status', { name: /menyusun jawaban/i })).not.toBeInTheDocument()
       expect(bucket.current?.sessionDetail.pendingAssistant).toBe(false)
+      expect(stream.querySelectorAll('[data-testid^="session-turn-"]')).toHaveLength(2)
       const timeline = bucket.current?.sessionDetail.timeline ?? []
       expect(timeline[timeline.length - 1].type).toBe('ASSISTANT_MESSAGE')
+      expect(screen.getByTestId('session-turn-2')).toHaveTextContent(timeline[timeline.length - 1].content)
       expect(ASSISTANT_RESPONSES).toContain(timeline[timeline.length - 1].content)
     } finally {
       vi.useRealTimers()
