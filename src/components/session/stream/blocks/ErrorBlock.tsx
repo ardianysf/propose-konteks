@@ -40,7 +40,7 @@ export default function ErrorBlock({
   const detailId = `kx-stream-error-detail-${useId().replace(/:/g, '-')}`
 
   return (
-    <ResponseBlock tone="attention" time={time} showFooter={showFooter} stats={stats}>
+    <ResponseBlock tone="neutral" time={time} showFooter={showFooter} stats={stats}>
       <div className="kx-stream-error" data-testid="error-card">
         {/* The summary row: the [×] ERROR kind chip REPLACES the Failed
          * badge (review) — title stretches, toggle rides right. Tapping

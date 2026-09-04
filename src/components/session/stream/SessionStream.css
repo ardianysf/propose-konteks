@@ -1566,6 +1566,7 @@
 
 .kx-stream-error__chevron {
   display: inline-flex;
+  color: var(--kx-danger);
   transition: transform 140ms ease-out;
 }
 
@@ -1580,7 +1581,7 @@
   /* No container bottom padding — the summary keeps its own balanced
    * 8px/8px air between the two lines when collapsed, and the expanded
    * detail carries its own bottom spacing before the closing line. */
-  border-bottom: 1px solid var(--kx-border); /* the line closes the block */
+  border-bottom: 1px solid var(--kx-danger); /* the line closes the block */
 }
 
 .kx-stream-error__summary {
@@ -1592,7 +1593,7 @@
    * block is just this line; expanded = the detail opens beneath it and
    * the closing line moves down with the content). */
   padding: 8px 0;
-  border-top: 1px solid var(--kx-border);
+  border-top: 2px solid var(--kx-danger);
 }
 
 .kx-stream-error__title {
@@ -1645,7 +1646,7 @@
 }
 
 .kx-stream-error__resolution--attention {
-  color: var(--kx-attention);
+  color: var(--kx-danger);
 }
 
 /* QUOTE — a session-ticket quotation (TaskQuoteCard anatomy): muted
@@ -1766,8 +1767,8 @@
   display: grid;
   gap: 6px; /* natural rhythm: label → card → total stay close */
   padding: 6px 0;
-  border-top: 1px solid var(--kx-border);
-  border-bottom: 1px solid var(--kx-border);
+  border-top: 2px solid var(--kx-attention);
+  border-bottom: 1px solid var(--kx-attention);
 }
 
 .kx-stream-estimate__head {
@@ -1789,7 +1790,7 @@
   font-family: inherit;
   font-size: var(--kx-text-sm);
   font-weight: var(--kx-font-medium);
-  color: var(--kx-muted-text-aa);
+  color: var(--kx-attention);
   cursor: pointer;
   transition: background-color 140ms ease-out, color 140ms ease-out;
 }
@@ -1797,7 +1798,7 @@
 .kx-stream-estimate__toggle:hover,
 .kx-stream-estimate__toggle:focus-visible {
   background: var(--kx-pale);
-  color: var(--kx-primary);
+  color: var(--kx-attention);
 }
 
 .kx-stream-estimate__toggle:focus-visible {
@@ -1835,7 +1836,7 @@
   font-weight: var(--kx-font-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--kx-muted-text-aa);
+  color: var(--kx-attention);
 }
 
 .kx-stream-estimate__heading {

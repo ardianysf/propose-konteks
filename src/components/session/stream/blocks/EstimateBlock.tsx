@@ -58,24 +58,28 @@ export default function EstimateBlock({
           </button>
         </div>
 
-        <article className="kx-stream-estimate" data-testid="estimate-card" aria-label={data.heading} hidden={!open}>
+        <article
+          id={detailId}
+          className="kx-stream-estimate"
+          data-testid="estimate-card"
+          aria-label={data.heading}
+          hidden={!open}
+        >
           <h4 className="kx-stream-estimate__heading">{data.heading}</h4>
 
-        {/* Collapsed rest: only the total row reads. */}
-        <div id={detailId} className="kx-stream-estimate__detail">
-          <dl className="kx-stream-estimate__rows">
-            {data.rows.slice(0, -1).map((row) => (
-              <div className="kx-stream-estimate__row" key={row.label}>
-                <dt className="kx-stream-estimate__row-label">{row.label}</dt>
-                <span className="kx-stream-estimate__leader" aria-hidden="true" />
-                <dd className="kx-stream-estimate__row-value kx-stream-tabular">{row.value}</dd>
-              </div>
-            ))}
-          </dl>
-          <p className="kx-stream-estimate__validity">{data.validUntil}</p>
-          <p className="kx-stream-estimate__note">{data.note}</p>
-        </div>
-
+          <div className="kx-stream-estimate__detail">
+            <dl className="kx-stream-estimate__rows">
+              {data.rows.slice(0, -1).map((row) => (
+                <div className="kx-stream-estimate__row" key={row.label}>
+                  <dt className="kx-stream-estimate__row-label">{row.label}</dt>
+                  <span className="kx-stream-estimate__leader" aria-hidden="true" />
+                  <dd className="kx-stream-estimate__row-value kx-stream-tabular">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="kx-stream-estimate__validity">{data.validUntil}</p>
+            <p className="kx-stream-estimate__note">{data.note}</p>
+          </div>
         </article>
 
         {/* The total row always reads — the collapsed summary AND the

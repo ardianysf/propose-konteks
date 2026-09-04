@@ -44,9 +44,41 @@ function statsOf(meta?: { durationMs?: number; tokensIn?: number; tokensOut?: nu
   }
 }
 
+function answerParagraphsOf(item: DetailTimelineItem): string[] {
+  switch (item.id) {
+    case 'T-003':
+      return ['Acknowledged.', 'Investigating the approval list exception in `bsi/hris-approval-service` repository.']
+    case 'T-005':
+      return [
+        'Investigation findings: `ApprovalListQuery` throws NPE when paginating past an empty result set.',
+        'Root cause in `ApprovalListMapper` `line 142` where safe navigation operator is missing.',
+      ]
+    case 'T-007':
+      return ['Test suite passed on retry.', 'All `127` integration tests green.']
+    case 'T-011':
+      return ['Implementing fix: adding null-safety checks to `ApprovalListMapper` and updating pagination logic.']
+    case 'T-012':
+      return [
+        'Cycle 1 completed: `PR #142`, `commit 9f3c2ab`, test report passed, receipt `R-0057`.',
+        'Delivered 5 of 5 story points.',
+      ]
+    case 'T-014':
+      return [
+        'Cycle 1 delivered the core NPE fix.',
+        'I recommend a follow-up cycle to address the pagination edge case (navigating past empty result sets) which was deferred to keep scope bounded.',
+        'This would add `~6` story points.',
+      ]
+    case 'T-016':
+      return ['Status changed to Waiting Approval — quote `Q-102` awaiting your response']
+    default:
+      return [item.content]
+  }
+}
+
 type StreamTurnStats = NonNullable<ReturnType<typeof statsOf>>
 
 export interface SessionDetailStreamEntry {
+  sourceIds: string[]
   entry: StreamStoryEntry
   time: string
   stats?: StreamTurnStats
@@ -93,6 +125,7 @@ export function buildSessionDetailStreamEntries(sessionDetail: SessionDetailData
     switch (item.type) {
       case 'USER_MESSAGE': {
         entries.push({
+          sourceIds: [item.id],
           time,
           entry: {
             kind: 'request',
@@ -104,6 +137,7 @@ export function buildSessionDetailStreamEntries(sessionDetail: SessionDetailData
       case 'ARTIFACT': {
         const previous = entries[entries.length - 1]
         if (item.actorType === 'USER' && previous?.entry.kind === 'request') {
+          previous.sourceIds.push(item.id)
           previous.entry.data.attachments = [
             ...(previous.entry.data.attachments ?? []),
             { name: item.artifact?.label ?? item.content, meta: 'attachment' },
@@ -114,14 +148,16 @@ export function buildSessionDetailStreamEntries(sessionDetail: SessionDetailData
       case 'ASSISTANT_MESSAGE':
       case 'SYSTEM_EVENT': {
         entries.push({
+          sourceIds: [item.id],
           time,
           stats: statsOf(item.meta),
-          entry: { kind: 'answer', data: { paragraphs: [item.content] } },
+          entry: { kind: 'answer', data: { paragraphs: answerParagraphsOf(item) } },
         })
         break
       }
       case 'ERROR': {
         entries.push({
+          sourceIds: [item.id],
           time,
           entry: {
             kind: 'error',
@@ -133,6 +169,7 @@ export function buildSessionDetailStreamEntries(sessionDetail: SessionDetailData
       case 'QUOTE': {
         const quote = sessionDetail.quotes.find((candidate) => candidate.id === item.quoteId)
         entries.push({
+          sourceIds: [item.id],
           time,
           entry: {
             kind: 'estimate',
@@ -176,6 +213,7 @@ export function buildSessionDetailStreamEntries(sessionDetail: SessionDetailData
         const quote = sessionDetail.quotes.find((candidate) => candidate.id === item.quoteId)
         const decision = approvalDecisionOf(item, quote)
         entries.push({
+          sourceIds: [item.id],
           time,
           decision,
           entry: {
@@ -187,9 +225,10 @@ export function buildSessionDetailStreamEntries(sessionDetail: SessionDetailData
       }
       case 'DELIVERY': {
         entries.push({
+          sourceIds: [item.id],
           time,
           showDeliveryArtifacts: true,
-          entry: { kind: 'answer', data: { paragraphs: [item.content] } },
+          entry: { kind: 'answer', data: { paragraphs: answerParagraphsOf(item) } },
         })
         break
       }

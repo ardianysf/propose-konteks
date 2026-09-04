@@ -78,6 +78,40 @@ const FIXTURE_TIMELINE = SESSION_DETAIL.timeline
 const NON_ARTIFACT_TIMELINE = FIXTURE_TIMELINE.filter((item) => item.type !== 'ARTIFACT')
 const FIXTURE_STREAM_ENTRIES = buildSessionDetailStreamEntries(SESSION_DETAIL)
 const FIXTURE_STREAM_KINDS = FIXTURE_STREAM_ENTRIES.map(({ entry }) => entry.kind)
+const EXPECTED_SOURCE_IDS = [
+  ['T-001', 'T-002'],
+  ['T-003'],
+  ['T-004'],
+  ['T-005'],
+  ['T-006'],
+  ['T-007'],
+  ['T-008'],
+  ['T-009'],
+  ['T-010'],
+  ['T-011'],
+  ['T-012'],
+  ['T-013'],
+  ['T-014'],
+  ['T-015'],
+  ['T-016'],
+]
+const EXPECTED_STREAM_KINDS = [
+  'request',
+  'answer',
+  'answer',
+  'answer',
+  'error',
+  'answer',
+  'estimate',
+  'approval-gate',
+  'answer',
+  'answer',
+  'answer',
+  'answer',
+  'answer',
+  'estimate',
+  'answer',
+]
 const INITIAL_STREAM_FOOTER_SLOT_IDS = FIXTURE_STREAM_KINDS.flatMap((_, index) =>
   isLastAgentTurnOfResponse(FIXTURE_STREAM_KINDS, index) ? [`session-turn-${index + 1}`] : [],
 )
@@ -405,14 +439,22 @@ describe('Session stream — timeline mapped to chat turns', () => {
 
     // Turns 2–4 — acknowledgement answer, system event, analysis answer:
     // all flat prose turns in fixture order.
-    expect(slot(2).textContent).toContain(FIXTURE_TIMELINE[2].content)
+    expect(slot(2)).toHaveTextContent('Acknowledged.')
+    expect(slot(2)).toHaveTextContent(
+      'Investigating the approval list exception in bsi/hris-approval-service repository.',
+    )
     expect(slot(3).textContent).toContain(FIXTURE_TIMELINE[3].content)
-    expect(slot(4).textContent).toContain(FIXTURE_TIMELINE[4].content)
+    expect(slot(4)).toHaveTextContent(
+      'Investigation findings: ApprovalListQuery throws NPE when paginating past an empty result set.',
+    )
+    expect(slot(4)).toHaveTextContent(
+      'Root cause in ApprovalListMapper line 142 where safe navigation operator is missing.',
+    )
 
-    // Turn 5 — the runner error: attention turn with the collapsed
+    // Turn 5 — the runner error: neutral turn shell with the collapsed
     // [× ERROR] summary row and a Show-detail disclosure.
     const errorTurn = slot(5)
-    expect(errorTurn.querySelector('article.kx-stream-turn')).toHaveClass('kx-stream-turn--attention')
+    expect(errorTurn.querySelector('article.kx-stream-turn')).toHaveClass('kx-stream-turn--neutral')
     expect(errorTurn.querySelector('[data-testid="error-card"]')).not.toBeNull()
     expect(errorTurn.querySelector('.kx-stream-error__kind')?.textContent).toContain('ERROR')
     expect(errorTurn.querySelector('.kx-stream-error__title')?.textContent).toBe(FIXTURE_TIMELINE[5].content)
@@ -427,7 +469,8 @@ describe('Session stream — timeline mapped to chat turns', () => {
     )
 
     // Turn 6 — tests-green answer.
-    expect(slot(6).textContent).toContain(FIXTURE_TIMELINE[6].content)
+    expect(slot(6)).toHaveTextContent('Test suite passed on retry.')
+    expect(slot(6)).toHaveTextContent('All 127 integration tests green.')
 
     // Turn 7 — the Q-101 quote event: estimate disclosure, collapsed by
     // default, total row reading the approved status.
@@ -447,17 +490,24 @@ describe('Session stream — timeline mapped to chat turns', () => {
 
     // Turns 9–10 — delivery-started system event + implementing answer.
     expect(slot(9).textContent).toContain(FIXTURE_TIMELINE[9].content)
-    expect(slot(10).textContent).toContain(FIXTURE_TIMELINE[10].content)
+    expect(slot(10)).toHaveTextContent(
+      'Implementing fix: adding null-safety checks to ApprovalListMapper and updating pagination logic.',
+    )
 
     // Turn 11 — the delivery: answer prose followed by the artifact chip row.
-    expect(slot(11).querySelector('.kx-stream-answer-prose')?.textContent).toContain(
-      FIXTURE_TIMELINE[11].content,
+    expect(slot(11)).toHaveTextContent(
+      'Cycle 1 completed: PR #142, commit 9f3c2ab, test report passed, receipt R-0057.',
     )
+    expect(slot(11)).toHaveTextContent('Delivered 5 of 5 story points.')
     expect(slot(11).querySelector('.kx-session-detail__delivery-artifacts')).not.toBeNull()
 
     // Turns 12–13 — cycle-completed system event + follow-up recommendation.
     expect(slot(12).textContent).toContain(FIXTURE_TIMELINE[12].content)
-    expect(slot(13).textContent).toContain(FIXTURE_TIMELINE[13].content)
+    expect(slot(13)).toHaveTextContent('Cycle 1 delivered the core NPE fix.')
+    expect(slot(13)).toHaveTextContent(
+      'I recommend a follow-up cycle to address the pagination edge case (navigating past empty result sets) which was deferred to keep scope bounded.',
+    )
+    expect(slot(13)).toHaveTextContent('This would add ~6 story points.')
 
     // Turn 14 — the Q-102 quote event: estimate collapsed, total reading
     // the pending status.
@@ -466,7 +516,7 @@ describe('Session stream — timeline mapped to chat turns', () => {
 
     // Turn 15 — the waiting-approval system event, the group-final agent
     // turn carrying the hover footer.
-    expect(slot(15).textContent).toContain(FIXTURE_TIMELINE[15].content)
+    expect(slot(15)).toHaveTextContent('Status changed to Waiting Approval — quote Q-102 awaiting your response')
 
     // The initial classic fixture is one continuous agent response group
     // after the opening user request, so ONLY the final slot carries the
@@ -482,6 +532,25 @@ describe('Session stream — timeline mapped to chat turns', () => {
         expect(turnSlot.querySelector('[data-testid="turn-footer"]')).toBeNull()
       }
     })
+  })
+
+  it('preserves the 15-slot source-order mapping and renders technical literals through AnswerBlock prose', () => {
+    renderSessionDetailPage()
+
+    expect(FIXTURE_STREAM_ENTRIES).toHaveLength(15)
+    expect(FIXTURE_STREAM_ENTRIES.map(({ sourceIds }) => sourceIds)).toEqual(EXPECTED_SOURCE_IDS)
+    expect(FIXTURE_STREAM_KINDS).toEqual(EXPECTED_STREAM_KINDS)
+
+    expect(within(slot(2)).getByText('bsi/hris-approval-service', { selector: 'code.kx-tech-code' })).toBeInTheDocument()
+    expect(within(slot(4)).getByText('ApprovalListQuery', { selector: 'code.kx-tech-code' })).toBeInTheDocument()
+    expect(within(slot(4)).getByText('ApprovalListMapper', { selector: 'code.kx-tech-code' })).toBeInTheDocument()
+    expect(within(slot(4)).getByText('line 142', { selector: 'code.kx-tech-code' })).toBeInTheDocument()
+    expect(within(slot(6)).getByText('127', { selector: 'code.kx-tech-code' })).toBeInTheDocument()
+    expect(within(slot(11)).getByText('PR #142', { selector: 'code.kx-tech-code' })).toBeInTheDocument()
+    expect(within(slot(11)).getByText('commit 9f3c2ab', { selector: 'code.kx-tech-code' })).toBeInTheDocument()
+    expect(within(slot(11)).getByText('R-0057', { selector: 'code.kx-tech-code' })).toBeInTheDocument()
+    expect(within(slot(13)).getByText('~6', { selector: 'code.kx-tech-code' })).toBeInTheDocument()
+    expect(within(slot(15)).getByText('Q-102', { selector: 'code.kx-tech-code' })).toBeInTheDocument()
   })
 
   it('renders the user turn as a right-aligned bubble and agent turns as flat prose articles', () => {
@@ -527,9 +596,10 @@ describe('Session stream — timeline mapped to chat turns', () => {
     const delivery = slot(11)
 
     // The delivery prose answers first…
-    expect(delivery.querySelector('.kx-stream-answer-prose')?.textContent).toContain(
-      FIXTURE_TIMELINE[11].content,
+    expect(delivery).toHaveTextContent(
+      'Cycle 1 completed: PR #142, commit 9f3c2ab, test report passed, receipt R-0057.',
     )
+    expect(delivery).toHaveTextContent('Delivered 5 of 5 story points.')
 
     // …then the artifacts ride as openable EntityToken chips — accessible
     // open-labels carry the kind, tooltips carry the artifact urls, and
