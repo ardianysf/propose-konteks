@@ -581,7 +581,7 @@ function streamAnswerPreview(mod: LoadedModule): ReactNode {
     },
     {
       label: <code>showFooter</code>,
-      node: <AnswerBlock data={answer} showFooter />,
+      node: <AnswerBlock data={answer} showFooter stats={{ duration: '229.2s', tokensIn: '1242k', tokensOut: '16.5k' }} />,
     },
   ])
 }
