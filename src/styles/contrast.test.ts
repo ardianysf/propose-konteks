@@ -99,9 +99,10 @@ function contrast(a: string, b: string): number {
 }
 
 // ---------------------------------------------------------------------------
-// Complete consumer inventory (261 entries — the §Fase 4 stream kinds
+// Complete consumer inventory (266 entries — the §Fase 4 stream kinds
 // added the quote's muted label/attribution and the error's accent
-// resolution line).
+// resolution line; the estimate kind/toggle later moved to the
+// dedicated attention token and no longer participate in the AA census).
 // cls: M = enabled muted text/placeholder, A = enabled accent text/glyph,
 //      S = white-text solid background, U = unchanged (decorative/disabled).
 // token is the ORIGINAL token each consumer started from.
@@ -430,12 +431,10 @@ function entries(): Entry[] {
       '.kx-stream-typing',
       '.kx-stream-quote__label',
       '.kx-stream-quote__attribution',
-      '.kx-stream-estimate__kind',
       '.kx-stream-turn__stats',
       '.kx-stream-bubble__read-toggle',
       '.kx-stream-estimate__note',
       '.kx-stream-error__toggle',
-      '.kx-stream-estimate__toggle',
     ].map((selector) => ({ file: STREAM, selector, property: 'color', token: MUTED_AA, cls: 'M' as Class })),
     // A — accent text/glyphs: tone-colored kind labels + icons on accent
     // turns, secondary/chip actions, resumed notices + settled marks,
@@ -1046,15 +1045,15 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 268 consumers — 98 muted, 93 accent-strong, 24 accent-text-aa', () => {
-    expect(inventory).toHaveLength(268)
+  it('covers exactly 266 consumers — 98 muted, 93 accent-strong, 24 accent-text-aa', () => {
+    expect(inventory).toHaveLength(266)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(98)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(93)
     expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(24)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(133)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(131)
     expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(61)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(9)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(65)

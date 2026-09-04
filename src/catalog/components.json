@@ -1243,7 +1243,7 @@
       "sourcePath": "src/components/session/stream/blocks/ErrorBlock.tsx",
       "exportName": "default",
       "classification": "adoptable",
-      "description": "Kind 13 (ERROR): clear failure information as a flat disclosure — the [×] ERROR kind chip + title + Show-detail toggle always read between two hairlines; expanding reveals the mono code/source literals, the impact prose, and the optional resolution line above the bottom rule (aria-expanded + aria-controls, [hidden]-guarded). No error token exists: the attention tone plus the badge's firm × carry the failure.",
+      "description": "Kind 13 (ERROR): clear failure information as a flat disclosure — the [×] ERROR kind chip + title + Show-detail toggle always read between danger separators; expanding reveals the mono code/source literals, the impact prose, and the optional resolution line above the bottom rule (aria-expanded + aria-controls, [hidden]-guarded). Error accents stay on --kx-danger, never --kx-attention.",
       "propDocs": {
         "data": "required, ErrorBlockData — title, optional mono code/source, impact prose, optional resolution (text + accent/attention tone)",
         "time": "optional, string (default '14:31') — turn timestamp (hover footer)",
@@ -1256,8 +1256,6 @@
       "tokenDeps": [
         "--kx-accent-strong",
         "--kx-accent-text-aa",
-        "--kx-attention",
-        "--kx-border",
         "--kx-danger",
         "--kx-font-bold",
         "--kx-font-medium",
@@ -1271,8 +1269,8 @@
       "variants": [
         "collapsed · Show detail toggle"
       ],
-      "fixtureRef": "single fixture specimen: the 503 verification failure, collapsed between hairlines — the Show-detail toggle expands code/source + impact + resolution live",
-      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; detail id statis (satu instance per halaman). RESPONSIVE: summary row wrap; meta mono wrap dengan overflow aman."
+      "fixtureRef": "single fixture specimen: the 503 verification failure, collapsed between danger separators — the Show-detail toggle expands code/source + impact + resolution live",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; detail id per instance dibuat lewat useId sehingga beberapa disclosure di halaman yang sama tetap aman. RESPONSIVE: summary row wrap; meta mono wrap dengan overflow aman."
     },
     {
       "id": "stream-estimate",
@@ -1281,7 +1279,7 @@
       "sourcePath": "src/components/session/stream/blocks/EstimateBlock.tsx",
       "exportName": "default",
       "classification": "adoptable",
-      "description": "Delivery-estimate kind (chat spec Fase 4b): the 'Review delivery estimate' disclosure between two hairline rules — the ESTIMATE kind label + Show-breakdown toggle lead, the total row always reads as the collapsed summary, and expanding reveals the bordered card inside: heading, dotted-leader rows (tabular numerals), validity line, and a muted note (aria-expanded + aria-controls).",
+      "description": "Delivery-estimate kind (chat spec Fase 4b): the 'Review delivery estimate' disclosure between two attention separators — the ESTIMATE kind label + Show-breakdown toggle lead, the total row always reads as the collapsed summary, and expanding reveals the bordered card inside: heading, dotted-leader rows (tabular numerals), validity line, and a muted note (aria-expanded + aria-controls).",
       "propDocs": {
         "data": "required, EstimateBlockData — label, heading, dotted-leader rows (the last row is the always-visible total), validUntil, note",
         "time": "optional, string (default '14:00') — turn timestamp (hover footer)",
@@ -1293,6 +1291,7 @@
       ],
       "tokenDeps": [
         "--kx-accent-strong",
+        "--kx-attention",
         "--kx-border",
         "--kx-font-bold",
         "--kx-font-medium",
@@ -1309,8 +1308,8 @@
       "variants": [
         "collapsed · Show breakdown toggle"
       ],
-      "fixtureRef": "single fixture specimen: the 2h 53m delivery estimate collapsed (label + toggle + total between rules) — Show breakdown expands the dotted-leader card live",
-      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; baris terakhir rows adalah total yang selalu tampil; detail id statis (satu instance per halaman). RESPONSIVE: leader dots menyusut; row wrap mengikuti lebar kolom."
+      "fixtureRef": "single fixture specimen: the 2h 53m delivery estimate collapsed with attention separators (label + toggle + total between rules) — Show breakdown expands the dotted-leader card live",
+      "adoptionNotes": "Presentation-only, tidak butuh MockupContext; baris terakhir rows adalah total yang selalu tampil; detail id per instance dibuat lewat useId sehingga beberapa disclosure di halaman yang sama tetap aman. RESPONSIVE: leader dots menyusut; row wrap mengikuti lebar kolom."
     },
     {
       "id": "tech-inline-code",
