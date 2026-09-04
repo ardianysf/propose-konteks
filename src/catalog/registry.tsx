@@ -1,6 +1,6 @@
 /*
  * registry.tsx (Task T3a, extended T4 + T6) — the runtime registry
- * mirroring src/catalog/components.json 1:1 (51 entries).
+ * mirroring src/catalog/components.json 1:1 (53 entries).
  *
  * Each entry lazy-imports its source module from src/components/ so the
  * catalog can load implementations on demand without copying them.
@@ -27,6 +27,7 @@ import {
   LIVE_TURN_SCRIPT,
 } from '../components/session/stream/attendanceReviewStory'
 import type { StreamStoryEntry } from '../components/session/stream/sessionStreamTypes'
+import type { TechStatus } from '../components/technical/StatusBadge'
 import {
   MockupFixtureProvider,
   makeFixtureState,
@@ -758,6 +759,173 @@ function streamEstimatePreview(mod: LoadedModule): ReactNode {
   ])
 }
 
+// ── technical text primitives (Stage B2) ──────────────────────────────────
+
+/** Code specimen 1 — a short (4-line) attendance query: under the
+ *  5-line gate, so it renders WITHOUT line numbers (default rules). */
+const TECH_SHORT_SQL = `SELECT employee_id, clock_in, clock_out
+FROM attendance_records
+WHERE work_date = '2026-08-31'
+  AND clock_out IS NULL;`
+
+/** Code specimen 2 — a 16-line sync config: past the 12-line collapse
+ *  threshold, so it starts collapsed (10 numbered lines) behind the
+ *  Show full code toggle; Copy stays interactive in the live preview. */
+const TECH_LONG_CONFIG = `source:
+  provider: gitea
+  repository: hris-frontend
+  branch: development
+sync:
+  schedule: "0 7 * * 1-5"
+  timezone: Asia/Jakarta
+  window:
+    opens: "07:30"
+    closes: "09:00"
+rules:
+  late_after: "09:00:59"
+  half_day_after: "13:00:00"
+  overtime:
+    min_minutes: 30
+    requires_approval: true`
+
+/** tech-inline-code (adoptable): the non-interactive literal VALUE —
+ *  the ink-first wash in a sentence vs a standalone specimen. */
+function techInlineCodePreview(mod: LoadedModule): ReactNode {
+  const InlineCode = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>in a sentence</code>,
+      node: (
+        <p className="kx-tech-showcase__prose">
+          Repository <InlineCode>hris-frontend</InlineCode> berada pada branch{' '}
+          <InlineCode>development</InlineCode>.
+        </p>
+      ),
+    },
+    {
+      label: <code>standalone</code>,
+      node: <InlineCode>ses_01JABC</InlineCode>,
+    },
+  ])
+}
+
+/** tech-entity-token (adoptable): pill (mono identifiers + sans title)
+ *  vs link (rests underlined; hover/focus becomes a pill). */
+function techEntityTokenPreview(mod: LoadedModule): ReactNode {
+  const EntityToken = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>pill · mono &amp; sans</code>,
+      node: (
+        <div className="kx-tech-showcase__row">
+          <EntityToken kind="repository" label="hris-frontend" />
+          <EntityToken kind="branch" label="development" />
+          <EntityToken kind="task" label="Task 7" mono={false} openLabel="Open Task 7" />
+          <EntityToken kind="session" label="ses_01JABC" />
+        </div>
+      ),
+    },
+    {
+      label: <code>link · rests underlined</code>,
+      node: (
+        <p className="kx-tech-showcase__prose">
+          Commit <EntityToken kind="commit" label="9f3c2a1" variant="link" /> masuk
+          malam ini — rests as accent ink + underline; hover/focus swaps to a
+          pill. The aria-label (default: Open commit 9f3c2a1) and title
+          tooltip carry the full value.
+        </p>
+      ),
+    },
+  ])
+}
+
+/** tech-metadata-pair (adoptable): the 2×2 mixed-value grid vs one long
+ *  string value with its hover/focus-revealed Copy action. */
+function techMetadataPairPreview(mod: LoadedModule): ReactNode {
+  const MetadataPair = asDefaultComponent(mod)
+  const EntityToken = asNamedComponent(mod, 'EntityToken')
+  return variantRow([
+    {
+      label: <code>2×2 grid · mixed values</code>,
+      node: (
+        <div className="kx-tech-showcase__meta">
+          <MetadataPair
+            label="Repository"
+            value={<EntityToken kind="repository" label="hris-frontend" />}
+          />
+          <MetadataPair
+            label="Branch"
+            value={<EntityToken kind="branch" label="development" />}
+          />
+          <MetadataPair label="Session ID" value="ses_01JG8Z4X7QK2M5RT9W3BV6DHC0LP" mono />
+          <MetadataPair label="Provider" value="Gitea" />
+        </div>
+      ),
+    },
+    {
+      label: <code>long value · hover copy</code>,
+      node: (
+        <MetadataPair
+          label="Webhook URL"
+          value="https://gitea.internal/api/v1/webhooks/wh_01JG8Z4X7QK2M5RT9W3BV6DHC0LP"
+        />
+      ),
+    },
+  ])
+}
+
+/** tech-status-badge (adoptable): all ten canonical statuses side by
+ *  side (Running pulses its dot) vs one onClick upgrade to button
+ *  semantics. */
+function techStatusBadgePreview(mod: LoadedModule): ReactNode {
+  const StatusBadge = asDefaultComponent(mod)
+  const statuses = mod.TECH_STATUSES as readonly TechStatus[]
+  return variantRow([
+    {
+      label: <code>all ten statuses</code>,
+      node: (
+        <div className="kx-tech-showcase__row">
+          {statuses.map((status) => (
+            <StatusBadge key={status} status={status} />
+          ))}
+        </div>
+      ),
+    },
+    {
+      label: <code>onClick · button semantics</code>,
+      node: <StatusBadge status="needs-review" onClick={() => undefined} />,
+    },
+  ])
+}
+
+/** tech-code-block (adoptable): 4-line SQL under the line-number gate vs
+ *  a 16-line config collapsed behind Show full code vs the footer line. */
+function techCodeBlockPreview(mod: LoadedModule): ReactNode {
+  const CodeBlock = asDefaultComponent(mod)
+  return variantRow([
+    {
+      label: <code>sql · 4 lines · no numbers</code>,
+      node: <CodeBlock code={TECH_SHORT_SQL} meta="sql" />,
+    },
+    {
+      label: <code>yaml · 16 lines · collapsed</code>,
+      node: (
+        <CodeBlock code={TECH_LONG_CONFIG} meta="config/attendance-sync.yaml" />
+      ),
+    },
+    {
+      label: <code>footer · execution context</code>,
+      node: (
+        <CodeBlock
+          code={TECH_SHORT_SQL}
+          meta="sql"
+          footer="Executed 09:41 · 3 rows returned"
+        />
+      ),
+    },
+  ])
+}
+
 /** feedback-modal (adoptable): good vs bad preset option sets. */
 function feedbackModalPreview(mod: LoadedModule): ReactNode {
   const FeedbackModal = asDefaultComponent(mod)
@@ -1226,6 +1394,44 @@ export const registry: RegistryEntry[] = [
     kind: 'component',
     load: () => import('../components/session/stream/blocks/EstimateBlock'),
     preview: streamEstimatePreview,
+  },
+  {
+    id: 'tech-inline-code',
+    kind: 'component',
+    load: () => import('../components/technical/InlineCode'),
+    preview: techInlineCodePreview,
+  },
+  {
+    id: 'tech-entity-token',
+    kind: 'component',
+    load: () => import('../components/technical/EntityToken'),
+    preview: techEntityTokenPreview,
+  },
+  {
+    id: 'tech-metadata-pair',
+    kind: 'component',
+    // MetadataPair previews compose EntityToken values; both stay lazy.
+    load: () =>
+      Promise.all([
+        import('../components/technical/MetadataPair'),
+        import('../components/technical/EntityToken'),
+      ]).then(([meta, entity]) => ({
+        default: meta.default,
+        EntityToken: entity.default,
+      })),
+    preview: techMetadataPairPreview,
+  },
+  {
+    id: 'tech-status-badge',
+    kind: 'component',
+    load: () => import('../components/technical/StatusBadge'),
+    preview: techStatusBadgePreview,
+  },
+  {
+    id: 'tech-code-block',
+    kind: 'component',
+    load: () => import('../components/technical/CodeBlock'),
+    preview: techCodeBlockPreview,
   },
   {
     id: 'feedback-modal',
