@@ -1,8 +1,7 @@
 /*
  * WarningBlock — kind 12 (WARNING): a SHORT notice row for brief
  * events — "session stopped / not connected" (spec §Fase 4). The
- * anatomy is deliberately minimal: danger icon (review — short failure
- * notices read as danger, not amber) + one line of prose
+ * anatomy is deliberately minimal: attention icon + one line of prose
  * (renderTechnicalText) inside a hairline 1px frame, radius 8 — no
  * card, no heavy border-left — with an optional trailing StatusBadge
  * ('Blocked' / 'Waiting for input'). The turn renders BARE (no kind
@@ -34,9 +33,12 @@ export default function WarningBlock({
   time = '14:43',
   showFooter = false,
 }: WarningBlockProps) {
+  const classes = ['kx-stream-warn']
+  if (data.tone === 'danger') classes.push('kx-stream-warn--danger')
+
   return (
     <ResponseBlock tone="attention" time={time} showFooter={showFooter}>
-      <p className="kx-stream-warn">
+      <p className={classes.join(' ')}>
         <span className="kx-stream-warn__icon" aria-hidden="true">
           <WarningIcon />
         </span>

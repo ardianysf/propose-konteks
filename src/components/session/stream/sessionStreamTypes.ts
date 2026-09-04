@@ -247,6 +247,10 @@ export interface AnswerBlockData {
  * with an optional trailing StatusBadge. */
 export interface WarningBlockData {
   text: string
+  /** Narrow semantic override for recovered connection-failure notices:
+   * danger adds a restrained red tint while ordinary warnings stay
+   * visually unchanged. */
+  tone?: 'danger'
   /** Trailing StatusBadge copy — 'Blocked' (danger tone) or
    * 'Waiting for input' (pause glyph). */
   badge?: 'Blocked' | 'Waiting for input'

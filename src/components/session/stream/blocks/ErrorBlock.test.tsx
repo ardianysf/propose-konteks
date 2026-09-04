@@ -60,7 +60,7 @@ describe('ErrorBlock', () => {
     expect(STREAM_CSS).toMatch(/\.kx-stream-error__kind\s*\{[^}]*color: var\(--kx-danger\);/s)
     expect(STREAM_CSS).toMatch(/\.kx-stream-error__chevron\s*\{[^}]*color: var\(--kx-danger\);/s)
     expect(STREAM_CSS).toMatch(/\.kx-stream-error\s*\{[^}]*border-bottom: 1px solid var\(--kx-danger\);/s)
-    expect(STREAM_CSS).toMatch(/\.kx-stream-error__summary\s*\{[^}]*border-top: 2px solid var\(--kx-danger\);/s)
+    expect(STREAM_CSS).toMatch(/\.kx-stream-error__summary\s*\{[^}]*border-top: 1px solid var\(--kx-danger\);/s)
     expect(STREAM_CSS).toMatch(/\.kx-stream-error__resolution--attention\s*\{[^}]*color: var\(--kx-danger\);/s)
 
     for (const selector of [
