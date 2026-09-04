@@ -17,19 +17,32 @@ import type { Plugin } from 'vite'
  *   /catalog/components → serves catalog.html
  *   /catalog/components/<slug> → serves catalog.html
  *
- * Note: the v2 app used to live at /v2.html with its own rewrite here — v2 is
- * now the primary app served at / (index.html), and /v2 is retired.
+ * The site root redirects to /catalog. The app remains available at /v2.
  */
-function catalogSpaFallback(): Plugin {
-  const makeSpaFallback = () => (req: any, _res: any, next: any) => {
-    // Only handle /catalog/* paths — blanket rewrite, identical to the
-    // original catalog-only behavior
-    if (req.url?.startsWith('/catalog')) {
-      // Rewrite to catalog.html for SPA routing
-      req.url = '/catalog.html'
-    }
-    next()
+export function routeSiteRequest(
+  req: { url?: string },
+  res: { statusCode: number; setHeader(name: string, value: string): unknown; end(): void },
+  next: () => void,
+) {
+  const url = req.url ?? ''
+  const queryIndex = url.indexOf('?')
+  const pathname = queryIndex === -1 ? url : url.slice(0, queryIndex)
+  const query = queryIndex === -1 ? '' : url.slice(queryIndex)
+  if (pathname === '/') {
+    res.statusCode = 302
+    res.setHeader('Location', `/catalog${query}`)
+    res.end()
+    return
   }
+  if (pathname === '/catalog' || pathname.startsWith('/catalog/')) {
+    req.url = `/catalog.html${query}`
+  } else if (pathname === '/v2' || pathname.startsWith('/v2/')) {
+    req.url = `/index.html${query}`
+  }
+  next()
+}
+
+function catalogSpaFallback(): Plugin {
   return {
     name: 'catalog-spa-fallback',
     configureServer(server) {
@@ -38,14 +51,14 @@ function catalogSpaFallback(): Plugin {
       // malformed percent-encoding)
       ;(server.middlewares as any).stack?.unshift({
         route: '',
-        handle: makeSpaFallback(),
+        handle: routeSiteRequest,
       })
     },
     configurePreviewServer(server) {
       // Insert middleware at the beginning of the stack for preview server too
       ;(server.middlewares as any).stack?.unshift({
         route: '',
-        handle: makeSpaFallback(),
+        handle: routeSiteRequest,
       })
     },
   }

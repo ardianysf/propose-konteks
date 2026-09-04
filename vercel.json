@@ -1,17 +1,20 @@
 {
   "redirects": [
     {
-      "source": "/v2",
-      "destination": "/",
-      "permanent": false
-    },
-    {
-      "source": "/v2/:path*",
-      "destination": "/",
+      "source": "/",
+      "destination": "/catalog",
       "permanent": false
     }
   ],
   "rewrites": [
+    {
+      "source": "/v2",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/v2/:path*",
+      "destination": "/index.html"
+    },
     {
       "source": "/catalog",
       "destination": "/catalog.html"
