@@ -74,14 +74,19 @@ function Fixture({
   )
 }
 
-/** Labelled side-by-side variant grid (see catalog.css .kx-cat-variant-*). */
+/** Labelled side-by-side variant grid (see catalog.css .kx-cat-variant-*).
+ * `wide` stacks the variants at full width — for components whose
+ * anatomy is a reading column (the session stream blocks: estimate,
+ * error, progress, artifact size against the ~680px session canvas). */
 function VariantGrid({
   items,
+  wide = false,
 }: {
   items: ReadonlyArray<{ label: ReactNode; node: ReactNode }>
+  wide?: boolean
 }) {
   return (
-    <div className="kx-cat-variant-row">
+    <div className={`kx-cat-variant-row${wide ? ' kx-cat-variant-row--wide' : ''}`}>
       {items.map((item, i) => (
         // Labels are unique per preview by construction (fixtureRef lists
         // them); index fallback keeps the grid robust for layout-only
@@ -113,11 +118,14 @@ function streamNode(node: ReactNode): ReactNode {
   )
 }
 
-/** variantRow with every node wrapped in the stream context. */
+/** variantRow with every node wrapped in the stream context, stacked at
+ * FULL WIDTH — the stream blocks are reading-column components. */
 function streamVariantRow(
   items: ReadonlyArray<{ label: ReactNode; node: ReactNode }>,
 ): ReactNode {
-  return variantRow(items.map((item) => ({ ...item, node: streamNode(item.node) })))
+  return (
+    <VariantGrid wide items={items.map((item) => ({ ...item, node: streamNode(item.node) }))} />
+  )
 }
 
 // ---------------------------------------------------------------------------
