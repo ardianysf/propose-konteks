@@ -1221,9 +1221,9 @@
       "sourcePath": "src/components/session/stream/blocks/WarningBlock.tsx",
       "exportName": "default",
       "classification": "adoptable",
-      "description": "Kind 12 (WARNING): a SHORT notice row for brief events (session paused / connection lost) — danger icon + one line of prose (renderTechnicalText) inside a hairline 1px frame, radius 8, with an optional trailing StatusBadge ('Blocked' danger tone / 'Waiting for input' pause glyph). Renders bare: the row IS the notice.",
+      "description": "Kind 12 (WARNING): a SHORT notice row for brief events (session paused / connection lost) — default WarningBlock icon/tone uses `--kx-attention` for the hairline 1px frame, radius 8, and one line of prose (renderTechnicalText), with an optional trailing StatusBadge ('Blocked' danger tone / 'Waiting for input' pause glyph). An explicit `tone: 'danger'` modifier adds the recovered-failure danger icon/tint via `--kx-danger`; not every warning uses danger. Renders bare: the row IS the notice.",
       "propDocs": {
-        "data": "required, WarningBlockData — notice text and optional badge copy ('Blocked' | 'Waiting for input')",
+        "data": "required, WarningBlockData — notice text, optional `tone: 'danger'` for recovered connection-failure tinting, and optional badge copy ('Blocked' | 'Waiting for input')",
         "time": "optional, string (default '14:43') — turn timestamp (hover footer)",
         "showFooter": "optional, boolean (default false) — hover footer; set on the group-final turn"
       },
@@ -1232,6 +1232,7 @@
         "src/components/session/stream/SessionStream.css"
       ],
       "tokenDeps": [
+        "--kx-attention",
         "--kx-border",
         "--kx-danger",
         "--kx-primary",

@@ -52,9 +52,11 @@ describe('EstimateBlock', () => {
     expect(card).toHaveAttribute('hidden')
   })
 
-  it('uses attention separators/toggle accents while keeping card borders and leaders on border tokens', () => {
-    expect(STREAM_CSS).toMatch(/\.kx-stream-estimate-disclosure\s*\{[^}]*border-top: 2px solid var\(--kx-attention\);[^}]*border-bottom: 1px solid var\(--kx-attention\);/s)
+  it('uses restrained attention accents while keeping separators hairline-thin and card content neutral', () => {
+    expect(STREAM_CSS).toMatch(/\.kx-stream-estimate-disclosure\s*\{[^}]*border-top: 1px solid var\(--kx-attention\);[^}]*border-bottom: 1px solid var\(--kx-attention\);/s)
+    expect(STREAM_CSS).toMatch(/\.kx-stream-estimate__head\s*\{[^}]*background: color-mix\(in srgb, var\(--kx-attention\) 12%, transparent\);/s)
     expect(STREAM_CSS).toMatch(/\.kx-stream-estimate__kind\s*\{[^}]*color: var\(--kx-attention\);/s)
+    expect(STREAM_CSS).toMatch(/\.kx-stream-estimate__kind::before\s*\{[^}]*content: '';[^}]*background: var\(--kx-attention\);/s)
     expect(STREAM_CSS).toMatch(/\.kx-stream-estimate__toggle\s*\{[^}]*color: var\(--kx-attention\);/s)
     expect(STREAM_CSS).toMatch(/\.kx-stream-estimate__toggle:hover,\s*\.kx-stream-estimate__toggle:focus-visible\s*\{[^}]*color: var\(--kx-attention\);/s)
     expect(STREAM_CSS).toMatch(/\.kx-stream-estimate\s*\{[^}]*border: 1px solid var\(--kx-border\);/s)

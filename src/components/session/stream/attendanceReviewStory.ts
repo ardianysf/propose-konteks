@@ -304,6 +304,7 @@ export const ATTENDANCE_REVIEW_STORY: StreamStoryEntry[] = [
     kind: 'warning',
     data: {
       text: 'Connection lost during sync check — paused 2m 14s, resumed automatically.',
+      tone: 'danger',
       badge: 'Waiting for input',
     },
   },

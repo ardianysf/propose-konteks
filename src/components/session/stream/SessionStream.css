@@ -1499,10 +1499,19 @@
   border-radius: 8px;
 }
 
+.kx-stream-warn--danger {
+  border-color: color-mix(in srgb, var(--kx-danger) 28%, var(--kx-border));
+  background: color-mix(in srgb, var(--kx-danger) 10%, transparent);
+}
+
 .kx-stream-warn__icon {
   flex: 0 0 auto;
   display: inline-flex;
-  color: var(--kx-danger); /* review: short failure notices read as danger */
+  color: var(--kx-attention);
+}
+
+.kx-stream-warn--danger .kx-stream-warn__icon {
+  color: var(--kx-danger);
 }
 
 .kx-stream-warn__text {
@@ -1593,7 +1602,7 @@
    * block is just this line; expanded = the detail opens beneath it and
    * the closing line moves down with the content). */
   padding: 8px 0;
-  border-top: 2px solid var(--kx-danger);
+  border-top: 1px solid var(--kx-danger);
 }
 
 .kx-stream-error__title {
@@ -1762,12 +1771,14 @@
 }
 
 /* The disclosure header rides OUTSIDE the card: label + toggle between
- * two hairline rules; the card below is centered. */
+ * two hairline rules; the card below is centered. Both separators stay
+ * hairline-thin, so the estimate state reads through the header accents
+ * instead of heavier structure. */
 .kx-stream-estimate-disclosure {
   display: grid;
   gap: 6px; /* natural rhythm: label → card → total stay close */
   padding: 6px 0;
-  border-top: 2px solid var(--kx-attention);
+  border-top: 1px solid var(--kx-attention);
   border-bottom: 1px solid var(--kx-attention);
 }
 
@@ -1776,6 +1787,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--kx-attention) 12%, transparent);
 }
 
 .kx-stream-estimate__toggle {
@@ -1837,6 +1851,15 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--kx-attention);
+}
+
+.kx-stream-estimate__kind::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--kx-attention);
 }
 
 .kx-stream-estimate__heading {
