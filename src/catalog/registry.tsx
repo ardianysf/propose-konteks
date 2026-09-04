@@ -101,6 +101,25 @@ function variantRow(
   return <VariantGrid items={items} />
 }
 
+/** Stream-context wrapper: the session-stream blocks size their
+ *  typography, rhythm, and ch-based widths against .kx-stream — catalog
+ *  previews must render inside the SAME context as the session page or
+ *  estimate/error/progress/artifact read off-scale. */
+function streamNode(node: ReactNode): ReactNode {
+  return (
+    <div className="kx-stream" style={{ width: '100%' }}>
+      <div className="kx-stream-slot">{node}</div>
+    </div>
+  )
+}
+
+/** variantRow with every node wrapped in the stream context. */
+function streamVariantRow(
+  items: ReadonlyArray<{ label: ReactNode; node: ReactNode }>,
+): ReactNode {
+  return variantRow(items.map((item) => ({ ...item, node: streamNode(item.node) })))
+}
+
 // ---------------------------------------------------------------------------
 // account
 // ---------------------------------------------------------------------------
@@ -430,7 +449,7 @@ function streamResponseBlockPreview(mod: LoadedModule): ReactNode {
   const ResponseBlock = asDefaultComponent(mod)
   const PlanIcon = asNamedComponent(mod, 'PlanIcon')
   const StreamChip = asNamedComponent(mod, 'StreamChip')
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>labeled turn</code>,
       node: (
@@ -468,7 +487,7 @@ function streamResponseBlockPreview(mod: LoadedModule): ReactNode {
  *  action bar, plus the afterBubble slot demo. */
 function streamBubblePreview(mod: LoadedModule): ReactNode {
   const BubbleBlock = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>default</code>,
       node: (
@@ -510,7 +529,7 @@ function streamBubblePreview(mod: LoadedModule): ReactNode {
 function streamUserRequestPreview(mod: LoadedModule): ReactNode {
   const UserRequestBlock = asDefaultComponent(mod)
   const request = story('request')
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>short · no clamp</code>,
       node: (
@@ -534,7 +553,7 @@ function streamUserRequestPreview(mod: LoadedModule): ReactNode {
  *  prose, scope in/out columns, confidence note, grounding line. */
 function streamAcknowledgementPreview(mod: LoadedModule): ReactNode {
   const AcknowledgementBlock = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>fixture · scope in/out + confidence</code>,
       node: <AcknowledgementBlock data={story('acknowledgement')} />,
@@ -547,7 +566,7 @@ function streamAcknowledgementPreview(mod: LoadedModule): ReactNode {
 function streamAnswerPreview(mod: LoadedModule): ReactNode {
   const AnswerBlock = asDefaultComponent(mod)
   const answer = story('answer')
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>prose</code>,
       node: <AnswerBlock data={answer} />,
@@ -564,7 +583,7 @@ function streamAnswerPreview(mod: LoadedModule): ReactNode {
 function streamClarificationPreview(mod: LoadedModule): ReactNode {
   const ClarificationBlock = asDefaultComponent(mod)
   const clarification = story('clarification')
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>{'interactive · answered={}'}</code>,
       node: (
@@ -586,7 +605,7 @@ function streamClarificationPreview(mod: LoadedModule): ReactNode {
 function streamPlanPreview(mod: LoadedModule): ReactNode {
   const PlanBlock = asDefaultComponent(mod)
   const plan = story('plan')
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>pending</code>,
       node: (
@@ -618,7 +637,7 @@ function streamPlanPreview(mod: LoadedModule): ReactNode {
 function streamApprovalGatePreview(mod: LoadedModule): ReactNode {
   const ApprovalGateBlock = asDefaultComponent(mod)
   const gate = story('approval-gate')
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>outstanding</code>,
       node: <ApprovalGateBlock data={gate} onDecision={() => undefined} />,
@@ -640,7 +659,7 @@ function streamApprovalGatePreview(mod: LoadedModule): ReactNode {
  *  vs the collapsed settled summary (expandable in the live preview). */
 function streamProgressPreview(mod: LoadedModule): ReactNode {
   const ProgressBlock = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>live · active phase</code>,
       node: (
@@ -659,7 +678,7 @@ function streamProgressPreview(mod: LoadedModule): ReactNode {
  *  the CodeBlock pair with Copy). */
 function streamToolEvidencePreview(mod: LoadedModule): ReactNode {
   const ToolEvidenceBlock = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>done · collapsed rows</code>,
       node: <ToolEvidenceBlock data={story('tool')} />,
@@ -688,7 +707,7 @@ function streamToolEvidencePreview(mod: LoadedModule): ReactNode {
  *  (interactive in the live preview). */
 function streamArtifactPreview(mod: LoadedModule): ReactNode {
   const ArtifactBlock = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>full-width row · hover actions</code>,
       node: <ArtifactBlock data={story('artifact')} />,
@@ -700,7 +719,7 @@ function streamArtifactPreview(mod: LoadedModule): ReactNode {
  *  chip, impact prose, mono location, quoted evidence. */
 function streamReviewFindingPreview(mod: LoadedModule): ReactNode {
   const ReviewFindingBlock = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>High severity fixture</code>,
       node: <ReviewFindingBlock data={story('review')} />,
@@ -713,7 +732,7 @@ function streamReviewFindingPreview(mod: LoadedModule): ReactNode {
  *  the 2px accent rule, with the hover footer. */
 function streamCompletionPreview(mod: LoadedModule): ReactNode {
   const CompletionBlock = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>fixture · showFooter</code>,
       node: <CompletionBlock data={story('completion')} showFooter />,
@@ -725,7 +744,7 @@ function streamCompletionPreview(mod: LoadedModule): ReactNode {
  *  prose line in a hairline frame, trailing Waiting-for-input badge. */
 function streamWarningPreview(mod: LoadedModule): ReactNode {
   const WarningBlock = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>notice · Waiting for input</code>,
       node: <WarningBlock data={story('warning')} />,
@@ -738,7 +757,7 @@ function streamWarningPreview(mod: LoadedModule): ReactNode {
  *  resolution above the bottom line (interactive in the live preview). */
 function streamErrorPreview(mod: LoadedModule): ReactNode {
   const ErrorBlock = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>collapsed · Show detail toggle</code>,
       node: <ErrorBlock data={story('error')} />,
@@ -751,7 +770,7 @@ function streamErrorPreview(mod: LoadedModule): ReactNode {
  *  card inside (interactive in the live preview). */
 function streamEstimatePreview(mod: LoadedModule): ReactNode {
   const EstimateBlock = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>collapsed · Show breakdown toggle</code>,
       node: <EstimateBlock data={story('estimate')} />,
@@ -792,7 +811,7 @@ rules:
  *  the ink-first wash in a sentence vs a standalone specimen. */
 function techInlineCodePreview(mod: LoadedModule): ReactNode {
   const InlineCode = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>in a sentence</code>,
       node: (
@@ -813,7 +832,7 @@ function techInlineCodePreview(mod: LoadedModule): ReactNode {
  *  vs link (rests underlined; hover/focus becomes a pill). */
 function techEntityTokenPreview(mod: LoadedModule): ReactNode {
   const EntityToken = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>pill · mono &amp; sans</code>,
       node: (
@@ -844,7 +863,7 @@ function techEntityTokenPreview(mod: LoadedModule): ReactNode {
 function techMetadataPairPreview(mod: LoadedModule): ReactNode {
   const MetadataPair = asDefaultComponent(mod)
   const EntityToken = asNamedComponent(mod, 'EntityToken')
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>2×2 grid · mixed values</code>,
       node: (
@@ -880,7 +899,7 @@ function techMetadataPairPreview(mod: LoadedModule): ReactNode {
 function techStatusBadgePreview(mod: LoadedModule): ReactNode {
   const StatusBadge = asDefaultComponent(mod)
   const statuses = mod.TECH_STATUSES as readonly TechStatus[]
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>all ten statuses</code>,
       node: (
@@ -902,7 +921,7 @@ function techStatusBadgePreview(mod: LoadedModule): ReactNode {
  *  a 16-line config collapsed behind Show full code vs the footer line. */
 function techCodeBlockPreview(mod: LoadedModule): ReactNode {
   const CodeBlock = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>sql · 4 lines · no numbers</code>,
       node: <CodeBlock code={TECH_SHORT_SQL} meta="sql" />,
@@ -929,7 +948,7 @@ function techCodeBlockPreview(mod: LoadedModule): ReactNode {
 /** feedback-modal (adoptable): good vs bad preset option sets. */
 function feedbackModalPreview(mod: LoadedModule): ReactNode {
   const FeedbackModal = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>good</code>,
       node: <FeedbackModal kind="good" embedded onClose={() => undefined} />,
@@ -1070,7 +1089,7 @@ function overlayLifecyclePreview(_mod: LoadedModule): ReactNode {
  *  change, visible side by side). */
 function sidebarPreview(mod: LoadedModule): ReactNode {
   const Sidebar = asDefaultComponent(mod)
-  return variantRow([
+  return streamVariantRow([
     {
       label: <code>expanded</code>,
       node: (
