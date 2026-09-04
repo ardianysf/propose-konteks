@@ -37,7 +37,8 @@ Exits 0 when already up-to-date.
 
 | Output | Dev | Preview |
 |--------|-----|---------|
-| **Main mockup** | `http://localhost:5173/` | `http://localhost:4173/` |
+| **Home → catalog** | `http://localhost:5173/` | `http://localhost:4173/` |
+| **V2 mockup** | `http://localhost:5173/v2` | `http://localhost:4173/v2` |
 | **Design system catalog** | `http://localhost:5173/catalog` | `http://localhost:4173/catalog` |
 | **Catalog tokens** | `http://localhost:5173/catalog/tokens` | `http://localhost:4173/catalog/tokens` |
 | **Catalog components** | `http://localhost:5173/catalog/components` | `http://localhost:4173/catalog/components` |
@@ -60,17 +61,22 @@ Theme lives **outside** `mockupReducer` — it's actual user state, not mock sce
 
 Loading and empty variants are reachable via URL query parameters (consumed once at reducer init, spec §15, AC43):
 
-- `/?mock=loading` — Skeleton/loading states for sessions, systems, repositories, components, pending reviews
-- `/?mock=empty` — Designed empty states for the same primary flows
-- `/` — Default populated "ready" state
+- `/v2?mock=loading` — Skeleton/loading states for sessions, systems, repositories, components, pending reviews
+- `/v2?mock=empty` — Designed empty states for the same primary flows
+- `/v2` — Default populated "ready" state
 
 ## Vercel Deployment
 
-`vercel.json` configures production routing rewrites for the design system catalog:
+`vercel.json` redirects the site root to the catalog and keeps the V2 app accessible:
 
 ```json
 {
+  "redirects": [
+    { "source": "/", "destination": "/catalog", "permanent": false }
+  ],
   "rewrites": [
+    { "source": "/v2", "destination": "/index.html" },
+    { "source": "/v2/:path*", "destination": "/index.html" },
     { "source": "/catalog", "destination": "/catalog.html" },
     { "source": "/catalog/:path*", "destination": "/catalog.html" }
   ]
