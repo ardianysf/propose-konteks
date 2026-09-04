@@ -15,7 +15,7 @@
  * error token exists — the attention tone plus the badge's firm ×
  * carry the failure (repo convention).
  */
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import ResponseBlock, { ChevronIcon, ErrorIcon, KIND_LABELS } from '../ResponseBlock'
 import InlineCode from '../../../technical/InlineCode'
 import { renderTechnicalText } from '../../../technical/renderTechnicalText'
@@ -26,18 +26,21 @@ interface ErrorBlockProps {
   time?: string
   /** Hover footer — when this turn ends its response group. */
   showFooter?: boolean
+  /** Execution stats on the footer (duration · tokens in · out). */
+  stats?: { duration: string; tokensIn: string; tokensOut: string }
 }
 
 export default function ErrorBlock({
   data,
   time = '14:31',
   showFooter = false,
+  stats,
 }: ErrorBlockProps) {
   const [open, setOpen] = useState(false)
-  const detailId = 'kx-stream-error-detail'
+  const detailId = `kx-stream-error-detail-${useId().replace(/:/g, '-')}`
 
   return (
-    <ResponseBlock tone="attention" time={time} showFooter={showFooter}>
+    <ResponseBlock tone="attention" time={time} showFooter={showFooter} stats={stats}>
       <div className="kx-stream-error" data-testid="error-card">
         {/* The summary row: the [×] ERROR kind chip REPLACES the Failed
          * badge (review) — title stretches, toggle rides right. Tapping

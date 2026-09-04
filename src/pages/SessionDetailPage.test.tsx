@@ -2,16 +2,18 @@ import { useEffect, useReducer } from 'react'
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import SessionDetailPage from './SessionDetailPage'
+import SessionDetailPage, { buildSessionDetailStreamEntries } from './SessionDetailPage'
+import { isLastAgentTurnOfResponse } from '../components/session/stream/responseGroup'
 import {
   PENDING_PROCESS_PHASES,
   PENDING_PHASE_DURATION_MS,
   pendingDelayMs,
 } from '../components/session/pendingPhases'
 import { ASSISTANT_RESPONSES } from '../data/assistantResponses'
+import { SESSION_DETAIL } from '../data/mockData'
 import { MockupContext, useMockup } from '../state/MockupContext'
 import { OverlayLifecycleProvider } from '../components/shell/OverlayLifecycle'
-import { initialState, mockupReducer, type MockupState } from '../state/mockupReducer'
+import { initialState, mockupReducer, type MockupAction, type MockupState } from '../state/mockupReducer'
 
 // ---------------------------------------------------------------------------
 // Harness — the page under the real reducer via the mockup context, with a
@@ -28,7 +30,14 @@ function StateProbe({ bucket }: { bucket: StateBucket }) {
   return null
 }
 
-function renderSessionDetailPage(search = '') {
+/**
+ * Renders the detail page with an extra `run-action` control that dispatches
+ * a mockup action on click. The retired SessionQuoteCard CTAs were the old
+ * UI driver for quote decisions; the reducer path is unchanged, so
+ * quote-decision coverage dispatches through this control and asserts the
+ * stream/tracker consequences the page renders.
+ */
+function renderSessionDetailPage(search = '', action?: MockupAction) {
   const bucket: StateBucket = { current: null }
 
   function Harness() {
@@ -42,6 +51,11 @@ function renderSessionDetailPage(search = '') {
         <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
           <StateProbe bucket={bucket} />
           <SessionDetailPage />
+          {action !== undefined && (
+            <button type="button" data-testid="run-action" onClick={() => dispatch(action)}>
+              Run action
+            </button>
+          )}
         </OverlayLifecycleProvider>
       </MockupContext.Provider>
     )
@@ -53,6 +67,33 @@ function renderSessionDetailPage(search = '') {
 afterEach(() => {
   vi.unstubAllGlobals()
 })
+
+// ---------------------------------------------------------------------------
+// Fixture helpers — the page renders from a clone of SESSION_DETAIL, so
+// tests reference the fixture directly to stay in sync with copy tweaks.
+// ---------------------------------------------------------------------------
+
+/** Fixture timeline, in order (T-001…T-016). */
+const FIXTURE_TIMELINE = SESSION_DETAIL.timeline
+const NON_ARTIFACT_TIMELINE = FIXTURE_TIMELINE.filter((item) => item.type !== 'ARTIFACT')
+const FIXTURE_STREAM_ENTRIES = buildSessionDetailStreamEntries(SESSION_DETAIL)
+const FIXTURE_STREAM_KINDS = FIXTURE_STREAM_ENTRIES.map(({ entry }) => entry.kind)
+const INITIAL_STREAM_FOOTER_SLOT_IDS = FIXTURE_STREAM_KINDS.flatMap((_, index) =>
+  isLastAgentTurnOfResponse(FIXTURE_STREAM_KINDS, index) ? [`session-turn-${index + 1}`] : [],
+)
+
+/** HH:MM local clock — mirrors the page's timestamp formatting. */
+const clockOf = (iso: string) => {
+  const date = new Date(iso)
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}
+
+/** The rendered stream slot for turn `n` (1-based, session-turn-N). */
+const slot = (n: number) => screen.getByTestId(`session-turn-${n}`)
+
+/** All stream slots in conversation order. */
+const allSlots = () =>
+  screen.getByTestId('session-stream').querySelectorAll('[data-testid^="session-turn-"]')
 
 // ---------------------------------------------------------------------------
 // Page structure
@@ -71,11 +112,21 @@ describe('SessionDetailPage — page structure', () => {
     expect(screen.queryByTestId('back-to-sessions')).not.toBeInTheDocument()
   })
 
-  it('renders the timeline section with SessionTimeline component', () => {
+  it('renders the conversation stream container (role log) with ordered turn slots', () => {
     renderSessionDetailPage()
-    const timeline = screen.getByTestId('session-timeline')
-    expect(timeline).toHaveAttribute('aria-label', 'Session timeline')
-    expect(timeline.querySelector('.kx-session-detail__timeline')).not.toBeNull()
+    const stream = screen.getByTestId('session-stream')
+    expect(stream).toHaveAttribute('role', 'log')
+    expect(stream).toHaveAttribute('aria-label', 'Session conversation')
+    expect(stream).toHaveClass('kx-stream')
+
+    // One slot per mapped timeline turn, flat siblings inside the stream.
+    const slots = stream.querySelectorAll(':scope > [data-testid^="session-turn-"]')
+    expect(slots).toHaveLength(15)
+    slots.forEach((turnSlot) => expect(turnSlot).toHaveClass('kx-stream-slot'))
+
+    // The stream replaces the retired SessionTimeline inside the blocks
+    // container.
+    expect(screen.getByTestId('session-detail-blocks')).toContainElement(stream)
   })
 })
 
@@ -174,12 +225,12 @@ describe('SessionTracker — minimal current-stage summary', () => {
   })
 
   it('drops the badge once the pending quote is approved', () => {
-    const { bucket } = renderSessionDetailPage()
+    // Approve through the reducer — the retired quote-card CTAs were the
+    // previous UI driver; the state the tracker derives from is unchanged.
+    const { bucket } = renderSessionDetailPage('', { type: 'SESSION_APPROVE_QUOTE', quoteId: 'Q-102' })
     expect(bucket.current?.sessionDetail.quotes.filter((q) => q.status === 'PENDING_APPROVAL')).toHaveLength(1)
 
-    // Approve the pending quote through the quote card action.
-    fireEvent.click(screen.getByTestId('quote-approval-toggle'))
-    fireEvent.click(screen.getByRole('button', { name: /Approve quote Q-102/ }))
+    fireEvent.click(screen.getByTestId('run-action'))
 
     const badge = screen.getByTestId('session-tracker').querySelector('.kx-session-detail__stage-pill-badge')
     expect(badge).toBeNull()
@@ -199,11 +250,9 @@ describe('SessionDetailPage — metadata footer chips', () => {
     const chips = footer?.querySelectorAll('.kx-chip')
     expect(chips).toHaveLength(4)
 
-    // Repository chip with icon
+    // The stream migration flattened the footer chips to plain text —
+    // repository, branch, issue ref, agent, in that order, icon-free.
     expect(chips?.[0].textContent).toContain('bsi/hris-approval-service')
-    expect(chips?.[0].querySelector('svg[data-icon="repository"]')).not.toBeNull()
-
-    // Branch chip
     expect(chips?.[1].textContent).toContain('fix/approval-list-exception')
 
     // Issue ref chip
@@ -211,6 +260,7 @@ describe('SessionDetailPage — metadata footer chips', () => {
 
     // Agent chip
     expect(chips?.[3].textContent).toContain('Konteks Engineering Agent')
+    expect(footer?.querySelectorAll('svg')).toHaveLength(0)
   })
 
   it('keeps mode/system/component context metadata in the header, not the footer', () => {
@@ -227,15 +277,17 @@ describe('SessionDetailPage — metadata footer chips', () => {
 // ---------------------------------------------------------------------------
 
 describe('SessionDetailPage — content blocks container', () => {
-  it('groups quote, timeline, and metadata as large discrete blocks', () => {
+  it('groups the conversation stream, quote estimates, and metadata as large discrete blocks', () => {
     renderSessionDetailPage()
     const blocks = screen.getByTestId('session-detail-blocks')
     expect(blocks).toHaveClass('kx-session-detail__blocks')
 
-    // Each block remains a flat sibling so it can later become clickable.
-    expect(blocks.querySelector('[data-testid="session-timeline"]')).not.toBeNull()
+    // Each block remains a flat sibling so it can later become clickable:
+    // the stream container, the metadata footer, and both quote-event
+    // estimate disclosures (the cards rest collapsed but mounted).
+    expect(blocks.querySelector('[data-testid="session-stream"]')).not.toBeNull()
     expect(blocks.querySelector('footer.kx-session-detail__meta')).not.toBeNull()
-    expect(blocks.querySelector('[data-testid="quote-approval-card"]')).not.toBeNull()
+    expect(blocks.querySelectorAll('[data-testid="estimate-card"]')).toHaveLength(2)
 
     // The tracker and sticky composer intentionally stay outside the blocks
     // container — both live inside the sticky composer area.
@@ -293,299 +345,438 @@ describe('SessionDetailPage — AppShell integration', () => {
 })
 
 // ---------------------------------------------------------------------------
-// SessionTimeline — all item types with timestamps
+// Session stream — the fixture timeline mapped onto chat-style turns.
+// (Replaces the retired SessionTimeline coverage: every timeline item type
+// now asserts its stream-component equivalent.)
 // ---------------------------------------------------------------------------
 
-describe('SessionTimeline — renders all 8 item types', () => {
-  it('renders all timeline item types in order with timestamps', () => {
-    const { container } = renderSessionDetailPage()
-    const timelineList = container.querySelector('.kx-session-detail__timeline')
-    expect(timelineList).not.toBeNull()
+describe('Session stream — timeline mapped to chat turns', () => {
+  it('keeps every mapped turn timestamp aligned with its non-artifact timeline source event', () => {
+    renderSessionDetailPage()
 
-    const items = timelineList?.querySelectorAll(':scope > li')
-    expect(items?.length).toBeGreaterThan(0)
+    expect(FIXTURE_STREAM_ENTRIES).toHaveLength(NON_ARTIFACT_TIMELINE.length)
 
-    // Check that user message has right-aligned bubble
-    const userBubble = container.querySelector('.kx-session-timeline__item--user')
-    expect(userBubble).toBeInTheDocument()
-    expect(userBubble?.querySelector('.kx-session-timeline__bubble--user')).not.toBeNull()
-    expect(userBubble?.querySelector('.kx-session-timeline__timestamp')).toBeNull()
+    NON_ARTIFACT_TIMELINE.forEach((item, index) => {
+      const expectedTime = clockOf(item.createdAt)
+      const renderedKind = FIXTURE_STREAM_ENTRIES[index]?.entry.kind
+      const renderedSlot = slot(index + 1)
+      const renderedTime =
+        renderedKind === 'request'
+          ? renderedSlot.querySelector('.kx-stream-bubble__time')?.textContent
+          : renderedSlot.querySelector('article.kx-stream-turn')?.getAttribute('data-stream-time')
 
-    // User and assistant bubbles remain visually distinct by alignment and
-    // surface, but intentionally carry no sender identity chrome.
-    const assistantBubble = container.querySelector('.kx-session-timeline__item--assistant')
-    expect(assistantBubble).toBeInTheDocument()
-    expect(assistantBubble?.querySelector('.kx-session-timeline__agent-label')).toBeNull()
-    expect(assistantBubble?.querySelector('.kx-session-timeline__agent-header')).toBeNull()
-    expect(assistantBubble?.querySelector('.kx-session-timeline__bubble--assistant')).not.toBeNull()
-    expect(userBubble?.textContent).not.toContain('You')
-
-    // Check system event
-    const systemEvent = container.querySelector('.kx-session-timeline__item--system')
-    expect(systemEvent).toBeInTheDocument()
-    expect(systemEvent?.querySelector('svg[data-icon="gear"]')).not.toBeNull()
-    expect(systemEvent?.querySelector('.kx-session-timeline__event-text')).not.toBeNull()
-
-    // Check quote card
-    const quoteCard = container.querySelector('[data-testid="timeline-quote-card"]')
-    expect(quoteCard).toBeInTheDocument()
-    expect(quoteCard?.querySelector('.kx-session-timeline__card-title')).not.toBeNull()
-
-    // Check approval item
-    const approvalItem = container.querySelector('.kx-session-timeline__item--approval')
-    expect(approvalItem).toBeInTheDocument()
-
-    // Check delivery card
-    const deliveryCard = container.querySelector('.kx-session-timeline__card--delivery')
-    expect(deliveryCard).toBeInTheDocument()
-    expect(deliveryCard?.querySelector('.kx-session-timeline__card-title')).toHaveTextContent('Delivery — D-057')
-
-    // Check error card
-    const errorCard = container.querySelector('[data-testid="timeline-error-card"]')
-    expect(errorCard).toBeInTheDocument()
-    expect(errorCard?.querySelector('.kx-session-timeline__error-title')).toHaveTextContent('Warning')
-
-    // Check artifact item
-    const artifactItem = container.querySelector('.kx-session-timeline__item--artifact')
-    expect(artifactItem).toBeInTheDocument()
-    expect(artifactItem?.querySelector('svg[data-icon="file"]')).not.toBeNull()
+      expect(FIXTURE_STREAM_ENTRIES[index]?.time, `${item.id} entry time`).toBe(expectedTime)
+      expect(renderedTime, `${item.id} (${item.type}) rendered in session-turn-${index + 1}`).toBe(expectedTime)
+    })
   })
 
-  it('user and assistant bubbles have different visual classes', () => {
-    const { container } = renderSessionDetailPage()
+  it('maps the fixture timeline onto ordered stream turns (user run merged, artifact attached)', () => {
+    renderSessionDetailPage()
+    const slots = allSlots()
 
-    const userBubble = container.querySelector('.kx-session-timeline__bubble--user')
-    const assistantBubble = container.querySelector('.kx-session-timeline__bubble--assistant')
+    // One turn per non-artifact timeline item — the USER artifact merges
+    // into the preceding request bubble as an attachment card.
+    expect(slots).toHaveLength(FIXTURE_TIMELINE.filter((item) => item.type !== 'ARTIFACT').length)
+    expect(slots).toHaveLength(15)
 
-    expect(userBubble).not.toBe(assistantBubble)
-    expect(userBubble).toHaveClass('kx-session-timeline__bubble--user')
-    expect(assistantBubble).toHaveClass('kx-session-timeline__bubble--assistant')
+    // Turn 1 — the user run: right-aligned request bubble carrying the
+    // message prose, the attachment card rendered AFTER the bubble shell
+    // inside the row, and the hover action bar (time + copy + edit)
+    // beneath it.
+    const request = within(slot(1))
+    const bubble = request.getByTestId('user-bubble')
+    expect(bubble).toHaveClass('kx-stream-bubble-row')
+    expect(bubble.querySelector('.kx-stream-bubble')).not.toBeNull()
+    expect(request.getByTestId('bubble-text')).toHaveTextContent(FIXTURE_TIMELINE[0].content)
+    const attachments = slot(1).querySelector('ul[aria-label="Attachments"]')
+    expect(attachments).not.toBeNull()
+    expect(attachments?.querySelectorAll('.kx-stream-attachment')).toHaveLength(1)
+    expect(attachments?.querySelector('.kx-stream-attachment__name')?.textContent).toBe(
+      'logs-approval-exception.txt',
+    )
+    expect(bubble.querySelector('.kx-stream-bubble')?.contains(attachments as Node)).toBe(false)
+    expect(bubble.contains(attachments as Node)).toBe(true)
+    expect(slot(1).querySelector('[data-testid="bubble-actions"]')).not.toBeNull()
+    expect(slot(1).querySelector('.kx-stream-bubble__time')?.textContent).toBe(
+      clockOf(FIXTURE_TIMELINE[0].createdAt),
+    )
+    // The short fixture message never shows the Read-more clamp control.
+    expect(slot(1).querySelector('.kx-stream-bubble__read-toggle')).toBeNull()
+
+    // Turns 2–4 — acknowledgement answer, system event, analysis answer:
+    // all flat prose turns in fixture order.
+    expect(slot(2).textContent).toContain(FIXTURE_TIMELINE[2].content)
+    expect(slot(3).textContent).toContain(FIXTURE_TIMELINE[3].content)
+    expect(slot(4).textContent).toContain(FIXTURE_TIMELINE[4].content)
+
+    // Turn 5 — the runner error: attention turn with the collapsed
+    // [× ERROR] summary row and a Show-detail disclosure.
+    const errorTurn = slot(5)
+    expect(errorTurn.querySelector('article.kx-stream-turn')).toHaveClass('kx-stream-turn--attention')
+    expect(errorTurn.querySelector('[data-testid="error-card"]')).not.toBeNull()
+    expect(errorTurn.querySelector('.kx-stream-error__kind')?.textContent).toContain('ERROR')
+    expect(errorTurn.querySelector('.kx-stream-error__title')?.textContent).toBe(FIXTURE_TIMELINE[5].content)
+    const errorToggle = within(errorTurn).getByRole('button', { name: /show detail/i })
+    expect(errorToggle).toHaveAttribute('aria-expanded', 'false')
+    expect(errorTurn.querySelector('.kx-stream-error__detail')).toHaveAttribute('hidden')
+    fireEvent.click(errorToggle)
+    expect(errorToggle).toHaveAttribute('aria-expanded', 'true')
+    expect(errorTurn.querySelector('.kx-stream-error__detail')).not.toHaveAttribute('hidden')
+    expect(errorTurn.querySelector('.kx-stream-error__impact')?.textContent).toBe(
+      'Automatically retried by the runner.',
+    )
+
+    // Turn 6 — tests-green answer.
+    expect(slot(6).textContent).toContain(FIXTURE_TIMELINE[6].content)
+
+    // Turn 7 — the Q-101 quote event: estimate disclosure, collapsed by
+    // default, total row reading the approved status.
+    const q101Total = slot(7).querySelector('.kx-stream-estimate__row--total')
+    expect(q101Total?.textContent).toContain('Status')
+    expect(q101Total?.textContent).toContain('Approved')
+
+    // Turn 8 — the Q-101 approval: resolved gate (accent tone, compact
+    // APPROVAL header, quiet decision line — no pending gate chrome).
+    const gate = slot(8)
+    expect(gate.querySelector('article.kx-stream-turn')).toHaveClass('kx-stream-turn--accent')
+    expect(gate.querySelector('.kx-stream-turn__kind')?.textContent).toBe('APPROVAL')
+    expect(gate.querySelector('.kx-stream-chip')?.textContent).toBe('Allow once')
+    expect(gate.textContent).toContain('Decision recorded:')
+    expect(gate.textContent).toContain(FIXTURE_TIMELINE[8].content)
+    expect(gate.querySelector('[data-testid="gate-pending"]')).toBeNull()
+
+    // Turns 9–10 — delivery-started system event + implementing answer.
+    expect(slot(9).textContent).toContain(FIXTURE_TIMELINE[9].content)
+    expect(slot(10).textContent).toContain(FIXTURE_TIMELINE[10].content)
+
+    // Turn 11 — the delivery: answer prose followed by the artifact chip row.
+    expect(slot(11).querySelector('.kx-stream-answer-prose')?.textContent).toContain(
+      FIXTURE_TIMELINE[11].content,
+    )
+    expect(slot(11).querySelector('.kx-session-detail__delivery-artifacts')).not.toBeNull()
+
+    // Turns 12–13 — cycle-completed system event + follow-up recommendation.
+    expect(slot(12).textContent).toContain(FIXTURE_TIMELINE[12].content)
+    expect(slot(13).textContent).toContain(FIXTURE_TIMELINE[13].content)
+
+    // Turn 14 — the Q-102 quote event: estimate collapsed, total reading
+    // the pending status.
+    const q102Total = slot(14).querySelector('.kx-stream-estimate__row--total')
+    expect(q102Total?.textContent).toContain('Waiting approval')
+
+    // Turn 15 — the waiting-approval system event, the group-final agent
+    // turn carrying the hover footer.
+    expect(slot(15).textContent).toContain(FIXTURE_TIMELINE[15].content)
+
+    // The initial classic fixture is one continuous agent response group
+    // after the opening user request, so ONLY the final slot carries the
+    // modern hover footer.
+    expect(INITIAL_STREAM_FOOTER_SLOT_IDS).toEqual(['session-turn-15'])
+    const footers = screen.getAllByTestId('turn-footer')
+    expect(footers).toHaveLength(INITIAL_STREAM_FOOTER_SLOT_IDS.length)
+    slots.forEach((turnSlot, index) => {
+      const slotId = `session-turn-${index + 1}`
+      if (INITIAL_STREAM_FOOTER_SLOT_IDS.includes(slotId)) {
+        expect(turnSlot.querySelector('[data-testid="turn-footer"]')).not.toBeNull()
+      } else {
+        expect(turnSlot.querySelector('[data-testid="turn-footer"]')).toBeNull()
+      }
+    })
   })
 
-  it('renders loading skeleton when demoVariant is loading', () => {
-    const { container } = renderSessionDetailPage('?mock=loading')
-    const skeleton = container.querySelector('[data-testid="timeline-skeleton"]')
-    expect(skeleton).toBeInTheDocument()
+  it('renders the user turn as a right-aligned bubble and agent turns as flat prose articles', () => {
+    renderSessionDetailPage()
+    const stream = screen.getByTestId('session-stream')
 
-    const skeletonRows = skeleton?.querySelectorAll('.kx-session-timeline__skeleton-row')
-    expect(skeletonRows?.length).toBe(6)
+    // Exactly one user bubble: the merged user run.
+    const userRow = screen.getByTestId('user-bubble')
+    expect(userRow).toHaveClass('kx-stream-bubble-row')
+    expect(stream.querySelectorAll('.kx-stream-bubble')).toHaveLength(1)
+
+    // Agent turns are flat prose articles — no bubbles and no sender
+    // identity chrome anywhere (the old timeline’s You/agent labels are
+    // gone with it).
+    const turns = stream.querySelectorAll('article.kx-stream-turn')
+    expect(turns).toHaveLength(14)
+    turns.forEach((turn) => {
+      expect(turn.querySelector('.kx-stream-bubble')).toBeNull()
+    })
+
+    // Conversational answers render bare (no kind header); the kinded
+    // turns label themselves inside their disclosures/headers instead.
+    for (const n of [2, 3, 4, 6, 9, 10, 12, 13, 15]) {
+      expect(slot(n).querySelector('.kx-stream-turn__head')).toBeNull()
+    }
+    expect(slot(5).querySelector('.kx-stream-error__kind')?.textContent).toContain('ERROR')
+    expect(slot(7).querySelector('.kx-stream-estimate__kind')?.textContent).toContain('ESTIMATE')
+    expect(slot(8).querySelector('.kx-stream-turn__head .kx-stream-turn__kind')?.textContent).toBe(
+      'APPROVAL',
+    )
   })
 
-  it('delivery card shows artifacts, summary, and limitations', () => {
-    const { container } = renderSessionDetailPage()
-    const deliveryCard = container.querySelector('.kx-session-timeline__card--delivery')
-    expect(deliveryCard).toBeInTheDocument()
+  it('renders the full stream under the loading demo variant — the retired timeline skeleton is gone', () => {
+    renderSessionDetailPage('?mock=loading')
+    // The stream migration dropped the demoVariant skeleton branch: the
+    // conversation renders identically regardless of the demo variant.
+    expect(screen.queryByTestId('timeline-skeleton')).not.toBeInTheDocument()
+    expect(allSlots()).toHaveLength(15)
+  })
 
-    // Artifacts
-    const artifacts = deliveryCard?.querySelector('.kx-session-timeline__artifacts')
-    expect(artifacts).toBeInTheDocument()
-    expect(artifacts?.querySelectorAll('a').length).toBeGreaterThan(0)
+  it('the delivery turn lists its artifacts as openable EntityTokens', () => {
+    renderSessionDetailPage()
+    const delivery = slot(11)
 
-    // Summary
-    expect(deliveryCard?.querySelector('.kx-session-timeline__card-summary')).not.toBeNull()
+    // The delivery prose answers first…
+    expect(delivery.querySelector('.kx-stream-answer-prose')?.textContent).toContain(
+      FIXTURE_TIMELINE[11].content,
+    )
 
-    // Limitations
-    expect(deliveryCard?.querySelector('.kx-session-timeline__card-limitations')).not.toBeNull()
+    // …then the artifacts ride as openable EntityToken chips — accessible
+    // open-labels carry the kind, tooltips carry the artifact urls, and
+    // only the commit identifier renders mono.
+    const row = delivery.querySelector('.kx-session-detail__delivery-artifacts')
+    expect(row).not.toBeNull()
+    const tokens = within(row as HTMLElement).getAllByRole('button')
+    expect(tokens).toHaveLength(4)
+    expect(tokens.map((token) => token.getAttribute('aria-label'))).toEqual([
+      'Open artifact PR #142',
+      'Open artifact commit 9f3c2ab',
+      'Open artifact Test Report',
+      'Open artifact Receipt R-0057',
+    ])
+    expect(tokens.map((token) => token.getAttribute('title'))).toEqual(
+      SESSION_DETAIL.delivery.artifacts.map((artifact) => artifact.url),
+    )
+    expect(tokens.filter((token) => token.classList.contains('kx-tech-entity--mono'))).toHaveLength(1)
+    expect(tokens[1]).toHaveClass('kx-tech-entity--mono')
   })
 })
 
 // ---------------------------------------------------------------------------
-// SessionQuoteCard — approval card with CTAs
+// Estimate disclosures — the QUOTE timeline events. (Replaces the retired
+// SessionQuoteCard coverage: each quote event renders a collapsed Estimate
+// disclosure whose card expands in place; quote decisions dispatch through
+// the reducer and assert the stream consequences.)
 // ---------------------------------------------------------------------------
 
-describe('SessionQuoteCard — quote approval card', () => {
-  it('renders quote approval card when pending quote exists', () => {
+describe('Estimate disclosures — quote events', () => {
+  it('renders a collapsed estimate disclosure for every quote event, keyed by quote status', () => {
     renderSessionDetailPage()
-    const quoteCard = screen.queryByTestId('quote-approval-card')
-    expect(quoteCard).toBeInTheDocument()
-    expect(quoteCard).toHaveTextContent('Quote awaiting your approval')
+
+    // Both quote events (Q-101, Q-102) map to estimate turns.
+    for (const n of [7, 14]) {
+      const estimate = slot(n)
+      expect(estimate.querySelector('.kx-stream-estimate-disclosure')).not.toBeNull()
+      expect(estimate.querySelector('.kx-stream-estimate__kind')?.textContent).toContain('ESTIMATE')
+      expect(estimate.querySelector('svg[data-icon="estimate"]')).not.toBeNull()
+      const toggle = within(estimate).getByRole('button', { name: /show breakdown/i })
+      expect(toggle).toHaveAttribute('aria-expanded', 'false')
+
+      // Collapsed: the hidden article keeps the detail row mounted, while
+      // the always-on total row remains visible outside it.
+      const card = within(estimate).getByTestId('estimate-card')
+      expect(card).toHaveAttribute('hidden')
+      expect(card.querySelectorAll('.kx-stream-estimate__row')).toHaveLength(1)
+      expect(estimate.querySelectorAll('.kx-stream-estimate__row--total')).toHaveLength(1)
+    }
+
+    // The always-visible total rows key off each quote's status: Q-101 is
+    // APPROVED in the fixture, Q-102 PENDING_APPROVAL.
+    expect(slot(7).querySelector('.kx-stream-estimate__row--total')?.textContent).toContain('Approved')
+    expect(slot(14).querySelector('.kx-stream-estimate__row--total')?.textContent).toContain(
+      'Waiting approval',
+    )
   })
 
-  it('shows all three CTAs: approve, reject, request revision', () => {
-    renderSessionDetailPage()
-    const quoteCard = screen.getByTestId('quote-approval-card')
-
-    // Collapsed by default: expand through the keyboard-accessible toggle.
-    const toggle = screen.getByTestId('quote-approval-toggle')
-    expect(toggle).toHaveAttribute('aria-expanded', 'false')
-    fireEvent.click(toggle)
-    expect(toggle).toHaveAttribute('aria-expanded', 'true')
-
-    const buttons = quoteCard.querySelectorAll('button')
-    expect(buttons.length).toBeGreaterThanOrEqual(3)
-
-    // Approve button has check icon
-    expect(quoteCard.querySelector('svg[data-icon="check"]')).not.toBeNull()
-
-    // Reject button has x icon
-    expect(quoteCard.querySelector('svg[data-icon="x"]')).not.toBeNull()
-
-    // Request revision button has refresh icon
-    expect(quoteCard.querySelector('svg[data-icon="refresh"]')).not.toBeNull()
-  })
-
-  it('keeps aria-controls off the toggle while the body is unmounted, adds it when expanded', () => {
-    renderSessionDetailPage()
-    const toggle = screen.getByTestId('quote-approval-toggle')
-
-    // Collapsed: body is unmounted, so aria-controls must not point at a
-    // non-existent element.
-    expect(toggle).toHaveAttribute('aria-expanded', 'false')
-    expect(toggle).not.toHaveAttribute('aria-controls')
-    expect(document.getElementById('kx-quote-approval-body')).toBeNull()
-
-    // Expanded: body mounts and aria-controls references it.
-    fireEvent.click(toggle)
-    expect(toggle).toHaveAttribute('aria-expanded', 'true')
-    expect(toggle).toHaveAttribute('aria-controls', 'kx-quote-approval-body')
-    expect(document.getElementById('kx-quote-approval-body')).not.toBeNull()
-
-    // Collapsing again returns to the clean no-target state.
-    fireEvent.click(toggle)
-    expect(toggle).toHaveAttribute('aria-expanded', 'false')
-    expect(toggle).not.toHaveAttribute('aria-controls')
-    expect(document.getElementById('kx-quote-approval-body')).toBeNull()
-  })
-
-  it('toggles expanded state via keyboard (Enter and Space)', async () => {
+  it('expands the quote card through the keyboard-accessible toggle (Enter and Space)', async () => {
     const user = userEvent.setup()
     renderSessionDetailPage()
-    const toggle = screen.getByTestId('quote-approval-toggle')
+    const q102 = slot(14)
+    const toggle = within(q102).getByRole('button', { name: /show breakdown/i })
     toggle.focus()
 
-    // Enter on the focused button triggers native keyboard activation (click).
+    // Enter on the focused button expands the card in place.
     await user.keyboard('{Enter}')
     expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(toggle).toHaveTextContent('Hide breakdown')
+    const card = within(q102).getByTestId('estimate-card')
+    expect(card).not.toHaveAttribute('hidden')
 
-    // Space on the focused button activates it again, collapsing the body.
+    // The expanded card carries the quote's exposed detail: heading, story
+    // points, validity line (Q-102 expires), and the event note. The
+    // waiting-approval summary stays in the always-visible total row.
+    expect(within(card).getByText('Quote Q-102 · v2')).toBeInTheDocument()
+    expect(within(card).getAllByText('Story points')).toHaveLength(1)
+    expect(card.textContent).toContain('6 (max 9)')
+    expect(card.textContent).toContain(
+      `Valid until ${clockOf(SESSION_DETAIL.quotes[1].expiresAt as string)}`,
+    )
+    expect(card.textContent).toContain(FIXTURE_TIMELINE[14].content)
+    expect(card.textContent).not.toContain('Waiting approval')
+    expect(q102.querySelector('.kx-stream-estimate__row--total')?.textContent).toContain('Waiting approval')
+
+    // Space on the focused button collapses it again.
     await user.keyboard(' ')
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(card).toHaveAttribute('hidden')
   })
 
-  it('approve updates status to DELIVERING and hides card', () => {
-    const bucket: StateBucket = { current: null }
+  it('gives each estimate disclosure its own detail id and keeps each toggle wired to its own body', () => {
+    renderSessionDetailPage()
+    const q101 = slot(7)
+    const q102 = slot(14)
+    const q101Toggle = within(q101).getByRole('button', { name: /show breakdown/i })
+    const q102Toggle = within(q102).getByRole('button', { name: /show breakdown/i })
+    const q101DetailId = q101Toggle.getAttribute('aria-controls')
+    const q102DetailId = q102Toggle.getAttribute('aria-controls')
 
-    function Harness() {
-      const [state, dispatch] = useReducer(mockupReducer, initialState())
-      useEffect(() => {
-        dispatch({ type: 'NAVIGATE', route: 'session-detail' })
-      }, [dispatch])
-      return (
-        <MockupContext.Provider value={{ state, dispatch }}>
-          <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
-            <StateProbe bucket={bucket} />
-            <SessionDetailPage />
-          </OverlayLifecycleProvider>
-        </MockupContext.Provider>
-      )
-    }
+    expect(q101DetailId).toBeTruthy()
+    expect(q102DetailId).toBeTruthy()
+    expect(q101DetailId).not.toBe(q102DetailId)
 
-    const { container } = render(<Harness />)
+    const q101Detail = q101.querySelector(`#${q101DetailId}`)
+    const q102Detail = q102.querySelector(`#${q102DetailId}`)
+    expect(q101Detail).not.toBeNull()
+    expect(q102Detail).not.toBeNull()
+    expect(q101.contains(q101Detail as Node)).toBe(true)
+    expect(q102.contains(q102Detail as Node)).toBe(true)
 
-    // Initially card is visible
-    expect(screen.getByTestId('quote-approval-card')).toBeInTheDocument()
+    const q101Card = within(q101).getByTestId('estimate-card')
+    const q102Card = within(q102).getByTestId('estimate-card')
+    expect(q101Card).toHaveAttribute('hidden')
+    expect(q102Card).toHaveAttribute('hidden')
 
-    // Expand the card to reveal the actions
-    fireEvent.click(screen.getByTestId('quote-approval-toggle'))
+    fireEvent.click(q101Toggle)
+    expect(q101Card).not.toHaveAttribute('hidden')
+    expect(q102Card).toHaveAttribute('hidden')
 
-    // Find and click approve button (first button with check icon)
-    const checkIconBtn = container.querySelector('svg[data-icon="check"]')?.closest('button')
-    expect(checkIconBtn).not.toBeNull()
-    fireEvent.click(checkIconBtn!)
+    fireEvent.click(q102Toggle)
+    expect(q102Card).not.toHaveAttribute('hidden')
+    expect(q101Toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(q102Toggle).toHaveAttribute('aria-expanded', 'true')
+  })
 
-    // Status changed to DELIVERING
+  it('approving the pending quote settles its estimate to Approved and appends gate + delivery-started turns', () => {
+    const { bucket } = renderSessionDetailPage('', { type: 'SESSION_APPROVE_QUOTE', quoteId: 'Q-102' })
+
+    // Before: the pending estimate reads Waiting approval; the tracker
+    // badge counts it.
+    expect(slot(14).querySelector('.kx-stream-estimate__row--total')?.textContent).toContain(
+      'Waiting approval',
+    )
+    expect(
+      screen.getByTestId('session-tracker').querySelector('.kx-session-detail__stage-pill-badge'),
+    ).not.toBeNull()
+
+    fireEvent.click(screen.getByTestId('run-action'))
+
+    // Status changed to DELIVERING; approval and delivery-started events
+    // appended to the timeline (same reducer path the card CTAs drove).
     expect(bucket.current?.sessionDetail.status).toBe('DELIVERING')
-
-    // Quote approval card is gone
-    expect(screen.queryByTestId('quote-approval-card')).not.toBeInTheDocument()
-
-    // Approval and delivery-started events added to timeline
     const timeline = bucket.current?.sessionDetail.timeline
-    expect(timeline?.some(t => t.content.includes('approved') && t.type === 'APPROVAL')).toBe(true)
-    expect(timeline?.some(t => t.content.includes('delivery started') && t.type === 'SYSTEM_EVENT')).toBe(true)
+    expect(timeline?.some((t) => t.content.includes('approved') && t.type === 'APPROVAL')).toBe(true)
+    expect(timeline?.some((t) => t.content.includes('delivery started') && t.type === 'SYSTEM_EVENT')).toBe(true)
+
+    // The settled estimate now reads Approved — the disclosure stays as a
+    // historical record instead of the card hiding.
+    expect(slot(14).querySelector('.kx-stream-estimate__row--total')?.textContent).toContain('Approved')
+    expect(slot(14).querySelector('.kx-stream-estimate__row--total')?.textContent).not.toContain(
+      'Waiting approval',
+    )
+
+    // The stream appends the resolved approval gate and the delivery-started
+    // answer; the sticky status badge flips to Delivering and the tracker
+    // badge drops.
+    const gate = slot(16)
+    expect(gate.querySelector('.kx-stream-turn__kind')?.textContent).toBe('APPROVAL')
+    expect(gate.textContent).toContain('Quote Q-102 approved by Refactory Admin')
+    expect(slot(17).textContent).toContain('Quote approved — delivery started')
+    expect(screen.getByTestId('session-status')).toHaveTextContent('Delivering')
+    expect(
+      screen.getByTestId('session-tracker').querySelector('.kx-session-detail__stage-pill-badge'),
+    ).toBeNull()
   })
 
-  it('reject keeps WAITING_APPROVAL, hides card, adds rejection event', () => {
-    const bucket: StateBucket = { current: null }
+  it('rejecting the pending quote blocks the quote stage and renders a denied approval decision', () => {
+    const { bucket } = renderSessionDetailPage('', {
+      type: 'SESSION_REJECT_QUOTE',
+      quoteId: 'Q-102',
+      reason: 'Scope mismatch',
+    })
 
-    function Harness() {
-      const [state, dispatch] = useReducer(mockupReducer, initialState())
-      useEffect(() => {
-        dispatch({ type: 'NAVIGATE', route: 'session-detail' })
-      }, [dispatch])
-      return (
-        <MockupContext.Provider value={{ state, dispatch }}>
-          <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
-            <StateProbe bucket={bucket} />
-            <SessionDetailPage />
-          </OverlayLifecycleProvider>
-        </MockupContext.Provider>
-      )
-    }
+    fireEvent.click(screen.getByTestId('run-action'))
 
-    const { container } = render(<Harness />)
-
-    // Initially card is visible
-    expect(screen.getByTestId('quote-approval-card')).toBeInTheDocument()
-
-    // Expand the card to reveal the actions
-    fireEvent.click(screen.getByTestId('quote-approval-toggle'))
-
-    // Find and click reject button (button with x icon)
-    const xIconBtn = container.querySelector('svg[data-icon="x"]')?.closest('button')
-    expect(xIconBtn).not.toBeNull()
-    fireEvent.click(xIconBtn!)
-
-    // Status stays WAITING_APPROVAL (actually becomes BLOCKED per reducer)
+    // Status stays WAITING_APPROVAL (the quote stage itself blocks).
     expect(['WAITING_APPROVAL', 'BLOCKED']).toContain(bucket.current?.sessionDetail.status)
+    const rejected = bucket.current?.sessionDetail.quotes.find((q) => q.id === 'Q-102')
+    expect(rejected?.status).toBe('REJECTED')
 
-    // Quote approval card is gone
-    expect(screen.queryByTestId('quote-approval-card')).not.toBeInTheDocument()
-
-    // Rejection event added
+    // Rejection event added.
     const timeline = bucket.current?.sessionDetail.timeline
-    expect(timeline?.some(t => t.content.includes('rejected') && t.type === 'APPROVAL')).toBe(true)
+    expect(timeline?.some((t) => t.content.includes('rejected') && t.type === 'APPROVAL')).toBe(true)
+
+    // The estimate settles to the em-dash (no decision value) and the stream
+    // appends the rejection gate + acknowledgement answer.
+    expect(slot(14).querySelector('.kx-stream-estimate__row--total')?.textContent).toContain('—')
+    const gate = slot(16)
+    expect(gate.querySelector('.kx-stream-turn__kind')?.textContent).toBe('APPROVAL')
+    expect(gate.querySelector('.kx-stream-chip')?.textContent).toBe('Deny')
+    expect(gate.textContent).toContain('Decision recorded:')
+    expect(gate.textContent).toContain('Deny')
+    expect(gate.textContent).toContain('Quote Q-102 rejected: Scope mismatch')
+    expect(slot(17).textContent).toContain(
+      'Understood — a revised quote can be requested whenever you are ready.',
+    )
+    expect(
+      screen.getByTestId('session-tracker').querySelector('.kx-session-detail__stage-pill-badge'),
+    ).toBeNull()
   })
 
-  it('request revision supersedes quote and creates new quote', () => {
-    const bucket: StateBucket = { current: null }
+  it('requesting a revision supersedes the quote and appends a fresh pending estimate', () => {
+    const { bucket } = renderSessionDetailPage('', {
+      type: 'SESSION_REQUEST_QUOTE_REVISION',
+      quoteId: 'Q-102',
+    })
 
-    function Harness() {
-      const [state, dispatch] = useReducer(mockupReducer, initialState())
-      useEffect(() => {
-        dispatch({ type: 'NAVIGATE', route: 'session-detail' })
-      }, [dispatch])
-      return (
-        <MockupContext.Provider value={{ state, dispatch }}>
-          <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
-            <StateProbe bucket={bucket} />
-            <SessionDetailPage />
-          </OverlayLifecycleProvider>
-        </MockupContext.Provider>
-      )
-    }
+    fireEvent.click(screen.getByTestId('run-action'))
 
-    const { container } = render(<Harness />)
-
-    // Expand the card to reveal the actions
-    fireEvent.click(screen.getByTestId('quote-approval-toggle'))
-
-    // Find and click request revision button (button with refresh icon)
-    const refreshIconBtn = container.querySelector('svg[data-icon="refresh"]')?.closest('button')
-    expect(refreshIconBtn).not.toBeNull()
-    fireEvent.click(refreshIconBtn!)
-
-    // Old quote is SUPERSEDED
-    const oldQuote = bucket.current?.sessionDetail.quotes.find(q => q.id === 'Q-102')
+    // Old quote is SUPERSEDED; the new revision is PENDING_APPROVAL.
+    const oldQuote = bucket.current?.sessionDetail.quotes.find((q) => q.id === 'Q-102')
     expect(oldQuote?.status).toBe('SUPERSEDED')
-
-    // New quote is PENDING_APPROVAL
-    const newQuote = bucket.current?.sessionDetail.quotes.find(q => q.version === 3)
+    const newQuote = bucket.current?.sessionDetail.quotes.find((q) => q.version === 3)
     expect(newQuote?.status).toBe('PENDING_APPROVAL')
 
-    // System event about supersession added
+    // System event about supersession added.
     const timeline = bucket.current?.sessionDetail.timeline
-    expect(timeline?.some(t => t.content.includes('superseded') && t.type === 'SYSTEM_EVENT')).toBe(true)
+    expect(timeline?.some((t) => t.content.includes('superseded') && t.type === 'SYSTEM_EVENT')).toBe(true)
+
+    // The stream appends the supersession answer and a fresh collapsed
+    // estimate for the revision, still waiting approval — and the tracker
+    // badge keeps counting one pending quote.
+    expect(slot(16).textContent).toContain('Quote Q-102 superseded — revised quote Q-103 prepared')
+    const revision = slot(17)
+    expect(within(revision).getByRole('button', { name: /show breakdown/i })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    )
+    const revisionCard = within(revision).getByTestId('estimate-card')
+    expect(revisionCard).toHaveAttribute('hidden')
+    expect(revisionCard).toHaveAttribute('aria-label', 'Quote Q-103 · v3')
+    expect(revision.querySelector('.kx-stream-estimate__row--total')?.textContent).toContain(
+      'Waiting approval',
+    )
+    fireEvent.click(within(revision).getByRole('button', { name: /show breakdown/i }))
+    expect(revisionCard).not.toHaveAttribute('hidden')
+    expect(revisionCard.textContent).toContain('6 (max 9)')
+    expect(revisionCard.textContent).toContain(`Valid until ${clockOf(newQuote?.expiresAt as string)}`)
+    expect(revisionCard.textContent).toContain('for revised scope.')
+    const footers = screen.getAllByTestId('turn-footer')
+    expect(footers).toHaveLength(1)
+    expect(within(revision).getByTestId('turn-footer')).toBe(footers[0])
+    expect(slot(16).querySelector('[data-testid="turn-footer"]')).toBeNull()
+    expect(
+      screen.getByTestId('session-tracker').querySelector('.kx-session-detail__stage-pill-badge'),
+    ).not.toBeNull()
   })
 })
 
@@ -722,7 +913,7 @@ describe('SessionDetailComposer — message composer', () => {
     expect(bucket.current?.sessionDetail.timeline.length).toBe(initialTimelineLength + 1)
   })
 
-  it('send appends only the user message and shows the pending dot-matrix loader until the drawn phases elapse', () => {
+  it('send appends only the user message and keeps the stream on that pending turn until the drawn delay elapses', () => {
     vi.useFakeTimers()
     try {
       const bucket: StateBucket = { current: null }
@@ -731,39 +922,41 @@ describe('SessionDetailComposer — message composer', () => {
       const sendButton = screen.getByRole('button', { name: /send message/i })
 
       const initialTimelineLength = bucket.current?.sessionDetail.timeline.length || 0
+      const initialTurnCount = allSlots().length
       fireEvent.change(textarea, { target: { value: 'First question' } })
       fireEvent.click(sendButton)
 
-      // Exactly +1 user message; loader up in its first drawn phase; composer
-      // locked while pending. The compact loader (12px) is accompanied by
-      // the visible process label.
+      // Exactly +1 user message; the current detail stream shows that new
+      // user turn and no assistant reply yet, while the composer stays
+      // locked by pendingAssistant.
       const phases = bucket.current?.sessionDetail.pendingPhases ?? []
       expect(phases.length).toBeGreaterThanOrEqual(3)
       expect(phases.length).toBeLessThanOrEqual(6)
-      const firstVariant = PENDING_PROCESS_PHASES.find((p) => p.label === phases[0])?.variant
-      expect(
-        screen.getByRole('status', { name: `Menyusun jawaban — ${phases[0]}` }),
-      ).toHaveClass(`kx-dmx--${firstVariant}`)
-      expect(screen.getByText(phases[0])).toBeVisible()
+      expect(allSlots()).toHaveLength(initialTurnCount + 1)
+      expect(screen.getByTestId(`session-turn-${initialTurnCount + 1}`)).toHaveTextContent('First question')
+      expect(screen.queryByTestId(`session-turn-${initialTurnCount + 2}`)).not.toBeInTheDocument()
       expect(sendButton).toBeDisabled()
 
       act(() => {
         vi.advanceTimersByTime(pendingDelayMs(phases))
       })
 
-      // A natural response from the pool is appended; loader gone; composer
-      // unlocked.
+      // A natural response from the pool is appended; the pending state is
+      // cleared and the stream gains the assistant turn.
       const timeline = bucket.current?.sessionDetail.timeline ?? []
       expect(timeline.length).toBe(initialTimelineLength + 2)
       expect(timeline[timeline.length - 1].type).toBe('ASSISTANT_MESSAGE')
       expect(ASSISTANT_RESPONSES).toContain(timeline[timeline.length - 1].content)
-      expect(screen.queryByRole('status', { name: /menyusun jawaban/i })).not.toBeInTheDocument()
+      expect(allSlots()).toHaveLength(initialTurnCount + 2)
+      expect(screen.getByTestId(`session-turn-${initialTurnCount + 2}`)).toHaveTextContent(
+        timeline[timeline.length - 1].content,
+      )
       // Composer unlocked: the send guard (pendingAssistant) is cleared; the
       // button itself stays disabled only because the input is empty again.
       expect(bucket.current?.sessionDetail.pendingAssistant).toBe(false)
       expect(bucket.current?.sessionDetail.pendingPhases).toEqual([])
 
-      // A follow-up send is possible and re-arms the loader.
+      // A follow-up send is possible and re-arms the pending cycle.
       fireEvent.change(textarea, { target: { value: 'Follow-up' } })
       expect(screen.getByRole('button', { name: /send message/i })).toBeEnabled()
     } finally {
@@ -771,7 +964,7 @@ describe('SessionDetailComposer — message composer', () => {
     }
   })
 
-  it('pending process label and loader variant advance through the phases, then the reply lands', () => {
+  it('holds the submitted user turn in place across the drawn pending cadence, then appends the reply', () => {
     vi.useFakeTimers()
     try {
       const bucket: StateBucket = { current: null }
@@ -779,34 +972,32 @@ describe('SessionDetailComposer — message composer', () => {
       const textarea = container.querySelector('textarea') as HTMLTextAreaElement
       const sendButton = screen.getByRole('button', { name: /send message/i })
 
+      const initialTurnCount = allSlots().length
       fireEvent.change(textarea, { target: { value: 'First question' } })
       fireEvent.click(sendButton)
 
-      // The drawn phase slice drives the bubble: visible label beside the
-      // loader, its own variant, and an aria-label that tracks the running
-      // process — one step per PENDING_PHASE_DURATION_MS.
+      // The classic detail page no longer renders the retired timeline
+      // loader; the observable pending state is the newly appended user turn
+      // holding as the last stream item until the full drawn delay elapses.
       const phases = bucket.current?.sessionDetail.pendingPhases ?? []
       expect(phases.length).toBeGreaterThanOrEqual(3)
-      phases.forEach((label, index) => {
-        const variant = PENDING_PROCESS_PHASES.find((p) => p.label === label)?.variant
-        expect(screen.getByText(label)).toBeVisible()
-        expect(screen.getByRole('status', { name: `Menyusun jawaban — ${label}` })).toHaveClass(
-          `kx-dmx--${variant}`,
-        )
-        if (index < phases.length - 1) {
-          act(() => {
-            vi.advanceTimersByTime(PENDING_PHASE_DURATION_MS)
-          })
-        }
-      })
+      for (let index = 1; index < phases.length; index += 1) {
+        act(() => {
+          vi.advanceTimersByTime(PENDING_PHASE_DURATION_MS)
+        })
+        expect(bucket.current?.sessionDetail.pendingAssistant).toBe(true)
+        expect(screen.getByTestId(`session-turn-${initialTurnCount + 1}`)).toHaveTextContent('First question')
+        expect(screen.queryByTestId(`session-turn-${initialTurnCount + 2}`)).not.toBeInTheDocument()
+      }
 
-      // The last phase holds until the full wait elapses, then resolves.
+      // The final phase duration resolves the pending cycle and appends the
+      // assistant reply.
       act(() => {
         vi.advanceTimersByTime(PENDING_PHASE_DURATION_MS)
       })
-      expect(screen.queryByRole('status', { name: /menyusun jawaban/i })).not.toBeInTheDocument()
-      expect(screen.queryByText(phases[phases.length - 1])).not.toBeInTheDocument()
       const timeline = bucket.current?.sessionDetail.timeline ?? []
+      expect(bucket.current?.sessionDetail.pendingAssistant).toBe(false)
+      expect(screen.getByTestId(`session-turn-${initialTurnCount + 2}`)).toBeInTheDocument()
       expect(timeline[timeline.length - 1].type).toBe('ASSISTANT_MESSAGE')
       expect(ASSISTANT_RESPONSES).toContain(timeline[timeline.length - 1].content)
     } finally {
@@ -851,13 +1042,15 @@ describe('SessionDetailComposer — message composer', () => {
 
       const textarea = screen.getByTestId('session-composer-input') as HTMLTextAreaElement
       const sendButton = screen.getByRole('button', { name: /send message/i })
+      const initialTurnCount = allSlots().length
       fireEvent.change(textarea, { target: { value: 'Asked before navigating' } })
       fireEvent.click(sendButton)
       const phases = bucket.current?.sessionDetail.pendingPhases ?? []
       expect(bucket.current?.sessionDetail.pendingAssistant).toBe(true)
-      expect(
-        screen.getByRole('status', { name: `Menyusun jawaban — ${phases[0]}` }),
-      ).toBeInTheDocument()
+      expect(screen.getByTestId(`session-turn-${initialTurnCount + 1}`)).toHaveTextContent(
+        'Asked before navigating',
+      )
+      expect(screen.queryByTestId(`session-turn-${initialTurnCount + 2}`)).not.toBeInTheDocument()
       const assistantCount = (bucket.current?.sessionDetail.timeline ?? []).filter(
         (item) => item.type === 'ASSISTANT_MESSAGE',
       ).length
@@ -876,17 +1069,18 @@ describe('SessionDetailComposer — message composer', () => {
       })
       expect(bucket.current?.sessionDetail.pendingAssistant).toBe(true)
 
-      // Back on the route: the loader shows again (first phase), the timer
-      // re-arms, and the reply lands exactly once after the full wait.
+      // Back on the route: the pending user turn is still the stream tail,
+      // the timer re-arms, and the reply lands exactly once after the full
+      // wait.
       fireEvent.click(screen.getByTestId('route-toggle'))
-      expect(
-        screen.getByRole('status', { name: `Menyusun jawaban — ${phases[0]}` }),
-      ).toBeInTheDocument()
+      expect(screen.getByTestId(`session-turn-${initialTurnCount + 1}`)).toHaveTextContent(
+        'Asked before navigating',
+      )
+      expect(screen.queryByTestId(`session-turn-${initialTurnCount + 2}`)).not.toBeInTheDocument()
       act(() => {
         vi.advanceTimersByTime(pendingDelayMs(phases))
       })
       expect(bucket.current?.sessionDetail.pendingAssistant).toBe(false)
-      expect(screen.queryByRole('status', { name: /menyusun jawaban/i })).not.toBeInTheDocument()
       const timelineAfter = bucket.current?.sessionDetail.timeline ?? []
       expect(timelineAfter.filter((item) => item.type === 'ASSISTANT_MESSAGE')).toHaveLength(
         assistantCount + 1,
@@ -931,18 +1125,22 @@ describe('SessionDetailComposer — message composer', () => {
       render(<PreseededHarness />)
 
       // Mount-time recovery ARMS the receive timeout with the stored
-      // phases: the loader shows with its first phase.
+      // phases: the current stream stays on the settled history while the
+      // pending guard keeps the send action locked.
       expect(bucket.current?.sessionDetail.pendingAssistant).toBe(true)
-      expect(
-        screen.getByRole('status', { name: `Menyusun jawaban — ${preseeded.sessionDetail.pendingPhases[0]}` }),
-      ).toBeInTheDocument()
+      fireEvent.change(screen.getByTestId('session-composer-input'), {
+        target: { value: 'Blocked while recovering' },
+      })
+      expect(screen.getByRole('button', { name: /send message/i })).toBeDisabled()
+      expect(allSlots()).toHaveLength(15)
+      expect(screen.queryByTestId('session-turn-16')).not.toBeInTheDocument()
 
       // The full phase sequence plays out, then the reply lands.
       act(() => {
         vi.advanceTimersByTime(pendingDelayMs(preseeded.sessionDetail.pendingPhases))
       })
       expect(bucket.current?.sessionDetail.pendingAssistant).toBe(false)
-      expect(screen.queryByRole('status', { name: /menyusun jawaban/i })).not.toBeInTheDocument()
+      expect(allSlots()).toHaveLength(16)
       const timeline = bucket.current?.sessionDetail.timeline ?? []
       expect(timeline[timeline.length - 1].type).toBe('ASSISTANT_MESSAGE')
     } finally {
@@ -950,64 +1148,63 @@ describe('SessionDetailComposer — message composer', () => {
     }
   })
 
-  it('response footer Retry re-asks the nearest preceding user message and is a no-op while pending', () => {
+  it('response-group footers expose the current copy/share actions and stay state-safe while pending', () => {
     const { bucket } = renderSessionDetailPage()
-    const before = bucket.current?.sessionDetail.timeline ?? []
-    const lastAssistantIndex = before.map((i) => i.type).lastIndexOf('ASSISTANT_MESSAGE')
-    expect(lastAssistantIndex).toBeGreaterThan(0)
-    let precedingUser = ''
-    for (let i = lastAssistantIndex - 1; i >= 0; i -= 1) {
-      if (before[i].type === 'USER_MESSAGE') {
-        precedingUser = before[i].content
-        break
-      }
-    }
-    expect(precedingUser).not.toBe('')
+    const footer = screen.getAllByTestId('turn-footer').at(-1)
+    expect(footer).toBeDefined()
+    expect(within(footer as HTMLElement).getByTestId('turn-copy')).toHaveAttribute(
+      'aria-label',
+      'Copy message',
+    )
+    expect(within(footer as HTMLElement).getByTestId('turn-share')).toHaveAttribute(
+      'aria-label',
+      'Share message',
+    )
 
-    // The last assistant message's footer menu offers Retry.
-    const moreButtons = screen.getAllByTestId('response-more')
-    fireEvent.click(moreButtons[moreButtons.length - 1])
-    fireEvent.click(within(screen.getByTestId('response-menu')).getByRole('menuitem', { name: 'Retry' }))
+    // The settled group-final footer flashes link-copy feedback.
+    fireEvent.click(within(footer as HTMLElement).getByTestId('turn-share'))
+    expect(within(footer as HTMLElement).getByText('Link copied')).toBeInTheDocument()
 
-    // Re-ask: +1 USER_MESSAGE with that content, pending armed, loader up.
-    const after = bucket.current?.sessionDetail.timeline ?? []
-    expect(after).toHaveLength(before.length + 1)
-    expect(after[after.length - 1].type).toBe('USER_MESSAGE')
-    expect(after[after.length - 1].content).toBe(precedingUser)
+    // While a fresh reply is pending, footer actions remain local-only: no
+    // retry/re-ask behavior, no timeline mutation, pending state unchanged.
+    const textarea = screen.getByTestId('session-composer-input') as HTMLTextAreaElement
+    const sendButton = screen.getByRole('button', { name: /send message/i })
+    fireEvent.change(textarea, { target: { value: 'Footer safety check' } })
+    fireEvent.click(sendButton)
+
+    const duringPending = bucket.current?.sessionDetail.timeline ?? []
+    expect(duringPending[duringPending.length - 1].type).toBe('USER_MESSAGE')
+    expect(duringPending[duringPending.length - 1].content).toBe('Footer safety check')
     expect(bucket.current?.sessionDetail.pendingAssistant).toBe(true)
-    expect(screen.getByRole('status', { name: /menyusun jawaban/i })).toBeInTheDocument()
 
-    // While pending, another footer's Retry is a no-op.
-    const moreButtonsAgain = screen.getAllByTestId('response-more')
-    fireEvent.click(moreButtonsAgain[0])
-    fireEvent.click(within(screen.getByTestId('response-menu')).getByRole('menuitem', { name: 'Retry' }))
-    expect(bucket.current?.sessionDetail.timeline ?? []).toHaveLength(before.length + 1)
+    fireEvent.click(within(footer as HTMLElement).getByTestId('turn-copy'))
+    expect(within(footer as HTMLElement).getByText('Copied')).toBeInTheDocument()
+    expect(bucket.current?.sessionDetail.timeline ?? []).toHaveLength(duringPending.length)
+    expect(bucket.current?.sessionDetail.pendingAssistant).toBe(true)
   })
 
-  it('shows locked notice when session is COMPLETED', () => {
-    const bucket: StateBucket = { current: null }
-
-    function Harness() {
-      const [state, dispatch] = useReducer(mockupReducer, initialState())
-      useEffect(() => {
-        dispatch({ type: 'NAVIGATE', route: 'session-detail' })
-        dispatch({ type: 'SESSION_APPROVE_QUOTE', quoteId: 'Q-102' })
-      }, [dispatch])
-      return (
-        <MockupContext.Provider value={{ state, dispatch }}>
-          <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
-            <StateProbe bucket={bucket} />
-            <SessionDetailPage />
-          </OverlayLifecycleProvider>
-        </MockupContext.Provider>
-      )
+  it('shows the locked composer notice when session status is COMPLETED', () => {
+    const completedState = {
+      ...initialState(),
+      route: 'session-detail' as const,
+      sessionDetail: {
+        ...initialState().sessionDetail,
+        status: 'COMPLETED' as const,
+      },
     }
 
-    render(<Harness />)
+    render(
+      <MockupContext.Provider value={{ state: completedState, dispatch: () => undefined }}>
+        <OverlayLifecycleProvider overlay={completedState.overlay} dispatch={() => undefined}>
+          <SessionDetailPage />
+        </OverlayLifecycleProvider>
+      </MockupContext.Provider>,
+    )
 
-    // For now, the mockup reducer doesn't change status to COMPLETED after approve
-    // So we'll just verify composer renders
-    expect(screen.getByTestId('session-composer')).toBeInTheDocument()
+    const composer = screen.getByTestId('session-composer')
+    expect(composer).toHaveClass('kx-session-composer--locked')
+    expect(screen.getByText('This session is completed. Start a follow-up cycle to continue.')).toBeInTheDocument()
+    expect(screen.queryByTestId('session-composer-input')).not.toBeInTheDocument()
   })
 
   it('has attachment, text document, and voice mock buttons', () => {

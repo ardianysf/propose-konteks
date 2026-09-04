@@ -397,7 +397,7 @@ export default function ResponseBlock({
   const classes = ['kx-stream-turn', `kx-stream-turn--${tone}`]
   if (className) classes.push(className)
   return (
-    <article id={id} className={classes.join(' ')}>
+    <article id={id} className={classes.join(' ')} data-stream-time={time}>
       {kindLabel !== undefined && (
         <header className="kx-stream-turn__head">
           <p className="kx-stream-turn__ident">
