@@ -215,9 +215,11 @@ describe('SessionStreamDetailPage — structure', () => {
     // Fase 4 — the WARNING turn (slot 11, between the tool batch and the
     // review finding): one notice line + the trailing StatusBadge.
     const warnSlot = document.getElementById('stream-kind-11')!
-    expect(
-      within(warnSlot).getByText(/Connection lost during sync check — paused 2m 14s/),
-    ).toBeInTheDocument()
+    const recoveredWarning = within(warnSlot).getByText(
+      /Connection lost during sync check — paused 2m 14s/,
+    )
+    expect(recoveredWarning).toBeInTheDocument()
+    expect(recoveredWarning.closest('.kx-stream-warn')).toHaveClass('kx-stream-warn--danger')
     expect(within(warnSlot).getByTestId('warning-badge')).toHaveTextContent('Waiting for input')
 
     // Fase 4 — the ERROR turn (slot 12): the estimate UI family — ERROR
