@@ -1348,6 +1348,17 @@ html.kx-catalog-page {
   gap: 16px;
 }
 
+/* Reading-column components (session stream blocks) stack at full width —
+ * their ch-based sizing needs the wide canvas, not a shrink-wrapped cell. */
+.kx-cat-variant-row--wide {
+  flex-direction: column;
+}
+
+.kx-cat-variant-row--wide .kx-cat-variant {
+  width: 100%;
+  max-width: 680px; /* the session reading column */
+}
+
 .kx-cat-variant {
   margin: 0;
   display: flex;
