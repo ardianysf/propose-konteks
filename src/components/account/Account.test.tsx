@@ -1,534 +1,399 @@
-import { useEffect, useReducer } from 'react'
+import { useReducer } from 'react'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
-import { getAggregatedCss } from '../../test/cssAggregate'
-import AccountMenu from './AccountMenu'
+import { vi } from 'vitest'
 import SettingsModal from './SettingsModal'
-import Sidebar from '../shell/Sidebar'
+import CustomizeModal from '../customize/CustomizeModal'
 import { OverlayLifecycleProvider } from '../shell/OverlayLifecycle'
-import { MockupContext, useMockup } from '../../state/MockupContext'
-import {
-  initialState,
-  mockupReducer,
-  type MockupState,
-} from '../../state/mockupReducer'
-import { ACCOUNT_ACTIONS } from '../../data/mockData'
-import { STORAGE_KEY } from '../../theme'
+import { MockupContext } from '../../state/MockupContext'
+import { initialState, mockupReducer, type DemoVariant, type MockupOverlay } from '../../state/mockupReducer'
+import { getSettingsCustomizeState, resetSettingsCustomizeStore, updateSettingsCustomizeState } from '../../state/settingsCustomizeStore'
+import { LOCALE_STORAGE_KEY, resetPrototypeLocaleForTests, setLocalePreference } from '../../i18n/prototypeLocale'
 
-// ---------------------------------------------------------------------------
-// jsdom lacks window.matchMedia, which src/theme.ts needs for 'system'
-// resolution. One shared stub MQL per file (theme.test.ts convention): the
-// theme runtime never unwires listeners, so per-test stubs would strand them.
-// ---------------------------------------------------------------------------
-
-type ThemeChangeHandler = (event: { matches: boolean }) => void
-
-function createMatchMediaStub(initialMatches: boolean) {
-  let matches = initialMatches
-  const listeners = new Set<ThemeChangeHandler>()
-  const mql = {
-    get matches() {
-      return matches
-    },
-    media: '(prefers-color-scheme: dark)',
-    addEventListener: (_type: string, handler: unknown) => {
-      listeners.add(handler as ThemeChangeHandler)
-    },
-    removeEventListener: (_type: string, handler: unknown) => {
-      listeners.delete(handler as ThemeChangeHandler)
-    },
-    addListener: (handler: unknown) => listeners.add(handler as ThemeChangeHandler),
-    removeListener: (handler: unknown) => listeners.delete(handler as ThemeChangeHandler),
-  } as unknown as MediaQueryList
-  return { mql, stub: vi.fn(() => mql), listeners }
-}
-
-const accountMedia = createMatchMediaStub(false)
-const realMatchMedia = window.matchMedia
-window.matchMedia = accountMedia.stub as unknown as typeof window.matchMedia
-
-afterAll(() => {
-  window.matchMedia = realMatchMedia
-})
-
-afterEach(() => {
-  // Theme is real persisted state outside MockupState — scrub it so the
-  // surrounding account/settings tests stay hermetic.
-  window.localStorage.clear()
-  delete document.documentElement.dataset.theme
-})
-
-// ---------------------------------------------------------------------------
-// Harness — the Sidebar + account overlay slot mounted the way AppShell
-// mounts them (Task 12): exactly one overlay at a time. A state bucket
-// captures the committed store for dispatch assertions.
-// ---------------------------------------------------------------------------
-
-type StateBucket = { current: MockupState | null }
-
-function StateProbe({ bucket }: { bucket: StateBucket }) {
-  const { state } = useMockup()
-  useEffect(() => {
-    bucket.current = state
-  })
-  return null
-}
-
-function renderShell(initial?: Partial<MockupState>) {
-  const bucket: StateBucket = { current: null }
-
+function renderOverlay(overlay: MockupOverlay = { kind: 'settings', section: 'general' }, demoVariant?: DemoVariant) {
   function Harness() {
-    const [state, dispatch] = useReducer(mockupReducer, { ...initialState(), ...initial })
-    return (
-      <MockupContext.Provider value={{ state, dispatch }}>
-        <StateProbe bucket={bucket} />
-        <OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>
-          <div className={state.sidebarCollapsed ? 'kx-app kx-app--rail' : 'kx-app'}>
-            <Sidebar />
-            {state.overlay.kind === 'account-menu' && <AccountMenu />}
-            {state.overlay.kind === 'settings' && <SettingsModal />}
-          </div>
-        </OverlayLifecycleProvider>
-      </MockupContext.Provider>
-    )
+    const [state, dispatch] = useReducer(mockupReducer, { ...initialState(), overlay, ...(demoVariant ? { demoVariant } : {}) })
+    return <MockupContext.Provider value={{ state, dispatch }}><OverlayLifecycleProvider overlay={state.overlay} dispatch={dispatch}>{state.overlay.kind === 'settings' && <SettingsModal />}{state.overlay.kind === 'customize' && <CustomizeModal />}</OverlayLifecycleProvider></MockupContext.Provider>
   }
-
-  return { ...render(<Harness />), bucket }
+  return render(<Harness />)
 }
 
-const openAccountMenu = () => fireEvent.click(screen.getByTestId('account-trigger'))
-const getMenu = () => screen.getByRole('menu', { name: 'Account' })
-const getDialog = () => screen.getByRole('dialog', { name: 'Settings' })
-const getSectionTablist = () => screen.getByRole('tablist', { name: 'Settings sections' })
-const getBillingTablist = () => screen.getByRole('tablist', { name: 'Billing sections' })
-const getSectionTabs = () => within(getSectionTablist()).getAllByRole('tab')
-const getSectionTab = (name: string) => within(getSectionTablist()).getByRole('tab', { name })
-const getBillingTabs = () => within(getBillingTablist()).getAllByRole('tab')
-const getBillingTab = (name: string) => within(getBillingTablist()).getByRole('tab', { name })
+beforeEach(() => { vi.restoreAllMocks(); resetSettingsCustomizeStore(); resetPrototypeLocaleForTests(); localStorage.clear() })
 
-// jsdom does not load stylesheets, so Warm Enterprise styling hooks are
-// verified against the shipped CSS/tokens directly (CustomizeModal.test
-// convention).
-// Style-contract source: aggregated stylesheets (spec addendum §8) —
-// components.css + the inert per-domain files; tokens.css stays direct.
-const css = getAggregatedCss()
-const tokens = readFileSync(join(process.cwd(), 'src/styles/tokens.css'), 'utf8')
-
-const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u
-
-// ---------------------------------------------------------------------------
-// Trigger wiring — account trigger vs separate Customize trigger (AC42/AC9)
-// ---------------------------------------------------------------------------
-
-describe('Account — sidebar trigger wiring', () => {
-  it('keeps the account trigger distinct from the separate Customize sliders trigger', () => {
-    const { bucket } = renderShell()
-    const accountTrigger = screen.getByTestId('account-trigger')
-    const customizeTrigger = screen.getByRole('button', { name: 'Customize' })
-
-    expect(accountTrigger).not.toBe(customizeTrigger)
-    expect(accountTrigger).toHaveAttribute('aria-haspopup', 'menu')
-    expect(accountTrigger).toHaveAccessibleName('Open account menu')
-    expect(customizeTrigger).not.toHaveAttribute('aria-haspopup', 'menu')
-
-    // The sliders icon opens Customize — never the account menu.
-    fireEvent.click(customizeTrigger)
-    expect(bucket.current?.overlay).toEqual({ kind: 'customize', tab: 'agents' })
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
-
-    // The user row opens the account menu.
-    fireEvent.click(accountTrigger)
-    expect(bucket.current?.overlay).toEqual({ kind: 'account-menu' })
-    expect(getMenu()).toBeInTheDocument()
+describe('SettingsModal', () => {
+  it('opens Billing directly on a typed subtab and navigates all six areas', () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'providers' })
+    expect(screen.getByRole('tab', { name: 'Providers' })).toHaveAttribute('aria-selected', 'true')
+    expect(within(screen.getByRole('tablist', { name: 'Billing' })).getAllByRole('tab')).toHaveLength(6)
+    fireEvent.click(screen.getByRole('tab', { name: 'Budgets' }))
+    expect(screen.getByText('Budget controls')).toBeInTheDocument()
   })
 
-  it('opens the account menu from the user row as a floating menu outside the sidebar', () => {
-    renderShell()
-    openAccountMenu()
-    const menu = getMenu()
-    expect(menu).toHaveClass('kx-menu', 'kx-account-menu')
-    expect(menu.closest('.kx-sidebar')).toBeNull()
-    expect(menu.closest('.kx-app')).not.toBeNull()
-    expect(document.querySelector('.kx-modal-backdrop')).toBeNull()
+  it('keeps subscription and entitlement context above every billing destination', () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'transactions' })
+    expect(screen.getAllByText('Subscription').length).toBeGreaterThan(0)
+    expect(screen.getByText('Plan entitlements')).toBeInTheDocument()
+    expect(screen.getByText('Operational limits')).toBeInTheDocument()
+    expect(screen.getByText('8,000')).toBeInTheDocument()
+    expect(screen.getByText('12 / 25')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Transactions' })).toHaveAttribute('aria-selected', 'true')
   })
 
-  it('exposes aria-expanded matching whether the account menu is open', () => {
-    renderShell()
-    const trigger = screen.getByTestId('account-trigger')
-    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  it('renders complete usage evidence and switches reconciled dimensions', () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'usage' })
+    expect(screen.getByText('Story Point ledger')).toBeInTheDocument()
+    expect(screen.getByText('Ledger consumption')).toBeInTheDocument()
+    expect(screen.getByText('Delivery-attributed value')).toBeInTheDocument()
+    expect(screen.getByText(/must not be added together/i)).toBeInTheDocument()
+    expect(screen.getByText('Provider and model tokens')).toBeInTheDocument()
+    expect(screen.getByText('Total sessions')).toBeInTheDocument()
+    expect(screen.getAllByText('Input tokens').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Output tokens').length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('tab', { name: 'Repository' }))
+    expect(screen.getByText('apps/web')).toBeInTheDocument()
+  })
 
-    fireEvent.click(trigger)
-    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  it('exports usage evidence as CSV and JSON downloads', () => {
+    const createObjectURL = vi.fn(() => 'blob:konteks-usage')
+    const revokeObjectURL = vi.fn()
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createObjectURL })
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectURL })
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'usage' })
+    fireEvent.click(screen.getByRole('button', { name: 'CSV' }))
+    fireEvent.click(screen.getByRole('button', { name: 'JSON' }))
+    expect(createObjectURL).toHaveBeenCalledTimes(2)
+    expect(revokeObjectURL).toHaveBeenCalledTimes(2)
+    expect(click).toHaveBeenCalledTimes(2)
+  })
 
+  it('shows reconciliation review state without merging ledger and delivery values', () => {
+    updateSettingsCustomizeState((state) => ({ ...state, usageAnalytics: { ...state.usageAnalytics, reconciled: false } }))
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'usage' })
+    expect(screen.getByText('Needs review')).toBeInTheDocument()
+    expect(screen.getAllByText('1,760').length).toBeGreaterThan(0)
+    expect(screen.getByText('1,483')).toBeInTheDocument()
+  })
+
+  it('changes plans through a dismissal-safe checkout dialog and records the transaction', async () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'plans' })
+    const scaleHeader = screen.getByText('Scale', { selector: 'strong' }).closest('th')
+    expect(scaleHeader).not.toBeNull()
+    fireEvent.click(within(scaleHeader as HTMLElement).getByRole('button', { name: 'Choose' }))
+    const dialog = screen.getByRole('dialog', { name: 'Change plan' })
+    const before = getSettingsCustomizeState().transactions.length
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm plan' }))
     fireEvent.keyDown(document, { key: 'Escape' })
-    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('dialog', { name: 'Change plan' })).toBeInTheDocument()
+    await waitFor(() => expect(within(dialog).getByText('Payment confirmed')).toBeInTheDocument())
+    expect(getSettingsCustomizeState().subscription.planName).toBe('Scale')
+    expect(getSettingsCustomizeState().entitlements.onPremRuntime).toBe(true)
+    expect(getSettingsCustomizeState().transactions).toHaveLength(before + 1)
   })
 
-  it('toggles the account menu closed on a second click of the same trigger', async () => {
-    const { bucket } = renderShell()
-    const trigger = screen.getByTestId('account-trigger')
+  it('keeps failed plan checkout local and succeeds exactly once after retry', async () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'plans' }, 'error')
+    const builderHeader = screen.getByText('Builder', { selector: 'strong' }).closest('th')
+    const before = getSettingsCustomizeState().transactions.length
+    fireEvent.click(within(builderHeader as HTMLElement).getByRole('button', { name: 'Choose' }))
+    const dialog = screen.getByRole('dialog', { name: 'Change plan' })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm plan' }))
+    await waitFor(() => expect(within(dialog).getByText('Payment failed')).toBeInTheDocument())
+    expect(getSettingsCustomizeState().subscription.planId).toBe('team')
+    expect(getSettingsCustomizeState().transactions).toHaveLength(before)
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Retry payment' }))
+    await waitFor(() => expect(within(dialog).getByText('Payment confirmed')).toBeInTheDocument())
+    expect(getSettingsCustomizeState().subscription.planId).toBe('builder')
+    expect(getSettingsCustomizeState().transactions).toHaveLength(before + 1)
+  })
 
-    fireEvent.click(trigger)
-    expect(getMenu()).toBeInTheDocument()
-    expect(bucket.current?.overlay).toEqual({ kind: 'account-menu' })
-    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  it('top ups Story Points once through a tax-aware confirmation dialog', async () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'topup' })
+    const packageButton = screen.getByText('Team boost').closest('button')
+    expect(packageButton).not.toBeNull()
+    const before = getSettingsCustomizeState().storyPointLedger
+    const transactions = getSettingsCustomizeState().transactions.length
+    fireEvent.click(packageButton as HTMLButtonElement)
+    const dialog = screen.getByRole('dialog', { name: 'Confirm Story Point purchase' })
+    expect(within(dialog).getByText('Net amount')).toBeInTheDocument()
+    expect(within(dialog).getByText('Tax')).toBeInTheDocument()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Confirm purchase' }))
+    await waitFor(() => expect(within(dialog).getByText('Top-up complete')).toBeInTheDocument())
+    expect(getSettingsCustomizeState().storyPointLedger.available).toBe(before.available + 500)
+    expect(getSettingsCustomizeState().storyPointLedger.totalPurchased).toBe(before.totalPurchased + 500)
+    expect(getSettingsCustomizeState().transactions).toHaveLength(transactions + 1)
+    expect(within(dialog).queryByRole('button', { name: 'Confirm purchase' })).not.toBeInTheDocument()
+  })
 
-    // The second click dismisses through the lifecycle — the menu
-    // unmounts and focus returns to the trigger.
+  it('saves authoritative budget caps and rejects duplicate provider currencies', () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'budgets' })
+    const monthly = screen.getByLabelText('Workspace monthly cap')
+    fireEvent.change(monthly, { target: { value: '12000' } })
+    expect(screen.getByLabelText(/Per-user cap/)).toBeDisabled()
+    const currencies = screen.getAllByLabelText('Billing currency')
+    fireEvent.change(currencies[1], { target: { value: 'IDR' } })
+    expect(screen.getByRole('alert')).toHaveTextContent('only one threshold')
+    expect(screen.getByRole('button', { name: 'Save budget policy' })).toBeDisabled()
+    fireEvent.change(currencies[1], { target: { value: 'USD' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save budget policy' }))
+    expect(getSettingsCustomizeState().budgetPolicy.workspaceMonthlyCap).toBe(12000)
+    expect(screen.getByText('Saved')).toBeInTheDocument()
+  })
+
+  it('paginates the full transaction status ledger', () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'transactions' })
+    expect(screen.getByText('TRX-2084')).toBeInTheDocument()
+    expect(screen.getByText('Page 1 of 3')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }))
+    expect(screen.getByText('TRX-2044')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }))
+    expect(screen.getByText('Partially refunded')).toBeInTheDocument()
+  })
+
+  it('keeps the billing shell visible through loading, empty, and stale-data error variants', () => {
+    const loading = renderOverlay({ kind: 'settings', section: 'billing', subtab: 'usage' }, 'loading')
+    expect(screen.getByText('Subscription')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Loading billing information')
+    loading.unmount()
+
+    const empty = renderOverlay({ kind: 'settings', section: 'billing', subtab: 'transactions' }, 'empty')
+    expect(screen.getByText('No transactions yet')).toBeInTheDocument()
+    expect(screen.getByRole('tablist', { name: 'Billing' })).toBeInTheDocument()
+    empty.unmount()
+
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'transactions' }, 'error')
+    expect(screen.getAllByRole('alert').length).toBeGreaterThan(0)
+    expect(screen.getByText('TRX-2084')).toBeInTheDocument()
+    fireEvent.click(screen.getAllByRole('button', { name: 'Try again' })[0])
+    expect(screen.queryByText('Some billing data is delayed')).not.toBeInTheDocument()
+  })
+
+  it('validates and saves a provider without persisting its credential', async () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'providers' })
+    fireEvent.click(screen.getByRole('button', { name: 'Connect provider' }))
+    const dialog = screen.getByRole('dialog', { name: 'Connect provider' })
+    fireEvent.change(within(dialog).getByLabelText('Connection name'), { target: { value: 'Release OpenAI' } })
+    fireEvent.change(within(dialog).getByLabelText('API key'), { target: { value: 'transient-secret' } })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Validate connection' }))
+    await waitFor(() => expect(within(dialog).getByText('Connection validated.')).toBeInTheDocument())
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(screen.getByText('Release OpenAI')).toBeInTheDocument())
+    expect(JSON.stringify(getSettingsCustomizeState())).not.toContain('transient-secret')
+  })
+
+  it('keeps a provider dialog open after simulated credential validation failure', async () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'providers' })
+    fireEvent.click(screen.getByRole('button', { name: 'Connect provider' }))
+    const dialog = screen.getByRole('dialog', { name: 'Connect provider' })
+    fireEvent.change(within(dialog).getByLabelText('Connection name'), { target: { value: 'Broken provider' } })
+    fireEvent.change(within(dialog).getByLabelText('API key'), { target: { value: 'invalid-demo' } })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Validate connection' }))
+    await waitFor(() => expect(within(dialog).getByRole('alert')).toHaveTextContent('Validation failed'))
+    expect(screen.getByRole('dialog', { name: 'Connect provider' })).toBeInTheDocument()
+  })
+
+  it('edits provider metadata through the same validated dialog', async () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'providers' })
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Team OpenAI' }))
+    const dialog = screen.getByRole('dialog', { name: 'Edit provider' })
+    const name = within(dialog).getByLabelText('Connection name')
+    expect(name).toHaveValue('Team OpenAI')
+    fireEvent.change(name, { target: { value: 'Primary OpenAI' } })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Validate connection' }))
+    await waitFor(() => expect(within(dialog).getByText('Connection validated.')).toBeInTheDocument())
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
+    await waitFor(() => expect(screen.getByText('Primary OpenAI')).toBeInTheDocument())
+  })
+
+  it('rotates a write-only provider credential and removes a connection with confirmation', async () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'providers' })
+    const providerRow = screen.getByText('Team OpenAI', { selector: 'strong' }).closest('article')
+    expect(providerRow).not.toBeNull()
+    fireEvent.click(within(providerRow as HTMLElement).getByRole('button', { name: 'Rotate key' }))
+    const rotate = screen.getByRole('dialog', { name: 'Rotate provider credential' })
+    fireEvent.change(within(rotate).getByLabelText('API key'), { target: { value: 'super-secret-N3W9' } })
+    fireEvent.click(within(rotate).getByRole('button', { name: 'Rotate key' }))
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Rotate provider credential' })).not.toBeInTheDocument())
+    expect(JSON.stringify(getSettingsCustomizeState())).not.toContain('super-secret-N3W9')
+    expect(getSettingsCustomizeState().providers.find((item) => item.id === 'provider-openai')?.maskedSuffix).toBe('N3W9')
+
+    const refreshedRow = screen.getByText('Team OpenAI', { selector: 'strong' }).closest('article')
+    fireEvent.click(within(refreshedRow as HTMLElement).getByRole('button', { name: 'Remove Team OpenAI' }))
+    const remove = screen.getByRole('dialog', { name: 'Remove provider' })
+    fireEvent.click(within(remove).getByRole('button', { name: 'Remove' }))
+    await waitFor(() => expect(getSettingsCustomizeState().providers.some((item) => item.id === 'provider-openai')).toBe(false))
+  })
+
+  it('saves the provider allowlist independently from provider credentials', () => {
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'providers' })
+    const compatible = screen.getByLabelText('OpenAI-compatible')
+    expect(compatible).not.toBeChecked()
+    fireEvent.click(compatible)
+    fireEvent.click(screen.getByRole('button', { name: 'Save policy' }))
+    expect(getSettingsCustomizeState().providerPolicy.allowedProviders).toContain('OpenAI-compatible')
+    expect(screen.getByRole('status')).toHaveTextContent('Provider policy saved')
+  })
+
+  it('validates and saves the profile name', () => {
+    renderOverlay()
+    const input = screen.getByLabelText('Display name')
+    fireEvent.change(input, { target: { value: '' } })
+    expect(screen.getByRole('alert')).toHaveTextContent('required')
+    fireEvent.change(input, { target: { value: 'Ayu Admin' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(screen.getByText('Saved')).toBeInTheDocument()
+  })
+
+  it('persists Indonesian locale and updates scoped copy', () => {
+    renderOverlay()
+    fireEvent.click(screen.getByRole('button', { name: 'Indonesian' }))
+    expect(localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('id')
+    expect(screen.getByRole('dialog', { name: 'Pengaturan' })).toBeInTheDocument()
+  })
+
+  it('localizes billing summaries, analytics, and navigation in Indonesian', () => {
+    setLocalePreference('id')
+    renderOverlay({ kind: 'settings', section: 'billing', subtab: 'usage' })
+    expect(screen.getByText('Langganan')).toBeInTheDocument()
+    expect(screen.getByText('Hak paket')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Penggunaan' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByText('Ledger dan atribusi pekerjaan')).toBeInTheDocument()
+    expect(screen.getByText(/tidak boleh dijumlahkan/)).toBeInTheDocument()
+  })
+
+  it('creates a detailed group in a nested dialog and deletes the regular group', async () => {
+    renderOverlay({ kind: 'settings', section: 'team' })
+    expect(screen.queryByRole('button', { name: /Delete Refactory owners/i })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Create group' }))
+    const dialog = screen.getByRole('dialog', { name: 'Create group' })
+    const submit = within(dialog).getByRole('button', { name: 'Create group' })
+    expect(submit).toBeDisabled()
+    fireEvent.change(within(dialog).getByLabelText('Group slug'), { target: { value: 'quality' } })
+    fireEvent.change(within(dialog).getByLabelText('Display name (optional)'), { target: { value: 'Quality' } })
+    fireEvent.change(within(dialog).getByLabelText('Description (optional)'), { target: { value: 'Quality engineering' } })
+    fireEvent.change(within(dialog).getByLabelText('Default role'), { target: { value: 'viewer' } })
+    fireEvent.click(submit)
+    expect(within(dialog).getByText('Creating group…')).toBeInTheDocument()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.getByRole('dialog', { name: 'Create group' })).toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Create group' })).not.toBeInTheDocument())
+    expect(screen.getByText('Quality')).toBeInTheDocument()
+    expect(screen.getByText(/refactory-quality · 0 members · Viewer/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Quality' }))
+    expect(screen.queryByText('Quality')).not.toBeInTheDocument()
+  })
+
+  it('validates required, malformed, duplicate, and over-length group slugs', () => {
+    renderOverlay({ kind: 'settings', section: 'team' })
+    fireEvent.click(screen.getByRole('button', { name: 'Create group' }))
+    const dialog = screen.getByRole('dialog', { name: 'Create group' })
+    const slug = within(dialog).getByLabelText('Group slug')
+    fireEvent.blur(slug)
+    expect(within(dialog).getByRole('alert')).toHaveTextContent('Enter a group slug')
+    fireEvent.change(slug, { target: { value: 'Bad Slug' } })
+    expect(within(dialog).getByRole('alert')).toHaveTextContent('lowercase letters')
+    fireEvent.change(slug, { target: { value: 'engineering' } })
+    expect(within(dialog).getByRole('alert')).toHaveTextContent('already exists')
+    fireEvent.change(slug, { target: { value: 'a'.repeat(60) } })
+    expect(within(dialog).getByRole('alert')).toHaveTextContent('63 characters or fewer')
+  })
+
+  it('invites an existing member from the selected group row exactly once', async () => {
+    renderOverlay({ kind: 'settings', section: 'team' })
+    fireEvent.click(screen.getByRole('button', { name: 'Invite Engineering' }))
+    const dialog = screen.getByRole('dialog', { name: 'Invite member — Engineering' })
+    expect(within(dialog).getByRole('status')).toHaveTextContent('Loading workspace members')
+    await waitFor(() => expect(within(dialog).getByText('Start typing to find a workspace member.')).toBeInTheDocument())
+    fireEvent.change(within(dialog).getByLabelText('Search members'), { target: { value: 'Samira' } })
+    fireEvent.click(within(dialog).getByLabelText(/Samira Putri/))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Add to group' }))
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Invite member — Engineering' })).not.toBeInTheDocument())
+    const engineeringRow = screen.getByText('Engineering', { selector: 'strong' }).closest('article')
+    expect(engineeringRow).not.toBeNull()
+    expect(within(engineeringRow as HTMLElement).getByText(/9 members/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Invite Engineering' }))
+    await waitFor(() => expect(screen.getByText('Start typing to find a workspace member.')).toBeInTheDocument())
+    fireEvent.change(screen.getByLabelText('Search members'), { target: { value: 'Samira' } })
+    expect(screen.getByText('No matching members found.')).toBeInTheDocument()
+  })
+
+  it('creates a group-scoped email invitation and exposes a copyable one-time link', async () => {
+    const writeText = vi.fn().mockRejectedValueOnce(new Error('Clipboard denied')).mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
+    renderOverlay({ kind: 'settings', section: 'team' })
+    fireEvent.click(screen.getByRole('button', { name: 'Invite Product reviewers' }))
+    const dialog = screen.getByRole('dialog', { name: 'Invite member — Product reviewers' })
+    fireEvent.click(within(dialog).getByRole('tab', { name: 'Invite by email' }))
+    const email = within(dialog).getByLabelText('Email address')
+    fireEvent.change(email, { target: { value: 'not-an-email' } })
+    expect(within(dialog).getByRole('alert')).toHaveTextContent('valid email')
+    fireEvent.change(email, { target: { value: 'new.member@example.com' } })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Create invitation' }))
+    await waitFor(() => expect(screen.getByRole('dialog', { name: 'Invitation ready to share' })).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: 'Copy link' }))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('could not be copied'))
+    fireEvent.click(screen.getByRole('button', { name: 'Copy link' }))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Acceptance link copied'))
+    expect(writeText).toHaveBeenCalledTimes(2)
+    expect(writeText).toHaveBeenLastCalledWith(expect.stringContaining('/accept-invitation?token='))
+    const handoffDialog = screen.getByRole('dialog', { name: 'Invitation ready to share' })
+    const handoffFooter = handoffDialog.querySelector('footer')
+    expect(handoffFooter).not.toBeNull()
+    fireEvent.click(within(handoffFooter as HTMLElement).getByRole('button', { name: 'Close' }))
+    expect(screen.getByText('new.member@example.com')).toBeInTheDocument()
+    expect(screen.getByText('Product reviewers', { selector: 'span' })).toBeInTheDocument()
+  })
+
+  it('closes a nested dialog with backdrop or Escape and restores its row trigger', async () => {
+    renderOverlay({ kind: 'settings', section: 'team' })
+    const trigger = screen.getByRole('button', { name: 'Invite Refactory owners' })
     fireEvent.click(trigger)
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
-    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
-    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    fireEvent.mouseDown(screen.getByTestId('team-dialog-backdrop'))
     await waitFor(() => expect(trigger).toHaveFocus())
 
-    // A third click reopens — the toggle never wedges the menu shut.
     fireEvent.click(trigger)
-    expect(getMenu()).toBeInTheDocument()
-    expect(trigger).toHaveAttribute('aria-expanded', 'true')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Account menu contents + semantics (AC42, AC45)
-// ---------------------------------------------------------------------------
-
-describe('Account — menu contents and keyboard operation', () => {
-  it('lists exactly the ACCOUNT_ACTIONS from mockData in data order — no renames, reorders, removals, or additions', () => {
-    renderShell()
-    openAccountMenu()
-    const items = within(getMenu()).getAllByRole('menuitem')
-    expect(items).toHaveLength(ACCOUNT_ACTIONS.length)
-    expect(items.map((item) => item.textContent)).toEqual(ACCOUNT_ACTIONS.map((a) => a.label))
-  })
-
-  it('moves focus into the first menu item on open and roves focus with arrow keys across the whole menu', () => {
-    renderShell()
-    openAccountMenu()
-    // Theme radios lead the menu; the action menuitems follow. Arrow-key
-    // roving covers both roles as one continuous sequence.
-    const items = [
-      ...within(getMenu()).getAllByRole('menuitemradio'),
-      ...within(getMenu()).getAllByRole('menuitem'),
-    ]
-    expect(items[0]).toHaveFocus()
-
-    fireEvent.keyDown(items[0], { key: 'ArrowDown' })
-    expect(items[1]).toHaveFocus()
-
-    fireEvent.keyDown(items[1], { key: 'ArrowUp' })
-    expect(items[0]).toHaveFocus()
-
-    // Arrow wrapping — from the first item up wraps to the last.
-    fireEvent.keyDown(items[0], { key: 'ArrowUp' })
-    expect(items.at(-1)).toHaveFocus()
-  })
-
-  it('Settings opens the modal on General and Billing opens it on Billing', () => {
-    const { bucket } = renderShell()
-    openAccountMenu()
-    fireEvent.click(within(getMenu()).getByRole('menuitem', { name: 'Settings' }))
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
-    expect(getDialog()).toBeInTheDocument()
-    expect(bucket.current?.overlay).toEqual({ kind: 'settings', section: 'general' })
-    expect(getSectionTab('General')).toHaveAttribute('aria-selected', 'true')
-    fireEvent.keyDown(document, { key: 'Escape' })
-
-    openAccountMenu()
-    fireEvent.click(within(getMenu()).getByRole('menuitem', { name: 'Billing' }))
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
-    expect(getDialog()).toBeInTheDocument()
-    expect(bucket.current?.overlay).toEqual({ kind: 'settings', section: 'billing' })
-    expect(getSectionTab('Billing')).toHaveAttribute('aria-selected', 'true')
-  })
-
-  it('keeps the remaining illustrative actions as close-only items — no invented IA', () => {
-    const { bucket } = renderShell()
-    openAccountMenu()
-    fireEvent.click(within(getMenu()).getByRole('menuitem', { name: 'Log out' }))
-    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  })
-
-  it('Escape closes the open account menu', () => {
-    const { bucket } = renderShell()
-    openAccountMenu()
-    expect(getMenu()).toBeInTheDocument()
-    fireEvent.keyDown(document, { key: 'Escape' })
-    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
-  })
-
-  it('restores focus to the account trigger when Escape closes the menu', async () => {
-    renderShell()
-    const trigger = screen.getByTestId('account-trigger')
-    openAccountMenu()
-    // The Theme radios (menuitemradio) precede the action items — the
-    // first menu item in DOM order is the "Light" theme radio.
-    const menuItems = getMenu().querySelectorAll('[role="menuitem"], [role="menuitemradio"]')
-    expect(menuItems[0]).toHaveFocus()
-
     fireEvent.keyDown(document, { key: 'Escape' })
     await waitFor(() => expect(trigger).toHaveFocus())
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Settings modal — sections, Billing subtabs, semantics (AC42)
-// ---------------------------------------------------------------------------
-
-describe('Account — Settings modal structure', () => {
-  it('renders General / Billing / Team in exact data order with General selected by default', () => {
-    renderShell({ overlay: { kind: 'settings', section: 'general' } })
-    expect(getSectionTabs().map((tab) => tab.textContent)).toEqual(['General', 'Billing', 'Team'])
-    expect(getSectionTab('General')).toHaveAttribute('aria-selected', 'true')
-    expect(within(getDialog()).getByRole('heading', { name: 'General', level: 3 })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Settings' })).toBeInTheDocument()
   })
 
-  it('shows exactly the six Billing subtabs — Usage, Plans, Providers, Budgets, Top Up, Transactions — when Billing is selected', () => {
-    renderShell({ overlay: { kind: 'settings', section: 'billing' } })
-    expect(getSectionTab('Billing')).toHaveAttribute('aria-selected', 'true')
-    expect(getBillingTabs().map((tab) => tab.textContent)).toEqual([
-      'Usage',
-      'Plans',
-      'Providers',
-      'Budgets',
-      'Top Up',
-      'Transactions',
-    ])
-    expect(getBillingTab('Usage')).toHaveAttribute('aria-selected', 'true')
-  })
-
-  it('navigates General → Billing → Team in place and swaps the panel content', () => {
-    renderShell({ overlay: { kind: 'settings', section: 'general' } })
-
-    fireEvent.click(getSectionTab('Billing'))
-    expect(getSectionTab('Billing')).toHaveAttribute('aria-selected', 'true')
-    expect(getSectionTab('General')).toHaveAttribute('aria-selected', 'false')
-    expect(within(getDialog()).getByRole('heading', { name: 'Usage', level: 3 })).toBeInTheDocument()
-
-    fireEvent.click(getSectionTab('Team'))
-    expect(getSectionTab('Team')).toHaveAttribute('aria-selected', 'true')
-    expect(within(getDialog()).getByRole('heading', { name: 'Team', level: 3 })).toBeInTheDocument()
-
-    fireEvent.click(getSectionTab('General'))
-    expect(getSectionTab('General')).toHaveAttribute('aria-selected', 'true')
-    expect(within(getDialog()).getByRole('heading', { name: 'General', level: 3 })).toBeInTheDocument()
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Selection semantics + keyboard operation (AC42, AC45)
-// ---------------------------------------------------------------------------
-
-describe('Account — selection semantics and keyboard operation', () => {
-  it('applies roving-tabindex selection semantics to the section tabs and moves selection with arrow keys', () => {
-    renderShell({ overlay: { kind: 'settings', section: 'general' } })
-    expect(getSectionTab('General')).toHaveAttribute('tabindex', '0')
-    expect(getSectionTab('Billing')).toHaveAttribute('tabindex', '-1')
-    expect(getSectionTab('Team')).toHaveAttribute('tabindex', '-1')
-
-    fireEvent.keyDown(getSectionTab('General'), { key: 'ArrowDown' })
-    expect(getSectionTab('Billing')).toHaveAttribute('aria-selected', 'true')
-    expect(getSectionTab('Billing')).toHaveAttribute('tabindex', '0')
-    expect(getSectionTab('General')).toHaveAttribute('tabindex', '-1')
-
-    fireEvent.keyDown(getSectionTab('Billing'), { key: 'End' })
-    expect(getSectionTab('Team')).toHaveAttribute('aria-selected', 'true')
-    expect(getSectionTab('Team')).toHaveAttribute('tabindex', '0')
-  })
-
-  it('applies roving-tabindex selection semantics to Billing subtabs with ArrowRight and End movement', () => {
-    renderShell({ overlay: { kind: 'settings', section: 'billing' } })
-    expect(getBillingTab('Usage')).toHaveAttribute('tabindex', '0')
-    expect(getBillingTab('Plans')).toHaveAttribute('tabindex', '-1')
-
-    fireEvent.keyDown(getBillingTab('Usage'), { key: 'ArrowRight' })
-    expect(getBillingTab('Plans')).toHaveAttribute('aria-selected', 'true')
-    expect(getBillingTab('Plans')).toHaveAttribute('tabindex', '0')
-    expect(getBillingTab('Usage')).toHaveAttribute('tabindex', '-1')
-
-    fireEvent.keyDown(getBillingTab('Plans'), { key: 'End' })
-    expect(getBillingTab('Transactions')).toHaveAttribute('aria-selected', 'true')
-    expect(getBillingTab('Transactions')).toHaveAttribute('tabindex', '0')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Dialog accessibility + dismissal (AC45)
-// ---------------------------------------------------------------------------
-
-describe('Account — Settings dialog accessibility and dismissal', () => {
-  it('is a labelled modal dialog that receives focus on mount and closes from the header control', () => {
-    const { bucket } = renderShell({ overlay: { kind: 'settings', section: 'general' } })
-    const dialog = getDialog()
-    expect(dialog).toHaveClass('kx-modal', 'kx-settings')
-    expect(dialog).toHaveAttribute('aria-modal', 'true')
-    expect(dialog).toHaveAccessibleName()
-    expect(within(dialog).getByRole('heading', { name: 'Settings' }).tagName).toBe('H2')
-    expect(dialog).toHaveFocus()
-
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }))
-    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  })
-
-  it('Escape closes the Settings modal from any focused descendant', () => {
-    const { bucket } = renderShell({ overlay: { kind: 'settings', section: 'billing' } })
-    expect(getDialog()).toBeInTheDocument()
-    fireEvent.keyDown(document, { key: 'Escape' })
-    expect(bucket.current?.overlay).toEqual({ kind: 'none' })
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  })
-
-  it('restores focus to the account trigger when Escape closes Settings opened from the account menu', async () => {
-    renderShell()
-    const trigger = screen.getByTestId('account-trigger')
-    openAccountMenu()
-    fireEvent.click(within(getMenu()).getByRole('menuitem', { name: 'Settings' }))
-    expect(getDialog()).toBeInTheDocument()
-
-    fireEvent.keyDown(document, { key: 'Escape' })
-    await waitFor(() => expect(trigger).toHaveFocus())
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  })
-
-  it('restores focus to the account trigger when the Close control closes Settings', async () => {
-    renderShell()
-    const trigger = screen.getByTestId('account-trigger')
-    openAccountMenu()
-    fireEvent.click(within(getMenu()).getByRole('menuitem', { name: 'Settings' }))
-    expect(getDialog()).toBeInTheDocument()
-
-    fireEvent.click(within(getDialog()).getByRole('button', { name: 'Close' }))
-    await waitFor(() => expect(trigger).toHaveFocus())
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  })
-
-  it('contains focus within the Settings dialog, wrapping at the cycle edges', () => {
-    renderShell({ overlay: { kind: 'settings', section: 'billing' } })
-    const dialog = getDialog()
+  it('keeps keyboard focus inside the active nested dialog', () => {
+    renderOverlay({ kind: 'settings', section: 'team' })
+    fireEvent.click(screen.getByRole('button', { name: 'Create group' }))
+    const dialog = screen.getByRole('dialog', { name: 'Create group' })
     const close = within(dialog).getByRole('button', { name: 'Close' })
-    const usageTab = getBillingTab('Usage')
-
-    // Shared focus containment focuses the dialog root on mount.
-    expect(dialog).toHaveFocus()
-
-    // Tab from the last sequential stop (Usage) wraps to the first (Close).
-    usageTab.focus()
-    fireEvent.keyDown(usageTab, { key: 'Tab' })
-    expect(close).toHaveFocus()
-
-    // Shift+Tab from the first stop wraps to the last (Usage).
+    const cancel = within(dialog).getByRole('button', { name: 'Cancel' })
+    close.focus()
     fireEvent.keyDown(close, { key: 'Tab', shiftKey: true })
-    expect(usageTab).toHaveFocus()
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Theme section — real persisted preference (src/theme.ts), AC42
-// ---------------------------------------------------------------------------
-
-describe('Account — theme preference section', () => {
-  const getThemeRadio = (name: string) =>
-    within(getMenu()).getByRole('menuitemradio', { name })
-
-  it('shows a labelled Theme group with Light/Dark/System radios, aria-checked on the active stored preference (default system)', () => {
-    renderShell()
-    openAccountMenu()
-
-    const group = within(getMenu()).getByRole('group', { name: 'Theme' })
-    const radios = within(group).getAllByRole('menuitemradio')
-    // Icon-only segmented radios — the accessible name is the label.
-    expect(radios.map((radio) => radio.getAttribute('aria-label'))).toEqual([
-      'Light',
-      'Dark',
-      'System',
-    ])
-
-    // No stored preference → 'system' is the active radio.
-    expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull()
-    expect(getThemeRadio('System')).toHaveAttribute('aria-checked', 'true')
-    expect(getThemeRadio('Light')).toHaveAttribute('aria-checked', 'false')
-    expect(getThemeRadio('Dark')).toHaveAttribute('aria-checked', 'false')
+    expect(cancel).toHaveFocus()
+    fireEvent.keyDown(cancel, { key: 'Tab' })
+    expect(close).toHaveFocus()
   })
 
-  it('marks the stored preference radio as active when the menu opens', () => {
-    window.localStorage.setItem(STORAGE_KEY, 'dark')
-    renderShell()
-    openAccountMenu()
-    expect(getThemeRadio('Dark')).toHaveAttribute('aria-checked', 'true')
-    expect(getThemeRadio('System')).toHaveAttribute('aria-checked', 'false')
+  it('prevents duplicate group invitations and existing group-member email invites', () => {
+    renderOverlay({ kind: 'settings', section: 'team' })
+    fireEvent.click(screen.getByRole('button', { name: 'Invite Engineering' }))
+    const dialog = screen.getByRole('dialog', { name: 'Invite member — Engineering' })
+    fireEvent.click(within(dialog).getByRole('tab', { name: 'Invite by email' }))
+    const email = within(dialog).getByLabelText('Email address')
+    fireEvent.change(email, { target: { value: 'maya@refactory.dev' } })
+    expect(within(dialog).getByRole('alert')).toHaveTextContent('already pending')
+    fireEvent.change(email, { target: { value: 'ayu@refactory.dev' } })
+    expect(within(dialog).getByRole('alert')).toHaveTextContent('already belongs')
+    expect(within(dialog).getByRole('button', { name: 'Create invitation' })).toBeDisabled()
   })
 
-  it("clicking 'Dark' stamps <html data-theme='dark'>, persists the raw 'dark' preference, and moves aria-checked to the Dark radio", () => {
-    renderShell()
-    openAccountMenu()
-    fireEvent.click(getThemeRadio('Dark'))
-
-    expect(document.documentElement.dataset.theme).toBe('dark')
-    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('dark')
-    expect(getThemeRadio('Dark')).toHaveAttribute('aria-checked', 'true')
-    expect(getThemeRadio('System')).toHaveAttribute('aria-checked', 'false')
-    // The menu stays open for instant visual feedback.
-    expect(getMenu()).toBeInTheDocument()
+  it('localizes both Team dialog surfaces in Indonesian', () => {
+    setLocalePreference('id')
+    renderOverlay({ kind: 'settings', section: 'team' })
+    fireEvent.click(screen.getByRole('button', { name: 'Buat grup' }))
+    expect(screen.getByRole('dialog', { name: 'Buat grup' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Slug grup')).toBeInTheDocument()
   })
 
-  it("clicking 'Light' stamps <html data-theme='light'>, persists the raw 'light' preference, and moves aria-checked to the Light radio", () => {
-    renderShell()
-    openAccountMenu()
-    fireEvent.click(getThemeRadio('Light'))
-
-    expect(document.documentElement.dataset.theme).toBe('light')
-    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('light')
-    expect(getThemeRadio('Light')).toHaveAttribute('aria-checked', 'true')
-    expect(getThemeRadio('System')).toHaveAttribute('aria-checked', 'false')
-  })
-
-  it("clicking 'System' resolves through prefers-color-scheme but persists the raw 'system' preference", () => {
-    renderShell()
-    openAccountMenu()
-    fireEvent.click(getThemeRadio('System'))
-
-    // The shared stub starts light → system resolves to light.
-    expect(document.documentElement.dataset.theme).toBe('light')
-    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('system')
-    expect(getThemeRadio('System')).toHaveAttribute('aria-checked', 'true')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Warm Enterprise styling hooks + hygiene (AC42, AC46)
-// ---------------------------------------------------------------------------
-
-describe('Account — styling hooks and hygiene', () => {
-  it('ships raised-surface and DM Sans hooks for the account menu and Settings modal', () => {
-    // Raised surfaces come from the shared .kx-menu / .kx-modal frames;
-    // the account surfaces layer their own classes on top.
-    expect(css).toContain('.kx-account-menu {')
-    expect(css).toContain('.kx-settings {')
-    expect(css).toMatch(/\.kx-menu\s*\{[^}]*background:\s*var\(--kx-raised\)/)
-    expect(css).toMatch(/\.kx-modal\s*\{[^}]*background:\s*var\(--kx-raised\)/)
-    expect(css).toMatch(/\.kx-account-menu__item\s*\{[^}]*font-family:\s*inherit/)
-    expect(css).toMatch(/\.kx-settings__section\s*\{[^}]*font-family:\s*inherit/)
-    expect(tokens).toMatch(/--kx-font-family:\s*'DM Sans'/)
-    expect(tokens).toMatch(/--kx-raised:\s*#fff/)
-  })
-
-  it('shows the visible Illustrative data marker inside Settings (AC46)', () => {
-    renderShell({ overlay: { kind: 'settings', section: 'general' } })
-    expect(getDialog().textContent).toContain('Illustrative data')
-  })
-
-  it('uses no emoji anywhere in the account menu or Settings modal', () => {
-    const first = renderShell()
-    openAccountMenu()
-    expect(getMenu().textContent).not.toMatch(EMOJI)
-    first.unmount()
-
-    renderShell({ overlay: { kind: 'settings', section: 'billing' } })
-    expect(getDialog().textContent).not.toMatch(EMOJI)
+  it('closes on Escape and restores the overlay slot', () => {
+    renderOverlay()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog', { name: 'Settings' })).not.toBeInTheDocument()
   })
 })

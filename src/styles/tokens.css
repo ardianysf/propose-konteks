@@ -164,8 +164,10 @@
 
   --kx-sidebar-w: 320px; /* Expanded white sidebar (spec §6.1, AC12) */
   --kx-sidebar-rail: 64px; /* Collapsed sidebar icon rail */
-  --kx-customize-w: 790px; /* Customize modal width — fixed on every tab */
-  --kx-customize-h: 580px; /* Customize modal height — fixed on every tab */
+  --kx-settings-w: 896px; /* Production-style Settings workspace width */
+  --kx-settings-h: 85dvh; /* Settings workspace viewport height */
+  --kx-customize-w: 896px; /* Production-style Customize workspace width */
+  --kx-customize-h: 85dvh; /* Customize workspace viewport height */
   --kx-drawer-w: 450px; /* Konteks Learned right drawer */
 }
 
