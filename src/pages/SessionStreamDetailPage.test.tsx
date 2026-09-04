@@ -375,6 +375,10 @@ describe('SessionStreamDetailPage — structure', () => {
       'aria-label',
       'Share message',
     )
+    // Execution stats ride beside the icons (duration · tokens in · out).
+    expect(within(groupTwoFinal).getByText(/229\.2s/)).toBeInTheDocument()
+    expect(within(groupTwoFinal).getByText(/1242k tokens in/)).toBeInTheDocument()
+    expect(within(groupTwoFinal).getByText(/16\.5k tokens out/)).toBeInTheDocument()
 
     // The final ANSWER (slot 15) renders prose but no footer — the
     // handoff after it ends the group.

@@ -121,6 +121,11 @@ const TURN_TIMES: string[] = [
 /** Timestamp shown by live turns (history carries fixture times). */
 const LIVE_TIME = 'just now'
 
+/** Execution stats riding the group-final answer footers (mock values —
+ * duration · tokens in · tokens out, per review). */
+const HISTORY_STATS = { duration: '229.2s', tokensIn: '1242k', tokensOut: '16.5k' }
+const LIVE_STATS = { duration: '18.4s', tokensIn: '96k', tokensOut: '2.1k' }
+
 /** The live progress clock ticks once per second. */
 const LIVE_CLOCK_MS = 1000
 
@@ -672,6 +677,7 @@ export default function SessionStreamDetailPage() {
             onAnswer={handleAnswer}
             time={time}
             showFooter={isGroupFinal(position - 1)}
+            stats={isGroupFinal(position - 1) ? HISTORY_STATS : undefined}
           />
         )
       case 'plan':
@@ -704,7 +710,14 @@ export default function SessionStreamDetailPage() {
       case 'answer':
         // Conversational prose — carries the footer only when it ends
         // its response group (spec refinements v3 #2).
-        return <AnswerBlock data={entry.data} time={time} showFooter={isGroupFinal(position - 1)} />
+        return (
+          <AnswerBlock
+            data={entry.data}
+            time={time}
+            showFooter={isGroupFinal(position - 1)}
+            stats={isGroupFinal(position - 1) ? HISTORY_STATS : undefined}
+          />
+        )
       case 'warning':
         // Fase 4 — mid-group notice row; never a group closer (spec
         // §Penempatan), so no footer.
@@ -719,7 +732,14 @@ export default function SessionStreamDetailPage() {
         // Fase 4b — the delivery-estimate card; mid-group, informational.
         return <EstimateBlock data={entry.data} time={time} />
       case 'completion':
-        return <CompletionBlock data={entry.data} time={time} showFooter={isGroupFinal(position - 1)} />
+        return (
+          <CompletionBlock
+            data={entry.data}
+            time={time}
+            showFooter={isGroupFinal(position - 1)}
+            stats={isGroupFinal(position - 1) ? HISTORY_STATS : undefined}
+          />
+        )
     }
   }
 
@@ -822,7 +842,7 @@ export default function SessionStreamDetailPage() {
       case 'answer':
         // The live script's final answer lands with the footer — the
         // same single-turn rule as the settled history's final answer.
-        return <AnswerBlock data={entry.data} time={LIVE_TIME} showFooter />
+        return <AnswerBlock data={entry.data} time={LIVE_TIME} showFooter stats={LIVE_STATS} />
     }
   }
 

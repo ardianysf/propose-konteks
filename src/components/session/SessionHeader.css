@@ -10,19 +10,23 @@
   padding: 10px 32px;
   background: var(--kx-canvas);
   border-bottom: 1px solid var(--kx-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kx-session-detail__head-left {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .kx-session-detail__head-main {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
   min-width: 0;
 }
 
 .kx-session-detail__share {
   flex-shrink: 0;
-  margin-left: auto;
   width: 28px;
   height: 28px;
   /* Center the glyph vertically inside the fixed square (kx-icon-btn's
