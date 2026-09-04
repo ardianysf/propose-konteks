@@ -375,7 +375,7 @@ export default function V2Sidebar() {
         className="kx-v2-menuitem"
         data-testid="v2-customize-trigger"
         onClick={() =>
-          dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', tab: 'agents' } })
+          dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', destination: { section: 'agents' } } })
         }
       >
         <span className="kx-v2-menuitem__icon" aria-hidden="true">

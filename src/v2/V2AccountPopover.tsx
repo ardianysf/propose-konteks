@@ -6,6 +6,8 @@
  */
 import { useEffect, useRef, useState, type MouseEvent } from 'react'
 import { useMockup } from '../state/MockupContext'
+import { usePrototypeLocale } from '../i18n/prototypeLocale'
+import type { OpenOverlayPayload } from '../state/mockupReducer'
 import { useOverlayLifecycle } from '../components/shell/OverlayLifecycle'
 import { useFocusContainment } from '../components/shell/useFocusContainment'
 import {
@@ -39,6 +41,7 @@ const THEME_ICONS: Record<ThemePreference, () => React.JSX.Element> = {
 
 export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProps) {
   const { state, dispatch } = useMockup()
+  const { t } = usePrototypeLocale()
   const { beginOverlayChain } = useOverlayLifecycle()
   const rootRef = useRef<HTMLDivElement>(null)
 
@@ -63,9 +66,7 @@ export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProp
 
   const openOverlayAndClose = (
     event: MouseEvent<HTMLElement>,
-    overlay:
-      | { kind: 'customize'; tab: 'agents' }
-      | { kind: 'settings'; section: 'general' | 'billing' },
+    overlay: OpenOverlayPayload,
   ) => {
     beginOverlayChain(event.currentTarget)
     dispatch({ type: 'OPEN_OVERLAY', overlay })
@@ -82,7 +83,7 @@ export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProp
         ref={rootRef}
         tabIndex={-1}
         role="dialog"
-        aria-label="Account menu"
+        aria-label={t('accountMenu')}
         className="kx-v2-pop__panel"
       >
         <span className="kx-v2-pop__handle" aria-hidden="true" />
@@ -90,8 +91,8 @@ export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProp
         {/* Theme — segmented control (Light/Dark/System), the popover's
             only non-row control; kept above the action rows so it reads as
             a display setting, not an account action. */}
-        <span className="kx-v2-pop__label">Theme</span>
-        <div className="kx-v2-theme kx-v2-theme--menu" role="group" aria-label="Theme">
+        <span className="kx-v2-pop__label">{t('theme')}</span>
+        <div className="kx-v2-theme kx-v2-theme--menu" role="group" aria-label={t('theme')}>
           {THEME_PREFERENCES.map((pref) => {
             const active = themePref === pref
             const Icon = THEME_ICONS[pref]
@@ -122,35 +123,35 @@ export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProp
           type="button"
           className="kx-v2-pop__row"
           data-testid="v2-popover-settings"
-          onClick={(event) => openOverlayAndClose(event, { kind: 'settings', section: 'general' })}
+          onClick={(event) => openOverlayAndClose(event, { kind: 'settings', destination: { section: 'general' } })}
         >
           <span className="kx-v2-pop__row-icon" aria-hidden="true">
             <GearIcon />
           </span>
-          <span className="kx-v2-pop__row-label">Settings</span>
+          <span className="kx-v2-pop__row-label">{t('settings')}</span>
         </button>
         <button
           type="button"
           className="kx-v2-pop__row"
           data-testid="v2-popover-billing"
-          onClick={(event) => openOverlayAndClose(event, { kind: 'settings', section: 'billing' })}
+          onClick={(event) => openOverlayAndClose(event, { kind: 'settings', destination: { section: 'billing', subtab: 'usage' } })}
         >
           <span className="kx-v2-pop__row-icon" aria-hidden="true">
             <BillingIcon />
           </span>
-          <span className="kx-v2-pop__row-label">Billing</span>
+          <span className="kx-v2-pop__row-label">{t('billing')}</span>
         </button>
-        <button type="button" className="kx-v2-pop__row" onClick={onClose}>
+        <button type="button" className="kx-v2-pop__row" onClick={(event) => openOverlayAndClose(event, { kind: 'customize', destination: { section: 'connections', subtab: 'mcp' } })}>
           <span className="kx-v2-pop__row-icon" aria-hidden="true">
             <IntegrationsIcon />
           </span>
-          <span className="kx-v2-pop__row-label">Integrations</span>
+          <span className="kx-v2-pop__row-label">{t('integrations')}</span>
         </button>
         <button type="button" className="kx-v2-pop__row" onClick={onClose}>
           <span className="kx-v2-pop__row-icon" aria-hidden="true">
             <KeyboardIcon />
           </span>
-          <span className="kx-v2-pop__row-label">Keyboard shortcuts</span>
+          <span className="kx-v2-pop__row-label">{t('shortcuts')}</span>
         </button>
 
         <div className="kx-v2-pop__divider" role="presentation" />
@@ -159,7 +160,7 @@ export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProp
           <span className="kx-v2-pop__row-icon" aria-hidden="true">
             <LogoutIcon />
           </span>
-          <span className="kx-v2-pop__row-label">Log out</span>
+          <span className="kx-v2-pop__row-label">{t('logout')}</span>
         </button>
       </div>
     </div>

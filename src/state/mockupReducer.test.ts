@@ -5,7 +5,7 @@ import {
   initialState,
   mockupReducer,
   resolveSessionContextDraft,
-  DEFAULT_CUSTOMIZE_TAB,
+  DEFAULT_CUSTOMIZE_DESTINATION,
   type MockupAction,
   type MockupState,
   type OpenOverlayPayload,
@@ -241,12 +241,12 @@ describe('OPEN_OVERLAY / CLOSE_OVERLAY', () => {
     expect(state.overlay).toEqual({ kind: 'none' })
   })
 
-  it('resolves the customize tab from the payload or the default', () => {
+  it('resolves the customize destination from the payload or the default', () => {
     let state = freshState()
     state = mockupReducer(state, { type: 'OPEN_OVERLAY', overlay: { kind: 'customize' } })
-    expect(state.overlay).toEqual({ kind: 'customize', tab: DEFAULT_CUSTOMIZE_TAB })
-    state = mockupReducer(state, { type: 'OPEN_OVERLAY', overlay: { kind: 'customize', tab: 'tools' } })
-    expect(state.overlay).toEqual({ kind: 'customize', tab: 'tools' })
+    expect(state.overlay).toEqual({ kind: 'customize', destination: DEFAULT_CUSTOMIZE_DESTINATION })
+    state = mockupReducer(state, { type: 'OPEN_OVERLAY', overlay: { kind: 'customize', destination: { section: 'capabilities', subtab: 'tools' } } })
+    expect(state.overlay).toEqual({ kind: 'customize', destination: { section: 'capabilities', subtab: 'tools' } })
   })
 
   it('resolves the learned tab from the payload or the default', () => {
@@ -261,8 +261,8 @@ describe('OPEN_OVERLAY / CLOSE_OVERLAY', () => {
     let state = freshState()
     state = mockupReducer(state, { type: 'OPEN_OVERLAY', overlay: { kind: 'settings' } })
     expect(state.overlay).toEqual({ kind: 'settings', section: 'general' })
-    state = mockupReducer(state, { type: 'OPEN_OVERLAY', overlay: { kind: 'settings', section: 'billing' } })
-    expect(state.overlay).toEqual({ kind: 'settings', section: 'billing' })
+    state = mockupReducer(state, { type: 'OPEN_OVERLAY', overlay: { kind: 'settings', destination: { section: 'billing', subtab: 'providers' } } })
+    expect(state.overlay).toEqual({ kind: 'settings', section: 'billing', subtab: 'providers' })
   })
 
   it('CLOSE_OVERLAY on an already-closed state is a safe no-op', () => {
@@ -272,23 +272,30 @@ describe('OPEN_OVERLAY / CLOSE_OVERLAY', () => {
   })
 })
 
+describe('demo variants', () => {
+  it.each(['ready', 'loading', 'empty', 'error'] as const)('resolves the %s state', (variant) => {
+    const search = variant === 'ready' ? '' : `?mock=${variant}`
+    expect(initialState(search).demoVariant).toBe(variant)
+  })
+})
+
 // ---------------------------------------------------------------------------
-// SET_CUSTOMIZE_TAB — switches tab in place, no close/reopen
+// SET_CUSTOMIZE_DESTINATION — switches grouped destination in place
 // ---------------------------------------------------------------------------
 
-describe('SET_CUSTOMIZE_TAB', () => {
-  it('switches the customize overlay tab in place without closing it', () => {
+describe('SET_CUSTOMIZE_DESTINATION', () => {
+  it('switches the customize overlay destination in place without closing it', () => {
     let state = freshState()
-    state = mockupReducer(state, { type: 'OPEN_OVERLAY', overlay: { kind: 'customize', tab: 'agents' } })
-    state = mockupReducer(state, { type: 'SET_CUSTOMIZE_TAB', tab: 'skills' })
-    expect(state.overlay).toEqual({ kind: 'customize', tab: 'skills' })
-    state = mockupReducer(state, { type: 'SET_CUSTOMIZE_TAB', tab: 'tools' })
-    expect(state.overlay).toEqual({ kind: 'customize', tab: 'tools' })
+    state = mockupReducer(state, { type: 'OPEN_OVERLAY', overlay: { kind: 'customize', destination: { section: 'agents' } } })
+    state = mockupReducer(state, { type: 'SET_CUSTOMIZE_DESTINATION', destination: { section: 'capabilities', subtab: 'skills' } })
+    expect(state.overlay).toEqual({ kind: 'customize', destination: { section: 'capabilities', subtab: 'skills' } })
+    state = mockupReducer(state, { type: 'SET_CUSTOMIZE_DESTINATION', destination: { section: 'connections', subtab: 'vcs' } })
+    expect(state.overlay).toEqual({ kind: 'customize', destination: { section: 'connections', subtab: 'vcs' } })
   })
 
   it('is a no-op when the customize overlay is not open', () => {
     const state = freshState()
-    const next = mockupReducer(state, { type: 'SET_CUSTOMIZE_TAB', tab: 'skills' })
+    const next = mockupReducer(state, { type: 'SET_CUSTOMIZE_DESTINATION', destination: { section: 'capabilities', subtab: 'skills' } })
     expect(next).toBe(state)
     expect(next.overlay).toEqual({ kind: 'none' })
   })
@@ -977,8 +984,8 @@ describe('immutability', () => {
       { type: 'TOGGLE_REPO', repoId: 'richapp/fe-richapp' },
       { type: 'CREATE_SYSTEM', name: 'Frozen Probe', description: 'immutability check' },
       { type: 'NAVIGATE', route: 'session-history' },
-      { type: 'OPEN_OVERLAY', overlay: { kind: 'customize', tab: 'skills' } },
-      { type: 'SET_CUSTOMIZE_TAB', tab: 'tools' },
+      { type: 'OPEN_OVERLAY', overlay: { kind: 'customize', destination: { section: 'capabilities', subtab: 'skills' } } },
+      { type: 'SET_CUSTOMIZE_DESTINATION', destination: { section: 'capabilities', subtab: 'tools' } },
       { type: 'CLOSE_OVERLAY' },
       { type: 'SET_MODE', mode: 'planning' },
       { type: 'TOGGLE_COMPONENT', componentId: 'comp-hris-web' },

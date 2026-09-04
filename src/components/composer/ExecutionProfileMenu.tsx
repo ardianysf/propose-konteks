@@ -127,7 +127,7 @@ export default function ExecutionProfileMenu() {
             role="menuitem"
             className="kx-profile-menu__manage"
             onClick={() =>
-              dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', tab: 'agents' } })
+              dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', destination: { section: 'agents' } } })
             }
           >
             <TuneIcon />

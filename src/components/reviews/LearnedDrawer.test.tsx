@@ -84,7 +84,7 @@ describe('LearnedDrawer — frame', () => {
     expect(closed.container.querySelector('.kx-learned')).toBeNull()
     closed.unmount()
 
-    const other = renderLearnedDrawer({ kind: 'customize', tab: 'agents' })
+    const other = renderLearnedDrawer({ kind: 'customize', destination: { section: 'agents' } })
     expect(other.container.querySelector('.kx-learned')).toBeNull()
     other.unmount()
 

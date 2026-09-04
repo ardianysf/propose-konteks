@@ -1,0 +1,194 @@
+.kx-field-help {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: -7px 0 0;
+  color: var(--kx-secondary);
+  font-size: var(--kx-text-xs);
+  font-weight: var(--kx-font-normal);
+}
+
+.kx-prefix-input,
+.kx-search-field,
+.kx-copy-field {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  border: 1px solid var(--kx-border);
+  border-radius: 7px;
+  background: var(--kx-raised);
+  overflow: hidden;
+}
+
+.kx-prefix-input:focus-within,
+.kx-search-field:focus-within,
+.kx-copy-field:focus-within {
+  border-color: var(--kx-accent);
+  box-shadow: 0 0 0 2px var(--kx-pale);
+}
+
+.kx-prefix-input > span {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 9px;
+  color: var(--kx-secondary);
+  font-size: var(--kx-text-sm);
+}
+
+.kx-prefix-input input,
+.kx-search-field input,
+.kx-copy-field input {
+  flex: 1;
+  min-width: 0;
+  min-height: 32px;
+  padding: 7px 9px 7px 2px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--kx-primary);
+  font: inherit;
+  font-size: var(--kx-text-sm);
+}
+
+.kx-search-field {
+  gap: 7px;
+  padding-left: 9px;
+  color: var(--kx-secondary);
+}
+
+.kx-search-field input {
+  padding-left: 0;
+}
+
+.kx-copy-field input {
+  padding-left: 9px;
+}
+
+.kx-copy-field .kx-button {
+  flex: none;
+  margin-right: 3px;
+}
+
+.kx-member-results {
+  display: grid;
+  max-height: 210px;
+  border: 1px solid var(--kx-border);
+  border-radius: 8px;
+  overflow-y: auto;
+}
+
+.kx-dialog-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 92px;
+  padding: 16px;
+  color: var(--kx-secondary);
+  font-size: var(--kx-text-xs);
+  text-align: center;
+}
+
+.kx-member-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--kx-border);
+  cursor: pointer;
+}
+
+.kx-member-option:first-child {
+  border-top: 0;
+}
+
+.kx-member-option:hover {
+  background: var(--kx-pale);
+}
+
+.kx-member-option input {
+  accent-color: var(--kx-accent);
+}
+
+.kx-member-option > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kx-member-option strong {
+  color: var(--kx-primary);
+  font-size: var(--kx-text-sm);
+}
+
+.kx-member-option small {
+  color: var(--kx-secondary);
+  font-size: var(--kx-text-xs);
+}
+
+.kx-invitation-handoff {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.kx-invitation-handoff strong {
+  color: var(--kx-primary);
+  font-size: var(--kx-text-sm);
+}
+
+.kx-invitation-handoff p {
+  margin: 3px 0 0;
+  color: var(--kx-secondary);
+  font-size: var(--kx-text-xs);
+}
+
+.kx-handoff-icon {
+  display: grid;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--kx-pale);
+  color: var(--kx-secondary);
+}
+
+.kx-dialog-warning {
+  margin: 0;
+  padding: 9px 11px;
+  border-radius: 7px;
+  background: var(--kx-pale);
+  color: var(--kx-attention);
+  font-size: var(--kx-text-xs);
+}
+
+.kx-copy-status {
+  min-height: 16px;
+  margin: -6px 0 0;
+  color: var(--kx-secondary);
+  font-size: var(--kx-text-xs);
+}
+
+.kx-spinner--small {
+  width: 13px;
+  height: 13px;
+}
+
+@media (max-width: 760px) {
+  .kx-copy-field {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 3px;
+  }
+
+  .kx-copy-field input {
+    padding-left: 7px;
+  }
+
+  .kx-copy-field .kx-button {
+    margin: 0;
+  }
+}
