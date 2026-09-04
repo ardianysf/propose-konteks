@@ -1313,6 +1313,200 @@
       "adoptionNotes": "Presentation-only, tidak butuh MockupContext; baris terakhir rows adalah total yang selalu tampil; detail id statis (satu instance per halaman). RESPONSIVE: leader dots menyusut; row wrap mengikuti lebar kolom."
     },
     {
+      "id": "tech-inline-code",
+      "name": "InlineCode",
+      "domain": "session",
+      "sourcePath": "src/components/technical/InlineCode.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Primitive 1 of the technical-text family (spec §1): the NON-interactive <code> for short literal system values inside prose — identifiers like hris-frontend, development, ses_01JABC. Mono at 0.95em inside a soft borderless ink-first wash (--kx-tech-code-bg / --kx-tech-code-text, tuned per theme); no hover, pointer, or chevron — it is a VALUE, not a control (openable objects are EntityToken's job). Values wrap whole-token (break-word, not anywhere) so short tokens never split mid-word.",
+      "propDocs": {
+        "children": "required, ReactNode — the literal value (short identifier / key / path fragment)",
+        "className": "optional, string — extra class on the <code>"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/technical/technical.css"
+      ],
+      "tokenDeps": [
+        "--kx-font-medium",
+        "--kx-font-mono",
+        "--kx-tech-code-bg",
+        "--kx-tech-code-text"
+      ],
+      "variants": [
+        "in a sentence",
+        "standalone"
+      ],
+      "fixtureRef": "variant grid: the sentence 'Repository hris-frontend berada pada branch development.' (the in-prose wash) | a standalone ses_01JABC id",
+      "adoptionNotes": "Pure presentational — no context, no state; pair with renderTechnicalText for agent prose. DOMAIN NOTE: registered under 'session' for consistency with the stream blocks that consume the technical family (the 'context' domain holds the app-coupled modals instead). RESPONSIVE: mono 0.95em keeps the inline line rhythm; long values wrap to the next line as a whole, splitting only genuinely unbreakable strings."
+    },
+    {
+      "id": "tech-entity-token",
+      "name": "EntityToken",
+      "domain": "session",
+      "sourcePath": "src/components/technical/EntityToken.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Primitive 2 (spec §2): an OPENABLE system object — repository, branch, document, artifact, task, plan, agent, tool, commit, session — as a <button> by default (opens a panel) or an <a> when href navigates. TWO interaction styles, never combined: 'pill' (default) rests as a subtle pill and changes color on hover/focus; 'link' rests as accent ink + underline and BECOMES a pill with the underline removed on hover/focus. Accessible name via openLabel (default 'Open {kind} {label}') plus a title tooltip that should carry the FULL value whenever the label is truncated (long paths, SHAs, URLs); the 13px stroke kind icon is aria-hidden.",
+      "propDocs": {
+        "kind": "required, EntityKind — repository|branch|document|artifact|task|plan|agent|tool|commit|session (drives the icon + default accessible name)",
+        "label": "required, string — the visible value",
+        "mono": "optional, boolean (default true) — identifier labels render mono; human-readable artifact titles stay sans",
+        "variant": "optional, 'pill' | 'link' (default 'pill') — the two interaction styles, never combined",
+        "openLabel": "optional, string — explicit accessible name, e.g. 'Open repository hris-frontend'",
+        "title": "optional, string — tooltip text; pass the FULL value for truncated labels (paths, SHAs, URLs); defaults to label",
+        "href": "optional, string — render an <a> (navigation) instead of a <button> (opens a panel)",
+        "onClick": "optional, () => void — click handler (phase-1 demo clicks are a documented noop; semantics stay intact)",
+        "className": "optional, string — extra class"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/technical/technical.css"
+      ],
+      "tokenDeps": [
+        "--kx-font-medium",
+        "--kx-font-mono",
+        "--kx-muted-text-aa",
+        "--kx-tech-entity-bg",
+        "--kx-tech-entity-bg-rest",
+        "--kx-tech-entity-border",
+        "--kx-tech-entity-border-rest",
+        "--kx-tech-entity-text",
+        "--kx-tech-focus-ring"
+      ],
+      "variants": [
+        "pill · mono & sans",
+        "link · rests underlined"
+      ],
+      "fixtureRef": "variant grid: pill row (repository/branch/session mono + Task 7 sans) | link commit 9f3c2a1 in a sentence — rests underlined, hover/focus becomes a pill; aria-label + title tooltip noted in the prose",
+      "adoptionNotes": "Pure + callback-driven; the target panel ships with the session-stream integration, so phase-1 demo clicks are a documented noop while full button/link semantics remain. RESPONSIVE: tokens wrap inline with gap; labels break-word inside min-width:0 so long identifiers never overflow the pill."
+    },
+    {
+      "id": "tech-metadata-pair",
+      "name": "MetadataPair",
+      "domain": "session",
+      "sourcePath": "src/components/technical/MetadataPair.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Primitive 3 (spec §3): one key–value row — a plain muted LABEL (11–12px medium sans, NEVER interactive; only the value may act) and a VALUE that accepts a plain string (optionally rendered as InlineCode via mono) or any ReactNode (EntityToken, …). String values longer than 24 characters gain a hover/focus-revealed Copy action with brief 'Copied' feedback (opacity reveal, not visibility, keeps the button keyboard-reachable — the same contract as the stream hover footers). The 2-col-desktop → 1-col-mobile grid of pairs lives at the usage site.",
+      "propDocs": {
+        "label": "required, string — the plain (never clickable) label",
+        "value": "required, string | ReactNode — string (mono renders it as InlineCode) or any node (EntityToken, …)",
+        "mono": "optional, boolean (default false) — string values render as InlineCode identifiers instead of sans",
+        "className": "optional, string — extra class on the pair",
+        "testId": "optional, string — data-testid"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/technical/technical.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-text-aa",
+        "--kx-font-bold",
+        "--kx-font-medium",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-tech-focus-ring",
+        "--kx-text-md",
+        "--kx-text-sm",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "2×2 grid · mixed values",
+        "long value · hover copy"
+      ],
+      "fixtureRef": "variant grid: the 2×2 grid (Repository/Branch as EntityToken values, mono Session ID string, plain Provider) | one long webhook URL with the hover/focus-revealed Copy",
+      "adoptionNotes": "Pure; Copy goes through the shared stream clipboard helper (silently tolerated where the clipboard is unavailable). RESPONSIVE: the grid of pairs is owned by the usage site — 2 columns on desktop collapsing to 1 on ≤760px; long values wrap inside min-width:0 cells with the Copy action revealed on hover/focus-within."
+    },
+    {
+      "id": "tech-status-badge",
+      "name": "StatusBadge",
+      "domain": "session",
+      "sourcePath": "src/components/technical/StatusBadge.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Primitive 4 (spec §4): the ten canonical execution statuses as a filled pill — Draft, Running, Waiting for input, Waiting approval, Needs review, Blocked, Completed, Partial, Failed, Cancelled. Sans (NEVER mono) 11–12px weight 600; ALWAYS icon + label + tone together so color never carries the meaning alone. Each tone renders a filled treatment — tinted fill + tone border + tone ink via the --kx-tech-status-* tokens (success reads the AA accent ink; warning/danger share the tuned amber family with the firm × telling them apart; neutral reads the AA muted ink). Running pulses a live dot that prefers-reduced-motion kills while keeping it visible. Non-clickable by default; an onClick upgrades the pill to real <button> semantics with a visible focus ring; an optional label override keeps tone + glyph (e.g. completed → 'Answered').",
+      "propDocs": {
+        "status": "required, TechStatus — one of the ten canonical keys (TECH_STATUSES)",
+        "onClick": "optional, () => void — upgrades the pill to a <button> with hover edge + focus ring",
+        "label": "optional, string — overrides the canonical label while keeping tone + glyph",
+        "className": "optional, string — extra class",
+        "testId": "optional, string — data-testid"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/technical/technical.css"
+      ],
+      "tokenDeps": [
+        "--kx-tech-entity-border-hover",
+        "--kx-tech-focus-ring",
+        "--kx-tech-status-danger",
+        "--kx-tech-status-danger-bg",
+        "--kx-tech-status-danger-border",
+        "--kx-tech-status-neutral",
+        "--kx-tech-status-neutral-bg",
+        "--kx-tech-status-neutral-border",
+        "--kx-tech-status-success",
+        "--kx-tech-status-success-bg",
+        "--kx-tech-status-success-border",
+        "--kx-tech-status-warning",
+        "--kx-tech-status-warning-bg",
+        "--kx-tech-status-warning-border",
+        "--kx-text-sm"
+      ],
+      "variants": [
+        "all ten statuses",
+        "onClick · button semantics"
+      ],
+      "fixtureRef": "variant grid: all ten canonical badges side by side (Running pulses its dot) | one Needs review badge with onClick — real button semantics",
+      "adoptionNotes": "Pure; the status set itself is canonical (TECH_STATUSES + TECH_STATUS_LABELS) — settled-state readings go through the label override, never a new status key. RESPONSIVE: pills keep white-space nowrap and wrap as whole units with gap on narrow columns."
+    },
+    {
+      "id": "tech-code-block",
+      "name": "CodeBlock",
+      "domain": "session",
+      "sourcePath": "src/components/technical/CodeBlock.tsx",
+      "exportName": "default",
+      "classification": "adoptable",
+      "description": "Primitive 5 (spec §5): the multiline counterpart of InlineCode — a header (mono muted meta + a Copy button with brief 'Copied' feedback via the shared stream clipboard helper) over a focusable <pre><code> body (mono 12–13px, lh 1.55) that scrolls horizontally without shrinking the font. Line numbers appear by default past 5 lines (overridable); code longer than 12 lines starts collapsed showing the first 10 behind a 'Show full code' toggle (aria-expanded). An optional muted footer line carries source/execution context, and a per-line class hook enables diff-style tinting on tool-evidence output.",
+      "propDocs": {
+        "code": "required, string — the code; a trailing newline is ignored",
+        "meta": "optional, string — header meta: a language or a file path (e.g. 'sql' or 'config/sync.yaml')",
+        "lineNumbers": "optional, boolean — overrides the >5-line default: true = always numbered, false = never",
+        "lineClassName": "optional, (line: string) => string | undefined — per-line class hook (e.g. diff +/- tinting)",
+        "footer": "optional, ReactNode — muted footer line for source/execution context",
+        "className": "optional, string — extra class",
+        "testId": "optional, string — data-testid"
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/components/technical/technical.css"
+      ],
+      "tokenDeps": [
+        "--kx-accent-text-aa",
+        "--kx-border",
+        "--kx-canvas",
+        "--kx-font-bold",
+        "--kx-font-mono",
+        "--kx-muted-text-aa",
+        "--kx-pale",
+        "--kx-primary",
+        "--kx-raised",
+        "--kx-tech-focus-ring",
+        "--kx-text-md",
+        "--kx-text-xs"
+      ],
+      "variants": [
+        "sql · 4 lines · no numbers",
+        "yaml · 16 lines · collapsed",
+        "footer · execution context"
+      ],
+      "fixtureRef": "variant grid: a 4-line SQL query (under the line-number gate, no numbers) | a 16-line YAML config collapsed to 10 numbered lines with Show full code + Copy interactive | the SQL again with a muted 'Executed 09:41 · 3 rows returned' footer",
+      "adoptionNotes": "Pure; Copy + collapse state is local to the block, collapse honors aria-expanded. RESPONSIVE: the body scrolls horizontally without shrinking the mono font and is focusable so keyboard users can scroll it; line numbers appear past 5 lines by default; the header wraps above the Copy button on narrow widths."
+    },
+    {
       "id": "feedback-modal",
       "name": "FeedbackModal",
       "domain": "session",

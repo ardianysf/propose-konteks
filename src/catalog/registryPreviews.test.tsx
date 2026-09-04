@@ -5,12 +5,12 @@
  * Derived from components.json + the runtime registry — never a hand-made
  * slug list, so the test set can never drift from the manifest:
  *   1. Every visual manifest entry (classification adoptable |
- *      mockup-coupled — 44 today) has exactly one registry entry, that
+ *      mockup-coupled — 49 today) has exactly one registry entry, that
  *      entry defines a `preview`, and the preview lazy-loads and renders
  *      inside an error boundary without an uncaught exception.
  *   2. ComponentDetailPage renders the required sections (Live preview,
  *      API contract, Contoh pemakaian, Meta) plus the resolved preview
- *      content for every one of the 44 slugs.
+ *      content for every one of the 49 slugs.
  *
  * Deliberately no pixel/style assertions: structure, roles, and section
  * presence only.
@@ -56,10 +56,10 @@ class TestErrorBoundary extends Component<
 }
 
 describe('registry ↔ manifest visual contract (parametrized)', () => {
-  it('the manifest carries 44 visual entries and they all have detail-page content fields', () => {
-    // Guard rail for the "44" in the task: if metadata work (R2+) changes
+  it('the manifest carries 49 visual entries and they all have detail-page content fields', () => {
+    // Guard rail for the "49" in the task: if metadata work (R2+) changes
     // classifications, this fails loudly instead of silently re-scoping.
-    expect(visualEntries).toHaveLength(44)
+    expect(visualEntries).toHaveLength(49)
     for (const entry of visualEntries) {
       expect(entry.id).toBeTruthy()
       expect(entry.name).toBeTruthy()
