@@ -510,7 +510,9 @@ html.kx-catalog-page {
   font-size: 15px;
   line-height: 1.6;
   color: var(--kxcat-ink-2);
-  max-width: 640px;
+  /* Desktop: full width (the reading cap is retired per review); long
+   * lines stay comfortable via the page's own container padding. */
+  max-width: none;
 }
 
 .kx-cat-page code {
