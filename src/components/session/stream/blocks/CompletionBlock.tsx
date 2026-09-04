@@ -20,13 +20,15 @@ interface CompletionBlockProps {
   time?: string
   /** Hover footer — when this turn ends its response group. */
   showFooter?: boolean
+  /** Execution stats on the footer (duration · tokens in · out). */
+  stats?: { duration: string; tokensIn: string; tokensOut: string }
 }
 
 export default function CompletionBlock({
   data,
   time = '15:03',
   showFooter = false,
-}: CompletionBlockProps) {
+  stats,}: CompletionBlockProps) {
   return (
     <ResponseBlock
       kindLabel="HANDOFF"
@@ -34,7 +36,7 @@ export default function CompletionBlock({
       icon={<CompletionIcon />}
       time={time}
       className="kx-stream-turn--completion"
-      showFooter={showFooter}
+      showFooter={showFooter} stats={stats}
       stateChip={<StatusBadge status="completed" />}
     >
       <div className="kx-stream-completion">

@@ -192,6 +192,11 @@
   color: var(--kx-muted-text-aa);
 }
 
+.kx-stream-turn__stats {
+  font-size: var(--kx-text-xs);
+  color: var(--kx-muted-text-aa);
+}
+
 .kx-stream-turn__time {
   margin-left: auto;
   font-size: var(--kx-text-xs);

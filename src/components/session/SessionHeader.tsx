@@ -59,26 +59,16 @@ export default function SessionHeader({
 
   return (
     <header className="kx-session-detail__head" data-testid="session-detail-header">
-      {/* Header stack order: title row (title + share) → context line
-          (mode · system · component). The status badge is intentionally not
-          here — it lives above the composer in the sticky composer area. */}
-      <div className="kx-session-detail__head-main">
+      {/* Left/right split (review): LEFT carries the title
+          (head-main) and the sr-only context line; RIGHT carries the
+          share icon — vertically centered against the whole left block. */}
+      <div className="kx-session-detail__head-left">
         {/* ≤760px the title hides behind the shared sr-only utility
             (global.css scopes it to mobile); the Share button stays
             visible and the desktop header renders unchanged. */}
-        <h1 className="kx-session-detail__title kx-u-sr-only">{headerTitle}</h1>
-        <button
-          type="button"
-          className="kx-icon-btn kx-session-detail__share"
-          aria-label="Share session"
-          data-testid="share-session"
-          onClick={() => {
-            // Mock-only affordance: no browser/network share side effect.
-          }}
-        >
-          <ShareIcon />
-        </button>
-      </div>
+        <div className="kx-session-detail__head-main">
+          <h1 className="kx-session-detail__title kx-u-sr-only">{headerTitle}</h1>
+        </div>
       {/* Context row: session context metadata (mode · system · component,
           read-only, stored on sessionDetail — option B). The row wraps
           cleanly on narrow viewports. */}
@@ -91,6 +81,19 @@ export default function SessionHeader({
           <span>{componentName ?? sessionDetail.componentName}</span>
         </span>
       </p>
+      </div>
+
+      <button
+        type="button"
+        className="kx-icon-btn kx-session-detail__share"
+        aria-label="Share session"
+        data-testid="share-session"
+        onClick={() => {
+          // Mock-only affordance: no browser/network share side effect.
+        }}
+      >
+        <ShareIcon />
+      </button>
     </header>
   )
 }

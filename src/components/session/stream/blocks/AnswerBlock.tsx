@@ -19,15 +19,18 @@ interface AnswerBlockProps {
   time?: string
   /** Hover footer — when this turn ends its response group. */
   showFooter?: boolean
+  /** Execution stats on the footer (duration · tokens in · out). */
+  stats?: { duration: string; tokensIn: string; tokensOut: string }
 }
 
 export default function AnswerBlock({
   data,
   time = '14:58',
   showFooter = false,
+  stats,
 }: AnswerBlockProps) {
   return (
-    <ResponseBlock tone="neutral" time={time} showFooter={showFooter}>
+    <ResponseBlock tone="neutral" time={time} showFooter={showFooter} stats={stats}>
       <div className="kx-stream-answer-prose">
         {data.paragraphs.map((paragraph, index) => (
           <p key={index} className="kx-stream-prose">

@@ -340,6 +340,9 @@ export interface ResponseBlockProps {
   time: string
   /** Optional status chip riding the compact header row. */
   stateChip?: ReactNode
+  /** Execution stats beside the footer icons (duration · tokens in ·
+   * tokens out) — shown on the group-final turn's hover footer. */
+  stats?: { duration: string; tokensIn: string; tokensOut: string }
   children: ReactNode
   /** Extra modifier class for the turn root (e.g. --completion). */
   className?: string
@@ -362,6 +365,7 @@ export default function ResponseBlock({
   className,
   id,
   showFooter = false,
+  stats,
 }: ResponseBlockProps) {
   const bodyRef = useRef<HTMLDivElement>(null)
   const [feedback, setFeedback] = useState<FooterFeedback>('idle')
@@ -433,6 +437,11 @@ export default function ResponseBlock({
           {feedback !== 'idle' && (
             <span className="kx-stream-turn__feedback" role="status">
               {feedback === 'copied' ? 'Copied' : 'Link copied'}
+            </span>
+          )}
+          {stats !== undefined && (
+            <span className="kx-stream-turn__stats kx-stream-tabular">
+              {stats.duration} · {stats.tokensIn} tokens in · {stats.tokensOut} tokens out
             </span>
           )}
           <span className="kx-stream-turn__time kx-stream-tabular">{time}</span>

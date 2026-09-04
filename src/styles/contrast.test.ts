@@ -431,6 +431,7 @@ function entries(): Entry[] {
       '.kx-stream-quote__label',
       '.kx-stream-quote__attribution',
       '.kx-stream-estimate__kind',
+      '.kx-stream-turn__stats',
       '.kx-stream-bubble__read-toggle',
       '.kx-stream-estimate__note',
       '.kx-stream-error__toggle',
@@ -1045,15 +1046,15 @@ describe('inventory completeness and non-duplication (AC9)', () => {
   const inventory = entries()
   const usages = collectUsages()
 
-  it('covers exactly 267 consumers — 98 muted, 93 accent-strong, 24 accent-text-aa', () => {
-    expect(inventory).toHaveLength(267)
+  it('covers exactly 268 consumers — 98 muted, 93 accent-strong, 24 accent-text-aa', () => {
+    expect(inventory).toHaveLength(268)
     expect(inventory.filter((e) => e.token === MUTED)).toHaveLength(98)
     expect(inventory.filter((e) => e.token === ACCENT_STRONG)).toHaveLength(93)
     expect(inventory.filter((e) => e.token === ACCENT_AA)).toHaveLength(24)
   })
 
   it('classifies the expected M/A/S/U counts', () => {
-    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(132)
+    expect(inventory.filter((e) => e.cls === 'M')).toHaveLength(133)
     expect(inventory.filter((e) => e.cls === 'A')).toHaveLength(61)
     expect(inventory.filter((e) => e.cls === 'S')).toHaveLength(9)
     expect(inventory.filter((e) => e.cls === 'U')).toHaveLength(65)

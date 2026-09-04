@@ -30,6 +30,8 @@ interface ClarificationBlockProps {
   time?: string
   /** Hover footer — when this turn ends its response group. */
   showFooter?: boolean
+  /** Execution stats on the footer (duration · tokens in · out). */
+  stats?: { duration: string; tokensIn: string; tokensOut: string }
 }
 
 export default function ClarificationBlock({
@@ -38,7 +40,7 @@ export default function ClarificationBlock({
   onAnswer,
   time = '14:05',
   showFooter = false,
-}: ClarificationBlockProps) {
+  stats,}: ClarificationBlockProps) {
   const settled = data.settledAnswers !== undefined
   const allAnswered =
     settled || data.questions.every((question) => answered[question.id] !== undefined)
@@ -49,7 +51,7 @@ export default function ClarificationBlock({
       tone={allAnswered ? 'accent' : 'attention'}
       icon={<ClarificationIcon />}
       time={time}
-      showFooter={showFooter}
+      showFooter={showFooter} stats={stats}
       stateChip={
         allAnswered ? (
           <StatusBadge status="completed" label="Answered" />
