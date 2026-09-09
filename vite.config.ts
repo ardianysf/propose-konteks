@@ -7,9 +7,9 @@ import type { Plugin } from 'vite'
 /**
  * Vite plugin to enable clean URL routing for the catalog SPA.
  *
- * This plugin adds middleware to both dev and preview servers that rewrites
- * /catalog/* requests to serve catalog.html, allowing HTML5 History API
- * navigation without hash fragments.
+ * This plugin adds middleware to both dev and preview servers. It rewrites
+ * /catalog/* requests to catalog.html for History API navigation and serves
+ * the standalone landing page at exactly /landingpage.
  *
  * Valid routes:
  *   /catalog → serves catalog.html
@@ -34,7 +34,9 @@ export function routeSiteRequest(
     res.end()
     return
   }
-  if (pathname === '/catalog' || pathname.startsWith('/catalog/')) {
+  if (pathname === '/landingpage') {
+    req.url = `/landingpage.html${query}`
+  } else if (pathname === '/catalog' || pathname.startsWith('/catalog/')) {
     req.url = `/catalog.html${query}`
   } else if (pathname === '/v2' || pathname.startsWith('/v2/')) {
     req.url = `/index.html${query}`
@@ -83,6 +85,7 @@ export default defineConfig({
       input: {
         main: fileURLToPath(new URL('./index.html', import.meta.url)),
         catalog: fileURLToPath(new URL('./catalog.html', import.meta.url)),
+        landingpage: fileURLToPath(new URL('./landingpage.html', import.meta.url)),
       },
     },
   },
