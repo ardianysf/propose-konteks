@@ -122,32 +122,31 @@
     .lp-drawer a:hover { background: var(--kx-pale); }
     .lp-drawer-tools { display: flex; gap: 8px; padding-top: 8px; border-top: 1px solid var(--kx-border); }
 
-    .lp-hero { position: relative; overflow: hidden; padding: 72px 32px 84px; background: var(--kx-canvas); color: var(--kx-primary); }
-    .lp-hero-inner { position: relative; z-index: 2; }
-    .lp-hero-copy { position: relative; z-index: 5; text-align: center; }
-    .lp-title { max-width: 980px; margin-inline: auto; font-family: 'Fraunces', Georgia, serif; font-size: clamp(48px, 6.3vw, 88px); font-variation-settings: 'opsz' 88, 'SOFT' 70, 'WONK' 1; font-weight: 800; letter-spacing: -.035em; line-height: .98; }
-    .lp-title span { display: block; }
-    .lp-lede { margin: 26px auto 0; max-width: 70ch; color: var(--kx-secondary); font-size: clamp(17px, 1.45vw, 20px); line-height: 1.55; }
+    .lp-hero { position: relative; height: 1064px; overflow: hidden; padding-inline: 32px; background: #faf8ef; color: #243025; }
+    .lp-hero-inner { position: relative; height: 100%; }
+    .lp-title { position: absolute; z-index: 1; top: 96px; left: 50%; width: min(776px, 100%); font-family: 'Fraunces', Georgia, serif; font-size: 88px; font-variation-settings: 'opsz' 88; font-weight: 800; letter-spacing: -.035em; line-height: 86px; text-align: center; white-space: pre; text-wrap: initial; transform: translateX(-50%); }
+    .lp-hero-art { position: absolute; z-index: 2; top: 166px; left: 50%; width: 703px; height: 703px; margin: 0; transform: translateX(-50%); }
+    .lp-hero-art img { width: 100%; height: 100%; object-fit: contain; }
+    .lp-lede { position: absolute; z-index: 3; top: 710px; left: 50%; width: min(940px, 100%); max-width: none; color: #58735a; font-size: 20px; line-height: 31px; text-align: center; transform: translateX(-50%); }
     .lp-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 30px; }
-    .lp-button-outline { border-color: var(--kx-primary); color: var(--kx-primary); }
-    .lp-button-outline:hover { background: var(--kx-pale); }
+    .lp-hero .lp-hero-actions { position: absolute; z-index: 3; top: 820px; left: 50%; margin-top: 0; transform: translateX(-50%); }
+    .lp-hero .lp-hero-actions .lp-button { height: 46px; min-height: 46px; padding: 0 14px; font-size: 14px; white-space: nowrap; }
+    .lp-hero .lp-hero-actions .lp-button:first-child { width: 168px; }
+    .lp-hero .lp-hero-actions .lp-button:last-child { width: 191px; }
+    .lp-button-outline { border-color: currentColor; color: currentColor; }
+    .lp-button-outline:hover { background: #f4f8ee; }
     .lp-boat-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
     .lp-paper-boat-svg { overflow: visible; }
     .lp-paper-boat-svg use { stroke: var(--boat-ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-    .lp-boat-model { --boat-paper: #faf8ef; --boat-paper-alt: #dfe8d2; --boat-ink: #243025; --boat-sea: #58735a; position: relative; height: 520px; margin: 52px auto 0; border-block: 1px solid var(--kx-border); background: var(--kx-canvas); isolation: isolate; }
-    .lp-boat-model::before, .lp-workflow-stage::before { content: ''; position: absolute; z-index: 0; top: 55%; right: 0; bottom: 0; left: 0; background: var(--kx-pale); }
-    .lp-boat-model::after, .lp-workflow-stage::after { content: ''; position: absolute; z-index: 1; top: 55%; right: 0; left: 0; border-top: 2px solid var(--boat-sea); }
+    .lp-workflow-stage::before { content: ''; position: absolute; z-index: 0; top: 55%; right: 0; bottom: 0; left: 0; background: var(--kx-pale); }
+    .lp-workflow-stage::after { content: ''; position: absolute; z-index: 1; top: 55%; right: 0; left: 0; border-top: 2px solid var(--boat-sea); }
     .lp-region-label { position: absolute; z-index: 5; left: 50%; font-size: 11px; font-weight: 700; letter-spacing: .18em; transform: translateX(-50%); }
     .lp-region-label--human { top: 14px; color: var(--kx-accent-text-aa); }
     .lp-region-label--agent { top: calc(55% + 14px); color: var(--kx-secondary); }
     .lp-human-callouts, .lp-agent-phases { margin: 0; padding: 0; list-style: none; }
     .lp-human-callouts li { position: absolute; z-index: 7; left: var(--callout-x); top: var(--callout-y); color: var(--kx-primary); font: 600 clamp(20px, 2vw, 26px)/1.05 'Caveat', cursive; transform: translate(-50%, -50%) rotate(var(--callout-rotate)); }
-    .lp-human-callouts li::after { content: ''; position: absolute; top: calc(100% + 7px); left: 50%; width: clamp(44px, 6vw, 72px); height: 22px; border-top: 1.5px solid var(--kx-attention); border-radius: 50%; opacity: 0; transform: translateX(-50%) rotate(8deg) scaleX(.35); transform-origin: left center; }
-    .lp-human-callouts li::before { content: ''; position: absolute; top: calc(100% + 21px); left: calc(50% + 29px); width: 7px; height: 7px; border-right: 1.5px solid var(--kx-attention); border-bottom: 1.5px solid var(--kx-attention); opacity: 0; transform: rotate(24deg); }
-    .lp-hero.is-annotated .lp-human-callouts li::after, .lp-hero.is-annotated .lp-human-callouts li::before { animation: lp-pointer-reveal 160ms ease-out forwards; animation-delay: calc(var(--callout-order) * 80ms); }
-    .lp-hero-boat { position: absolute; z-index: 4; top: 55%; left: 50%; width: min(39vw, 380px); overflow: visible; color: var(--boat-ink); transform: translate(-50%, -50%); }
-    .lp-hero.is-motion-active .lp-hero-boat { animation: lp-paper-float 4s ease-in-out infinite; }
-    .lp-hero-boat svg { width: 100%; overflow: visible; }
+    .lp-human-callouts li::after { content: ''; position: absolute; top: calc(100% + 7px); left: 50%; width: clamp(44px, 6vw, 72px); height: 22px; border-top: 1.5px solid var(--kx-attention); border-radius: 50%; opacity: 1; transform: translateX(-50%) rotate(8deg); transform-origin: left center; }
+    .lp-human-callouts li::before { content: ''; position: absolute; top: calc(100% + 21px); left: calc(50% + 29px); width: 7px; height: 7px; border-right: 1.5px solid var(--kx-attention); border-bottom: 1.5px solid var(--kx-attention); opacity: 1; transform: rotate(24deg); }
     .lp-agent-phases li { position: absolute; z-index: 6; left: var(--phase-x); top: var(--phase-y); min-width: 68px; color: var(--kx-secondary); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-align: center; transform: translate(-50%, -50%); }
     .lp-agent-phases li::before { content: counter(list-item, decimal-leading-zero); display: block; width: 24px; height: 24px; margin: 0 auto 5px; border: 1px solid var(--kx-secondary); border-radius: 50%; font: 500 10px/22px 'JetBrains Mono', monospace; }
     .lp-agent-phases li:not(:last-child)::after { content: ''; position: absolute; top: 12px; left: calc(50% + 30px); width: clamp(18px, 5vw, 56px); border-top: 1px dashed var(--kx-muted); }
@@ -345,8 +344,6 @@
     .lp-footer-bottom { display: flex; justify-content: space-between; gap: 24px; margin-top: 58px; border-top: 1px solid var(--kx-border); padding-top: 22px; color: var(--kx-muted-text-aa); font-size: 13px; }
     .lp-footer-bottom a { color: var(--kx-accent-text-aa); font-weight: 700; }
 
-    @keyframes lp-paper-float { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, calc(-50% - 6px)); } }
-    @keyframes lp-pointer-reveal { to { opacity: 1; } }
     @keyframes lp-sparkle { 0%, 100% { transform: scale(.5); opacity: .55; } 50% { transform: scale(.8); opacity: 1; } }
     @keyframes lp-boat-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 
@@ -358,13 +355,16 @@
     }
     @media (max-width: 899px) {
       .lp-shell { width: min(100% - 32px, 680px); }
-      .lp-hero { padding-block: 64px 72px; }
-      .lp-boat-model { height: 610px; }
+      .lp-hero { height: auto; padding: 64px 32px 80px; }
+      .lp-hero-inner { display: flex; height: auto; flex-direction: column; align-items: center; }
+      .lp-title { position: relative; top: auto; left: auto; width: min(100%, 640px); font-size: clamp(48px, 8vw, 68px); line-height: .98; transform: none; }
+      .lp-hero-art { position: relative; top: auto; left: auto; width: min(100%, 620px); height: auto; aspect-ratio: 1; margin-top: -30px; transform: none; }
+      .lp-lede { position: relative; top: auto; left: auto; width: min(100%, 620px); margin-top: clamp(-140px, -20vw, -72px); font-size: 18px; line-height: 28px; transform: none; }
+      .lp-hero .lp-hero-actions { position: relative; top: auto; left: auto; margin-top: 30px; transform: none; }
       .lp-human-callouts { position: absolute; z-index: 7; top: 52px; right: 7%; left: 7%; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 34px; }
       .lp-human-callouts li, .lp-workflow-stage .lp-human-callouts li { position: relative; top: auto; left: auto; min-height: 44px; display: grid; place-items: center; text-align: center; transform: rotate(var(--callout-rotate)); }
       .lp-human-callouts li::after { top: calc(100% + 2px); width: 50px; }
       .lp-human-callouts li::before { top: calc(100% + 16px); }
-      .lp-hero-boat { width: min(58vw, 350px); }
       .lp-agent-phases { position: absolute; z-index: 6; top: calc(55% + 58px); right: 8%; left: 8%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px 10px; }
       .lp-agent-phases li { position: relative; top: auto; left: auto; transform: none; }
       .lp-agent-phases li::after { display: none; }
@@ -410,20 +410,14 @@
       .lp-nav-inner { gap: 10px; }
       .lp-nav-actions { display: none; }
       .lp-mobile-menu { margin-left: auto; }
-      .lp-hero { padding: 52px 16px 64px; }
-      .lp-hero-inner { display: grid; }
-      .lp-hero-copy { display: contents; }
-      .lp-title { order: 1; font-size: clamp(32px, 9.4vw, 42px); }
-      .lp-title span { white-space: nowrap; }
-      .lp-lede { order: 2; font-size: 17px; }
-      .lp-hero-actions { order: 4; align-items: stretch; }
-      .lp-hero-actions .lp-button { flex: 1 1 100%; }
-      .lp-boat-model { order: 3; width: 100%; height: 720px; margin-top: 42px; }
+      .lp-hero { padding: 40px 16px 52px; }
+      .lp-title { width: 100%; font-size: clamp(36px, 10.25vw, 42px); line-height: .98; }
+      .lp-hero-art { width: min(100%, 358px); margin-top: -18px; }
+      .lp-lede { width: 100%; margin-top: clamp(-78px, -20vw, -68px); font-size: 16px; line-height: 24px; }
+      .lp-hero .lp-hero-actions { width: 100%; align-items: stretch; margin-top: 24px; }
+      .lp-hero .lp-hero-actions .lp-button { width: 100%; flex: 1 1 100%; }
       .lp-human-callouts { top: 50px; right: 2%; left: 2%; gap: 14px 8px; }
       .lp-human-callouts li, .lp-workflow-stage .lp-human-callouts li { padding-inline: 2px; font-size: 19px; }
-      .lp-hero-boat { top: 48%; width: min(82vw, 320px); }
-      .lp-boat-model::before { top: 55%; }
-      .lp-boat-model::after { top: 55%; }
       .lp-agent-phases { top: calc(55% + 48px); right: 16%; left: 16%; grid-template-columns: 1fr; gap: 10px; }
       .lp-agent-phases li { display: grid; min-height: 38px; grid-template-columns: 32px 1fr; align-items: center; text-align: left; }
       .lp-agent-phases li::before { margin: 0; text-align: center; }
@@ -484,7 +478,7 @@
   THESIS: People steer above the waterline while agents execute below it. Refuses the generic dev-tool hero (gradient + screenshot).
   OWN-WORLD: Warm Enterprise cream, ink sage, matcha, and amber; flat paper geometry, crisp waterlines, restrained handwriting, Fraunces display, pill CTAs.
   STORY: visitors understand the ownership boundary, see the eight-state handoff, and act via Start building.
-  FIRST VIEWPORT: centered two-line promise and CTAs above one large Perspective 01 paper boat; four human callouts stay above its waterline and five ordered phases below.
+  FIRST VIEWPORT: Figma 571:6 — centered two-line promise, supplied paper-boat image, supporting copy, then CTAs; human/agent callouts begin only in #workflow.
   FORM: paper-boat control diagram, Persuade mode, light+dark.
   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
   -->
@@ -530,29 +524,11 @@
         </defs>
       </svg>
       <div class="lp-shell lp-hero-inner">
-        <div class="lp-hero-copy">
-          <h1 class="lp-title" id="lp-hero-title"><span>People lead the vision. </span><span>Agents do the rest.</span></h1>
-          <p class="lp-lede">Your team writes down what should exist. The agents you already use plan it, price it, build it, check it, and keep watch. You say yes first and accept at the end. One set of rules for the whole company.</p>
-          <div class="lp-hero-actions"><a class="lp-button lp-button-solid" href="https://app.konteks.io/">Start building ↗</a><a class="lp-button lp-button-outline" href="#workflow">See how it works ↓</a></div>
-        </div>
-        <figure class="lp-boat-model" role="group" aria-label="A paper boat rests on a waterline. Human control stays above; agent execution moves through Write, Plan, Build, Check, and Watch below.">
-          <span class="lp-region-label lp-region-label--human">HUMAN CONTROL</span>
-          <ol class="lp-human-callouts">
-            <li style="--callout-x:14%;--callout-y:22%;--callout-rotate:-4deg;--callout-order:0">Lead the vision</li>
-            <li style="--callout-x:77%;--callout-y:18%;--callout-rotate:3deg;--callout-order:1">Set the constraints</li>
-            <li style="--callout-x:80%;--callout-y:39%;--callout-rotate:-2deg;--callout-order:2">Judge the evidence</li>
-            <li style="--callout-x:12%;--callout-y:42%;--callout-rotate:2deg;--callout-order:3">Hold the context</li>
-          </ol>
-          <div class="lp-hero-boat" aria-hidden="true"><svg class="lp-paper-boat-svg" viewBox="0 0 440 260"><use href="#lp-boat-01"/></svg></div>
-          <span class="lp-region-label lp-region-label--agent">AGENT EXECUTION</span>
-          <ol class="lp-agent-phases">
-            <li style="--phase-x:14%;--phase-y:73%">Write</li>
-            <li style="--phase-x:32%;--phase-y:81%">Plan</li>
-            <li style="--phase-x:50%;--phase-y:73%">Build</li>
-            <li style="--phase-x:68%;--phase-y:81%">Check</li>
-            <li style="--phase-x:86%;--phase-y:73%">Watch</li>
-          </ol>
-        </figure>
+        <h1 class="lp-title" id="lp-hero-title">People lead the vision.
+Agents do the rest.</h1>
+        <figure class="lp-hero-art"><img src="/landingpage-assets/figma-paper-boat-hero.png" width="703" height="703" alt="A paper boat floating on hand-drawn blue water."></figure>
+        <p class="lp-lede">Your team writes down what should exist. The agents you already use plan it, price it, build it, check it, and keep watch. You say yes first and accept at the end. One set of rules for the whole company.</p>
+        <div class="lp-hero-actions"><a class="lp-button lp-button-solid" href="https://app.konteks.io/">Start building ↗</a><a class="lp-button lp-button-outline" href="#workflow">See how it works ↓</a></div>
       </div>
     </section>
 
@@ -608,7 +584,7 @@
         <figure class="lp-workflow-figure">
           <div class="lp-workflow-scroll">
             <div class="lp-workflow-sticky">
-              <div class="lp-workflow-stage" role="group" aria-label="A paper boat stays on the waterline while eight perspectives show human control above and agent execution below.">
+              <div class="lp-workflow-stage" role="group" aria-label="A paper boat rests on a waterline. Human control stays above; agent execution moves through Write, Plan, Build, Check, and Watch below.">
                 <span class="lp-region-label lp-region-label--human">HUMAN CONTROL</span>
                 <ol class="lp-human-callouts">
                   <li class="is-context-active" style="--callout-x:14%;--callout-y:22%;--callout-rotate:-4deg">Lead the vision</li>
@@ -803,31 +779,6 @@
         });
       });
 
-      const hero = doc.querySelector('.lp-hero');
-      let heroHasRevealed = reducedMotion;
-      let heroInView = reducedMotion;
-
-      function setHeroVisibility(isVisible) {
-        if (!hero) return;
-        heroInView = isVisible;
-        if (isVisible) heroHasRevealed = true;
-        hero.classList.toggle('is-annotated', heroHasRevealed);
-        hero.classList.toggle('is-motion-active', isVisible && !reducedMotion && !doc.hidden);
-      }
-
-      let heroObserver = null;
-      if (hero) {
-        if (!reducedMotion && typeof win.IntersectionObserver === 'function') {
-          heroObserver = new win.IntersectionObserver((entries) => {
-            const entry = entries[0];
-            setHeroVisibility(Boolean(entry && entry.isIntersecting && entry.intersectionRatio >= 0.25));
-          }, { threshold: [0, 0.25] });
-          heroObserver.observe(hero);
-        } else {
-          setHeroVisibility(true);
-        }
-      }
-
       const workflow = doc.querySelector('.lp-workflow-scroll');
       const scenes = Array.from(doc.querySelectorAll('[data-workflow-scene]')).map((scene) => ({
         element: scene,
@@ -941,21 +892,15 @@
       }
 
       doc.addEventListener('visibilitychange', () => {
-        if (hero) {
-          if (doc.hidden) hero.classList.remove('is-motion-active');
-          else if (heroHasRevealed) setHeroVisibility(heroInView);
-        }
         if (!doc.hidden) queueWorkflowUpdate();
       });
 
       win.addEventListener('pagehide', () => {
         if (frame) win.cancelAnimationFrame(frame);
         frame = 0;
-        if (hero) hero.classList.remove('is-motion-active');
       });
 
       win.addEventListener('beforeunload', () => {
-        if (heroObserver) heroObserver.disconnect();
         if (frame) win.cancelAnimationFrame(frame);
       });
     })();
