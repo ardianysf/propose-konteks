@@ -42,7 +42,6 @@
       --kx-bubble-bg: #e5ecda;
       --kx-second: #58735a;
       --kx-second-soft: #778c78;
-      --lp-harbor: #243025;
       --lp-cream: #faf8ef;
       --lp-shadow: 0 14px 34px rgb(36 48 37 / .12);
     }
@@ -99,8 +98,6 @@
     .lp-button:active { transform: translateY(1px); }
     .lp-button-solid { border-color: var(--kx-accent); background: var(--kx-accent); color: var(--kx-accent-fill-ink); }
     .lp-button-solid:hover { background: #a5cf84; }
-    .lp-button-outline-light { border-color: rgb(250 248 239 / .68); color: var(--lp-cream); }
-    .lp-button-outline-light:hover { background: rgb(250 248 239 / .1); }
 
     .lp-nav { position: sticky; z-index: 50; top: 0; border-bottom: 1px solid var(--kx-border); background: var(--kx-canvas); }
     .lp-nav-inner { display: flex; min-height: 68px; align-items: center; gap: 22px; }
@@ -125,43 +122,35 @@
     .lp-drawer a:hover { background: var(--kx-pale); }
     .lp-drawer-tools { display: flex; gap: 8px; padding-top: 8px; border-top: 1px solid var(--kx-border); }
 
-    .lp-hero { position: relative; min-height: 830px; padding-block: 64px; padding-top: 64px; padding-bottom: 64px; padding-left: 32px; padding-right: 32px; background: var(--lp-harbor); color: var(--lp-cream); }
-    .lp-hero-inner { position: relative; z-index: 2; display: grid; min-height: 702px; grid-template-columns: .88fr 1.12fr; align-items: center; gap: 28px; padding-block: 28px 86px; }
-    .lp-hero-copy { position: relative; z-index: 5; }
-    .lp-title { max-width: 690px; font-family: 'Fraunces', Georgia, serif; font-size: clamp(44px, 5.4vw, 76px); font-variation-settings: 'opsz' 72, 'SOFT' 70, 'WONK' 1; font-weight: 800; letter-spacing: -.03em; line-height: 1.04; }
+    .lp-hero { position: relative; overflow: hidden; padding: 72px 32px 84px; background: var(--kx-canvas); color: var(--kx-primary); }
+    .lp-hero-inner { position: relative; z-index: 2; }
+    .lp-hero-copy { position: relative; z-index: 5; text-align: center; }
+    .lp-title { max-width: 980px; margin-inline: auto; font-family: 'Fraunces', Georgia, serif; font-size: clamp(48px, 6.3vw, 88px); font-variation-settings: 'opsz' 88, 'SOFT' 70, 'WONK' 1; font-weight: 800; letter-spacing: -.035em; line-height: .98; }
     .lp-title span { display: block; }
-    .lp-lede { margin-top: 24px; max-width: 59ch; color: #e8ede8; font-size: clamp(18px, 1.55vw, 20px); line-height: 1.55; }
-    .lp-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
-    .lp-harbor-art { position: relative; align-self: stretch; min-height: 510px; overflow: visible; isolation: isolate; }
-    .lp-harbor-visuals { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
-    .lp-decorative-bleed { position: absolute; z-index: 0; inset: -30px -22vw 10px -80px; overflow: clip; }
-    .lp-collage { position: absolute; inset: 0; width: 900px; height: 600px; object-fit: contain; opacity: .25; transform: translate3d(var(--lp-parallax-x, 0), var(--lp-parallax-y, 0), 0); }
-    .lp-lighthouse { position: absolute; z-index: 2; bottom: 32px; left: -34px; width: min(45%, 280px); transform: translate3d(var(--lp-parallax-x, 0), var(--lp-parallax-y, 0), 0); }
-    .lp-lighthouse-beam { position: absolute; z-index: 1; inset: 2% -22% 26% -8%; width: 130%; height: 72%; color: #faf8ef; opacity: .16; transform-origin: 17% 58%; animation: lp-beam-sweep 8s ease-in-out infinite; }
-    .lp-stage-visuals { position: absolute; z-index: 2; inset: 1% -3% 17% 4%; width: 99%; height: 76%; color: #faf8ef; transform: translate3d(var(--lp-parallax-x, 0), var(--lp-parallax-y, 0), 0); }
-    .lp-stage-grid { opacity: 1; }
-    .lp-stage-connector, .lp-stage-waves { opacity: 0; }
-    .lp-stage-grid, .lp-stage-connector, .lp-stage-waves { transition: opacity 520ms ease; will-change: opacity; }
-    .lp-stage-morph { will-change: d; }
-    .lp-lighthouse-banner { position: absolute; z-index: 5; bottom: 245px; left: 22px; max-width: 198px; padding: 8px 12px 9px 14px; background: var(--lp-cream); box-shadow: 0 6px 12px rgb(15 21 16 / .22); color: var(--lp-harbor); font-size: 12px; font-weight: 700; letter-spacing: 0; line-height: 1.35; transform: rotate(-2deg); }
-    .lp-lighthouse-banner::before { content: ''; position: absolute; bottom: 100%; left: 12px; height: 28px; border-left: 1px solid var(--lp-cream); }
-    .lp-boat { position: absolute; z-index: 3; top: 178px; right: -6px; width: min(58%, 340px); transform: translate3d(calc(var(--lp-sail-x, 0px) + var(--lp-parallax-x, 0px)), calc(var(--lp-sail-y, 0px) + var(--lp-parallax-y, 0px)), 0); animation: lp-boat-bob 4s ease-in-out infinite; will-change: transform; }
-    .lp-route { position: absolute; z-index: 1; right: 1%; bottom: 95px; width: 81%; color: #e8ede8; opacity: .68; transform: translate3d(var(--lp-parallax-x, 0), var(--lp-parallax-y, 0), 0); }
-    .lp-sparkle { position: absolute; z-index: 4; top: 104px; right: 18%; width: 31px; color: var(--kx-accent); animation: lp-sparkle 2.5s ease-in-out infinite; }
-    .lp-stations { position: absolute; z-index: 6; right: 0; bottom: 44px; left: 2%; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-    .lp-station { min-width: 0; border: var(--lp-station-stroke, 1px) solid rgb(250 248 239 / .6); border-radius: 999px; padding: 8px 6px 7px; background: var(--lp-harbor); color: var(--lp-cream); cursor: pointer; text-align: center; transition: transform 160ms ease, background-color 160ms ease; }
-    .lp-station[aria-pressed='true'] { --lp-station-stroke: 2px; background: #344536; }
-    .lp-station:hover { background: #344536; transform: translateY(-2px) rotate(1deg); }
-    .lp-station:active { transform: translateY(1px); }
-    .lp-station strong { display: block; font-size: 13px; }
-    .lp-station small { display: block; margin-top: 3px; color: #c5d9a6; font-size: 11px; font-weight: 700; letter-spacing: .11em; }
-    .lp-waves { position: absolute; z-index: 1; right: 0; bottom: 0; left: 0; width: 100%; height: 182px; object-fit: cover; object-position: bottom center; opacity: .76; }
-    .lp-pillars { position: absolute; z-index: 8; right: 0; bottom: -56px; left: 0; }
-    .lp-pillar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-    .lp-pillar { min-height: 112px; border: 0; border-radius: 14px; padding: 18px 20px; background: var(--lp-cream); color: #243025; box-shadow: 0 14px 32px rgb(15 21 16 / .18); transition: transform 160ms ease; }
-    .lp-pillar:hover { transform: translateY(-2px); }
-    .lp-pillar strong { display: block; font-family: 'Fraunces', Georgia, serif; font-size: 21px; line-height: 1.3; }
-    .lp-pillar span { display: block; margin-top: 7px; color: #4f7044; font-size: 14px; line-height: 1.4; }
+    .lp-lede { margin: 26px auto 0; max-width: 70ch; color: var(--kx-secondary); font-size: clamp(17px, 1.45vw, 20px); line-height: 1.55; }
+    .lp-hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 30px; }
+    .lp-button-outline { border-color: var(--kx-primary); color: var(--kx-primary); }
+    .lp-button-outline:hover { background: var(--kx-pale); }
+    .lp-boat-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+    .lp-paper-boat-svg { overflow: visible; }
+    .lp-paper-boat-svg use { stroke: var(--boat-ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .lp-boat-model { --boat-paper: #faf8ef; --boat-paper-alt: #dfe8d2; --boat-ink: #243025; --boat-sea: #58735a; position: relative; height: 520px; margin: 52px auto 0; border-block: 1px solid var(--kx-border); background: var(--kx-canvas); isolation: isolate; }
+    .lp-boat-model::before, .lp-workflow-stage::before { content: ''; position: absolute; z-index: 0; top: 55%; right: 0; bottom: 0; left: 0; background: var(--kx-pale); }
+    .lp-boat-model::after, .lp-workflow-stage::after { content: ''; position: absolute; z-index: 1; top: 55%; right: 0; left: 0; border-top: 2px solid var(--boat-sea); }
+    .lp-region-label { position: absolute; z-index: 5; left: 50%; font-size: 11px; font-weight: 700; letter-spacing: .18em; transform: translateX(-50%); }
+    .lp-region-label--human { top: 14px; color: var(--kx-accent-text-aa); }
+    .lp-region-label--agent { top: calc(55% + 14px); color: var(--kx-secondary); }
+    .lp-human-callouts, .lp-agent-phases { margin: 0; padding: 0; list-style: none; }
+    .lp-human-callouts li { position: absolute; z-index: 7; left: var(--callout-x); top: var(--callout-y); color: var(--kx-primary); font: 600 clamp(20px, 2vw, 26px)/1.05 'Caveat', cursive; transform: translate(-50%, -50%) rotate(var(--callout-rotate)); }
+    .lp-human-callouts li::after { content: ''; position: absolute; top: calc(100% + 7px); left: 50%; width: clamp(44px, 6vw, 72px); height: 22px; border-top: 1.5px solid var(--kx-attention); border-radius: 50%; opacity: 0; transform: translateX(-50%) rotate(8deg) scaleX(.35); transform-origin: left center; }
+    .lp-human-callouts li::before { content: ''; position: absolute; top: calc(100% + 21px); left: calc(50% + 29px); width: 7px; height: 7px; border-right: 1.5px solid var(--kx-attention); border-bottom: 1.5px solid var(--kx-attention); opacity: 0; transform: rotate(24deg); }
+    .lp-hero.is-annotated .lp-human-callouts li::after, .lp-hero.is-annotated .lp-human-callouts li::before { animation: lp-pointer-reveal 160ms ease-out forwards; animation-delay: calc(var(--callout-order) * 80ms); }
+    .lp-hero-boat { position: absolute; z-index: 4; top: 55%; left: 50%; width: min(39vw, 380px); overflow: visible; color: var(--boat-ink); transform: translate(-50%, -50%); }
+    .lp-hero.is-motion-active .lp-hero-boat { animation: lp-paper-float 4s ease-in-out infinite; }
+    .lp-hero-boat svg { width: 100%; overflow: visible; }
+    .lp-agent-phases li { position: absolute; z-index: 6; left: var(--phase-x); top: var(--phase-y); min-width: 68px; color: var(--kx-secondary); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-align: center; transform: translate(-50%, -50%); }
+    .lp-agent-phases li::before { content: counter(list-item, decimal-leading-zero); display: block; width: 24px; height: 24px; margin: 0 auto 5px; border: 1px solid var(--kx-secondary); border-radius: 50%; font: 500 10px/22px 'JetBrains Mono', monospace; }
+    .lp-agent-phases li:not(:last-child)::after { content: ''; position: absolute; top: 12px; left: calc(50% + 30px); width: clamp(18px, 5vw, 56px); border-top: 1px dashed var(--kx-muted); }
 
     .lp-ledger-section { padding-block: 160px 128px; }
     .lp-sticker { display: inline-block; margin-bottom: 18px; border: 1px solid var(--kx-attention); border-radius: 999px; padding: 7px 14px; color: var(--kx-attention); font-size: 12px; font-weight: 700; letter-spacing: .14em; line-height: 1; transform: rotate(-2deg); }
@@ -206,48 +195,56 @@
     .lp-card-copy { margin-top: 9px; color: var(--kx-secondary); }
     .lp-card-kicker { display: block; margin-bottom: 8px; color: var(--kx-accent-text-aa); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 
+    .lp-workflow { overflow: clip; }
     .lp-workflow-figure { margin-top: 58px; }
-    .lp-workflow-scroll { min-height: 430vh; }
-    .lp-workflow-sticky { position: sticky; top: 68px; display: grid; min-height: calc(100vh - 68px); align-content: center; padding-block: 22px; }
-    .lp-waterline-stage { position: relative; height: min(650px, calc(100vh - 178px)); min-height: 540px; overflow: hidden; border: 0; border-radius: 16px; padding-right: 8px; padding-left: 8px; background: var(--kx-raised); box-shadow: var(--lp-shadow); }
-    .lp-waterline-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    .lp-waterline-wave { position: absolute; z-index: 2; top: 43%; right: 2%; left: 2%; width: 96%; height: 76px; overflow: visible; color: var(--kx-secondary); }
-    .lp-above-label, .lp-below-label { position: absolute; z-index: 2; left: 28px; color: var(--kx-primary); font-size: 13px; font-weight: 700; }
-    .lp-above-label { top: 24px; }
-    .lp-below-label { bottom: 22px; color: #e8ede8; }
-    .lp-signal-pills { position: absolute; z-index: 4; top: 92px; right: 5%; left: 5%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
-    .lp-signal { --lp-signal-color: var(--kx-accent-strong); min-height: 42px; border: 1px solid var(--kx-accent-strong); border-radius: 999px; background: var(--kx-pale); color: var(--kx-accent-text-aa); cursor: pointer; font-weight: 700; transition: transform 160ms ease, background-color 160ms ease, color 160ms ease; }
-    .lp-signal:nth-child(2) { --lp-signal-color: var(--kx-attention); }
-    .lp-signal:nth-child(3) { --lp-signal-color: var(--kx-secondary); }
-    .lp-signal:nth-child(4) { --lp-signal-color: var(--kx-accent-segment-aa); }
-    .lp-signal:nth-child(5) { --lp-signal-color: var(--kx-accent); }
-    .lp-signal:nth-child(6) { --lp-signal-color: var(--kx-accent-solid-aa); }
-    .lp-signal:nth-child(even) { margin-top: 42px; }
-    .lp-signal:hover { background: var(--kx-bubble-bg); transform: translateY(-2px) rotate(1deg); }
-    .lp-signal:active { transform: translateY(1px); }
-    .lp-signal.is-current { background: var(--kx-accent); color: var(--kx-accent-fill-ink); }
-    .lp-falling-signals { position: absolute; z-index: 5; inset: 0; overflow: hidden; pointer-events: none; }
-    .lp-falling-signal { position: absolute; top: 0; left: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--lp-signal-color, var(--kx-accent-strong)); box-shadow: 0 4px 10px rgb(36 48 37 / .18); will-change: transform; }
-    .lp-terminal { position: absolute; z-index: 3; right: 18%; bottom: 66px; left: 18%; min-height: 218px; border-block: 1px solid rgb(232 237 232 / .36); padding: 24px 0; color: #e8ede8; }
-    .lp-terminal-dots { display: flex; gap: 7px; margin-bottom: 20px; }
-    .lp-terminal-dots i { width: 6px; height: 6px; border-radius: 50%; background: #e8ede8; opacity: .35; }
-    .lp-terminal-lines { display: block; }
-    .lp-terminal code { display: block; font: 400 12px/1.8 'JetBrains Mono', monospace; white-space: nowrap; }
-    .lp-workflow-figure figcaption { max-width: 760px; margin: 18px auto 0; color: var(--kx-secondary); text-align: center; }
-    .lp-steer-label { margin-top: 68px; font-family: 'Fraunces', Georgia, serif; font-size: 24px; font-weight: 800; }
-    .lp-steer-label { display: flex; align-items: center; gap: 10px; }
-    .lp-steer-label svg { width: 32px; color: var(--kx-accent-text-aa); }
-    .lp-ticket-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; }
-    .lp-ticket { position: relative; min-width: 0; border-block: 2px solid var(--kx-primary); padding: 24px 18px 18px; background: var(--kx-raised); transition: transform 160ms ease, background-color 160ms ease; }
-    .lp-ticket::before, .lp-ticket::after { content: ''; position: absolute; top: -7px; width: 12px; height: 12px; border-radius: 50%; background: var(--kx-canvas); }
-    .lp-ticket::before { left: -6px; }
-    .lp-ticket::after { right: -6px; }
-    .lp-ticket:hover { background: var(--kx-pale); transform: translateY(-2px); }
-    .lp-ticket h3 { margin-top: 5px; font-family: 'Fraunces', Georgia, serif; font-size: 24px; line-height: 1.3; }
-    .lp-steps { margin: 20px 0 0; padding: 0; list-style: none; }
-    .lp-steps li { display: grid; grid-template-columns: 27px 1fr; gap: 9px; border-top: 1px solid var(--kx-border); padding-block: 12px; padding-top: 12px; padding-bottom: 12px; color: var(--kx-secondary); font-size: 14px; line-height: 1.45; }
-    .lp-step-num { color: var(--kx-accent-text-aa); font: 500 11px/1.5 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
-    .lp-workflow-close { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 46px; border-top: 1px solid var(--kx-border); padding-top: 25px; color: var(--kx-secondary); }
+    .lp-workflow-scroll { display: grid; grid-template-columns: minmax(0, 1fr) minmax(270px, 31%); gap: 28px; align-items: start; }
+    .lp-workflow-sticky { position: sticky; top: 86px; display: grid; min-height: calc(100vh - 104px); align-content: center; }
+    .lp-workflow-stage { --boat-paper: #faf8ef; --boat-paper-alt: #dfe8d2; --boat-ink: #243025; --boat-sea: #58735a; position: relative; height: min(660px, calc(100vh - 126px)); min-height: 590px; overflow: hidden; border-block: 2px solid var(--kx-primary); padding: 12px; background: var(--kx-raised); }
+    .lp-workflow-stage .lp-human-callouts li { font-size: clamp(16px, 1.8vw, 22px); opacity: .64; transition: color 120ms linear, opacity 120ms linear; }
+    .lp-workflow-stage .lp-human-callouts li::after, .lp-workflow-stage .lp-human-callouts li::before { opacity: 1; }
+    .lp-workflow-stage .lp-human-callouts li::after { transform: translateX(-50%) rotate(8deg) scaleX(1); }
+    .lp-workflow-stage .lp-human-callouts li.is-context-active { color: var(--kx-primary); opacity: 1; }
+    .lp-workflow-boat-stack { position: absolute; z-index: 4; top: 55%; left: 50%; width: min(56%, 380px); aspect-ratio: 22 / 13; transform: translate(-50%, -50%); }
+    .lp-workflow-view { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 120ms linear, transform 120ms linear; }
+    .lp-workflow-view:first-child { opacity: 1; }
+    .lp-workflow-stage .lp-agent-phases li { opacity: .58; transition: opacity 120ms linear, color 120ms linear; }
+    .lp-workflow-stage .lp-agent-phases li.is-active { color: var(--kx-primary); opacity: 1; }
+    .lp-workflow-stage .lp-agent-phases li.is-active::before { border-width: 2px; background: var(--kx-accent); color: var(--kx-accent-fill-ink); }
+    .lp-perspective-indicator { position: absolute; z-index: 6; top: calc(55% - 28px); left: 50%; padding: 3px 8px; background: var(--kx-primary); color: var(--kx-canvas); font: 500 11px/1.4 'JetBrains Mono', monospace; letter-spacing: .08em; transform: translate(-50%, -100%); }
+    .lp-perspective-indicator::after { content: ''; position: absolute; top: 100%; left: 50%; height: 28px; border-left: 1px solid var(--kx-attention); }
+    .lp-perspective-indicator::before { content: ''; position: absolute; top: calc(100% + 25px); left: 50%; width: 7px; height: 7px; border: 2px solid var(--kx-attention); border-radius: 50%; background: var(--kx-raised); transform: translateX(-50%); }
+    .lp-stage-context-layer { display: none; }
+    .lp-stage-context { position: absolute; left: 50%; width: min(46%, 360px); text-align: center; transform: translateX(-50%); }
+    .lp-stage-context strong { display: block; margin-bottom: 4px; color: var(--kx-primary); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+    .lp-stage-context p { color: var(--kx-secondary); font-size: clamp(11px, 1vw, 13px); line-height: 1.4; }
+    .lp-stage-context--human { top: 10%; }
+    .lp-stage-context--agent { bottom: 2.5%; width: min(52%, 420px); }
+    .lp-stage-context-marker { position: absolute; top: 27%; bottom: 14%; left: 50%; border-left: 1px dashed var(--kx-attention); }
+    .lp-stage-context-marker::before, .lp-stage-context-marker::after { content: ''; position: absolute; left: -4px; width: 7px; height: 7px; border: 1px solid var(--kx-attention); border-radius: 50%; background: var(--kx-raised); }
+    .lp-stage-context-marker::before { top: -4px; }
+    .lp-stage-context-marker::after { bottom: -4px; }
+    @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+      .lp-stage-context-layer { position: absolute; z-index: 3; inset: 0; display: block; pointer-events: none; }
+      .lp-perspective-card .lp-state-context { position: absolute !important; width: 1px !important; height: 1px !important; margin: 0 !important; overflow: hidden !important; clip-path: inset(50%) !important; padding: 0 !important; border: 0 !important; white-space: nowrap !important; }
+      html.lp-scroll-enhanced .lp-perspective-card { transition: none; will-change: opacity, transform; }
+    }
+    .lp-workflow-scenes { min-width: 0; }
+    .lp-rotation-scene { position: relative; min-height: 145vh; border-top: 1px solid var(--kx-border); }
+    .lp-rotation-scene:last-child { border-bottom: 1px solid var(--kx-border); }
+    .lp-scene-name { position: absolute; top: 18px; left: 0; color: var(--kx-muted-text-aa); font: 500 10px/1.4 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; }
+    .lp-perspective-card { position: absolute; top: 50%; right: 0; left: 0; padding: 22px 0; opacity: 0; transform: translateY(-45%); transition: opacity 120ms linear, transform 120ms linear; }
+    .lp-perspective-card:first-of-type { opacity: 1; }
+    .lp-perspective-card.is-active { opacity: 1; transform: translateY(-50%); }
+    .lp-perspective-id { color: var(--kx-primary); font: 700 12px/1.4 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; }
+    .lp-perspective-card h3 { margin-top: 9px; font-family: 'Fraunces', Georgia, serif; font-size: clamp(24px, 2.5vw, 32px); line-height: 1.05; }
+    .lp-state-thumbnail { display: none; height: 150px; margin-block: 18px; }
+    .lp-state-thumbnail svg { width: 100%; height: 100%; }
+    .lp-state-context { margin-top: 22px; border-top: 1px solid var(--kx-border); padding-top: 18px; }
+    .lp-state-context + .lp-state-context { margin-top: 18px; }
+    .lp-state-context strong { display: block; margin-bottom: 5px; color: var(--kx-primary); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    .lp-state-context p { color: var(--kx-primary); font-size: 14px; line-height: 1.55; }
+    .lp-agent-context { border-top-color: var(--kx-secondary); }
+    .lp-workflow-caption { max-width: 760px; margin: 28px auto 0; color: var(--kx-secondary); text-align: center; }
 
     .lp-product { background: var(--kx-pale); }
     .lp-subhead { margin-top: 64px; font-family: 'Fraunces', Georgia, serif; font-size: 28px; font-weight: 800; }
@@ -348,13 +345,10 @@
     .lp-footer-bottom { display: flex; justify-content: space-between; gap: 24px; margin-top: 58px; border-top: 1px solid var(--kx-border); padding-top: 22px; color: var(--kx-muted-text-aa); font-size: 13px; }
     .lp-footer-bottom a { color: var(--kx-accent-text-aa); font-weight: 700; }
 
-    @keyframes lp-sparkle { 0%, 100% { transform: translate3d(var(--lp-parallax-x, 0px), var(--lp-parallax-y, 0px), 0) scale(.5); opacity: .55; } 50% { transform: translate3d(var(--lp-parallax-x, 0px), var(--lp-parallax-y, 0px), 0) scale(.8); opacity: 1; } }
-    @keyframes lp-boat-bob { 0%, 100% { transform: translate3d(calc(var(--lp-sail-x, 0px) + var(--lp-parallax-x, 0px)), calc(var(--lp-sail-y, 0px) + var(--lp-parallax-y, 0px)), 0); } 50% { transform: translate3d(calc(var(--lp-sail-x, 0px) + var(--lp-parallax-x, 0px)), calc(var(--lp-sail-y, 0px) + var(--lp-parallax-y, 0px) - 7px), 0); } }
-    @keyframes lp-beam-sweep { 0%, 100% { transform: rotate(-5deg); opacity: .1; } 50% { transform: rotate(6deg); opacity: .2; } }
-
-    @media (pointer: fine) and (prefers-reduced-motion: no-preference) {
-      .lp-collage, .lp-lighthouse, .lp-route, .lp-stage-visuals, .lp-sparkle { will-change: transform; }
-    }
+    @keyframes lp-paper-float { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, calc(-50% - 6px)); } }
+    @keyframes lp-pointer-reveal { to { opacity: 1; } }
+    @keyframes lp-sparkle { 0%, 100% { transform: scale(.5); opacity: .55; } 50% { transform: scale(.8); opacity: 1; } }
+    @keyframes lp-boat-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 
     @media (max-width: 1050px) {
       .lp-nav-links { display: none; }
@@ -364,30 +358,42 @@
     }
     @media (max-width: 899px) {
       .lp-shell { width: min(100% - 32px, 680px); }
-      .lp-hero { min-height: 1120px; }
-      .lp-hero-inner { display: block; padding-block: 8px 126px; }
-      .lp-harbor-art { min-height: 560px; margin-top: 36px; }
-      .lp-lighthouse { left: 0; width: 245px; }
-      .lp-lighthouse-banner { bottom: 250px; left: 55px; }
-      .lp-boat { top: 165px; right: 0; width: 290px; }
-      .lp-collage { inset: -20px -220px 0 -90px; }
-      .lp-route { bottom: 112px; width: 72%; }
-      .lp-stations { bottom: 40px; left: 0; }
-      .lp-pillar-grid { gap: 8px; }
-      .lp-pillar { min-height: 126px; padding: 15px; }
-      .lp-pillars { bottom: -72px; }
-      .lp-ledger-section { padding-top: 172px; }
+      .lp-hero { padding-block: 64px 72px; }
+      .lp-boat-model { height: 610px; }
+      .lp-human-callouts { position: absolute; z-index: 7; top: 52px; right: 7%; left: 7%; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 34px; }
+      .lp-human-callouts li, .lp-workflow-stage .lp-human-callouts li { position: relative; top: auto; left: auto; min-height: 44px; display: grid; place-items: center; text-align: center; transform: rotate(var(--callout-rotate)); }
+      .lp-human-callouts li::after { top: calc(100% + 2px); width: 50px; }
+      .lp-human-callouts li::before { top: calc(100% + 16px); }
+      .lp-hero-boat { width: min(58vw, 350px); }
+      .lp-agent-phases { position: absolute; z-index: 6; top: calc(55% + 58px); right: 8%; left: 8%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px 10px; }
+      .lp-agent-phases li { position: relative; top: auto; left: auto; transform: none; }
+      .lp-agent-phases li::after { display: none; }
+      .lp-workflow-scroll { display: block; }
+      .lp-workflow-sticky { position: static; min-height: 0; }
+      .lp-workflow-stage { height: 560px; min-height: 0; }
+      .lp-workflow-boat-stack { width: min(52vw, 330px); }
+      .lp-rotation-scene { min-height: 0; padding-block: 64px 30px; }
+      .lp-scene-name { top: 22px; }
+      .lp-perspective-card { position: relative; top: auto; display: grid; grid-template-areas: 'state-id' 'state-title' 'human-context' 'boat-view' 'agent-context'; padding: 30px 0; opacity: 1; transform: none; }
+      .lp-perspective-id { grid-area: state-id; }
+      .lp-perspective-card > h3 { grid-area: state-title; }
+      .lp-state-thumbnail { --boat-paper: #faf8ef; --boat-paper-alt: #dfe8d2; --boat-ink: #243025; position: relative; grid-area: boat-view; display: block; isolation: isolate; }
+      .lp-state-thumbnail::before { content: ''; position: absolute; z-index: -2; top: 55%; right: 0; bottom: 0; left: 0; background: var(--kx-pale); }
+      .lp-state-thumbnail::after { content: ''; position: absolute; z-index: -1; top: 55%; right: 0; left: 0; border-top: 2px solid var(--boat-sea, #58735a); }
+      .lp-state-context:not(.lp-agent-context) { grid-area: human-context; }
+      .lp-agent-context { grid-area: agent-context; }
+      .lp-perspective-card.is-active { transform: none; }
+      html.lp-scroll-enhanced .lp-perspective-card { opacity: 1; transform: translateY(10px); }
+      html.lp-scroll-enhanced .lp-perspective-card.is-seen { opacity: 1; transform: none; }
+      .lp-ledger-section { padding-top: 128px; }
       .lp-theory-split { grid-template-columns: 1fr; gap: 58px; }
       .lp-waterline { height: 62px; }
       .lp-waterline::before, .lp-waterline::after { top: 50%; right: 0; bottom: auto; left: 0; border-top: 1px solid var(--kx-border); border-left: 0; }
       .lp-waterline svg { width: 100px; margin: 0 auto; transform: rotate(90deg); }
       .lp-section { padding-block: 96px; }
-      .lp-signal-pills { grid-template-columns: repeat(3, 1fr); }
-      .lp-signal:nth-child(even) { margin-top: 22px; }
-      .lp-terminal { right: 8%; left: 8%; }
-      .lp-ticket-grid, .lp-question-grid, .lp-session-grid, .lp-training-grid { grid-template-columns: 1fr; }
-      .lp-ticket, .lp-question, .lp-session-ticket, .lp-training { min-height: 0; }
-      .lp-workflow-close, .lp-catalog-card, .lp-agent-details, .lp-final-grid { grid-template-columns: 1fr; }
+      .lp-question-grid, .lp-session-grid, .lp-training-grid { grid-template-columns: 1fr; }
+      .lp-question, .lp-session-ticket, .lp-training { min-height: 0; }
+      .lp-catalog-card, .lp-agent-details, .lp-final-grid { grid-template-columns: 1fr; }
       .lp-rule-grid { grid-template-columns: 1fr; }
       .lp-rule-column { padding-bottom: 16px; }
       .lp-persona-grid { grid-template-columns: 1fr; }
@@ -404,34 +410,37 @@
       .lp-nav-inner { gap: 10px; }
       .lp-nav-actions { display: none; }
       .lp-mobile-menu { margin-left: auto; }
-      .lp-hero { min-height: 1190px; }
-      .lp-title { font-size: clamp(44px, 13.5vw, 60px); }
-      .lp-harbor-art { min-height: 500px; }
-      .lp-lighthouse { bottom: 78px; left: -20px; width: 205px; }
-      .lp-lighthouse-banner { bottom: 210px; left: 10px; max-width: 172px; font-size: 12px; }
-      .lp-boat { top: 145px; width: 245px; }
-      .lp-route { bottom: 115px; width: 76%; }
-      .lp-stations { grid-template-columns: repeat(5, 82px); gap: 7px; overflow-x: auto; padding: 8px 0 12px; }
-      .lp-station { font-size: 12px; }
-      .lp-pillars { bottom: -245px; }
-      .lp-pillar-grid { grid-template-columns: 1fr; }
-      .lp-pillar { min-height: 0; }
-      .lp-ledger-section { padding-top: 340px; }
+      .lp-hero { padding: 52px 16px 64px; }
+      .lp-hero-inner { display: grid; }
+      .lp-hero-copy { display: contents; }
+      .lp-title { order: 1; font-size: clamp(32px, 9.4vw, 42px); }
+      .lp-title span { white-space: nowrap; }
+      .lp-lede { order: 2; font-size: 17px; }
+      .lp-hero-actions { order: 4; align-items: stretch; }
+      .lp-hero-actions .lp-button { flex: 1 1 100%; }
+      .lp-boat-model { order: 3; width: 100%; height: 720px; margin-top: 42px; }
+      .lp-human-callouts { top: 50px; right: 2%; left: 2%; gap: 14px 8px; }
+      .lp-human-callouts li, .lp-workflow-stage .lp-human-callouts li { padding-inline: 2px; font-size: 19px; }
+      .lp-hero-boat { top: 48%; width: min(82vw, 320px); }
+      .lp-boat-model::before { top: 55%; }
+      .lp-boat-model::after { top: 55%; }
+      .lp-agent-phases { top: calc(55% + 48px); right: 16%; left: 16%; grid-template-columns: 1fr; gap: 10px; }
+      .lp-agent-phases li { display: grid; min-height: 38px; grid-template-columns: 32px 1fr; align-items: center; text-align: left; }
+      .lp-agent-phases li::before { margin: 0; text-align: center; }
+      .lp-workflow-stage { height: 680px; }
+      .lp-workflow-stage .lp-agent-phases { right: 16%; left: 16%; grid-template-columns: 1fr; }
+      .lp-workflow-stage .lp-agent-phases li { display: grid; grid-template-columns: 32px minmax(0, 1fr); text-align: left; }
+      .lp-workflow-stage .lp-agent-phases li::before { margin: 0; }
+      .lp-workflow-boat-stack { top: 49%; width: 82%; }
+      .lp-perspective-indicator { top: calc(55% - 16px); }
+      .lp-state-thumbnail { height: 132px; }
+      .lp-ledger-section { padding-top: 112px; }
       .lp-ledger-head { grid-template-columns: 1fr 36px 1fr; padding-inline: 10px; }
       .lp-ledger-arrow { width: 68px; }
       .lp-ledger-row { grid-template-columns: 1fr 36px 1fr; align-items: start; padding: 16px 10px; font-size: 14px; }
       .lp-row-arrow { padding-top: 2px; }
       .lp-quote { margin-inline: 8px; }
       .lp-role-item { grid-template-columns: 36px 1fr; }
-      .lp-waterline-stage { height: min(620px, calc(100vh - 158px)); min-height: 540px; }
-      .lp-above-label { top: 18px; left: 18px; }
-      .lp-signal-pills { top: 74px; right: 16px; left: 16px; gap: 8px; }
-      .lp-signal { min-height: 38px; padding-inline: 7px; font-size: 12px; }
-      .lp-signal:nth-child(even) { margin-top: 16px; }
-      .lp-terminal { right: 16px; bottom: 62px; left: 16px; overflow-x: auto; padding: 20px 0; }
-      .lp-terminal code { font-size: 11px; }
-      .lp-below-label { left: 18px; font-size: 11px; }
-      .lp-workflow-close { gap: 14px; }
       .lp-catalog-card { gap: 18px; }
       .lp-acp-bridge { grid-template-columns: 54px auto 54px; }
       .lp-acp-bridge svg { width: 54px; }
@@ -447,22 +456,36 @@
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      *, *::before, *::after { animation: none !important; transition: none !important; transform: none !important; }
-      .lp-workflow-scroll { min-height: 0; }
-      .lp-workflow-sticky { position: static; min-height: 0; padding-block: 0; }
-      .lp-waterline-stage { height: 620px; }
-      .lp-signal:hover, .lp-signal.is-current { background: var(--kx-pale); color: var(--kx-accent-text-aa); }
-      .lp-falling-signals { display: none; }
-      .lp-boat { transform: translate3d(var(--lp-sail-x, 0px), var(--lp-sail-y, 0px), 0) !important; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .lp-human-callouts li::before, .lp-human-callouts li::after { opacity: 1 !important; }
+      .lp-workflow-scroll { display: block; }
+      .lp-workflow-sticky { position: static; min-height: 0; }
+      .lp-workflow-stage { height: 590px; }
+      .lp-workflow-scenes { width: 100%; min-width: 0; }
+      .lp-rotation-scene { min-height: 0; padding-block: 64px 30px; }
+      .lp-scene-name { top: 22px; }
+      .lp-perspective-card, html.lp-scroll-enhanced .lp-perspective-card { position: relative; top: auto; display: grid; width: min(100%, 760px); grid-template-areas: 'state-id' 'state-title' 'human-context' 'boat-view' 'agent-context'; margin-inline: auto; padding: 30px 0; opacity: 1; transform: none !important; }
+      .lp-perspective-id { grid-area: state-id; }
+      .lp-perspective-card > h3 { grid-area: state-title; }
+      .lp-perspective-card .lp-state-context { position: static !important; width: auto !important; height: auto !important; margin-top: 22px !important; overflow: visible !important; clip-path: none !important; padding-top: 18px !important; border-top: 1px solid var(--kx-border) !important; white-space: normal !important; }
+      .lp-state-context:not(.lp-agent-context) { grid-area: human-context; }
+      .lp-perspective-card .lp-agent-context { grid-area: agent-context; border-top-color: var(--kx-secondary) !important; }
+      .lp-stage-context-layer { display: none !important; }
+      .lp-state-thumbnail { --boat-paper: #faf8ef; --boat-paper-alt: #dfe8d2; --boat-ink: #243025; position: relative; grid-area: boat-view; display: block; isolation: isolate; }
+      .lp-state-thumbnail::before { content: ''; position: absolute; z-index: -2; top: 55%; right: 0; bottom: 0; left: 0; background: var(--kx-pale); }
+      .lp-state-thumbnail::after { content: ''; position: absolute; z-index: -1; top: 55%; right: 0; left: 0; border-top: 2px solid var(--boat-sea, #58735a); }
+    }
+    @media (max-width: 620px) and (prefers-reduced-motion: reduce) {
+      .lp-workflow-stage { height: 680px; min-height: 680px; }
     }
   </style>
 </head>
 <body><!--
-  THESIS: Konteks is a harbor: people hold the light, agents crew the boats. Refuses the generic dev-tool hero (gradient + screenshot).
-  OWN-WORLD: Warm Enterprise tokens only (cream #faf8ef, ink sage #243025, accent #8fbf6a/#4f7044, amber #9a6212, plum/teal only inside illustration cameos); hand-drawn line-art paper boats, lighthouse, waterline; Fraunces display; pill CTAs; rotated proof cards.
-  STORY: visitor understands people-led/agent-run in one viewport, believes via rules+receipts, acts via Start building.
-  FIRST VIEWPORT: deep-sage harbor scene full-bleed; cream line-art lighthouse left, paper-boat note sailing a dashed route through five station pills (Write→Plan→Build→Check→Watch, PEOPLE then AGENTS labels); H1 in Fraunces cream, two-line; pill CTAs; three pillar chips (Authority/Money/Evidence) overlapping the waterline edge.
-  FORM: playful marketing one-pager, Persuade mode, light+dark.
+  THESIS: People steer above the waterline while agents execute below it. Refuses the generic dev-tool hero (gradient + screenshot).
+  OWN-WORLD: Warm Enterprise cream, ink sage, matcha, and amber; flat paper geometry, crisp waterlines, restrained handwriting, Fraunces display, pill CTAs.
+  STORY: visitors understand the ownership boundary, see the eight-state handoff, and act via Start building.
+  FIRST VIEWPORT: centered two-line promise and CTAs above one large Perspective 01 paper boat; four human callouts stay above its waterline and five ordered phases below.
+  FORM: paper-boat control diagram, Persuade mode, light+dark.
   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
   -->
   <nav class="lp-nav" aria-label="Main navigation">
@@ -494,33 +517,43 @@
 
   <main>
     <section class="lp-hero" aria-labelledby="lp-hero-title">
+      <svg class="lp-boat-defs" aria-hidden="true">
+        <defs>
+          <symbol id="lp-boat-01" viewBox="0 0 440 260"><path d="M55 145H385L315 220H125Z" fill="var(--boat-paper)"/><path d="M55 145L220 70L385 145L220 177Z" fill="var(--boat-paper-alt)"/><path d="M125 220L220 177L315 220" fill="none"/><path d="M220 70V177M55 145H385" fill="none"/></symbol>
+          <symbol id="lp-boat-02" viewBox="0 0 440 260"><path d="M48 150L390 134L322 218L126 220Z" fill="var(--boat-paper)"/><path d="M48 150L238 68L390 134L228 178Z" fill="var(--boat-paper-alt)"/><path d="M126 220L228 178L322 218M238 68L228 178M48 150L390 134" fill="none"/></symbol>
+          <symbol id="lp-boat-03" viewBox="0 0 440 260"><path d="M44 155L394 128L330 214L132 221Z" fill="var(--boat-paper)"/><path d="M44 155L270 78L394 128L235 180Z" fill="var(--boat-paper-alt)"/><path d="M132 221L235 180L330 214M270 78L235 180M44 155L394 128" fill="none"/></symbol>
+          <symbol id="lp-boat-04" viewBox="0 0 440 260"><path d="M40 158L398 126L336 211L136 221Z" fill="var(--boat-paper)"/><path d="M40 158L312 98L398 126L242 181Z" fill="var(--boat-paper-alt)"/><path d="M136 221L242 181L336 211M312 98L242 181M40 158L398 126" fill="none"/></symbol>
+          <symbol id="lp-boat-05" viewBox="0 0 440 260"><path d="M68 140H372L304 220H136Z" fill="var(--boat-paper)"/><path d="M68 140L220 101L372 140L220 183Z" fill="var(--boat-paper-alt)"/><path d="M136 220L220 183L304 220M220 101V183M68 140H372" fill="none"/></symbol>
+          <symbol id="lp-boat-06" viewBox="0 0 440 260"><path d="M42 126L400 158L304 221L104 211Z" fill="var(--boat-paper)"/><path d="M42 126L128 98L400 158L198 181Z" fill="var(--boat-paper-alt)"/><path d="M104 211L198 181L304 221M128 98L198 181M42 126L400 158" fill="none"/></symbol>
+          <symbol id="lp-boat-07" viewBox="0 0 440 260"><path d="M46 128L396 155L308 221L110 214Z" fill="var(--boat-paper)"/><path d="M46 128L170 78L396 155L205 180Z" fill="var(--boat-paper-alt)"/><path d="M110 214L205 180L308 221M170 78L205 180M46 128L396 155" fill="none"/></symbol>
+          <symbol id="lp-boat-08" viewBox="0 0 440 260"><path d="M50 134L392 150L314 220L118 218Z" fill="var(--boat-paper)"/><path d="M50 134L202 68L392 150L212 178Z" fill="var(--boat-paper-alt)"/><path d="M118 218L212 178L314 220M202 68L212 178M50 134L392 150" fill="none"/></symbol>
+        </defs>
+      </svg>
       <div class="lp-shell lp-hero-inner">
         <div class="lp-hero-copy">
-          <h1 class="lp-title" id="lp-hero-title"><span>People lead the vision.</span><span>Agents do the rest.</span></h1>
+          <h1 class="lp-title" id="lp-hero-title"><span>People lead the vision. </span><span>Agents do the rest.</span></h1>
           <p class="lp-lede">Your team writes down what should exist. The agents you already use plan it, price it, build it, check it, and keep watch. You say yes first and accept at the end. One set of rules for the whole company.</p>
-          <div class="lp-hero-actions"><a class="lp-button lp-button-solid" href="https://app.konteks.io/">Start building ↗</a><a class="lp-button lp-button-outline-light" href="#workflow">See how it works ↓</a></div>
+          <div class="lp-hero-actions"><a class="lp-button lp-button-solid" href="https://app.konteks.io/">Start building ↗</a><a class="lp-button lp-button-outline" href="#workflow">See how it works ↓</a></div>
         </div>
-        <figure class="lp-harbor-art" role="group" aria-label="A note becomes a boat. Write, Plan, Build, Check, Watch.">
-          <div class="lp-harbor-visuals" aria-hidden="true">
-            <div class="lp-decorative-bleed"><img class="lp-collage" data-parallax="3" src="/landingpage-assets/collage-shapes.png" alt=""></div>
-            <svg class="lp-lighthouse-beam" viewBox="0 0 720 420" preserveAspectRatio="none"><path d="M104 244L690 82L690 332Z" fill="currentColor"/></svg>
-            <svg class="lp-stage-visuals" data-parallax="4" viewBox="0 0 640 420">
-              <g class="lp-stage-grid" data-hero-grid fill="none" stroke="currentColor" stroke-width="1" opacity=".32"><path d="M246 86H394M246 120H394M246 154H394M246 188H394M246 222H394M246 256H394"/><path d="M256 62V282" stroke="#8fbf6a"/></g>
-              <path class="lp-stage-morph" data-hero-morph d="M230 50L410 50L410 50L410 290L410 290L230 290L230 290L230 50Z" fill="rgb(250 248 239 / .08)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-              <path class="lp-stage-connector" data-hero-connector d="M230 50L410 50" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 6"/>
-              <g class="lp-stage-waves" data-hero-waves fill="none" stroke-linecap="round"><path data-hero-wave-one d="M110 320C170 304 220 336 280 320S390 304 450 320S520 336 530 320" stroke="#8fbf6a" stroke-width="2.4"/><path data-hero-wave-two d="M170 346C220 334 260 358 310 346S400 334 470 346" stroke="#e8ede8" stroke-width="1.8"/></g>
-            </svg>
-            <img class="lp-lighthouse" data-parallax="5" src="/landingpage-assets/lighthouse.png" alt="">
-            <img class="lp-boat" data-parallax="8" src="/landingpage-assets/paper-boat.png" alt="">
-            <svg class="lp-route" data-parallax="4" viewBox="0 0 520 110"><path d="M8 78C88 14 151 94 227 51S377 17 511 65" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="7 10" stroke-linecap="round"/></svg>
-            <svg class="lp-sparkle" data-parallax="6" viewBox="0 0 32 32"><path d="M16 2c.7 8.7 5.3 13.3 14 14-8.7.7-13.3 5.3-14 14-.7-8.7-5.3-13.3-14-14C10.7 15.3 15.3 10.7 16 2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-          </div>
-          <span class="lp-lighthouse-banner">The AI control plane for software engineering</span>
-          <div class="lp-stations"><button class="lp-station" data-station="0" type="button" role="button" tabindex="0" aria-pressed="true"><strong>Write</strong><small>PEOPLE</small></button><button class="lp-station" data-station="1" type="button" role="button" tabindex="0" aria-pressed="false"><strong>Plan</strong><small>AGENTS</small></button><button class="lp-station" data-station="2" type="button" role="button" tabindex="0" aria-pressed="false"><strong>Build</strong><small>AGENTS</small></button><button class="lp-station" data-station="3" type="button" role="button" tabindex="0" aria-pressed="false"><strong>Check</strong><small>AGENTS</small></button><button class="lp-station" data-station="4" type="button" role="button" tabindex="0" aria-pressed="false"><strong>Watch</strong><small>AGENTS</small></button></div>
+        <figure class="lp-boat-model" role="group" aria-label="A paper boat rests on a waterline. Human control stays above; agent execution moves through Write, Plan, Build, Check, and Watch below.">
+          <span class="lp-region-label lp-region-label--human">HUMAN CONTROL</span>
+          <ol class="lp-human-callouts">
+            <li style="--callout-x:14%;--callout-y:22%;--callout-rotate:-4deg;--callout-order:0">Lead the vision</li>
+            <li style="--callout-x:77%;--callout-y:18%;--callout-rotate:3deg;--callout-order:1">Set the constraints</li>
+            <li style="--callout-x:80%;--callout-y:39%;--callout-rotate:-2deg;--callout-order:2">Judge the evidence</li>
+            <li style="--callout-x:12%;--callout-y:42%;--callout-rotate:2deg;--callout-order:3">Hold the context</li>
+          </ol>
+          <div class="lp-hero-boat" aria-hidden="true"><svg class="lp-paper-boat-svg" viewBox="0 0 440 260"><use href="#lp-boat-01"/></svg></div>
+          <span class="lp-region-label lp-region-label--agent">AGENT EXECUTION</span>
+          <ol class="lp-agent-phases">
+            <li style="--phase-x:14%;--phase-y:73%">Write</li>
+            <li style="--phase-x:32%;--phase-y:81%">Plan</li>
+            <li style="--phase-x:50%;--phase-y:73%">Build</li>
+            <li style="--phase-x:68%;--phase-y:81%">Check</li>
+            <li style="--phase-x:86%;--phase-y:73%">Watch</li>
+          </ol>
         </figure>
       </div>
-      <img class="lp-waves" src="/landingpage-assets/waves-strip.png" alt="">
-      <div class="lp-pillars"><div class="lp-shell lp-pillar-grid"><div class="lp-pillar"><strong>Authority</strong><span>No agent outranks the people around it</span></div><div class="lp-pillar"><strong>Money</strong><span>A ceiling before anything runs</span></div><div class="lp-pillar"><strong>Evidence</strong><span>A receipt for every delivery</span></div></div></div>
     </section>
 
     <section class="lp-ledger-section" aria-labelledby="lp-ledger-title">
@@ -572,30 +605,105 @@
     <section class="lp-section lp-workflow" id="workflow" aria-labelledby="lp-workflow-title">
       <div class="lp-shell">
         <div class="lp-section-head"><span class="lp-label">How it works</span><h2 class="lp-heading" id="lp-workflow-title">Initiatives, issues, releases. A person can steer at every step.</h2></div>
-        <figure class="lp-workflow-figure" aria-label="Where the signals go. Above the waterline: people, together: Note, Comment, Reaction, Reply, Yes, Accept. Below the waterline: the agent's session.">
+        <figure class="lp-workflow-figure">
           <div class="lp-workflow-scroll">
             <div class="lp-workflow-sticky">
-              <div class="lp-waterline-stage">
-                <img class="lp-waterline-backdrop" src="/landingpage-assets/waterline-split.png" alt="">
-                <span class="lp-above-label">Above the waterline: people, together</span>
-                <div class="lp-signal-pills"><button class="lp-signal" data-signal="0" data-line="read the note · 3 paragraphs" type="button" role="button" tabindex="0">Note</button><button class="lp-signal" data-signal="1" data-line="comment folded into the plan" type="button" role="button" tabindex="0">Comment</button><button class="lp-signal" data-signal="2" data-line="reaction noted · priority up" type="button" role="button" tabindex="0">Reaction</button><button class="lp-signal" data-signal="3" data-line="reply answered in the thread" type="button" role="button" tabindex="0">Reply</button><button class="lp-signal" data-signal="4" data-line="yes received · build starts" type="button" role="button" tabindex="0">Yes</button><button class="lp-signal" data-signal="5" data-line="accepted · receipt written" type="button" role="button" tabindex="0">Accept</button></div>
-                <svg class="lp-waterline-wave" viewBox="0 0 1000 76" preserveAspectRatio="none" aria-hidden="true"><path id="lp-waterline-sine" data-waterline-path d="M0 38C160 26 330 50 500 38S840 26 1000 38" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="10 7"/><text fill="currentColor" font-family="DM Sans, sans-serif" font-size="12" font-weight="700" letter-spacing="1.7"><textPath href="#lp-waterline-sine" startOffset="88%" text-anchor="middle">WATERLINE</textPath></text></svg>
-                <div class="lp-falling-signals" aria-hidden="true"></div>
-                <div class="lp-terminal" aria-hidden="true"><span class="lp-terminal-dots"><i></i><i></i><i></i></span><span class="lp-terminal-lines"><code>&gt; session open · waiting for signals</code></span></div>
-                <span class="lp-below-label">Below the waterline: the agent’s session</span>
+              <div class="lp-workflow-stage" role="group" aria-label="A paper boat stays on the waterline while eight perspectives show human control above and agent execution below.">
+                <span class="lp-region-label lp-region-label--human">HUMAN CONTROL</span>
+                <ol class="lp-human-callouts">
+                  <li class="is-context-active" style="--callout-x:14%;--callout-y:22%;--callout-rotate:-4deg">Lead the vision</li>
+                  <li style="--callout-x:77%;--callout-y:18%;--callout-rotate:3deg">Set the constraints</li>
+                  <li style="--callout-x:80%;--callout-y:39%;--callout-rotate:-2deg">Judge the evidence</li>
+                  <li class="is-context-active" style="--callout-x:12%;--callout-y:42%;--callout-rotate:2deg">Hold the context</li>
+                </ol>
+                <div class="lp-workflow-boat-stack" aria-hidden="true">
+                  <svg class="lp-workflow-view lp-paper-boat-svg" data-boat-view="01" viewBox="0 0 440 260"><use href="#lp-boat-01"/></svg>
+                  <svg class="lp-workflow-view lp-paper-boat-svg" data-boat-view="02" viewBox="0 0 440 260"><use href="#lp-boat-02"/></svg>
+                  <svg class="lp-workflow-view lp-paper-boat-svg" data-boat-view="03" viewBox="0 0 440 260"><use href="#lp-boat-03"/></svg>
+                  <svg class="lp-workflow-view lp-paper-boat-svg" data-boat-view="04" viewBox="0 0 440 260"><use href="#lp-boat-04"/></svg>
+                  <svg class="lp-workflow-view lp-paper-boat-svg" data-boat-view="05" viewBox="0 0 440 260"><use href="#lp-boat-05"/></svg>
+                  <svg class="lp-workflow-view lp-paper-boat-svg" data-boat-view="06" viewBox="0 0 440 260"><use href="#lp-boat-06"/></svg>
+                  <svg class="lp-workflow-view lp-paper-boat-svg" data-boat-view="07" viewBox="0 0 440 260"><use href="#lp-boat-07"/></svg>
+                  <svg class="lp-workflow-view lp-paper-boat-svg" data-boat-view="08" viewBox="0 0 440 260"><use href="#lp-boat-08"/></svg>
+                </div>
+                <span class="lp-perspective-indicator" data-perspective-indicator>Perspective 01</span>
+                <span class="lp-region-label lp-region-label--agent">AGENT EXECUTION</span>
+                <ol class="lp-agent-phases">
+                  <li class="is-active" data-agent-phase="Write" style="--phase-x:14%;--phase-y:73%">Write</li>
+                  <li data-agent-phase="Plan" style="--phase-x:32%;--phase-y:81%">Plan</li>
+                  <li data-agent-phase="Build" style="--phase-x:50%;--phase-y:73%">Build</li>
+                  <li data-agent-phase="Check" style="--phase-x:68%;--phase-y:81%">Check</li>
+                  <li data-agent-phase="Watch" style="--phase-x:86%;--phase-y:73%">Watch</li>
+                </ol>
+                <div class="lp-stage-context-layer" aria-hidden="true">
+                  <div class="lp-stage-context lp-stage-context--human"><strong data-stage-human-label>Human control · Perspective 01</strong><p data-stage-human-context>Lead the vision and hold the unwritten context before work leaves shore.</p></div>
+                  <span class="lp-stage-context-marker"></span>
+                  <div class="lp-stage-context lp-stage-context--agent"><strong data-stage-agent-label>Agent execution · Write</strong><p data-stage-agent-context>Write turns the note into a durable starting record the team can inspect.</p></div>
+                </div>
               </div>
-              <figcaption>Every comment and reaction is a signal. It flows into the agent’s session, the same transcript you already know from coding with an agent.</figcaption>
+            </div>
+            <div class="lp-workflow-scenes">
+              <section class="lp-rotation-scene" data-workflow-scene="1" aria-labelledby="lp-scene-1-title">
+                <h3 class="lp-scene-name" id="lp-scene-1-title">Scene 1 · Perspectives 01–03</h3>
+                <article class="lp-perspective-card is-active" data-perspective="01">
+                  <span class="lp-perspective-id">Perspective 01 · Front</span><h3>The brief meets the waterline.</h3>
+                  <div class="lp-state-thumbnail" aria-hidden="true"><svg class="lp-paper-boat-svg" viewBox="0 0 440 260"><use href="#lp-boat-01"/></svg></div>
+                  <div class="lp-state-context"><strong>Human control</strong><p>Lead the vision and hold the unwritten context before work leaves shore.</p></div>
+                  <div class="lp-state-context lp-agent-context"><strong>Agent execution</strong><p>Write turns the note into a durable starting record the team can inspect.</p></div>
+                </article>
+                <article class="lp-perspective-card" data-perspective="02">
+                  <span class="lp-perspective-id">Perspective 02 · Front right</span><h3>The first fold defines the limits.</h3>
+                  <div class="lp-state-thumbnail" aria-hidden="true"><svg class="lp-paper-boat-svg" viewBox="0 0 440 260"><use href="#lp-boat-02"/></svg></div>
+                  <div class="lp-state-context"><strong>Human control</strong><p>Set the constraints: authority, budget ceiling, and what done must mean.</p></div>
+                  <div class="lp-state-context lp-agent-context"><strong>Agent execution</strong><p>Plan reads the note and code, then returns an approach inside those limits.</p></div>
+                </article>
+                <article class="lp-perspective-card" data-perspective="03">
+                  <span class="lp-perspective-id">Perspective 03 · Right quarter</span><h3>The plan shows its evidence.</h3>
+                  <div class="lp-state-thumbnail" aria-hidden="true"><svg class="lp-paper-boat-svg" viewBox="0 0 440 260"><use href="#lp-boat-03"/></svg></div>
+                  <div class="lp-state-context"><strong>Human control</strong><p>Judge the evidence against the vision and the constraints before approving work.</p></div>
+                  <div class="lp-state-context lp-agent-context"><strong>Agent execution</strong><p>Plan exposes scope, checks, risks, and a quoted ceiling for review.</p></div>
+                </article>
+              </section>
+              <section class="lp-rotation-scene" data-workflow-scene="2" aria-labelledby="lp-scene-2-title">
+                <h3 class="lp-scene-name" id="lp-scene-2-title">Scene 2 · Perspectives 04–06</h3>
+                <article class="lp-perspective-card" data-perspective="04">
+                  <span class="lp-perspective-id">Perspective 04 · Right side</span><h3>The approved work turns broadside.</h3>
+                  <div class="lp-state-thumbnail" aria-hidden="true"><svg class="lp-paper-boat-svg" viewBox="0 0 440 260"><use href="#lp-boat-04"/></svg></div>
+                  <div class="lp-state-context"><strong>Human control</strong><p>Keep the vision steady while the approved plan moves into execution.</p></div>
+                  <div class="lp-state-context lp-agent-context"><strong>Agent execution</strong><p>Build opens an isolated branch and carries the change across every affected repo.</p></div>
+                </article>
+                <article class="lp-perspective-card" data-perspective="05">
+                  <span class="lp-perspective-id">Perspective 05 · Rear</span><h3>The hidden work stays accountable.</h3>
+                  <div class="lp-state-thumbnail" aria-hidden="true"><svg class="lp-paper-boat-svg" viewBox="0 0 440 260"><use href="#lp-boat-05"/></svg></div>
+                  <div class="lp-state-context"><strong>Human control</strong><p>Hold the wider context while the agent works below the visible surface.</p></div>
+                  <div class="lp-state-context lp-agent-context"><strong>Agent execution</strong><p>Build records tool calls, decisions, and cost as the implementation takes shape.</p></div>
+                </article>
+                <article class="lp-perspective-card" data-perspective="06">
+                  <span class="lp-perspective-id">Perspective 06 · Left rear</span><h3>The return journey begins with proof.</h3>
+                  <div class="lp-state-thumbnail" aria-hidden="true"><svg class="lp-paper-boat-svg" viewBox="0 0 440 260"><use href="#lp-boat-06"/></svg></div>
+                  <div class="lp-state-context"><strong>Human control</strong><p>Judge whether the evidence is strong enough to bring the work back.</p></div>
+                  <div class="lp-state-context lp-agent-context"><strong>Agent execution</strong><p>Check runs review and real-browser verification, preserving what actually passed.</p></div>
+                </article>
+              </section>
+              <section class="lp-rotation-scene" data-workflow-scene="3" aria-labelledby="lp-scene-3-title">
+                <h3 class="lp-scene-name" id="lp-scene-3-title">Scene 3 · Perspectives 07–08</h3>
+                <article class="lp-perspective-card" data-perspective="07">
+                  <span class="lp-perspective-id">Perspective 07 · Left side</span><h3>Acceptance remains a human act.</h3>
+                  <div class="lp-state-thumbnail" aria-hidden="true"><svg class="lp-paper-boat-svg" viewBox="0 0 440 260"><use href="#lp-boat-07"/></svg></div>
+                  <div class="lp-state-context"><strong>Human control</strong><p>Judge the evidence, keep the constraints intact, and decide whether to accept.</p></div>
+                  <div class="lp-state-context lp-agent-context"><strong>Agent execution</strong><p>Check returns tested pull requests, screenshots, and an explicit receipt.</p></div>
+                </article>
+                <article class="lp-perspective-card" data-perspective="08">
+                  <span class="lp-perspective-id">Perspective 08 · Left quarter</span><h3>The boat keeps watch after delivery.</h3>
+                  <div class="lp-state-thumbnail" aria-hidden="true"><svg class="lp-paper-boat-svg" viewBox="0 0 440 260"><use href="#lp-boat-08"/></svg></div>
+                  <div class="lp-state-context"><strong>Human control</strong><p>Lead what happens next and hold the context that no monitor can know.</p></div>
+                  <div class="lp-state-context lp-agent-context"><strong>Agent execution</strong><p>Watch reads logs and alerts, opens the issue, and prepares the next evidence-backed action.</p></div>
+                </article>
+              </section>
             </div>
           </div>
+          <figcaption class="lp-workflow-caption">The viewpoint changes; ownership does not. People steer above the waterline while agents move the work through Write, Plan, Build, Check, and Watch.</figcaption>
         </figure>
-        <p class="lp-steer-label"><svg viewBox="0 0 32 16" aria-hidden="true"><path d="M31 8H4m7-6L4 8l7 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> You can step in here</p>
-        <div class="lp-ticket-grid">
-          <article class="lp-ticket"><span class="lp-card-kicker">What is moving?</span><h3>Initiative</h3><ol class="lp-steps"><li><span class="lp-step-num">01</span><span>You write a note. Teammates comment and react.</span></li><li><span class="lp-step-num">02</span><span>A plan comes back with a ceiling, set from the agent’s own calibrated estimate.</span></li><li><span class="lp-step-num">03</span><span>You say yes.</span></li><li><span class="lp-step-num">04</span><span>The agent builds, with a second agent reviewing.</span></li><li><span class="lp-step-num">05</span><span>It checks its own work in a real browser.</span></li><li><span class="lp-step-num">06</span><span>You accept. Tested pull requests and a receipt.</span></li></ol></article>
-          <article class="lp-ticket"><span class="lp-card-kicker">What is wrong?</span><h3>Issue</h3><ol class="lp-steps"><li><span class="lp-step-num">01</span><span>The agent catches the alert first and opens an issue with a severity.</span></li><li><span class="lp-step-num">02</span><span>It contains the damage.</span></li><li><span class="lp-step-num">03</span><span>It proposes the fix. You say yes.</span></li><li><span class="lp-step-num">04</span><span>A normal build if the fix needs code. Resolved, timeline kept.</span></li></ol></article>
-          <article class="lp-ticket"><span class="lp-card-kicker">What shipped?</span><h3>Release</h3><ol class="lp-steps"><li><span class="lp-step-num">01</span><span>Accepted work gathers into a release candidate.</span></li><li><span class="lp-step-num">02</span><span>You decide when it ships.</span></li><li><span class="lp-step-num">03</span><span>The release reads like a post the team can react to.</span></li></ol></article>
-          <article class="lp-ticket"><span class="lp-card-kicker">Who carried it?</span><h3>Leaderboard</h3><ol class="lp-steps"><li><span class="lp-step-num">01</span><span>People, by what they were part of.</span></li><li><span class="lp-step-num">02</span><span>Models, by what they return for what they cost.</span></li><li><span class="lp-step-num">03</span><span>Nothing to steer here. This one only counts.</span></li></ol></article>
-        </div>
-        <div class="lp-workflow-close"><p>As agents get smarter, you steer less and read fewer transcripts.</p><p>Every tool call and every transcript stays in the record, for whenever you want to look.</p></div>
       </div>
     </section>
 
@@ -680,389 +788,175 @@
 
       const doc = document;
       const win = window;
-      const clock = () => win.performance && typeof win.performance.now === 'function' ? win.performance.now() : Date.now();
-      const requestFrame = typeof win.requestAnimationFrame === 'function'
-        ? win.requestAnimationFrame.bind(win)
-        : (callback) => win.setTimeout(() => callback(clock()), 16);
-      const cancelFrame = typeof win.cancelAnimationFrame === 'function'
-        ? win.cancelAnimationFrame.bind(win)
-        : win.clearTimeout.bind(win);
-      const reducedQuery = typeof win.matchMedia === 'function' ? win.matchMedia('(prefers-reduced-motion: reduce)') : null;
-      const finePointerQuery = typeof win.matchMedia === 'function' ? win.matchMedia('(pointer: fine)') : null;
+      const root = doc.documentElement;
+      const reducedQuery = typeof win.matchMedia === 'function'
+        ? win.matchMedia('(prefers-reduced-motion: reduce)')
+        : null;
       const reducedMotion = Boolean(reducedQuery && reducedQuery.matches);
-      let destroyed = false;
+      const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
 
       doc.querySelectorAll('[data-theme-toggle]').forEach((button) => {
         button.addEventListener('click', () => {
-          const next = doc.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-          doc.documentElement.dataset.theme = next;
+          const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+          root.dataset.theme = next;
           try { win.localStorage.setItem('konteks-theme', next); } catch (_) {}
         });
       });
 
       const hero = doc.querySelector('.lp-hero');
-      const harborVisuals = doc.querySelector('.lp-harbor-visuals');
-      const boat = doc.querySelector('.lp-boat');
-      const stations = Array.from(doc.querySelectorAll('.lp-station[data-station]'));
-      const heroGrid = doc.querySelector('[data-hero-grid]');
-      const heroConnector = doc.querySelector('[data-hero-connector]');
-      const heroWaves = doc.querySelector('[data-hero-waves]');
-      const stationOffsets = [[-72, 6], [-48, 0], [-24, 9], [2, 2], [26, 10]];
-      const heroPauseReasons = new Set();
-      let heroIndex = reducedMotion ? 4 : 0;
-      let heroTimer = 0;
-      let heroInView = true;
-      let boatFrame = 0;
-      let boatPosition = stationOffsets[heroIndex] || [0, 0];
+      let heroHasRevealed = reducedMotion;
+      let heroInView = reducedMotion;
 
-      function setBoatPosition(index, immediate) {
-        if (!boat) return;
-        const target = stationOffsets[index] || [0, 0];
-        if (boatFrame) cancelFrame(boatFrame);
-        if (immediate || reducedMotion || (boatPosition[0] === target[0] && boatPosition[1] === target[1])) {
-          boatPosition = target.slice();
-          boat.style.setProperty('--lp-sail-x', `${target[0]}px`);
-          boat.style.setProperty('--lp-sail-y', `${target[1]}px`);
-          boatFrame = 0;
-          return;
-        }
-        const start = boatPosition.slice();
-        const startedAt = clock();
-        const duration = 520;
-        const move = (timestamp) => {
-          if (destroyed || doc.hidden) {
-            boatFrame = 0;
-            return;
-          }
-          const progress = Math.min(1, Math.max(0, (timestamp - startedAt) / duration));
-          const eased = 1 - Math.pow(1 - progress, 3);
-          const x = start[0] + (target[0] - start[0]) * eased;
-          const y = start[1] + (target[1] - start[1]) * eased;
-          boatPosition = [x, y];
-          boat.style.setProperty('--lp-sail-x', `${x.toFixed(2)}px`);
-          boat.style.setProperty('--lp-sail-y', `${y.toFixed(2)}px`);
-          boatFrame = progress < 1 ? requestFrame(move) : 0;
-        };
-        boatFrame = requestFrame(move);
+      function setHeroVisibility(isVisible) {
+        if (!hero) return;
+        heroInView = isVisible;
+        if (isVisible) heroHasRevealed = true;
+        hero.classList.toggle('is-annotated', heroHasRevealed);
+        hero.classList.toggle('is-motion-active', isVisible && !reducedMotion && !doc.hidden);
       }
-
-      function stopHeroAuto() {
-        if (heroTimer) win.clearTimeout(heroTimer);
-        heroTimer = 0;
-      }
-
-      function canCycleHero() {
-        return !destroyed && !reducedMotion && !doc.hidden && heroInView && heroPauseReasons.size === 0 && stations.length > 0;
-      }
-
-      function scheduleHeroAuto() {
-        stopHeroAuto();
-        if (!canCycleHero()) return;
-        heroTimer = win.setTimeout(() => {
-          heroTimer = 0;
-          selectStation((heroIndex + 1) % stations.length, false);
-          scheduleHeroAuto();
-        }, 1800);
-      }
-
-      function selectStation(index, userInitiated) {
-        if (!stations.length) return;
-        const nextIndex = Math.min(stations.length - 1, Math.max(0, Number(index) || 0));
-        heroIndex = nextIndex;
-        stations.forEach((station, stationIndex) => {
-          const selected = stationIndex === nextIndex;
-          station.classList.toggle('is-current', selected);
-          station.setAttribute('aria-pressed', selected ? 'true' : 'false');
-        });
-        if (heroGrid) heroGrid.style.opacity = nextIndex <= 1 ? '1' : '0';
-        if (heroConnector) heroConnector.style.opacity = nextIndex >= 1 ? '.72' : '0';
-        if (heroWaves) heroWaves.style.opacity = nextIndex >= 3 ? '1' : '0';
-        setBoatPosition(nextIndex, reducedMotion);
-        if (userInitiated) scheduleHeroAuto();
-      }
-
-      stations.forEach((station) => {
-        const index = Number(station.dataset.station) || 0;
-        station.addEventListener('pointerenter', () => {
-          heroPauseReasons.add('pointer');
-          stopHeroAuto();
-          selectStation(index, true);
-        });
-        station.addEventListener('pointerleave', () => {
-          heroPauseReasons.delete('pointer');
-          scheduleHeroAuto();
-        });
-        station.addEventListener('focus', () => {
-          heroPauseReasons.add('focus');
-          stopHeroAuto();
-          selectStation(index, true);
-        });
-        station.addEventListener('blur', () => {
-          heroPauseReasons.delete('focus');
-          scheduleHeroAuto();
-        });
-        station.addEventListener('click', () => selectStation(index, true));
-        station.addEventListener('keydown', (event) => {
-          if (event.key !== 'Enter' && event.key !== ' ') return;
-          event.preventDefault();
-          selectStation(index, true);
-        });
-      });
-
-      if (boat) {
-        boat.style.setProperty('--lp-sail-x', `${boatPosition[0]}px`);
-        boat.style.setProperty('--lp-sail-y', `${boatPosition[1]}px`);
-      }
-      selectStation(heroIndex, false);
 
       let heroObserver = null;
-      if (hero && !reducedMotion && typeof win.IntersectionObserver === 'function') {
-        heroObserver = new win.IntersectionObserver((entries) => {
-          heroInView = entries.some((entry) => entry.isIntersecting);
-          if (heroInView) scheduleHeroAuto();
-          else stopHeroAuto();
-        }, { threshold: 0.05 });
-        heroObserver.observe(hero);
-      }
-      scheduleHeroAuto();
-
-      let parallaxFrame = 0;
-      let parallaxPoint = null;
-      function renderParallax() {
-        parallaxFrame = 0;
-        if (!hero || !harborVisuals || !parallaxPoint || destroyed || doc.hidden) return;
-        const rect = hero.getBoundingClientRect();
-        const x = Math.max(-1, Math.min(1, ((parallaxPoint.x - rect.left) / Math.max(1, rect.width)) * 2 - 1));
-        const y = Math.max(-1, Math.min(1, ((parallaxPoint.y - rect.top) / Math.max(1, rect.height)) * 2 - 1));
-        harborVisuals.style.setProperty('--lp-parallax-x', `${(x * 8).toFixed(2)}px`);
-        harborVisuals.style.setProperty('--lp-parallax-y', `${(y * 8).toFixed(2)}px`);
-      }
-      function queueParallax(point) {
-        parallaxPoint = point;
-        if (!parallaxFrame) parallaxFrame = requestFrame(renderParallax);
-      }
-      if (hero && harborVisuals && !reducedMotion && finePointerQuery && finePointerQuery.matches) {
-        hero.addEventListener('pointermove', (event) => queueParallax({ x: event.clientX, y: event.clientY }), { passive: true });
-        hero.addEventListener('pointerleave', () => {
-          const rect = hero.getBoundingClientRect();
-          queueParallax({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
-        });
-      }
-
-      const signals = Array.from(doc.querySelectorAll('.lp-signal'));
-      const fallingLayer = doc.querySelector('.lp-falling-signals');
-      const terminal = doc.querySelector('.lp-terminal');
-      const terminalLines = doc.querySelector('.lp-terminal-lines');
-      const waterlinePath = doc.querySelector('.lp-waterline-sine, [data-waterline-path]');
-      const workflowScroll = doc.querySelector('.lp-workflow-scroll');
-      const workflowSticky = doc.querySelector('.lp-workflow-sticky');
-      const fallingAnimations = new Map();
-      let signalTimer = 0;
-      let autoSignalHasFired = false;
-      let scrollFrame = 0;
-      let scrollIndex = -1;
-      let waveFrame = 0;
-      let wavePhase = 0;
-      let lastWaveTick = 0;
-
-      function appendTerminalLine(index) {
-        const signal = signals[index];
-        if (!terminalLines || !signal || !signal.dataset.line) return;
-        const code = doc.createElement('code');
-        code.textContent = `> ${signal.dataset.line}`;
-        terminalLines.appendChild(code);
-        while (terminalLines.children.length > 6) terminalLines.removeChild(terminalLines.firstElementChild);
-      }
-
-      function setCurrentSignal(index) {
-        signals.forEach((signal, signalIndex) => signal.classList.toggle('is-current', signalIndex === index));
-      }
-
-      function finishFallingSignal(node, shouldAppend, index) {
-        const frame = fallingAnimations.get(node);
-        if (frame) cancelFrame(frame);
-        fallingAnimations.delete(node);
-        node.remove();
-        if (shouldAppend) appendTerminalLine(index);
-      }
-
-      function emitSignal(index) {
-        const signal = signals[index];
-        if (!signal) return;
-        if (reducedMotion || !fallingLayer || !terminal) {
-          appendTerminalLine(index);
-          return;
+      if (hero) {
+        if (!reducedMotion && typeof win.IntersectionObserver === 'function') {
+          heroObserver = new win.IntersectionObserver((entries) => {
+            const entry = entries[0];
+            setHeroVisibility(Boolean(entry && entry.isIntersecting && entry.intersectionRatio >= 0.25));
+          }, { threshold: [0, 0.25] });
+          heroObserver.observe(hero);
+        } else {
+          setHeroVisibility(true);
         }
-        const layerRect = fallingLayer.getBoundingClientRect();
-        const signalRect = signal.getBoundingClientRect();
-        const terminalRect = terminal.getBoundingClientRect();
-        const startX = signalRect.left - layerRect.left + signalRect.width / 2 - 5;
-        const startY = signalRect.top - layerRect.top + signalRect.height / 2 - 5;
-        const endX = terminalRect.left - layerRect.left + terminalRect.width / 2 - 5;
-        const endY = terminalRect.top - layerRect.top + 54;
-        const node = doc.createElement('span');
-        node.className = 'lp-falling-signal';
-        node.style.setProperty('--lp-signal-start-x', `${startX}px`);
-        node.style.setProperty('--lp-signal-start-y', `${startY}px`);
-        node.style.setProperty('--lp-signal-end-x', `${endX}px`);
-        node.style.setProperty('--lp-signal-end-y', `${endY}px`);
-        const signalColor = win.getComputedStyle ? win.getComputedStyle(signal).getPropertyValue('--lp-signal-color').trim() : '';
-        if (signalColor) node.style.setProperty('--lp-signal-color', signalColor);
-        node.style.transform = `translate3d(${startX}px, ${startY}px, 0)`;
-        fallingLayer.appendChild(node);
-        const startedAt = clock();
-        const fall = (timestamp) => {
-          if (destroyed || doc.hidden || !node.isConnected) {
-            finishFallingSignal(node, false, index);
-            return;
+      }
+
+      const workflow = doc.querySelector('.lp-workflow-scroll');
+      const scenes = Array.from(doc.querySelectorAll('[data-workflow-scene]')).map((scene) => ({
+        element: scene,
+        cards: Array.from(scene.querySelectorAll('[data-perspective]'))
+      }));
+      const views = Array.from(doc.querySelectorAll('[data-boat-view]'));
+      const phases = Array.from(doc.querySelectorAll('.lp-workflow-stage [data-agent-phase]'));
+      const workflowCallouts = Array.from(doc.querySelectorAll('.lp-workflow-stage .lp-human-callouts li'));
+      const indicator = doc.querySelector('[data-perspective-indicator]');
+      const stageHumanLabel = doc.querySelector('[data-stage-human-label]');
+      const stageHumanContext = doc.querySelector('[data-stage-human-context]');
+      const stageAgentLabel = doc.querySelector('[data-stage-agent-label]');
+      const stageAgentContext = doc.querySelector('[data-stage-agent-context]');
+      const stateToPhase = ['Write', 'Plan', 'Plan', 'Build', 'Build', 'Check', 'Check', 'Watch'];
+      const stateToCallouts = [[0, 3], [1], [2], [0], [3], [2], [1, 2], [0, 3]];
+      const allCards = scenes.flatMap((scene) => scene.cards);
+      let frame = 0;
+
+      function setWorkflowState(statePosition) {
+        const position = clamp(statePosition, 0, 7);
+        const lower = Math.floor(position);
+        const upper = Math.ceil(position);
+        const blend = position - lower;
+        const nearest = clamp(Math.round(position), 0, 7);
+
+        views.forEach((view, index) => {
+          let opacity = 0;
+          if (index === lower) opacity = upper === lower ? 1 : 1 - blend;
+          if (index === upper) opacity = upper === lower ? 1 : blend;
+          view.style.opacity = opacity.toFixed(3);
+          view.style.transform = `translateX(${((index - position) * 5).toFixed(2)}%)`;
+        });
+
+        const smoothBlend = blend * blend * (3 - 2 * blend);
+        allCards.forEach((card, index) => {
+          let opacity = 0;
+          if (index === lower) opacity = upper === lower ? 1 : 1 - smoothBlend;
+          if (index === upper) opacity = upper === lower ? 1 : smoothBlend;
+          card.classList.toggle('is-active', index === nearest);
+          if (win.matchMedia('(min-width: 900px)').matches && !reducedMotion) {
+            card.style.opacity = opacity.toFixed(3);
+            card.style.transform = `translateY(calc(-50% + ${((index - position) * 132).toFixed(2)}px))`;
+          } else {
+            card.style.removeProperty('opacity');
+            card.style.removeProperty('transform');
           }
-          const progress = Math.min(1, Math.max(0, (timestamp - startedAt) / 800));
-          const eased = 1 - Math.pow(1 - progress, 3);
-          const x = startX + (endX - startX) * eased;
-          const y = startY + (endY - startY) * eased - Math.sin(Math.PI * progress) * 28;
-          node.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
-          if (progress < 1) fallingAnimations.set(node, requestFrame(fall));
-          else finishFallingSignal(node, true, index);
-        };
-        fallingAnimations.set(node, requestFrame(fall));
-      }
-
-      signals.forEach((signal, fallbackIndex) => {
-        const index = Number(signal.dataset.signal);
-        const signalIndex = Number.isFinite(index) ? index : fallbackIndex;
-        signal.addEventListener('click', () => {
-          setCurrentSignal(signalIndex);
-          emitSignal(signalIndex);
         });
-        signal.addEventListener('keydown', (event) => {
-          if (event.key !== 'Enter' && event.key !== ' ') return;
-          event.preventDefault();
-          setCurrentSignal(signalIndex);
-          emitSignal(signalIndex);
+
+        const perspective = String(nearest + 1).padStart(2, '0');
+        const activePhase = stateToPhase[nearest];
+        phases.forEach((phase) => {
+          const active = phase.dataset.agentPhase === activePhase;
+          phase.classList.toggle('is-active', active);
+          phase.setAttribute('aria-current', active ? 'step' : 'false');
         });
-      });
+        const activeCallouts = stateToCallouts[nearest];
+        workflowCallouts.forEach((callout, index) => {
+          callout.classList.toggle('is-context-active', activeCallouts.includes(index));
+        });
 
-      if (reducedMotion) {
-        [0, 1, 4].forEach(appendTerminalLine);
+        const activeCard = allCards[nearest];
+        const activeContexts = activeCard ? activeCard.querySelectorAll('.lp-state-context p') : [];
+        if (stageHumanLabel) stageHumanLabel.textContent = `Human control · Perspective ${perspective}`;
+        if (stageHumanContext && activeContexts[0]) stageHumanContext.textContent = activeContexts[0].textContent;
+        if (stageAgentLabel) stageAgentLabel.textContent = `Agent execution · ${activePhase}`;
+        if (stageAgentContext && activeContexts[1]) stageAgentContext.textContent = activeContexts[1].textContent;
+        if (indicator) indicator.textContent = `Perspective ${perspective}`;
       }
 
-      function stopSignalAuto() {
-        if (signalTimer) win.clearTimeout(signalTimer);
-        signalTimer = 0;
-      }
+      function deriveWorkflowState() {
+        frame = 0;
+        if (!workflow || scenes.length !== 3 || allCards.length !== 8) return;
+        const viewportHeight = Math.max(1, win.innerHeight || root.clientHeight || 1);
+        const focusY = viewportHeight * 0.5;
+        let selectedScene = scenes[0];
+        let smallestDistance = Infinity;
 
-      function scheduleSignalAuto() {
-        stopSignalAuto();
-        if (destroyed || reducedMotion || doc.hidden || !signals.length) return;
-        signalTimer = win.setTimeout(() => {
-          signalTimer = 0;
-          emitSignal(Math.floor(Math.random() * signals.length));
-          autoSignalHasFired = true;
-          scheduleSignalAuto();
-        }, autoSignalHasFired ? 2400 : 1200);
-      }
-      scheduleSignalAuto();
-
-      function drawWaterline(timestamp) {
-        waveFrame = 0;
-        if (destroyed || reducedMotion || doc.hidden || !waterlinePath) return;
-        if (timestamp - lastWaveTick >= 40) {
-          wavePhase += Math.min(64, Math.max(0, timestamp - lastWaveTick || 16)) * 0.002;
-          const points = [];
-          for (let point = 0; point <= 40; point += 1) {
-            const x = point * 25;
-            const y = 38 + Math.sin(point * 0.62 + wavePhase) * 9;
-            points.push(`${point ? 'L' : 'M'}${x} ${y.toFixed(2)}`);
+        scenes.forEach((scene) => {
+          const rect = scene.element.getBoundingClientRect();
+          const distance = focusY < rect.top ? rect.top - focusY : focusY > rect.bottom ? focusY - rect.bottom : 0;
+          if (distance < smallestDistance) {
+            smallestDistance = distance;
+            selectedScene = scene;
           }
-          waterlinePath.setAttribute('d', points.join(''));
-          lastWaveTick = timestamp;
+          scene.cards.forEach((card) => {
+            const cardRect = card.getBoundingClientRect();
+            card.classList.toggle('is-seen', cardRect.top < viewportHeight * 0.82 && cardRect.bottom > viewportHeight * 0.18);
+          });
+        });
+
+        const sceneIndex = scenes.indexOf(selectedScene);
+        const sceneRect = selectedScene.element.getBoundingClientRect();
+        const localProgress = clamp((focusY - sceneRect.top) / Math.max(1, sceneRect.height), 0, 1);
+        const sceneStarts = [0, 3, 6];
+        const localSpan = selectedScene.cards.length - 1;
+        setWorkflowState(sceneStarts[sceneIndex] + localProgress * localSpan);
+      }
+
+      function queueWorkflowUpdate() {
+        if (!frame && !reducedMotion) frame = win.requestAnimationFrame(deriveWorkflowState);
+      }
+
+      if (workflow && scenes.length === 3 && allCards.length === 8) {
+        setWorkflowState(0);
+        if (!reducedMotion) {
+          root.classList.add('lp-scroll-enhanced');
+          win.addEventListener('scroll', queueWorkflowUpdate, { passive: true });
+          win.addEventListener('resize', queueWorkflowUpdate, { passive: true });
+          queueWorkflowUpdate();
         }
-        waveFrame = requestFrame(drawWaterline);
-      }
-
-      function startWaterline() {
-        if (!waveFrame && !reducedMotion && !doc.hidden && waterlinePath && !destroyed) {
-          lastWaveTick = clock();
-          waveFrame = requestFrame(drawWaterline);
-        }
-      }
-      startWaterline();
-
-      const scrollEmitted = new Set();
-      function updateScrollNarrative() {
-        scrollFrame = 0;
-        if (destroyed || reducedMotion || !workflowScroll || !signals.length) return;
-        const rect = workflowScroll.getBoundingClientRect();
-        const viewportHeight = Math.max(1, win.innerHeight || doc.documentElement.clientHeight || 1);
-        if (rect.top > viewportHeight || rect.bottom < 0) return;
-        const stickyHeight = workflowSticky ? Math.min(viewportHeight, workflowSticky.getBoundingClientRect().height) : viewportHeight;
-        const scrollableHeight = Math.max(1, rect.height - stickyHeight);
-        const stickyTop = 68;
-        const progress = Math.max(0, Math.min(1, (stickyTop - rect.top) / scrollableHeight));
-        const nextIndex = Math.min(signals.length - 1, Math.round(progress * (signals.length - 1)));
-        if (nextIndex === scrollIndex) return;
-        scrollIndex = nextIndex;
-        setCurrentSignal(nextIndex);
-        if (!scrollEmitted.has(nextIndex)) {
-          scrollEmitted.add(nextIndex);
-          emitSignal(nextIndex);
-        }
-      }
-
-      function queueScrollNarrative() {
-        if (!scrollFrame) scrollFrame = requestFrame(updateScrollNarrative);
-      }
-      if (!reducedMotion && workflowScroll) {
-        win.addEventListener('scroll', queueScrollNarrative, { passive: true });
-        win.addEventListener('resize', queueScrollNarrative, { passive: true });
-        queueScrollNarrative();
-      }
-
-      function stopFallingSignals() {
-        Array.from(fallingAnimations.keys()).forEach((node) => finishFallingSignal(node, false, 0));
-      }
-
-      function suspendMotion() {
-        stopHeroAuto();
-        stopSignalAuto();
-        if (boatFrame) cancelFrame(boatFrame);
-        if (parallaxFrame) cancelFrame(parallaxFrame);
-        if (scrollFrame) cancelFrame(scrollFrame);
-        if (waveFrame) cancelFrame(waveFrame);
-        boatFrame = 0;
-        parallaxFrame = 0;
-        scrollFrame = 0;
-        waveFrame = 0;
-        stopFallingSignals();
       }
 
       doc.addEventListener('visibilitychange', () => {
-        if (doc.hidden) {
-          suspendMotion();
-        } else if (!destroyed) {
-          scheduleHeroAuto();
-          scheduleSignalAuto();
-          startWaterline();
-          queueScrollNarrative();
+        if (hero) {
+          if (doc.hidden) hero.classList.remove('is-motion-active');
+          else if (heroHasRevealed) setHeroVisibility(heroInView);
         }
+        if (!doc.hidden) queueWorkflowUpdate();
       });
 
-      win.addEventListener('pagehide', (event) => {
-        if (!event.persisted) destroyed = true;
-        suspendMotion();
+      win.addEventListener('pagehide', () => {
+        if (frame) win.cancelAnimationFrame(frame);
+        frame = 0;
+        if (hero) hero.classList.remove('is-motion-active');
       });
-      win.addEventListener('pageshow', () => {
-        if (!destroyed && !doc.hidden) {
-          scheduleHeroAuto();
-          scheduleSignalAuto();
-          startWaterline();
-          queueScrollNarrative();
-        }
-      });
+
       win.addEventListener('beforeunload', () => {
-        destroyed = true;
-        suspendMotion();
         if (heroObserver) heroObserver.disconnect();
+        if (frame) win.cancelAnimationFrame(frame);
       });
     })();
   </script>
