@@ -16,6 +16,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/landingpage",
+      "destination": "/landingpage.html"
+    },
+    {
       "source": "/catalog",
       "destination": "/catalog.html"
     },

@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="The AI control plane for software engineering.">
+  <title>Konteks — People lead the vision. Agents do the rest.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Caveat:wght@500;600&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    (() => {
+      const saved = localStorage.getItem('konteks-theme') || 'system';
+      const dark = saved === 'dark' || (saved === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --kx-canvas: #faf8ef;
+      --kx-raised: #fff;
+      --kx-primary: #243025;
+      --kx-secondary: #58735a;
+      --kx-muted: #778c78;
+      --kx-muted-text-aa: #607260;
+      --kx-accent-text-aa: #4f7044;
+      --kx-accent-solid-aa: #4f7044;
+      --kx-accent-segment-aa: #95a547;
+      --kx-border: #e2e9d5;
+      --kx-pale: #f4f8ee;
+      --kx-accent: #8fbf6a;
+      --kx-accent-strong: #5f8d4e;
+      --kx-accent-solid-ink: #ffffff;
+      --kx-accent-fill-ink: #243025;
+      --kx-attention: #9a6212;
+      --kx-danger: #b3261e;
+      --kx-system-map-container: #7c5cbf;
+      --kx-system-map-component: #2f6f8f;
+      --kx-bubble-bg: #e5ecda;
+      --kx-second: #58735a;
+      --kx-second-soft: #778c78;
+      --lp-harbor: #243025;
+      --lp-cream: #faf8ef;
+      --lp-shadow: 0 14px 34px rgb(36 48 37 / .12);
+    }
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --kx-canvas: #0f1510;
+      --kx-raised: #1a231b;
+      --kx-primary: #e8ede8;
+      --kx-secondary: #c5cfc6;
+      --kx-muted: #9ead9f;
+      --kx-muted-text-aa: #9ead9f;
+      --kx-accent-text-aa: #c5d9a6;
+      --kx-accent-solid-aa: #4f7044;
+      --kx-accent-segment-aa: #a8c883;
+      --kx-border: #35502c;
+      --kx-pale: #152618;
+      --kx-accent: #8fbf6a;
+      --kx-accent-strong: #5f8d4e;
+      --kx-accent-solid-ink: #ffffff;
+      --kx-accent-fill-ink: #0f1510;
+      --kx-attention: #e6b366;
+      --kx-danger: #ef9a8f;
+      --kx-system-map-container: #b9a0e8;
+      --kx-system-map-component: #7cc4e0;
+      --kx-bubble-bg: #22301f;
+      --kx-second: #c5cfc6;
+      --kx-second-soft: #9ead9f;
+      --lp-shadow: 0 14px 34px rgb(0 0 0 / .24);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--kx-canvas); color: var(--kx-primary); font: 400 16px/1.65 'DM Sans', sans-serif;  line-height: 1.6; }
+    body::selection { background: var(--kx-accent); color: var(--kx-accent-fill-ink); }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; }
+    a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: .22em; }
+    img, svg { display: block; max-width: 100%; }
+    h1, h2, h3, p, figure, blockquote { margin: 0; }
+    h1, h2, h3 { text-wrap: balance; }
+    p { max-width: 72ch; }
+    :focus-visible { outline: 3px solid var(--kx-accent); outline-offset: 4px; }
+    ::-webkit-scrollbar { width: 12px; }
+    ::-webkit-scrollbar-track { background: var(--kx-canvas); }
+    ::-webkit-scrollbar-thumb { background: var(--kx-muted-text-aa); border: 3px solid var(--kx-canvas); border-radius: 999px; }
+
+    .lp-shell { width: min(1120px, 100%); margin-inline: auto; }
+    main p, main li, main dd, main figcaption, footer p, footer li { line-height: 1.6; }
+    .lp-label { display: inline-flex; align-items: center; gap: 8px; color: var(--kx-accent-text-aa); font-size: 12px; font-weight: 700; letter-spacing: .12em; line-height: 1.4; text-transform: uppercase; }
+    .lp-label::before { content: ''; width: 22px; border-top: 1px solid currentColor; }
+    .lp-heading { margin-top: 20px; font-family: 'Baloo 2', sans-serif; font-size: clamp(30px, 4vw, 48px); font-weight: 800; letter-spacing: -.025em; line-height: 1.08; }
+    .lp-button { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; border: 1px solid currentColor; border-radius: 999px; padding: 10px 20px; font-weight: 700; line-height: 1.3; text-decoration: none; transition: transform 160ms ease, background-color 160ms ease, color 160ms ease; }
+    .lp-button:hover { transform: translateY(-2px); }
+    .lp-button:active { transform: translateY(1px); }
+    .lp-button-solid { border-color: var(--kx-accent); background: var(--kx-accent); color: var(--kx-accent-fill-ink); }
+    .lp-button-solid:hover { background: #a5cf84; }
+    .lp-button-outline-light { border-color: rgb(250 248 239 / .68); color: var(--lp-cream); }
+    .lp-button-outline-light:hover { background: rgb(250 248 239 / .1); }
+
+    .lp-nav { position: sticky; z-index: 50; top: 0; border-bottom: 1px solid var(--kx-border); background: var(--kx-canvas); }
+    .lp-nav-inner { display: flex; min-height: 68px; align-items: center; gap: 22px; }
+    .lp-brand { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 9px; font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 800; text-decoration: none; }
+    .lp-brand svg { width: 34px; height: 34px; }
+    .lp-beta { border: 1px solid var(--kx-accent); border-radius: 999px; padding: 2px 7px; color: var(--kx-accent-text-aa); font: 700 11px/1.4 'DM Sans', sans-serif; letter-spacing: .1em; text-transform: uppercase; }
+    .lp-nav-links { display: flex; min-width: 0; align-items: center; gap: clamp(10px, 1.25vw, 18px); margin-left: auto; }
+    .lp-nav-links a { font-size: 12px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+    .lp-nav-links a:hover { color: var(--kx-accent-text-aa); }
+    .lp-nav-actions { display: flex; align-items: center; gap: 8px; }
+    .lp-icon-button, .lp-id { display: inline-grid; width: 40px; height: 40px; place-items: center; border: 1px solid var(--kx-border); border-radius: 999px; background: transparent; color: var(--kx-primary); cursor: pointer; transition: transform 160ms ease, background-color 160ms ease; }
+    .lp-id { font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+    .lp-icon-button:hover, .lp-id:hover { background: var(--kx-pale); transform: translateY(-1px); }
+    .lp-icon-sun, [data-theme='dark'] .lp-icon-moon { display: none; }
+    [data-theme='dark'] .lp-icon-sun { display: block; }
+    .lp-nav-cta { min-height: 40px; padding: 9px 15px; font-size: 12px; }
+    .lp-mobile-menu { display: none; margin-left: auto; }
+    .lp-mobile-menu summary { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid var(--kx-border); border-radius: 999px; cursor: pointer; list-style: none; }
+    .lp-mobile-menu summary::-webkit-details-marker { display: none; }
+    .lp-drawer { position: absolute; top: 68px; right: 16px; left: 16px; display: grid; gap: 2px; border: 0; border-radius: 14px; padding: 10px; background: var(--kx-raised); box-shadow: var(--lp-shadow); }
+    .lp-drawer a { min-height: 42px; padding: 9px 11px; border-radius: 10px; font-weight: 700; text-decoration: none; }
+    .lp-drawer a:hover { background: var(--kx-pale); }
+    .lp-drawer-tools { display: flex; gap: 8px; padding-top: 8px; border-top: 1px solid var(--kx-border); }
+
+    .lp-hero { position: relative; min-height: 830px; padding-block: 64px; padding-top: 64px; padding-bottom: 64px; padding-left: 32px; padding-right: 32px; background: var(--lp-harbor); color: var(--lp-cream); }
+    .lp-hero-inner { position: relative; z-index: 2; display: grid; min-height: 702px; grid-template-columns: .88fr 1.12fr; align-items: center; gap: 28px; padding-block: 28px 86px; }
+    .lp-hero-copy { position: relative; z-index: 5; }
+    .lp-title { max-width: 690px; font-family: 'Baloo 2', sans-serif; font-size: clamp(44px, 5.4vw, 76px); font-weight: 800; letter-spacing: -.03em; line-height: 1.04; }
+    .lp-title span { display: block; }
+    .lp-lede { margin-top: 24px; max-width: 59ch; color: #e8ede8; font-size: clamp(18px, 1.55vw, 20px); line-height: 1.55; }
+    .lp-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+    .lp-harbor-art { position: relative; align-self: stretch; min-height: 510px; }
+    .lp-harbor-visuals { position: absolute; inset: 0; overflow: hidden; }
+    .lp-collage { position: absolute; z-index: 0; inset: -30px -22vw 10px -80px; width: 900px; height: 600px; object-fit: contain; opacity: .25; }
+    .lp-lighthouse { position: absolute; z-index: 2; bottom: 32px; left: -34px; width: min(45%, 280px); }
+    .lp-lighthouse-banner { position: absolute; z-index: 5; bottom: 245px; left: 22px; max-width: 198px; padding: 8px 12px 9px 14px; background: var(--lp-cream); box-shadow: 0 6px 12px rgb(15 21 16 / .22); color: var(--lp-harbor); font-size: 12px; font-weight: 700; letter-spacing: 0; line-height: 1.35; transform: rotate(-2deg); }
+    .lp-lighthouse-banner::before { content: ''; position: absolute; bottom: 100%; left: 12px; height: 28px; border-left: 1px solid var(--lp-cream); }
+    .lp-boat { position: absolute; z-index: 3; top: 178px; right: -6px; width: min(58%, 340px); animation: lp-boat-bob 4s ease-in-out infinite; }
+    .lp-route { position: absolute; z-index: 1; right: 1%; bottom: 95px; width: 81%; color: #e8ede8; opacity: .68; }
+    .lp-sparkle { position: absolute; z-index: 4; top: 104px; right: 18%; width: 31px; color: var(--kx-accent); animation: lp-sparkle 2.5s ease-in-out infinite; }
+    .lp-stations { position: absolute; z-index: 6; right: 0; bottom: 44px; left: 2%; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .lp-station { min-width: 0; border: 1px solid rgb(250 248 239 / .6); border-radius: 999px; padding: 8px 6px 7px; background: var(--lp-harbor); color: var(--lp-cream); cursor: pointer; text-align: center; transition: transform 160ms ease, background-color 160ms ease; }
+    .lp-station:hover { background: #344536; transform: translateY(-2px) rotate(1deg); }
+    .lp-station:active { transform: translateY(1px); }
+    .lp-station strong { display: block; font-size: 13px; }
+    .lp-station small { display: block; margin-top: 3px; color: #c5d9a6; font-size: 11px; font-weight: 700; letter-spacing: .11em; }
+    .lp-waves { position: absolute; z-index: 1; right: 0; bottom: 0; left: 0; width: 100%; height: 182px; object-fit: cover; object-position: bottom center; opacity: .76; }
+    .lp-pillars { position: absolute; z-index: 8; right: 0; bottom: -56px; left: 0; }
+    .lp-pillar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .lp-pillar { min-height: 112px; border: 0; border-radius: 14px; padding: 18px 20px; background: var(--lp-cream); color: #243025; box-shadow: 0 14px 32px rgb(15 21 16 / .18); transition: transform 160ms ease; }
+    .lp-pillar:hover { transform: translateY(-2px); }
+    .lp-pillar strong { display: block; font-family: 'Baloo 2', sans-serif; font-size: 21px; line-height: 1.3; }
+    .lp-pillar span { display: block; margin-top: 7px; color: #4f7044; font-size: 14px; line-height: 1.4; }
+
+    .lp-ledger-section { padding-block: 160px 128px; }
+    .lp-sticker { display: inline-block; margin-bottom: 18px; border: 1px solid var(--kx-attention); border-radius: 999px; padding: 7px 14px; color: var(--kx-attention); font-size: 12px; font-weight: 700; letter-spacing: .14em; line-height: 1; transform: rotate(-2deg); }
+    .lp-ledger-head { position: relative; display: grid; grid-template-columns: 1fr 90px 1fr; margin-top: 48px; border-block: 2px solid var(--kx-primary); padding: 12px 18px; }
+    .lp-ledger-head span { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .lp-ledger-head span:last-child { color: var(--kx-accent-text-aa); }
+    .lp-ledger-arrow { position: absolute; top: -55px; left: 50%; width: 90px; transform: translateX(-50%); }
+    .lp-ledger { border-bottom: 2px solid var(--kx-primary); }
+    .lp-ledger-row { display: grid; min-height: 70px; grid-template-columns: 1fr 90px 1fr; align-items: center; border-bottom: 1px solid var(--kx-border); padding: 12px 18px; transition: background-color 160ms ease; }
+    .lp-ledger-row:last-child { border: 0; }
+    .lp-ledger-row:hover { background: var(--kx-pale); }
+    .lp-before { color: var(--kx-muted-text-aa); text-decoration-color: var(--kx-attention); text-decoration-line: line-through; text-decoration-thickness: 1px; }
+    .lp-now { color: var(--kx-primary); font-weight: 700; }
+    .lp-row-arrow { color: var(--kx-attention); text-align: center; }
+    .lp-row-arrow svg { width: 26px; margin-inline: auto; }
+
+    .lp-theory { padding-block: 126px 144px; padding-top: 126px; padding-bottom: 144px; padding-left: 32px; padding-right: 32px; background: var(--kx-pale); }
+    .lp-quote { max-width: 880px; margin: 58px auto 84px; border: 0; border-radius: 14px; padding: clamp(26px, 5vw, 54px); background: var(--kx-raised); box-shadow: var(--lp-shadow); transform: rotate(-2deg); }
+    .lp-quote blockquote { font-family: 'Baloo 2', sans-serif; font-size: clamp(24px, 3vw, 36px); font-weight: 700; letter-spacing: -.015em; line-height: 1.35; }
+    .lp-quote figcaption { margin-top: 24px; color: var(--kx-accent-text-aa); font: 600 clamp(20px, 2.3vw, 28px)/1.3 'Caveat', cursive; }
+    .lp-theory-split { display: grid; grid-template-columns: 1fr 88px 1fr; gap: 30px; }
+    .lp-role-title { font-family: 'Baloo 2', sans-serif; font-size: 28px; font-weight: 800; }
+    .lp-role-list { display: grid; gap: 0; margin-top: 20px; }
+    .lp-role-item { display: grid; grid-template-columns: 42px 1fr; gap: 14px; border-top: 1px solid var(--kx-border); padding-block: 20px; padding-top: 20px; padding-bottom: 20px; }
+    .lp-role-item:first-child { border-top: 2px solid var(--kx-primary); }
+    .lp-role-item h3 { font-family: 'Baloo 2', sans-serif; font-size: 22px; line-height: 1.3; }
+    .lp-role-item p { margin-top: 5px; color: var(--kx-secondary); }
+    .lp-number { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; background: var(--kx-accent); color: var(--kx-accent-fill-ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .lp-agent-mark { display: grid; width: 36px; height: 36px; place-items: center; color: var(--kx-accent-text-aa); }
+    .lp-agent-mark svg { width: 25px; }
+    .lp-waterline { position: relative; }
+    .lp-waterline::before, .lp-waterline::after { content: ''; position: absolute; top: 6px; bottom: 6px; left: 50%; border-left: 1px solid var(--kx-border); }
+    .lp-waterline svg { position: sticky; top: 110px; width: 88px; margin-top: 125px; color: var(--kx-accent-text-aa); }
+    .lp-rule { margin-top: 80px; border: 2px solid var(--kx-accent-strong); border-radius: 14px; padding: clamp(24px, 4vw, 38px); background: var(--kx-raised); text-align: center; box-shadow: var(--lp-shadow); }
+    .lp-rule span { display: inline-block; border: 1px solid var(--kx-accent-strong); border-radius: 999px; padding: 7px 14px; color: var(--kx-accent-text-aa); font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+    .lp-rule p { max-width: 850px; margin: 20px auto 0; font-family: 'Baloo 2', sans-serif; font-size: clamp(20px, 2.5vw, 28px); font-weight: 700; line-height: 1.35; }
+
+    .lp-section { padding-block: 126px; padding-top: 126px; padding-bottom: 126px; padding-left: 32px; padding-right: 32px; }
+    .lp-section-head { max-width: 920px; }
+    .lp-section-lede { margin-top: 22px; color: var(--kx-secondary); font-size: clamp(18px, 1.7vw, 20px); line-height: 1.55; }
+    .lp-card-title { font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 800; line-height: 1.3; }
+    .lp-card-copy { margin-top: 9px; color: var(--kx-secondary); }
+    .lp-card-kicker { display: block; margin-bottom: 8px; color: var(--kx-accent-text-aa); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+
+    .lp-workflow-figure { margin-top: 58px; }
+    .lp-waterline-stage { position: relative; min-height: 620px; overflow: hidden; border: 0; border-radius: 16px; padding-right: 8px; padding-left: 8px; background: var(--kx-raised); box-shadow: var(--lp-shadow); }
+    .lp-waterline-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .lp-above-label, .lp-below-label { position: absolute; z-index: 2; left: 28px; color: var(--kx-primary); font-size: 13px; font-weight: 700; }
+    .lp-above-label { top: 24px; }
+    .lp-below-label { bottom: 22px; color: #e8ede8; }
+    .lp-signal-pills { position: absolute; z-index: 3; top: 92px; right: 5%; left: 5%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    .lp-signal { min-height: 42px; border: 1px solid var(--kx-accent-strong); border-radius: 999px; background: var(--kx-pale); color: var(--kx-accent-text-aa); cursor: pointer; font-weight: 700; transition: transform 160ms ease, background-color 160ms ease; }
+    .lp-signal:nth-child(even) { margin-top: 42px; }
+    .lp-signal:hover { background: var(--kx-bubble-bg); transform: translateY(-2px) rotate(1deg); }
+    .lp-signal:active { transform: translateY(1px); }
+    .lp-terminal { position: absolute; z-index: 3; right: 18%; bottom: 66px; left: 18%; border-block: 1px solid rgb(232 237 232 / .36); padding: 24px 0; color: #e8ede8; }
+    .lp-terminal-dots { display: flex; gap: 7px; margin-bottom: 20px; }
+    .lp-terminal-dots i { width: 6px; height: 6px; border-radius: 50%; background: #e8ede8; opacity: .35; }
+    .lp-terminal code { display: block; font: 400 12px/1.8 'JetBrains Mono', monospace; white-space: nowrap; }
+    .lp-workflow-figure figcaption { max-width: 760px; margin: 24px auto 0; color: var(--kx-secondary); text-align: center; }
+    .lp-steer-label { margin-top: 68px; font-family: 'Baloo 2', sans-serif; font-size: 24px; font-weight: 800; }
+    .lp-steer-label { display: flex; align-items: center; gap: 10px; }
+    .lp-steer-label svg { width: 32px; color: var(--kx-accent-text-aa); }
+    .lp-ticket-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; }
+    .lp-ticket { position: relative; min-width: 0; border-block: 2px solid var(--kx-primary); padding: 24px 18px 18px; background: var(--kx-raised); transition: transform 160ms ease, background-color 160ms ease; }
+    .lp-ticket::before, .lp-ticket::after { content: ''; position: absolute; top: -7px; width: 12px; height: 12px; border-radius: 50%; background: var(--kx-canvas); }
+    .lp-ticket::before { left: -6px; }
+    .lp-ticket::after { right: -6px; }
+    .lp-ticket:hover { background: var(--kx-pale); transform: translateY(-2px); }
+    .lp-ticket h3 { margin-top: 5px; font-family: 'Baloo 2', sans-serif; font-size: 24px; line-height: 1.3; }
+    .lp-steps { margin: 20px 0 0; padding: 0; list-style: none; }
+    .lp-steps li { display: grid; grid-template-columns: 27px 1fr; gap: 9px; border-top: 1px solid var(--kx-border); padding-block: 12px; padding-top: 12px; padding-bottom: 12px; color: var(--kx-secondary); font-size: 14px; line-height: 1.45; }
+    .lp-step-num { color: var(--kx-accent-text-aa); font: 500 11px/1.5 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+    .lp-workflow-close { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 46px; border-top: 1px solid var(--kx-border); padding-top: 25px; color: var(--kx-secondary); }
+
+    .lp-product { background: var(--kx-pale); }
+    .lp-subhead { margin-top: 64px; font-family: 'Baloo 2', sans-serif; font-size: 28px; font-weight: 800; }
+    .lp-question-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; }
+    .lp-question { min-height: 245px; border-top: 2px solid var(--kx-primary); padding: 23px 18px; background: var(--kx-raised); transition: transform 160ms ease; }
+    .lp-question:hover { transform: translateY(-2px); }
+    .lp-question h3 { font-family: 'Baloo 2', sans-serif; font-size: 23px; line-height: 1.3; }
+    .lp-question span { display: inline-block; margin-top: 18px; border: 1px solid var(--kx-accent-strong); border-radius: 999px; padding: 5px 10px; color: var(--kx-accent-text-aa); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .lp-question p { margin-top: 15px; color: var(--kx-secondary); font-size: 14px; }
+    .lp-activities { margin-top: 42px; border-block: 1px solid var(--kx-border); padding-block: 22px; color: var(--kx-secondary); }
+    .lp-activities strong { color: var(--kx-primary); }
+    .lp-catalog-card { display: grid; grid-template-columns: .7fr 1.6fr; gap: 42px; margin-top: 38px; border: 1px solid var(--kx-border); border-radius: 14px; padding: clamp(26px, 5vw, 46px); background: var(--kx-raised); }
+    .lp-catalog-card h3 { font-family: 'Baloo 2', sans-serif; font-size: clamp(24px, 3vw, 34px); line-height: 1.3; }
+    .lp-catalog-card p { margin-top: 13px; color: var(--kx-secondary); }
+
+    .lp-inverse { background: #243025; color: #faf8ef; }
+    .lp-inverse .lp-label { color: #c5d9a6; }
+    .lp-inverse .lp-heading { color: #faf8ef; }
+    .lp-mono-line { margin-top: 18px; color: #c5d9a6; font: 400 13px/1.5 'JetBrains Mono', monospace; }
+    .lp-rule-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 58px; }
+    .lp-rule-column { border-top: 2px solid #faf8ef; padding-top: 24px; }
+    .lp-rule-column h3 { font-family: 'Baloo 2', sans-serif; font-size: 27px; line-height: 1.3; }
+    .lp-rule-column > p { margin-top: 9px; color: #e8ede8; }
+    .lp-checklist { display: grid; gap: 13px; margin: 23px 0 0; padding: 0; list-style: none; }
+    .lp-checklist li { display: grid; grid-template-columns: 21px 1fr; gap: 10px; color: #e8ede8; font-size: 14px; line-height: 1.45; }
+    .lp-checklist svg { width: 19px; color: #8fbf6a; }
+    .lp-session-block { margin-top: 96px; border-top: 1px solid rgb(250 248 239 / .24); padding-top: 68px; }
+    .lp-session-intro { margin-top: 12px; color: #e8ede8; }
+    .lp-session-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 30px; }
+    .lp-session-ticket { position: relative; min-height: 270px; overflow: hidden; border: 1px solid rgb(250 248 239 / .34); border-radius: 14px; padding: 25px 20px 54px; color: #faf8ef; transition: transform 160ms ease, background-color 160ms ease; }
+    .lp-session-ticket:hover { background: #344536; transform: translateY(-2px); }
+    .lp-session-ticket h3 { font-family: 'Baloo 2', sans-serif; font-size: 22px; line-height: 1.3; }
+    .lp-session-ticket p { margin-top: 14px; color: #e8ede8; font-size: 14px; }
+    .lp-ticket-stub { position: absolute; right: 0; bottom: 0; left: 0; border-top: 1px dashed rgb(250 248 239 / .36); padding: 10px 20px; color: #c5d9a6; font: 500 11px/1.35 'JetBrains Mono', monospace; letter-spacing: .1em; }
+
+    .lp-agent-copy { margin-top: 22px; color: var(--kx-secondary); font-size: clamp(18px, 1.7vw, 20px); }
+    .lp-acp-diagram { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 28px; margin-top: 58px; border-block: 2px solid var(--kx-primary); padding-block: 42px; }
+    .lp-agent-chips { display: flex; flex-wrap: wrap; gap: 9px; }
+    .lp-agent-chip, .lp-dock { border: 1px solid var(--kx-border); border-radius: 999px; padding: 10px 15px; background: var(--kx-raised); font-weight: 700; }
+    .lp-acp-bridge { display: grid; grid-template-columns: 62px auto 62px; align-items: center; gap: 8px; color: var(--kx-accent-text-aa); font: 500 12px/1.4 'JetBrains Mono', monospace; letter-spacing: .1em; text-align: center; }
+    .lp-acp-bridge svg { width: 62px; }
+    .lp-dock { justify-self: end; border-color: var(--kx-accent-strong); padding: 15px 26px; color: var(--kx-accent-text-aa); font-family: 'Baloo 2', sans-serif; font-size: 24px; }
+    .lp-agent-details { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 36px; }
+    .lp-agent-stack { display: grid; gap: 18px; }
+    .lp-agent-note, .lp-machine, .lp-mcp { border-top: 2px solid var(--kx-primary); padding: 22px; background: var(--kx-pale); }
+    .lp-agent-note p + p { margin-top: 15px; }
+    .lp-agent-note strong { color: var(--kx-primary); }
+    .lp-machine .lp-card-title { font-size: 20px; }
+    .lp-mcp h3 { font-family: 'Baloo 2', sans-serif; font-size: 25px; line-height: 1.3; }
+    .lp-mcp > p { margin-top: 8px; color: var(--kx-secondary); }
+    .lp-mcp dl { margin: 22px 0 0; }
+    .lp-mcp dl div { display: grid; grid-template-columns: 105px 1fr; gap: 15px; border-top: 1px solid var(--kx-border); padding-block: 11px; padding-top: 11px; padding-bottom: 11px; }
+    .lp-mcp dt { color: var(--kx-muted-text-aa); font-size: 12px; font-weight: 700; }
+    .lp-mcp dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+    .lp-mcp .lp-data { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .lp-seal-line { margin-top: 22px; border: 1px solid var(--kx-accent-strong); border-radius: 999px; padding: 10px 15px; color: var(--kx-accent-text-aa); font-size: 13px; font-weight: 700; text-align: center; }
+    .lp-resource-links { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 20px; }
+    .lp-resource-links a { color: var(--kx-accent-text-aa); font-weight: 700; }
+
+    .lp-persona-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 42px; }
+    .lp-persona { position: relative; min-height: 160px; border-block: 1px solid var(--kx-border); padding: 28px 22px; background: var(--kx-pale); }
+    .lp-persona p { font-size: 18px; }
+    .lp-persona strong { color: var(--kx-primary); }
+    .lp-margin-note { position: absolute; right: 18px; bottom: 12px; color: var(--kx-accent-text-aa); font: 600 19px/1.35 'Caveat', cursive; transform: rotate(-2deg); }
+    .lp-refactory { margin-top: 38px; font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.35; }
+    .lp-training-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 25px; }
+    .lp-training { min-height: 210px; border-top: 2px solid var(--kx-primary); padding: 23px 18px; transition: transform 160ms ease, background-color 160ms ease; }
+    .lp-training:hover { background: var(--kx-pale); transform: translateY(-2px); }
+    .lp-training h3 { font-family: 'Baloo 2', sans-serif; font-size: 21px; line-height: 1.3; }
+    .lp-training p { margin-top: 12px; color: var(--kx-secondary); font-size: 14px; }
+    .lp-training-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 38px; }
+    .lp-training-chip { border: 1px solid var(--kx-border); border-radius: 999px; padding: 9px 14px; color: var(--kx-secondary); font-size: 13px; }
+
+    .lp-final { position: relative; overflow: hidden; padding-block: 112px 124px; padding-top: 112px; padding-bottom: 124px; padding-left: 32px; padding-right: 32px; }
+    .lp-final-grid { display: grid; grid-template-columns: 1fr .88fr; align-items: center; gap: 52px; }
+    .lp-final .lp-heading { max-width: 700px; }
+    .lp-final-art { position: relative; min-height: 390px; }
+    .lp-final-boats { width: 100%; height: 390px; object-fit: contain; animation: lp-boat-bob 4s ease-in-out infinite; }
+    .lp-final-sparkle { position: absolute; top: 8%; right: 9%; width: 38px; color: #8fbf6a; animation: lp-sparkle 2.5s ease-in-out infinite; }
+    .lp-enterprise { margin-top: 34px; border-top: 1px solid rgb(250 248 239 / .28); padding-top: 24px; color: #e8ede8; font-size: 14px; }
+    .lp-postcard { position: relative; display: grid; grid-template-columns: 120px 1fr; gap: 24px; margin: 76px auto 0; border: 1px solid #e2e9d5; border-radius: 14px; padding: 28px; background: #faf8ef; box-shadow: 0 8px 14px rgb(15 21 16 / .25); color: #243025; transform: rotate(3deg); }
+    .lp-postcard img { width: 112px; height: 128px; object-fit: contain; }
+    .lp-postcard-meta { color: #4f7044; font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: none; }
+    .lp-postcard blockquote { margin-top: 12px; font-family: 'Baloo 2', sans-serif; font-size: clamp(22px, 3vw, 32px); font-weight: 700; line-height: 1.3; }
+    .lp-postcard a { display: inline-block; margin-top: 18px; color: #4f7044; font-weight: 700; }
+    .lp-postcard-signature { position: absolute; right: 28px; bottom: 18px; color: #4f7044; font: 600 22px/1.35 'Caveat', cursive; transform: rotate(-2deg); }
+
+    .lp-footer { border-top: 2px solid var(--kx-primary); padding-block: 64px 28px; background: var(--kx-canvas); }
+    .lp-footer-grid { display: grid; grid-template-columns: 1.35fr repeat(3, .75fr); gap: 46px; }
+    .lp-footer-brand svg { width: 44px; height: 44px; }
+    .lp-footer-brand p { margin-top: 18px; color: var(--kx-secondary); }
+    .lp-footer-email { display: inline-block; margin-top: 14px; color: var(--kx-accent-text-aa); font-weight: 700; }
+    .lp-footer h2 { font-family: 'Baloo 2', sans-serif; font-size: 20px; }
+    .lp-footer ul { margin: 14px 0 0; padding: 0; list-style: none; }
+    .lp-footer li { border-top: 1px solid var(--kx-border); padding-block: 10px; padding-top: 10px; padding-bottom: 10px; }
+    .lp-footer li a { color: var(--kx-secondary); text-decoration: none; }
+    .lp-footer li a:hover { color: var(--kx-accent-text-aa); text-decoration: underline; }
+    .lp-footer-bottom { display: flex; justify-content: space-between; gap: 24px; margin-top: 58px; border-top: 1px solid var(--kx-border); padding-top: 22px; color: var(--kx-muted-text-aa); font-size: 13px; }
+    .lp-footer-bottom a { color: var(--kx-accent-text-aa); font-weight: 700; }
+
+    @keyframes lp-sparkle { 0%, 100% { transform: scale(.5); opacity: .55; } 50% { transform: scale(.8); opacity: 1; } }
+    @keyframes lp-boat-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+    @media (max-width: 1050px) {
+      .lp-nav-links { display: none; }
+      .lp-nav-actions { margin-left: auto; }
+      .lp-mobile-menu { display: block; margin-left: 0; }
+      .lp-nav-actions .lp-icon-button, .lp-nav-actions .lp-id { display: none; }
+    }
+    @media (max-width: 899px) {
+      .lp-shell { width: min(100% - 32px, 680px); }
+      .lp-hero { min-height: 1120px; }
+      .lp-hero-inner { display: block; padding-block: 8px 126px; }
+      .lp-harbor-art { min-height: 560px; margin-top: 36px; }
+      .lp-lighthouse { left: 0; width: 245px; }
+      .lp-lighthouse-banner { bottom: 250px; left: 55px; }
+      .lp-boat { top: 165px; right: 0; width: 290px; }
+      .lp-collage { inset: -20px -220px 0 -90px; }
+      .lp-route { bottom: 112px; width: 72%; }
+      .lp-stations { bottom: 40px; left: 0; }
+      .lp-pillar-grid { gap: 8px; }
+      .lp-pillar { min-height: 126px; padding: 15px; }
+      .lp-pillars { bottom: -72px; }
+      .lp-ledger-section { padding-top: 172px; }
+      .lp-theory-split { grid-template-columns: 1fr; gap: 58px; }
+      .lp-waterline { height: 62px; }
+      .lp-waterline::before, .lp-waterline::after { top: 50%; right: 0; bottom: auto; left: 0; border-top: 1px solid var(--kx-border); border-left: 0; }
+      .lp-waterline svg { width: 100px; margin: 0 auto; transform: rotate(90deg); }
+      .lp-section { padding-block: 96px; }
+      .lp-signal-pills { grid-template-columns: repeat(3, 1fr); }
+      .lp-signal:nth-child(even) { margin-top: 22px; }
+      .lp-terminal { right: 8%; left: 8%; }
+      .lp-ticket-grid, .lp-question-grid, .lp-session-grid, .lp-training-grid { grid-template-columns: 1fr; }
+      .lp-ticket, .lp-question, .lp-session-ticket, .lp-training { min-height: 0; }
+      .lp-workflow-close, .lp-catalog-card, .lp-agent-details, .lp-final-grid { grid-template-columns: 1fr; }
+      .lp-rule-grid { grid-template-columns: 1fr; }
+      .lp-rule-column { padding-bottom: 16px; }
+      .lp-persona-grid { grid-template-columns: 1fr; }
+      .lp-acp-diagram { grid-template-columns: 1fr; justify-items: center; }
+      .lp-agent-chips { justify-content: center; }
+      .lp-acp-bridge { grid-template-columns: 80px auto 80px; }
+      .lp-acp-bridge svg { width: 80px; }
+      .lp-dock { justify-self: center; }
+      .lp-final-art { min-height: 320px; }
+      .lp-final-boats { height: 320px; }
+      .lp-footer-grid { grid-template-columns: 1.4fr repeat(3, 1fr); gap: 24px; }
+    }
+    @media (max-width: 620px) {
+      .lp-nav-inner { gap: 10px; }
+      .lp-nav-actions { display: none; }
+      .lp-mobile-menu { margin-left: auto; }
+      .lp-hero { min-height: 1190px; }
+      .lp-title { font-size: clamp(44px, 13.5vw, 60px); }
+      .lp-harbor-art { min-height: 500px; }
+      .lp-lighthouse { bottom: 78px; left: -20px; width: 205px; }
+      .lp-lighthouse-banner { bottom: 210px; left: 10px; max-width: 172px; font-size: 12px; }
+      .lp-boat { top: 145px; width: 245px; }
+      .lp-route { bottom: 115px; width: 76%; }
+      .lp-stations { grid-template-columns: repeat(5, 82px); gap: 7px; overflow-x: auto; padding: 8px 0 12px; }
+      .lp-station { font-size: 12px; }
+      .lp-pillars { bottom: -245px; }
+      .lp-pillar-grid { grid-template-columns: 1fr; }
+      .lp-pillar { min-height: 0; }
+      .lp-ledger-section { padding-top: 340px; }
+      .lp-ledger-head { grid-template-columns: 1fr 36px 1fr; padding-inline: 10px; }
+      .lp-ledger-arrow { width: 68px; }
+      .lp-ledger-row { grid-template-columns: 1fr 36px 1fr; align-items: start; padding: 16px 10px; font-size: 14px; }
+      .lp-row-arrow { padding-top: 2px; }
+      .lp-quote { margin-inline: 8px; }
+      .lp-role-item { grid-template-columns: 36px 1fr; }
+      .lp-waterline-stage { min-height: 650px; }
+      .lp-above-label { top: 18px; left: 18px; }
+      .lp-signal-pills { top: 74px; right: 16px; left: 16px; gap: 8px; }
+      .lp-signal { min-height: 38px; padding-inline: 7px; font-size: 12px; }
+      .lp-signal:nth-child(even) { margin-top: 16px; }
+      .lp-terminal { right: 16px; bottom: 62px; left: 16px; overflow-x: auto; padding: 20px 0; }
+      .lp-terminal code { font-size: 11px; }
+      .lp-below-label { left: 18px; font-size: 11px; }
+      .lp-workflow-close { gap: 14px; }
+      .lp-catalog-card { gap: 18px; }
+      .lp-acp-bridge { grid-template-columns: 54px auto 54px; }
+      .lp-acp-bridge svg { width: 54px; }
+      .lp-agent-details { gap: 14px; }
+      .lp-mcp { padding-inline: 16px; }
+      .lp-mcp dl div { grid-template-columns: 78px 1fr; gap: 9px; }
+      .lp-postcard { grid-template-columns: 72px 1fr; gap: 15px; margin-inline: 5px; padding: 20px; }
+      .lp-postcard img { width: 70px; height: 92px; }
+      .lp-postcard-signature { position: static; display: block; margin-top: 14px; }
+      .lp-footer-grid { grid-template-columns: 1fr 1fr; }
+      .lp-footer-brand { grid-column: 1 / -1; }
+      .lp-footer-bottom { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; transform: none !important; }
+    }
+  </style>
+</head>
+<body><!--
+  THESIS: Konteks is a harbor: people hold the light, agents crew the boats. Refuses the generic dev-tool hero (gradient + screenshot).
+  OWN-WORLD: Warm Enterprise tokens only (cream #faf8ef, ink sage #243025, accent #8fbf6a/#4f7044, amber #9a6212, plum/teal only inside illustration cameos); hand-drawn line-art paper boats, lighthouse, waterline; Baloo 2 display; pill CTAs; rotated proof cards.
+  STORY: visitor understands people-led/agent-run in one viewport, believes via rules+receipts, acts via Start building.
+  FIRST VIEWPORT: deep-sage harbor scene full-bleed; cream line-art lighthouse left, paper-boat note sailing a dashed route through five station pills (Write→Plan→Build→Check→Watch, PEOPLE then AGENTS labels); H1 in Baloo 2 cream, two-line; pill CTAs; three pillar chips (Authority/Money/Evidence) overlapping the waterline edge.
+  FORM: playful marketing one-pager, Persuade mode, light+dark.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
+  -->
+  <nav class="lp-nav" aria-label="Main navigation">
+    <div class="lp-shell lp-nav-inner">
+      <a class="lp-brand" href="https://konteks.io/" aria-label="Konteks home">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><defs><clipPath id="lp-nav-hull"><path d="M8 56 L92 56 L74 84 L26 84 Z"/></clipPath><clipPath id="lp-nav-sail"><path d="M50 14 L22 56 L50 56 Z"/><path d="M50 14 L50 56 L78 56 Z"/></clipPath></defs><g transform="translate(50 50) scale(.94) translate(-50 -50)"><path d="M8 56 L92 56 L74 84 L26 84 Z" fill="var(--kx-pale)"/><path d="M50 14 L22 56 L50 56 Z" fill="var(--kx-raised)"/><path d="M50 14 L50 56 L78 56 Z" fill="var(--kx-bubble-bg)"/><path d="M41 56 L50 42 L59 56 Z" fill="var(--kx-pale)"/><path d="M8 56 L92 56 L88 62.5 L12 62.5 Z" fill="var(--kx-border)"/><g clip-path="url(#lp-nav-hull)" stroke="var(--kx-border)" fill="none"><path d="M0 69H100M0 76H100"/><path d="M27 56L19 86" stroke="var(--kx-accent)"/></g><g clip-path="url(#lp-nav-sail)" stroke="var(--kx-border)" fill="none"><path d="M0 28H100M0 36H100M0 44H100M0 51H100"/></g><g fill="none" stroke="var(--kx-primary)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M8 56L92 56L74 84L26 84Z"/><path d="M12 62.5L88 62.5"/><path d="M50 14L22 56M50 14L78 56M50 14L50 56M41 56L50 42L59 56Z"/></g><path d="M6 89C14 83 22 95 30 89S46 83 54 89S70 95 78 89S90 83 96 89" fill="none" stroke="var(--kx-second)" stroke-width="2.6" stroke-linecap="round"/><path d="M22 96C28 91 34 101 40 96S52 91 58 96S72 101 78 96" fill="none" stroke="var(--kx-second-soft)" stroke-width="2.08" stroke-linecap="round"/></g></svg>
+        <span>Konteks</span><span class="lp-beta">Beta</span>
+      </a>
+      <div class="lp-nav-links">
+        <a href="https://konteks.io/#product">Product</a><a href="https://konteks.io/#workflow">How it works</a><a href="https://konteks.io/#sessions">Four kinds of session</a><a href="https://konteks.io/#enablement">Enablement</a><a href="https://konteks.io/pricing/">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="https://konteks.io/blog/">Journal</a>
+      </div>
+      <div class="lp-nav-actions">
+        <button class="lp-icon-button" type="button" data-theme-toggle aria-label="Switch color theme">
+          <svg class="lp-icon-moon" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M15.8 12.8A6.7 6.7 0 0 1 7.2 4.2 6.7 6.7 0 1 0 15.8 12.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          <svg class="lp-icon-sun" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 1.5V4M10 16v2.5M1.5 10H4M16 10h2.5M4 4l1.8 1.8M14.2 14.2L16 16M16 4l-1.8 1.8M5.8 14.2L4 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+        <button class="lp-id" type="button">ID</button>
+        <a class="lp-button lp-button-solid lp-nav-cta" href="https://app.konteks.io/">Start building ↗</a>
+      </div>
+      <details class="lp-mobile-menu">
+        <summary aria-label="Open navigation"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></summary>
+        <div class="lp-drawer">
+          <a href="https://konteks.io/#product">Product</a><a href="https://konteks.io/#workflow">How it works</a><a href="https://konteks.io/#sessions">Four kinds of session</a><a href="https://konteks.io/#enablement">Enablement</a><a href="https://konteks.io/pricing/">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="https://konteks.io/blog/">Journal</a>
+          <div class="lp-drawer-tools"><button class="lp-icon-button" type="button" data-theme-toggle aria-label="Switch color theme"><svg class="lp-icon-moon" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M15.8 12.8A6.7 6.7 0 0 1 7.2 4.2 6.7 6.7 0 1 0 15.8 12.8Z" fill="none" stroke="currentColor" stroke-width="1.7"/></svg><svg class="lp-icon-sun" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 1.5V4M10 16v2.5M1.5 10H4M16 10h2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></button><button class="lp-id" type="button">ID</button><a class="lp-button lp-button-solid lp-nav-cta" href="https://app.konteks.io/">Start building ↗</a></div>
+        </div>
+      </details>
+    </div>
+  </nav>
+
+  <main>
+    <section class="lp-hero" aria-labelledby="lp-hero-title">
+      <div class="lp-shell lp-hero-inner">
+        <div class="lp-hero-copy">
+          <h1 class="lp-title" id="lp-hero-title"><span>People lead the vision.</span><span>Agents do the rest.</span></h1>
+          <p class="lp-lede">Your team writes down what should exist. The agents you already use plan it, price it, build it, check it, and keep watch. You say yes first and accept at the end. One set of rules for the whole company.</p>
+          <div class="lp-hero-actions"><a class="lp-button lp-button-solid" href="https://app.konteks.io/">Start building ↗</a><a class="lp-button lp-button-outline-light" href="#workflow">See how it works ↓</a></div>
+        </div>
+        <figure class="lp-harbor-art" role="group" aria-label="A note becomes a boat. Write, Plan, Build, Check, Watch.">
+          <div class="lp-harbor-visuals" aria-hidden="true">
+            <img class="lp-collage" src="/landingpage-assets/collage-shapes.png" alt="">
+            <img class="lp-lighthouse" src="/landingpage-assets/lighthouse.png" alt="">
+            <img class="lp-boat" src="/landingpage-assets/paper-boat.png" alt="">
+            <svg class="lp-route" viewBox="0 0 520 110"><path d="M8 78C88 14 151 94 227 51S377 17 511 65" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="7 10" stroke-linecap="round"/></svg>
+            <svg class="lp-sparkle" viewBox="0 0 32 32"><path d="M16 2c.7 8.7 5.3 13.3 14 14-8.7.7-13.3 5.3-14 14-.7-8.7-5.3-13.3-14-14C10.7 15.3 15.3 10.7 16 2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="lp-lighthouse-banner">The AI control plane for software engineering</span>
+          <div class="lp-stations"><button class="lp-station" type="button" role="button" tabindex="0"><strong>Write</strong><small>PEOPLE</small></button><button class="lp-station" type="button" role="button" tabindex="0"><strong>Plan</strong><small>AGENTS</small></button><button class="lp-station" type="button" role="button" tabindex="0"><strong>Build</strong><small>AGENTS</small></button><button class="lp-station" type="button" role="button" tabindex="0"><strong>Check</strong><small>AGENTS</small></button><button class="lp-station" type="button" role="button" tabindex="0"><strong>Watch</strong><small>AGENTS</small></button></div>
+        </figure>
+      </div>
+      <img class="lp-waves" src="/landingpage-assets/waves-strip.png" alt="">
+      <div class="lp-pillars"><div class="lp-shell lp-pillar-grid"><div class="lp-pillar"><strong>Authority</strong><span>No agent outranks the people around it</span></div><div class="lp-pillar"><strong>Money</strong><span>A ceiling before anything runs</span></div><div class="lp-pillar"><strong>Evidence</strong><span>A receipt for every delivery</span></div></div></div>
+    </section>
+
+    <section class="lp-ledger-section" aria-labelledby="lp-ledger-title">
+      <div class="lp-shell">
+        <span class="lp-sticker">2026</span>
+        <h2 class="lp-heading" id="lp-ledger-title">The year the paradigm changed.</h2>
+        <div class="lp-ledger-head"><span>Before</span><span aria-hidden="true"></span><span>Now</span><img class="lp-ledger-arrow" src="/landingpage-assets/arrow-doodle.png" alt=""></div>
+        <div class="lp-ledger">
+          <div class="lp-ledger-row"><span class="lp-before">An idea</span><span class="lp-row-arrow" aria-hidden="true"><svg viewBox="0 0 28 16"><path d="M1 8h23m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="lp-now">Still yours. Write it down.</span></div>
+          <div class="lp-ledger-row"><span class="lp-before">A requirements document</span><span class="lp-row-arrow" aria-hidden="true"><svg viewBox="0 0 28 16"><path d="M1 8h23m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="lp-now">A note, in plain words.</span></div>
+          <div class="lp-ledger-row"><span class="lp-before">An estimation meeting</span><span class="lp-row-arrow" aria-hidden="true"><svg viewBox="0 0 28 16"><path d="M1 8h23m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="lp-now">A quoted ceiling, in minutes.</span></div>
+          <div class="lp-ledger-row"><span class="lp-before">Sprint planning</span><span class="lp-row-arrow" aria-hidden="true"><svg viewBox="0 0 28 16"><path d="M1 8h23m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="lp-now">The plan comes back by itself. You say yes.</span></div>
+          <div class="lp-ledger-row"><span class="lp-before">Writing the code</span><span class="lp-row-arrow" aria-hidden="true"><svg viewBox="0 0 28 16"><path d="M1 8h23m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="lp-now">Gone. The agent types.</span></div>
+          <div class="lp-ledger-row"><span class="lp-before">A code review queue</span><span class="lp-row-arrow" aria-hidden="true"><svg viewBox="0 0 28 16"><path d="M1 8h23m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="lp-now">The agent checks its own work. You accept.</span></div>
+          <div class="lp-ledger-row"><span class="lp-before">A manual test pass</span><span class="lp-row-arrow" aria-hidden="true"><svg viewBox="0 0 28 16"><path d="M1 8h23m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="lp-now">A browser agent clicks through it.</span></div>
+          <div class="lp-ledger-row"><span class="lp-before">A release checklist</span><span class="lp-row-arrow" aria-hidden="true"><svg viewBox="0 0 28 16"><path d="M1 8h23m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="lp-now">Accepted work gathers itself. When it ships is still your call.</span></div>
+          <div class="lp-ledger-row"><span class="lp-before">On-call at 3 a.m.</span><span class="lp-row-arrow" aria-hidden="true"><svg viewBox="0 0 28 16"><path d="M1 8h23m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="lp-now">The agent is awake. You read it over coffee.</span></div>
+          <div class="lp-ledger-row"><span class="lp-before">A status report</span><span class="lp-row-arrow" aria-hidden="true"><svg viewBox="0 0 28 16"><path d="M1 8h23m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="lp-now">Already written. It is the record.</span></div>
+          <div class="lp-ledger-row"><span class="lp-before">Ten tools, ten logins</span><span class="lp-row-arrow" aria-hidden="true"><svg viewBox="0 0 28 16"><path d="M1 8h23m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><span class="lp-now">One record, one set of rules.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-theory" aria-labelledby="lp-theory-title">
+      <div class="lp-shell">
+        <span class="lp-label">What is left for people</span>
+        <h2 class="lp-heading" id="lp-theory-title">Programming is theory building.</h2>
+        <figure class="lp-quote"><blockquote>“Programming properly should be regarded as an activity by which the programmers form or achieve a certain kind of insight, a theory, of the matters at hand.”</blockquote><figcaption>Peter Naur · Programming as Theory Building, 1985</figcaption></figure>
+        <div class="lp-theory-split">
+          <div><h3 class="lp-role-title">People</h3><div class="lp-role-list">
+            <article class="lp-role-item"><span class="lp-number">1</span><div><h3>Lead the vision</h3><p>Decide what should exist, and what we will not build.</p></div></article>
+            <article class="lp-role-item"><span class="lp-number">2</span><div><h3>Set the constraints</h3><p>The budget ceiling, who may touch what, and what done means.</p></div></article>
+            <article class="lp-role-item"><span class="lp-number">3</span><div><h3>Say yes</h3><p>And be accountable for it.</p></div></article>
+            <article class="lp-role-item"><span class="lp-number">4</span><div><h3>Judge the evidence</h3><p>Read the plan, the checks, and the receipt. Know when it is thin.</p></div></article>
+            <article class="lp-role-item"><span class="lp-number">5</span><div><h3>Hold the context</h3><p>The things nobody wrote down.</p></div></article>
+          </div></div>
+          <div class="lp-waterline" aria-hidden="true"><svg viewBox="0 0 88 260"><path d="M44 0v260M26 25c12 8 24-8 36 0M26 235c12 8 24-8 36 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 7"/></svg></div>
+          <div><h3 class="lp-role-title">Agents</h3><div class="lp-role-list">
+            <article class="lp-role-item"><span class="lp-agent-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c.5 5.9 3.6 9 9.5 9.5-5.9.5-9 3.6-9.5 9.5-.5-5.9-3.6-9-9.5-9.5C8.4 11 11.5 7.9 12 2Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><div><h3>Plan</h3><p>Read the note and the code. Write what gets built, what done means, and a ceiling.</p></div></article>
+            <article class="lp-role-item"><span class="lp-agent-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c.5 5.9 3.6 9 9.5 9.5-5.9.5-9 3.6-9.5 9.5-.5-5.9-3.6-9-9.5-9.5C8.4 11 11.5 7.9 12 2Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><div><h3>Build</h3><p>On its own branch, across every repo the change touches, with a second agent reviewing.</p></div></article>
+            <article class="lp-role-item"><span class="lp-agent-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c.5 5.9 3.6 9 9.5 9.5-5.9.5-9 3.6-9.5 9.5-.5-5.9-3.6-9-9.5-9.5C8.4 11 11.5 7.9 12 2Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><div><h3>Check</h3><p>Click through the work in a real browser. Keep the screenshots. Say what could not be verified.</p></div></article>
+            <article class="lp-role-item"><span class="lp-agent-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c.5 5.9 3.6 9 9.5 9.5-5.9.5-9 3.6-9.5 9.5-.5-5.9-3.6-9-9.5-9.5C8.4 11 11.5 7.9 12 2Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><div><h3>Watch</h3><p>Read the logs and alerts. Catch the issue first. Work the fix.</p></div></article>
+          </div></div>
+        </div>
+        <div class="lp-rule"><span>The one rule</span><p>No agent has more authority than the people around it. Nothing costs money before a person says yes. Every decision that matters comes back to a person.</p></div>
+      </div>
+    </section>
+
+    <section class="lp-section lp-workflow" id="workflow" aria-labelledby="lp-workflow-title">
+      <div class="lp-shell">
+        <div class="lp-section-head"><span class="lp-label">How it works</span><h2 class="lp-heading" id="lp-workflow-title">Initiatives, issues, releases. A person can steer at every step.</h2></div>
+        <figure class="lp-workflow-figure" aria-label="Where the signals go. Above the waterline: people, together: Note, Comment, Reaction, Reply, Yes, Accept. Below the waterline: the agent's session.">
+          <div class="lp-waterline-stage">
+            <img class="lp-waterline-backdrop" src="/landingpage-assets/waterline-split.png" alt="">
+            <span class="lp-above-label">Above the waterline: people, together</span>
+            <div class="lp-signal-pills"><button class="lp-signal" type="button" role="button" tabindex="0">Note</button><button class="lp-signal" type="button" role="button" tabindex="0">Comment</button><button class="lp-signal" type="button" role="button" tabindex="0">Reaction</button><button class="lp-signal" type="button" role="button" tabindex="0">Reply</button><button class="lp-signal" type="button" role="button" tabindex="0">Yes</button><button class="lp-signal" type="button" role="button" tabindex="0">Accept</button></div>
+            <div class="lp-terminal" aria-hidden="true"><span class="lp-terminal-dots"><i></i><i></i><i></i></span><code>&gt; accepted · receipt written</code><code>&gt; read the note · 3 paragraphs</code><code>&gt; reply answered in the thread</code><code>&gt; accepted · receipt written</code><code>&gt; read the note · 3 paragraphs</code><code>&gt; read the note · 3 paragraphs</code></div>
+            <span class="lp-below-label">Below the waterline: the agent’s session</span>
+          </div>
+          <figcaption>Every comment and reaction is a signal. It flows into the agent’s session, the same transcript you already know from coding with an agent.</figcaption>
+        </figure>
+        <p class="lp-steer-label"><svg viewBox="0 0 32 16" aria-hidden="true"><path d="M31 8H4m7-6L4 8l7 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> You can step in here</p>
+        <div class="lp-ticket-grid">
+          <article class="lp-ticket"><span class="lp-card-kicker">What is moving?</span><h3>Initiative</h3><ol class="lp-steps"><li><span class="lp-step-num">01</span><span>You write a note. Teammates comment and react.</span></li><li><span class="lp-step-num">02</span><span>A plan comes back with a ceiling, set from the agent’s own calibrated estimate.</span></li><li><span class="lp-step-num">03</span><span>You say yes.</span></li><li><span class="lp-step-num">04</span><span>The agent builds, with a second agent reviewing.</span></li><li><span class="lp-step-num">05</span><span>It checks its own work in a real browser.</span></li><li><span class="lp-step-num">06</span><span>You accept. Tested pull requests and a receipt.</span></li></ol></article>
+          <article class="lp-ticket"><span class="lp-card-kicker">What is wrong?</span><h3>Issue</h3><ol class="lp-steps"><li><span class="lp-step-num">01</span><span>The agent catches the alert first and opens an issue with a severity.</span></li><li><span class="lp-step-num">02</span><span>It contains the damage.</span></li><li><span class="lp-step-num">03</span><span>It proposes the fix. You say yes.</span></li><li><span class="lp-step-num">04</span><span>A normal build if the fix needs code. Resolved, timeline kept.</span></li></ol></article>
+          <article class="lp-ticket"><span class="lp-card-kicker">What shipped?</span><h3>Release</h3><ol class="lp-steps"><li><span class="lp-step-num">01</span><span>Accepted work gathers into a release candidate.</span></li><li><span class="lp-step-num">02</span><span>You decide when it ships.</span></li><li><span class="lp-step-num">03</span><span>The release reads like a post the team can react to.</span></li></ol></article>
+          <article class="lp-ticket"><span class="lp-card-kicker">Who carried it?</span><h3>Leaderboard</h3><ol class="lp-steps"><li><span class="lp-step-num">01</span><span>People, by what they were part of.</span></li><li><span class="lp-step-num">02</span><span>Models, by what they return for what they cost.</span></li><li><span class="lp-step-num">03</span><span>Nothing to steer here. This one only counts.</span></li></ol></article>
+        </div>
+        <div class="lp-workflow-close"><p>As agents get smarter, you steer less and read fewer transcripts.</p><p>Every tool call and every transcript stays in the record, for whenever you want to look.</p></div>
+      </div>
+    </section>
+
+    <section class="lp-section lp-product" id="product" aria-labelledby="lp-product-title">
+      <div class="lp-shell">
+        <div class="lp-section-head"><span class="lp-label">The whole company</span><h2 class="lp-heading" id="lp-product-title">Many notes. Many agents. One record.</h2><p class="lp-section-lede">Every team writes notes and runs agents. All of it lands in one record, under the same rules.</p></div>
+        <h3 class="lp-subhead">Four questions that matter</h3>
+        <div class="lp-question-grid">
+          <article class="lp-question"><h3>What is moving?</h3><span>Work In Progress</span><p>Every initiative, who leads it, and what phase it is in.</p></article>
+          <article class="lp-question"><h3>What is wrong?</h3><span>Issues</span><p>Incidents with a severity, an owner, and a timeline.</p></article>
+          <article class="lp-question"><h3>What shipped?</h3><span>Releases</span><p>Accepted work, gathered and released by a person.</p></article>
+          <article class="lp-question"><h3>Who carried it?</h3><span>Leaderboard</span><p>People by what they were part of. Models by what they return for what they cost.</p></article>
+        </div>
+        <p class="lp-activities"><strong>Activities</strong>: One timeline of the turning points: started, approved, fixed, shipped, with people’s own words next to each.</p>
+        <article class="lp-catalog-card"><div><span class="lp-label">The catalog</span></div><div><h3>Each product lives in a Software System.</h3><p>A software catalog of its repos and components. Every session reads it, so the next note starts knowing the software.</p></div></article>
+      </div>
+    </section>
+
+    <section class="lp-section lp-inverse" id="sessions" aria-labelledby="lp-sessions-title">
+      <div class="lp-shell">
+        <div class="lp-section-head"><span class="lp-label">One set of rules</span><h2 class="lp-heading" id="lp-sessions-title">Authority, money, evidence. The same for every person and every agent.</h2><p class="lp-mono-line">Enforced on the server, never by a prompt.</p></div>
+        <div class="lp-rule-grid">
+          <article class="lp-rule-column"><h3>Authority</h3><p>Enterprise IAM is built in.</p><ul class="lp-checklist"><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Least-privilege roles you define, and groups</span></li><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Access scoped to exact Systems</span></li><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Temporary access with a reason and an expiry</span></li><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Service accounts that can never hold human authority</span></li><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>One audit trail across app, API, and MCP</span></li></ul></article>
+          <article class="lp-rule-column"><h3>Money</h3><p>Every piece of work is quoted as a ceiling before it runs.</p><ul class="lp-checklist"><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Your yes locks the ceiling</span></li><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Quotes calibrated from your own delivery history</span></li><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>New automation runs in shadow on real work before it may decide anything</span></li><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Provider bill shown separately, never marked up</span></li></ul></article>
+          <article class="lp-rule-column"><h3>Evidence</h3><p>A permanent receipt for every delivery.</p><ul class="lp-checklist"><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Quoted, settled, provider cost, evidence</span></li><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>The agent that builds never judges its own work</span></li><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Budgets stop before the line, not after</span></li><li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m3 10 4 4 10-10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Retries have limits; real decisions come back to a person</span></li></ul></article>
+        </div>
+        <div class="lp-session-block"><span class="lp-label">Four kinds of session</span><p class="lp-session-intro">Each one is a session on the same Software System.</p><div class="lp-session-grid">
+          <article class="lp-session-ticket"><h3>Project Management</h3><p>A requirement becomes milestones, sprints, and tickets. Each ticket becomes a plan.</p><span class="lp-ticket-stub">Project Management</span></article>
+          <article class="lp-session-ticket"><h3>Engineering</h3><p>A plan becomes a yes, tested pull requests, and a receipt.</p><span class="lp-ticket-stub">Engineering</span></article>
+          <article class="lp-session-ticket"><h3>QA</h3><p>A browser agent clicks through what shipped and reports only what it ran.</p><span class="lp-ticket-stub">QA</span></article>
+          <article class="lp-session-ticket"><h3>Ops</h3><p>The agent watches logs and alerts, opens the issue, and works the fix.</p><span class="lp-ticket-stub">Ops</span></article>
+        </div></div>
+      </div>
+    </section>
+
+    <section class="lp-section lp-agent" id="agent" aria-labelledby="lp-agent-title">
+      <div class="lp-shell">
+        <div class="lp-section-head"><span class="lp-label">Keep your agent</span><h2 class="lp-heading" id="lp-agent-title">Keep the agent you already have.</h2><p class="lp-agent-copy">Konteks speaks ACP, the Agent Client Protocol. The agent your engineers already run connects as it is, on a laptop or in the cloud, under the same ceilings, stop points, and receipts.</p></div>
+        <div class="lp-acp-diagram" role="img" aria-label="Claude, Codex, Pi, Cursor, and Hermes connect to Konteks through ACP."><div class="lp-agent-chips"><span class="lp-agent-chip">Claude</span><span class="lp-agent-chip">Codex</span><span class="lp-agent-chip">Pi</span><span class="lp-agent-chip">Cursor</span><span class="lp-agent-chip">Hermes</span></div><div class="lp-acp-bridge"><svg viewBox="0 0 64 14" aria-hidden="true"><path d="M62 7H4m7-5L4 7l7 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>ACP</span><svg viewBox="0 0 64 14" aria-hidden="true"><path d="M2 7h58m-7-5 7 5-7 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="lp-dock">Konteks</div></div>
+        <div class="lp-agent-details">
+          <div class="lp-agent-stack"><article class="lp-agent-note"><p>Sign in with the Claude or Codex subscription you already have, or bring Pi, Cursor, or Hermes with a key.</p><p><strong>Your provider bills you. Never marked up.</strong></p></article><article class="lp-machine"><span class="lp-card-title">Your own machine</span><p class="lp-card-copy">The agent on my laptop, or in the cloud, signed in as me, over ACP.</p></article></div>
+          <article class="lp-mcp"><h3>Connect through MCP</h3><p>Same context, same rules, same stop points, whether a person or an agent is asking.</p><dl><div><dt>Agents</dt><dd>Claude, Codex, Pi, Cursor, Hermes</dd></div><div><dt>VCS</dt><dd>GitHub, Gitea</dd></div><div><dt>Endpoint</dt><dd class="lp-data">https://api.konteks.io/mcp</dd></div><div><dt>Transport</dt><dd class="lp-data">Streamable HTTP</dd></div><div><dt>Auth</dt><dd>scoped Bearer credential, rotatable and revocable</dd></div></dl><p class="lp-seal-line">Secrets never reach a prompt, a screenshot, or a log.</p><p class="lp-resource-links"><a href="https://konteks.io/security/">Security →</a><a href="https://konteks.io/docs/">Docs →</a><a href="https://konteks.io/pricing/">Pricing →</a></p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section lp-enablement" id="enablement" aria-labelledby="lp-enablement-title">
+      <div class="lp-shell">
+        <div class="lp-section-head"><span class="lp-label">Learning the new discipline</span><h2 class="lp-heading" id="lp-enablement-title">If the work changed, how we learn it changed.</h2><p class="lp-section-lede">Nobody was trained for this job. So we learn it.</p></div>
+        <div class="lp-persona-grid"><article class="lp-persona"><p><strong>Juniors</strong> learn to judge evidence they did not produce.</p><span class="lp-margin-note">judge evidence</span></article><article class="lp-persona"><p><strong>Leads</strong> learn to write constraints.</p><span class="lp-margin-note">write constraints</span></article><article class="lp-persona"><p><strong>Product people</strong> learn to write the note.</p><span class="lp-margin-note">write the note</span></article></div>
+        <p class="lp-refactory">Refactory, the team behind Konteks, trains for exactly this.</p>
+        <div class="lp-training-grid"><article class="lp-training"><h3>Readiness mapping</h3><p>Roles, workflows, risks, and the first work worth doing.</p></article><article class="lp-training"><h3>Role-based training</h3><p>Hands-on, for engineers, leads, product people, and reviewers.</p></article><article class="lp-training"><h3>Guided onboarding</h3><p>Systems, repos, roles, and the habit of saying yes on evidence.</p></article><article class="lp-training"><h3>Coaching</h3><p>Review, measure, improve, after the workshop ends.</p></article></div>
+        <div class="lp-training-cta"><a class="lp-button lp-button-solid" href="mailto:hello@konteks.io?subject=Agentic%20training%20and%20onboarding">Talk to us about training →</a><span class="lp-training-chip">With Konteks, or on its own.</span></div>
+      </div>
+    </section>
+
+    <section class="lp-final lp-inverse" id="final" aria-labelledby="lp-final-title">
+      <div class="lp-shell">
+        <div class="lp-final-grid"><div><span class="lp-label">Last page</span><h2 class="lp-heading" id="lp-final-title">Unlearn the old way. Learn to work with agents.</h2><div class="lp-hero-actions"><a class="lp-button lp-button-solid" href="https://app.konteks.io/">Start building ↗</a></div><p class="lp-enterprise">Rolling out to a large team? Ask us about SSO/SCIM, dedicated runtimes, on-prem or VPC deployment, audit export, and onboarding.</p></div><div class="lp-final-art"><img class="lp-final-boats" src="/landingpage-assets/boats-sailing.png" alt=""><svg class="lp-final-sparkle" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2c.7 8.7 5.3 13.3 14 14-8.7.7-13.3 5.3-14 14-.7-8.7-5.3-13.3-14-14C10.7 15.3 15.3 10.7 16 2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>
+        <article class="lp-postcard"><img src="/landingpage-assets/postcard-stamp.png" alt=""><div><span class="lp-postcard-meta">From the journal · Day 1 · August 17, 2026</span><blockquote>Delivery was never the hard part. The plan was.</blockquote><a href="https://konteks.io/blog/day-1-introducing-project-management-mode/">Read →</a><span class="lp-postcard-signature">Day 1</span></div></article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="lp-footer">
+    <div class="lp-shell">
+      <div class="lp-footer-grid">
+        <div class="lp-footer-brand">
+          <a href="https://konteks.io/" aria-label="Konteks home"><svg viewBox="0 0 100 100" role="img" aria-label="Konteks"><defs><clipPath id="lp-foot-hull"><path d="M8 56L92 56L74 84L26 84Z"/></clipPath><clipPath id="lp-foot-sail"><path d="M50 14L22 56L50 56Z"/><path d="M50 14L50 56L78 56Z"/></clipPath></defs><g transform="translate(50 50) scale(.94) translate(-50 -50)"><path d="M8 56L92 56L74 84L26 84Z" fill="var(--kx-pale)"/><path d="M50 14L22 56L50 56Z" fill="var(--kx-raised)"/><path d="M50 14L50 56L78 56Z" fill="var(--kx-bubble-bg)"/><g fill="none" stroke="var(--kx-primary)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M8 56L92 56L74 84L26 84Z"/><path d="M50 14L22 56M50 14L78 56M50 14L50 56"/></g><path d="M6 89C14 83 22 95 30 89S46 83 54 89S70 95 78 89S90 83 96 89" fill="none" stroke="var(--kx-second)" stroke-width="2.6" stroke-linecap="round"/></g></svg></a>
+          <p>The AI control plane for software engineering.</p><a class="lp-footer-email" href="mailto:hello@konteks.io">hello@konteks.io</a>
+        </div>
+        <div><h2>Product</h2><ul><li><a href="https://konteks.io/#product">Product overview</a></li><li><a href="https://konteks.io/#workflow">How it works</a></li><li><a href="https://konteks.io/#sessions">Four kinds of session</a></li><li><a href="https://konteks.io/#enablement">Training &amp; onboarding</a></li><li><a href="https://konteks.io/pricing/">Pricing</a></li><li><a href="https://app.konteks.io/">Start building ↗</a></li></ul></div>
+        <div><h2>Resources</h2><ul><li><a href="https://konteks.io/docs/#app">Konteks</a></li><li><a href="https://konteks.io/docs/#mcp">MCP</a></li><li><a href="https://konteks.io/docs/#api-reference">API reference</a></li><li><a href="https://konteks.io/blog/">Journal</a></li></ul></div>
+        <div><h2>Company</h2><ul><li><a href="https://konteks.io/about/">About</a></li><li><a href="https://konteks.io/contact/">Contact</a></li><li><a href="https://konteks.io/security/">Security</a></li><li><a href="https://konteks.io/privacy/">Privacy</a></li><li><a href="https://konteks.io/terms/">Terms</a></li></ul></div>
+      </div>
+      <div class="lp-footer-bottom"><p>Made by <a href="https://refactory.id/">Refactory ↗</a>, the team behind Konteks.</p><p>© 2026 Konteks · konteks.io</p></div>
+    </div>
+  </footer>
+  <script>
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem('konteks-theme', next);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<!-- saved from url=(0027)https://konteks.io/#product -->
+<html lang="en" class="dark"> <body cz-shortcut-listen="true">
+<nav class="kx-nav scrolled" aria-label="Main navigation">
+<svg viewBox="0 0 100 100" width="32" height="32" class="h-8 w-8" aria-hidden="true"><defs><clippath id="k-mark-hull">
+</path></clippath><clippath id="k-mark-sail">
+</path>
+</path></clippath></defs><g transform="translate(50 50) scale(0.94) translate(-50 -50)">
+</path>
+</path>
+</path>
+</path>
+</path><g clip-path="url(#k-mark-hull)" stroke="var(--kx-border)" stroke-width="1" fill="none">
+</path>
+</path></g><g clip-path="url(#k-mark-sail)" stroke="var(--kx-border)" stroke-width="1" fill="none">
+</path></g><g fill="none" stroke="var(--kx-primary)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
+</path>
+</path>
+</path>
+</path>
+</path></g>
+</path>
+</path></g></svg>
+Konteks</span>
+Konteks</span>
+Beta</span></a>
+Product</a>
+How it works</a>
+Four kinds of session</a>
+Enablement</a>
+Pricing</a>
+Docs</a>
+Journal</a></div>
+<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true">
+</path></svg></button>
+ID</button>
+Start building ↗</a></div>
+<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+</path></svg></button></div></nav><main class="kx-page">
+The AI control plane for software engineering</span>
+[[h1]]
+People lead the vision.</span>
+Agents do the rest.</span>
+Your team writes down what should exist. The agents you already use plan it, price it, build it, check it, and keep watch. You say yes first and accept at the end. One set of rules for the whole company.</p>
+Start building ↗</a>
+See how it works ↓</a></div><ul class="mt-10 grid gap-3 sm:grid-cols-3">
+Authority</span>
+No agent outranks the people around it</p></li>
+Money</span>
+A ceiling before anything runs</p></li>
+Evidence</span>
+A receipt for every delivery</p></li></ul></div><svg viewBox="0 0 640 520" class="h-auto w-full" role="img" aria-label="A note becomes a boat. Write, Plan, Build, Check, Watch."><defs>
+</path></pattern><radialgradient id="fig1-fade" cx="50%" cy="50%" r="62%"><stop offset="55%" stop-color="#fff" stop-opacity="1"></stop><stop offset="100%" stop-color="#fff" stop-opacity="0"></stop></radialgradient><mask id="fig1-mask"><rect width="640" height="520" fill="url(#fig1-fade)"></rect></mask></defs><rect width="640" height="520" fill="url(#fig1-grid)" mask="url(#fig1-mask)"></rect><g stroke="var(--kx-border)" opacity="0">
+</line>
+</line>
+</line>
+</line>
+</line>
+</line>
+</line></g>
+</path>
+</path>
+</path>
+</path><g role="button" tabindex="0" class="cursor-pointer outline-none"><rect x="48" y="427" width="96" height="26" rx="13" fill="var(--kx-pale)" stroke="var(--kx-accent)" stroke-width="1"></rect><text x="96" y="444.5" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="12.5" font-weight="500" fill="var(--kx-accent-text-aa)">Write</text><text x="96" y="476" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="10" font-weight="500" letter-spacing="0.14em" fill="var(--kx-accent-text-aa)">PEOPLE</text></g><g role="button" tabindex="0" class="cursor-pointer outline-none"><rect x="160" y="427" width="96" height="26" rx="13" fill="var(--kx-second-pale)" stroke="var(--kx-second-border)" stroke-width="1"></rect><text x="208" y="444.5" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="12.5" font-weight="500" fill="var(--kx-second-text-aa)">Plan</text><text x="208" y="476" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="10" font-weight="500" letter-spacing="0.14em" fill="var(--kx-second-text-aa)">AGENTS</text></g><g role="button" tabindex="0" class="cursor-pointer outline-none"><rect x="272" y="427" width="96" height="26" rx="13" fill="var(--kx-second-pale)" stroke="var(--kx-second-border)" stroke-width="1"></rect><text x="320" y="444.5" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="12.5" font-weight="500" fill="var(--kx-second-text-aa)">Build</text><text x="320" y="476" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="10" font-weight="500" letter-spacing="0.14em" fill="var(--kx-second-text-aa)">AGENTS</text></g><g role="button" tabindex="0" class="cursor-pointer outline-none"><rect x="384" y="427" width="96" height="26" rx="13" fill="var(--kx-second-pale)" stroke="var(--kx-second-border)" stroke-width="1"></rect><text x="432" y="444.5" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="12.5" font-weight="500" fill="var(--kx-second-text-aa)">Check</text><text x="432" y="476" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="10" font-weight="500" letter-spacing="0.14em" fill="var(--kx-second-text-aa)">AGENTS</text></g><g role="button" tabindex="0" class="cursor-pointer outline-none"><rect x="496" y="427" width="96" height="26" rx="13" fill="var(--kx-second-pale)" stroke="var(--kx-second-border)" stroke-width="2"></rect><text x="544" y="444.5" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="12.5" font-weight="500" fill="var(--kx-second-text-aa)">Watch</text><text x="544" y="476" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="10" font-weight="500" letter-spacing="0.14em" fill="var(--kx-second-text-aa)">AGENTS</text></g></svg></div></section>
+2026</span>
+[[h2]] The year the paradigm changed.
+Before</span>
+Now</span></div>
+Before</span>
+An idea</span></p>
+Now</span>Still yours. Write it down.</p></div>
+Before</span>
+A requirements document</span></p>
+Now</span>A note, in plain words.</p></div>
+Before</span>
+An estimation meeting</span></p>
+Now</span>A quoted ceiling, in minutes.</p></div>
+Before</span>
+Sprint planning</span></p>
+Now</span>The plan comes back by itself. You say yes.</p></div>
+Before</span>
+Writing the code</span></p>
+Now</span>Gone. The agent types.</p></div>
+Before</span>
+A code review queue</span></p>
+Now</span>The agent checks its own work. You accept.</p></div>
+Before</span>
+A manual test pass</span></p>
+Now</span>A browser agent clicks through it.</p></div>
+Before</span>
+A release checklist</span></p>
+Now</span>Accepted work gathers itself. When it ships is still your call.</p></div>
+Before</span>
+On-call at 3 a.m.</span></p>
+Now</span>The agent is awake. You read it over coffee.</p></div>
+Before</span>
+A status report</span></p>
+Now</span>Already written. It is the record.</p></div>
+Before</span>
+Ten tools, ten logins</span></p>
+Now</span>One record, one set of rules.</p></div></div></div></section>
+What is left for people</span>
+[[h2]] Programming is theory building.
+<figure class="kx-quote mt-10 max-w-4xl">
+“Programming properly should be regarded as an activity by which the programmers form or achieve a certain kind of insight, a theory, of the matters at hand.”</p></blockquote>
+Peter Naur · Programming as Theory Building, 1985</figcaption></figure>
+People</span>
+1</span></span>
+[[h3]] Lead the vision
+Decide what should exist, and what we will not build.</p></div>
+2</span></span>
+[[h3]] Set the constraints
+The budget ceiling, who may touch what, and what done means.</p></div>
+3</span></span>
+[[h3]] Say yes
+And be accountable for it.</p></div>
+4</span></span>
+[[h3]] Judge the evidence
+Read the plan, the checks, and the receipt. Know when it is thin.</p></div>
+5</span></span>
+[[h3]] Hold the context
+The things nobody wrote down.</p></div></div>
+Agents</span>
+[[h3]] Plan
+Read the note and the code. Write what gets built, what done means, and a ceiling.</p></div>
+[[h3]] Build
+On its own branch, across every repo the change touches, with a second agent reviewing.</p></div>
+[[h3]] Check
+Click through the work in a real browser. Keep the screenshots. Say what could not be verified.</p></div>
+[[h3]] Watch
+Read the logs and alerts. Catch the issue first. Work the fix.</p></div></div>
+The one rule</span>
+No agent has more authority than the people around it. Nothing costs money before a person says yes. Every decision that matters comes back to a person.</p></div></div></section>
+How it works</span>
+[[h2]] Initiatives, issues, releases. A person can steer at every step.
+<svg viewBox="0 0 640 520" class="h-auto w-full" role="img" aria-label="Where the signals go. Above the waterline: people, together: Note, Comment, Reaction, Reply, Yes, Accept. Below the waterline: the agent’s session."><defs>
+</path></pattern><radialgradient id="fig2-fade" cx="50%" cy="50%" r="62%"><stop offset="55%" stop-color="#fff" stop-opacity="1"></stop><stop offset="100%" stop-color="#fff" stop-opacity="0"></stop></radialgradient><mask id="fig2-mask"><rect width="640" height="520" fill="url(#fig2-fade)"></rect></mask></defs><rect width="640" height="520" fill="url(#fig2-grid)" mask="url(#fig2-mask)"></rect><text x="24" y="40" font-family="DM Sans, system-ui, sans-serif" font-size="14" font-weight="500" fill="var(--kx-primary)">Above the waterline: people, together</text><g role="button" tabindex="0" class="cursor-pointer outline-none"><rect x="38" y="77" width="84" height="26" rx="13" fill="var(--kx-pale)" stroke="var(--kx-accent)"></rect><text x="80" y="94.5" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="12.5" font-weight="500" fill="var(--kx-accent-text-aa)">Note</text></g><g role="button" tabindex="0" class="cursor-pointer outline-none"><rect x="134" y="121" width="84" height="26" rx="13" fill="var(--kx-pale)" stroke="var(--kx-accent)"></rect><text x="176" y="138.5" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="12.5" font-weight="500" fill="var(--kx-accent-text-aa)">Comment</text></g><g role="button" tabindex="0" class="cursor-pointer outline-none"><rect x="230" y="77" width="84" height="26" rx="13" fill="var(--kx-pale)" stroke="var(--kx-accent)"></rect><text x="272" y="94.5" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="12.5" font-weight="500" fill="var(--kx-accent-text-aa)">Reaction</text></g><g role="button" tabindex="0" class="cursor-pointer outline-none"><rect x="326" y="121" width="84" height="26" rx="13" fill="var(--kx-pale)" stroke="var(--kx-accent)"></rect><text x="368" y="138.5" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="12.5" font-weight="500" fill="var(--kx-accent-text-aa)">Reply</text></g><g role="button" tabindex="0" class="cursor-pointer outline-none"><rect x="422" y="77" width="84" height="26" rx="13" fill="var(--kx-pale)" stroke="var(--kx-accent)"></rect><text x="464" y="94.5" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="12.5" font-weight="500" fill="var(--kx-accent-text-aa)">Yes</text></g><g role="button" tabindex="0" class="cursor-pointer outline-none"><rect x="518" y="121" width="84" height="26" rx="13" fill="var(--kx-pale)" stroke="var(--kx-accent)"></rect><text x="560" y="138.5" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="12.5" font-weight="500" fill="var(--kx-accent-text-aa)">Accept</text></g>
+</path><text x="616" y="291" text-anchor="end" font-family="DM Sans, system-ui, sans-serif" font-size="9.5" font-weight="500" letter-spacing="0.14em" fill="var(--kx-second-text-aa)">WATERLINE</text><rect x="150" y="318" width="340" height="170" rx="10" fill="#243025" stroke="var(--kx-second)" stroke-width="1.2"></rect><circle cx="166" cy="332" r="3" fill="#e8ede8" opacity="0.35"></circle><circle cx="177" cy="332" r="3" fill="#e8ede8" opacity="0.35"></circle><circle cx="188" cy="332" r="3" fill="#e8ede8" opacity="0.35"></circle><text x="166" y="358" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#e8ede8">> accepted · receipt written</text><text x="166" y="380" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#e8ede8">> read the note · 3 paragraphs</text><text x="166" y="402" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#e8ede8">> reply answered in the thread</text><text x="166" y="424" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#e8ede8">> accepted · receipt written</text><text x="166" y="446" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#e8ede8">> read the note · 3 paragraphs</text><text x="166" y="468" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="#e8ede8">> read the note · 3 paragraphs</text><g></g><text x="24" y="508" font-family="DM Sans, system-ui, sans-serif" font-size="14" font-weight="500" fill="var(--kx-second-text-aa)">Below the waterline: the agent’s session</text></svg>
+Every comment and reaction is a signal. It flows into the agent’s session, the same transcript you already know from coding with an agent.</p></div></div>
+</span> You can step in here</p>
+What is moving?</span>
+[[h3]] Initiative
+<ol class="kx-steps mt-4">
+1</span>
+You write a note. Teammates comment and react.</span>
+</span></li>
+2</span>
+A plan comes back with a ceiling, set from the agent’s own calibrated estimate.</span>
+</span></li>
+3</span>
+You say yes.</span>
+</span></li>
+4</span>
+The agent builds, with a second agent reviewing.</span>
+</span></li>
+5</span>
+It checks its own work in a real browser.</span>
+</span></li>
+6</span>
+You accept. Tested pull requests and a receipt.</span>
+</span></li></ol></div>
+What is wrong?</span>
+[[h3]] Issue
+<ol class="kx-steps mt-4">
+1</span>
+The agent catches the alert first and opens an issue with a severity.</span>
+</span></li>
+2</span>
+It contains the damage.</span>
+</span></li>
+3</span>
+It proposes the fix. You say yes.</span>
+</span></li>
+4</span>
+A normal build if the fix needs code. Resolved, timeline kept.</span>
+</span></li></ol></div>
+What shipped?</span>
+[[h3]] Release
+<ol class="kx-steps mt-4">
+1</span>
+Accepted work gathers into a release candidate.</span>
+</span></li>
+2</span>
+You decide when it ships.</span>
+</span></li>
+3</span>
+The release reads like a post the team can react to.</span>
+</span></li></ol></div>
+Who carried it?</span>
+[[h3]] Leaderboard
+<ol class="kx-steps mt-4">
+1</span>
+People, by what they were part of.</span></li>
+2</span>
+Models, by what they return for what they cost.</span></li>
+3</span>
+Nothing to steer here. This one only counts.</span></li></ol></div></div>
+As agents get smarter, you steer less and read fewer transcripts.</p></div>
+Every tool call and every transcript stays in the record, for whenever you want to look.</p></div></div></div></section>
+The whole company</span>
+[[h2]] Many notes. Many agents. One record.
+Every team writes notes and runs agents. All of it lands in one record, under the same rules.</p>
+Four questions that matter</span>
+[[h3]] What is moving?
+Work In Progress</span>
+Every initiative, who leads it, and what phase it is in.</p></div>
+[[h3]] What is wrong?
+Issues</span>
+Incidents with a severity, an owner, and a timeline.</p></div>
+[[h3]] What shipped?
+Releases</span>
+Accepted work, gathered and released by a person.</p></div>
+[[h3]] Who carried it?
+Leaderboard</span>
+People by what they were part of. Models by what they return for what they cost.</p></div></div></div>
+<strong class="font-medium text-ink">Activities</strong>: One timeline of the turning points: started, approved, fixed, shipped, with people’s own words next to each.</p>
+The catalog</span>
+[[h3]] Each product lives in a Software System.
+A software catalog of its repos and components. Every session reads it, so the next note starts knowing the software.</p></div></div></section>
+One set of rules</span>
+[[h2]] Authority, money, evidence. The same for every person and every agent.
+Enforced on the server, never by a prompt.</p>
+[[h3]] Authority
+Enterprise IAM is built in.</p><ul class="kx-checklist mt-2 text-sm text-secondary">
+Least-privilege roles you define, and groups</li>
+Access scoped to exact Systems</li>
+Temporary access with a reason and an expiry</li>
+Service accounts that can never hold human authority</li>
+One audit trail across app, API, and MCP</li></ul></div>
+[[h3]] Money
+Every piece of work is quoted as a ceiling before it runs.</p><ul class="kx-checklist mt-2 text-sm text-secondary">
+Your yes locks the ceiling</li>
+Quotes calibrated from your own delivery history</li>
+New automation runs in shadow on real work before it may decide anything</li>
+Provider bill shown separately, never marked up</li></ul></div>
+[[h3]] Evidence
+A permanent receipt for every delivery.</p><ul class="kx-checklist mt-2 text-sm text-secondary">
+Quoted, settled, provider cost, evidence</li>
+The agent that builds never judges its own work</li>
+Budgets stop before the line, not after</li>
+Retries have limits; real decisions come back to a person</li></ul></div></div>
+Four kinds of session</span>
+Each one is a session on the same Software System.</p>
+[[h3]] Project Management
+</div>
+A requirement becomes milestones, sprints, and tickets. Each ticket becomes a plan.</p></div>
+[[h3]] Engineering
+</div>
+A plan becomes a yes, tested pull requests, and a receipt.</p></div>
+[[h3]] QA
+</div>
+A browser agent clicks through what shipped and reports only what it ran.</p></div>
+[[h3]] Ops
+</div>
+The agent watches logs and alerts, opens the issue, and works the fix.</p></div></div></div></div></section>
+Keep your agent</span>
+[[h2]] Keep the agent you already have.
+Konteks speaks ACP, the Agent Client Protocol. The agent your engineers already run connects as it is, on a laptop or in the cloud, under the same ceilings, stop points, and receipts.</p>
+Claude</span>
+Codex</span>
+Pi</span>
+Cursor</span>
+Hermes</span>
+⟵ ACP ⟶</span>
+Konteks</span></div>
+Sign in with the Claude or Codex subscription you already have, or bring Pi, Cursor, or Hermes with a key.</p>
+Your provider bills you. Never marked up.</p></div>
+Your own machine</span></span>
+The agent on my laptop, or in the cloud, signed in as me, over ACP.</p></div></div>
+[[h3]] Connect through MCP
+Same context, same rules, same stop points, whether a person or an agent is asking.</p><dl class="kx-dl mt-4">
+<dt>Agents</dt><dd class="min-w-0 break-all text-ink">Claude, Codex, Pi, Cursor, Hermes</dd></div>
+<dt>VCS</dt><dd class="min-w-0 break-all text-ink">GitHub, Gitea</dd></div>
+<dt>Endpoint</dt><dd class="min-w-0 break-all text-ink">https://api.konteks.io/mcp</dd></div>
+<dt>Transport</dt><dd class="min-w-0 break-all text-ink">Streamable HTTP</dd></div>
+<dt>Auth</dt><dd class="min-w-0 break-all text-ink">scoped Bearer credential, rotatable and revocable</dd></div></dl>
+Secrets never reach a prompt, a screenshot, or a log.</p>
+Security →</a>
+Docs →</a>
+Pricing →</a></p></div></div></div></section>
+Learning the new discipline</span>
+[[h2]] If the work changed, how we learn it changed.
+Nobody was trained for this job. So we learn it.</p>
+<strong class="font-medium text-ink">Juniors</strong> learn to judge evidence they did not produce.</p></div>
+<strong class="font-medium text-ink">Leads</strong> learn to write constraints.</p></div>
+<strong class="font-medium text-ink">Product people</strong> learn to write the note.</p></div></div>
+Refactory, the team behind Konteks, trains for exactly this.</p>
+[[h3]] Readiness mapping
+Roles, workflows, risks, and the first work worth doing.</p></div>
+[[h3]] Role-based training
+Hands-on, for engineers, leads, product people, and reviewers.</p></div>
+[[h3]] Guided onboarding
+Systems, repos, roles, and the habit of saying yes on evidence.</p></div>
+[[h3]] Coaching
+Review, measure, improve, after the workshop ends.</p></div></div>
+Talk to us about training →</a>
+With Konteks, or on its own.</span></div></div>
+Last page</span>
+[[h2]] Unlearn the old way. Learn to work with agents.
+</div>
+Start building ↗</a></div>
+Rolling out to a large team? Ask us about SSO/SCIM, dedicated runtimes, on-prem or VPC deployment, audit export, and onboarding.</p></div>
+From the journal · Day 1 · August 17, 2026</span>
+Delivery was never the hard part. The plan was.</p></div>
+Read →</a></div></div></section></div></main><footer class="kx-footer px-4 pb-8 pt-14 sm:px-6 lg:px-8">
+<svg viewBox="0 0 100 100" width="40" height="40" class="h-10 w-10" role="img" aria-label="Konteks"><defs><clippath id="k-mark-hull">
+</path></clippath><clippath id="k-mark-sail">
+</path>
+</path></clippath></defs><g transform="translate(50 50) scale(0.94) translate(-50 -50)">
+</path>
+</path>
+</path>
+</path>
+</path><g clip-path="url(#k-mark-hull)" stroke="var(--kx-border)" stroke-width="1" fill="none">
+</path>
+</path></g><g clip-path="url(#k-mark-sail)" stroke="var(--kx-border)" stroke-width="1" fill="none">
+</path></g><g fill="none" stroke="var(--kx-primary)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
+</path>
+</path>
+</path>
+</path>
+</path></g>
+</path>
+</path></g></svg></a>
+The AI control plane for software engineering.</p>
+hello@konteks.io</a></div>
+[[h2]] Product
+<ul class="mt-3 space-y-1.5">
+Product overview</a></li>
+How it works</a></li>
+Four kinds of session</a></li>
+Training & onboarding</a></li>
+Pricing</a></li>
+Start building ↗</a></li></ul></div>
+[[h2]] Resources
+<ul class="mt-3 space-y-1.5">
+Konteks</a></li>
+MCP</a></li>
+API reference</a></li>
+Journal</a></li></ul></div>
+[[h2]] Company
+<ul class="mt-3 space-y-1.5">
+About</a></li>
+Contact</a></li>
+Security</a></li>
+Privacy</a></li>
+Terms</a></li></ul></div></div></div>
+Made by
+Refactory ↗</a>, the team behind Konteks.</p>
+© 2026 Konteks · konteks.io</p></div></div></footer></div></div> <next-route-announcer>
+Konteks: People lead the vision. Agents do the rest.</p></next-route-announcer> </body><iframe id="jam-coms-eabc2385-a380-49c7-9d0e-1f5835378b4f" src="./Konteks_ People lead the vision. Agents do the rest._files/icom.html" style="display: none; width: 0px; height: 0px;"></iframe><iframe id="jam-ui" src="./Konteks_ People lead the vision. Agents do the rest._files/iui.html"></iframe></html>
