@@ -239,3 +239,17 @@ Implementation is complete when:
 - Do not restyle the product application or catalog.
 - Do not fabricate product claims or integrations.
 - Do not add a runtime dependency unless browser APIs are insufficient.
+
+## Approved Hero Choreography Refinement
+
+The supplied `Video Baru2.mp4` replaces the previous stop-motion source. Preserve the complete 16:9 frame: the bottom of the boat and water reflection may not be cropped. The hero media wrapper may grow and overlap behind the title, but the video uses contained sizing plus a four-sided feather mask and a background sampled from the footage so no rectangular boundary appears.
+
+The three human/agent pairs use **Staggered Waterline** choreography rather than one repeated position:
+
+1. Vision / Planning: human signal enters from the upper left; agent response enters in the lower right below the waterline.
+2. Constraints / Build: human signal enters from the upper right; agent response enters in the lower left below the waterline.
+3. Evidence / Check: human signal enters from left-of-center above the boat; agent response enters right-of-center below the waterline.
+
+Every human signal carries the slug `ABOVE THE WATERLINE`; every agent response carries `UNDER THE WATERLINE`. Incoming items combine fade with a directional slide. During a state change, the old signal/response slide out while the next pair enters from its own origin; old and new content are separate transient nodes so their movement overlaps rather than changing text inside one stationary element.
+
+The ownership explanation beginning “Your team writes down what should exist…” remains inside the hero section but does not appear alongside the three active pairs. It receives a separate final reading interval after the third pair exits, lower in the hero runway.
