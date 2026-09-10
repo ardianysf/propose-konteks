@@ -252,6 +252,43 @@ The final close remains decisive, uses a smaller headline than the hero, and cen
 - Without JavaScript, all factual content and process stages remain readable.
 - Reduced motion shows final text rather than simulated typing.
 
+## Asset Production Plan
+
+All new assets must be produced and bundled locally during implementation. The landing page may not depend on third-party image URLs at runtime.
+
+### Quote-stage paper boat
+
+- Source the boat from the supplied `Video Baru2.mp4` so its folds, graphite texture, proportions, and lighting match the hero exactly.
+- Review representative source frames and choose the cleanest settled boat pose for the quote composition; do not assume the hero's initial third frame is automatically the best extraction frame.
+- Extract the selected full-resolution frame, then remove the footage background, water rings, reflection, and loose water fragments.
+- Prefer a deterministic alpha matte when the source separates cleanly. If the water cannot be removed without damaging the paper edges, use an image-editing pass constrained to removal and edge reconstruction only—do not redesign the boat or invent a second illustration style.
+- Deliver a transparent asset at a working size of at least 1400px on its longest edge as `public/landingpage-assets/theory-paper-boat.webp`. Retain a lossless working PNG outside the runtime bundle only if needed for later revision.
+- Preserve natural paper grain and slightly imperfect graphite edges. Reject halos, clipped tips, opaque corner pixels, remaining water, fake drop shadows, and newly invented folds.
+- The browser supplies positioning and entrance motion; the raster asset itself contains no baked background, motion trail, or empty layout padding.
+
+### Session icons
+
+- Author four inline SVG icons specifically for Project Management, Engineering, QA, and Ops.
+- Use the existing 1–1.5px forest stroke, restrained green/blue semantic accents, `currentColor`, and a shared viewBox.
+- Keep them geometric interface symbols rather than sketch illustrations: milestone/plan, branch/pull request, browser/check, and alert/log pulse.
+- No icon contains text or a numeric substitute. Each decorative icon is hidden from assistive technology because its adjacent heading supplies the meaning.
+
+### Integration marks
+
+- Collect official, current marks for Claude, Codex/OpenAI, Pi, Cursor, Hermes, GitHub, and Gitea from their owners' brand resources or repositories when available.
+- Store approved vector marks locally under `public/landingpage-assets/integrations/`; normalize only the artboard, rendered size, and monochrome treatment required by the Konteks visual system. Do not redraw or geometrically alter trademark shapes.
+- Every mark appears with a visible text label, so recognition and accessibility do not depend on the logo alone.
+- If an official reusable mark cannot be obtained or its usage is unclear, ship the integration as a typographic name with the shared connection glyph instead of fabricating a logo.
+- ACP, MCP Endpoint, Transport, and Auth are protocol/specification nodes, not brands; represent them with type and authored connection geometry rather than logos.
+
+### Optimization and provenance
+
+- Record each external mark's source URL and retrieval date in `public/landingpage-assets/integrations/SOURCES.md`.
+- Remove unnecessary SVG metadata and scripts; keep `viewBox` intact and do not inline remote references.
+- Set explicit rendered dimensions for every image and logo to avoid layout shift.
+- Verify light and dark treatments, transparent edges, keyboard/assistive labels, missing-asset fallback, and 390px/1200px/1440px compositions.
+- Run an orphan and broken-reference scan after implementation. Delete superseded generated assets only after the new page has no references to them.
+
 ## Asset Changes
 
 Delete the rejected generated illustration assets once they are no longer referenced:
@@ -261,7 +298,7 @@ Delete the rejected generated illustration assets once they are no longer refere
 - `public/landingpage-assets/hero-boat-plate-generated.png`
 - Generated source duplicates used only for those plates.
 
-Keep the supplied stop-motion video. Reuse a small existing paper-boat mark only where it functions as brand/navigation detail, never as the hero fallback.
+Keep the supplied stop-motion video. Produce the transparent quote-stage boat and integration marks according to the plan above. Reuse a small existing paper-boat mark only where it functions as brand/navigation detail, never as the hero fallback.
 
 ## Verification
 
@@ -280,6 +317,9 @@ Implementation is complete when:
 11. Later sections use smaller headings and varied compact layouts.
 12. Both themes and reduced-motion mode remain readable.
 13. Desktop and mobile screenshots receive a fresh Impeccable finish review.
+14. The quote boat has a clean transparent edge with no water or reflection at 1× and 2× inspection.
+15. All integration marks are local, labeled, source-documented, and free of remote runtime dependencies.
+16. Session icons share one stroke and viewBox system and contain no numbers.
 
 ## Scope
 
