@@ -361,13 +361,12 @@
 
     .enablement__grid { grid-template-columns: .88fr 1.12fr; }
     .enablement-visual { width: 100%; margin: 0 0 38px; transform: translateX(calc(var(--enable-drift, 0) * 18px)); }
-    .enablement-options { margin-top: 26px; border: 1px solid var(--ink); background: var(--canvas); }
+    .enablement-options { margin-top: 48px; border: 1px solid var(--ink); background: var(--canvas); }
     .enablement-options__head { padding: 20px; border-bottom: 1px solid var(--ink); background: var(--green-pale); }
     .enablement-options__head .enablement-table-title { margin-bottom: 0; }
-    .enablement-offer { display: grid; grid-template-columns: 1fr 1fr; }
-    .enablement-offer p { min-height: 150px; padding: 20px; color: var(--ink-2); font-size: 14px; }
-    .enablement-offer p:nth-child(even) { border-left: 1px solid var(--line); }
-    .enablement-offer p:nth-child(n + 3) { border-top: 1px solid var(--line); }
+    .enablement-offer { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .enablement-offer p { min-height: 170px; padding: 20px; color: var(--ink-2); font-size: 14px; }
+    .enablement-offer p + p { border-left: 1px solid var(--line); }
     .enablement-offer strong { display: block; margin-bottom: 10px; color: var(--green-dark); font: 700 17px/1.15 var(--display); }
     .enablement-table-title { margin: 0 0 12px; color: var(--ink); font: 700 22px/1.15 var(--display); }
     .enablement-table-kicker { display: block; margin-bottom: 8px; color: var(--green-dark); font: 750 11px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; }
@@ -385,6 +384,9 @@
       .response { width: min(240px, 24vw); }
       .paradigm-stage { grid-template-columns: .9fr 1.1fr; gap: 5vw; }
       .record__grid, .agent-layout, .enablement__grid { gap: 5vw; }
+      .enablement-offer { grid-template-columns: repeat(2, 1fr); }
+      .enablement-offer p:nth-child(odd) { border-left: 0; }
+      .enablement-offer p:nth-child(n + 3) { border-top: 1px solid var(--line); }
     }
     @media (min-width: 1051px) and (max-width: 1250px) {
       .nav__links { gap: 13px; margin-left: 34px; }
@@ -457,7 +459,7 @@
       .integration-detail + .integration-detail { border-top: 1px solid var(--line); border-left: 0; padding-left: 0; }
       .enablement-offer { grid-template-columns: 1fr; }
       .enablement-offer p { min-height: 0; }
-      .enablement-offer p:nth-child(even) { border-left: 0; }
+      .enablement-offer p { border-left: 0 !important; }
       .enablement-offer p + p { border-top: 1px solid var(--line); }
       .footer__grid { grid-template-columns: 1fr 1fr; }
     }
@@ -710,22 +712,24 @@
     </section>
 
     <section class="chapter enablement" id="enablement" data-enable-section aria-labelledby="enablement-title">
-      <div class="chapter__inner enablement__grid">
-        <div>
-          <img class="enablement-visual" src="/landingpage-assets/illustrations/enablement-learning-path.webp" alt="A hand-drawn learning path for teams working with agents">
-          <h2 class="display" id="enablement-title">If the work changed, how we learn it <em>changed too.</em></h2>
-          <p class="lede">Nobody was trained for this job. Refactory, the team behind Konteks, trains for exactly this.</p>
-        </div>
-        <div>
-          <span class="enablement-table-kicker">Your team</span><h3 class="enablement-table-title">What each role needs to learn</h3>
-          <div class="learning-list"><p><strong>Juniors</strong> learn to judge evidence they did not produce.</p><p><strong>Leads</strong> learn to write useful constraints and approval boundaries.</p><p><strong>Product people</strong> learn to turn intent into the note agents can act on.</p><p><strong>Reviewers &amp; teams</strong> practice accepting, rejecting, and coaching real workflows.</p></div>
-          <p class="enablement-bridge">Those role gaps determine the enablement path—not a one-size-fits-all workshop.</p>
-          <div class="enablement-options">
-            <div class="enablement-options__head"><span class="enablement-table-kicker">Refactory</span><h3 class="enablement-table-title">How we help the capability stick</h3></div>
-            <div class="enablement-offer" aria-label="Enablement services"><p><strong>Readiness mapping</strong><span>We map roles, workflows, and approval risks before changing the operating model.</span></p><p><strong>Role-based training</strong><span>We train each role against the decisions and evidence it actually owns.</span></p><p><strong>Guided onboarding</strong><span>We connect one real Software System and run the first sessions with your team.</span></p><p><strong>Ongoing coaching</strong><span>We review receipts, constraints, and decisions after launch so the practice improves.</span></p></div>
+      <div class="chapter__inner">
+        <div class="enablement__grid">
+          <div>
+            <img class="enablement-visual" src="/landingpage-assets/illustrations/enablement-learning-path.webp" alt="A hand-drawn learning path for teams working with agents">
+            <h2 class="display" id="enablement-title">If the work changed, how we learn it <em>changed too.</em></h2>
+            <p class="lede">Nobody was trained for this job. Refactory, the team behind Konteks, trains for exactly this.</p>
           </div>
-          <p style="margin-top:30px"><a class="button button--solid" href="mailto:hello@konteks.io?subject=Agentic%20training%20and%20onboarding">Talk to us about enablement →</a></p>
+          <div>
+            <span class="enablement-table-kicker">Your team</span><h3 class="enablement-table-title">What each role needs to learn</h3>
+            <div class="learning-list"><p><strong>Juniors</strong> learn to judge evidence they did not produce.</p><p><strong>Leads</strong> learn to write useful constraints and approval boundaries.</p><p><strong>Product people</strong> learn to turn intent into the note agents can act on.</p><p><strong>Reviewers &amp; teams</strong> practice accepting, rejecting, and coaching real workflows.</p></div>
+            <p class="enablement-bridge">Those role gaps determine the enablement path—not a one-size-fits-all workshop.</p>
+          </div>
         </div>
+        <div class="enablement-options">
+          <div class="enablement-options__head"><span class="enablement-table-kicker">Refactory</span><h3 class="enablement-table-title">How we help the capability stick</h3></div>
+          <div class="enablement-offer" aria-label="Enablement services"><p><strong>Readiness mapping</strong><span>We map roles, workflows, and approval risks before changing the operating model.</span></p><p><strong>Role-based training</strong><span>We train each role against the decisions and evidence it actually owns.</span></p><p><strong>Guided onboarding</strong><span>We connect one real Software System and run the first sessions with your team.</span></p><p><strong>Ongoing coaching</strong><span>We review receipts, constraints, and decisions after launch so the practice improves.</span></p></div>
+        </div>
+        <p style="margin-top:30px"><a class="button button--solid" href="mailto:hello@konteks.io?subject=Agentic%20training%20and%20onboarding">Talk to us about enablement →</a></p>
       </div>
     </section>
 
