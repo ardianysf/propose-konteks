@@ -272,10 +272,9 @@
     .enablement__grid { display: grid; grid-template-columns: .82fr 1.18fr; gap: 8vw; align-items: end; }
     .enablement__mark { display: grid; width: 56px; height: 56px; margin-bottom: 24px; place-items: center; color: var(--green-dark); }
     .enablement__mark svg { width: 52px; height: 52px; }
-    .learning-list { display: grid; grid-template-columns: repeat(2, 1fr); margin-top: 0; border-top: 1px solid var(--line); }
-    .learning-list p { min-height: 108px; border-bottom: 1px solid var(--line); padding: 17px 18px 17px 0; color: var(--ink-2); font-size: 16px; }
-    .learning-list p:nth-child(even) { border-left: 1px solid var(--line); padding-right: 0; padding-left: 18px; }
-    .learning-list strong { color: var(--ink); }
+    .learning-list { display: grid; grid-template-columns: 1fr; margin-top: 0; border-top: 1px solid var(--line); }
+    .learning-list p { border-bottom: 1px solid var(--line); padding: 17px 0; color: var(--ink-2); font-size: 16px; }
+    .learning-list strong { display: block; margin-bottom: 5px; color: var(--ink); }
 
     .closing { min-height: 70svh; display: grid; place-items: center; background: var(--green); color: #17231a; text-align: center; }
     .closing .display { max-width: 900px; }
@@ -430,9 +429,6 @@
       .theory-stage { position: relative; height: auto; min-height: 0; padding: 106px 16px 82px; }
       .theory-layout, .step-in__head, .workflow-head, .record__grid, .agent-layout, .enablement__grid, .rules__head, .sessions__grid { grid-template-columns: 1fr; }
       .enablement__grid { align-items: start; }
-      .learning-list { grid-template-columns: 1fr; }
-      .learning-list p { min-height: 0; padding-inline: 0; }
-      .learning-list p:nth-child(even) { border-left: 0; padding-left: 0; }
       .theory-video { width: min(560px, 100%); margin-top: 48px; opacity: 1; transform: scale(1.22); }
       .process-rail { margin-top: 38px; overflow-x: auto; }
       .process-step { min-width: 94px; }
