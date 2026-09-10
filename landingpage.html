@@ -121,7 +121,7 @@
     .boat-wrap { position: absolute; z-index: 3; inset: 0; overflow: hidden; background: var(--hero-surface); pointer-events: none; transform: translateY(calc(var(--hero-drift, 0) * 12px)); }
     .boat-media { position: absolute; top: 58%; left: 50%; width: auto; max-width: none; height: min(80vh, 820px); object-fit: contain; transform: translate(-50%, -50%); }
     .boat-video { z-index: 2; opacity: 0; mix-blend-mode: normal; filter: none; mask-image: linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%); transition: opacity .55s ease; }
-    .hero-stage.video-ready .boat-video { opacity: var(--video-reveal, 0); }
+    .hero-stage.video-ready .boat-video { opacity: 1; }
     .response__copy { display: block; }
     .response__title { display: block; margin-top: 2px; font-size: 16px; font-weight: 700; line-height: 1.15; }
     .response__text { display: block; margin-top: 4px; color: var(--ink-2); font-size: 12px; line-height: 1.38; }
@@ -135,18 +135,18 @@
     .no-js .hero-stage { position: relative; min-height: 1260px; }
     .no-js .hero-conclusion { opacity: 1; transform: none; }
     .no-js .hero-annotation { opacity: 1; pointer-events: auto; transform: none; }
-    .signal.pair-0 { --enter-x: -42px; --exit-x: -58px; top: 49%; left: max(32px, calc(50% - 620px)); right: auto; width: clamp(280px, 23vw, 330px); }
-    .response.pair-0 { --enter-x: 42px; --exit-x: 58px; top: 72%; right: max(32px, calc(50% - 620px)); left: auto; width: clamp(300px, 24vw, 345px); }
-    .signal.pair-1 { --enter-x: 42px; --exit-x: 58px; top: 45%; right: max(42px, calc(50% - 590px)); left: auto; width: clamp(340px, 29vw, 420px); }
-    .response.pair-1 { --enter-x: -42px; --exit-x: -58px; top: 68%; left: max(38px, calc(50% - 610px)); right: auto; width: clamp(350px, 30vw, 440px); }
-    .signal.pair-2 { --enter-x: -36px; --exit-x: -52px; top: 53%; left: max(9vw, calc(50% - 470px)); right: auto; width: clamp(270px, 22vw, 315px); }
-    .response.pair-2 { --enter-x: 36px; --exit-x: 52px; top: 75%; right: max(10vw, calc(50% - 470px)); left: auto; width: clamp(290px, 24vw, 350px); }
+    .signal.pair-0 { --enter-x: -68px; --exit-x: -84px; top: 49%; left: max(32px, calc(50% - 620px)); right: auto; width: clamp(280px, 23vw, 330px); }
+    .response.pair-0 { --enter-x: 68px; --exit-x: 84px; top: 72%; right: max(44px, calc(50% - 560px)); left: auto; width: clamp(260px, 20vw, 285px); }
+    .signal.pair-1 { --enter-x: 68px; --exit-x: 84px; top: 45%; right: max(120px, calc(50% - 500px)); left: auto; width: clamp(310px, 24vw, 340px); }
+    .response.pair-1 { --enter-x: -68px; --exit-x: -84px; top: 68%; left: max(38px, calc(50% - 610px)); right: auto; width: clamp(350px, 30vw, 440px); }
+    .signal.pair-2 { --enter-x: -64px; --exit-x: -80px; top: 53%; left: max(9vw, calc(50% - 470px)); right: auto; width: clamp(270px, 22vw, 315px); }
+    .response.pair-2 { --enter-x: 64px; --exit-x: 80px; top: 75%; right: max(180px, calc(50% - 410px)); left: auto; width: clamp(260px, 21vw, 290px); }
     .signal.pair-1 .signal__zone, .response.pair-0 .response__zone, .response.pair-2 .response__zone { grid-template-columns: minmax(38px, 1fr) 9px max-content; }
     .signal.pair-1 .signal__zone::after, .response.pair-0 .response__zone::after, .response.pair-2 .response__zone::after { grid-column: 1; }
     .signal.pair-1 .signal__zone::before, .response.pair-0 .response__zone::before, .response.pair-2 .response__zone::before { grid-column: 2; }
     .signal.pair-1 .signal__zone > span, .response.pair-0 .response__zone > span, .response.pair-2 .response__zone > span { grid-column: 3; }
     .signal__kind, .signal__title, .signal__text, .response__kind, .response__title, .response__text { width: min(215px, calc(100% - 18px)); }
-    .signal.pair-1 .signal__kind, .signal.pair-1 .signal__title, .signal.pair-1 .signal__text, .response.pair-0 .response__kind, .response.pair-0 .response__title, .response.pair-0 .response__text, .response.pair-2 .response__kind, .response.pair-2 .response__title, .response.pair-2 .response__text { margin-right: 0; margin-left: auto; padding-left: 18px; }
+    .signal.pair-1 .signal__kind, .signal.pair-1 .signal__title, .signal.pair-1 .signal__text, .response.pair-0 .response__kind, .response.pair-0 .response__title, .response.pair-0 .response__text, .response.pair-2 .response__kind, .response.pair-2 .response__title, .response.pair-2 .response__text { width: 205px; margin-right: -97px; margin-left: auto; padding-left: 0; }
     .hero-annotation.state-enter { opacity: 0; transform: translate3d(var(--enter-x), 10px, 0); }
     .hero-annotation.state-exit, .hero-ending .hero-annotation { opacity: 0; transform: translate3d(var(--exit-x), -5px, 0); }
     .hero-ghost { pointer-events: none; }
@@ -608,6 +608,7 @@
       const terminalState = document.querySelector('[data-terminal-state]');
       const processLive = document.querySelector('[data-process-live]');
       const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const heroVideoStart = 2 / 24;
       const states = [
         { human: 'Lead the vision', humanCopy: 'Decide what should exist, and what we will not build.', agent: 'Planning', agentCopy: 'Reads the note and the code, then defines scope and a ceiling.', log: ['› Reading note', '› Mapping systems', '› Defining scope'] },
         { human: 'Set the constraints', humanCopy: 'Name the budget ceiling, who may touch what, and what done means.', agent: 'Build', agentCopy: 'Works on an isolated branch while another agent reviews the change.', log: ['› Opening branch', '› Building change', '› Running review'] },
@@ -741,17 +742,14 @@ $ next: say yes to run the approved plan`;
           stage.classList.toggle('annotations-ready', progress > .012 && !ending);
           stage.style.setProperty('--hero-drift', progress.toFixed(3));
           stage.style.setProperty('--hero-progress', progress.toFixed(3));
-          stage.style.setProperty('--video-reveal', clamp((progress - .025) / .075, 0, 1).toFixed(3));
           stage.style.setProperty('--hero-end', clamp((progress - .86) / .1, 0, 1).toFixed(3));
           if (ending !== heroEnding) {
             heroEnding = ending;
             stage.classList.toggle('hero-ending', ending);
           }
-          const heroTitle = stage.querySelector('.hero-title');
-          if (heroTitle) heroTitle.style.opacity = String(1 - clamp((progress - .76) / .16, 0, 1));
           if (!ending) render(index);
           if (video && Number.isFinite(video.duration) && video.duration > 0) {
-            const target = progress * Math.max(0, video.duration - .05);
+            const target = heroVideoStart + progress * Math.max(0, video.duration - heroVideoStart - .05);
             if (Math.abs(video.currentTime - target) > .04) video.currentTime = target;
           }
         }
@@ -788,8 +786,17 @@ $ next: say yes to run the approved plan`;
         stage.classList.add('video-ready');
         update();
       };
-      if (video?.readyState >= 1) showVideo();
-      else video?.addEventListener('loadedmetadata', showVideo, { once: true });
+      const primeVideo = () => {
+        if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
+        const start = Math.min(heroVideoStart, Math.max(0, video.duration - .05));
+        if (Math.abs(video.currentTime - start) <= .01) showVideo();
+        else {
+          video.addEventListener('seeked', showVideo, { once: true });
+          video.currentTime = start;
+        }
+      };
+      if (video?.readyState >= 1) primeVideo();
+      else video?.addEventListener('loadedmetadata', primeVideo, { once: true });
       [signal, response].forEach(control => control?.addEventListener('click', () => render((current + 1) % states.length)));
       render(0);
       if (reduced || innerWidth <= 720) {
