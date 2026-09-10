@@ -35,7 +35,9 @@ The page must stop treating every section as a hero. Only the opening and the pa
 
 ### Integrated illustration details
 
-Remove the generated full-width illustration plates. Replace them with a coherent family of small, icon-sized line illustrations placed inside the content structure rather than above or beside it as separate artwork.
+Remove the generated full-width illustration plates. Replace them with a coherent family of hand-drawn illustrations placed inside the content structure rather than appearing as unrelated decoration.
+
+`Gambar Contoh001.webp` and `Gambar Contoh.webp` are style references, not content references. Their relevant qualities are the visibly hand-drawn contour, relaxed perspective, simplified dimensional form, irregular line weight, and playful technical storytelling. Texture and grain are secondary; do not reproduce their blue/purple palette or their specific watch/character subjects.
 
 Icon subjects include:
 
@@ -47,7 +49,7 @@ Icon subjects include:
 - Agent/session mark.
 - Small paper-boat or waterline motif where navigation needs continuity.
 
-Icons use forest outlines with limited green and pencil-blue accents, subtle graphite irregularity, and enough internal detail to prevent the page from feeling flat. They remain under icon scale, contain no text, and never become independent image cards.
+Every asset follows the Konteks theme: forest outlines, leaf-green human/approval accents, pencil-blue agent/process accents, and warm-paper or transparent grounds. The hand-drawn gesture is more important than visible texture. Small symbols contain no text and never become independent image cards; larger section illustrations must be compositionally attached to their copy or rules.
 
 ## Page Architecture
 
@@ -182,11 +184,17 @@ Remove the large boat image. Use a compact editorial product index based on the 
 
 ### 7. Authority, money, evidence
 
-Remove the generated checkpoint plate. Use a compact dark chapter with three typographic columns. Each column gets one detailed integrated line icon and concise factual copy. Avoid card containers and oversized headings.
+Remove the generated checkpoint plate and the current crisp geometric SVG icons. Use a compact dark chapter with three typographic columns. Each column gets one small hand-drawn illustration in the approved style and concise factual copy:
+
+- Authority — a scoped access pass/gate with a clearly bounded permission path.
+- Money — a time/budget ceiling instrument with a locked threshold.
+- Evidence — a receipt and browser-proof stack with an explicit check.
+
+The illustrations share perspective, contour weight, and scale but use different silhouettes. Avoid card containers and oversized headings.
 
 ### 8. Four session types
 
-Use a compact two-by-two editorial grid on the pale green field. Replace numeric prefixes with four consistent line icons: milestone/plan for Project Management, branch/pull request for Engineering, browser/check for QA, and alert/log pulse for Ops. Keep Project Management, Engineering, QA, and Ops readable without turning each into a card or hero row.
+Use a compact two-by-two editorial grid on the pale green field. Replace numeric prefixes with four consistent hand-drawn symbols: milestone/plan for Project Management, branch/pull request for Engineering, browser/check for QA, and alert/log pulse for Ops. Keep Project Management, Engineering, QA, and Ops readable without turning each into a card or hero row.
 
 ### 9. Keep your existing agent
 
@@ -211,6 +219,8 @@ Rebuild enablement as a legible `audience need → Konteks enablement` matrix:
 - Reviewers and teams need to practice approval and evidence habits in real workflows.
 
 Map those needs to Readiness Mapping, Role-based Training, Guided Onboarding, and Coaching. Keep the statement that Refactory is the team behind Konteks and that training can be delivered with Konteks or independently. End with one training CTA.
+
+Add one hand-drawn enablement illustration integrated into the open side of the matrix. It depicts a practical learning path—note, constraints, approval, evidence—being navigated by a small team. It supports the mapping rather than replacing any audience or offering text, and it must not turn the section into another hero.
 
 The final close remains decisive, uses a smaller headline than the hero, and centers the heading, supporting copy, and CTA as one aligned group.
 
@@ -268,10 +278,27 @@ All new assets must be produced and bundled locally during implementation. The l
 
 ### Session icons
 
-- Author four inline SVG icons specifically for Project Management, Engineering, QA, and Ops.
-- Use the existing 1–1.5px forest stroke, restrained green/blue semantic accents, `currentColor`, and a shared viewBox.
-- Keep them geometric interface symbols rather than sketch illustrations: milestone/plan, branch/pull request, browser/check, and alert/log pulse.
+- Produce four compact hand-drawn symbols specifically for Project Management, Engineering, QA, and Ops.
+- Use a shared transparent artboard, consistent optical size, forest contour, and restrained green/blue semantic accents.
+- Subjects are milestone/plan, branch/pull request, browser/check, and alert/log pulse. Their contours may be irregular, but their silhouettes must remain instantly scannable at 40–52px.
+- Deliver 512px transparent WebP masters as `session-project-management.webp`, `session-engineering.webp`, `session-qa.webp`, and `session-ops.webp` under `public/landingpage-assets/illustrations/`.
 - No icon contains text or a numeric substitute. Each decorative icon is hidden from assistive technology because its adjacent heading supplies the meaning.
+
+### Governance illustrations
+
+- Produce three transparent hand-drawn assets for Authority, Money, and Evidence using the approved reference style and the Konteks palette.
+- Output at least 720px on the longest edge so the illustrations remain clean on high-density screens, then render them at approximately 72–104px inside the three-column chapter.
+- Use distinct subjects defined in the page architecture; do not recolor or repurpose the supplied watch and character samples as final assets.
+- Deliver as `governance-authority.webp`, `governance-money.webp`, and `governance-evidence.webp` under `public/landingpage-assets/illustrations/`.
+- Preserve transparent backgrounds and generous but consistent internal artboard margins. Reject clip-art stiffness, perfect CAD geometry, heavy noise overlays, illegible miniature detail, or three variations of the same generic badge.
+
+### Enablement illustration
+
+- Produce one transparent hand-drawn illustration showing the learning progression from note to constraints to approval to evidence, with a small team actively navigating it.
+- Use the Konteks palette rather than the purple sample palette. People/human decisions receive leaf-green accents; process/evidence receives pencil blue.
+- Deliver at least 1200px on the longest edge as `enablement-learning-path.webp` under `public/landingpage-assets/illustrations/`.
+- Compose it for an asymmetric horizontal crop beside the enablement matrix. The asset contains no written labels because all meaning remains present in semantic HTML.
+- Verify that the section remains balanced when the image is unavailable; the illustration is supporting content, not required instruction.
 
 ### Integration marks
 
@@ -286,6 +313,7 @@ All new assets must be produced and bundled locally during implementation. The l
 - Record each external mark's source URL and retrieval date in `public/landingpage-assets/integrations/SOURCES.md`.
 - Remove unnecessary SVG metadata and scripts; keep `viewBox` intact and do not inline remote references.
 - Set explicit rendered dimensions for every image and logo to avoid layout shift.
+- Use image generation/editing only to create the approved hand-drawn assets and constrained boat cleanup. Review every output against the supplied style samples and Konteks palette before it enters the runtime bundle.
 - Verify light and dark treatments, transparent edges, keyboard/assistive labels, missing-asset fallback, and 390px/1200px/1440px compositions.
 - Run an orphan and broken-reference scan after implementation. Delete superseded generated assets only after the new page has no references to them.
 
@@ -319,7 +347,10 @@ Implementation is complete when:
 13. Desktop and mobile screenshots receive a fresh Impeccable finish review.
 14. The quote boat has a clean transparent edge with no water or reflection at 1× and 2× inspection.
 15. All integration marks are local, labeled, source-documented, and free of remote runtime dependencies.
-16. Session icons share one stroke and viewBox system and contain no numbers.
+16. Session icons share one contour/artboard system, contain no numbers, and remain recognizable at their final rendered size.
+17. Authority, Money, and Evidence use three distinct hand-drawn illustrations rather than the current geometric SVG icons.
+18. The enablement illustration reinforces note → constraints → approval → evidence without replacing the role/solution matrix.
+19. New illustrative assets match the samples' hand-drawn gesture while retaining the Konteks palette; texture is visibly secondary.
 
 ## Scope
 
