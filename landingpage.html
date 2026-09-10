@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="The AI control plane for software engineering.">
   <title>Konteks — People lead the vision. Agents do the rest.</title>
+  <link rel="icon" href="/assets/konteks/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght,SOFT,WONK@9..144,600..900,0..100,0..1&amp;display=swap" rel="stylesheet">
@@ -105,7 +106,7 @@
     .progress__track { display: grid; width: 126px; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .progress__track i { height: 4px; border-radius: 4px; background: var(--line); transition: background-color .35s ease, transform .35s var(--ease); transform-origin: left; }
     .progress__track i.is-active { background: var(--green); transform: scaleX(1.05); }
-    .signal, .response { position: absolute; z-index: 7; display: block; width: min(250px, 20vw); min-height: 82px; border: 0; padding: 0; background: transparent; text-align: left; cursor: pointer; transition: opacity .48s var(--ease), transform .48s var(--ease); }
+    .signal, .response { position: absolute; z-index: 7; display: block; width: min(250px, 20vw); min-height: 82px; border: 0; padding: 0; background: transparent; text-align: left; cursor: pointer; transition: opacity .85s ease, transform 1.15s cubic-bezier(.25, .1, .25, 1); will-change: opacity, transform; }
     .hero-annotation { opacity: 0; pointer-events: none; transform: translate3d(var(--enter-x), 10px, 0); }
     .annotations-ready .hero-annotation { opacity: 1; pointer-events: auto; transform: none; }
     .signal__zone, .response__zone { display: grid; grid-template-columns: 9px max-content minmax(38px, 1fr); align-items: center; gap: 9px; margin-bottom: 10px; color: var(--green-dark); font: 700 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
@@ -289,8 +290,10 @@
     .reduced-state-summary, .reduced-flow-summary { display: none; }
 
     .paradigm-year { margin-bottom: 18px; color: var(--green); font: 750 12px/1 var(--mono); letter-spacing: .18em; }
-    .ledger-head { position: absolute; z-index: 5; top: 20px; right: 0; left: 0; display: grid; grid-template-columns: minmax(130px, .8fr) 54px minmax(210px, 1.2fr); gap: 16px; color: color-mix(in srgb, var(--canvas) 58%, transparent); font: 700 11px/1 var(--mono); letter-spacing: .14em; }
-    .ledger-head span:last-child { grid-column: 3; }
+    .ledger-head { position: absolute; z-index: 5; top: 0; right: 0; left: 0; display: grid; grid-template-columns: minmax(130px, .8fr) 54px minmax(210px, 1.2fr); gap: 0; font: 800 11px/1 var(--mono); letter-spacing: .14em; }
+    .ledger-head span { display: block; min-height: 44px; padding: 17px 16px 14px; }
+    .ledger-head span:first-child { grid-column: 1 / 3; background: #3d657b; color: #f8fbfc; }
+    .ledger-head span:last-child { grid-column: 3; background: var(--green); color: #17231a; }
 
     .theory-runway { position: relative; height: 230vh; min-height: 1800px; background: var(--canvas); }
     .theory-stage { position: sticky; top: 0; display: grid; min-height: 720px; height: 100svh; overflow: hidden; padding: 92px max(32px, calc((100vw - 1240px) / 2)) 54px; }
@@ -309,6 +312,9 @@
     .step-in { background: var(--canvas); }
     .step-in__head { display: grid; grid-template-columns: .65fr 1.35fr; gap: 7vw; align-items: end; }
     .step-in__head .display { max-width: 520px; font-size: clamp(38px, 4.2vw, 58px); }
+    .step-in__notes { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 36px; border-block: 1px solid var(--line); }
+    .step-in__notes p { padding: 18px 28px 18px 0; color: var(--ink-2); font-size: 15px; }
+    .step-in__notes p + p { border-left: 1px solid var(--line); padding-right: 0; padding-left: 28px; }
     .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 56px; border-top: 1px solid var(--ink); }
     .action-card { min-height: 270px; border-bottom: 1px solid var(--line); padding: 24px 24px 26px 0; }
     .action-card + .action-card { border-left: 1px solid var(--line); padding-left: 24px; }
@@ -320,6 +326,7 @@
 
     .record .display, .sessions .display, .agent-section .display, .enablement .display { font-size: clamp(36px, 4.1vw, 58px); }
     .record__grid { grid-template-columns: .67fr 1.33fr; }
+    .record-visual { width: min(430px, 100%); margin-top: 34px; object-fit: contain; transform: translate3d(calc(var(--record-drift, 0) * -18px), 0, 0); }
     .question { grid-template-columns: minmax(165px, .58fr) 1.42fr; }
     .question-tag { display: block; margin-bottom: 5px; color: var(--green-dark); font: 700 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
 
@@ -327,8 +334,8 @@
     .rule-icon img { width: 86px; height: 86px; object-fit: contain; }
     .rule-column { min-height: 390px; }
 
-    .session { grid-template-columns: 56px 1fr; min-height: 178px; }
-    .session__icon { width: 48px; height: 48px; object-fit: contain; }
+    .session { grid-template-columns: 140px 1fr; min-height: 224px; gap: 22px; padding-block: 26px; }
+    .session__icon { width: 132px; height: 132px; object-fit: contain; align-self: start; }
     svg.session__icon { overflow: visible; color: var(--green-dark); }
     .session p { grid-column: 2; }
 
@@ -352,6 +359,10 @@
     .enablement-offer { margin-top: 28px; border-top: 1px solid var(--line); }
     .enablement-offer p { display: grid; grid-template-columns: 1fr 1.15fr; gap: 20px; border-bottom: 1px solid var(--line); padding: 14px 0; color: var(--ink-2); font-size: 14px; }
     .enablement-offer strong { color: var(--green-dark); }
+    .enablement-explainer { max-width: 640px; margin-bottom: 26px; color: var(--ink-2); font-size: 17px; }
+    .enablement-table-title { margin: 0 0 12px; color: var(--ink); font: 700 22px/1.15 var(--display); }
+    .enablement-table-kicker { display: block; margin-bottom: 8px; color: var(--green-dark); font: 750 11px/1 var(--mono); letter-spacing: .11em; text-transform: uppercase; }
+    .enablement-bridge { margin: 24px 0; border-left: 2px solid var(--green); padding-left: 16px; color: var(--ink-2); font-size: 14px; }
     .closing .chapter__inner { display: grid; justify-items: center; }
     .closing .display { margin-inline: auto; }
 
@@ -395,7 +406,9 @@
       .paradigm-stage { display: block; }
       .paradigm-copy h2 { font-size: clamp(54px, 15vw, 78px); }
       .ledger-window { height: auto; margin-top: 70px; overflow: visible; }
-      .ledger-head { position: relative; top: auto; margin-bottom: 10px; grid-template-columns: 1fr 32px 1.25fr; }
+      .ledger-head { position: sticky; top: 60px; margin-bottom: 10px; grid-template-columns: 1fr 1.25fr; }
+      .ledger-head span:first-child { grid-column: 1; }
+      .ledger-head span:last-child { grid-column: 2; }
       .ledger-track { position: relative; }
       .ledger-row { position: relative; top: auto; grid-template-columns: 1fr 32px 1.25fr; min-height: 128px; opacity: 1; transform: none !important; }
       .ledger-window::before, .ledger-window::after, .ledger-index { display: none; }
@@ -417,7 +430,12 @@
       .rule-column + .rule-column { border-top: 1px solid color-mix(in srgb, var(--canvas) 24%, transparent); border-left: 0; padding-left: 0; }
       .session-list { grid-template-columns: 1fr; }
       .session:nth-child(even) { border-left: 0; padding-left: 0; }
+      .session { grid-template-columns: 108px 1fr; }
+      .session__icon { width: 100px; height: 100px; }
       .action-grid { grid-template-columns: 1fr; }
+      .step-in__notes { grid-template-columns: 1fr; }
+      .step-in__notes p { padding: 16px 0; }
+      .step-in__notes p + p { border-top: 1px solid var(--line); border-left: 0; padding-left: 0; }
       .action-card { min-height: 0; padding: 24px 0; }
       .action-card + .action-card { border-left: 0; padding-left: 0; }
       .question { grid-template-columns: 1fr; gap: 8px; }
@@ -610,6 +628,7 @@
           <h2 class="display" id="step-in-title">You can step in here.</h2>
           <p class="lede">Every workflow has a human stop. React to a note, approve a plan, decide to ship, or inspect the record without hunting through agent transcripts.</p>
         </div>
+        <div class="step-in__notes"><p>As agents get smarter, you steer less and read fewer transcripts.</p><p>Every tool call and every transcript stays in the record, for whenever you want to look.</p></div>
         <div class="action-grid">
           <article class="action-card"><span class="action-card__route"><i></i> Note → plan → accept</span><h3>Initiative</h3><p>Write the intent, add comments or reactions, set a ceiling, say yes, then accept tested pull requests and their receipt.</p><footer>Human stop · approve the plan</footer></article>
           <article class="action-card"><span class="action-card__route"><i></i> Alert → contain → resolve</span><h3>Issue</h3><p>An agent catches the alert and severity, contains the incident, proposes a fix, then waits for your approval before the normal build begins.</p><footer>Human stop · authorize the fix</footer></article>
@@ -624,6 +643,7 @@
         <div>
           <h2 class="display" id="record-title">Many notes. Many agents. <em>One record.</em></h2>
           <p class="lede">Every team writes notes and runs agents. All of it lands in one record, under the same rules.</p>
+          <img class="record-visual" src="/landingpage-assets/illustrations/record-one-record.webp" alt="Hand-drawn notes and agent signals converging into one record">
         </div>
         <div class="questions">
           <article class="question"><h3><span class="question-tag">Work in progress</span>What is moving?</h3><p>Every initiative, its leader, and the phase it is in—without a separate status meeting.</p></article>
@@ -651,10 +671,10 @@
       <div class="chapter__inner sessions__grid">
         <h2 class="display" id="sessions-title">Four kinds of session. <em>One Software System.</em></h2>
         <div class="session-list">
-          <article class="session"><svg class="session__icon" viewBox="0 0 52 52" fill="none" aria-hidden="true"><path d="m5 13 13-5 15 6 14-5v30l-14 5-15-6-13 5V13Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M18 8v30M33 14v30M11 31c8-14 18 7 30-10" stroke="currentColor" stroke-width="2" stroke-dasharray="3 4"/><circle cx="11" cy="31" r="3" fill="var(--green)"/><circle cx="41" cy="21" r="3" fill="var(--blue)"/></svg><h3>Project Management</h3><p>A requirement becomes milestones, sprints, tickets, and a plan.</p></article>
-          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-engineering.webp" alt=""><h3>Engineering</h3><p>An approved plan becomes tested pull requests and a receipt.</p></article>
-          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-qa.webp" alt=""><h3>QA</h3><p>A browser agent clicks through what shipped and reports only what it ran.</p></article>
-          <article class="session"><svg class="session__icon" viewBox="0 0 52 52" fill="none" aria-hidden="true"><path d="M9 42h34M16 42l5-19 10-6 5 25M22 24l14 7M24 30l11 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 17c6 0 11 5 11 11M31 11c9 0 17 8 17 17" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/><circle cx="31" cy="17" r="3" fill="var(--green)"/></svg><h3>Ops</h3><p>The agent watches logs and alerts, opens the issue, and works the fix.</p></article>
+          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-project-management-v2.webp" alt=""><h3>Project Management</h3><p>A requirement becomes milestones, sprints, tickets, and a plan.</p></article>
+          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-engineering-v2.webp" alt=""><h3>Engineering</h3><p>An approved plan becomes tested pull requests and a receipt.</p></article>
+          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-qa-v2.webp" alt=""><h3>QA</h3><p>A browser agent clicks through what shipped and reports only what it ran.</p></article>
+          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-ops-v2.webp" alt=""><h3>Ops</h3><p>The agent watches logs and alerts, opens the issue, and works the fix.</p></article>
         </div>
       </div>
     </section>
@@ -682,7 +702,15 @@
           <p class="lede">Nobody was trained for this job. Refactory, the team behind Konteks, trains for exactly this.</p>
           <img class="enablement-visual" src="/landingpage-assets/illustrations/enablement-learning-path.webp" alt="A hand-drawn learning path for teams working with agents">
         </div>
-        <div><div class="learning-list"><p><strong>Juniors</strong> learn to judge evidence they did not produce.</p><p><strong>Leads</strong> learn to write useful constraints and approval boundaries.</p><p><strong>Product people</strong> learn to turn intent into the note agents can act on.</p><p><strong>Reviewers &amp; teams</strong> practice accepting, rejecting, and coaching real workflows.</p></div><div class="enablement-offer" aria-label="Enablement services"><p><strong>Readiness mapping</strong><span>Find where agentic work fits before changing the whole operating model.</span></p><p><strong>Role-based training</strong><span>Different practice for juniors, leads, product people, and reviewers.</span></p><p><strong>Guided onboarding</strong><span>Connect a real Software System and run the first sessions together.</span></p><p><strong>Ongoing coaching</strong><span>Keep improving judgment, constraints, and evidence after the workshop.</span></p></div><p style="margin-top:30px"><a class="button button--solid" href="mailto:hello@konteks.io?subject=Agentic%20training%20and%20onboarding">Talk to us about enablement →</a></p></div>
+        <div>
+          <p class="enablement-explainer">The first table names the judgment each role must build. The second shows how Refactory turns those gaps into a practical adoption path.</p>
+          <span class="enablement-table-kicker">Your team</span><h3 class="enablement-table-title">What each role needs to learn</h3>
+          <div class="learning-list"><p><strong>Juniors</strong> learn to judge evidence they did not produce.</p><p><strong>Leads</strong> learn to write useful constraints and approval boundaries.</p><p><strong>Product people</strong> learn to turn intent into the note agents can act on.</p><p><strong>Reviewers &amp; teams</strong> practice accepting, rejecting, and coaching real workflows.</p></div>
+          <p class="enablement-bridge">Those role gaps determine the enablement path—not a one-size-fits-all workshop.</p>
+          <span class="enablement-table-kicker">Refactory</span><h3 class="enablement-table-title">How we help the capability stick</h3>
+          <div class="enablement-offer" aria-label="Enablement services"><p><strong>Readiness mapping</strong><span>We map roles, workflows, and approval risks before changing the operating model.</span></p><p><strong>Role-based training</strong><span>We train each role against the decisions and evidence it actually owns.</span></p><p><strong>Guided onboarding</strong><span>We connect one real Software System and run the first sessions with your team.</span></p><p><strong>Ongoing coaching</strong><span>We review receipts, constraints, and decisions after launch so the practice improves.</span></p></div>
+          <p style="margin-top:30px"><a class="button button--solid" href="mailto:hello@konteks.io?subject=Agentic%20training%20and%20onboarding">Talk to us about enablement →</a></p>
+        </div>
       </div>
     </section>
 
@@ -783,7 +811,7 @@ $ next: say yes to run the approved plan`;
         node.parentElement.appendChild(ghost);
         ghost.getBoundingClientRect();
         requestAnimationFrame(() => ghost.classList.add('state-exit'));
-        setTimeout(() => ghost.remove(), 620);
+        setTimeout(() => ghost.remove(), 1100);
       };
       const setPairClass = (node, index) => {
         node.classList.remove('pair-0', 'pair-1', 'pair-2');
@@ -813,8 +841,10 @@ $ next: say yes to run the approved plan`;
         if (!immediate && !reduced) {
           signal.getBoundingClientRect();
           requestAnimationFrame(() => {
-            signal.classList.remove('state-enter');
-            response.classList.remove('state-enter');
+            requestAnimationFrame(() => {
+              signal.classList.remove('state-enter');
+              response.classList.remove('state-enter');
+            });
           });
         } else {
           signal.classList.remove('state-exit');
