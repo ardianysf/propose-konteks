@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en" data-theme="light" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Konteks for people. MCP for agents. Tenant-scoped APIs underneath both.">
+  <title>Konteks documentation: Konteks, MCP, and API reference</title>
+  <link rel="icon" href="/assets/konteks/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght,SOFT,WONK@9..144,600..900,0..100,0..1&amp;display=swap" rel="stylesheet">
+  <script>
+    (() => {
+      document.documentElement.classList.replace('no-js', 'js');
+      let saved = 'system';
+      try { saved = localStorage.getItem('konteks-theme') || 'system'; } catch (_) {}
+      const dark = saved === 'dark' || (saved === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #fbfaf6;
+      --surface: #f4f0e1;
+      --ink: #1e2f25;
+      --ink-2: #51695a;
+      --quiet: #5f7365;
+      --line: #dce4d7;
+      --green: #8ab869;
+      --green-dark: #4f7044;
+      --green-pale: #e9f1df;
+      --blue: #8bb2cc;
+      --blue-pale: #dceaf2;
+      --hero-surface: #f1f0e9;
+      --theory-surface: #f6f5ec;
+      --display: 'Fraunces', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --canvas: #101712;
+      --surface: #18221a;
+      --ink: #edf2ec;
+      --ink-2: #bdcbbf;
+      --quiet: #95a497;
+      --line: #314334;
+      --green: #9bc778;
+      --green-dark: #b6d59d;
+      --green-pale: #203320;
+      --blue: #8dbad4;
+      --blue-pale: #1a303c;
+      --hero-surface: #101712;
+      --theory-surface: #101712;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; overflow-x: hidden; background: var(--canvas); color: var(--ink); font: 400 16px/1.55 var(--sans); }
+    ::selection { background: var(--green); color: #162018; }
+    :focus-visible { outline: 3px solid var(--green); outline-offset: 4px; }
+    ::-webkit-scrollbar { width: 11px; }
+    ::-webkit-scrollbar-track { background: var(--canvas); }
+    ::-webkit-scrollbar-thumb { border: 3px solid var(--canvas); border-radius: 20px; background: var(--quiet); }
+    img, video, svg { display: block; max-width: 100%; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+    button, a { color: inherit; font: inherit; }
+    a { text-decoration-thickness: 1px; text-underline-offset: .23em; }
+    h1, h2, p { margin: 0; }
+    .shell { width: min(1240px, calc(100% - 64px)); margin-inline: auto; }
+    .button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 8px; border: 1px solid currentColor; border-radius: 999px; padding: 0 22px; font-weight: 700; text-decoration: none; transition: transform .22s var(--ease), background-color .22s ease; }
+    .button:hover { transform: translateY(-2px); }
+    .button--solid { border-color: var(--green); background: var(--green); color: #17231a; }
+
+    .nav { position: fixed; z-index: 100; inset: 0 0 auto; border-bottom: 1px solid var(--line); background: var(--canvas); }
+    .nav__inner { display: flex; min-height: 64px; align-items: center; gap: 24px; }
+    .brand { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 9px; font: 800 22px/1 var(--display); text-decoration: none; }
+    .brand img { width: 38px; height: 32px; object-fit: contain; mix-blend-mode: multiply; }
+    [data-theme='dark'] .brand img { filter: invert(.86) hue-rotate(80deg); mix-blend-mode: screen; }
+    .beta { border: 1px solid var(--green); border-radius: 999px; padding: 2px 7px; color: var(--green-dark); font: 700 11px/1.35 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+    .nav__links { display: flex; align-items: center; gap: clamp(14px, 1.7vw, 26px); margin-left: 120px; }
+    .nav__links a { font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .nav__links a:hover { color: var(--green-dark); }
+    .nav__tools { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .icon-button, .locale { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: transparent; cursor: pointer; }
+    .locale { font-size: 11px; font-weight: 700; }
+    .nav__cta { min-height: 44px; padding-inline: 18px; font-size: 13px; }
+    .sun, [data-theme='dark'] .moon { display: none; }
+    [data-theme='dark'] .sun { display: block; }
+    .mobile-nav { display: none; }
+    .mobile-nav summary { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--line); border-radius: 50%; cursor: pointer; list-style: none; }
+    .mobile-nav summary::-webkit-details-marker { display: none; }
+    .mobile-nav__panel { position: absolute; top: 58px; right: 0; display: grid; width: min(340px, calc(100vw - 32px)); border: 1px solid var(--line); border-radius: 14px; padding: 10px; background: var(--surface); box-shadow: 0 18px 40px rgb(30 47 37 / .14); }
+    .mobile-nav__panel a { border-radius: 9px; padding: 10px 12px; font-weight: 650; text-decoration: none; }
+    .mobile-nav__panel a:hover { background: var(--green-pale); }
+
+    .chapter { position: relative; padding: clamp(88px, 9vw, 138px) 32px; }
+    .chapter__inner { width: min(1240px, 100%); margin-inline: auto; }
+    .display { max-width: 920px; font: 750 clamp(42px, 4.8vw, 68px)/.98 var(--display); font-variation-settings: 'opsz' 76, 'SOFT' 48, 'WONK' 1; letter-spacing: -.03em; text-wrap: balance; }
+    .display em { color: var(--green-dark); font-style: italic; font-weight: 650; }
+    .lede { max-width: 680px; margin-top: 22px; color: var(--ink-2); font-size: clamp(17px, 1.55vw, 21px); line-height: 1.5; }
+    .small-label { color: var(--green-dark); font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+
+    .agent-terminal { border-top: 2px solid var(--green); padding: 16px 19px 18px; background: #15231b; color: #d9e7dc; font: 500 12px/1.62 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .terminal-head { display: flex; justify-content: space-between; border-bottom: 1px solid #405347; padding-bottom: 10px; color: #a4b7a8; font-size: 10px; }
+    .terminal-body { padding-top: 14px; white-space: pre-wrap; }
+    .terminal-body .ok { color: #9bc778; }
+    .terminal-body .run { color: #8dbad4; }
+
+    .footer { background: #17231a; color: #eef3ea; padding: 80px 32px 38px; }
+    .footer__grid { display: grid; grid-template-columns: 1.8fr repeat(3, 1fr); gap: 50px; }
+    .footer h2 { margin-bottom: 18px; font-size: 13px; }
+    .footer ul { margin: 0; padding: 0; list-style: none; }
+    .footer li + li { margin-top: 10px; }
+    .footer a { color: #cbd7ca; }
+    .footer__brand { font: 800 34px/1 var(--display); }
+    .footer__brand p { max-width: 290px; margin-top: 20px; color: #aab9ab; font: 400 15px/1.5 var(--sans); }
+    .footer__bottom { display: flex; justify-content: space-between; gap: 30px; margin-top: 78px; border-top: 1px solid #344238; padding-top: 24px; color: #91a095; font-size: 13px; }
+
+    @media (max-width: 1050px) {
+      .nav__links { display: none; }
+      .nav__tools { margin-left: auto; }
+      .mobile-nav { display: block; }
+    }
+    @media (min-width: 1051px) and (max-width: 1250px) {
+      .nav__links { gap: 13px; margin-left: 34px; }
+      .nav__cta { padding-inline: 14px; }
+    }
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 32px, 620px); }
+      .nav__inner { min-height: 60px; }
+      .nav__tools .locale, .nav__tools .nav__cta { display: none; }
+      .nav__tools { margin-left: auto; }
+      .chapter { padding: 82px 16px; }
+      .display { font-size: clamp(39px, 10.5vw, 52px); }
+      .footer__grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .001ms !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+    }
+
+    /* current-page wayfinding */
+    .nav__links a[aria-current='page'] { color: var(--green-dark); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+    .mobile-nav__panel a[aria-current='page'] { color: var(--green-dark); }
+
+    /* docs page */
+    h3 { margin: 0; }
+    .docs-head { padding-top: clamp(150px, 15vw, 204px); }
+    .docs-head .display { margin-top: 18px; }
+    .docs-index { display: flex; flex-wrap: wrap; gap: 10px 36px; margin-top: 46px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 15px 0; }
+    .docs-index a { display: flex; min-height: 44px; align-items: center; padding: 3px 0; color: var(--quiet); font: 700 11px/1.4 var(--mono); letter-spacing: .13em; text-transform: uppercase; text-decoration: none; font-variant-numeric: tabular-nums; }
+    .docs-index a:hover { color: var(--green-dark); }
+
+    .surface-chapter { border-top: 2px solid var(--ink); }
+    .surface-chapter--alt { background: var(--surface); }
+    .surface-chapter__numeral { color: var(--green-dark); font: 700 12px/1 var(--mono); letter-spacing: .16em; font-variant-numeric: tabular-nums; }
+    .surface-chapter__title { max-width: 760px; margin-top: 20px; font: 750 clamp(36px, 3.9vw, 54px)/1.02 var(--display); font-variation-settings: 'opsz' 76, 'SOFT' 48, 'WONK' 1; letter-spacing: -.03em; text-wrap: balance; }
+    .surface-chapter__intro { max-width: 680px; margin-top: 22px; color: var(--ink-2); font-size: clamp(16px, 1.4vw, 18px); line-height: 1.6; }
+    .surface-chapter__intro + .surface-chapter__intro { margin-top: 14px; }
+    .surface-chapter__note { max-width: 680px; margin-top: 12px; color: var(--quiet); font-size: 13px; }
+    .surface-chapter__actions { margin-top: 28px; }
+
+    .ref-subhead { margin: clamp(48px, 6vw, 68px) 0 0; color: var(--green-dark); font: 750 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .ref-list { margin: clamp(48px, 6vw, 72px) 0 0; padding: 0; list-style: none; border-top: 1px solid var(--ink); }
+    .ref-list li { display: grid; grid-template-columns: 36px 1fr; gap: 18px; align-content: start; border-bottom: 1px solid var(--line); padding: 22px 0; }
+    .ref-list--grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .ref-list--grid li:nth-child(odd) { padding-right: 26px; }
+    .ref-list--grid li:nth-child(even) { border-left: 1px solid var(--line); padding-left: 26px; }
+    .ref-mark { color: var(--green-dark); font-size: 15px; line-height: 1.5; }
+    .ref-list h3 { color: var(--ink); font: 700 17.5px/1.35 var(--sans); }
+    .ref-list p { margin-top: 6px; color: var(--ink-2); font-size: 14.5px; line-height: 1.58; }
+
+    .agent-terminal { max-width: 760px; margin-top: 18px; }
+    .terminal-body { overflow-wrap: anywhere; }
+    .terminal-key { color: #a4b7a8; }
+    .ref-caution { max-width: 760px; margin-top: 40px; border: 1px solid var(--green-dark); padding: 20px 24px; color: var(--ink-2); font-size: 14px; line-height: 1.6; }
+
+    .api-notes { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: clamp(48px, 6vw, 72px); border-top: 1px solid var(--ink); }
+    .api-note { padding: 20px 22px 6px 0; color: var(--ink-2); font-size: 14px; line-height: 1.58; }
+    .api-note + .api-note { border-left: 1px solid var(--line); padding-left: 22px; }
+    .api-note h3 { color: var(--ink); font: 700 17.5px/1.35 var(--sans); }
+    .api-note p { margin-top: 6px; }
+
+    .docs-close { border-top: 2px solid var(--ink); background: var(--surface); }
+    .docs-close__title { max-width: 680px; font: 650 clamp(27px, 3vw, 42px)/1.12 var(--display); font-variation-settings: 'opsz' 76, 'SOFT' 48, 'WONK' 1; letter-spacing: -.02em; text-wrap: balance; }
+    .docs-close p { max-width: 560px; margin-top: 14px; color: var(--ink-2); }
+    .docs-close__link { display: inline-flex; min-height: 44px; align-items: center; margin-top: 26px; font-weight: 700; }
+    .docs-close__link:hover { color: var(--green-dark); }
+
+    @media (max-width: 720px) {
+      .docs-head { padding-top: 128px; }
+      .surface-chapter__title { font-size: clamp(32px, 9vw, 42px); }
+      .docs-index { gap: 10px 26px; }
+      .ref-list--grid { grid-template-columns: 1fr; }
+      .ref-list--grid li:nth-child(odd) { padding-right: 0; }
+      .ref-list--grid li:nth-child(even) { border-left: 0; padding-left: 0; }
+      .api-notes { grid-template-columns: 1fr; }
+      .api-note { padding: 18px 0 6px; }
+      .api-note + .api-note { border-top: 1px solid var(--line); border-left: 0; padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    DIRECTION CONTRACT — docs.html
+
+    THESIS: The docs page is the product contract made readable: Konteks for people, MCP for agents, tenant-scoped APIs underneath both — one authority, stated plainly.
+
+    OWN-WORLD: Editorial Runway in read mode. Warm paper, forest ink, hairline ledgers with 2px ink chapter rules, Fraunces display over DM Sans, mono metadata, pill buttons. The one borrowed object is the fixed dark terminal.
+
+    STORY: Wayfinding before prose — a ruled index row, then 01 Konteks, 02 Core MCP, 03 API reference, then a quiet door to hello@konteks.io.
+
+    FIRST VIEWPORT: "Reference section" eyebrow, the "Three surfaces. One product contract." display line, the lede, and the ruled mono index.
+
+    FORM: Static and readable — no imagery, no scroll choreography; ruled two-column ledgers that collapse to one column on small screens.
+
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+  -->
+  <nav class="nav" aria-label="Main navigation">
+    <div class="shell nav__inner">
+      <a class="brand" href="/" aria-label="Konteks home">
+        <img src="/landingpage-assets/figma-paper-boat-hero.png" alt="">
+        <span>Konteks</span><span class="beta">Beta</span>
+      </a>
+      <div class="nav__links">
+        <a href="/#product">Product</a><a href="/#workflow">How it works</a><a href="/#sessions">Four kinds of session</a><a href="/#enablement">Enablement</a><a href="/pricing/">Pricing</a><a href="/docs/" aria-current="page">Docs</a><a href="/blog/">Journal</a>
+      </div>
+      <div class="nav__tools">
+        <button class="icon-button" type="button" data-theme-toggle aria-label="Switch color theme">
+          <svg class="moon" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M15.8 12.8A6.7 6.7 0 0 1 7.2 4.2a6.7 6.7 0 1 0 8.6 8.6Z" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          <svg class="sun" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 1.5V4M10 16v2.5M1.5 10H4M16 10h2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+        <button class="locale" type="button" aria-label="Switch language">ID</button>
+        <a class="button button--solid nav__cta" href="https://app.konteks.io/">Start building ↗</a>
+      </div>
+      <details class="mobile-nav">
+        <summary aria-label="Open navigation"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 9h14M2 13h14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></summary>
+        <div class="mobile-nav__panel"><a href="/#product">Product</a><a href="/#workflow">How it works</a><a href="/#sessions">Four kinds of session</a><a href="/#enablement">Enablement</a><a href="/pricing/">Pricing</a><a href="/docs/" aria-current="page">Docs</a><a href="/blog/">Journal</a><a href="https://app.konteks.io/">Start building ↗</a></div>
+      </details>
+    </div>
+  </nav>
+
+  <main>
+    <header class="chapter docs-head">
+      <div class="chapter__inner">
+        <p class="small-label">Reference section</p>
+        <h1 class="display">Three surfaces. <em>One product contract.</em></h1>
+        <p class="lede">Konteks for people. MCP for agents. Tenant-scoped APIs underneath both. Konteks is model-neutral by design, so your team can choose the model and coding agent that fit the work.</p>
+        <nav class="docs-index" aria-label="On this page">
+          <a href="#app">01 · Konteks</a>
+          <a href="#mcp">02 · MCP</a>
+          <a href="#api-reference">03 · API reference</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="chapter surface-chapter" id="app" aria-labelledby="app-title">
+      <div class="chapter__inner">
+        <p class="surface-chapter__numeral">01</p>
+        <h2 class="surface-chapter__title" id="app-title">Konteks</h2>
+        <p class="surface-chapter__intro">The human workspace for creating Systems, opening sessions in Engineering, Project Management, or QA mode, selecting Components and repositories, configuring agents through unified Agent Setup, reviewing estimates, approving work, and reading evidence.</p>
+        <p class="surface-chapter__note">Konteks is available on the web, on desktop and mobile browsers.</p>
+        <p class="surface-chapter__actions"><a class="button" href="https://app.konteks.io/">Open Konteks ↗</a></p>
+        <ul class="ref-list ref-list--grid">
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Start with a Software System</h3><p>Every durable session belongs to one explicit Backstage/C4 System boundary and binds one ready Execution Profile revision.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Choose known Components</h3><p>Reuse catalogued repositories naturally, or bootstrap new Components from repository information.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Review before execution</h3><p>Inspect proposal scope, upfront estimate, affected repositories, and the human approval boundary.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Follow and reconcile</h3><p>Track runs, tasks, validation, pull requests, usage, and Value Receipt evidence from the same session.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Plan in Project Management mode</h3><p>Draft a PRD, break it into milestones, sprints, and tickets, and open one Engineering session per ticket. Estimates flow back to the tickets, and a live delivery Report consolidates Value Receipts.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Verify in QA mode</h3><p>Verify a delivered change against a Preview Environment through browser journeys, per-criterion assertions, and a Verification Report that declares its own coverage. Anything a run did not exercise reads as unverified, never as passed.</p></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="chapter surface-chapter surface-chapter--alt" id="mcp" aria-labelledby="mcp-title">
+      <div class="chapter__inner">
+        <p class="surface-chapter__numeral">02</p>
+        <h2 class="surface-chapter__title" id="mcp-title">Core MCP</h2>
+        <p class="surface-chapter__intro">The public remote MCP endpoint for authorized external agents. It federates Konteks capabilities behind one tenant-scoped connection.</p>
+        <p class="surface-chapter__intro">Use it from Codex, Claude, or another MCP-compatible coding agent. Konteks supplies the durable software context, policy, estimate, approval boundary, and evidence; your team chooses the model.</p>
+        <h3 class="ref-subhead">Connection shape</h3>
+        <div class="agent-terminal">
+          <div class="terminal-head"><span>connection / core-mcp</span><span>READY</span></div>
+          <div class="terminal-body"><span class="terminal-key">Endpoint:</span> https://api.konteks.io/mcp
+<span class="terminal-key">Transport:</span> Streamable HTTP
+<span class="terminal-key">Auth:</span> Bearer &lt;scoped credential&gt;
+
+<span class="ok">initialize</span> → tools/list → resources/list → resources/templates/list → tools/call | resources/read</div>
+        </div>
+        <ul class="ref-list">
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Discover</h3><p>Find Systems, sessions, catalog context, billing state, and federated tools without hard-coded IDs.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Act safely</h3><p>Tool metadata, permissions, tenant scope, budgets, and human approval control what may run.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Keep parity</h3><p>Konteks and MCP share the same product context, policies, and outcome model.</p></div></li>
+        </ul>
+        <p class="ref-caution">Create, rotate, and revoke credentials from Konteks’s Work Locally surface. Never place credentials in prompts, source control, screenshots, or shared logs.</p>
+      </div>
+    </section>
+
+    <section class="chapter surface-chapter" id="api-reference" aria-labelledby="api-title">
+      <div class="chapter__inner">
+        <p class="surface-chapter__numeral">03</p>
+        <h2 class="surface-chapter__title" id="api-title">API reference</h2>
+        <p class="surface-chapter__intro">Public APIs are tenant-scoped and generally consumed through Konteks or MCP. Direct integrations should use documented endpoints and published authentication methods.</p>
+        <ul class="ref-list ref-list--grid">
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Identity &amp; workspace</h3><p>Authentication, active workspace, membership, invitations, and tenant-scoped account context.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Software Systems &amp; sessions</h3><p>Create and select Systems; create sessions; send messages; attach files; inspect and cancel runs.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Catalog learning</h3><p>Review known Components, provisional repository-derived facts, and evidence-backed catalog changes.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>VCS connectors</h3><p>Connect, validate, inspect, revoke, restore, and browse repositories from supported providers.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Plans &amp; execution</h3><p>Inspect proposals and plans, follow events and tasks, confirm or revise approved work, and read outcomes.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Billing</h3><p>Read plans, entitlements, balance, budgets, quotes, reservations, usage analytics, exports, and transactions.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Profiles &amp; models</h3><p>Configure Planner, Executor, Assistant, and Search roles through unified Agent Setup, manage named immutable-revision Execution Profiles, and validate supported models while keeping credentials protected.</p></div></li>
+          <li><span class="ref-mark" aria-hidden="true">↳</span><div><h3>Project management</h3><p>Draft PRDs, accept breakdowns, assign tickets, open a ticket’s Engineering session, and read the live delivery Report that consolidates ticket estimates and Value Receipts.</p></div></li>
+        </ul>
+        <div class="api-notes">
+          <div class="api-note"><h3>Authentication</h3><p>Browser requests use the authenticated Konteks session. External agents use revocable, scoped MCP credentials. Service credentials are not public client credentials.</p></div>
+          <div class="api-note"><h3>Errors</h3><p>Treat 401/403 as authentication or authorization boundaries, 409 as state conflict, 402 as billing recovery, and 5xx as retryable only when the operation is idempotent.</p></div>
+          <div class="api-note"><h3>Stability</h3><p>Konteks is in beta and the public surface is being stabilized. We will publish versioned schemas and changelog details before incompatible changes.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter docs-close" aria-labelledby="docs-close-title">
+      <div class="chapter__inner">
+        <h2 class="docs-close__title" id="docs-close-title">Need the public contract clarified?</h2>
+        <p>If a capability is not documented here, contact us before building against it.</p>
+        <a class="docs-close__link" href="mailto:hello@konteks.io?subject=Konteks%20API%20question">hello@konteks.io →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="chapter__inner">
+      <div class="footer__grid">
+        <div class="footer__brand">Konteks<p>The AI control plane for software engineering.</p></div>
+        <div><h2>Product</h2><ul><li><a href="/#product">Overview</a></li><li><a href="/#workflow">How it works</a></li><li><a href="/#sessions">Sessions</a></li><li><a href="/#enablement">Enablement</a></li></ul></div>
+        <div><h2>Resources</h2><ul><li><a href="/docs/">Docs</a></li><li><a href="/docs/#api-reference">API reference</a></li><li><a href="/blog/">Journal</a></li><li><a href="/pricing/">Pricing</a></li></ul></div>
+        <div><h2>Company</h2><ul><li><a href="/about/">About</a></li><li><a href="/contact/">Contact</a></li><li><a href="/security/">Security</a></li><li><a href="/privacy/">Privacy</a></li></ul></div>
+      </div>
+      <div class="footer__bottom"><span>Made by <a href="https://refactory.id/">Refactory ↗</a></span><span>© 2026 Konteks · konteks.io</span></div>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      document.querySelectorAll('[data-theme-toggle]').forEach(button => button.addEventListener('click', () => {
+        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try { localStorage.setItem('konteks-theme', next); } catch (_) {}
+      }));
+    })();
+  </script>
+</body>
+</html>

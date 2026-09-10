@@ -16,6 +16,9 @@ import type { Plugin } from 'vite'
  *   /catalog/tokens → serves catalog.html
  *   /catalog/components → serves catalog.html
  *   /catalog/components/<slug> → serves catalog.html
+ *   /pricing, /pricing/ → serves pricing.html
+ *   /docs, /docs/ → serves docs.html
+ *   /blog, /blog/ → serves journal.html
  *
  * The site root redirects to /catalog. The app remains available at /v2.
  */
@@ -36,6 +39,12 @@ export function routeSiteRequest(
   }
   if (pathname === '/landingpage') {
     req.url = `/landingpage.html${query}`
+  } else if (pathname === '/pricing' || pathname === '/pricing/') {
+    req.url = `/pricing.html${query}`
+  } else if (pathname === '/docs' || pathname === '/docs/') {
+    req.url = `/docs.html${query}`
+  } else if (pathname === '/blog' || pathname === '/blog/') {
+    req.url = `/journal.html${query}`
   } else if (pathname === '/catalog' || pathname.startsWith('/catalog/')) {
     req.url = `/catalog.html${query}`
   } else if (pathname === '/v2' || pathname.startsWith('/v2/')) {
@@ -86,6 +95,9 @@ export default defineConfig({
         main: fileURLToPath(new URL('./index.html', import.meta.url)),
         catalog: fileURLToPath(new URL('./catalog.html', import.meta.url)),
         landingpage: fileURLToPath(new URL('./landingpage.html', import.meta.url)),
+        pricing: fileURLToPath(new URL('./pricing.html', import.meta.url)),
+        docs: fileURLToPath(new URL('./docs.html', import.meta.url)),
+        journal: fileURLToPath(new URL('./journal.html', import.meta.url)),
       },
     },
   },
