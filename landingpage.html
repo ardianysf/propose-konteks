@@ -31,8 +31,10 @@
       --green-pale: #e9f1df;
       --blue: #8bb2cc;
       --blue-pale: #dceaf2;
+      --hero-surface: #f1f0e9;
       --display: 'Fraunces', Georgia, serif;
       --sans: 'DM Sans', system-ui, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       --ease: cubic-bezier(.16, 1, .3, 1);
     }
     [data-theme='dark'] {
@@ -48,6 +50,7 @@
       --green-pale: #203320;
       --blue: #8dbad4;
       --blue-pale: #1a303c;
+      --hero-surface: #101712;
     }
     *, *::before, *::after { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -91,37 +94,33 @@
     .mobile-nav__panel a { border-radius: 9px; padding: 10px 12px; font-weight: 650; text-decoration: none; }
     .mobile-nav__panel a:hover { background: var(--green-pale); }
 
-    .hero-runway { position: relative; height: 430vh; min-height: 3100px; background: var(--surface); }
-    .hero-stage { position: sticky; top: 0; height: 100svh; min-height: 720px; overflow: hidden; background: var(--surface); }
+    .hero-runway { position: relative; height: 430vh; min-height: 3100px; background: var(--hero-surface); }
+    .hero-stage { position: sticky; top: 0; height: 100svh; min-height: 720px; overflow: hidden; background: var(--hero-surface); }
     .hero-stage::after { content: ''; position: absolute; z-index: 0; right: 0; bottom: 8%; left: 0; border-top: 1px solid var(--line); }
     .hero-eyebrow { position: absolute; z-index: 7; top: 15%; left: 50%; color: var(--green-dark); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; transform: translateX(-50%); }
     .hero-title { position: absolute; z-index: 6; top: 20%; left: 50%; width: min(1080px, calc(100% - 120px)); color: var(--ink); font: 800 clamp(70px, 6.1vw, 94px)/.9 var(--display); font-variation-settings: 'opsz' 96, 'SOFT' 45, 'WONK' 1; letter-spacing: -.035em; text-align: center; text-wrap: balance; transform: translateX(-50%) translateY(calc(var(--hero-drift, 0) * -10px)); transition: opacity .35s ease; }
-    .hero-title em { color: var(--green-dark); font-style: italic; font-weight: 650; }
+    .hero-title span { color: var(--green-dark); font-style: normal; font-weight: 800; }
     .progress { display: none; }
     .progress__count { display: block; margin-bottom: 12px; font-size: 14px; font-weight: 700; }
     .progress__track { display: grid; width: 126px; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .progress__track i { height: 4px; border-radius: 4px; background: var(--line); transition: background-color .35s ease, transform .35s var(--ease); transform-origin: left; }
     .progress__track i.is-active { background: var(--green); transform: scaleX(1.05); }
-    .signal { position: absolute; z-index: 7; width: min(205px, 16vw); min-height: 82px; border: 0; border-top: 1px solid var(--green-dark); padding: 9px 6px 8px 0; background: transparent; text-align: left; cursor: pointer; transition: opacity .48s var(--ease), transform .48s var(--ease); }
-    .signal::before { content: ''; position: absolute; top: -5px; right: -5px; width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
-    .signal::after { content: ''; position: absolute; top: -1px; left: 100%; width: clamp(72px, 8vw, 124px); border-top: 1px solid var(--green); transform: rotate(12deg); transform-origin: left; }
-    .signal__zone, .response__zone { display: block; margin-bottom: 5px; font: 700 9px/1.1 var(--mono); letter-spacing: .13em; text-transform: uppercase; }
-    .signal__zone { color: var(--green-dark); }
-    .response__zone { color: #537895; }
-    .signal__kind { display: block; color: var(--green-dark); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .signal, .response { position: absolute; z-index: 7; display: block; width: min(250px, 20vw); min-height: 82px; border: 0; padding: 0; background: transparent; text-align: left; cursor: pointer; transition: opacity .48s var(--ease), transform .48s var(--ease); }
+    .signal__zone, .response__zone { display: grid; grid-template-columns: 9px max-content minmax(38px, 1fr); align-items: center; gap: 9px; margin-bottom: 10px; color: var(--green-dark); font: 700 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+    .signal__zone::before, .response__zone::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
+    .signal__zone::after, .response__zone::after { content: ''; border-top: 1px solid var(--green-dark); }
+    .signal__zone::before, .response__zone::before { grid-column: 1; grid-row: 1; }
+    .signal__zone > span, .response__zone > span { grid-column: 2; grid-row: 1; }
+    .signal__zone::after, .response__zone::after { grid-column: 3; grid-row: 1; }
+    .signal__kind, .response__kind { display: block; margin-left: 18px; color: var(--green-dark); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
     .signal__title { display: block; margin-top: 2px; font-size: 16px; font-weight: 700; line-height: 1.15; }
+    .signal__title, .signal__text, .response__title, .response__text { margin-left: 18px; }
     .signal__text { display: block; margin-top: 4px; color: var(--ink-2); font-size: 12px; line-height: 1.38; }
-    .boat-wrap { position: absolute; z-index: 3; inset: 0; overflow: hidden; background: var(--surface); pointer-events: none; transform: translateY(calc(var(--hero-drift, 0) * 12px)); }
-    .boat-media { position: absolute; top: 53%; left: 50%; width: auto; max-width: none; height: min(88vh, 900px); object-fit: contain; transform: translate(-50%, -50%); }
-    .boat-video { z-index: 2; opacity: 0; mix-blend-mode: normal; filter: saturate(.9) contrast(.975); mask-image: radial-gradient(ellipse 69% 66% at 50% 53%, #000 48%, rgb(0 0 0 / .96) 61%, rgb(0 0 0 / .54) 77%, transparent 100%); transition: opacity .55s ease; }
+    .boat-wrap { position: absolute; z-index: 3; inset: 0; overflow: hidden; background: var(--hero-surface); pointer-events: none; transform: translateY(calc(var(--hero-drift, 0) * 12px)); }
+    .boat-media { position: absolute; top: 58%; left: 50%; width: auto; max-width: none; height: min(80vh, 820px); object-fit: contain; transform: translate(-50%, -50%); }
+    .boat-video { z-index: 2; opacity: 0; mix-blend-mode: normal; filter: none; mask-image: linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%); transition: opacity .55s ease; }
     .hero-stage.video-ready .boat-video { opacity: var(--video-reveal, 0); }
-    .response { position: absolute; z-index: 7; display: grid; width: min(215px, 17vw); min-height: 90px; grid-template-columns: 34px 1fr; align-items: start; border: 0; border-top: 1px solid var(--blue); padding: 0; background: transparent; text-align: left; cursor: pointer; transition: opacity .48s var(--ease), transform .48s var(--ease); }
-    .response::before { content: ''; position: absolute; top: -1px; right: 100%; width: clamp(72px, 8vw, 124px); border-top: 1px solid var(--blue); transform: rotate(-9deg); transform-origin: right; }
-    .response__mark { position: relative; display: grid; width: 28px; height: 28px; margin: 12px 0 0; place-items: center; border-radius: 50%; background: var(--green); }
-    .response__mark::before, .response__mark::after { content: ''; position: absolute; top: 50%; left: 50%; width: 12px; border-top: 2px solid #17231a; transform: translate(-50%, -50%); }
-    .response__mark::after { transform: translate(-50%, -50%) rotate(90deg); }
-    .response__copy { display: block; padding: 11px 0 8px 7px; }
-    .response__kind { display: block; color: var(--green-dark); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .response__copy { display: block; }
     .response__title { display: block; margin-top: 2px; font-size: 16px; font-weight: 700; line-height: 1.15; }
     .response__text { display: block; margin-top: 4px; color: var(--ink-2); font-size: 12px; line-height: 1.38; }
     .response__log { display: none; }
@@ -133,15 +132,18 @@
     .no-js .hero-runway { height: auto; min-height: 0; }
     .no-js .hero-stage { position: relative; min-height: 1260px; }
     .no-js .hero-conclusion { opacity: 1; transform: none; }
-    .signal.pair-0 { --enter-x: -42px; --exit-x: -58px; top: 49%; left: max(32px, calc(50% - 620px)); right: auto; }
-    .response.pair-0 { --enter-x: 42px; --exit-x: 58px; top: 72%; right: max(32px, calc(50% - 620px)); left: auto; }
-    .signal.pair-1 { --enter-x: 42px; --exit-x: 58px; top: 45%; right: max(42px, calc(50% - 590px)); left: auto; }
-    .response.pair-1 { --enter-x: -42px; --exit-x: -58px; top: 68%; left: max(38px, calc(50% - 610px)); right: auto; }
-    .signal.pair-2 { --enter-x: -36px; --exit-x: -52px; top: 53%; left: max(9vw, calc(50% - 470px)); right: auto; }
-    .response.pair-2 { --enter-x: 36px; --exit-x: 52px; top: 75%; right: max(10vw, calc(50% - 470px)); left: auto; }
-    .signal.pair-1::before { right: auto; left: -5px; }
-    .signal.pair-1::after { right: 100%; left: auto; transform: rotate(-10deg); transform-origin: right; }
-    .response.pair-1::before { right: auto; left: 100%; transform: rotate(9deg); transform-origin: left; }
+    .signal.pair-0 { --enter-x: -42px; --exit-x: -58px; top: 49%; left: max(32px, calc(50% - 620px)); right: auto; width: clamp(280px, 23vw, 330px); }
+    .response.pair-0 { --enter-x: 42px; --exit-x: 58px; top: 72%; right: max(32px, calc(50% - 620px)); left: auto; width: clamp(300px, 24vw, 345px); }
+    .signal.pair-1 { --enter-x: 42px; --exit-x: 58px; top: 45%; right: max(42px, calc(50% - 590px)); left: auto; width: clamp(340px, 29vw, 420px); }
+    .response.pair-1 { --enter-x: -42px; --exit-x: -58px; top: 68%; left: max(38px, calc(50% - 610px)); right: auto; width: clamp(350px, 30vw, 440px); }
+    .signal.pair-2 { --enter-x: -36px; --exit-x: -52px; top: 53%; left: max(9vw, calc(50% - 470px)); right: auto; width: clamp(270px, 22vw, 315px); }
+    .response.pair-2 { --enter-x: 36px; --exit-x: 52px; top: 75%; right: max(10vw, calc(50% - 470px)); left: auto; width: clamp(290px, 24vw, 350px); }
+    .signal.pair-1 .signal__zone, .response.pair-0 .response__zone, .response.pair-2 .response__zone { grid-template-columns: minmax(38px, 1fr) 9px max-content; }
+    .signal.pair-1 .signal__zone::after, .response.pair-0 .response__zone::after, .response.pair-2 .response__zone::after { grid-column: 1; }
+    .signal.pair-1 .signal__zone::before, .response.pair-0 .response__zone::before, .response.pair-2 .response__zone::before { grid-column: 2; }
+    .signal.pair-1 .signal__zone > span, .response.pair-0 .response__zone > span, .response.pair-2 .response__zone > span { grid-column: 3; }
+    .signal__kind, .signal__title, .signal__text, .response__kind, .response__title, .response__text { width: min(215px, calc(100% - 18px)); }
+    .signal.pair-1 .signal__kind, .signal.pair-1 .signal__title, .signal.pair-1 .signal__text, .response.pair-0 .response__kind, .response.pair-0 .response__title, .response.pair-0 .response__text, .response.pair-2 .response__kind, .response.pair-2 .response__title, .response.pair-2 .response__text { margin-right: 0; margin-left: auto; padding-left: 18px; }
     .hero-annotation.state-enter { opacity: 0; transform: translate3d(var(--enter-x), 10px, 0); }
     .hero-annotation.state-exit, .hero-ending .hero-annotation { opacity: 0; transform: translate3d(var(--exit-x), -5px, 0); }
     .hero-ghost { pointer-events: none; }
@@ -304,16 +306,14 @@
       .nav__tools .locale, .nav__tools .nav__cta { display: none; }
       .nav__tools { margin-left: auto; }
       .hero-runway { height: auto; min-height: 0; }
-      .hero-stage { position: relative; height: auto; min-height: 1080px; padding-top: 92px; overflow: hidden; background: var(--surface); }
+      .hero-stage { position: relative; height: auto; min-height: 1080px; padding-top: 92px; overflow: hidden; background: var(--hero-surface); }
       .hero-title { position: relative; top: auto; left: auto; width: calc(100% - 32px); margin-inline: auto; font-size: clamp(54px, 15vw, 78px); text-align: left; transform: none; }
       .hero-eyebrow { position: relative; top: auto; left: auto; width: calc(100% - 32px); margin: 0 auto 16px; transform: none; }
       .signal, .signal.pair-0, .signal.pair-1, .signal.pair-2 { top: 500px; right: auto; left: 16px; width: 154px; }
-      .signal::after { top: -1px; left: 100%; width: 58px; transform: rotate(10deg); }
-      .boat-wrap { inset: 0; width: 100%; height: 100%; background: var(--surface); transform: none; }
-      .boat-media { top: 610px; width: auto; height: 500px; }
+      .boat-wrap { inset: 0; width: 100%; height: 100%; background: var(--hero-surface); transform: none; }
+      .boat-media { top: 640px; width: auto; height: 500px; }
       .response, .response.pair-0, .response.pair-1, .response.pair-2 { top: 710px; right: 16px; left: auto; width: 164px; grid-template-columns: 32px 1fr; transform: none; }
       .response { padding-inline: 6px; background: transparent; }
-      .response::before { top: -1px; right: 100%; bottom: auto; width: 58px; transform: rotate(-9deg); }
       .response__log { grid-column: 1 / -1; border-top: 1px solid var(--line); border-left: 0; }
       .hero-conclusion { right: 16px; bottom: 72px; left: 16px; justify-items: start; opacity: 1; text-align: left; transform: none; }
       .hero-stage.video-ready .boat-video { opacity: 1; }
@@ -392,9 +392,9 @@
     <section class="hero-runway" data-hero-runway aria-labelledby="hero-title">
       <div class="hero-stage" data-hero-stage>
         <p class="hero-eyebrow">The AI control plane for software engineering</p>
-        <h1 class="hero-title" id="hero-title">People lead the <em>vision.</em><br>Agents do the <em>rest.</em></h1>
+        <h1 class="hero-title" id="hero-title">People lead the <span>vision.</span><br>Agents do the <span>rest.</span></h1>
         <button class="signal hero-annotation pair-0" type="button" data-signal aria-live="polite" aria-label="Show next human signal and agent response">
-          <span class="signal__zone">Above the waterline</span>
+          <span class="signal__zone"><span>Above waterline</span></span>
           <span class="signal__kind">People</span>
           <span class="signal__title" data-human-title>Lead the vision</span>
           <span class="signal__text" data-human-copy>Decide what should exist, and what we will not build.</span>
@@ -405,8 +405,7 @@
           </video>
         </div>
         <button class="response hero-annotation pair-0" type="button" data-response aria-live="polite" aria-label="Show next human signal and agent response">
-          <span class="response__mark" aria-hidden="true"></span>
-          <span class="response__copy"><span class="response__zone">Under the waterline</span><span class="response__kind">Agent</span><span class="response__title" data-agent-title>Planning</span><span class="response__text" data-agent-copy>Reads the note and the code, then defines scope and a ceiling.</span></span>
+          <span class="response__copy"><span class="response__zone"><span>Under waterline</span></span><span class="response__kind">Agent</span><span class="response__title" data-agent-title>Planning</span><span class="response__text" data-agent-copy>Reads the note and the code, then defines scope and a ceiling.</span></span>
           <span class="response__log" aria-hidden="true" data-agent-log><span>› Reading note</span><span>› Mapping systems</span><span>› Defining scope</span></span>
         </button>
         <div class="hero-conclusion">
