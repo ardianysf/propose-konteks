@@ -106,6 +106,8 @@
     .progress__track i { height: 4px; border-radius: 4px; background: var(--line); transition: background-color .35s ease, transform .35s var(--ease); transform-origin: left; }
     .progress__track i.is-active { background: var(--green); transform: scaleX(1.05); }
     .signal, .response { position: absolute; z-index: 7; display: block; width: min(250px, 20vw); min-height: 82px; border: 0; padding: 0; background: transparent; text-align: left; cursor: pointer; transition: opacity .48s var(--ease), transform .48s var(--ease); }
+    .hero-annotation { opacity: 0; pointer-events: none; transform: translate3d(var(--enter-x), 10px, 0); }
+    .annotations-ready .hero-annotation { opacity: 1; pointer-events: auto; transform: none; }
     .signal__zone, .response__zone { display: grid; grid-template-columns: 9px max-content minmax(38px, 1fr); align-items: center; gap: 9px; margin-bottom: 10px; color: var(--green-dark); font: 700 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
     .signal__zone::before, .response__zone::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
     .signal__zone::after, .response__zone::after { content: ''; border-top: 1px solid var(--green-dark); }
@@ -132,6 +134,7 @@
     .no-js .hero-runway { height: auto; min-height: 0; }
     .no-js .hero-stage { position: relative; min-height: 1260px; }
     .no-js .hero-conclusion { opacity: 1; transform: none; }
+    .no-js .hero-annotation { opacity: 1; pointer-events: auto; transform: none; }
     .signal.pair-0 { --enter-x: -42px; --exit-x: -58px; top: 49%; left: max(32px, calc(50% - 620px)); right: auto; width: clamp(280px, 23vw, 330px); }
     .response.pair-0 { --enter-x: 42px; --exit-x: 58px; top: 72%; right: max(32px, calc(50% - 620px)); left: auto; width: clamp(300px, 24vw, 345px); }
     .signal.pair-1 { --enter-x: 42px; --exit-x: 58px; top: 45%; right: max(42px, calc(50% - 590px)); left: auto; width: clamp(340px, 29vw, 420px); }
@@ -317,6 +320,7 @@
       .response__log { grid-column: 1 / -1; border-top: 1px solid var(--line); border-left: 0; }
       .hero-conclusion { right: 16px; bottom: 72px; left: 16px; justify-items: start; opacity: 1; text-align: left; transform: none; }
       .hero-stage.video-ready .boat-video { opacity: 1; }
+      .hero-annotation { opacity: 1; pointer-events: auto; transform: none; }
       .chapter { padding: 82px 16px; }
       .display { font-size: clamp(39px, 10.5vw, 52px); }
       .paradigm-runway, .workflow-runway { height: auto; min-height: 0; }
@@ -351,6 +355,7 @@
       .hero-stage { position: relative; min-height: 980px; }
       .boat-video { display: none; }
       .hero-conclusion { opacity: 1; transform: none; }
+      .hero-annotation { opacity: 1; pointer-events: auto; transform: none; }
       .workflow-runway { height: auto; min-height: 0; }
       .workflow-stage { position: relative; top: auto; height: auto; overflow: visible; }
       .js .process-fallback { display: grid; }
@@ -733,6 +738,7 @@ $ next: say yes to run the approved plan`;
           const pairProgress = clamp(progress / .79, 0, .999);
           const index = Math.min(2, Math.floor(pairProgress * 3));
           const ending = progress >= .82;
+          stage.classList.toggle('annotations-ready', progress > .012 && !ending);
           stage.style.setProperty('--hero-drift', progress.toFixed(3));
           stage.style.setProperty('--hero-progress', progress.toFixed(3));
           stage.style.setProperty('--video-reveal', clamp((progress - .025) / .075, 0, 1).toFixed(3));
