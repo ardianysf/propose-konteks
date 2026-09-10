@@ -97,7 +97,7 @@
     .mobile-nav__panel a { border-radius: 9px; padding: 10px 12px; font-weight: 650; text-decoration: none; }
     .mobile-nav__panel a:hover { background: var(--green-pale); }
 
-    .hero-runway { position: relative; height: 430vh; min-height: 3100px; background: var(--hero-surface); }
+    .hero-runway { position: relative; height: 530vh; min-height: 3800px; background: var(--hero-surface); }
     .hero-stage { position: sticky; top: 0; height: 100svh; min-height: 720px; overflow: hidden; background: var(--hero-surface); }
     .hero-stage::after { content: ''; position: absolute; z-index: 0; right: 0; bottom: 8%; left: 0; border-top: 1px solid var(--line); }
     .hero-eyebrow { position: absolute; z-index: 7; top: 15%; left: 50%; color: var(--green-dark); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; transform: translateX(-50%); }
@@ -173,7 +173,7 @@
     .ledger-track { position: absolute; inset: 0; }
     .ledger-row { position: absolute; top: 50%; right: 0; left: 0; display: grid; grid-template-columns: minmax(130px, .8fr) 54px minmax(210px, 1.2fr); align-items: center; gap: 16px; min-height: 112px; border-bottom: 1px solid color-mix(in srgb, var(--canvas) 14%, transparent); opacity: var(--row-opacity, .1); transform: translateY(calc(-50% + var(--row-offset, 0) * 116px)) scale(var(--row-scale, .94)); transition: opacity .5s var(--ease), transform .5s var(--ease); }
     .ledger-row.is-active { --row-opacity: 1; --row-scale: 1; }
-    .ledger-before { color: color-mix(in srgb, var(--canvas) 48%, transparent); text-decoration: line-through; text-decoration-color: var(--green); }
+    .ledger-before { color: color-mix(in srgb, var(--canvas) 62%, transparent); }
     .ledger-arrow { color: var(--green); font-size: 24px; text-align: center; }
     .ledger-now { font: 650 clamp(18px, 1.8vw, 27px)/1.18 var(--display); }
     .ledger-index { position: absolute; right: 0; bottom: 20px; color: color-mix(in srgb, var(--canvas) 55%, transparent); font-variant-numeric: tabular-nums; }
@@ -248,7 +248,7 @@
     .rule-column li { border-top: 1px solid color-mix(in srgb, var(--canvas) 15%, transparent); padding: 12px 0; }
 
     .sessions { background: var(--green-pale); }
-    .sessions__grid { display: grid; grid-template-columns: .58fr 1.42fr; gap: 8vw; align-items: start; }
+    .sessions__grid { display: grid; grid-template-columns: .58fr 1.42fr; gap: 4vw; align-items: start; }
     .session-list { display: grid; grid-template-columns: 1fr 1fr; margin-top: 0; border-top: 1px solid var(--ink); }
     .session { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-content: start; min-height: 160px; border-bottom: 1px solid var(--ink); padding: 22px 20px 20px 0; }
     .session:nth-child(even) { border-left: 1px solid var(--ink); padding-left: 20px; }
@@ -294,7 +294,7 @@
     .paradigm-year { margin-bottom: 18px; color: var(--green); font: 750 12px/1 var(--mono); letter-spacing: .18em; }
     .ledger-head { position: absolute; z-index: 5; top: 0; right: 0; left: 0; display: grid; grid-template-columns: minmax(130px, .8fr) 54px minmax(210px, 1.2fr); gap: 0; font: 800 11px/1 var(--mono); letter-spacing: .14em; }
     .ledger-head span { display: block; min-height: 44px; padding: 17px 16px 14px; }
-    .ledger-head span:first-child { grid-column: 1 / 3; background: #3d657b; color: #f8fbfc; }
+    .ledger-head span:first-child { grid-column: 1 / 3; background: #d8d0bc; color: #26352b; }
     .ledger-head span:last-child { grid-column: 3; background: var(--green); color: #17231a; }
 
     .theory-runway { position: relative; height: 380vh; min-height: 3000px; background: var(--theory-surface); }
@@ -341,7 +341,8 @@
     .session { grid-template-columns: 140px 1fr; min-height: 224px; gap: 22px; padding-block: 26px; }
     .session__icon { width: 132px; height: 132px; object-fit: contain; align-self: start; }
     svg.session__icon { overflow: visible; color: var(--green-dark); }
-    .session p { grid-column: 2; }
+    .session__copy { align-self: start; }
+    .session__copy p { margin-top: 18px; }
 
     .agent-layout { grid-template-columns: .76fr 1.24fr; align-items: start; }
     .connection-map { position: relative; display: grid; grid-template-columns: 1fr 170px 1fr; gap: 22px; align-items: stretch; min-height: 520px; }
@@ -677,10 +678,10 @@
       <div class="chapter__inner sessions__grid">
         <h2 class="display" id="sessions-title">Four kinds of session. <em>One Software System.</em></h2>
         <div class="session-list">
-          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-project-management-v2.webp" alt=""><h3>Project Management</h3><p>A requirement becomes milestones, sprints, tickets, and a plan.</p></article>
-          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-engineering-v2.webp" alt=""><h3>Engineering</h3><p>An approved plan becomes tested pull requests and a receipt.</p></article>
-          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-qa-v2.webp" alt=""><h3>QA</h3><p>A browser agent clicks through what shipped and reports only what it ran.</p></article>
-          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-ops-v2.webp" alt=""><h3>Ops</h3><p>The agent watches logs and alerts, opens the issue, and works the fix.</p></article>
+          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-project-management-v2.webp" alt=""><div class="session__copy"><h3>Project Management</h3><p>A requirement becomes milestones, sprints, tickets, and a plan.</p></div></article>
+          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-engineering-v2.webp" alt=""><div class="session__copy"><h3>Engineering</h3><p>An approved plan becomes tested pull requests and a receipt.</p></div></article>
+          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-qa-v2.webp" alt=""><div class="session__copy"><h3>QA</h3><p>A browser agent clicks through what shipped and reports only what it ran.</p></div></article>
+          <article class="session"><img class="session__icon" src="/landingpage-assets/illustrations/session-ops-v2.webp" alt=""><div class="session__copy"><h3>Ops</h3><p>The agent watches logs and alerts, opens the issue, and works the fix.</p></div></article>
         </div>
       </div>
     </section>
@@ -894,19 +895,20 @@ $ next: say yes to run the approved plan`;
           const rect = runway.getBoundingClientRect();
           const span = Math.max(1, runway.offsetHeight - innerHeight);
           const progress = clamp(-rect.top / span, 0, 1);
-          const index = progress < .18 ? 0 : progress < .41 ? 1 : 2;
-          const ending = progress >= .82;
-          stage.classList.toggle('annotations-ready', progress > .012 && !ending);
-          stage.style.setProperty('--hero-drift', progress.toFixed(3));
-          stage.style.setProperty('--hero-progress', progress.toFixed(3));
-          stage.style.setProperty('--hero-end', clamp((progress - .86) / .1, 0, 1).toFixed(3));
+          const sceneProgress = clamp(progress / .77, 0, 1);
+          const index = sceneProgress < .18 ? 0 : sceneProgress < .41 ? 1 : 2;
+          const ending = sceneProgress >= .82;
+          stage.classList.toggle('annotations-ready', sceneProgress > .012 && !ending);
+          stage.style.setProperty('--hero-drift', sceneProgress.toFixed(3));
+          stage.style.setProperty('--hero-progress', sceneProgress.toFixed(3));
+          stage.style.setProperty('--hero-end', clamp((sceneProgress - .86) / .1, 0, 1).toFixed(3));
           if (ending !== heroEnding) {
             heroEnding = ending;
             stage.classList.toggle('hero-ending', ending);
           }
           if (!ending) render(index);
           if (video && Number.isFinite(video.duration) && video.duration > 0) {
-            const target = heroVideoStart + progress * Math.max(0, video.duration - heroVideoStart - .05);
+            const target = heroVideoStart + sceneProgress * Math.max(0, video.duration - heroVideoStart - .05);
             if (Math.abs(video.currentTime - target) > .04) video.currentTime = target;
           }
         }
