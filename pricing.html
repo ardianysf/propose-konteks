@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en" data-theme="light" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Konteks plan pricing in IDR, included Story Points, repository and System limits, MCP access, validation, and enterprise deployment.">
+  <title>Konteks pricing: exact plans and included capabilities</title>
+  <link rel="icon" href="/assets/konteks/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght,SOFT,WONK@9..144,600..900,0..100,0..1&amp;display=swap" rel="stylesheet">
+  <script>
+    (() => {
+      document.documentElement.classList.replace('no-js', 'js');
+      let saved = 'system';
+      try { saved = localStorage.getItem('konteks-theme') || 'system'; } catch (_) {}
+      const dark = saved === 'dark' || (saved === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #fbfaf6;
+      --surface: #f4f0e1;
+      --ink: #1e2f25;
+      --ink-2: #51695a;
+      --quiet: #5f7365;
+      --line: #dce4d7;
+      --green: #8ab869;
+      --green-dark: #4f7044;
+      --green-pale: #e9f1df;
+      --blue: #8bb2cc;
+      --blue-pale: #dceaf2;
+      --hero-surface: #f1f0e9;
+      --theory-surface: #f6f5ec;
+      --display: 'Fraunces', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --canvas: #101712;
+      --surface: #18221a;
+      --ink: #edf2ec;
+      --ink-2: #bdcbbf;
+      --quiet: #95a497;
+      --line: #314334;
+      --green: #9bc778;
+      --green-dark: #b6d59d;
+      --green-pale: #203320;
+      --blue: #8dbad4;
+      --blue-pale: #1a303c;
+      --hero-surface: #101712;
+      --theory-surface: #101712;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; overflow-x: hidden; background: var(--canvas); color: var(--ink); font: 400 16px/1.55 var(--sans); }
+    ::selection { background: var(--green); color: #162018; }
+    :focus-visible { outline: 3px solid var(--green); outline-offset: 4px; }
+    ::-webkit-scrollbar { width: 11px; }
+    ::-webkit-scrollbar-track { background: var(--canvas); }
+    ::-webkit-scrollbar-thumb { border: 3px solid var(--canvas); border-radius: 20px; background: var(--quiet); }
+    img, video, svg { display: block; max-width: 100%; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+    button, a { color: inherit; font: inherit; }
+    a { text-decoration-thickness: 1px; text-underline-offset: .23em; }
+    h1, h2, p { margin: 0; }
+    .shell { width: min(1240px, calc(100% - 64px)); margin-inline: auto; }
+    .button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 8px; border: 1px solid currentColor; border-radius: 999px; padding: 0 22px; font-weight: 700; text-decoration: none; transition: transform .22s var(--ease), background-color .22s ease; }
+    .button:hover { transform: translateY(-2px); }
+    .button--solid { border-color: var(--green); background: var(--green); color: #17231a; }
+
+    .nav { position: fixed; z-index: 100; inset: 0 0 auto; border-bottom: 1px solid var(--line); background: var(--canvas); }
+    .nav__inner { display: flex; min-height: 64px; align-items: center; gap: 24px; }
+    .brand { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 9px; font: 800 22px/1 var(--display); text-decoration: none; }
+    .brand img { width: 38px; height: 32px; object-fit: contain; mix-blend-mode: multiply; }
+    [data-theme='dark'] .brand img { filter: invert(.86) hue-rotate(80deg); mix-blend-mode: screen; }
+    .beta { border: 1px solid var(--green); border-radius: 999px; padding: 2px 7px; color: var(--green-dark); font: 700 11px/1.35 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+    .nav__links { display: flex; align-items: center; gap: clamp(14px, 1.7vw, 26px); margin-left: 120px; }
+    .nav__links a { font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .nav__links a:hover { color: var(--green-dark); }
+    .nav__tools { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .icon-button, .locale { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: transparent; cursor: pointer; }
+    .locale { font-size: 11px; font-weight: 700; }
+    .nav__cta { min-height: 44px; padding-inline: 18px; font-size: 13px; }
+    .sun, [data-theme='dark'] .moon { display: none; }
+    [data-theme='dark'] .sun { display: block; }
+    .mobile-nav { display: none; }
+    .mobile-nav summary { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--line); border-radius: 50%; cursor: pointer; list-style: none; }
+    .mobile-nav summary::-webkit-details-marker { display: none; }
+    .mobile-nav__panel { position: absolute; top: 58px; right: 0; display: grid; width: min(340px, calc(100vw - 32px)); border: 1px solid var(--line); border-radius: 14px; padding: 10px; background: var(--surface); box-shadow: 0 18px 40px rgb(30 47 37 / .14); }
+    .mobile-nav__panel a { border-radius: 9px; padding: 10px 12px; font-weight: 650; text-decoration: none; }
+    .mobile-nav__panel a:hover { background: var(--green-pale); }
+
+    .chapter { position: relative; padding: clamp(88px, 9vw, 138px) 32px; }
+    .chapter__inner { width: min(1240px, 100%); margin-inline: auto; }
+    .display { max-width: 920px; font: 750 clamp(42px, 4.8vw, 68px)/.98 var(--display); font-variation-settings: 'opsz' 76, 'SOFT' 48, 'WONK' 1; letter-spacing: -.03em; text-wrap: balance; }
+    .display em { color: var(--green-dark); font-style: italic; font-weight: 650; }
+    .lede { max-width: 680px; margin-top: 22px; color: var(--ink-2); font-size: clamp(17px, 1.55vw, 21px); line-height: 1.5; }
+    .small-label { color: var(--green-dark); font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+
+    .footer { background: #17231a; color: #eef3ea; padding: 80px 32px 38px; }
+    .footer__grid { display: grid; grid-template-columns: 1.8fr repeat(3, 1fr); gap: 50px; }
+    .footer h2 { margin-bottom: 18px; font-size: 13px; }
+    .footer ul { margin: 0; padding: 0; list-style: none; }
+    .footer li + li { margin-top: 10px; }
+    .footer a { color: #cbd7ca; }
+    .footer__brand { font: 800 34px/1 var(--display); }
+    .footer__brand p { max-width: 290px; margin-top: 20px; color: #aab9ab; font: 400 15px/1.5 var(--sans); }
+    .footer__bottom { display: flex; justify-content: space-between; gap: 30px; margin-top: 78px; border-top: 1px solid #344238; padding-top: 24px; color: #91a095; font-size: 13px; }
+
+    @media (max-width: 1050px) {
+      .nav__links { display: none; }
+      .nav__tools { margin-left: auto; }
+      .mobile-nav { display: block; }
+    }
+    @media (min-width: 1051px) and (max-width: 1250px) {
+      .nav__links { gap: 13px; margin-left: 34px; }
+      .nav__cta { padding-inline: 14px; }
+    }
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 32px, 620px); }
+      .nav__inner { min-height: 60px; }
+      .nav__tools .locale, .nav__tools .nav__cta { display: none; }
+      .nav__tools { margin-left: auto; }
+      .chapter { padding: 82px 16px; }
+      .footer__grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .001ms !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+    }
+
+    .nav__links a[aria-current='page'] { color: var(--green-dark); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+    .mobile-nav__panel a[aria-current='page'] { color: var(--green-dark); }
+
+    /* ---- Pricing page content (page-specific, after shell CSS) ---- */
+    .page-head { padding-top: clamp(118px, 12.5vw, 196px); }
+    .pricing-overage { margin-top: 30px; color: var(--quiet); font: 500 12.5px/1.5 var(--mono); font-variant-numeric: tabular-nums; }
+
+    .plans-chapter { padding-top: clamp(44px, 5.5vw, 84px); }
+    .plan-ledger { --plan-gutter: clamp(16px, 2.4vw, 30px); margin-inline: calc(-1 * var(--plan-gutter)); }
+    .plan-ledger__labels, .plan-row { display: grid; grid-template-columns: minmax(170px, 1.05fr) minmax(170px, .95fr) minmax(0, 1.7fr) auto; column-gap: clamp(20px, 2.6vw, 36px); align-items: start; padding-inline: var(--plan-gutter); }
+    .plan-ledger__labels { padding-block: 14px 12px; border-top: 2px solid var(--ink); color: var(--quiet); font: 600 10.5px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .plan-ledger__labels span:last-child { justify-self: end; }
+    .plan-ledger__rows { margin: 0; padding: 0; list-style: none; }
+    .plan-row { padding-block: 38px; border-top: 1px solid var(--line); }
+    .plan-row__name { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+    .plan-row__audience { margin-top: 8px; max-width: 30ch; color: var(--ink-2); font-size: 13.5px; line-height: 1.55; }
+    .plan-stamp { display: inline-block; margin-top: 12px; border: 1px solid var(--green-dark); border-radius: 999px; padding: 3px 9px; color: var(--green-dark); font: 700 10.5px/1.35 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+    .plan-row__amount { font-size: 25px; font-weight: 700; letter-spacing: -.015em; font-variant-numeric: tabular-nums; }
+    .plan-row__qualifier { margin-top: 6px; color: var(--quiet); font: 500 12px/1.5 var(--mono); font-variant-numeric: tabular-nums; }
+    .plan-row__meta { margin-top: 16px; display: grid; gap: 6px; }
+    .plan-row__sp-label { color: var(--green-dark); font-size: 10.5px; font-weight: 700; letter-spacing: .12em; }
+    .plan-row__meta-line { color: var(--ink-2); font: 500 12px/1.55 var(--mono); font-variant-numeric: tabular-nums; overflow-wrap: break-word; }
+    .plan-row__features { margin-top: 2px; padding: 0; list-style: none; display: grid; gap: 10px; }
+    .plan-row__features li { display: flex; gap: 10px; align-items: baseline; color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+    .plan-row__features li::before { content: '↳'; flex: 0 0 auto; color: var(--green-dark); font-size: 13px; }
+    .plan-row__cta { justify-self: end; }
+    .plan-row__cta .button { font-size: 13px; padding-inline: 18px; white-space: nowrap; }
+    .plan-row__cta .button:not(.button--solid):hover { color: var(--green-dark); }
+    .plan-row--team { padding-block: 42px 46px; background: var(--green-pale); border-radius: 18px; }
+
+    .billing-head { margin-top: 12px; font: 650 clamp(30px, 3.4vw, 40px)/1.06 var(--display); font-variation-settings: 'opsz' 60, 'SOFT' 40, 'WONK' 1; letter-spacing: -.02em; text-wrap: balance; }
+    .billing-grid { margin-top: 46px; display: grid; grid-template-columns: 1fr 1fr; }
+    .billing-item { border-top: 1px solid var(--line); padding: 32px 0 40px; }
+    .billing-item:nth-child(odd) { padding-right: clamp(22px, 3.4vw, 48px); }
+    .billing-item:nth-child(even) { border-left: 1px solid var(--line); padding-left: clamp(22px, 3.4vw, 48px); }
+    .billing-item h3 { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+    .billing-item p { margin-top: 10px; max-width: 54ch; color: var(--ink-2); font-size: 15px; line-height: 1.6; }
+    .billing-item--wide { grid-column: 1 / -1; margin-top: 12px; border: 0; border-radius: 18px; background: var(--green-pale); padding: clamp(24px, 3vw, 36px) clamp(22px, 3.4vw, 48px); }
+
+    .notes-head { color: var(--green-dark); font: 700 11px/1.35 var(--sans); letter-spacing: .13em; text-transform: uppercase; }
+    .notes-list { margin: 28px 0 0; max-width: 78ch; padding: 0; list-style: none; counter-reset: note; }
+    .notes-list li { counter-increment: note; display: flex; gap: 18px; padding: 17px 0; color: var(--ink-2); font-size: 13px; line-height: 1.7; }
+    .notes-list li + li { border-top: 1px solid var(--line); }
+    .notes-list li::before { content: counter(note, decimal-leading-zero); flex: 0 0 auto; color: var(--green-dark); font: 600 12px/1.7 var(--mono); font-variant-numeric: tabular-nums; }
+    .notes-terms { display: inline-flex; min-height: 44px; align-items: center; margin-top: 20px; font-size: 14px; font-weight: 650; color: var(--ink); }
+    .notes-terms:hover { color: var(--green-dark); }
+    .notes-section { padding-bottom: clamp(96px, 11vw, 168px); }
+
+    @media (max-width: 899px) {
+      .plan-ledger { --plan-gutter: 14px; margin-inline: -6px; }
+      .plan-ledger__labels { display: none; }
+      .plan-row { grid-template-columns: 1fr; row-gap: 16px; padding-block: 30px 34px; }
+      .plan-row__audience { max-width: 52ch; }
+      .plan-row__cta { justify-self: start; }
+      .plan-row--team { padding-block: 34px 38px; }
+      .billing-grid { grid-template-columns: 1fr; }
+      .billing-item { padding: 28px 0 34px; }
+      .billing-item:nth-child(odd) { padding-right: 0; }
+      .billing-item:nth-child(even) { border-left: 0; padding-left: 0; }
+      .billing-item--wide { margin-inline: -6px; padding: 26px 20px; }
+      .notes-section { padding-bottom: clamp(80px, 18vw, 120px); }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    THESIS: Pricing states plainly what Konteks costs: exact plans, included capabilities, quoted ceilings before work runs, and provider costs shown separately — never marked up.
+    OWN-WORLD: Konteks is the AI control plane for software engineering. People hold the theory, agents move the work, evidence settles every delivery.
+    STORY: A reader arrives from the landing page wanting numbers, not sales talk. The page answers with plans, included capabilities, and one clear next step.
+    FIRST VIEWPORT: Fixed nav with Pricing marked current, then the Launch pricing chapter label above the plan content that follows.
+    FORM: Shell frame copied verbatim from landingpage.html — same head, fonts, theme stamp, nav, footer. Main content is added by the next worker.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+  -->
+  <nav class="nav" aria-label="Main navigation">
+    <div class="shell nav__inner">
+      <a class="brand" href="/" aria-label="Konteks home">
+        <img src="/landingpage-assets/figma-paper-boat-hero.png" alt="">
+        <span>Konteks</span><span class="beta">Beta</span>
+      </a>
+      <div class="nav__links">
+        <a href="/#product">Product</a><a href="/#workflow">How it works</a><a href="/#sessions">Four kinds of session</a><a href="/#enablement">Enablement</a><a href="/pricing/" aria-current="page">Pricing</a><a href="/docs/">Docs</a><a href="/blog/">Journal</a>
+      </div>
+      <div class="nav__tools">
+        <button class="icon-button" type="button" data-theme-toggle aria-label="Switch color theme">
+          <svg class="moon" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M15.8 12.8A6.7 6.7 0 0 1 7.2 4.2a6.7 6.7 0 1 0 8.6 8.6Z" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          <svg class="sun" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 1.5V4M10 16v2.5M1.5 10H4M16 10h2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+        <button class="locale" type="button" aria-label="Switch language">ID</button>
+        <a class="button button--solid nav__cta" href="https://app.konteks.io/">Start building ↗</a>
+      </div>
+      <details class="mobile-nav">
+        <summary aria-label="Open navigation"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 9h14M2 13h14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></summary>
+        <div class="mobile-nav__panel"><a href="/#product">Product</a><a href="/#workflow">How it works</a><a href="/#sessions">Four kinds of session</a><a href="/#enablement">Enablement</a><a href="/pricing/" aria-current="page">Pricing</a><a href="/docs/">Docs</a><a href="/blog/">Journal</a><a href="https://app.konteks.io/">Start building ↗</a></div>
+      </details>
+    </div>
+  </nav>
+
+  <main id="main">
+    <section class="chapter page-head">
+      <div class="chapter__inner">
+        <p class="small-label">Launch pricing</p>
+        <h1 class="display">Pay for governed work. Bring <em>your own agent</em>.</h1>
+        <p class="lede">Every Konteks plan is BYOA, Bring Your Own Agent. Claude, Codex, Pi, Cursor, or Hermes works under the subscription or key you already have, and your provider bills you directly. Konteks Story Points pay for orchestration, execution, validation, evidence, and platform control.</p>
+        <p class="pricing-overage">Overage and top-up reference: Rp192,000 per Story Point</p>
+      </div>
+    </section>
+
+    <section class="chapter plans-chapter" aria-labelledby="plans-heading">
+      <div class="chapter__inner">
+        <h2 id="plans-heading" class="sr-only">Exact plans and included capabilities</h2>
+        <div class="plan-ledger">
+          <div class="plan-ledger__labels" aria-hidden="true">
+            <span>Plan</span><span>Price</span><span>Included</span><span>Action</span>
+          </div>
+          <ul class="plan-ledger__rows">
+            <li class="plan-row">
+              <div>
+                <h3 class="plan-row__name">Free</h3>
+                <p class="plan-row__audience">Explore one real Software System with your own model key.</p>
+              </div>
+              <div>
+                <p class="plan-row__amount">Rp0</p>
+                <p class="plan-row__qualifier">forever</p>
+                <div class="plan-row__meta">
+                  <p class="plan-row__meta-line">1 user</p>
+                  <span class="plan-row__sp-label">Included Story Points</span>
+                  <p class="plan-row__meta-line">0 monthly · 0.5 SP one-time onboarding grant</p>
+                </div>
+              </div>
+              <ul class="plan-row__features">
+                <li>1 user, 1 System, 2 repositories</li>
+                <li>1 concurrent agent run</li>
+                <li>Read-only Core MCP</li>
+                <li>Automatic catalog generation</li>
+                <li>Story Point top-ups available</li>
+              </ul>
+              <div class="plan-row__cta"><a class="button" href="https://app.konteks.io/">Start building ↗</a></div>
+            </li>
+            <li class="plan-row">
+              <div>
+                <h3 class="plan-row__name">Builder</h3>
+                <p class="plan-row__audience">For an individual builder shipping governed repository work.</p>
+              </div>
+              <div>
+                <p class="plan-row__amount">Rp304,000</p>
+                <p class="plan-row__qualifier">per user / month</p>
+                <div class="plan-row__meta">
+                  <p class="plan-row__meta-line">1 seat minimum</p>
+                  <span class="plan-row__sp-label">Included Story Points</span>
+                  <p class="plan-row__meta-line">2 SP per seat / month</p>
+                </div>
+              </div>
+              <ul class="plan-row__features">
+                <li>Up to 3 Systems and 10 repositories</li>
+                <li>1 concurrent agent run</li>
+                <li>Read and write Core MCP</li>
+                <li>Basic validation runtime</li>
+                <li>Standard support</li>
+              </ul>
+              <div class="plan-row__cta"><a class="button" href="https://app.konteks.io/">Start building ↗</a></div>
+            </li>
+            <li class="plan-row plan-row--team">
+              <div>
+                <h3 class="plan-row__name">Team</h3>
+                <span class="plan-stamp">Most teams start here</span>
+                <p class="plan-row__audience">For engineering teams coordinating agents across a shared catalog.</p>
+              </div>
+              <div>
+                <p class="plan-row__amount">Rp624,000</p>
+                <p class="plan-row__qualifier">per user / month</p>
+                <div class="plan-row__meta">
+                  <p class="plan-row__meta-line">3 seats · Rp1,872,000 minimum</p>
+                  <span class="plan-row__sp-label">Included Story Points</span>
+                  <p class="plan-row__meta-line">6 pooled SP per seat / month</p>
+                </div>
+              </div>
+              <ul class="plan-row__features">
+                <li>Up to 25 Systems and 100 repositories</li>
+                <li>3 concurrent agent runs</li>
+                <li>Advanced validation and team presence</li>
+                <li>Audit logs and advanced budgets</li>
+                <li>Provider policy controls</li>
+              </ul>
+              <div class="plan-row__cta"><a class="button button--solid" href="https://app.konteks.io/">Start building ↗</a></div>
+            </li>
+            <li class="plan-row">
+              <div>
+                <h3 class="plan-row__name">Scale</h3>
+                <p class="plan-row__audience">For larger organizations that need identity automation and dedicated capacity.</p>
+              </div>
+              <div>
+                <p class="plan-row__amount">Rp1,264,000</p>
+                <p class="plan-row__qualifier">per user / month</p>
+                <div class="plan-row__meta">
+                  <p class="plan-row__meta-line">10 seats · Rp12,640,000 minimum</p>
+                  <span class="plan-row__sp-label">Included Story Points</span>
+                  <p class="plan-row__meta-line">15 pooled SP per seat / month</p>
+                </div>
+              </div>
+              <ul class="plan-row__features">
+                <li>Up to 100 Systems and 500 repositories</li>
+                <li>10 concurrent agent runs</li>
+                <li>SSO and SCIM</li>
+                <li>Dedicated runtime</li>
+                <li>Priority support</li>
+              </ul>
+              <div class="plan-row__cta"><a class="button" href="https://app.konteks.io/">Start building ↗</a></div>
+            </li>
+            <li class="plan-row">
+              <div>
+                <h3 class="plan-row__name">Enterprise</h3>
+                <p class="plan-row__audience">For unrestricted estates, deployment control, and enterprise evidence requirements.</p>
+              </div>
+              <div>
+                <p class="plan-row__amount">Custom</p>
+                <p class="plan-row__qualifier">annual agreement</p>
+                <div class="plan-row__meta">
+                  <p class="plan-row__meta-line">USD 2,500 monthly platform minimum</p>
+                  <span class="plan-row__sp-label">Included Story Points</span>
+                  <p class="plan-row__meta-line">USD 1,000 monthly committed SP spend minimum</p>
+                </div>
+              </div>
+              <ul class="plan-row__features">
+                <li>Unlimited users, Systems, repositories, and runs</li>
+                <li>On-premise and VPC deployment</li>
+                <li>Dedicated runtime and support</li>
+                <li>Enterprise audit export</li>
+                <li>Custom governance and commercial terms</li>
+              </ul>
+              <div class="plan-row__cta"><a class="button" href="mailto:hello@konteks.io?subject=Konteks%20Enterprise">Talk to us →</a></div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter billing-chapter" aria-labelledby="billing-heading">
+      <div class="chapter__inner">
+        <p class="small-label">How billing works</p>
+        <h2 id="billing-heading" class="billing-head">No token theatre.</h2>
+        <div class="billing-grid">
+          <div class="billing-item">
+            <h3>Every plan is BYOA</h3>
+            <p>Bring the coding agent you already pay for. Claude and Codex sign in with your subscription; any supported provider connects with a key. Provider tokens and money never enter the Story Point total.</p>
+          </div>
+          <div class="billing-item">
+            <h3>Quotes come before runs</h3>
+            <p>Chargeable stages receive an upfront estimate, a best-effort provider-cost estimate where pricing allows, a budget decision, and an approval boundary before execution.</p>
+          </div>
+          <div class="billing-item">
+            <h3>Allowances scale with seats</h3>
+            <p>Builder, Team, and Scale receive monthly Story Points per paid seat. Team and Scale pool them across the workspace.</p>
+          </div>
+          <div class="billing-item">
+            <h3>Receipts explain reality</h3>
+            <p>Completed work reconciles the approved maximum, actual platform usage, provider telemetry, and delivery evidence.</p>
+          </div>
+          <div class="billing-item billing-item--wide">
+            <h3>Project Management mode on every plan</h3>
+            <p>PRDs, breakdowns, tickets, and delivery Reports add no new meter. Chargeable work still happens only through quoted, approved Engineering delivery.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter notes-section" aria-labelledby="notes-heading">
+      <div class="chapter__inner">
+        <h2 id="notes-heading" class="notes-head">Pricing notes</h2>
+        <ol class="notes-list">
+          <li>Published IDR prices are fixed plan prices, not live foreign-exchange quotes. We will announce pricing changes before they take effect.</li>
+          <li>Free includes no recurring Story Point allowance. Its 0.5 SP is a one-time onboarding grant. Top-ups remain available where the account and payment method permit them.</li>
+          <li>Enterprise platform and committed Story Point minimums are separate USD-denominated commercial floors. Final enterprise agreements may include deployment, support, security, and volume terms.</li>
+          <li>Agentic readiness workshops, role-based training, guided onboarding, and adoption coaching are available as professional services. Scope and pricing are tailored to the organization and are separate unless included in an order.</li>
+          <li>Taxes, model-provider charges, cloud infrastructure outside the plan, and optional paid support may be billed separately where applicable.</li>
+        </ol>
+        <a class="notes-terms" href="/terms/">See the Terms. →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="chapter__inner">
+      <div class="footer__grid">
+        <div class="footer__brand">Konteks<p>The AI control plane for software engineering.</p></div>
+        <div><h2>Product</h2><ul><li><a href="/#product">Overview</a></li><li><a href="/#workflow">How it works</a></li><li><a href="/#sessions">Sessions</a></li><li><a href="/#enablement">Enablement</a></li></ul></div>
+        <div><h2>Resources</h2><ul><li><a href="/docs/">Docs</a></li><li><a href="/docs/#api-reference">API reference</a></li><li><a href="/blog/">Journal</a></li><li><a href="/pricing/">Pricing</a></li></ul></div>
+        <div><h2>Company</h2><ul><li><a href="/about/">About</a></li><li><a href="/contact/">Contact</a></li><li><a href="/security/">Security</a></li><li><a href="/privacy/">Privacy</a></li></ul></div>
+      </div>
+      <div class="footer__bottom"><span>Made by <a href="https://refactory.id/">Refactory ↗</a></span><span>© 2026 Konteks · konteks.io</span></div>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      document.querySelectorAll('[data-theme-toggle]').forEach(button => button.addEventListener('click', () => {
+        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try { localStorage.setItem('konteks-theme', next); } catch (_) {}
+      }));
+    })();
+  </script>
+</body>
+</html>

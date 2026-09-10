@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en" data-theme="light" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Launch notes, engineering scars, and the decisions behind software that remembers.">
+  <title>Konteks Journal: launch notes and product thinking</title>
+  <link rel="icon" href="/assets/konteks/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght,SOFT,WONK@9..144,600..900,0..100,0..1&amp;display=swap" rel="stylesheet">
+  <script>
+    (() => {
+      document.documentElement.classList.replace('no-js', 'js');
+      let saved = 'system';
+      try { saved = localStorage.getItem('konteks-theme') || 'system'; } catch (_) {}
+      const dark = saved === 'dark' || (saved === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #fbfaf6;
+      --surface: #f4f0e1;
+      --ink: #1e2f25;
+      --ink-2: #51695a;
+      --quiet: #5f7365;
+      --line: #dce4d7;
+      --green: #8ab869;
+      --green-dark: #4f7044;
+      --green-pale: #e9f1df;
+      --blue: #8bb2cc;
+      --blue-pale: #dceaf2;
+      --hero-surface: #f1f0e9;
+      --theory-surface: #f6f5ec;
+      --display: 'Fraunces', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+    [data-theme='dark'] {
+      color-scheme: dark;
+      --canvas: #101712;
+      --surface: #18221a;
+      --ink: #edf2ec;
+      --ink-2: #bdcbbf;
+      --quiet: #95a497;
+      --line: #314334;
+      --green: #9bc778;
+      --green-dark: #b6d59d;
+      --green-pale: #203320;
+      --blue: #8dbad4;
+      --blue-pale: #1a303c;
+      --hero-surface: #101712;
+      --theory-surface: #101712;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; overflow-x: hidden; background: var(--canvas); color: var(--ink); font: 400 16px/1.55 var(--sans); }
+    ::selection { background: var(--green); color: #162018; }
+    :focus-visible { outline: 3px solid var(--green); outline-offset: 4px; }
+    ::-webkit-scrollbar { width: 11px; }
+    ::-webkit-scrollbar-track { background: var(--canvas); }
+    ::-webkit-scrollbar-thumb { border: 3px solid var(--canvas); border-radius: 20px; background: var(--quiet); }
+    img, video, svg { display: block; max-width: 100%; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+    button, a { color: inherit; font: inherit; }
+    a { text-decoration-thickness: 1px; text-underline-offset: .23em; }
+    h1, h2, p { margin: 0; }
+    .shell { width: min(1240px, calc(100% - 64px)); margin-inline: auto; }
+    .button { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 8px; border: 1px solid currentColor; border-radius: 999px; padding: 0 22px; font-weight: 700; text-decoration: none; transition: transform .22s var(--ease), background-color .22s ease; }
+    .button:hover { transform: translateY(-2px); }
+    .button--solid { border-color: var(--green); background: var(--green); color: #17231a; }
+
+    .nav { position: fixed; z-index: 100; inset: 0 0 auto; border-bottom: 1px solid var(--line); background: var(--canvas); }
+    .nav__inner { display: flex; min-height: 64px; align-items: center; gap: 24px; }
+    .brand { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 9px; font: 800 22px/1 var(--display); text-decoration: none; }
+    .brand img { width: 38px; height: 32px; object-fit: contain; mix-blend-mode: multiply; }
+    [data-theme='dark'] .brand img { filter: invert(.86) hue-rotate(80deg); mix-blend-mode: screen; }
+    .beta { border: 1px solid var(--green); border-radius: 999px; padding: 2px 7px; color: var(--green-dark); font: 700 11px/1.35 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+    .nav__links { display: flex; align-items: center; gap: clamp(14px, 1.7vw, 26px); margin-left: 120px; }
+    .nav__links a { font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .nav__links a:hover { color: var(--green-dark); }
+    .nav__links a[aria-current='page'] { color: var(--green-dark); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+    .nav__tools { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .icon-button, .locale { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: transparent; cursor: pointer; }
+    .locale { font-size: 11px; font-weight: 700; }
+    .nav__cta { min-height: 44px; padding-inline: 18px; font-size: 13px; }
+    .sun, [data-theme='dark'] .moon { display: none; }
+    [data-theme='dark'] .sun { display: block; }
+    .mobile-nav { display: none; }
+    .mobile-nav summary { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--line); border-radius: 50%; cursor: pointer; list-style: none; }
+    .mobile-nav summary::-webkit-details-marker { display: none; }
+    .mobile-nav__panel { position: absolute; top: 58px; right: 0; display: grid; width: min(340px, calc(100vw - 32px)); border: 1px solid var(--line); border-radius: 14px; padding: 10px; background: var(--surface); box-shadow: 0 18px 40px rgb(30 47 37 / .14); }
+    .mobile-nav__panel a { border-radius: 9px; padding: 10px 12px; font-weight: 650; text-decoration: none; }
+    .mobile-nav__panel a:hover { background: var(--green-pale); }
+    .mobile-nav__panel a[aria-current='page'] { color: var(--green-dark); }
+
+    .chapter { position: relative; padding: clamp(88px, 9vw, 138px) 32px; }
+    .chapter__inner { width: min(1240px, 100%); margin-inline: auto; }
+    .display { max-width: 920px; font: 750 clamp(42px, 4.8vw, 68px)/.98 var(--display); font-variation-settings: 'opsz' 76, 'SOFT' 48, 'WONK' 1; letter-spacing: -.03em; text-wrap: balance; }
+    .display em { color: var(--green-dark); font-style: italic; font-weight: 650; }
+    .lede { max-width: 680px; margin-top: 22px; color: var(--ink-2); font-size: clamp(17px, 1.55vw, 21px); line-height: 1.5; }
+    .small-label { color: var(--green-dark); font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+
+    .footer { background: #17231a; color: #eef3ea; padding: 80px 32px 38px; }
+    .footer__grid { display: grid; grid-template-columns: 1.8fr repeat(3, 1fr); gap: 50px; }
+    .footer h2 { margin-bottom: 18px; font-size: 13px; }
+    .footer ul { margin: 0; padding: 0; list-style: none; }
+    .footer li + li { margin-top: 10px; }
+    .footer a { color: #cbd7ca; }
+    .footer__brand { font: 800 34px/1 var(--display); }
+    .footer__brand p { max-width: 290px; margin-top: 20px; color: #aab9ab; font: 400 15px/1.5 var(--sans); }
+    .footer__bottom { display: flex; justify-content: space-between; gap: 30px; margin-top: 78px; border-top: 1px solid #344238; padding-top: 24px; color: #91a095; font-size: 13px; }
+
+    .journal-header { padding: clamp(160px, 15vw, 200px) 32px clamp(72px, 7vw, 112px); }
+    .journal-header .chapter__inner { position: relative; }
+    .journal-stamp { position: absolute; top: -4px; right: 0; width: clamp(64px, 6.4vw, 88px); transform: rotate(7deg); opacity: .95; }
+    [data-theme='dark'] .journal-stamp { filter: brightness(.72) saturate(.85); opacity: .85; }
+    .journal-ledger { padding: 0 32px clamp(88px, 9vw, 138px); }
+    .entry-list { margin: 0; padding: 0; list-style: none; border-top: 2px solid var(--ink); }
+    .entry { border-bottom: 1px solid var(--line); padding: clamp(56px, 7vw, 84px) 0; }
+    .entry__meta { color: var(--green-dark); font: 700 11px/1.6 var(--mono); letter-spacing: .12em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+    .entry__meta .sep { margin-inline: 10px; color: var(--quiet); }
+    .entry__title { max-width: 960px; margin-top: 18px; font: 800 clamp(30px, 3.5vw, 48px)/1.06 var(--display); font-variation-settings: 'opsz' 60, 'SOFT' 48, 'WONK' 1; letter-spacing: -.02em; text-wrap: balance; }
+    .entry__title a { color: inherit; text-decoration: none; transition: color .18s ease; }
+    .entry__title a:hover { color: var(--green-dark); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .23em; }
+    .entry__excerpt { max-width: 640px; margin-top: 20px; color: var(--ink-2); font-size: clamp(16px, 1.35vw, 18px); line-height: 1.6; }
+    .entry__read { display: inline-block; margin-top: 16px; border-radius: 999px; padding: 12px 2px; color: var(--green-dark); font-size: 15px; font-weight: 600; text-decoration-thickness: 2px; }
+    .entry__read .arrow { display: inline-block; margin-left: 6px; transition: transform .22s var(--ease); }
+    .entry__read:hover { color: var(--green-dark); }
+    .entry__read:hover .arrow { transform: translateX(3px); }
+
+    @media (max-width: 1050px) {
+      .nav__links { display: none; }
+      .nav__tools { margin-left: auto; }
+      .mobile-nav { display: block; }
+    }
+    @media (min-width: 1051px) and (max-width: 1250px) {
+      .nav__links { gap: 13px; margin-left: 34px; }
+      .nav__cta { padding-inline: 14px; }
+    }
+    @media (max-width: 1249px) {
+      .journal-stamp { display: none; }
+    }
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 32px, 620px); }
+      .nav__inner { min-height: 60px; }
+      .nav__tools .locale, .nav__tools .nav__cta { display: none; }
+      .nav__tools { margin-left: auto; }
+      .chapter { padding: 82px 16px; }
+      .display { font-size: clamp(39px, 10.5vw, 52px); }
+      .footer__grid { grid-template-columns: 1fr 1fr; }
+      .journal-header { padding: 132px 16px 56px; }
+      .journal-ledger { padding: 0 16px 82px; }
+      .entry { padding: 48px 0; }
+      .entry__title { margin-top: 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .001ms !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    THESIS: Konteks ships opinions, so its journal reads like the product thinks: calm paper, ink rules, mono provenance lines.
+    OWN-WORLD: Editorial Runway, borrowed whole from the landing page — warm paper canvas, forest ink, leaf-green accents, hairline ledgers, Fraunces voice over DM Sans hands, system mono for stamps.
+    STORY: A contents page, not a feed. Eyebrow, one honest headline, then a two-entry ledger opened by a 2px ink rule; nothing padded, nothing invented.
+    FIRST VIEWPORT: Fixed compact nav over generous paper; green eyebrow, balanced Fraunces headline with one em, quiet lede, a postmark stamp resting to the right.
+    FORM: One h1, one h2 per entry, mono meta lines with tabular dates, 65–75ch excerpts, hairline separations, AA contrast in both themes, 44px targets.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
+  -->
+  <nav class="nav" aria-label="Main navigation">
+    <div class="shell nav__inner">
+      <a class="brand" href="/" aria-label="Konteks home">
+        <img src="/landingpage-assets/figma-paper-boat-hero.png" alt="">
+        <span>Konteks</span><span class="beta">Beta</span>
+      </a>
+      <div class="nav__links">
+        <a href="/#product">Product</a><a href="/#workflow">How it works</a><a href="/#sessions">Four kinds of session</a><a href="/#enablement">Enablement</a><a href="/pricing/">Pricing</a><a href="/docs/">Docs</a><a href="/blog/" aria-current="page">Journal</a>
+      </div>
+      <div class="nav__tools">
+        <button class="icon-button" type="button" data-theme-toggle aria-label="Switch color theme">
+          <svg class="moon" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M15.8 12.8A6.7 6.7 0 0 1 7.2 4.2a6.7 6.7 0 1 0 8.6 8.6Z" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          <svg class="sun" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 1.5V4M10 16v2.5M1.5 10H4M16 10h2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+        <button class="locale" type="button" aria-label="Switch language">ID</button>
+        <a class="button button--solid nav__cta" href="https://app.konteks.io/">Start building ↗</a>
+      </div>
+      <details class="mobile-nav">
+        <summary aria-label="Open navigation"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 9h14M2 13h14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></summary>
+        <div class="mobile-nav__panel"><a href="/#product">Product</a><a href="/#workflow">How it works</a><a href="/#sessions">Four kinds of session</a><a href="/#enablement">Enablement</a><a href="/pricing/">Pricing</a><a href="/docs/">Docs</a><a href="/blog/" aria-current="page">Journal</a><a href="https://app.konteks.io/">Start building ↗</a></div>
+      </details>
+    </div>
+  </nav>
+
+  <main>
+    <header class="chapter journal-header">
+      <div class="chapter__inner">
+        <img class="journal-stamp" src="/landingpage-assets/postcard-stamp.png" alt="" aria-hidden="true">
+        <p class="small-label">Konteks journal</p>
+        <h1 class="display">Notes from the part where the product <em>becomes real.</em></h1>
+        <p class="lede">Launch notes, engineering scars, and the decisions behind software that remembers.</p>
+      </div>
+    </header>
+
+    <section class="journal-ledger" aria-label="Entries">
+      <div class="chapter__inner">
+        <ol class="entry-list">
+          <li>
+            <article class="entry">
+              <p class="entry__meta"><time datetime="2026-08-17">August 17, 2026</time><span class="sep" aria-hidden="true">·</span><span>Launch notes</span><span class="sep" aria-hidden="true">·</span><span>6 min read</span></p>
+              <h2 class="entry__title"><a href="/blog/day-1-introducing-project-management-mode/">Day 1: introducing Project Management mode, and why it matters</a></h2>
+              <p class="entry__excerpt">Konteks is live in beta on August 17. Delivery was never the hard part. Deciding what to build, in what order, at what cost, that was. Here is what we shipped for it.</p>
+              <a class="entry__read" href="/blog/day-1-introducing-project-management-mode/">Read the entry <span class="arrow" aria-hidden="true">→</span></a>
+            </article>
+          </li>
+          <li>
+            <article class="entry">
+              <p class="entry__meta"><time datetime="2026-07-16">July 16, 2026</time><span class="sep" aria-hidden="true">·</span><span>Launch notes</span><span class="sep" aria-hidden="true">·</span><span>6 min read</span></p>
+              <h2 class="entry__title"><a href="/blog/the-road-to-august-17/">The road to August 17: software should remember</a></h2>
+              <p class="entry__excerpt">A launch countdown, and the story of how years of real engineering work turned into a system that gives humans and agents the same durable context.</p>
+              <a class="entry__read" href="/blog/the-road-to-august-17/">Read the entry <span class="arrow" aria-hidden="true">→</span></a>
+            </article>
+          </li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="chapter__inner">
+      <div class="footer__grid">
+        <div class="footer__brand">Konteks<p>The AI control plane for software engineering.</p></div>
+        <div><h2>Product</h2><ul><li><a href="/#product">Overview</a></li><li><a href="/#workflow">How it works</a></li><li><a href="/#sessions">Sessions</a></li><li><a href="/#enablement">Enablement</a></li></ul></div>
+        <div><h2>Resources</h2><ul><li><a href="/docs/">Docs</a></li><li><a href="/docs/#api-reference">API reference</a></li><li><a href="/blog/">Journal</a></li><li><a href="/pricing/">Pricing</a></li></ul></div>
+        <div><h2>Company</h2><ul><li><a href="/about/">About</a></li><li><a href="/contact/">Contact</a></li><li><a href="/security/">Security</a></li><li><a href="/privacy/">Privacy</a></li></ul></div>
+      </div>
+      <div class="footer__bottom"><span>Made by <a href="https://refactory.id/">Refactory ↗</a></span><span>© 2026 Konteks · konteks.io</span></div>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      document.querySelectorAll('[data-theme-toggle]').forEach(button => button.addEventListener('click', () => {
+        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try { localStorage.setItem('konteks-theme', next); } catch (_) {}
+      }));
+    })();
+  </script>
+</body>
+</html>

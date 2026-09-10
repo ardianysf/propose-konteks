@@ -20,6 +20,30 @@
       "destination": "/landingpage.html"
     },
     {
+      "source": "/pricing",
+      "destination": "/pricing.html"
+    },
+    {
+      "source": "/pricing/",
+      "destination": "/pricing.html"
+    },
+    {
+      "source": "/docs",
+      "destination": "/docs.html"
+    },
+    {
+      "source": "/docs/",
+      "destination": "/docs.html"
+    },
+    {
+      "source": "/blog",
+      "destination": "/journal.html"
+    },
+    {
+      "source": "/blog/",
+      "destination": "/journal.html"
+    },
+    {
       "source": "/catalog",
       "destination": "/catalog.html"
     },
