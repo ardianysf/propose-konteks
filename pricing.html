@@ -374,6 +374,21 @@
     .plan-row > div:first-child { padding-top: 0; }
     .plan-row__meta { border-top: 0; }
     .plan-row__name { margin-top: 0; }
+    /* ---- billing chapter split with receipt illustration ---- */
+    .billing-chapter .chapter__inner { display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: clamp(40px, 6vw, 92px); align-items: start; }
+    .billing-intro .billing-illustration { display: block; width: clamp(190px, 19vw, 280px); height: auto; margin: 0 0 26px; }
+    .billing-intro .small-label { margin-top: 0; }
+    .billing-intro .billing-head { margin-top: 12px; }
+    .billing-grid { margin-top: 0; }
+    .billing-item { display: block; border-bottom: 1px solid var(--line); padding: 20px 0 24px; }
+    .billing-item h3 { font-size: 16px; }
+    .billing-item p { margin-top: 7px; font-size: 14.5px; line-height: 1.6; }
+    .plan-row__name { margin-top: 12px; }
+    @media (max-width: 899px) {
+      .billing-chapter .chapter__inner { grid-template-columns: 1fr; gap: 34px; }
+      .billing-intro .billing-illustration { width: 200px; margin-bottom: 18px; }
+      .billing-item { padding: 18px 0 22px; }
+    }
   </style>
 </head>
 <body>
@@ -547,8 +562,11 @@
 
     <section class="chapter billing-chapter" aria-labelledby="billing-heading">
       <div class="chapter__inner">
-        <p class="small-label">How billing works</p>
-        <h2 id="billing-heading" class="billing-head">No token theatre.</h2>
+        <div class="billing-intro">
+          <img class="billing-illustration" src="/landingpage-assets/illustrations/receipt.png" alt="A paper receipt for governed work" width="1254" height="1254">
+          <p class="small-label">How billing works</p>
+          <h2 id="billing-heading" class="billing-head">No token theatre.</h2>
+        </div>
         <div class="billing-grid">
           <div class="billing-item">
             <h3>Every plan is BYOA</h3>
