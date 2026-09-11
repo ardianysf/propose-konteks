@@ -138,63 +138,58 @@
     .mobile-nav__panel a[aria-current='page'] { color: var(--green-dark); }
 
     /* ---- Pricing page content (page-specific, after shell CSS) ---- */
-    .page-head { padding-top: clamp(118px, 12.5vw, 196px); }
+    .page-head { padding-top: clamp(118px, 12.5vw, 196px); text-align: center; }
+    .page-head .display { margin-inline: auto; }
+    .page-head .lede { margin-inline: auto; }
     .pricing-overage { margin-top: 30px; color: var(--quiet); font: 500 12.5px/1.5 var(--mono); font-variant-numeric: tabular-nums; }
 
     .plans-chapter { padding-top: clamp(44px, 5.5vw, 84px); }
-    .plan-ledger { --plan-gutter: clamp(16px, 2.4vw, 30px); margin-inline: calc(-1 * var(--plan-gutter)); }
-    .plan-ledger__labels, .plan-row { display: grid; grid-template-columns: minmax(170px, 1.05fr) minmax(170px, .95fr) minmax(0, 1.7fr) auto; column-gap: clamp(20px, 2.6vw, 36px); align-items: start; padding-inline: var(--plan-gutter); }
-    .plan-ledger__labels { padding-block: 14px 12px; border-top: 2px solid var(--ink); color: var(--quiet); font: 600 10.5px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
-    .plan-ledger__labels span:last-child { justify-self: end; }
-    .plan-ledger__rows { margin: 0; padding: 0; list-style: none; }
-    .plan-row { padding-block: 38px; border-top: 1px solid var(--line); }
+    .plan-ledger__rows { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; align-items: stretch; }
+    .plan-row { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; border: 1px solid var(--line); border-radius: 18px; padding: 26px 22px; }
+    .plan-row > div:first-child { min-height: 108px; }
     .plan-row__name { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
-    .plan-row__audience { margin-top: 8px; max-width: 30ch; color: var(--ink-2); font-size: 13.5px; line-height: 1.55; }
-    .plan-stamp { display: inline-block; margin-top: 12px; border: 1px solid var(--green-dark); border-radius: 999px; padding: 3px 9px; color: var(--green-dark); font: 700 10.5px/1.35 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+    .plan-row__audience { margin-top: 8px; color: var(--ink-2); font-size: 13px; line-height: 1.55; }
+    .plan-stamp { display: inline-block; margin-top: 12px; border: 1px solid var(--green-dark); border-radius: 999px; padding: 3px 9px; color: var(--green-dark); font: 700 11px/1.35 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
     .plan-row__amount { font-size: 25px; font-weight: 700; letter-spacing: -.015em; font-variant-numeric: tabular-nums; }
     .plan-row__qualifier { margin-top: 6px; color: var(--quiet); font: 500 12px/1.5 var(--mono); font-variant-numeric: tabular-nums; }
     .plan-row__meta { margin-top: 16px; display: grid; gap: 6px; }
-    .plan-row__sp-label { color: var(--green-dark); font-size: 10.5px; font-weight: 700; letter-spacing: .12em; }
+    .plan-row__sp-label { color: var(--green-dark); font-size: 11px; font-weight: 700; letter-spacing: .08em; }
     .plan-row__meta-line { color: var(--ink-2); font: 500 12px/1.55 var(--mono); font-variant-numeric: tabular-nums; overflow-wrap: break-word; }
-    .plan-row__features { margin-top: 2px; padding: 0; list-style: none; display: grid; gap: 10px; }
-    .plan-row__features li { display: flex; gap: 10px; align-items: baseline; color: var(--ink-2); font-size: 14px; line-height: 1.5; }
-    .plan-row__features li::before { content: '↳'; flex: 0 0 auto; color: var(--green-dark); font-size: 13px; }
-    .plan-row__cta { justify-self: end; }
-    .plan-row__cta .button { font-size: 13px; padding-inline: 18px; white-space: nowrap; }
+    .plan-row__features { margin-top: 20px; padding: 0; list-style: none; display: grid; gap: 9px; }
+    .plan-row__features li { display: flex; gap: 9px; align-items: baseline; color: var(--ink-2); font-size: 13px; line-height: 1.45; }
+    .plan-row__features li::before { content: '↳'; flex: 0 0 auto; color: var(--green-dark); font-size: 12px; }
+    .plan-row__cta { margin-top: auto; padding-top: 22px; align-self: stretch; }
+    .plan-row__cta .button { width: 100%; justify-content: center; font-size: 13px; padding-inline: 18px; white-space: nowrap; }
     .plan-row__cta .button:not(.button--solid):hover { color: var(--green-dark); }
-    .plan-row--team { padding-block: 42px 46px; background: var(--green-pale); border-radius: 18px; }
+    .plan-row--team { border-color: var(--green-dark); background: var(--green-pale); }
+    .plan-row--team .plan-row__qualifier { color: var(--ink-2); }
 
     .billing-head { margin-top: 12px; font: 650 clamp(30px, 3.4vw, 40px)/1.06 var(--display); font-variation-settings: 'opsz' 60, 'SOFT' 40, 'WONK' 1; letter-spacing: -.02em; text-wrap: balance; }
-    .billing-grid { margin-top: 46px; display: grid; grid-template-columns: 1fr 1fr; }
-    .billing-item { border-top: 1px solid var(--line); padding: 32px 0 40px; }
-    .billing-item:nth-child(odd) { padding-right: clamp(22px, 3.4vw, 48px); }
-    .billing-item:nth-child(even) { border-left: 1px solid var(--line); padding-left: clamp(22px, 3.4vw, 48px); }
+    .billing-grid { margin-top: 46px; display: grid; grid-template-columns: 1fr; border-top: 1px solid var(--line); }
+    .billing-item { display: grid; grid-template-columns: minmax(220px, .55fr) 1.45fr; gap: clamp(20px, 3vw, 44px); border-bottom: 1px solid var(--line); padding: 26px 0 30px; }
     .billing-item h3 { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
-    .billing-item p { margin-top: 10px; max-width: 54ch; color: var(--ink-2); font-size: 15px; line-height: 1.6; }
-    .billing-item--wide { grid-column: 1 / -1; margin-top: 12px; border: 0; border-radius: 18px; background: var(--green-pale); padding: clamp(24px, 3vw, 36px) clamp(22px, 3.4vw, 48px); }
+    .billing-item p { margin: 0; color: var(--ink-2); font-size: 15px; line-height: 1.6; }
 
-    .notes-head { color: var(--green-dark); font: 700 11px/1.35 var(--sans); letter-spacing: .13em; text-transform: uppercase; }
-    .notes-list { margin: 28px 0 0; max-width: 78ch; padding: 0; list-style: none; counter-reset: note; }
-    .notes-list li { counter-increment: note; display: flex; gap: 18px; padding: 17px 0; color: var(--ink-2); font-size: 13px; line-height: 1.7; }
+    .notes-section { background: var(--surface); }
+    .notes-head { margin-top: 12px; font: 650 clamp(30px, 3.4vw, 40px)/1.06 var(--display); font-variation-settings: 'opsz' 60, 'SOFT' 40, 'WONK' 1; letter-spacing: -.02em; }
+    .notes-list { margin: 36px 0 0; padding: 0; list-style: none; counter-reset: note; border-top: 1px solid var(--line); }
+    .notes-list li { counter-increment: note; display: grid; grid-template-columns: 64px 1fr; gap: 18px; padding: 16px 0; color: var(--ink-2); font-size: 13.5px; line-height: 1.7; }
     .notes-list li + li { border-top: 1px solid var(--line); }
-    .notes-list li::before { content: counter(note, decimal-leading-zero); flex: 0 0 auto; color: var(--green-dark); font: 600 12px/1.7 var(--mono); font-variant-numeric: tabular-nums; }
-    .notes-terms { display: inline-flex; min-height: 44px; align-items: center; margin-top: 20px; font-size: 14px; font-weight: 650; color: var(--ink); }
-    .notes-terms:hover { color: var(--green-dark); }
-    .notes-section { padding-bottom: clamp(96px, 11vw, 168px); }
+    .notes-list li::before { content: counter(note, decimal-leading-zero); color: var(--green-dark); font: 600 12px/1.9 var(--mono); font-variant-numeric: tabular-nums; }
+    .notes-terms { display: inline-flex; min-height: 44px; align-items: center; margin-top: 26px; color: var(--green-dark); font: 700 12px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 5px; }
+    .notes-terms:hover { color: var(--ink); }
+    .notes-section { padding-bottom: 128px; }
 
     @media (max-width: 899px) {
-      .plan-ledger { --plan-gutter: 14px; margin-inline: -6px; }
-      .plan-ledger__labels { display: none; }
-      .plan-row { grid-template-columns: 1fr; row-gap: 16px; padding-block: 30px 34px; }
-      .plan-row__audience { max-width: 52ch; }
-      .plan-row__cta { justify-self: start; }
-      .plan-row--team { padding-block: 34px 38px; }
-      .billing-grid { grid-template-columns: 1fr; }
-      .billing-item { padding: 28px 0 34px; }
-      .billing-item:nth-child(odd) { padding-right: 0; }
-      .billing-item:nth-child(even) { border-left: 0; padding-left: 0; }
-      .billing-item--wide { margin-inline: -6px; padding: 26px 20px; }
-      .notes-section { padding-bottom: clamp(80px, 18vw, 120px); }
+      .billing-item { grid-template-columns: 1fr; gap: 8px; padding: 24px 0 28px; }
+      .notes-section { padding-bottom: 96px; }
+    }
+    @media (max-width: 1050px) {
+      .plan-ledger__rows { grid-template-columns: repeat(3, 1fr); }
+      .plan-row > div:first-child { min-height: 0; }
+    }
+    @media (max-width: 720px) {
+      .plan-ledger__rows { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -245,9 +240,6 @@
       <div class="chapter__inner">
         <h2 id="plans-heading" class="sr-only">Exact plans and included capabilities</h2>
         <div class="plan-ledger">
-          <div class="plan-ledger__labels" aria-hidden="true">
-            <span>Plan</span><span>Price</span><span>Included</span><span>Action</span>
-          </div>
           <ul class="plan-ledger__rows">
             <li class="plan-row">
               <div>
@@ -391,7 +383,7 @@
             <h3>Receipts explain reality</h3>
             <p>Completed work reconciles the approved maximum, actual platform usage, provider telemetry, and delivery evidence.</p>
           </div>
-          <div class="billing-item billing-item--wide">
+          <div class="billing-item">
             <h3>Project Management mode on every plan</h3>
             <p>PRDs, breakdowns, tickets, and delivery Reports add no new meter. Chargeable work still happens only through quoted, approved Engineering delivery.</p>
           </div>
@@ -401,7 +393,8 @@
 
     <section class="chapter notes-section" aria-labelledby="notes-heading">
       <div class="chapter__inner">
-        <h2 id="notes-heading" class="notes-head">Pricing notes</h2>
+        <p class="small-label">The fine print</p>
+        <h2 id="notes-heading" class="notes-head">Pricing notes.</h2>
         <ol class="notes-list">
           <li>Published IDR prices are fixed plan prices, not live foreign-exchange quotes. We will announce pricing changes before they take effect.</li>
           <li>Free includes no recurring Story Point allowance. Its 0.5 SP is a one-time onboarding grant. Top-ups remain available where the account and payment method permit them.</li>
