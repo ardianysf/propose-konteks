@@ -75,9 +75,9 @@
 
     .nav { position: fixed; z-index: 100; inset: 0 0 auto; border-bottom: 1px solid var(--line); background: var(--canvas); }
     .nav__inner { display: flex; min-height: 64px; align-items: center; gap: 24px; }
-    .brand { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 9px; font: 800 22px/1 var(--display); text-decoration: none; }
-    .brand img { width: 38px; height: 32px; object-fit: contain; mix-blend-mode: multiply; }
-    [data-theme='dark'] .brand img { filter: invert(.86) hue-rotate(80deg); mix-blend-mode: screen; }
+    .brand { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 9px; text-decoration: none; }
+    .brand__logo { width: auto; height: 26px; }
+    [data-theme='dark'] .brand__logo { filter: brightness(0) invert(1); }
     .beta { border: 1px solid var(--green); border-radius: 999px; padding: 2px 7px; color: var(--green-dark); font: 700 11px/1.35 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
     .nav__links { display: flex; align-items: center; gap: clamp(14px, 1.7vw, 26px); margin-left: 120px; }
     .nav__links a { font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
@@ -110,14 +110,14 @@
     .footer ul { margin: 0; padding: 0; list-style: none; }
     .footer li + li { margin-top: 10px; }
     .footer a { color: #cbd7ca; }
-    .footer__brand { font: 800 34px/1 var(--display); }
+    .footer__logo { width: 132px; height: auto; filter: brightness(0) invert(1); opacity: .92; }
+    .footer a { text-decoration: none; }
+    .footer a:hover { color: #eef3ea; }
     .footer__brand p { max-width: 290px; margin-top: 20px; color: #aab9ab; font: 400 15px/1.5 var(--sans); }
     .footer__bottom { display: flex; justify-content: space-between; gap: 30px; margin-top: 78px; border-top: 1px solid #344238; padding-top: 24px; color: #91a095; font-size: 13px; }
 
     .journal-header { padding: clamp(160px, 15vw, 200px) 32px clamp(72px, 7vw, 112px); }
     .journal-header .chapter__inner { position: relative; }
-    .journal-stamp { position: absolute; top: -4px; right: 0; width: clamp(64px, 6.4vw, 88px); transform: rotate(7deg); opacity: .95; }
-    [data-theme='dark'] .journal-stamp { filter: brightness(.72) saturate(.85); opacity: .85; }
     .journal-ledger { padding: 0 32px clamp(88px, 9vw, 138px); }
     .entry-list { margin: 0; padding: 0; list-style: none; border-top: 2px solid var(--ink); }
     .entry { border-bottom: 1px solid var(--line); padding: clamp(56px, 7vw, 84px) 0; }
@@ -141,9 +141,6 @@
       .nav__links { gap: 13px; margin-left: 34px; }
       .nav__cta { padding-inline: 14px; }
     }
-    @media (max-width: 1249px) {
-      .journal-stamp { display: none; }
-    }
     @media (max-width: 720px) {
       .shell { width: min(100% - 32px, 620px); }
       .nav__inner { min-height: 60px; }
@@ -161,6 +158,23 @@
       html { scroll-behavior: auto; }
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .001ms !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
     }
+
+    /* ---- journal head art and entry cards ---- */
+    .journal-head__grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr); gap: clamp(36px, 5vw, 84px); align-items: start; }
+    .journal-head__art { justify-self: end; margin-top: clamp(6px, 2vw, 26px); width: clamp(260px, 27vw, 400px); height: auto; }
+    .entry-list { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; border-top: 0; }
+    .entry { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; padding: 0; background: var(--canvas); }
+    .entry__media { aspect-ratio: 8 / 5; overflow: hidden; border-bottom: 1px solid var(--line); }
+    .entry__art { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .entry__body { display: flex; flex: 1; flex-direction: column; padding: 22px 24px 26px; }
+    .entry__title { max-width: none; margin-top: 14px; font-size: clamp(24px, 2.1vw, 30px); line-height: 1.3; }
+    .entry__excerpt { margin-top: 12px; font-size: 16px; line-height: 1.55; }
+    .entry__read { margin-top: auto; padding-top: 18px; }
+    @media (max-width: 720px) {
+      .journal-head__grid { grid-template-columns: 1fr; }
+      .journal-head__art { justify-self: start; margin-top: 8px; width: min(340px, 84vw); }
+      .entry-list { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -175,8 +189,7 @@
   <nav class="nav" aria-label="Main navigation">
     <div class="shell nav__inner">
       <a class="brand" href="/" aria-label="Konteks home">
-        <img src="/landingpage-assets/figma-paper-boat-hero.png" alt="">
-        <span>Konteks</span><span class="beta">Beta</span>
+        <img class="brand__logo" src="/landingpage-assets/logos/konteks.webp" alt="Konteks"><span class="beta">Beta</span>
       </a>
       <div class="nav__links">
         <a href="/#product">Product</a><a href="/#workflow">How it works</a><a href="/#sessions">Four kinds of session</a><a href="/#enablement">Enablement</a><a href="/pricing/">Pricing</a><a href="/docs/">Docs</a><a href="/blog/" aria-current="page">Journal</a>
@@ -199,10 +212,14 @@
   <main>
     <header class="chapter journal-header">
       <div class="chapter__inner">
-        <img class="journal-stamp" src="/landingpage-assets/postcard-stamp.png" alt="" aria-hidden="true">
-        <p class="small-label">Konteks journal</p>
-        <h1 class="display">Notes from the part where the product <em>becomes real.</em></h1>
-        <p class="lede">Launch notes, engineering scars, and the decisions behind software that remembers.</p>
+        <div class="journal-head__grid">
+          <div class="journal-head__copy">
+            <p class="small-label">Konteks journal</p>
+            <h1 class="display">Notes from the part where the product <em>becomes real.</em></h1>
+            <p class="lede">Launch notes, engineering scars, and the decisions behind software that remembers.</p>
+          </div>
+          <img class="journal-head__art" src="/landingpage-assets/illustrations/journal.png" alt="Paper journal notes from the Konteks team" width="1254" height="1254">
+        </div>
       </div>
     </header>
 
@@ -211,18 +228,24 @@
         <ol class="entry-list">
           <li>
             <article class="entry">
-              <p class="entry__meta"><time datetime="2026-08-17">August 17, 2026</time><span class="sep" aria-hidden="true">·</span><span>Launch notes</span><span class="sep" aria-hidden="true">·</span><span>6 min read</span></p>
-              <h2 class="entry__title"><a href="/blog/day-1-introducing-project-management-mode/">Day 1: introducing Project Management mode, and why it matters</a></h2>
-              <p class="entry__excerpt">Konteks is live in beta on August 17. Delivery was never the hard part. Deciding what to build, in what order, at what cost, that was. Here is what we shipped for it.</p>
-              <a class="entry__read" href="/blog/day-1-introducing-project-management-mode/">Read the entry <span class="arrow" aria-hidden="true">→</span></a>
+              <div class="entry__media"><img class="entry__art" src="/landingpage-assets/illustrations/illustration-002.png" alt="" aria-hidden="true" width="1448" height="1086"></div>
+              <div class="entry__body">
+                <p class="entry__meta"><time datetime="2026-08-17">August 17, 2026</time><span class="sep" aria-hidden="true">·</span><span>Launch notes</span><span class="sep" aria-hidden="true">·</span><span>6 min read</span></p>
+                <h2 class="entry__title"><a href="/blog/day-1-introducing-project-management-mode/">Day 1: introducing Project Management mode, and why it matters</a></h2>
+                <p class="entry__excerpt">Konteks is live in beta on August 17. Delivery was never the hard part. Deciding what to build, in what order, at what cost, that was. Here is what we shipped for it.</p>
+                <a class="entry__read" href="/blog/day-1-introducing-project-management-mode/">Read the entry <span class="arrow" aria-hidden="true">→</span></a>
+              </div>
             </article>
           </li>
           <li>
             <article class="entry">
-              <p class="entry__meta"><time datetime="2026-07-16">July 16, 2026</time><span class="sep" aria-hidden="true">·</span><span>Launch notes</span><span class="sep" aria-hidden="true">·</span><span>6 min read</span></p>
-              <h2 class="entry__title"><a href="/blog/the-road-to-august-17/">The road to August 17: software should remember</a></h2>
-              <p class="entry__excerpt">A launch countdown, and the story of how years of real engineering work turned into a system that gives humans and agents the same durable context.</p>
-              <a class="entry__read" href="/blog/the-road-to-august-17/">Read the entry <span class="arrow" aria-hidden="true">→</span></a>
+              <div class="entry__media"><img class="entry__art" src="/landingpage-assets/illustrations/illustration-001.png" alt="" aria-hidden="true" width="1672" height="941"></div>
+              <div class="entry__body">
+                <p class="entry__meta"><time datetime="2026-07-16">July 16, 2026</time><span class="sep" aria-hidden="true">·</span><span>Launch notes</span><span class="sep" aria-hidden="true">·</span><span>6 min read</span></p>
+                <h2 class="entry__title"><a href="/blog/the-road-to-august-17/">The road to August 17: software should remember</a></h2>
+                <p class="entry__excerpt">A launch countdown, and the story of how years of real engineering work turned into a system that gives humans and agents the same durable context.</p>
+                <a class="entry__read" href="/blog/the-road-to-august-17/">Read the entry <span class="arrow" aria-hidden="true">→</span></a>
+              </div>
             </article>
           </li>
         </ol>
@@ -233,7 +256,7 @@
   <footer class="footer">
     <div class="chapter__inner">
       <div class="footer__grid">
-        <div class="footer__brand">Konteks<p>The AI control plane for software engineering.</p></div>
+        <div class="footer__brand"><img class="footer__logo" src="/landingpage-assets/logos/konteks.webp" alt="Konteks"><p>The AI control plane for software engineering.</p></div>
         <div><h2>Product</h2><ul><li><a href="/#product">Overview</a></li><li><a href="/#workflow">How it works</a></li><li><a href="/#sessions">Sessions</a></li><li><a href="/#enablement">Enablement</a></li></ul></div>
         <div><h2>Resources</h2><ul><li><a href="/docs/">Docs</a></li><li><a href="/docs/#api-reference">API reference</a></li><li><a href="/blog/">Journal</a></li><li><a href="/pricing/">Pricing</a></li></ul></div>
         <div><h2>Company</h2><ul><li><a href="/about/">About</a></li><li><a href="/contact/">Contact</a></li><li><a href="/security/">Security</a></li><li><a href="/privacy/">Privacy</a></li></ul></div>
