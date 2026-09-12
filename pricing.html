@@ -75,9 +75,9 @@
 
     .nav { position: fixed; z-index: 100; inset: 0 0 auto; border-bottom: 1px solid var(--line); background: var(--canvas); }
     .nav__inner { display: flex; min-height: 64px; align-items: center; gap: 24px; }
-    .brand { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 9px; font: 800 22px/1 var(--display); text-decoration: none; }
-    .brand img { width: 38px; height: 32px; object-fit: contain; mix-blend-mode: multiply; }
-    [data-theme='dark'] .brand img { filter: invert(.86) hue-rotate(80deg); mix-blend-mode: screen; }
+    .brand { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 9px; text-decoration: none; }
+    .brand__logo { width: auto; height: 26px; }
+    [data-theme='dark'] .brand__logo { filter: brightness(0) invert(1); }
     .beta { border: 1px solid var(--green); border-radius: 999px; padding: 2px 7px; color: var(--green-dark); font: 700 11px/1.35 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
     .nav__links { display: flex; align-items: center; gap: clamp(14px, 1.7vw, 26px); margin-left: 120px; }
     .nav__links a { font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
@@ -108,7 +108,9 @@
     .footer ul { margin: 0; padding: 0; list-style: none; }
     .footer li + li { margin-top: 10px; }
     .footer a { color: #cbd7ca; }
-    .footer__brand { font: 800 34px/1 var(--display); }
+    .footer__logo { width: 132px; height: auto; filter: brightness(0) invert(1); opacity: .92; }
+    .footer a { text-decoration: none; }
+    .footer a:hover { color: #eef3ea; }
     .footer__brand p { max-width: 290px; margin-top: 20px; color: #aab9ab; font: 400 15px/1.5 var(--sans); }
     .footer__bottom { display: flex; justify-content: space-between; gap: 30px; margin-top: 78px; border-top: 1px solid #344238; padding-top: 24px; color: #91a095; font-size: 13px; }
 
@@ -389,6 +391,11 @@
       .billing-intro .billing-illustration { width: 200px; margin-bottom: 18px; }
       .billing-item { padding: 18px 0 22px; }
     }
+
+    .plan-row { grid-template-rows: 156px 212px minmax(170px, 1fr) auto; min-height: 626px; }
+    @media (max-width: 720px) {
+      .plan-row { grid-template-rows: auto auto auto auto; min-height: 0; }
+    }
   </style>
 </head>
 <body>
@@ -403,8 +410,7 @@
   <nav class="nav" aria-label="Main navigation">
     <div class="shell nav__inner">
       <a class="brand" href="/" aria-label="Konteks home">
-        <img src="/landingpage-assets/figma-paper-boat-hero.png" alt="">
-        <span>Konteks</span><span class="beta">Beta</span>
+        <img class="brand__logo" src="/landingpage-assets/logos/konteks.webp" alt="Konteks"><span class="beta">Beta</span>
       </a>
       <div class="nav__links">
         <a href="/#product">Product</a><a href="/#workflow">How it works</a><a href="/#sessions">Four kinds of session</a><a href="/#enablement">Enablement</a><a href="/pricing/" aria-current="page">Pricing</a><a href="/docs/">Docs</a><a href="/blog/">Journal</a>
@@ -611,7 +617,7 @@
   <footer class="footer">
     <div class="chapter__inner">
       <div class="footer__grid">
-        <div class="footer__brand">Konteks<p>The AI control plane for software engineering.</p></div>
+        <div class="footer__brand"><img class="footer__logo" src="/landingpage-assets/logos/konteks.webp" alt="Konteks"><p>The AI control plane for software engineering.</p></div>
         <div><h2>Product</h2><ul><li><a href="/#product">Overview</a></li><li><a href="/#workflow">How it works</a></li><li><a href="/#sessions">Sessions</a></li><li><a href="/#enablement">Enablement</a></li></ul></div>
         <div><h2>Resources</h2><ul><li><a href="/docs/">Docs</a></li><li><a href="/docs/#api-reference">API reference</a></li><li><a href="/blog/">Journal</a></li><li><a href="/pricing/">Pricing</a></li></ul></div>
         <div><h2>Company</h2><ul><li><a href="/about/">About</a></li><li><a href="/contact/">Contact</a></li><li><a href="/security/">Security</a></li><li><a href="/privacy/">Privacy</a></li></ul></div>
