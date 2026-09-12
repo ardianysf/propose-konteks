@@ -225,6 +225,13 @@
       .surface-chapter__pair { grid-template-columns: 1fr; }
     }
     .docs-close a:focus-visible { outline-color: #17231a; }
+    /* ---- docs-close illustration ---- */
+    .docs-close__grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: clamp(32px, 5vw, 84px); align-items: center; }
+    .docs-close__art { justify-self: end; width: clamp(200px, 21vw, 320px); height: auto; }
+    @media (max-width: 720px) {
+      .docs-close__grid { grid-template-columns: 1fr; }
+      .docs-close__art { justify-self: start; margin-top: 26px; width: min(280px, 72vw); }
+    }
   </style>
 </head>
 <body>
@@ -361,9 +368,14 @@
 
     <section class="chapter docs-close" aria-labelledby="docs-close-title">
       <div class="chapter__inner">
-        <h2 class="docs-close__title" id="docs-close-title">Need the public contract clarified?</h2>
-        <p>If a capability is not documented here, contact us before building against it.</p>
-        <a class="docs-close__link" href="mailto:hello@konteks.io?subject=Konteks%20API%20question">hello@konteks.io →</a>
+        <div class="docs-close__grid">
+          <div class="docs-close__copy">
+            <h2 class="docs-close__title" id="docs-close-title">Need the public contract clarified?</h2>
+            <p>If a capability is not documented here, contact us before building against it.</p>
+            <a class="docs-close__link" href="mailto:hello@konteks.io?subject=Konteks%20API%20question">hello@konteks.io →</a>
+          </div>
+          <img class="docs-close__art" src="/landingpage-assets/illustrations/docs4.png" alt="" aria-hidden="true" width="1254" height="1254">
+        </div>
       </div>
     </section>
   </main>
