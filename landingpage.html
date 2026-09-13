@@ -80,7 +80,9 @@
     .brand { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 9px; text-decoration: none; }
     .brand__logo { width: auto; height: 26px; }
     [data-theme='dark'] .brand__logo { filter: brightness(0) invert(1); }
-    [data-theme='dark'] .boat-media { filter: brightness(.64) saturate(.78); mix-blend-mode: screen; }
+    [data-theme='dark'] .boat-video-light, [data-theme='dark'] .theory-video-light { display: none; }
+    [data-theme='light'] .boat-video-dark, [data-theme='light'] .theory-video-dark { display: none; }
+    [data-theme='dark'] .boat-video-dark { mix-blend-mode: screen; filter: saturate(.9); }
     [data-theme='dark'] .hero-stage, [data-theme='dark'] .boat-wrap { background: var(--canvas); }
     .beta { border: 1px solid var(--green); border-radius: 999px; padding: 2px 7px; color: var(--green-dark); font: 700 11px/1.35 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
     .nav__links { display: flex; align-items: center; gap: clamp(14px, 1.7vw, 26px); margin-left: 120px; }
@@ -130,6 +132,7 @@
     .boat-wrap { position: absolute; z-index: 3; inset: 0; overflow: hidden; background: var(--hero-surface); pointer-events: none; transform: translateY(calc(var(--hero-drift, 0) * 12px)); }
     .boat-media { position: absolute; top: 58%; left: 50%; width: auto; max-width: none; height: min(80vh, 820px); object-fit: contain; transform: translate(-50%, -50%); }
     .boat-video { z-index: 2; opacity: 0; mix-blend-mode: normal; filter: none; mask-image: linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%); transition: opacity .55s ease; }
+    .boat-video-dark { mask-image: linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%); mask-composite: intersect; }
     .hero-stage.video-ready .boat-video { opacity: 1; }
     .response__copy { display: block; }
     .response__title { display: block; margin-top: 2px; font-size: 16px; font-weight: 700; line-height: 1.15; }
@@ -352,7 +355,8 @@
     .theory__quote { font-size: clamp(35px, 4.2vw, 62px); }
     .theory-video { justify-self: end; width: min(760px, 54vw); aspect-ratio: 16 / 9; object-fit: contain; opacity: 0; mix-blend-mode: normal; filter: saturate(.86) contrast(.98); mask-image: radial-gradient(ellipse 72% 70% at center, #000 62%, transparent 100%); transform: scale(1.42); transform-origin: center; transition: opacity .3s ease; }
     .theory-stage.theory-video-ready .theory-video { opacity: 1; }
-    [data-theme='dark'] .theory-video { mix-blend-mode: screen; filter: grayscale(.35) brightness(.5) contrast(1.15); }
+    [data-theme='dark'] .theory-video-dark { mix-blend-mode: screen; filter: saturate(.9); }
+    .theory-video-dark { mask-image: radial-gradient(ellipse 72% 70% at center, #000 62%, transparent 100%), linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%); mask-composite: intersect; }
     .boundary-section { background: var(--surface); }
     .boundary { margin-top: 0; }
     .boundary__people h3 { color: var(--green-dark); }
@@ -577,8 +581,11 @@
           <span class="signal__text" data-human-copy>Decide what should exist, and what we will not build.</span>
         </button>
         <div class="boat-wrap" aria-hidden="true">
-          <video class="boat-media boat-video" data-hero-video muted playsinline preload="metadata">
+          <video class="boat-media boat-video boat-video-light" data-hero-video muted playsinline preload="metadata">
             <source src="/landingpage-assets/paper-boat-stop-motion-v2.mp4" type="video/mp4">
+          </video>
+          <video class="boat-media boat-video boat-video-dark" data-hero-video muted playsinline preload="metadata">
+            <source src="/landingpage-assets/paper-boat-stop-motion-v2-dark.mp4" type="video/mp4">
           </video>
         </div>
         <button class="response hero-annotation pair-0" type="button" data-response aria-live="polite" aria-label="Show next human signal and agent response">
@@ -629,8 +636,11 @@
             <h2 class="theory__quote" id="theory-title">“Programming properly should be regarded as an activity by which programmers form a <em>theory</em> of the matters at hand.”</h2>
             <p class="theory__source">Peter Naur · Programming as Theory Building, 1985</p>
           </div>
-          <video class="theory-video" data-theory-video muted playsinline preload="auto" aria-hidden="true">
+          <video class="theory-video theory-video-light" data-theory-video muted playsinline preload="auto" aria-hidden="true">
             <source src="/landingpage-assets/theory-paper-boat-stop-motion.mp4" type="video/mp4">
+          </video>
+          <video class="theory-video theory-video-dark" data-theory-video muted playsinline preload="auto" aria-hidden="true">
+            <source src="/landingpage-assets/theory-paper-boat-stop-motion-dark.mp4" type="video/mp4">
           </video>
         </div>
       </div>
@@ -953,13 +963,13 @@
       const root = document.documentElement;
       const runway = document.querySelector('[data-hero-runway]');
       const stage = document.querySelector('[data-hero-stage]');
-      const video = document.querySelector('[data-hero-video]');
+      const heroVideos = [...document.querySelectorAll('[data-hero-video]')];
       const signal = document.querySelector('[data-signal]');
       const response = document.querySelector('[data-response]');
       const paradigm = document.querySelector('[data-paradigm]');
       const theory = document.querySelector('[data-theory]');
       const theoryStage = theory?.querySelector('.theory-stage');
-      const theoryVideo = document.querySelector('[data-theory-video]');
+      const theoryVideos = [...document.querySelectorAll('[data-theory-video]')];
       const ledgerRows = [...document.querySelectorAll('[data-ledger-row]')];
       const ledgerIndex = document.querySelector('[data-ledger-index]');
       const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1095,10 +1105,11 @@
             stage.classList.toggle('hero-ending', ending);
           }
           if (!ending) render(index);
-          if (video && Number.isFinite(video.duration) && video.duration > 0) {
-            const target = heroVideoStart + sceneProgress * Math.max(0, video.duration - heroVideoStart - .05);
-            if (Math.abs(video.currentTime - target) > .04) video.currentTime = target;
-          }
+          heroVideos.forEach((heroVideo) => {
+            if (!Number.isFinite(heroVideo.duration) || heroVideo.duration <= 0) return;
+            const target = heroVideoStart + sceneProgress * Math.max(0, heroVideo.duration - heroVideoStart - .05);
+            if (Math.abs(heroVideo.currentTime - target) > .04) heroVideo.currentTime = target;
+          });
         }
         if (paradigm && ledgerRows.length) {
           const rect = paradigm.getBoundingClientRect();
@@ -1119,11 +1130,12 @@
         if (theory) {
           const rect = theory.getBoundingClientRect();
           const progress = clamp(-rect.top / Math.max(1, theory.offsetHeight - innerHeight), 0, 1);
-          if (theoryVideo && Number.isFinite(theoryVideo.duration) && theoryVideo.duration > 0) {
+          theoryVideos.forEach((theoryVideo) => {
+            if (!Number.isFinite(theoryVideo.duration) || theoryVideo.duration <= 0) return;
             const end = Math.max(theoryVideoStart, theoryVideo.duration - .05);
             const target = theoryVideoStart + progress * (end - theoryVideoStart);
             if (Math.abs(theoryVideo.currentTime - target) > .035) theoryVideo.currentTime = target;
-          }
+          });
         }
         if (workflowRunway && sceneCards.length && !reduced && innerWidth > 720) {
           const rect = workflowRunway.getBoundingClientRect();
@@ -1154,31 +1166,39 @@
         update();
       };
       const primeVideo = () => {
-        if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
-        const start = Math.min(heroVideoStart, Math.max(0, video.duration - .05));
-        if (Math.abs(video.currentTime - start) <= .01) showVideo();
-        else {
-          video.addEventListener('seeked', showVideo, { once: true });
-          video.currentTime = start;
-        }
+        heroVideos.forEach((heroVideo) => {
+          if (!Number.isFinite(heroVideo.duration) || heroVideo.duration <= 0) return;
+          const start = Math.min(heroVideoStart, Math.max(0, heroVideo.duration - .05));
+          if (Math.abs(heroVideo.currentTime - start) <= .01) showVideo();
+          else {
+            heroVideo.addEventListener('seeked', showVideo, { once: true });
+            heroVideo.currentTime = start;
+          }
+        });
       };
-      if (video?.readyState >= 1) primeVideo();
-      else video?.addEventListener('loadedmetadata', primeVideo, { once: true });
+      heroVideos.forEach((heroVideo) => {
+        if (heroVideo.readyState >= 1) primeVideo();
+        else heroVideo.addEventListener('loadedmetadata', primeVideo, { once: true });
+      });
       const primeTheoryVideo = () => {
-        if (!theoryVideo || !Number.isFinite(theoryVideo.duration) || theoryVideo.duration <= 0) return;
-        const start = Math.min(theoryVideoStart, Math.max(0, theoryVideo.duration - .05));
-        const reveal = () => {
-          theoryStage?.classList.add('theory-video-ready');
-          update();
-        };
-        if (Math.abs(theoryVideo.currentTime - start) <= .01) reveal();
-        else {
-          theoryVideo.addEventListener('seeked', reveal, { once: true });
-          theoryVideo.currentTime = start;
-        }
+        theoryVideos.forEach((theoryVideo) => {
+          if (!Number.isFinite(theoryVideo.duration) || theoryVideo.duration <= 0) return;
+          const start = Math.min(theoryVideoStart, Math.max(0, theoryVideo.duration - .05));
+          const reveal = () => {
+            theoryStage?.classList.add('theory-video-ready');
+            update();
+          };
+          if (Math.abs(theoryVideo.currentTime - start) <= .01) reveal();
+          else {
+            theoryVideo.addEventListener('seeked', reveal, { once: true });
+            theoryVideo.currentTime = start;
+          }
+        });
       };
-      if (theoryVideo?.readyState >= 1) primeTheoryVideo();
-      else theoryVideo?.addEventListener('loadedmetadata', primeTheoryVideo, { once: true });
+      theoryVideos.forEach((theoryVideo) => {
+        if (theoryVideo.readyState >= 1) primeTheoryVideo();
+        else theoryVideo.addEventListener('loadedmetadata', primeTheoryVideo, { once: true });
+      });
       [signal, response].forEach(control => control?.addEventListener('click', () => render((current + 1) % states.length)));
       render(0, true);
       update();
