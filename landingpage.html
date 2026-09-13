@@ -82,7 +82,7 @@
     [data-theme='dark'] .brand__logo { filter: brightness(0) invert(1); }
     [data-theme='dark'] .boat-video-light, [data-theme='dark'] .theory-video-light { display: none; }
     [data-theme='light'] .boat-video-dark, [data-theme='light'] .theory-video-dark { display: none; }
-    [data-theme='dark'] .boat-video-dark { mix-blend-mode: screen; filter: saturate(.9); }
+    [data-theme='dark'] .boat-video-dark { mix-blend-mode: screen; filter: contrast(1.4) brightness(1.2); }
     [data-theme='dark'] .hero-stage, [data-theme='dark'] .boat-wrap { background: var(--canvas); }
     .beta { border: 1px solid var(--green); border-radius: 999px; padding: 2px 7px; color: var(--green-dark); font: 700 11px/1.35 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
     .nav__links { display: flex; align-items: center; gap: clamp(14px, 1.7vw, 26px); margin-left: 120px; }
@@ -355,7 +355,7 @@
     .theory__quote { font-size: clamp(35px, 4.2vw, 62px); }
     .theory-video { justify-self: end; width: min(760px, 54vw); aspect-ratio: 16 / 9; object-fit: contain; opacity: 0; mix-blend-mode: normal; filter: saturate(.86) contrast(.98); mask-image: radial-gradient(ellipse 72% 70% at center, #000 62%, transparent 100%); transform: scale(1.42); transform-origin: center; transition: opacity .3s ease; }
     .theory-stage.theory-video-ready .theory-video { opacity: 1; }
-    [data-theme='dark'] .theory-video-dark { mix-blend-mode: screen; filter: saturate(.9); }
+    [data-theme='dark'] .theory-video-dark { mix-blend-mode: screen; filter: contrast(1.4) brightness(1.2); }
     .theory-video-dark { mask-image: radial-gradient(ellipse 72% 70% at center, #000 62%, transparent 100%), linear-gradient(to right, transparent 0%, #000 12%, #000 88%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%); mask-composite: intersect; }
     .boundary-section { background: var(--surface); }
     .boundary { margin-top: 0; }
