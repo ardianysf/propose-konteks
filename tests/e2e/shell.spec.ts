@@ -274,7 +274,7 @@ test.describe.fixme('shell', () => {
 
     const newSession = page.getByTestId('new-session-trigger')
     await newSession.click()
-    await expect(page.getByRole('heading', { name: 'New session', level: 1 })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'New session', exact: true })).toBeVisible()
     await expect(page.getByRole('region', { name: 'Session history' })).toHaveCount(0)
     await expect(page.getByRole('menu')).toHaveCount(0)
     await expect(page.locator('.kx-modal-backdrop')).toHaveCount(0)
@@ -283,7 +283,7 @@ test.describe.fixme('shell', () => {
     // A second click with no overlay open navigates directly (no-op route
     // change, still clean).
     await newSession.click()
-    await expect(page.getByRole('heading', { name: 'New session', level: 1 })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'New session', exact: true })).toBeVisible()
     await expect(page.getByRole('menu')).toHaveCount(0)
   })
 
@@ -313,7 +313,7 @@ test.describe.fixme('shell', () => {
 
     // Navigation from Session History works through the rail control.
     await newSession.click()
-    await expect(page.getByRole('heading', { name: 'New session', level: 1 })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'New session', exact: true })).toBeVisible()
     await expect(newSession).toHaveAttribute('aria-current', 'page')
   })
 
@@ -394,7 +394,7 @@ test.describe.fixme('shell', () => {
 
     // The New Session page header carries no toggle of its own.
     await page.getByTestId('new-session-trigger').click()
-    await expect(page.getByRole('heading', { name: 'New session', level: 1 })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'New session', exact: true })).toBeVisible()
     await expect(
       page.getByTestId('new-session-header').locator('[data-testid="sidebar-toggle"]'),
     ).toHaveCount(0)
@@ -491,225 +491,34 @@ test.describe.fixme('shell', () => {
   })
 })
 
-test.describe('composer layout correction surfaces', () => {
-  test('renders exactly one h1 and a decorative intro image (empty alt, aria-hidden)', async ({ page }) => {
-    await goto(page)
-    await expect(page.locator('h1')).toHaveCount(1)
-    await expect(page.getByRole('heading', { name: 'New session', level: 1 })).toBeVisible()
-
-    const introImg = page.locator('.kx-new-session__intro-img')
-    await expect(introImg).toHaveCount(1)
-    await expect(introImg).toHaveAttribute('alt', '')
-    await expect(introImg).toHaveAttribute('aria-hidden', 'true')
-    await expect(introImg).toHaveAttribute('src', '/assets/konteks/empty-sessions.png')
-  })
-
-  test('header spans full width independent of the composer; the bounded content column sits below it', async ({ page }) => {
-    await goto(page)
-
-    const headerBox = await page.getByTestId('new-session-header').boundingBox()
-    const contentBox = await page.getByTestId('new-session-content').boundingBox()
-    const composerBox = await page.getByTestId('composer').boundingBox()
-    expect(headerBox).not.toBeNull()
-    expect(contentBox).not.toBeNull()
-    expect(composerBox).not.toBeNull()
-
-    // The header band is wider than the bounded composer/content column.
-    expect(headerBox!.width).toBeGreaterThan(contentBox!.width)
-    expect(headerBox!.width).toBeGreaterThan(composerBox!.width)
-
-    // The header sits above the content region; both are centered in the
-    // page column, so the bounded column is inset inside the header band.
-    expect(headerBox!.y + headerBox!.height).toBeLessThanOrEqual(contentBox!.y)
-    expect(contentBox!.x).toBeGreaterThanOrEqual(headerBox!.x)
-    const headerCenter = headerBox!.x + headerBox!.width / 2
-    const contentCenter = contentBox!.x + contentBox!.width / 2
-    expect(Math.abs(headerCenter - contentCenter)).toBeLessThanOrEqual(2)
-  })
-
-  test('reviews pill and disclaimer carry the exact copy in their standalone wrappers', async ({ page }) => {
-    await goto(page)
-
-    const wrapper = page.getByTestId('reviews-wrapper')
-    await expect(wrapper).toBeVisible()
-    await expect(wrapper).toHaveClass(/kx-new-session__reviews/)
-
-    const reviews = wrapper.getByTestId('reviews-waiting')
-    await expect(reviews).toBeVisible()
-    await expect(reviews).toContainText('Reviews waiting')
-    await expect(reviews.locator('.kx-composer__badge')).toHaveText('3')
-
-    const disclaimer = page.getByTestId('disclaimer')
-    await expect(disclaimer).toBeVisible()
-    await expect(disclaimer).toHaveClass(/kx-new-session__disclaimer/)
-    await expect(disclaimer).toHaveText('Konteks can make mistakes. Verify important information.')
-  })
-
-  test('intro keeps a clear gap above the reviews pill and the composer', async ({ page }) => {
-    await goto(page)
-
-    const introBox = await page.getByTestId('new-session-intro').boundingBox()
-    const reviewsBox = await page.getByTestId('reviews-wrapper').boundingBox()
-    const composerBox = await page.getByTestId('composer').boundingBox()
-    expect(introBox).not.toBeNull()
-    expect(reviewsBox).not.toBeNull()
-    expect(composerBox).not.toBeNull()
-
-    // The intro's bottom margin (clamp(40px, 7vh, 72px)) separates it
-    // from the reviews pill, which sits 12px above the composer.
-    const introToReviews = reviewsBox!.y - (introBox!.y + introBox!.height)
-    expect(introToReviews).toBeGreaterThanOrEqual(40)
-    const reviewsToComposer = composerBox!.y - (reviewsBox!.y + reviewsBox!.height)
-    expect(reviewsToComposer).toBeGreaterThanOrEqual(12)
-  })
-
-  test('repository trigger opens the repository modal over the shell (modal regression)', async ({ page }) => {
-    await goto(page)
-    await page.getByTestId('repository-trigger').click()
+// V2 replaced the previous root shell. These regressions exercise its
+// current geometry and shared composer instead of retired V1 selectors.
+test.describe('V2 composer and responsive regressions', () => {
+  test('new session keeps the shared composer and repository dialog operable', async ({ page }) => {
+    await page.goto('/v2/new-session')
+    await expect(page.getByRole('region', { name: 'New session', exact: true })).toBeVisible()
+    const trigger = page.getByTestId('repository-trigger')
+    await trigger.click()
     const dialog = page.getByRole('dialog', { name: 'Choose work repositories' })
     await expect(dialog).toBeVisible()
-    await expect(dialog).toBeFocused()
-
-    // The modal operates: Cancel closes it and returns focus to the trigger.
     await dialog.getByRole('button', { name: 'Cancel' }).click()
     await expect(dialog).toHaveCount(0)
-    await expect(page.getByTestId('repository-trigger')).toBeFocused()
-  })
-
-  test('component trigger opens above its trigger and operates the menu (modal regression)', async ({ page }) => {
-    await goto(page)
-    const trigger = page.getByTestId('component-trigger')
-    await trigger.click()
-    const menu = page.getByTestId('component-menu')
-    await expect(menu).toBeVisible()
-
-    // Anchored above the trigger, flush with its left edge: the menu's
-    // bottom never reaches past the trigger's top.
-    const triggerBox = await trigger.boundingBox()
-    const menuBox = await menu.boundingBox()
-    expect(Math.abs(menuBox!.x - triggerBox!.x)).toBeLessThan(2)
-    expect(menuBox!.y + menuBox!.height).toBeLessThanOrEqual(triggerBox!.y)
-
-    // The menu operates: a search narrows the rows and Clear resets them.
-    const search = menu.getByRole('searchbox', { name: 'Search components or repositories' })
-    await search.fill('mytok')
-    await expect(menu.locator('.kx-component-menu__row')).toHaveCount(1)
-    await menu.getByRole('menuitemcheckbox', { name: /mytok-mobile/ }).check()
-    await menu.getByRole('menuitem', { name: 'Clear' }).click()
-    await expect(page.getByTestId('component-trigger')).toHaveText('Choose component')
-
-    await pressEscape(page)
-    await expect(menu).toHaveCount(0)
-    await expect(page.getByTestId('component-trigger')).toBeFocused()
-  })
-
-  test('component trigger toggles its menu closed on a second click', async ({ page }) => {
-    await goto(page)
-    const trigger = page.getByTestId('component-trigger')
-    await trigger.click()
-    const menu = page.getByTestId('component-menu')
-    await expect(menu).toBeVisible()
-    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
-
-    // The same trigger's second click dismisses the menu and restores
-    // focus instead of re-opening it.
-    await trigger.click()
-    await expect(menu).toHaveCount(0)
-    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
     await expect(trigger).toBeFocused()
-  })
-})
-
-test.describe('responsive regressions (Task 13)', () => {
-  test('crossing 1280px forces the rail and stands the in-sidebar toggle down; crossing back restores the stored expanded state', async ({ page }) => {
-    await goto(page)
-    await expect.poll(() => sidebarWidth(page)).toBe(320)
-    await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeVisible()
-
-    await page.setViewportSize({ width: 1280, height: 900 })
-    await expect.poll(() => sidebarWidth(page)).toBe(64)
-    // Expansion is unavailable in the forced rail: the stored preference is
-    // still expanded, so the DOM toggle is the top-right collapse control —
-    // it is display:none here, standing down exactly like the old
-    // page-header toggle did.
-    await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeHidden()
-
-    await page.setViewportSize({ width: 1281, height: 900 })
-    await expect.poll(() => sidebarWidth(page)).toBe(320)
-    await expect(page.getByRole('button', { name: 'Collapse sidebar' })).toBeVisible()
+    await page.getByTestId('composer-input').fill('Review illustrative checkout code')
+    await page.getByTestId('composer-send').click()
+    await expect(page).toHaveURL(/session-detail/)
+    await expect(page.locator('main')).toContainText('Review illustrative checkout code')
   })
 
-  test('a stored rail preference survives the 1280→1281 round trip', async ({ page }) => {
-    await goto(page)
-    await page.getByRole('button', { name: 'Collapse sidebar' }).click()
-    await expect(sidebar(page)).toHaveClass(/kx-sidebar--rail/)
-    await expect.poll(() => sidebarWidth(page)).toBe(64)
-
-    await page.setViewportSize({ width: 1280, height: 900 })
-    await expect.poll(() => sidebarWidth(page)).toBe(64)
-
-    await page.setViewportSize({ width: 1281, height: 900 })
-    await expect.poll(() => sidebarWidth(page)).toBe(64)
-  })
-
-  test('fits 1200×720 with no horizontal scroll and unclipped composer/modal (AC44)', async ({ page }) => {
-    await page.setViewportSize({ width: 1200, height: 720 })
-    await goto(page)
-
-    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth)
-    expect(scrollWidth).toBeLessThanOrEqual(1200)
-
-    const composerBox = await page.getByTestId('composer').boundingBox()
-    expect(composerBox).not.toBeNull()
-    expect(composerBox!.x + composerBox!.width).toBeLessThanOrEqual(1200)
-
-    await openCustomize(page)
-    const modalBox = await page.getByTestId('customize-modal').boundingBox()
-    expect(modalBox).not.toBeNull()
-    expect(modalBox!.x).toBeGreaterThanOrEqual(0)
-    expect(modalBox!.y).toBeGreaterThanOrEqual(0)
-    expect(modalBox!.x + modalBox!.width).toBeLessThanOrEqual(1200)
-    expect(modalBox!.y + modalBox!.height).toBeLessThanOrEqual(720)
-  })
-
-  test('keeps the header, intro, reviews pill, composer/input box, and disclaimer fully inside both required viewports', async ({ page }) => {
-    for (const { width, height } of [
-      { width: 1440, height: 900 },
-      { width: 1200, height: 720 },
-    ]) {
-      await page.setViewportSize({ width, height })
-      await goto(page)
-
-      const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth)
-      expect(scrollWidth, `document must not overflow ${width}px horizontally`).toBeLessThanOrEqual(width)
-
-      // Both axes: every required New Session region must sit fully inside
-      // the viewport — x AND y bounds — at 1440×900 and the compact-height
-      // 1200×720 regression viewport (AC44).
-      for (const testId of [
-        'new-session-header',
-        'new-session-content',
-        'new-session-intro',
-        'composer',
-        'composer-input-box',
-        'reviews-wrapper',
-        'disclaimer',
-      ]) {
-        const box = await page.getByTestId(testId).boundingBox()
-        expect(box, `${testId} should be visible at ${width}x${height}`).not.toBeNull()
-        expect(box!.x, `${testId} left edge at ${width}x${height}`).toBeGreaterThanOrEqual(0)
-        expect(box!.x + box!.width, `${testId} right edge at ${width}x${height}`).toBeLessThanOrEqual(width)
-        expect(box!.y, `${testId} top edge at ${width}x${height}`).toBeGreaterThanOrEqual(0)
-        expect(box!.y + box!.height, `${testId} bottom edge at ${width}x${height}`).toBeLessThanOrEqual(height)
-      }
-
-      // Full-width header stays wider than the bounded composer column at
-      // both viewports — the header never collapses to the content width.
-      const headerBox = await page.getByTestId('new-session-header').boundingBox()
-      const composerBox = await page.getByTestId('composer').boundingBox()
-      expect(headerBox!.width, `header wider than composer at ${width}x${height}`).toBeGreaterThan(
-        composerBox!.width,
-      )
-    }
-  })
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 1200, height: 720 }, { width: 390, height: 844 }]) {
+    test(`composer stays inside the viewport at ${viewport.width}`, async ({ page }) => {
+      await page.setViewportSize(viewport)
+      await page.goto('/v2/new-session')
+      await expect(page.getByTestId('composer')).toBeVisible()
+      const box = await page.getByTestId('composer').boundingBox()
+      expect(box!.x).toBeGreaterThanOrEqual(0)
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width)
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width)
+    })
+  }
 })

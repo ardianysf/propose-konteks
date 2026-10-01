@@ -239,7 +239,7 @@
   letter-spacing: 0.6px;
 }
 
-.system-node__cat { color: var(--kx-system-map-system); }
+.system-node__cat { color: var(--kx-accent-text-aa); }
 .container-node__cat { color: var(--kx-system-map-container); }
 .repository-node__cat { color: var(--kx-secondary); }
 .component-node__cat { color: var(--kx-system-map-component); }

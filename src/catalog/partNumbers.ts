@@ -16,6 +16,7 @@ import { entriesByDomain, type ManifestEntry } from './manifest'
 
 /** Domain → stencil code (matches the Overview index order, alphabetical). */
 export const DOMAIN_CODES: Record<string, string> = {
+  product: 'PRD',
   account: 'ACC',
   composer: 'CMP',
   context: 'CTX',

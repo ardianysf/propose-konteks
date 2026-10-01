@@ -4,7 +4,7 @@ A local React + TypeScript mockup of the **Konteks "Warm Enterprise" visual reva
 
 - **Authoritative contract:** [`docs/superpowers/specs/2026-08-16-konteks-visual-revamp-design.md`](docs/superpowers/specs/2026-08-16-konteks-visual-revamp-design.md) (46 acceptance criteria, AC1–AC46).
 - **Implementation plan:** [`docs/plans/2026-08-16-konteks-clickable-mockup-implementation.md`](docs/plans/2026-08-16-konteks-clickable-mockup-implementation.md).
-- **Scope:** Single-page app driven by `mockupReducer` (route, sidebar, mode, system/repository/component selection, Execution Profile, overlays). No backend, no network calls, no persistence — **except** theme preference, which uses real `localStorage` (see §Theme below).
+- **Scope:** Single-page app driven by `mockupReducer` (route, sidebar, mode, system/repository/component selection, Execution Profile, overlays). No backend integration. Product/session changes are memory-only; theme, settings, and customization follow their existing local storage conventions.
 
 > **All content is illustrative.** Timestamps, counts, session names, system names, repository names, and model names are placeholder data. A visible **"Illustrative data"** marker appears on Session History and in Settings; sidebar and New Session carry no marker (spec §2, AC46).
 
@@ -45,6 +45,12 @@ Exits 0 when already up-to-date.
 | **Catalog component detail** | `http://localhost:5173/catalog/components/<slug>` | `http://localhost:4173/catalog/components/<slug>` |
 
 Run `npm run dev` for development or `npm run build && npm run preview` for production preview.
+
+## Live-workflow prototype
+
+`/v2/activities`, `/v2/work`, `/v2/issues`, `/v2/releases`, `/v2/leaderboard`, `/v2/customize/runtimes`, `/v2/settings/general`, `/v2/profile`, `/v2/systems`, and `/v2/work-locally` expose the inspected live workflows with the proposed design system. Detail URLs preserve selected fixture records and browser history. New record changes remain local and reset on reload.
+
+See the [coverage matrix](docs/evidence/live-app-refactor/coverage.md) and [screenshots and validation](docs/evidence/live-app-refactor/README.md) for the exact scope, reference blockers, and reproduction commands. The component catalog includes the new shared product header, row, empty state, and filters.
 
 ## Theme
 

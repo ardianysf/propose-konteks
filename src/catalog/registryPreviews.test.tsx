@@ -56,10 +56,10 @@ class TestErrorBoundary extends Component<
 }
 
 describe('registry ↔ manifest visual contract (parametrized)', () => {
-  it('the manifest carries 49 visual entries and they all have detail-page content fields', () => {
+  it('the manifest carries 53 visual entries and they all have detail-page content fields', () => {
     // Guard rail for the "49" in the task: if metadata work (R2+) changes
     // classifications, this fails loudly instead of silently re-scoping.
-    expect(visualEntries).toHaveLength(49)
+    expect(visualEntries).toHaveLength(53)
     for (const entry of visualEntries) {
       expect(entry.id).toBeTruthy()
       expect(entry.name).toBeTruthy()
