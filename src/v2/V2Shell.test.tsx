@@ -85,6 +85,7 @@ afterAll(() => {
 })
 
 beforeEach(() => {
+  window.history.replaceState(null, '', '/v2')
   media.mql.setMatches(false)
   window.localStorage.clear()
   delete document.documentElement.dataset.theme
@@ -507,7 +508,7 @@ describe('V2AccountPopover', () => {
     expect(within(popover).queryByText('Component catalog')).not.toBeInTheDocument()
   })
 
-  it('sidebar menu rows: Customize opens the customize modal, Component catalog links to /catalog', async () => {
+  it('sidebar menu rows: Customize opens the full Customize page, Component catalog links to /catalog', async () => {
     render(<V2App />)
 
     // Catalog — plain anchor to the catalog page.
@@ -516,7 +517,7 @@ describe('V2AccountPopover', () => {
 
     // Customize — dispatches the customize overlay and the modal mounts.
     fireEvent.click(screen.getByTestId('v2-customize-trigger'))
-    expect(await screen.findByTestId('customize-modal')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Customize', level: 1 })).toBeInTheDocument()
   })
 
   it('hands Account integrations into Customize Connections', async () => {

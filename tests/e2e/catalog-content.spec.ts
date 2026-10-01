@@ -65,6 +65,7 @@ test.describe('catalog content', () => {
         'Composer',
         'Context',
         'Customize',
+        'Product',
         'Reviews',
         'Session',
         'Shell',
@@ -74,7 +75,7 @@ test.describe('catalog content', () => {
           main(page).getByRole('link', { name: new RegExp(domain, 'i') }).first(),
         ).toBeVisible()
       }
-      await expect(main(page).locator('a.kx-cat-row')).toHaveCount(8)
+      await expect(main(page).locator('a.kx-cat-row')).toHaveCount(9)
     })
   })
 

@@ -23,7 +23,7 @@ function Status({ children, tone = 'neutral' }: { children: React.ReactNode; ton
   return <span className={`kx-status kx-status--${tone}`}>{children}</span>
 }
 
-function GeneralPanel() {
+export function GeneralPanel() {
   const data = useSettingsCustomizeStore()
   const { t, preference, setPreference } = usePrototypeLocale()
   const [name, setName] = useState(data.displayName)

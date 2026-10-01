@@ -1,3 +1,8 @@
+import { useSettingsCustomizeStore } from '../state/settingsCustomizeStore'
+import { Activity, Bug, Rocket, Trophy, ListTodo, Laptop } from 'lucide-react'
+import { ProductNotifications } from './product/ProductPages'
+import { RuntimeConnectButton } from './product/RuntimePages'
+import type { ProductRoute } from './product/productState'
 /*
  * V2Sidebar — the redesigned /v2 navigation surface (CLEAN pass).
  *
@@ -53,14 +58,15 @@ const LOGO_EXPANDED_SRC = '/assets/konteks/logo-text-main.png'
 const LOGO_RAIL_SRC = '/assets/konteks/web-topbar-icon-128.png'
 
 // ILLUSTRATIVE — user identity is placeholder data, not a production fact
-const USER_NAME = 'Refactory Admin'
-const USER_INITIALS = 'RA'
 
 type Popover = 'none' | 'context' | 'account'
 
 export default function V2Sidebar() {
   const { state, dispatch } = useMockup()
   const collapsed = state.sidebarCollapsed
+  const account = useSettingsCustomizeStore()
+  const USER_NAME = account.displayName
+  const USER_INITIALS = USER_NAME.split(/\s+/).map(n => n[0]).slice(0, 2).join('').toUpperCase()
 
   // "All systems" context: the whole active workspace is selected
   // instead of one system. Any real SET_ACTIVE_SYSTEM (popover row,
@@ -311,6 +317,8 @@ export default function V2Sidebar() {
         )}
       </div>
 
+      <ProductNotifications />
+
       {/* Rail: Search sits directly BELOW the brand — the same top slot
           it occupies next to the wordmark in the expanded sidebar. */}
       {railLayout && (
@@ -350,6 +358,13 @@ export default function V2Sidebar() {
         </span>
       </button>
 
+      <div className="kx-product-nav" role="group" aria-label="Main menu">
+        {([{ route: 'activities', label: 'Activities', Icon: Activity }, { route: 'work', label: 'Work In Progress', Icon: ListTodo }, { route: 'issues', label: 'Issues', Icon: Bug }, { route: 'releases', label: 'Releases', Icon: Rocket }, { route: 'leaderboard', label: 'Leaderboard', Icon: Trophy }] as const).map(({ route, label, Icon }) => {
+          const active = state.route === route || (route === 'work' && state.route === 'work-detail')
+          return <button key={route} className={`kx-v2-menuitem${active ? ' kx-v2-menuitem--active' : ''}`} aria-label={label} title={label} aria-current={active ? 'page' : undefined} onClick={() => dispatch({ type: 'NAVIGATE_PRODUCT', route: route as ProductRoute })}><span className="kx-v2-menuitem__icon" aria-hidden="true"><Icon size={18} /></span><span className="kx-v2-menuitem__label">{label}</span>{route === 'work' && <span className="kx-product-nav-count">{state.product.initiatives.length}</span>}</button>
+        })}
+      </div>
+
       {/* One visual menu language: identical row height, icon tile,
           gap, color, and label position for all three actions. */}
       <button
@@ -372,10 +387,12 @@ export default function V2Sidebar() {
 
       <button
         type="button"
-        className="kx-v2-menuitem"
+        className={`kx-v2-menuitem${state.route === 'customize-page' ? ' kx-v2-menuitem--active' : ''}`}
+        aria-label="Customize"
+        title="Customize"
         data-testid="v2-customize-trigger"
         onClick={() =>
-          dispatch({ type: 'OPEN_OVERLAY', overlay: { kind: 'customize', destination: { section: 'agents' } } })
+          dispatch({ type: 'NAVIGATE_PRODUCT', route: 'customize-page', customizeSection: 'runtimes' })
         }
       >
         <span className="kx-v2-menuitem__icon" aria-hidden="true">
@@ -390,6 +407,12 @@ export default function V2Sidebar() {
         </span>
         <span className="kx-v2-menuitem__label">Component catalog</span>
       </a>
+
+      <div className="kx-product-runtime-nav" role="group" aria-label="Runtimes">
+        <p className="kx-product-runtime-nav__label">RUNTIMES</p>
+        <RuntimeConnectButton small />
+        {state.product.runtimes.map(runtime => <button key={runtime.id} className={`kx-v2-menuitem${state.route === 'runtime' && state.product.selectedId === runtime.id ? ' kx-v2-menuitem--active' : ''}`} aria-label={`${runtime.name}: ${runtime.status}`} title={`${runtime.name}: ${runtime.status}`} onClick={() => dispatch({ type: 'NAVIGATE_PRODUCT', route: 'runtime', id: runtime.id })}><span className="kx-v2-menuitem__icon" aria-hidden="true"><Laptop size={17} /></span><span className="kx-v2-menuitem__label">{runtime.name}</span><span className={`kx-product-runtime-dot${runtime.status === 'Ready' ? ' kx-product-runtime-dot--ready' : ''}`} aria-hidden="true" /></button>)}
+      </div>
 
       {/* Sessions has exactly one chevron at the far right. The text area
           navigates to the session list; the chevron independently toggles
