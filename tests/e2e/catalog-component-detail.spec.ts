@@ -1,25 +1,23 @@
+import { readFileSync } from 'node:fs'
 import { expect, test, type Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
-/**
- * Catalog component-detail smoke (R1 of the dual-output replan, spec
- * AC5/AC6/AC7).
- *
- * - ONE smoke test opens all 31 /catalog/components/<slug> routes inside a
- *   single reused page (clean URL navigation never reloads the catalog SPA)
- *   and asserts, per slug: detail heading, resolved live preview (placeholder
- *   gone, real content present), the API contract / Contoh pemakaian /
- *   Meta sections, and zero console errors / pageerrors.
- * - The slug list is a frozen snapshot of the 31 visual manifest entries
- *   (adoptable + mockup-coupled); the unit suite
- *   (src/catalog/registryPreviews.test.tsx) enforces the live
- *   registry↔manifest 1:1 contract, so drift fails loudly there.
- * - Axe WCAG2AA runs on ONE representative detail per component domain
- *   (account/composer/context/customize/reviews/session/shell/system) —
- *   not on all 31 — plus the overview/tokens/index coverage that already
- *   lives in catalog-content.spec.ts. Violations on the shared shell are
- *   filtered to frame-content issues only once per test run.
- */
+const manifest = JSON.parse(
+  readFileSync(
+    new URL('../../src/catalog/components.json', import.meta.url),
+    'utf8',
+  ),
+) as {
+  components: Array<{
+    id: string
+    name: string
+    domain: string
+    classification: string
+  }>
+}
+
+/** Catalog smoke follows every visual manifest entry, checks resolved previews
+ * and API sections, and scans one representative per original domain with Axe. */
 
 const nav = (page: Page) => page.getByRole('navigation', { name: 'Catalog' })
 const main = (page: Page) => page.locator('main.kx-cat-main')
@@ -35,50 +33,11 @@ async function gotoCatalog(page: Page, path = '/catalog') {
   await expect(nav(page)).toBeVisible()
 }
 
-/** The 31 visual manifest entries (adoptable + mockup-coupled), frozen
- *  from components.json at R1 time — see header comment for the drift
- *  guard. Domain-leading entries double as the axe representatives. */
-const VISUAL_SLUGS: ReadonlyArray<{ slug: string; name: string; domain: string }> = [
-  // account
-  { slug: 'account-menu', name: 'AccountMenu', domain: 'account' },
-  { slug: 'settings-modal', name: 'SettingsModal', domain: 'account' },
-  // composer
-  { slug: 'component-menu', name: 'ComponentMenu', domain: 'composer' },
-  { slug: 'composer', name: 'Composer', domain: 'composer' },
-  { slug: 'execution-profile-menu', name: 'ExecutionProfileMenu', domain: 'composer' },
-  { slug: 'session-mode', name: 'SessionMode', domain: 'composer' },
-  // context
-  { slug: 'create-system-modal', name: 'CreateSystemModal', domain: 'context' },
-  { slug: 'manual-repository-modal', name: 'ManualRepositoryModal', domain: 'context' },
-  { slug: 'repository-selector-modal', name: 'RepositorySelectorModal', domain: 'context' },
-  // customize
-  { slug: 'agents-tab', name: 'AgentsTab', domain: 'customize' },
-  { slug: 'context-tab', name: 'ContextTab', domain: 'customize' },
-  { slug: 'customize-modal', name: 'CustomizeModal', domain: 'customize' },
-  { slug: 'integrations-tab', name: 'IntegrationsTab', domain: 'customize' },
-  { slug: 'skills-tab', name: 'SkillsTab', domain: 'customize' },
-  { slug: 'tools-tab', name: 'ToolsTab', domain: 'customize' },
-  // reviews
-  { slug: 'learned-drawer', name: 'LearnedDrawer', domain: 'reviews' },
-  // session
-  { slug: 'dot-matrix-loader', name: 'DotMatrixLoader', domain: 'session' },
-  { slug: 'response-footer', name: 'ResponseFooter', domain: 'session' },
-  { slug: 'feedback-modal', name: 'FeedbackModal', domain: 'session' },
-  { slug: 'session-detail-composer', name: 'SessionDetailComposer', domain: 'session' },
-  { slug: 'session-header', name: 'SessionHeader', domain: 'session' },
-  { slug: 'session-quote-card', name: 'SessionQuoteCard', domain: 'session' },
-  { slug: 'session-status-badge', name: 'SessionStatusBadge', domain: 'session' },
-  { slug: 'session-timeline', name: 'SessionTimeline', domain: 'session' },
-  { slug: 'session-tracker', name: 'SessionTracker', domain: 'session' },
-  // shell
-  { slug: 'collapse-icon', name: 'CollapseIcon', domain: 'shell' },
-  { slug: 'overlay-lifecycle', name: 'OverlayLifecycle', domain: 'shell' },
-  { slug: 'sidebar', name: 'Sidebar', domain: 'shell' },
-  { slug: 'system-menu', name: 'SystemMenu', domain: 'shell' },
-  { slug: 'workspace-menu', name: 'WorkspaceMenu', domain: 'shell' },
-  // system
-  { slug: 'system-map-modal', name: 'SystemMapModal', domain: 'system' },
-]
+const VISUAL_SLUGS = manifest.components
+  .filter((entry) =>
+    ['adoptable', 'mockup-coupled'].includes(entry.classification),
+  )
+  .map((entry) => ({ slug: entry.id, name: entry.name, domain: entry.domain }))
 
 // One axe-scanned representative per component domain. Two deliberate
 // choices, both documented pre-existing mockup issues OUTSIDE R1's scope
@@ -94,13 +53,25 @@ const VISUAL_SLUGS: ReadonlyArray<{ slug: string; name: string; domain: string }
 // The shell domain's representative is workspace-menu, whose detail is the
 // most complex shell preview; overview/tokens/index axe coverage stays in
 // catalog-content.spec.ts.
-const AXE_REPRESENTATIVES: ReadonlyArray<{ slug: string; name: string; domain: string }> = [
+const AXE_REPRESENTATIVES: ReadonlyArray<{
+  slug: string
+  name: string
+  domain: string
+}> = [
   { slug: 'account-menu', name: 'AccountMenu', domain: 'account' },
   { slug: 'component-menu', name: 'ComponentMenu', domain: 'composer' },
-  { slug: 'manual-repository-modal', name: 'ManualRepositoryModal', domain: 'context' },
+  {
+    slug: 'manual-repository-modal',
+    name: 'ManualRepositoryModal',
+    domain: 'context',
+  },
   { slug: 'customize-modal', name: 'CustomizeModal', domain: 'customize' },
   { slug: 'learned-drawer', name: 'LearnedDrawer', domain: 'reviews' },
-  { slug: 'session-status-badge', name: 'SessionStatusBadge', domain: 'session' },
+  {
+    slug: 'session-status-badge',
+    name: 'SessionStatusBadge',
+    domain: 'session',
+  },
   { slug: 'workspace-menu', name: 'WorkspaceMenu', domain: 'shell' },
   { slug: 'system-map-modal', name: 'SystemMapModal', domain: 'system' },
 ]
@@ -134,15 +105,15 @@ async function expectRequiredDetailSections(page: Page) {
   )
 }
 
-test.describe('catalog component detail smoke (31 visual entries)', () => {
-  // 31 sequential detail renders in one reused page; previews lazy-load
+test.describe('catalog component detail smoke (all visual entries)', () => {
+  // All visual detail renders in one reused page; previews lazy-load
   // real components. Generous but bounded timeout.
   test.setTimeout(180_000)
 
-  test('all 31 /catalog/components/<slug> routes render heading, preview, and sections without console errors', async ({
+  test('all manifest /catalog/components/<slug> routes render heading, preview, and sections without console errors', async ({
     page,
   }) => {
-    test.skip(VISUAL_SLUGS.length !== 31, 'visual slug snapshot drifted')
+    expect(VISUAL_SLUGS.length).toBe(53)
 
     const errors: string[] = []
     page.on('console', (msg) => {
@@ -165,8 +136,12 @@ test.describe('catalog component detail smoke (31 visual entries)', () => {
       // Isolate each lazy preview/fixture with a document navigation. Path-only
       // churn leaves stateful overlay fixtures from the prior specimen alive.
       // Navigate directly to the clean URL for each slug.
-      await page.goto(`/catalog/components/${slug}?smoke=${slug}`, { waitUntil: 'networkidle' })
-      await expect(page).toHaveURL(new RegExp(`catalog/components/${slug}\\?smoke=${slug}$`))
+      await page.goto(`/catalog/components/${slug}?smoke=${slug}`, {
+        waitUntil: 'networkidle',
+      })
+      await expect(page).toHaveURL(
+        new RegExp(`catalog/components/${slug}\\?smoke=${slug}$`),
+      )
       // Wait for the main element to be stable before checking content.
       await expect(main(page), `catalog main for ${slug}`).toBeVisible()
       // Wait for the heading to be visible - this also ensures the previous
@@ -194,7 +169,9 @@ test.describe('axe wcag2aa — representative detail per domain', () => {
       ).toBeVisible()
       // Scan the fully rendered detail (async live preview resolved).
       await expectResolvedPreview(page)
-      const results = await new AxeBuilder({ page }).withTags(['wcag2aa']).analyze()
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2aa'])
+        .analyze()
       expect(
         results.violations,
         `${slug}: ${JSON.stringify(results.violations, null, 2)}`,

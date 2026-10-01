@@ -1553,4 +1553,25 @@ export const registry: RegistryEntry[] = [
     load: () => import('../components/system/SystemMapModal'),
     preview: systemMapModalPreview,
   },
+  // Shared live-product workflow primitives.
+  {
+    id: 'product-page-header', kind: 'component',
+    load: () => import('../v2/product/ProductPrimitives'),
+    preview: (mod) => { const Header = asNamedComponent(mod, 'ProductPageHeader'); return <Header title="Work In Progress" description="What people are driving. Agents do the rest." onBack={() => {}} /> },
+  },
+  {
+    id: 'product-row', kind: 'component',
+    load: () => import('../v2/product/ProductPrimitives'),
+    preview: (mod) => { const Row = asNamedComponent(mod, 'ProductRow'); return <Row title="Improve checkout" description="Driven by Alex Morgan" meta="A revised plan is ready." status="draft" statusLabel="Planning" onClick={() => {}} /> },
+  },
+  {
+    id: 'product-empty', kind: 'component',
+    load: () => import('../v2/product/ProductPrimitives'),
+    preview: (mod) => { const Empty = asNamedComponent(mod, 'ProductEmpty'); return <Empty title="Nothing is open">When something breaks, it appears here.</Empty> },
+  },
+  {
+    id: 'product-filters', kind: 'component',
+    load: () => import('../v2/product/ProductPrimitives'),
+    preview: (mod) => { const Filters = asNamedComponent(mod, 'ProductFilters'); return <Fixture><Filters query="" onQuery={() => {}} showCreate /></Fixture> },
+  },
 ]

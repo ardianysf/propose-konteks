@@ -44,6 +44,8 @@ export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProp
   const { t } = usePrototypeLocale()
   const { beginOverlayChain } = useOverlayLifecycle()
   const rootRef = useRef<HTMLDivElement>(null)
+  const [shortcuts, setShortcuts] = useState(false)
+  const go = (route: 'profile' | 'settings-page' | 'work-locally' | 'support') => { dispatch({ type: 'NAVIGATE_PRODUCT', route }); onClose() }
 
   // Theme preference mirror — subscribed to the real mechanism so the
   // segmented control stays in sync, including the system-scheme flip
@@ -87,6 +89,9 @@ export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProp
         className="kx-v2-pop__panel"
       >
         <span className="kx-v2-pop__handle" aria-hidden="true" />
+        <button type="button" className="kx-v2-pop__row" onClick={() => go('profile')}><span className="kx-v2-pop__row-label">Profile</span></button>
+        <button type="button" className="kx-v2-pop__row" onClick={() => go('work-locally')}><span className="kx-v2-pop__row-label">Work Locally</span></button>
+        <button type="button" className="kx-v2-pop__row" onClick={() => go('support')}><span className="kx-v2-pop__row-label">Support</span></button>
 
         {/* Theme — segmented control (Light/Dark/System), the popover's
             only non-row control; kept above the action rows so it reads as
@@ -123,7 +128,7 @@ export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProp
           type="button"
           className="kx-v2-pop__row"
           data-testid="v2-popover-settings"
-          onClick={(event) => openOverlayAndClose(event, { kind: 'settings', destination: { section: 'general' } })}
+          onClick={() => { dispatch({ type: 'NAVIGATE_PRODUCT', route: 'settings-page', settingsSection: 'general' }); onClose() }}
         >
           <span className="kx-v2-pop__row-icon" aria-hidden="true">
             <GearIcon />
@@ -134,7 +139,7 @@ export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProp
           type="button"
           className="kx-v2-pop__row"
           data-testid="v2-popover-billing"
-          onClick={(event) => openOverlayAndClose(event, { kind: 'settings', destination: { section: 'billing', subtab: 'usage' } })}
+          onClick={() => { dispatch({ type: 'NAVIGATE_PRODUCT', route: 'settings-page', settingsSection: 'usage' }); onClose() }}
         >
           <span className="kx-v2-pop__row-icon" aria-hidden="true">
             <BillingIcon />
@@ -147,16 +152,17 @@ export default function V2AccountPopover({ open, onClose }: V2AccountPopoverProp
           </span>
           <span className="kx-v2-pop__row-label">{t('integrations')}</span>
         </button>
-        <button type="button" className="kx-v2-pop__row" onClick={onClose}>
+        <button type="button" className="kx-v2-pop__row" aria-expanded={shortcuts} onClick={() => setShortcuts(!shortcuts)}>
           <span className="kx-v2-pop__row-icon" aria-hidden="true">
             <KeyboardIcon />
           </span>
           <span className="kx-v2-pop__row-label">{t('shortcuts')}</span>
         </button>
+        {shortcuts && <div className="kx-product-reference-note"><p>⌘K / Ctrl+K — Search</p><p>Escape — Close dialog or menu</p><p>Tab / Shift+Tab — Move focus</p></div>}
 
         <div className="kx-v2-pop__divider" role="presentation" />
 
-        <button type="button" className="kx-v2-pop__row" onClick={onClose}>
+        <button type="button" className="kx-v2-pop__row" onClick={() => { dispatch({ type: 'PRODUCT', action: { kind: 'session', signedOut: true } }); onClose() }}>
           <span className="kx-v2-pop__row-icon" aria-hidden="true">
             <LogoutIcon />
           </span>
