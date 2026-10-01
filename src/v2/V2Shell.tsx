@@ -1,3 +1,5 @@
+import ProductPages from './product/ProductPages'
+import { PRODUCT_ROUTES } from './product/productState'
 /*
  * V2Shell — the /v2 application frame.
  *
@@ -99,7 +101,9 @@ export default function V2Shell() {
         <main className="kx-main">
           {/* Route switch — the page components render unchanged; the
               task-session route renders the shared TaskSessionDetailPage. */}
-          {state.route === 'new-session' ? (
+          {(PRODUCT_ROUTES as readonly string[]).includes(state.route) ? (
+            <ProductPages key={state.route} />
+          ) : state.route === 'new-session' ? (
             <NewSessionPage />
           ) : state.route === 'session-detail' ? (
             <SessionDetailPage />

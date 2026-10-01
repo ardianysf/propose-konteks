@@ -1999,6 +1999,157 @@
       "fixtureRef": "MockupFixtureProvider overrides={{ overlay: { kind: 'system-map', systemId: activeSystemId } }}",
       "adoptionNotes": "Butuh MockupContext (read-only slice) + fixture; lihat fixture pattern docs/ai-adoption.md.",
       "responsive": "At <=760px the modal uses a 12px gutter, a 100dvh-aware max-height with internal scrolling, and the graph container yields its fixed 480px height to the remaining space (320px floor)."
+    },
+    {
+      "id": "product-page-header",
+      "name": "ProductPageHeader",
+      "domain": "product",
+      "sourcePath": "src/v2/product/ProductPrimitives.tsx",
+      "exportName": "ProductPageHeader",
+      "classification": "adoptable",
+      "description": "Token-based header for live product workflows, with an illustrative-data label, actions and optional back navigation.",
+      "propDocs": {
+        "title": "Page heading.",
+        "description": "Optional supporting copy.",
+        "actions": "Optional action controls.",
+        "onBack": "Optional back navigation callback.",
+        "backLabel": "Accessible back button label."
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/v2/product/product.css",
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [
+        "--kx-primary",
+        "--kx-secondary",
+        "--kx-border",
+        "--kx-pale",
+        "--kx-text-3xl"
+      ],
+      "variants": [
+        "light",
+        "dark",
+        "mobile"
+      ],
+      "fixtureRef": null,
+      "adoptionNotes": "Use existing --kx-* tokens. Callbacks belong to the consumer; the filter requires MockupProvider.",
+      "responsive": "Stacks controls and wraps rows at ≤760px."
+    },
+    {
+      "id": "product-row",
+      "name": "ProductRow",
+      "domain": "product",
+      "sourcePath": "src/v2/product/ProductPrimitives.tsx",
+      "exportName": "ProductRow",
+      "classification": "adoptable",
+      "description": "Navigable record row that reuses the technical status badge and existing typography.",
+      "propDocs": {
+        "title": "Primary record label.",
+        "description": "Optional supporting description.",
+        "meta": "Optional metadata.",
+        "status": "Canonical technical status.",
+        "statusLabel": "Optional status label override.",
+        "onClick": "Record navigation callback."
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/v2/product/product.css",
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [
+        "--kx-primary",
+        "--kx-secondary",
+        "--kx-border",
+        "--kx-pale",
+        "--kx-text-3xl"
+      ],
+      "variants": [
+        "light",
+        "dark",
+        "mobile"
+      ],
+      "fixtureRef": null,
+      "adoptionNotes": "Use existing --kx-* tokens. Callbacks belong to the consumer; the filter requires MockupProvider.",
+      "responsive": "Stacks controls and wraps rows at ≤760px."
+    },
+    {
+      "id": "product-empty",
+      "name": "ProductEmpty",
+      "domain": "product",
+      "sourcePath": "src/v2/product/ProductPrimitives.tsx",
+      "exportName": "ProductEmpty",
+      "classification": "adoptable",
+      "description": "Consistent empty-state layout for product lists and unavailable references.",
+      "propDocs": {
+        "title": "Empty-state heading.",
+        "children": "Explanation.",
+        "action": "Optional recovery action."
+      },
+      "contextContract": null,
+      "cssFiles": [
+        "src/v2/product/product.css",
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [
+        "--kx-primary",
+        "--kx-secondary",
+        "--kx-border",
+        "--kx-pale",
+        "--kx-text-3xl"
+      ],
+      "variants": [
+        "light",
+        "dark",
+        "mobile"
+      ],
+      "fixtureRef": null,
+      "adoptionNotes": "Use existing --kx-* tokens. Callbacks belong to the consumer; the filter requires MockupProvider.",
+      "responsive": "Stacks controls and wraps rows at ≤760px."
+    },
+    {
+      "id": "product-filters",
+      "name": "ProductFilters",
+      "domain": "product",
+      "sourcePath": "src/v2/product/ProductPrimitives.tsx",
+      "exportName": "ProductFilters",
+      "classification": "mockup-coupled",
+      "description": "Shared Software System filter and search control connected to the prototype reducer.",
+      "propDocs": {
+        "query": "Current search query.",
+        "onQuery": "Search query callback.",
+        "showCreate": "Show the system management entry.",
+        "showSearch": "Show initiative search; disable for empty Issues/Releases views."
+      },
+      "contextContract": {
+        "reads": [
+          "systems",
+          "product.systemFilter"
+        ],
+        "dispatches": [
+          "PRODUCT",
+          "NAVIGATE_PRODUCT"
+        ]
+      },
+      "cssFiles": [
+        "src/v2/product/product.css",
+        "src/styles/components.css"
+      ],
+      "tokenDeps": [
+        "--kx-primary",
+        "--kx-secondary",
+        "--kx-border",
+        "--kx-pale",
+        "--kx-text-3xl"
+      ],
+      "variants": [
+        "light",
+        "dark",
+        "mobile"
+      ],
+      "fixtureRef": "mockup",
+      "adoptionNotes": "Use existing --kx-* tokens. Callbacks belong to the consumer; the filter requires MockupProvider.",
+      "responsive": "Stacks controls and wraps rows at ≤760px."
     }
   ]
 }

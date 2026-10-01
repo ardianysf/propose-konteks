@@ -1,3 +1,4 @@
+import { initialProductState, productReducer, type ProductState, type ProductAction, type ProductRoute, type ProductCustomizeSection, type ProductSettingsSection } from '../v2/product/productState'
 import {
   DEFAULT_ACTIVE_PROFILE_ID,
   DEFAULT_ACTIVE_SYSTEM_ID,
@@ -81,7 +82,7 @@ export const DEFAULT_SETTINGS_DESTINATION: SettingsDestination = { section: 'gen
 // State
 // ---------------------------------------------------------------------------
 
-export type MockupRoute =
+export type MockupRoute = ProductRoute
   | 'new-session'
   | 'session-history'
   | 'session-detail'
@@ -108,6 +109,7 @@ export interface SessionContext {
 
 export interface MockupState {
   route: MockupRoute
+  product: ProductState
   sidebarCollapsed: boolean
   /** Mobile (≤760px) reveal drawer — independent of the collapse state. */
   sidebarMobileOpen: boolean
@@ -129,6 +131,9 @@ export interface MockupState {
 }
 
 export type MockupAction =
+  | { type: 'PRODUCT'; action: ProductAction }
+  | { type: 'OPEN_INITIATIVE_SESSION'; initiativeId: string }
+  | { type: 'NAVIGATE_PRODUCT'; route: MockupRoute; id?: string; from?: ProductRoute; customizeSection?: ProductCustomizeSection; settingsSection?: ProductSettingsSection }
   | { type: 'SET_ACTIVE_SYSTEM'; systemId: string }
   | { type: 'TOGGLE_REPO'; repoId: string }
   | { type: 'CREATE_SYSTEM'; name: string; description?: string }
@@ -169,6 +174,7 @@ export function initialState(search: string = ''): MockupState {
 
   return {
     route: 'new-session',
+    product: initialProductState(),
     sidebarCollapsed: false,
     sidebarMobileOpen: false,
     sessionMode: 'engineering',
@@ -227,6 +233,28 @@ export function resolveSessionContextDraft(state: MockupState): SessionContext {
 
 export function mockupReducer(state: MockupState, action: MockupAction): MockupState {
   switch (action.type) {
+    case 'PRODUCT': {
+      const productAction = action.action
+      if (productAction.kind === 'create-initiative' && !state.systems.some(s => s.id === productAction.systemId)) return state
+      const product = productReducer(state.product, action.action)
+      if (product === state.product) return state
+      if (productAction.kind === 'create-initiative') {
+        const session = mockupReducer({ ...state, activeSystemId: productAction.systemId, selectedRepoIds: [] }, { type: 'SESSION_CREATE_FROM_COMPOSER', content: productAction.title })
+        return { ...session, product, route: 'work-detail' }
+      }
+      return { ...state, product }
+    }
+    case 'OPEN_INITIATIVE_SESSION': {
+      const initiative = state.product.initiatives.find(i => i.id === action.initiativeId)
+      if (!initiative) return state
+      return mockupReducer({ ...state, activeSystemId: initiative.systemId, selectedRepoIds: [], sidebarMobileOpen: false, overlay: { kind: 'none' } }, { type: 'SESSION_CREATE_FROM_COMPOSER', content: initiative.title + '\n\n' + initiative.notes.map(n => n.body).join('\n\n') })
+    }
+    case 'NAVIGATE_PRODUCT': return {
+      ...state, route: action.route, sidebarMobileOpen: false, overlay: { kind: 'none' },
+      ...(action.route === 'task-session-detail' && action.id ? { activeTaskSessionId: action.id } : {}),
+      product: { ...state.product, selectedId: action.id ?? '', returnRoute: action.from ?? state.product.returnRoute, customizeSection: action.customizeSection ?? state.product.customizeSection, settingsSection: action.settingsSection ?? state.product.settingsSection },
+    }
+
     case 'SET_ACTIVE_SYSTEM': {
       if (
         action.systemId === state.activeSystemId ||

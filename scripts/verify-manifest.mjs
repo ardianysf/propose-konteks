@@ -69,6 +69,7 @@ function fail(check, where, message) {
 }
 
 const VALID_DOMAINS = new Set([
+  'product',
   'account',
   'composer',
   'context',
