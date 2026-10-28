@@ -972,7 +972,8 @@
 .kx .catx-nav a:hover{background:var(--hover);color:var(--ink)}
 .kx .catx-nav a[aria-current="page"]{background:var(--accent-soft);color:var(--accent-ink)}
 .kx .catx-nav a .count{margin-left:auto}
-.kx .catx-nav .grp{font-size:var(--t12);font-weight:600;color:var(--ink-3);padding:14px 10px 4px}
+.kx .catx-nav .grp{font-size:var(--t12);font-weight:600;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.06em;padding:18px 10px 6px}
+.kx .catx-nav .grp:first-child{padding-top:4px}
 .kx .catx-main{display:grid;gap:24px;min-width:0;grid-template-columns:minmax(0,1fr)}
 .kx .catx-head{display:grid;gap:8px}
 .kx .catx-head p{color:var(--ink-2);max-width:72ch}

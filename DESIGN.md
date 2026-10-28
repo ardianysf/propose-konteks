@@ -724,6 +724,7 @@ One composer for notes and the agent session. The textarea grows to 200px; a bar
 **Session dock (compact).** In the agent session the dock is two short rows, about 100px in all. The first holds the cycle progress as one pill (current step with its figure, "Cycle 2 of 2", a chevron) and, to its right, the "Konteks can make mistakes" line. The pill opens a popover with the full vertical stepper (Estimate → Quote → Plan → Delivery → Receipt, each with its figure) and a link to the previous cycle; Escape closes it and returns focus to the pill. The second row is the composer in its compact form: text and tools on one line, the line growing upward as the message gets longer; "⌘↵ to send" moves to the Send button's tooltip and stays as the field's description for screen readers. Under 560px the tools drop under the text. Chosen over a progress strip under the top bar and a side rail (28 Oct 2026).
 
 ## Decisions (28 Oct 2026)
+- Component catalog: group labels in the side list (Navigasi, Aksi & input, Data…) are uppercase, 12/600, tracked 0.06em, in accent ink, so groups read apart from the items. This is the only uppercase label in the product; eyebrows above headings stay banned.
 - Body text is 13px (headings 14/600 and up); 11px removed; six sizes, at most five per page.
 - The pitch prototype keeps its typeface switcher. Default Inter; IBM Plex Sans is the recommendation, pending a brand decision.
 - Card edges stay quiet (1.25:1) because cards are not controls; control edges use line-input (3.09:1).
