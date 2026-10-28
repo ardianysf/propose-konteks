@@ -1356,7 +1356,7 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 @media (max-width:640px){.auth-base{justify-content:center;text-align:center;background:var(--bg);border-top:1px solid var(--line)}}
 @media (prefers-reduced-motion:reduce){.auth-card{animation:none}}
 
-/* ---------- Session composer dock: three compact layouts (A strip, B pill, C rail) ---------- */
+/* ---------- Session dock: a progress pill and a one-row composer ---------- */
 /* Compact composer: text and tools on one row; the row grows upward as the message gets longer. */
 .cx-compact{grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:6px;padding:6px 6px 6px 8px}
 .cx-compact .cx-picks,.cx-compact .atts{grid-column:1/-1}
@@ -1367,15 +1367,7 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 @media (max-width:560px){.cx-compact{grid-template-columns:minmax(0,1fr)}.cx-compact .cx-send{margin-left:auto}}
 .sess-foot{padding-top:10px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
 .sess-foot .sess-col{gap:6px}
-.cx-note{text-align:center;font-size:var(--t12)}
-/* A: progress moves to a slim strip under the top bar; the dock holds only the composer. */
-.sess-a{grid-template-rows:auto minmax(0,1fr) auto}
-.sess-prog{border-bottom:1px solid var(--line);padding:6px 24px;background:var(--bg)}
-.sess-prog .sess-col{max-width:none}
-.sess-prog .cycle{flex-wrap:nowrap;gap:16px}
-.sess-prog .stepper{flex:1 1 auto;min-width:0}
-.sess-prog .cyc-nav .hint{white-space:nowrap}
-/* B: progress collapses into one pill above the composer; the full stepper opens in a popover. */
+/* Cycle progress collapses into one pill above the composer; the full stepper and cycle history open in a popover. */
 .cx-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
 .cx-meta>.hint{font-size:var(--t12);text-align:right}
 .prog-pill{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 8px;border:1px solid var(--line);border-radius:var(--r6);background:var(--surface);font:inherit;font-size:var(--t12);font-weight:500;color:var(--ink);cursor:pointer;white-space:nowrap}
@@ -1384,30 +1376,19 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .prog-pill svg{width:14px;height:14px;color:var(--ink-3)}
 .pp-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-strong);box-shadow:0 0 0 3px var(--focus)}
 .pp-sep{width:1px;height:12px;background:var(--line)}
-.prog-pop{display:grid;gap:12px;min-width:220px}
+.prog-pop{display:grid;gap:12px;justify-self:stretch}
+.qpop:has(.prog-pop){width:min(280px,calc(100vw - 32px))}
 .pp-h{display:flex;gap:8px;align-items:baseline;font-size:var(--t13)}
 .pp-h b{font-weight:600}
 .pp-f{border-top:1px solid var(--line);padding-top:8px}
-/* Vertical stepper, shared by the B popover and the C rail. */
-.prog-pop .stepper,.sess-rail .stepper{flex-direction:column;align-items:flex-start;overflow:visible}
-.prog-pop .step-line,.sess-rail .step-line{width:1px;height:14px;margin:2px 0 2px 8.5px}
-.prog-pop .step,.sess-rail .step{flex-wrap:wrap;row-gap:0}
-.prog-pop .step small,.sess-rail .step small{flex-basis:100%;padding-left:24px;margin:0}
-/* C: progress lives in a sticky rail beside the transcript on wide screens; below 1180px it falls back to A's strip. */
-.sess-c .sess-scroll{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,760px) minmax(0,1fr);column-gap:32px;align-items:start}
-.sess-c .sess-scroll>.sess-col{grid-column:2;grid-row:1;margin:0;width:100%}
-.sess-rail{grid-column:3;grid-row:1;position:sticky;top:0;display:grid;gap:12px;justify-self:start;max-width:240px;padding-top:4px}
-.sess-rail .cyc-nav .hint{display:none}
-.sess-prog-c{display:none}
-@media (max-width:1179px){
-  .sess-c .sess-scroll{display:block}
-  .sess-rail{display:none}
-  .sess-prog-c{display:block;position:sticky;top:-24px;z-index:3;margin:-24px -24px 20px}
-}
+/* Vertical stepper inside the popover. */
+.prog-pop .stepper{flex-direction:column;align-items:flex-start;overflow:visible}
+.prog-pop .step-line{width:1px;height:14px;margin:2px 0 2px 8.5px}
+.prog-pop .step{flex-wrap:wrap;row-gap:0}
+.prog-pop .step small{flex-basis:100%;padding-left:24px;margin:0}
 /* The session fills what is left of the window under the banner and top bar, so the composer never drops below the fold. */
 @media (min-width:861px){
   .main:has(.sess){height:calc(100vh - var(--pb));overflow:hidden}
   .main:has(.sess) .sess{flex:1 1 0;min-height:0;height:auto}
 }
-@media (max-width:1100px){.sess-prog .step small{display:none}}
-@media (max-width:560px){.sess-prog .cyc-nav .hint{display:none}.sess-prog{padding:6px 16px}}
+@media (max-width:560px){.cx-meta{flex-wrap:wrap;row-gap:4px}.cx-meta>.hint{text-align:left}}
