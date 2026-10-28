@@ -14,40 +14,52 @@ function pageOverview() {
     ["Bahasa agen", "Istilah internal, handle mesin, token di setiap pesan.", "Ringkasan untuk manusia lebih dulu, nama orang, jejak agen dilipat.", "UX-019"],
     ["Sistem visual", "9 ukuran font, 7 radius, 7 format tanggal, checkbox biru bawaan browser.", "7 ukuran, 3 radius, satu format tanggal, semua kontrol bertema.", "DS-01 s.d. DS-09"],
   ];
-  return `<div class="doc"><div class="doc-in">
-    <header>
-      <h1>Proses yang sama. Tampilan produk yang matang.</h1>
+  const keep = [
+    ["Menu dan urutannya", `<p>Activities, Work In Progress, Issues, Releases, Leaders, Customize, runtime, dan menu akun (Settings, EN/ID, Support, Sign Out).</p><p class="k-note">Runtime di sidebar diringkas jadi satu bar status, lalu komputer Anda dan Work Locally.</p>`],
+    ["Alur inisiatif", flowList(["New initiative", "Planning", "PRD", "Breakdown", "Estimasi", "Approve", "Delivery", "Receipt"]) + `<p class="k-note">Tombol PRD, Breakdown, Updates, dan Details tetap di tempatnya.</p>`],
+    ["Siklus tiket", flowList(["Estimate", "Quote", "Plan", "Delivery", "Receipt"]) + `<p class="k-note">Termasuk siklus sebelumnya.</p>`],
+    ["Customize dan Settings", `<p>Sepuluh bagian Customize, tujuh tab Access, lima tab Settings, dan semua field di setiap form create.</p>`],
+    ["Update konektor", `<p>Otomatis dalam 6 jam, atau pemilik menjalankan <code>konteks-remote update</code> di komputernya.</p><p class="k-note">Tidak ada tombol update baru.</p>`],
+    ["Masuk", `<p>Dengan Google.</p>`],
+  ];
+  const grp = g => { const [name, ps] = DEMO_PAGES.find(d => d[0] === g); return `<div class="sm-g"><span class="label">${name}</span><ul>${ps.map(([h, l]) => `<li><a href="#${h}">${l}${ic("arrow-right")}</a></li>`).join("")}</ul></div>`; };
+  return `<div class="doc ov"><div class="doc-in">
+    <header class="ov-hero">
+      <h1>Proses yang sama.<br>Tampilan produk yang matang.</h1>
       <p class="lede">Usulan redesign Konteks untuk tim internal. Setiap halaman, menu, form, langkah, dan aksi di aplikasi yang sekarang berjalan tetap ada dengan arti yang sama. Yang berubah hanya cara layar menampilkannya.</p>
       <div class="cta-row"><a class="btn btn-primary btn-lg" href="#work">${ic("play")}Buka demo</a><a class="btn btn-lg" href="#foundations">Design system</a><a class="btn btn-lg" href="#components">Katalog komponen</a><a class="btn btn-lg" href="#code">${ic("code")}Kode</a></div>
+      <div class="ov-shot"><div class="ov-shot-in" inert aria-hidden="true">${pageWork().replace(/ id="[^"]*"/g, "").replace(/<(\/?)main\b/g, "<$1div")}</div><a class="ov-shot-link" href="#work" tabindex="-1" aria-label="Buka demo: Work In Progress"></a></div>
     </header>
     <section class="sec">
       <div class="sec-head"><h2>Yang tidak berubah</h2><p>Dicocokkan langsung dengan app.konteks.io secara read-only pada 27 Oktober 2026.</p></div>
-      <div class="prose"><ul class="plist">
-        <li>Menu dan urutannya: Activities, Work In Progress, Issues, Releases, Leaders, Customize, runtime (di sidebar diringkas jadi satu bar status, lalu komputer Anda dan Work Locally), menu akun (Settings, EN/ID, Support, Sign Out).</li>
-        <li>Alur inisiatif: New initiative → planning → PRD → Breakdown → estimasi → Approve → delivery → receipt. Tombol PRD, Breakdown, Updates, dan Details tetap di tempatnya.</li>
-        <li>Siklus tiket: Estimate → Quote → Plan → Delivery → Receipt, dengan siklus sebelumnya.</li>
-        <li>Sepuluh bagian Customize, tujuh tab Access, lima tab Settings, dan semua field di setiap form create.</li>
-        <li>Update konektor: otomatis dalam 6 jam, atau pemilik menjalankan <code>konteks-remote update</code> di komputernya. Tidak ada tombol update baru.</li>
-        <li>Masuk dengan Google.</li>
-      </ul></div>
+      <dl class="keep">${keep.map(([t, b]) => `<div class="k-i"><dt>${t}</dt><dd>${b}</dd></div>`).join("")}</dl>
     </section>
     <section class="sec">
       <div class="sec-head"><h2>Yang berubah di tampilan</h2><p>Setiap perubahan menjawab temuan di audit UI/UX 27 Oktober 2026.</p></div>
-      <div class="panel scroll-x"><table class="tbl" style="min-width:760px"><thead><tr><th>Area</th><th>Sekarang</th><th>Usulan</th><th>Temuan</th></tr></thead>
-      <tbody>${rows.map(r => `<tr><td style="font-weight:500;white-space:nowrap">${r[0]}</td><td style="color:var(--ink-2)">${r[1]}</td><td>${r[2]}</td><td class="mono" style="white-space:nowrap;color:var(--ink-3)">${r[3]}</td></tr>`).join("")}</tbody></table></div>
+      <div class="panel scroll-x"><table class="tbl ov-tbl"><colgroup><col style="width:19%"><col style="width:28%"><col><col style="width:15%"></colgroup><thead><tr><th>Area</th><th>Sekarang</th><th>Usulan</th><th>Temuan</th></tr></thead>
+      <tbody>${rows.map(r => `<tr><th scope="row">${r[0]}</th><td class="was">${r[1]}</td><td>${r[2]}</td><td class="mono ref">${r[3]}</td></tr>`).join("")}</tbody></table></div>
     </section>
     <section class="sec">
-      <div class="sec-head"><h2>Semua layar demo</h2><p>Data contoh, alur nyata. Form bisa diisi dan dikirim; tidak ada yang tersimpan.</p></div>
-      <div class="pages">${DEMO_PAGES.map(([g, ps]) => `<div class="panel pg"><span class="label">${g}</span>${ps.map(([h, l]) => `<a href="#${h}">${l}${ic("arrow-right")}</a>`).join("")}</div>`).join("")}</div>
-      <div class="prose"><p>Di detail inisiatif dan sesi agen, tombol <b>As Contributor / As Approver</b> menunjukkan bagaimana izin mengubah apa yang boleh dilakukan. Tombol itu hanya untuk demo.</p></div>
+      <div class="sec-head"><h2>Semua layar demo</h2><p>Data contoh, alur nyata. Form bisa diisi dan dikirim; tidak ada yang tersimpan. Di detail inisiatif dan sesi agen, tombol <b>As Contributor / As Approver</b> menunjukkan bagaimana izin mengubah apa yang boleh dilakukan; tombol itu hanya untuk demo.</p></div>
+      <nav class="panel smap" aria-label="Semua layar demo">
+        <div class="sm-c">${grp("Masuk")}${grp("Settings & akun")}</div>
+        <div class="sm-c">${grp("Kerja")}</div>
+        <div class="sm-c sm-wide">${grp("Customize")}</div>
+      </nav>
     </section>
     <section class="sec">
       <div class="sec-head"><h2>Prinsip</h2></div>
-      <div class="panel scroll-x"><table class="tbl"><tbody>
-        ${[["Siapa bertindak, dan mengapa, tampil paling dulu.", "Setiap kartu menyebut penyebab terakhir dan satu aksi."], ["Uang dan kerja agen tidak jalan tanpa keputusan yang terlihat.", "Estimasi selalu menampilkan batas Story Points dan rentang biaya model sebelum Approve."], ["Satu status per objek.", "Tidak ada dua label yang saling bertentangan pada satu kartu, baris, atau ringkasan."], ["Ringkasan manusia lebih dulu, jejak agen bila perlu.", "Transkrip dan log tetap ada, tetapi dilipat."], ["Izin terlihat di tempat keputusan.", "Kontrol yang tidak boleh diubah terlihat terkunci, dengan alasan dan Request access."]].map(([a, b]) => `<tr><td style="font-weight:500;width:40%">${a}</td><td style="color:var(--ink-2)">${b}</td></tr>`).join("")}
-      </tbody></table></div>
+      <dl class="keep princ">${[["Siapa bertindak, dan mengapa, tampil paling dulu.", "Setiap kartu menyebut penyebab terakhir dan satu aksi."], ["Uang dan kerja agen tidak jalan tanpa keputusan yang terlihat.", "Estimasi selalu menampilkan batas Story Points dan rentang biaya model sebelum Approve."], ["Satu status per objek.", "Tidak ada dua label yang saling bertentangan pada satu kartu, baris, atau ringkasan."], ["Ringkasan manusia lebih dulu, jejak agen bila perlu.", "Transkrip dan log tetap ada, tetapi dilipat."], ["Izin terlihat di tempat keputusan.", "Kontrol yang tidak boleh diubah terlihat terkunci, dengan alasan dan Request access."]].map(([a, b]) => `<div class="k-i"><dt>${a}</dt><dd><p>${b}</p></dd></div>`).join("")}</dl>
     </section>
   </div></div>`;
+}
+function flowList(steps) { return `<ol class="flow">${steps.map((x, i) => `<li><b>${x}</b>${i < steps.length - 1 ? ic("chevron-right") : ""}</li>`).join("")}</ol>`; }
+/* The hero preview is the real Work In Progress page, rendered at 1280px and scaled to the column. */
+function bindOverview() {
+  bindDocs();
+  const box = $(".ov-shot"); if (!box) return;
+  const fit = () => box.style.setProperty("--k", box.clientWidth / 1280);
+  fit(); new ResizeObserver(fit).observe(box);
 }
 
 /* ---------- Foundations ---------- */

@@ -87,3 +87,53 @@
 }
 /* The tab hangs in the top-right corner; the rows it would touch keep clear of it. */
 @media (min-width:861px){:root.pb-off .newver,:root.pb-off .main>.top{padding-right:96px}}
+
+/* ---------- Pitch overview ---------- */
+.ov .doc-in{gap:72px}
+.ov-hero h1{max-width:none;text-wrap:balance}
+.ov-hero .lede{max-width:64ch}
+/* The real Work In Progress page at 1280px, scaled to the column (--k is set by bindOverview). Desktop layouts only. */
+.ov-shot{--k:.84;display:block;position:relative;margin-top:40px;aspect-ratio:1280/720;overflow:hidden;border:1px solid var(--line);border-radius:var(--r10);background:var(--bg);box-shadow:var(--shadow-2);
+  -webkit-mask-image:linear-gradient(to bottom,var(--ink) 72%,transparent);mask-image:linear-gradient(to bottom,var(--ink) 72%,transparent);transition:translate .25s var(--ease),box-shadow .25s var(--ease)}
+.ov-shot-link{position:absolute;inset:0;z-index:1}
+.ov-shot:hover{translate:0 -2px;box-shadow:var(--shadow-3)}
+.ov-shot-in{width:1280px;height:800px;transform:scale(var(--k));transform-origin:0 0;pointer-events:none;user-select:none}
+.ov-shot-in .app{min-height:800px}
+.ov-shot-in .side{position:relative;top:0;height:800px}
+.ov-shot-in .top,.ov-shot-in .banner{position:static}
+.ov-shot-in .newver,.ov-shot-in .side-resize,.ov-shot-in [data-tip]::after{display:none}
+@media (max-width:860px){.ov-shot{display:none}}
+
+/* What stays: a definition grid that uses the full column instead of one narrow list. */
+.keep{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:0 var(--s6);margin:0}
+.k-i{display:grid;gap:8px;align-content:start;padding:var(--s4) 0 var(--s5);border-top:1px solid var(--line)}
+.k-i dt{font-size:var(--t14);font-weight:600;color:var(--ink)}
+.k-i dd{margin:0;display:grid;gap:8px;font-size:var(--t13);line-height:1.55;color:var(--ink-2)}
+.k-i .k-note{color:var(--ink-3);font-size:var(--t12)}
+.princ .k-i dt{font-size:var(--t14);font-weight:600;line-height:1.4;max-width:34ch}
+.flow{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 2px}
+.flow li{display:inline-flex;align-items:center;gap:2px;white-space:nowrap}
+.flow b{padding:5px 8px;border:1px solid var(--line);border-radius:var(--r4);background:var(--sunken);font-size:var(--t12);font-weight:500;color:var(--ink);line-height:1}
+.flow svg{width:14px;height:14px;color:var(--ink-3)}
+
+/* Change table */
+.ov-tbl{table-layout:fixed;min-width:760px}
+.ov-tbl tbody th{text-align:left;font-weight:500;font-size:var(--t13);color:var(--ink);padding:12px;border-bottom:1px solid var(--line);vertical-align:top;white-space:normal}
+.ov-tbl tr:last-child th{border-bottom:0}
+.ov-tbl .was{color:var(--ink-3)}
+.ov-tbl .ref{color:var(--ink-3);font-size:var(--t12);white-space:nowrap}
+
+/* All demo screens: one sitemap, columns balanced by content */
+.smap{display:grid;grid-template-columns:1fr 1fr 2fr;padding:var(--s5);gap:var(--s5) var(--s6)}
+.sm-c{display:grid;gap:var(--s5);align-content:start}
+.sm-g{display:grid;gap:4px;align-content:start}
+.sm-g .label{padding-bottom:4px}
+.sm-g ul{list-style:none;margin:0;padding:0;display:grid;gap:0 var(--s6)}
+.sm-wide .sm-g ul{display:block;columns:2;column-gap:var(--s6)}
+.sm-wide .sm-g li{break-inside:avoid}
+.sm-g a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;padding:5px 8px;margin:0 -8px;border-radius:var(--r6);font-size:var(--t13);color:var(--ink);text-decoration:none}
+.sm-g a svg{width:14px;height:14px;color:var(--ink-3);opacity:0;translate:-4px 0;transition:opacity .15s var(--ease),translate .15s var(--ease)}
+.sm-g a:hover{background:var(--hover)}
+.sm-g a:hover svg,.sm-g a:focus-visible svg{opacity:1;translate:0 0}
+@media (max-width:860px){.smap{grid-template-columns:1fr 1fr}.sm-wide{grid-column:1/-1}.ov .doc-in{gap:56px}}
+@media (max-width:560px){.smap{grid-template-columns:1fr;padding:var(--s4)}.sm-wide .sm-g ul{columns:1}}

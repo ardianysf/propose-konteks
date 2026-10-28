@@ -193,6 +193,56 @@ svg.lucide{width:16px;height:16px;flex:none;vertical-align:-3px}
 }
 /* The tab hangs in the top-right corner; the rows it would touch keep clear of it. */
 @media (min-width:861px){:root.pb-off .newver,:root.pb-off .main>.top{padding-right:96px}}
+
+/* ---------- Pitch overview ---------- */
+.ov .doc-in{gap:72px}
+.ov-hero h1{max-width:none;text-wrap:balance}
+.ov-hero .lede{max-width:64ch}
+/* The real Work In Progress page at 1280px, scaled to the column (--k is set by bindOverview). Desktop layouts only. */
+.ov-shot{--k:.84;display:block;position:relative;margin-top:40px;aspect-ratio:1280/720;overflow:hidden;border:1px solid var(--line);border-radius:var(--r10);background:var(--bg);box-shadow:var(--shadow-2);
+  -webkit-mask-image:linear-gradient(to bottom,var(--ink) 72%,transparent);mask-image:linear-gradient(to bottom,var(--ink) 72%,transparent);transition:translate .25s var(--ease),box-shadow .25s var(--ease)}
+.ov-shot-link{position:absolute;inset:0;z-index:1}
+.ov-shot:hover{translate:0 -2px;box-shadow:var(--shadow-3)}
+.ov-shot-in{width:1280px;height:800px;transform:scale(var(--k));transform-origin:0 0;pointer-events:none;user-select:none}
+.ov-shot-in .app{min-height:800px}
+.ov-shot-in .side{position:relative;top:0;height:800px}
+.ov-shot-in .top,.ov-shot-in .banner{position:static}
+.ov-shot-in .newver,.ov-shot-in .side-resize,.ov-shot-in [data-tip]::after{display:none}
+@media (max-width:860px){.ov-shot{display:none}}
+
+/* What stays: a definition grid that uses the full column instead of one narrow list. */
+.keep{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:0 var(--s6);margin:0}
+.k-i{display:grid;gap:8px;align-content:start;padding:var(--s4) 0 var(--s5);border-top:1px solid var(--line)}
+.k-i dt{font-size:var(--t14);font-weight:600;color:var(--ink)}
+.k-i dd{margin:0;display:grid;gap:8px;font-size:var(--t13);line-height:1.55;color:var(--ink-2)}
+.k-i .k-note{color:var(--ink-3);font-size:var(--t12)}
+.princ .k-i dt{font-size:var(--t14);font-weight:600;line-height:1.4;max-width:34ch}
+.flow{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 2px}
+.flow li{display:inline-flex;align-items:center;gap:2px;white-space:nowrap}
+.flow b{padding:5px 8px;border:1px solid var(--line);border-radius:var(--r4);background:var(--sunken);font-size:var(--t12);font-weight:500;color:var(--ink);line-height:1}
+.flow svg{width:14px;height:14px;color:var(--ink-3)}
+
+/* Change table */
+.ov-tbl{table-layout:fixed;min-width:760px}
+.ov-tbl tbody th{text-align:left;font-weight:500;font-size:var(--t13);color:var(--ink);padding:12px;border-bottom:1px solid var(--line);vertical-align:top;white-space:normal}
+.ov-tbl tr:last-child th{border-bottom:0}
+.ov-tbl .was{color:var(--ink-3)}
+.ov-tbl .ref{color:var(--ink-3);font-size:var(--t12);white-space:nowrap}
+
+/* All demo screens: one sitemap, columns balanced by content */
+.smap{display:grid;grid-template-columns:1fr 1fr 2fr;padding:var(--s5);gap:var(--s5) var(--s6)}
+.sm-c{display:grid;gap:var(--s5);align-content:start}
+.sm-g{display:grid;gap:4px;align-content:start}
+.sm-g .label{padding-bottom:4px}
+.sm-g ul{list-style:none;margin:0;padding:0;display:grid;gap:0 var(--s6)}
+.sm-wide .sm-g ul{display:block;columns:2;column-gap:var(--s6)}
+.sm-wide .sm-g li{break-inside:avoid}
+.sm-g a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;padding:5px 8px;margin:0 -8px;border-radius:var(--r6);font-size:var(--t13);color:var(--ink);text-decoration:none}
+.sm-g a svg{width:14px;height:14px;color:var(--ink-3);opacity:0;translate:-4px 0;transition:opacity .15s var(--ease),translate .15s var(--ease)}
+.sm-g a:hover{background:var(--hover)}
+.sm-g a:hover svg,.sm-g a:focus-visible svg{opacity:1;translate:0 0}
+@media (max-width:860px){.smap{grid-template-columns:1fr 1fr}.sm-wide{grid-column:1/-1}.ov .doc-in{gap:56px}}
+@media (max-width:560px){.smap{grid-template-columns:1fr;padding:var(--s4)}.sm-wide .sm-g ul{columns:1}}
 /* ---------- Primitives ---------- */
 .btn{--h:32px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:var(--h);padding:0 12px;border-radius:var(--r6);border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font-size:var(--t13);font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,box-shadow .15s;box-shadow:var(--shadow-1)}
 .btn:hover{background:var(--sunken);border-color:var(--ink-3)}
@@ -3402,40 +3452,52 @@ function pageOverview() {
     ["Bahasa agen", "Istilah internal, handle mesin, token di setiap pesan.", "Ringkasan untuk manusia lebih dulu, nama orang, jejak agen dilipat.", "UX-019"],
     ["Sistem visual", "9 ukuran font, 7 radius, 7 format tanggal, checkbox biru bawaan browser.", "7 ukuran, 3 radius, satu format tanggal, semua kontrol bertema.", "DS-01 s.d. DS-09"],
   ];
-  return `<div class="doc"><div class="doc-in">
-    <header>
-      <h1>Proses yang sama. Tampilan produk yang matang.</h1>
+  const keep = [
+    ["Menu dan urutannya", `<p>Activities, Work In Progress, Issues, Releases, Leaders, Customize, runtime, dan menu akun (Settings, EN/ID, Support, Sign Out).</p><p class="k-note">Runtime di sidebar diringkas jadi satu bar status, lalu komputer Anda dan Work Locally.</p>`],
+    ["Alur inisiatif", flowList(["New initiative", "Planning", "PRD", "Breakdown", "Estimasi", "Approve", "Delivery", "Receipt"]) + `<p class="k-note">Tombol PRD, Breakdown, Updates, dan Details tetap di tempatnya.</p>`],
+    ["Siklus tiket", flowList(["Estimate", "Quote", "Plan", "Delivery", "Receipt"]) + `<p class="k-note">Termasuk siklus sebelumnya.</p>`],
+    ["Customize dan Settings", `<p>Sepuluh bagian Customize, tujuh tab Access, lima tab Settings, dan semua field di setiap form create.</p>`],
+    ["Update konektor", `<p>Otomatis dalam 6 jam, atau pemilik menjalankan <code>konteks-remote update</code> di komputernya.</p><p class="k-note">Tidak ada tombol update baru.</p>`],
+    ["Masuk", `<p>Dengan Google.</p>`],
+  ];
+  const grp = g => { const [name, ps] = DEMO_PAGES.find(d => d[0] === g); return `<div class="sm-g"><span class="label">${name}</span><ul>${ps.map(([h, l]) => `<li><a href="#${h}">${l}${ic("arrow-right")}</a></li>`).join("")}</ul></div>`; };
+  return `<div class="doc ov"><div class="doc-in">
+    <header class="ov-hero">
+      <h1>Proses yang sama.<br>Tampilan produk yang matang.</h1>
       <p class="lede">Usulan redesign Konteks untuk tim internal. Setiap halaman, menu, form, langkah, dan aksi di aplikasi yang sekarang berjalan tetap ada dengan arti yang sama. Yang berubah hanya cara layar menampilkannya.</p>
       <div class="cta-row"><a class="btn btn-primary btn-lg" href="#work">${ic("play")}Buka demo</a><a class="btn btn-lg" href="#foundations">Design system</a><a class="btn btn-lg" href="#components">Katalog komponen</a><a class="btn btn-lg" href="#code">${ic("code")}Kode</a></div>
+      <div class="ov-shot"><div class="ov-shot-in" inert aria-hidden="true">${pageWork().replace(/ id="[^"]*"/g, "").replace(/<(\/?)main\b/g, "<$1div")}</div><a class="ov-shot-link" href="#work" tabindex="-1" aria-label="Buka demo: Work In Progress"></a></div>
     </header>
     <section class="sec">
       <div class="sec-head"><h2>Yang tidak berubah</h2><p>Dicocokkan langsung dengan app.konteks.io secara read-only pada 27 Oktober 2026.</p></div>
-      <div class="prose"><ul class="plist">
-        <li>Menu dan urutannya: Activities, Work In Progress, Issues, Releases, Leaders, Customize, runtime (di sidebar diringkas jadi satu bar status, lalu komputer Anda dan Work Locally), menu akun (Settings, EN/ID, Support, Sign Out).</li>
-        <li>Alur inisiatif: New initiative → planning → PRD → Breakdown → estimasi → Approve → delivery → receipt. Tombol PRD, Breakdown, Updates, dan Details tetap di tempatnya.</li>
-        <li>Siklus tiket: Estimate → Quote → Plan → Delivery → Receipt, dengan siklus sebelumnya.</li>
-        <li>Sepuluh bagian Customize, tujuh tab Access, lima tab Settings, dan semua field di setiap form create.</li>
-        <li>Update konektor: otomatis dalam 6 jam, atau pemilik menjalankan <code>konteks-remote update</code> di komputernya. Tidak ada tombol update baru.</li>
-        <li>Masuk dengan Google.</li>
-      </ul></div>
+      <dl class="keep">${keep.map(([t, b]) => `<div class="k-i"><dt>${t}</dt><dd>${b}</dd></div>`).join("")}</dl>
     </section>
     <section class="sec">
       <div class="sec-head"><h2>Yang berubah di tampilan</h2><p>Setiap perubahan menjawab temuan di audit UI/UX 27 Oktober 2026.</p></div>
-      <div class="panel scroll-x"><table class="tbl" style="min-width:760px"><thead><tr><th>Area</th><th>Sekarang</th><th>Usulan</th><th>Temuan</th></tr></thead>
-      <tbody>${rows.map(r => `<tr><td style="font-weight:500;white-space:nowrap">${r[0]}</td><td style="color:var(--ink-2)">${r[1]}</td><td>${r[2]}</td><td class="mono" style="white-space:nowrap;color:var(--ink-3)">${r[3]}</td></tr>`).join("")}</tbody></table></div>
+      <div class="panel scroll-x"><table class="tbl ov-tbl"><colgroup><col style="width:19%"><col style="width:28%"><col><col style="width:15%"></colgroup><thead><tr><th>Area</th><th>Sekarang</th><th>Usulan</th><th>Temuan</th></tr></thead>
+      <tbody>${rows.map(r => `<tr><th scope="row">${r[0]}</th><td class="was">${r[1]}</td><td>${r[2]}</td><td class="mono ref">${r[3]}</td></tr>`).join("")}</tbody></table></div>
     </section>
     <section class="sec">
-      <div class="sec-head"><h2>Semua layar demo</h2><p>Data contoh, alur nyata. Form bisa diisi dan dikirim; tidak ada yang tersimpan.</p></div>
-      <div class="pages">${DEMO_PAGES.map(([g, ps]) => `<div class="panel pg"><span class="label">${g}</span>${ps.map(([h, l]) => `<a href="#${h}">${l}${ic("arrow-right")}</a>`).join("")}</div>`).join("")}</div>
-      <div class="prose"><p>Di detail inisiatif dan sesi agen, tombol <b>As Contributor / As Approver</b> menunjukkan bagaimana izin mengubah apa yang boleh dilakukan. Tombol itu hanya untuk demo.</p></div>
+      <div class="sec-head"><h2>Semua layar demo</h2><p>Data contoh, alur nyata. Form bisa diisi dan dikirim; tidak ada yang tersimpan. Di detail inisiatif dan sesi agen, tombol <b>As Contributor / As Approver</b> menunjukkan bagaimana izin mengubah apa yang boleh dilakukan; tombol itu hanya untuk demo.</p></div>
+      <nav class="panel smap" aria-label="Semua layar demo">
+        <div class="sm-c">${grp("Masuk")}${grp("Settings & akun")}</div>
+        <div class="sm-c">${grp("Kerja")}</div>
+        <div class="sm-c sm-wide">${grp("Customize")}</div>
+      </nav>
     </section>
     <section class="sec">
       <div class="sec-head"><h2>Prinsip</h2></div>
-      <div class="panel scroll-x"><table class="tbl"><tbody>
-        ${[["Siapa bertindak, dan mengapa, tampil paling dulu.", "Setiap kartu menyebut penyebab terakhir dan satu aksi."], ["Uang dan kerja agen tidak jalan tanpa keputusan yang terlihat.", "Estimasi selalu menampilkan batas Story Points dan rentang biaya model sebelum Approve."], ["Satu status per objek.", "Tidak ada dua label yang saling bertentangan pada satu kartu, baris, atau ringkasan."], ["Ringkasan manusia lebih dulu, jejak agen bila perlu.", "Transkrip dan log tetap ada, tetapi dilipat."], ["Izin terlihat di tempat keputusan.", "Kontrol yang tidak boleh diubah terlihat terkunci, dengan alasan dan Request access."]].map(([a, b]) => `<tr><td style="font-weight:500;width:40%">${a}</td><td style="color:var(--ink-2)">${b}</td></tr>`).join("")}
-      </tbody></table></div>
+      <dl class="keep princ">${[["Siapa bertindak, dan mengapa, tampil paling dulu.", "Setiap kartu menyebut penyebab terakhir dan satu aksi."], ["Uang dan kerja agen tidak jalan tanpa keputusan yang terlihat.", "Estimasi selalu menampilkan batas Story Points dan rentang biaya model sebelum Approve."], ["Satu status per objek.", "Tidak ada dua label yang saling bertentangan pada satu kartu, baris, atau ringkasan."], ["Ringkasan manusia lebih dulu, jejak agen bila perlu.", "Transkrip dan log tetap ada, tetapi dilipat."], ["Izin terlihat di tempat keputusan.", "Kontrol yang tidak boleh diubah terlihat terkunci, dengan alasan dan Request access."]].map(([a, b]) => `<div class="k-i"><dt>${a}</dt><dd><p>${b}</p></dd></div>`).join("")}</dl>
     </section>
   </div></div>`;
+}
+function flowList(steps) { return `<ol class="flow">${steps.map((x, i) => `<li><b>${x}</b>${i < steps.length - 1 ? ic("chevron-right") : ""}</li>`).join("")}</ol>`; }
+/* The hero preview is the real Work In Progress page, rendered at 1280px and scaled to the column. */
+function bindOverview() {
+  bindDocs();
+  const box = $(".ov-shot"); if (!box) return;
+  const fit = () => box.style.setProperty("--k", box.clientWidth / 1280);
+  fit(); new ResizeObserver(fit).observe(box);
 }
 
 /* ---------- Foundations ---------- */
@@ -4223,7 +4285,7 @@ function bindCode() {
 /* ---------- router ----------
    Hash routes. "settings" and "customize" are reserved by the host, so sections use their own names. */
 const ROUTES = {
-  overview: [pageOverview, bindDocs, "pitch", "Pitch"], foundations: [pageFoundations, bindDocs, "foundations", "Design system"],
+  overview: [pageOverview, bindOverview, "pitch", "Pitch"], foundations: [pageFoundations, bindDocs, "foundations", "Design system"],
   components: [pageComponents, bindCatalog, "components", "Komponen"], code: [pageCode, bindCode, "code", "Kode"],
   login: [pageLogin, bindLogin, "login", "Sign in"],
   work: [pageWork, bindWork, "demo", "Work In Progress"], initiative: [pageInitiative, bindInitiative, "demo", () => (iniById[S.cur] || INITIATIVES[0]).title],

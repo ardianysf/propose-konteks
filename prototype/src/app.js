@@ -1,7 +1,7 @@
 /* ---------- router ----------
    Hash routes. "settings" and "customize" are reserved by the host, so sections use their own names. */
 const ROUTES = {
-  overview: [pageOverview, bindDocs, "pitch", "Pitch"], foundations: [pageFoundations, bindDocs, "foundations", "Design system"],
+  overview: [pageOverview, bindOverview, "pitch", "Pitch"], foundations: [pageFoundations, bindDocs, "foundations", "Design system"],
   components: [pageComponents, bindCatalog, "components", "Komponen"], code: [pageCode, bindCode, "code", "Kode"],
   login: [pageLogin, bindLogin, "login", "Sign in"],
   work: [pageWork, bindWork, "demo", "Work In Progress"], initiative: [pageInitiative, bindInitiative, "demo", () => (iniById[S.cur] || INITIATIVES[0]).title],
