@@ -1559,14 +1559,13 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 
 /* ---------- Work In Progress: a work queue (whose move, how long, how far along), not a feed ---------- */
 .queue-wrap{padding:16px 24px 72px}
+.q-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.q-filter{max-width:100%;overflow-x:auto;scrollbar-width:none}
+.q-filter button{white-space:nowrap}
+.q-filter .count{margin-left:6px}
 .queue{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r10);overflow:hidden}
-.q-band{display:flex;align-items:baseline;gap:10px;padding:9px 18px;background:var(--sunken);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.q-band:first-child{border-top:0}
-.q-band h2{display:flex;align-items:center;gap:8px;font-size:var(--t13);font-weight:600}
-.q-band>span{font-size:var(--t12);color:var(--ink-3)}
-.q-band.quiet h2{color:var(--ink-2)}
 .q-row{display:grid;grid-template-columns:184px minmax(0,1fr) auto;gap:20px;padding:16px 18px;border-top:1px solid var(--line);cursor:pointer;transition:background-color .15s}
-.q-band+.q-row{border-top:0}
+.q-row:first-child{border-top:0}
 .q-row:hover{background:var(--hover)}
 .q-who{display:grid;gap:6px;align-content:start}
 .q-mover{display:flex;align-items:center;gap:8px;min-width:0}
@@ -1617,8 +1616,7 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
   .q-who{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .q-wait{padding-left:0}
   .q-act{justify-content:flex-start}
-  .q-band{flex-wrap:wrap;row-gap:0;padding:9px 14px}
-  .q-band>span{flex-basis:100%}
+  .q-bar .hint{display:none}
 }
 /* Narrow main column: only the current step keeps its name; the others are dots on the line. */
 @media (max-width:1280px){

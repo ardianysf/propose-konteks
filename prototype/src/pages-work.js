@@ -53,16 +53,21 @@ function queueRow(i, mine) {
   </li>`;
 }
 
+/* Minutes since the initiative last moved, from its "waiting" time ("1d 3h", "7h 11m", "18m"). */
+const waitMin = w => { const g = k => +(w.match(new RegExp("(\\d+)" + k)) || [0, 0])[1]; return g("d") * 1440 + g("h") * 60 + g("m"); };
+/* Whose move, as a filter over one list: everything mixed and newest movement first, like a timeline. */
+const WIP_FILTERS = [["all", "All"], ["mine", "Needs you"], ["others", "Needs someone else"], ["agents", "Agents delivering"]];
+const wipKind = i => actsNow(i) ? "mine" : i.tone === "running" ? "agents" : "others";
 function pageWork() {
-  const list = INITIATIVES.filter(i => !S.sys || i.sys === S.sys);
-  const mine = list.filter(actsNow);
-  const others = list.filter(i => !actsNow(i) && i.tone !== "running");
-  const moving = list.filter(i => i.tone === "running");
-  const group = (title, note, items, isMine, quiet) => items.length ? `<li class="q-band ${quiet ? "quiet" : ""}"><h2>${title}<span class="count">${items.length}</span></h2><span>${note}</span></li>${items.map(i => queueRow(i, isMine)).join("")}` : "";
+  const list = INITIATIVES.filter(i => !S.sys || i.sys === S.sys).sort((x, y) => waitMin(x.wait) - waitMin(y.wait));
+  const f = S.wipF || "all", count = k => k === "all" ? list.length : list.filter(i => wipKind(i) === k).length;
+  const shown = f === "all" ? list : list.filter(i => wipKind(i) === f);
   const banner = S.bannerGone ? "" : `<div class="banner" id="connBanner">${ic("plug-zap")}<span class="grow"><b style="color:var(--ink);font-weight:500">Rentify was connected</b> from sari@debian on 30 Sep 2026.</span><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Dismiss" id="connX">${ic("x")}</button></div>`;
   const head = `<div class="pagehead">${phead("Work In Progress", "What people are driving. Agents do the rest.", `<button class="btn btn-primary" id="newInit">${ic("plus")}New initiative</button>`)}${sysFilter()}${banner}</div>`;
-  const body = list.length ? `<div class="queue-wrap"><ul class="queue" aria-label="Work In Progress">${group("Needs you", "You drive these", mine, true)}${group("Needs someone else", "Follow along; the named person acts", others, false)}${group("Agents are delivering", "Nothing to do until they report back", moving, false, true)}</ul></div>`
-    : `<div class="queue-wrap"><div class="q-empty"><h3>Nothing in progress in ${esc(sysById[S.sys].name)}</h3><p>Start an initiative and a planning session opens behind it, ready to read your notes.</p><button class="btn btn-sm" id="newInit2">${ic("plus")}New initiative</button></div></div>`;
+  const bar = `<div class="q-bar"><div class="seg q-filter" role="group" aria-label="Whose move">${WIP_FILTERS.map(([k, l]) => `<button type="button" data-wipf="${k}" aria-pressed="${f === k}">${l}<span class="count">${count(k)}</span></button>`).join("")}</div><span class="hint">Most recent movement first</span></div>`;
+  const none = { mine: "Nothing waits on you right now.", others: "Nobody else is holding anything up.", agents: "No agent is delivering right now." }[f];
+  const body = !list.length ? `<div class="queue-wrap"><div class="q-empty"><h3>Nothing in progress in ${esc(sysById[S.sys].name)}</h3><p>Start an initiative and a planning session opens behind it, ready to read your notes.</p><button class="btn btn-sm" id="newInit2">${ic("plus")}New initiative</button></div></div>`
+    : `<div class="queue-wrap">${bar}${shown.length ? `<ul class="queue" aria-label="Work In Progress">${shown.map(i => queueRow(i, wipKind(i) === "mine")).join("")}</ul>` : `<div class="q-empty"><h3>${none}</h3><p><button class="linkbtn" type="button" data-wipf="all">Show everything</button></p></div>`}</div>`;
   return shell("work", "", head + body, { flush: true });
 }
 function bindWork() {
@@ -74,6 +79,7 @@ function bindWork() {
   $$("[data-go]").forEach(r => r.onclick = e => { if (e.target.closest("button,a,summary")) return; S.cur = r.dataset.go; location.hash = "initiative"; });
   bindMore();
   $$("[data-act]").forEach(b => b.onclick = () => runAction(iniById[b.dataset.act], b));
+  $$("[data-wipf]").forEach(b => b.onclick = () => { S.wipF = b.dataset.wipf; render(); $(`.q-filter [data-wipf="${S.wipF}"]`)?.focus(); });
 }
 
 /* Actions from a card run as they do live. Only Approve from the list first shows the cost (UX-003),
