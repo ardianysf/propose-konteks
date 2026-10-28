@@ -68,7 +68,7 @@ function shell(active, top, body, { flush = false } = {}) {
     <a href="#work" ${active === "work" ? 'aria-current="page"' : ""}>${ic("square-kanban")}Work<span class="count">${need}</span></a>
     <a href="#releases" ${active === "releases" ? 'aria-current="page"' : ""}>${ic("rocket")}Releases</a>
     <a href="#runtimes" ${active === "customize" ? 'aria-current="page"' : ""}>${ic("sliders-horizontal")}Customize</a>
-    <button type="button" id="moreTab" aria-label="More: Issues, Leaders, runtimes and account">${ic("menu")}More</button>
+    <button type="button" id="moreTab" aria-label="More: Issues, Leaders, runtimes and account" ${["issues", "leaders", "runtime", "settings"].includes(active) ? 'aria-current="page"' : ""}>${ic("menu")}More</button>
   </nav>
 </div>`;
 }

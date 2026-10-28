@@ -468,7 +468,10 @@ input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:16px;hei
 .tabbar-demo{display:flex;position:static;border:1px solid var(--line);border-radius:var(--r10);max-width:390px}
 .tabbar,.tabbar-demo{background:var(--surface);border-top:1px solid var(--line)}
 .tabbar a,.tabbar button,.tabbar-demo a,.tabbar-demo button{flex:1;display:grid;justify-items:center;gap:2px;padding:8px 0 6px;font-size:var(--t12);font-weight:500;color:var(--ink-3);text-decoration:none;border:0;background:none;position:relative;cursor:pointer}
-.tabbar a[aria-current="page"],.tabbar-demo a[aria-current="page"]{color:var(--accent-ink)}
+/* Active tab: the icon sits in an accent pill and the label turns accent and semibold, so it reads without relying on colour alone. */
+.tabbar a[aria-current="page"],.tabbar-demo a[aria-current="page"],.tabbar button[aria-current="page"]{color:var(--accent-ink);font-weight:600}
+.tabbar a svg.lucide,.tabbar button svg.lucide,.tabbar-demo a svg.lucide,.tabbar-demo button svg.lucide{box-sizing:content-box;padding:3px 14px;border-radius:999px;transition:background-color .2s var(--ease)}
+.tabbar [aria-current="page"] svg.lucide,.tabbar-demo [aria-current="page"] svg.lucide{background:var(--nav-on)}
 .tabbar svg.lucide,.tabbar-demo svg.lucide{width:20px;height:20px}
 .tabbar .count,.tabbar-demo .count{position:absolute;top:3px;left:calc(50% + 6px);background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 @media (max-width:860px){

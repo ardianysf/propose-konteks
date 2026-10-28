@@ -437,7 +437,9 @@
 .kx .tabbar-demo{display:flex;position:static;border:1px solid var(--line);border-radius:var(--r10);max-width:390px}
 .kx .tabbar,.kx .tabbar-demo{background:var(--surface);border-top:1px solid var(--line)}
 .kx .tabbar a,.kx .tabbar button,.kx .tabbar-demo a,.kx .tabbar-demo button{flex:1;display:grid;justify-items:center;gap:2px;padding:8px 0 6px;font-size:var(--t12);font-weight:500;color:var(--ink-3);text-decoration:none;border:0;background:none;position:relative;cursor:pointer}
-.kx .tabbar a[aria-current="page"],.kx .tabbar-demo a[aria-current="page"]{color:var(--accent-ink)}
+.kx .tabbar a[aria-current="page"],.kx .tabbar-demo a[aria-current="page"],.kx .tabbar button[aria-current="page"]{color:var(--accent-ink);font-weight:600}
+.kx .tabbar a svg.lucide,.kx .tabbar button svg.lucide,.kx .tabbar-demo a svg.lucide,.kx .tabbar-demo button svg.lucide{box-sizing:content-box;padding:3px 14px;border-radius:999px;transition:background-color .2s var(--ease)}
+.kx .tabbar [aria-current="page"] svg.lucide,.kx .tabbar-demo [aria-current="page"] svg.lucide{background:var(--nav-on)}
 .kx .tabbar svg.lucide,.kx .tabbar-demo svg.lucide{width:20px;height:20px}
 .kx .tabbar .count,.kx .tabbar-demo .count{position:absolute;top:3px;left:calc(50% + 6px);background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 @media (max-width:860px){
