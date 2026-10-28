@@ -1410,3 +1410,6 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .hsel{display:flex;align-items:center;gap:8px;font-size:var(--t13);margin-top:-4px}
 .hsel b{font-weight:600}
 [data-comment][aria-expanded="true"],[data-cmt][aria-expanded="true"]{background:var(--press);color:var(--ink)}
+/* Official agent marks: square, drawn in currentColor so they follow light and dark. */
+.htile .hm-svg{width:26px;height:26px;color:var(--ink-2)}
+.htile:hover .hm-svg,.htile[aria-pressed="true"] .hm-svg{color:var(--ink)}
