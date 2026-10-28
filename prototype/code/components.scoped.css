@@ -1380,3 +1380,4 @@
 .kx .hbadge.muted{background:var(--line-strong);color:var(--ink-2)}
 .kx .hsel{display:flex;align-items:center;gap:8px;font-size:var(--t13);margin-top:-4px}
 .kx .hsel b{font-weight:600}
+.kx [data-comment][aria-expanded="true"],.kx [data-cmt][aria-expanded="true"]{background:var(--press);color:var(--ink)}

@@ -226,7 +226,18 @@ Every documented command runs on rf-01; outcomes are recorded as passed, failed 
     const n = $("#notesH + .hint"); if (n) n.textContent = `${list.querySelectorAll(".cmt").length + 1} · notes feed the plan`;
   } });
   $$("[data-react]").forEach(b => b.onclick = () => { const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on); const c = b.querySelector("span"); c.textContent = +c.textContent + (on ? 1 : -1); });
-  $$("[data-comment]").forEach(b => b.onclick = () => { if (b.closest(".cmt-b").querySelector(".compose")) return; b.closest(".cmt-b").insertAdjacentHTML("beforeend", `<div class="compose"><textarea rows="1" placeholder="Reply to this note" aria-label="Comment"></textarea><button class="btn btn-primary btn-sm" type="button" onclick="this.closest('.compose').remove();toast('Comment posted')">Comment</button></div>`); b.closest(".cmt-b").querySelector("textarea").focus(); });
+  /* Comment toggles its reply box: a second press (or Escape, or Cancel) closes it and returns focus to the button. */
+  $$("[data-comment]").forEach(b => { b.setAttribute("aria-expanded", "false"); b.onclick = () => {
+    const host = b.closest(".cmt-b"), open = host.querySelector(".compose");
+    const shut = () => { host.querySelector(".compose")?.remove(); b.setAttribute("aria-expanded", "false"); b.focus(); };
+    if (open) return shut();
+    host.insertAdjacentHTML("beforeend", `<div class="compose"><textarea rows="1" placeholder="Reply to this note" aria-label="Comment"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div>`);
+    const box = host.querySelector(".compose"), ta = box.querySelector("textarea");
+    b.setAttribute("aria-expanded", "true"); ta.focus();
+    box.querySelector("[data-cx]").onclick = shut;
+    box.querySelector("[data-cp]").onclick = () => { shut(); toast("Comment posted"); };
+    ta.onkeydown = e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); shut(); } };
+  }; });
 }
 
 /* Attach opens the file picker and shows chips; React offers a small set of reactions. */

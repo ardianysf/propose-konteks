@@ -130,9 +130,18 @@ function pageActivities() {
 function bindActivities() {
   bindSysFilter();
   $$("[data-ini]").forEach(a => a.onclick = () => { S.cur = a.dataset.ini; });
-  $$("[data-cmt]").forEach(b => b.onclick = () => { const art = b.closest(".arow"); if (art.nextElementSibling?.classList.contains("arow-cmt")) return art.nextElementSibling.querySelector("textarea").focus();
+  /* Comment toggles its box: a second press (or Escape, or Cancel) closes it and returns focus to the button. */
+  $$("[data-cmt]").forEach(b => { b.setAttribute("aria-expanded", "false"); b.onclick = () => {
+    const art = b.closest(".arow"), next = art.nextElementSibling;
+    const shut = () => { if (art.nextElementSibling?.classList.contains("arow-cmt")) art.nextElementSibling.remove(); b.setAttribute("aria-expanded", "false"); b.classList.remove("on"); b.focus(); };
+    if (next?.classList.contains("arow-cmt")) return shut();
     art.insertAdjacentHTML("afterend", `<div class="arow-cmt"><div class="compose"><textarea rows="1" placeholder="Write a comment" aria-label="Comment"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div></div>`);
-    const box = art.nextElementSibling; box.querySelector("textarea").focus(); box.querySelector("[data-cx]").onclick = () => box.remove(); box.querySelector("[data-cp]").onclick = () => { box.remove(); toast("Comment posted"); }; });
+    const box = art.nextElementSibling, ta = box.querySelector("textarea");
+    b.setAttribute("aria-expanded", "true"); b.classList.add("on"); ta.focus();
+    box.querySelector("[data-cx]").onclick = shut;
+    box.querySelector("[data-cp]").onclick = () => { shut(); toast("Comment posted"); };
+    ta.onkeydown = e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); shut(); } };
+  }; });
   $("#moreAct")?.addEventListener("click", () => { S.actMore = true; render(); });
 }
 

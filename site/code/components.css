@@ -1432,3 +1432,4 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .hbadge.ok{background:var(--accent-strong)}.hbadge.warn{background:var(--warn)}.hbadge.danger{background:var(--danger)}.hbadge.muted{background:var(--line-strong);color:var(--ink-2)}
 .hsel{display:flex;align-items:center;gap:8px;font-size:var(--t13);margin-top:-4px}
 .hsel b{font-weight:600}
+[data-comment][aria-expanded="true"],[data-cmt][aria-expanded="true"]{background:var(--press);color:var(--ink)}
