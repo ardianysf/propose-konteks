@@ -249,8 +249,8 @@ function pageLeaders() {
    own mark: work queued, moving, delivered, and the few waiting for a person. The sign-in sits in a clearing at the
    centre. Hover a waiting glyph to see what it waits for; pressing Sign in sets the waiting ones moving again. */
 /* Three sign-in designs for comparison, one process: Google-only Backstage sign-in with the same help and error.
-   A (#login) the field, B (#login/receipt) the receipt stub, C (#login/flow) the Approve station. */
-const LOGIN_VARIANTS = [["", "Field"], ["receipt", "Receipt"], ["flow", "Flow"]];
+   A (#login) the field, B (#login/night) the dark contour night, C (#login/split) sign-in beside the product. */
+const LOGIN_VARIANTS = [["", "Field"], ["night", "Night"], ["split", "Split"]];
 function loginBits() {
   const busy = S.loginStep === "busy", err = S.loginStep === "error";
   return {
@@ -261,8 +261,8 @@ function loginBits() {
   };
 }
 function pageLogin() {
-  if (S.loginVar === "receipt") return pageLoginReceipt();
-  if (S.loginVar === "flow") return pageLoginFlow();
+  if (S.loginVar === "night") return pageLoginNight();
+  if (S.loginVar === "split") return pageLoginSplit();
   const busy = S.loginStep === "busy", err = S.loginStep === "error";
   return `<div class="auth">
     <canvas class="field" id="field" aria-hidden="true"></canvas>
@@ -281,47 +281,58 @@ function pageLogin() {
     ${loginBits().base}
   </div>`;
 }
-/* B · Receipt: the sign-in is the stub of a delivery receipt, the proof that nothing ran until a person approved it. */
-function pageLoginReceipt() {
-  const b = loginBits();
-  const lines = [["Initiative", "Refresh the Support API README"], ["Ticket", "TKT-1"], ["Ran on", "rf-01 · your server"], ["Approved by", "Maya Lestari · 27 Oct, 14.36"], "-",
-    ["Quoted, at most", "2.15 SP"], ["Used", "1.84 SP"], ["Model cost", "$1.12 · your plan"], ["Pull request", "#142 · merged"]];
-  return `<div class="auth auth-r">
-    <main class="r-stage" id="main" tabindex="-1">
-      <div class="r-slot" aria-hidden="true"></div>
-      <div class="r-feed">
-        <article class="receipt" aria-label="Sample delivery receipt, with sign-in">
-          <header class="r-head"><span class="auth-mark"><span class="brand-mark">K</span>Konteks</span><span class="r-kind">Delivery receipt · Sample</span></header>
-          <h1>Nothing ran until someone approved it.</h1>
-          <dl class="r-lines">${lines.map((l, n) => l === "-" ? `<div class="r-rule" style="--i:${n}" aria-hidden="true"></div>` : `<div style="--i:${n}"><dt>${l[0]}</dt><dd>${l[1]}</dd></div>`).join("")}</dl>
-          <p class="r-total" style="--i:${lines.length}"><span>Settled</span><b>1.84 SP</b></p>
-          <div class="r-perf" aria-hidden="true">${ic("scissors")}</div>
-          <section class="r-stub" aria-labelledby="stubH">
-            <h2 id="stubH">Sign in to see yours</h2>
-            ${b.err}${b.btn}${b.help}
-          </section>
-        </article>
+/* B · Night: a dark matcha ground with slow contour lines and a quiet column; the agents' work drifts past below. */
+function nightContours() {
+  let out = "";
+  for (let k = 0; k < 30; k++) {
+    let d = "";
+    for (let x = -60; x <= 1500; x += 30) {
+      const y = 70 + k * 30 + 48 * Math.sin(x / 230 + k * .33) + 26 * Math.sin(x / 97 + k * .7) + 14 * Math.sin(x / 53 + k * 1.3) + k * k * .15 * Math.sin(x / 400);
+      d += (x === -60 ? "M" : " L") + x + "," + y.toFixed(1);
+    }
+    out += `<path d="${d}" class="${k % 5 ? "" : "major"}"/>`;
+  }
+  return out;
+}
+const NIGHT_CHIPS = [["done", "PR #142 merged"], ["run", "TKT-2 delivering on rf-01"], ["plan", "Plan written · Rental checkout"], ["wait", "Estimate waits for approval"],
+  ["done", "Receipt settled · 1.84 SP"], ["plan", "Breakdown ready · HRIS README"], ["run", "Planning · Invoice export"]];
+function pageLoginNight() {
+  const b = loginBits(), chips = NIGHT_CHIPS.map(([k, t]) => `<span class="n-chip"><i class="n-${k}"></i>${t}</span>`).join("");
+  return `<div class="auth auth-n">
+    <svg class="n-lines" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g>${nightContours()}</g></svg>
+    <header class="n-top"><span class="auth-mark"><span class="brand-mark">K</span>Konteks</span></header>
+    <main class="n-main" id="main" tabindex="-1">
+      <div class="n-col">
+        <span class="n-tile" aria-hidden="true"><span class="brand-mark">K</span></span>
+        <h1>Sign in to Konteks</h1>
+        <p class="auth-lede">Your agents kept working while you were away. A few things are waiting for you.</p>
+        ${b.err}${b.btn}${b.help}
       </div>
+      <div class="n-rail" aria-hidden="true"><div class="n-track">${chips}${chips}</div></div>
     </main>
     ${b.base}
   </div>`;
 }
-/* C · Flow: the governed flow at page scale. Agents carry the work to Approve, the one station that needs a person. */
-const LOGIN_FLOW = [["Plan", "The agent writes the plan from your request."], ["Breakdown", "Tickets, each with its repository."], ["Estimate", "A quote in Story Points before anything runs."],
-  ["Approve", "A person signs off. Nothing runs before that."], ["Delivery", "On your team's runtime, as a pull request."], ["Receipt", "Only what was used is settled."]];
-function pageLoginFlow() {
-  const b = loginBits();
-  return `<div class="auth auth-f">
-    <header class="f-top"><span class="auth-mark"><span class="brand-mark">K</span>Konteks</span></header>
-    <main class="f-main" id="main" tabindex="-1">
-      <div class="f-copy"><h1>Agents do the work.<br>Approving is yours.</h1>
-        <p class="auth-lede">Konteks plans, breaks down, estimates and delivers on your team's computers. It stops at one station and waits for a person.</p></div>
-      <div class="f-trackwrap">
-        <span class="f-token" aria-hidden="true">${ic("bot")}Refresh the Support API README</span>
-        <ol class="f-track" aria-label="The governed flow">${LOGIN_FLOW.map(([n, d], k) => `<li class="${k < 3 ? "done" : k === 3 ? "gate" : ""}" style="--k:${k}" ${k === 3 ? 'aria-current="step"' : ""}><i></i><b>${n}</b><span>${d}</span>${k === 3 ? `<span class="f-token f-token-m" aria-hidden="true">${ic("bot")}Refresh the Support API README · waiting here</span><section class="f-card" aria-labelledby="fH"><h2 id="fH">This step needs you</h2>${b.err}${b.btn}${b.help}</section>` : ""}</li>`).join("")}</ol>
-      </div>
-    </main>
-    ${b.base}
+/* C · Split: sign in on paper; the product itself on the moss panel beside it (the real Work In Progress page and a real decision card). */
+function pageLoginSplit() {
+  const b = loginBits(), v = S.viewAs; S.viewAs = "approver";
+  const card = shotOf(attentionCard(iniById["INI-139"])); S.viewAs = v;
+  return `<div class="auth auth-s">
+    <section class="s-left">
+      <header class="s-top"><span class="auth-mark"><span class="brand-mark">K</span>Konteks</span></header>
+      <main class="s-form" id="main" tabindex="-1">
+        <h1>Welcome back.</h1>
+        <p class="auth-lede">Sign in to see what your agents moved and what is waiting for you.</p>
+        ${b.err}${b.btn}${b.help}
+        <div class="s-card-m s-light" aria-hidden="true" inert>${card}</div>
+      </main>
+      ${b.base}
+    </section>
+    <aside class="s-right" aria-hidden="true" inert>
+      <div class="s-shot s-light"><div class="ov-shot-in">${shotOf(pageWork())}</div></div>
+      <div class="s-card s-light">${card}</div>
+      <div class="s-cap"><b>Nothing runs until a person approves it.</b><span>Agents plan, estimate and deliver on your own runtimes. You decide what spends.</span></div>
+    </aside>
   </div>`;
 }
 /* The field: one canvas, a glyph every 32px. Colours come from the tokens, so dark mode follows. */
@@ -394,6 +405,8 @@ function startField(cv) {
 }
 function bindLogin() {
   const f = $("#field") ? startField($("#field")) : null;
+  /* Split: the product shot renders at 1280px and scales to the panel. */
+  $$(".s-shot").forEach(box => { const fit = () => box.style.setProperty("--k", box.clientWidth / 1280); fit(); new ResizeObserver(fit).observe(box); });
   $("#gBtn")?.addEventListener("click", () => { f?.release(); sfx("ok"); S.loginStep = "busy"; const b = $("#gBtn"); b.disabled = true; b.setAttribute("aria-busy", "true"); b.innerHTML = `<span class="spin"></span>Waiting for Google…`; setTimeout(() => { S.loginStep = "idle"; location.hash = "work"; }, 1400); });
   $("#gErr")?.addEventListener("click", () => { S.loginStep = "error"; render(); });
 }

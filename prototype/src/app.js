@@ -40,8 +40,10 @@ function render() {
   if (key === "access") S.accessTab = ACCESS_TABS.some(([k]) => k === sub) ? sub : "overview";
   /* "#initiative/activities": the same detail page, opened from Activities, goes back there (live: ?from=activities). */
   if (key === "initiative") S.iniFrom = sub === "activities" ? "activities" : "work";
-  if (key === "login") S.loginVar = ["receipt", "flow"].includes(sub) ? sub : "";
-  const badSub = sub && !(key === "access" && ACCESS_TABS.some(([k]) => k === sub)) && !(key === "initiative" && sub === "activities") && !(key === "login" && ["receipt", "flow"].includes(sub));
+  /* Older links to the first B and C designs land on their replacements. */
+  if (key === "login" && (sub === "receipt" || sub === "flow")) { history.replaceState(null, "", "#login/" + (sub === "receipt" ? "night" : "split")); return render(); }
+  if (key === "login") S.loginVar = ["night", "split"].includes(sub) ? sub : "";
+  const badSub = sub && !(key === "access" && ACCESS_TABS.some(([k]) => k === sub)) && !(key === "initiative" && sub === "activities") && !(key === "login" && ["night", "split"].includes(sub));
   const known = badSub ? null : ROUTES[key];
   const [page, bind, section, title] = known || [notFound, () => {}, "demo", "Not found"];
   /* The pitch bar steps aside in the demo app so it reads like the product; a pull tab brings it back. */
