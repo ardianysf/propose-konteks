@@ -1365,3 +1365,18 @@
 .kx .cx-meta{flex-wrap:wrap;row-gap:4px}
 .kx .cx-meta>.hint{text-align:left}
 }
+.kx .harnsel.tiles{gap:8px}
+.kx .htile{position:relative;display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid var(--line-strong);border-radius:var(--r10);background:var(--surface);cursor:pointer;transition:border-color .15s,background-color .15s,box-shadow .15s}
+.kx .htile:hover{border-color:var(--ink-3);background:var(--sunken)}
+.kx .htile[aria-pressed="true"]{border-color:var(--accent-strong);background:var(--accent-soft);box-shadow:0 0 0 3px var(--focus)}
+.kx .htile .hm-img{width:22px;height:22px;object-fit:contain}
+.kx .htile .hm-mono{font-size:var(--t12);font-weight:600;letter-spacing:.02em;color:var(--ink-2)}
+.kx .htile[aria-pressed="true"] .hm-mono{color:var(--accent-ink)}
+.kx .hbadge{position:absolute;right:-5px;bottom:-5px;display:grid;place-items:center;width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);background:var(--ink-3);color:var(--surface)}
+.kx .hbadge svg{width:10px;height:10px;stroke-width:3}
+.kx .hbadge.ok{background:var(--accent-strong)}
+.kx .hbadge.warn{background:var(--warn)}
+.kx .hbadge.danger{background:var(--danger)}
+.kx .hbadge.muted{background:var(--line-strong);color:var(--ink-2)}
+.kx .hsel{display:flex;align-items:center;gap:8px;font-size:var(--t13);margin-top:-4px}
+.kx .hsel b{font-weight:600}

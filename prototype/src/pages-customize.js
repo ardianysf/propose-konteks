@@ -103,7 +103,8 @@ function pageRuntime() {
     ${upd}
     <div class="split"><div class="col">
       <section class="card"><div class="card-h"><h3>Agents</h3><span class="hint">Cost stays with your subscription</span></div><div class="card-b">
-        ${r.harness.length ? `<div class="harnsel" role="group" aria-label="Agents on ${esc(r.name)}">${r.harness.map(([n, k]) => `<button type="button" aria-pressed="${h && h[0] === n}" data-harn="${esc(n)}">${n} ${st(...hst(k))}</button>`).join("")}</div>
+        ${r.harness.length ? `<div class="harnsel tiles" role="group" aria-label="Agents on ${esc(r.name)}">${r.harness.map(([n, k]) => harnTile(n, k, hst(k), !!(h && h[0] === n))).join("")}</div>
+        <p class="hsel"><b>${h[0]}</b> ${st(...hst(h[1]))}</p>
         ${!online ? `<p class="hint">${esc(r.name)} is not connected, so no agent can take work until it is back online.</p>` : hFix ? `<div class="fix"><b>${h[0]}: ${HARNESS_STATUS[h[1]][1]}.</b> ${hFix[0]}:</div>${cmd(hFix[1])}` : `<p class="hint">${h[0]} is ready. New sessions on ${esc(r.name)} can use it.</p>`}`
         : `<div class="empty" style="max-width:none"><div class="ic">${ic("bot")}</div><h3>No agent on this computer yet</h3><p>Add one, then sign it in with your own account. No workload can be served until then.</p>${cmd("konteks-remote agent add codex")}</div>`}
       </div></section>

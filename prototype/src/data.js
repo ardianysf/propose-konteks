@@ -72,6 +72,15 @@ const RUNTIMES = [
 const rtById = Object.fromEntries(RUNTIMES.map(r => [r.id, r]));
 const HARNESS_STATUS = { ready: ["ok", "Ready"], signin: ["warn", "Needs sign-in"], failed: ["danger", "Failed"], na: ["muted", "Not available"] };
 const HARNESS_KEY = { "Claude Code": "claude-code", Codex: "codex", "DeepSeek Harness": "dsh", OpenCode: "opencode", "Google Antigravity": "antigravity" };
+/* Agent marks. Put each vendor's official mark (from its brand or press kit) at assets/harness/<key>.svg and list
+   the key here; until then a neutral two-letter mark stands in. The name and status always stay in the
+   accessible name and the tooltip, and the selected agent is named in text under the row (UX-038). */
+const HARNESS_LOGO = {};
+const HARNESS_MONO = { "Claude Code": "CC", Codex: "CX", "DeepSeek Harness": "DS", OpenCode: "OC", "Google Antigravity": "AG" };
+const HARNESS_BADGE = { ready: "check", signin: "key-round", failed: "x", na: "minus" };
+const harnMark = n => HARNESS_LOGO[HARNESS_KEY[n]] ? `<img class="hm-img" src="assets/harness/${HARNESS_KEY[n]}.svg" alt="">` : `<span class="hm-mono" aria-hidden="true">${HARNESS_MONO[n] || esc(n.slice(0, 2).toUpperCase())}</span>`;
+/* One agent as a compact tile: mark plus a status badge whose icon, not only its colour, carries the state. */
+const harnTile = (n, key, [kind, label], pressed) => `<button type="button" class="htile" aria-pressed="${pressed}" aria-label="${esc(n)}: ${esc(label)}" data-tip="${esc(n)} · ${esc(label)}" data-harn="${esc(n)}">${harnMark(n)}<span class="hbadge ${kind}" aria-hidden="true">${ic(label === "Ready when online" ? "clock" : HARNESS_BADGE[key])}</span></button>`;
 
 /* Customize › Access › Roles: the 16 built-in templates, with their live one-line descriptions and permission groups. */
 const ROLES = [

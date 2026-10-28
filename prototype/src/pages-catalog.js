@@ -35,7 +35,7 @@ const CAT_GROUPS = [
     ["c-thread", "Catatan & komentar", "“Draft your thinking”, Attach, Post note, komentar, React, balasan Konteks."],
     ["c-chat", "Pesan sesi agen", "Ringkasan manusia lebih dulu, jejak agen dilipat, nama orang bukan handle mesin (UX-019)."],
     ["c-map", "System map", "Node System dan Component dengan garis relasi, kontrol zoom berlabel, tanpa chip “unknown” (UX-021)."],
-    ["c-harness", "Agen di runtime", "Nama dan status agen dalam teks, plus perintah perbaikan untuk tiap status (UX-038)."],
+    ["c-harness", "Agen di runtime", "Satu ubin per agen: logo resmi (atau tanda dua huruf sampai logonya dipasang) dengan lencana status berbentuk ikon. Nama dan status ada di nama aksesibel dan tooltip; agen terpilih disebut dalam teks di bawahnya, beserta perintah perbaikannya (UX-038)."],
     ["c-diff", "Diff", "Nomor baris, wrap, dan tampilan rendered untuk Markdown (UX-022)."],
   ]],
   ["Umpan balik & lapisan", [
@@ -208,7 +208,7 @@ decide resume not available → new proposal</pre></details>
         <div class="mnode sys" style="left:calc(50% - 90px);top:20px"><span class="label">System</span><b>Rentify</b></div>
         ${[["support-api", "8%", "Confirmed", "ok"], ["web-app", "calc(50% - 90px)", "Confirmed", "ok"], ["gmail-handler", "calc(92% - 180px)", "Provisional", "warn"]].map(([n, l, s, k]) => `<div class="mnode" style="left:${l};top:150px"><b>${n}</b><span class="mono hint">rentify/${n}</span>${st(k, s)}<button class="btn btn-sm">Start session</button></div>`).join("")}
       </div></div>`,
-    "c-harness": () => `<div class="harnsel" role="group" aria-label="Agent">${[["Claude Code", "signin"], ["Codex", "ready", 1], ["DeepSeek Harness", "ready"], ["OpenCode", "failed"], ["Google Antigravity", "na"]].map(([n, k, p]) => `<button type="button" aria-pressed="${!!p}" data-harn>${n} ${st(...HARNESS_STATUS[k])}</button>`).join("")}</div>
+    "c-harness": () => `<div class="harnsel tiles" role="group" aria-label="Agent">${[["Claude Code", "signin", 1], ["Codex", "ready"], ["DeepSeek Harness", "ready"], ["OpenCode", "failed"], ["Google Antigravity", "na"]].map(([n, k, p]) => harnTile(n, k, HARNESS_STATUS[k], !!p)).join("")}</div><p class="hsel"><b>Claude Code</b> ${st(...HARNESS_STATUS.signin)}</p>
       <div class="fix"><b>Claude Code: Needs sign-in.</b> Sign it in on rf-01:</div>${cmd("konteks-remote auth login claude-code")}`,
     "c-diff": () => PANES.changes(),
     "c-callout": () => `<div class="banner" id="ban1">${ic("plug-zap")}<span class="grow"><b style="color:var(--ink);font-weight:500">Rentify was connected</b> from sari@debian on 30 Sep 2026.</span><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Dismiss" id="banX">${ic("x")}</button></div>
@@ -410,7 +410,7 @@ function bindCatalog() {
   if (drop) { drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); }; drop.ondragleave = () => drop.classList.remove("over"); drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); addFiles(e.dataTransfer.files); }; }
   /* reactions, harness, map, banner, pager */
   $$("[data-react]").forEach(b => b.onclick = () => { const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on); const c = b.querySelector("span"); c.textContent = +c.textContent + (on ? 1 : -1); });
-  $$("[data-harn]").forEach(b => b.onclick = () => $$("[data-harn]").forEach(x => x.setAttribute("aria-pressed", x === b)));
+  $$("[data-harn]").forEach(b => b.onclick = () => { $$("[data-harn]").forEach(x => x.setAttribute("aria-pressed", x === b)); const [n, l] = b.getAttribute("aria-label").split(": "), sel = b.closest(".demo")?.querySelector(".hsel"); if (sel) { sel.innerHTML = `<b>${esc(n)}</b> ${st(b.querySelector(".hbadge").classList[1], l)}`; } });
   let z = 1; $$("[data-zoom]").forEach(b => b.onclick = () => { z = b.dataset.zoom === "in" ? Math.min(1.6, z + .2) : b.dataset.zoom === "out" ? Math.max(.6, z - .2) : 1; $("#mapIn").style.transform = `scale(${z})`; });
   const map = $("#map1");
   if (map) { const svg = map.querySelector("svg.links"); const draw = () => { const w = map.clientWidth; const pts = [[w * .08 + 90], [w / 2], [w * .92 - 90]]; svg.innerHTML = pts.map(([x]) => `<path d="M${w / 2} 64 V110 H${x} V150" fill="none" stroke="var(--line-strong)" stroke-width="1.25"/>`).join(""); }; draw(); new ResizeObserver(draw).observe(map); }
