@@ -85,7 +85,7 @@ function pageFoundations() {
   ];
   return `<div class="doc"><div class="doc-in">
     <header><h1>Design system Konteks</h1><p class="lede">Warna dasar tetap hijau matcha yang sudah dikenal. Yang baru adalah disiplinnya: setiap warna, ukuran, dan jarak punya satu peran, dan tidak ada nilai di luar token.</p>
-    <nav class="toc" aria-label="Isi" style="margin-top:20px">${[["f0", "Warna"], ["f1", "Tipografi"], ["ftype", "Pilihan huruf"], ["f2", "Jarak & radius"], ["f3", "Kedalaman"], ["f4", "Ikon & status"], ["f5", "Gerak"], ["f6", "Bahasa"], ["f7", "Format"]].map(([id, l]) => `<a href="#foundations" data-jump="${id}">${l}</a>`).join("")}</nav></header>
+    <nav class="toc" aria-label="Isi" style="margin-top:20px">${[["f0", "Warna"], ["f1", "Tipografi"], ["ftype", "Pilihan huruf"], ["f2", "Jarak & radius"], ["f3", "Kedalaman"], ["f4", "Ikon & status"], ["ficons", "Semua ikon"], ["f5", "Gerak"], ["f6", "Bahasa"], ["f7", "Format"]].map(([id, l]) => `<a href="#foundations" data-jump="${id}">${l}</a>`).join("")}</nav></header>
 
     <section class="sec" id="f0"><div class="sec-head"><h2>Warna</h2><p>Strategi restrained: latar netral hangat, satu aksen hijau untuk aksi dan seleksi, serta warna status hanya bila ada artinya. Setiap token punya padanan mode gelap.</p></div>
       <div class="swatches">${colors.map(([n, t, h, u]) => `<div class="sw"><div class="sw-chip" style="background:var(${t})"></div><div class="sw-body"><b>${n}</b><span class="mono">${t} · ${h}</span><span>${u}</span></div></div>`).join("")}</div>
@@ -125,6 +125,13 @@ function pageFoundations() {
       <div class="specimen-row">${st("ok", "Ready")}${st("warn", "Not accepting work")}${st("danger", "Failed")}${st("info", "Delivering")}${st("muted", "Not connected")}</div></div>
     </section>
 
+    <section class="sec" id="ficons"><div class="sec-head"><h2>Semua ikon di demo</h2><p>${ICONS_USED.length} ikon Lucide 0.460, garis 1,75: 16 px di navigasi dan tombol, 14 px di dalam teks. Daftar ini dibuat dari kode demo (<code>tools/icons_used.py</code>) dan dicek dengan membuka setiap layar (<code>tools/icons_crawl.py</code>), jadi ikon baru di demo otomatis muncul di sini. Klik ikon untuk menyalin namanya.</p></div>
+      <div class="ico-bar"><label class="search ico-search">${ic("search")}<input type="search" id="icoQ" placeholder="Cari ikon atau layar" aria-label="Cari ikon"></label><span class="hint" id="icoN" aria-live="polite">${ICONS_USED.length} ikon</span></div>
+      <ul class="ico-grid" id="icoGrid">${ICONS_USED.map(([n, where]) => `<li><button type="button" class="ico" data-ico="${n}" data-where="${esc(where.join(" · "))}" title="${esc(n)} · ${esc(where.join(" · "))}">${ic(n)}<span>${n}</span></button></li>`).join("")}</ul>
+      <p class="hint ico-empty" id="icoEmpty" hidden>Tidak ada ikon yang cocok.</p>
+      <div class="sec-sub"><h3>Tanda khusus</h3><p class="hint">Digambar sendiri, bukan dari Lucide: tanda Konteks, glyph tahap, dan logo agen di runtime.</p></div>
+      <div class="panel specimen"><div class="specimen-row ico-marks"><span class="ico-mark"><span class="brand-mark">K</span><small>Konteks</small></span>${[["Planning", "waiting"], ["Executing", "running"], ["Planning", "blocked"], ["Done", "done"]].map(([a, t]) => `<span class="ico-mark">${sg(a, t)}<small>Stage · ${t}</small></span>`).join("")}${Object.keys(HARNESS_SVG).map(n => `<span class="ico-mark ico-harn">${harnMark(n)}<small>${esc(n)}</small></span>`).join("")}</div></div>
+    </section>
     <section class="sec" id="f5"><div class="sec-head"><h2>Gerak</h2><p>150–250 ms dengan ease-out eksponensial. Gerak hanya menyampaikan perubahan state: drawer masuk dari kanan, toast naik, tombol berubah menjadi “Approving”. Tidak ada animasi saat halaman dimuat. Mode reduced-motion dihormati.</p></div></section>
 
     <section class="sec" id="f6"><div class="sec-head"><h2>Bahasa</h2><p>Tulis dari sisi pengguna. Tombol menyebut aksinya; pesan error menyebut masalah dan cara memperbaikinya.</p></div>
@@ -207,5 +214,10 @@ function bindDocs() {
   $$("[data-font]").forEach(b => b.onclick = () => setFont(b.dataset.font));
   bindCodeViews();
   $$("[data-jump]").forEach(a => a.onclick = e => { e.preventDefault(); document.getElementById(a.dataset.jump)?.scrollIntoView({ behavior: "smooth", block: "start" }); });
+  /* Icon index: filter by name or by where it is used; a click copies the name. */
+  $("#icoQ")?.addEventListener("input", e => { const q = e.target.value.trim().toLowerCase(); let n = 0;
+    $$("#icoGrid li").forEach(li => { const b = li.firstElementChild, hit = !q || b.dataset.ico.includes(q) || b.dataset.where.toLowerCase().includes(q); li.hidden = !hit; n += hit; });
+    $("#icoN").textContent = `${n} ikon`; $("#icoEmpty").hidden = !!n; });
+  $$("[data-ico]").forEach(b => b.onclick = () => copyText(b.dataset.ico));
   $("#wrapT")?.addEventListener("click", e => { const on = $("#diff").classList.toggle("wrap"); e.currentTarget.textContent = on ? "No wrap" : "Wrap lines"; });
 }
