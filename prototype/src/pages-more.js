@@ -1,6 +1,12 @@
 /* ---------- Agent session (/?conversation=…): same header, transcript, cycle stepper and composer as live ---------- */
+try { S.cxv = localStorage.getItem("kx-cxv") || "a"; } catch (e) { S.cxv = "a"; }
+if (!["a", "b", "c"].includes(S.cxv)) S.cxv = "a";
+function stepperHtml() { return `<div class="stepper" aria-label="Cycle 2 steps">${[["Estimate", 1], ["Quote", S.approved ? 1 : 2, "2.15 SP · $0.57–$2.02"], ["Plan", S.approved ? 2 : 0, "0/1"], ["Delivery", 0], ["Receipt", 0]].map(([l, s, sub], n) => `${n ? '<span class="step-line"></span>' : ""}<span class="step ${s === 1 ? "done" : s === 2 ? "now" : ""}" ${s === 2 ? 'aria-current="step"' : ""}><span class="n">${s === 1 ? ic("check") : n + 1}</span>${l}${sub ? `<small>${sub}</small>` : ""}</span>`).join("")}</div>`; }
 function pageSession() {
-  const can = S.viewAs === "approver";
+  const can = S.viewAs === "approver", v = S.cxv;
+  const stepper = stepperHtml();
+  const cycnav = `<span class="cyc-nav"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Previous cycle" data-tip="Previous cycle" data-cycprev>${ic("chevron-left")}</button><span class="hint">Cycle 2 of 2 · current</span><button class="btn btn-ghost btn-icon btn-sm" aria-label="Newer cycle" disabled>${ic("chevron-right")}</button></span>`;
+  const cycle = `<div class="cycle">${stepper}${cycnav}</div>`;
   const top = `<a class="back" href="#initiative">${ic("arrow-left")}Back to Refresh the Support API README</a>
     <div class="top-r">
       <button class="tag tagbtn" type="button" id="rtChip" aria-label="Runtime rf-01, Ready">${ic("server")}rf-01 ${st("ok", "Ready")}</button>
@@ -8,9 +14,11 @@ function pageSession() {
       <button class="btn btn-ghost btn-sm" id="sysMap">${ic("map")}System map</button>
       <button class="btn btn-ghost btn-sm" id="files">${ic("folder")}Session files</button>
       ${viewAsToggle()}
+      <div class="seg demo-only" role="group" aria-label="Demo only: composer layout" data-tip="Demo only: composer layout">${[["a", "A"], ["b", "B"], ["c", "C"]].map(([k, l]) => `<button type="button" data-cxv="${k}" aria-pressed="${v === k}">${l}</button>`).join("")}</div>
     </div>`;
-  const body = `<div class="sess">
-    <div class="sess-scroll"><div class="sess-col">
+  const body = `<div class="sess sess-${v}">
+    ${v === "a" ? `<div class="sess-prog"><div class="sess-col">${cycle}</div></div>` : ""}
+    <div class="sess-scroll">${v === "c" ? `<aside class="sess-rail" aria-label="Cycle progress"><span class="label">Cycle 2 of 2 · current</span>${stepper}${cycnav}</aside><div class="sess-prog sess-prog-c">${cycle}</div>` : ""}<div class="sess-col">
       <div class="sess-ticket"><span class="idc">TKT-1</span><h1 class="h-page">Validate and refresh the support-api README</h1>${sysTag("rentify")}</div>
       <details class="inline-disc"><summary>${ic("chevron-right")}Ticket and acceptance criteria</summary><div class="disc-in prose"><p>Update only the existing README from current source and configuration, validate the documented workflows on rf-01, and leave one independently reviewed README-only pull request unmerged.</p><ol><li>Only the existing README changes.</li><li>Purpose, boundaries, flows and workflows are explained from current source.</li><li>Environment variable names only; no secret values.</li><li>Documented commands are executed on rf-01; outcomes are recorded as passed, failed or unavailable.</li></ol></div></details>
       <div class="evgroup">
@@ -55,11 +63,10 @@ submit proposal (ticket verbatim + retry instruction)</pre></details>
       <details class="inline-disc"><summary>${ic("chevron-right")}Konteks learned · 1 note</summary><div class="disc-in hint">The verify script prints an expected Asana error from a rejection-logging test. It is not the cause of a failed check.</div></details>
       <div class="sess-live" id="sessLive"></div>
     </div></div>
-    <div class="sess-foot"><div class="sess-col">
-      <div class="cycle"><div class="stepper" aria-label="Cycle 2 steps">${[["Estimate", 1], ["Quote", S.approved ? 1 : 2, "2.15 SP · $0.57–$2.02"], ["Plan", S.approved ? 2 : 0, "0/1"], ["Delivery", 0], ["Receipt", 0]].map(([l, s, sub], n) => `${n ? '<span class="step-line"></span>' : ""}<span class="step ${s === 1 ? "done" : s === 2 ? "now" : ""}" ${s === 2 ? 'aria-current="step"' : ""}><span class="n">${s === 1 ? ic("check") : n + 1}</span>${l}${sub ? `<small>${sub}</small>` : ""}</span>`).join("")}</div>
-        <span class="cyc-nav"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Previous cycle" data-tip="Previous cycle" id="cycPrev">${ic("chevron-left")}</button><span class="hint">Cycle 2 of 2 · current</span><button class="btn btn-ghost btn-icon btn-sm" aria-label="Newer cycle" disabled>${ic("chevron-right")}</button></span></div>
-      <div class="atts" id="sessAtts"></div>${composerHtml({ id: "sessCx", placeholder: "Describe the outcome you need. Type / for a skill", cta: "Send", attachId: "sessAtts", lead: `<button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Create text attachment" data-tip="Create text attachment" id="txtAtt">${ic("file-plus-2")}</button><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Record voice message" data-tip="Record voice message" id="voiceBtn" aria-pressed="false">${ic("mic")}</button>` })}
-      <p class="hint" style="text-align:center">Konteks can make mistakes. Verify important information.</p>
+    <div class="sess-foot sess-foot-${v}"><div class="sess-col">
+      ${v === "b" ? `<div class="cx-meta"><button class="prog-pill" type="button" id="progPill" aria-haspopup="dialog">${S.approved ? `<span class="pp-dot now"></span>Plan <small>0/1</small>` : `<span class="pp-dot now"></span>Quote <small>2.15 SP</small>`}<span class="pp-sep"></span><span class="hint">Cycle 2 of 2</span>${ic("chevron-up")}</button><span class="hint">Konteks can make mistakes. Verify important information.</span></div>` : ""}
+      <div class="atts" id="sessAtts"></div>${composerHtml({ id: "sessCx", placeholder: "Describe the outcome you need. Type / for a skill", cta: "Send", attachId: "sessAtts", compact: true, lead: `<button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Create text attachment" data-tip="Create text attachment" id="txtAtt">${ic("file-plus-2")}</button><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Record voice message" data-tip="Record voice message" id="voiceBtn" aria-pressed="false">${ic("mic")}</button>` })}
+      ${v !== "b" ? `<p class="cx-note hint">Konteks can make mistakes. Verify important information.</p>` : ""}
     </div></div>
   </div>`;
   return shell("work", top, body, { flush: true });
@@ -74,7 +81,12 @@ function bindSession() {
     <div class="props">${[["Runtime", "rf-01"], ["Started", "27 Oct 2026, 15.22"], ["Ended", "27 Oct 2026, 17.19"], ["Stopped by", "Maya Lestari"]].map(([a, b]) => `<div class="prop"><span>${a}</span><div>${b}</div></div>`).join("")}</div>`));
   $("#rtChip")?.addEventListener("click", () => { S.rt = "rf-01"; location.hash = "runtime"; });
   $("#vcsChip")?.addEventListener("click", () => drawer("Repository", `<div class="props">${[["Connection", "Rentify org · Gitea"], ["URL", `<span class="mono">https://gitea.example.id/rentify/support-api</span>`], ["Branch", `<span class="mono">konteks/tkt-1-readme</span>`], ["Pull request", "#41 · open"]].map(([a, b]) => `<div class="prop"><span>${a}</span><div>${b}</div></div>`).join("")}</div>`));
-  $("#cycPrev")?.addEventListener("click", () => toast("Cycle 1: estimate, quote, plan and a delivery that stopped"));
+  $$("[data-cycprev]").forEach(b => b.onclick = () => toast("Cycle 1: estimate, quote, plan and a delivery that stopped"));
+  $("#progPill")?.addEventListener("click", e => {
+    const p = popover(e.currentTarget, "Cycle progress", `<div class="prog-pop"><div class="pp-h"><b>Cycle 2 of 2</b><span class="hint">current</span></div>${stepperHtml()}<div class="pp-f"><button class="btn btn-ghost btn-sm" type="button" data-cycprev>${ic("chevron-left")}Cycle 1</button></div></div>`);
+    drawIcons(); p.el.querySelector("[data-cycprev]").onclick = () => { p.close(); toast("Cycle 1: estimate, quote, plan and a delivery that stopped"); };
+  });
+  $$("[data-cxv]").forEach(b => b.onclick = () => { S.cxv = b.dataset.cxv; try { localStorage.setItem("kx-cxv", S.cxv); } catch (e) {} render(); });
   $("#txtAtt")?.addEventListener("click", () => { const m = modal("Create text attachment", `<div class="field"><label for="taName">Name</label><input id="taName" class="input" placeholder="e.g. error-log.txt"></div><div class="field"><label for="taBody">Text</label><textarea id="taBody" class="textarea mono-area" rows="8" placeholder="Paste a log, a spec or notes"></textarea></div>`, `<button class="btn" data-close>Cancel</button><button class="btn btn-primary" id="taOk" disabled>Attach</button>`); const chk = () => m.querySelector("#taOk").disabled = !(m.querySelector("#taName").value.trim() && m.querySelector("#taBody").value.trim()); m.querySelector("#taName").oninput = chk; m.querySelector("#taBody").oninput = chk; m.querySelector("#taOk").onclick = () => { closeOverlay(); toast("Text attached to the message"); }; });
   bindNoteTools();
   $("#voiceBtn")?.addEventListener("click", e => { const b = e.currentTarget, on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on); b.classList.toggle("rec", on); b.setAttribute("aria-label", on ? "Stop recording" : "Record voice message"); toast(on ? "Recording. Select the microphone again to stop" : "Recording added to your message"); });

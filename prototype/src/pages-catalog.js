@@ -273,7 +273,8 @@ function pageComponents() {
     const used = INVENTORY.filter(r => idsOf(r).includes(cur));
     const pos = all.findIndex(x => x[0] === cur), prev = all[pos - 1], next = all[pos + 1];
     main = demoBlock(cur, ti, d, html) + `<section class="used"><h3 class="h-sub">Dipakai di aplikasi <span class="count">${used.length}</span></h3>
-      <ul>${used.map(r => `<li><span>${esc(r[0])}</span><span class="hint">${esc(r[1])}</span>${r[6] && r[6] !== "components" ? `<a href="#${r[6]}">${esc(DEMO_NAME[r[6]] || r[6])}${ic("arrow-up-right")}</a>` : ""}</li>`).join("")}</ul></section>
+      <div class="panel scroll-x"><table class="tbl used-t"><colgroup><col><col style="width:200px"><col style="width:176px"></colgroup><thead><tr><th>Elemen</th><th>Tempat</th><th class="end">Lihat di demo</th></tr></thead>
+      <tbody>${used.map(r => `<tr><td>${esc(r[0])}</td><td class="where">${esc(r[1])}</td><td class="end">${r[6] && r[6] !== "components" ? `<a href="#${r[6]}">${esc(DEMO_NAME[r[6]] || r[6])}${ic("arrow-up-right")}</a>` : `<span class="hint">Hanya di katalog</span>`}</td></tr>`).join("")}</tbody></table></div></section>
       <div class="catx-pn">${prev ? `<button class="btn btn-ghost btn-sm" type="button" data-comp="${prev[0]}">${ic("arrow-left")}${esc(prev[1])}</button>` : "<span></span>"}${next ? `<button class="btn btn-ghost btn-sm" type="button" data-comp="${next[0]}">${esc(next[1])}${ic("arrow-right")}</button>` : ""}</div>`;
   }
   return `<div class="catx-wrap"><header class="catx-top"><h1>Katalog komponen</h1><p>${all.length} komponen dalam ${CAT_GROUPS.length} kelompok. Pilih satu untuk melihat state-nya, kodenya, dan di mana ia dipakai.</p></header>
@@ -292,7 +293,9 @@ function comboBind(rootId, groups, onPick) {
     const r = trig.getBoundingClientRect(), gap = 4, below = innerHeight - r.bottom - gap - 8, above = r.top - gap - 8;
     const want = Math.min(pop.scrollHeight, 320), up = below < Math.min(want, 220) && above > below;
     const room = Math.max(160, Math.min(320, up ? above : below));
-    pop.style.left = Math.max(8, Math.min(r.left, innerWidth - r.width - 8)) + "px"; pop.style.width = r.width + "px";
+    /* At least as wide as the trigger and wide enough for the longest option (up to 320px), so names never clip. */
+    pop.style.minWidth = Math.max(r.width, 220) + "px"; pop.style.maxWidth = Math.min(320, innerWidth - 16) + "px";
+    pop.style.left = Math.max(8, Math.min(r.left, innerWidth - pop.offsetWidth - 8)) + "px";
     pop.style.maxHeight = room + "px";
     pop.style.top = up ? "" : r.bottom + gap + "px"; pop.style.bottom = up ? innerHeight - r.top + gap + "px" : "";
     pop.classList.toggle("up", up);

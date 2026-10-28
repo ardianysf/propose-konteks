@@ -43,7 +43,7 @@ function render() {
   const [page, bind, section, title] = known || [notFound, () => {}, "demo", "Not found"];
   /* The pitch bar steps aside in the demo app so it reads like the product; a pull tab brings it back. */
   document.documentElement.classList.toggle("pb-off", section === "demo" && !S.pbar);
-  if (render._last !== key + (sub ? "/" + sub : "")) { $$(".scrim,.drawer,.dialog,.menu,.floatpop").forEach(e => e.remove()); document.removeEventListener("keydown", overlayKey); }
+  if (render._last !== key + (sub ? "/" + sub : "")) { $$(".scrim,.drawer,.dialog,.menu,.floatpop,.pop-fixed").forEach(e => e.remove()); document.removeEventListener("keydown", overlayKey); }
   const keepScroll = render._last === key + (sub ? "/" + sub : ""), y = scrollY;
   /* Loading state (DS-10): an initiative opened for the first time shows a skeleton shaped like the page, not "Loading…". */
   if (key === "initiative" && S.iniLoaded !== S.cur) {

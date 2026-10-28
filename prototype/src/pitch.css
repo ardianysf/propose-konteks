@@ -97,10 +97,10 @@
 .cta-meta{font-size:var(--t12);font-weight:500;color:var(--ink-3);padding-left:8px;margin-left:2px;border-left:1px solid var(--line)}
 .ov-stage{position:relative;margin-top:48px;aspect-ratio:1080/600;-webkit-mask-image:linear-gradient(to bottom,var(--ink) 70%,transparent);mask-image:linear-gradient(to bottom,var(--ink) 70%,transparent)}
 .ov-shot{--k:.6;position:absolute;aspect-ratio:1280/760;overflow:hidden;border:1px solid var(--line);border-radius:var(--r10);background:var(--bg)}
-.ov-front{left:14%;width:72%;top:9%;z-index:2;box-shadow:var(--shadow-3);transition:translate .3s var(--ease)}
+.ov-front{left:14%;width:72%;top:0;z-index:2;box-shadow:var(--shadow-3);transition:translate .3s var(--ease)}
 .ov-back{width:58%;filter:blur(2.5px) saturate(.85);opacity:.55;box-shadow:var(--shadow-2);transition:translate .4s var(--ease),opacity .4s var(--ease)}
-.ov-b1{left:0;top:0}
-.ov-b2{right:0;top:4%}
+.ov-b1{left:0;top:14%}
+.ov-b2{right:0;top:20%}
 .ov-stage:hover .ov-front{translate:0 -3px}
 .ov-stage:hover .ov-b1{translate:-6px 0;opacity:.62}
 .ov-stage:hover .ov-b2{translate:6px 0;opacity:.62}

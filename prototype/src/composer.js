@@ -8,15 +8,15 @@ const SLASH = () => [
   ...TOOLS.map(t => ({ kind: "tool", name: t.name, desc: t.desc, icon: "wrench" })),
 ];
 
-function composerHtml({ id, placeholder, cta = "Post note", attachId, lead = "" }) {
-  return `<div class="cx" id="${id}">
+function composerHtml({ id, placeholder, cta = "Post note", attachId, lead = "", compact = false }) {
+  return `<div class="cx${compact ? " cx-compact" : ""}" id="${id}">
     <div class="cx-picks" hidden></div>
     <textarea rows="1" placeholder="${esc(placeholder)}" aria-label="${esc(placeholder)}" aria-describedby="${id}-hint" aria-autocomplete="list"></textarea>
     <div class="cx-bar">
       ${lead}<button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Attach file" data-tip="Attach file" data-attach="${attachId}">${ic("paperclip")}</button>
       <button class="btn btn-ghost btn-sm cx-slash" type="button" aria-haspopup="listbox" data-tip="Use a skill or tool">${ic("sparkles")}Skill<span class="kbd">/</span></button>
       <span class="cx-hint" id="${id}-hint">⌘↵ to send</span>
-      <button class="btn btn-primary btn-sm cx-send" type="button" disabled>${esc(cta)}</button>
+      <button class="btn btn-primary btn-sm cx-send" type="button" disabled data-tip="⌘↵ to send">${esc(cta)}</button>
     </div></div>`;
 }
 
