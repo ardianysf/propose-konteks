@@ -1177,7 +1177,7 @@ tr.clickable{cursor:pointer} tr.clickable:hover td{background:var(--hover)} tr.c
 .fleet-t .lg.warn{background:var(--warn)} .fleet-t .lg.off{background:var(--line-strong)}
 @media (max-width:860px){.side .mine-nav .rt-st,.app.railed .side .mine-nav .rt-st{display:inline}.app.railed .fleet-t{display:grid}.app.railed .side-sec .side-h span{display:inline}.app.railed .side-sec .side-h{justify-content:space-between}}
 /* ---------- Composer (notes and agent session) ---------- */
-.cx{display:grid;gap:4px;padding:8px 8px 6px;border:1px solid var(--line-input);border-radius:var(--r10);background:var(--surface);transition:border-color .15s,box-shadow .15s}
+.cx{cursor:text;display:grid;gap:4px;padding:8px 8px 6px;border:1px solid var(--line-input);border-radius:var(--r10);background:var(--surface);transition:border-color .15s,box-shadow .15s}
 .cx:focus-within{border-color:var(--accent-strong);box-shadow:0 0 0 3px var(--focus)}
 .cx textarea{border:0;background:none;resize:none;min-height:24px;max-height:200px;padding:4px 6px;font:inherit;font-size:var(--t13);line-height:1.5;outline:none;width:100%}
 .cx textarea::placeholder{color:var(--ink-3)}

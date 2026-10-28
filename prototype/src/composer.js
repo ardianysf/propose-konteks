@@ -69,6 +69,8 @@ function bindComposer(root, { onSend }) {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); go(); }
   });
   ta.addEventListener("blur", () => setTimeout(() => { if (document.activeElement !== ta) closePop(); }, 120));
+  /* The whole box is the input: a press anywhere that is not a control puts the caret in the text. */
+  root.addEventListener("mousedown", e => { if (e.target === ta || e.target.closest("button,a,input,label,.cx-pick")) return; e.preventDefault(); ta.focus(); const n = ta.value.length; ta.setSelectionRange(n, n); });
   root.querySelector(".cx-slash").onclick = () => {
     const p = ta.selectionStart, pre = ta.value.slice(0, p), needSpace = pre && !/\s$/.test(pre);
     ta.value = pre + (needSpace ? " /" : "/") + ta.value.slice(p); ta.focus(); ta.selectionStart = ta.selectionEnd = p + (needSpace ? 2 : 1);
