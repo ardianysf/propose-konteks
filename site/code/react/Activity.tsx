@@ -1,5 +1,5 @@
 import * as React from "react";
-import { MessageSquare } from "lucide-react";
+import { Box, MessageSquare } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { Reactions, Reaction } from "./Reactions";
 import { Button } from "./Button";
@@ -34,7 +34,8 @@ export interface ActivityCardProps {
   time: string;
   timeTitle?: string;
   system: string;
-  stage: string;
+  /** Not shown: the verb and the agent's reply already say where the work stands. Kept so callers need not change. */
+  stage?: string;
   updates: number;
   /** The person's own content, e.g. their request as a quote. */
   children?: React.ReactNode;
@@ -49,7 +50,7 @@ export interface ActivityCardProps {
   action?: React.ReactNode;
 }
 
-export function ActivityCard({ actor, verb, initiative, time, timeTitle, system, stage, updates, children, reply, live, reactions, onReactions, onComment, action }: ActivityCardProps) {
+export function ActivityCard({ actor, verb, initiative, time, timeTitle, system, updates, children, reply, live, reactions, onReactions, onComment, action }: ActivityCardProps) {
   return (
     <li className="relative grid grid-cols-[32px_minmax(0,1fr)] gap-3 pb-4 max-[560px]:grid-cols-1 max-[560px]:pb-3">
       {/* On phones the rail goes and the avatar moves into the card header, so the card gets the full width. */}
@@ -58,20 +59,23 @@ export function ActivityCard({ actor, verb, initiative, time, timeTitle, system,
       </span>
       <article aria-label={`${actor.name} ${verb} ${initiative.title}`}
         className={cx("grid min-w-0 gap-3 rounded-lg border bg-app-card px-5 py-4 transition-[border-color,box-shadow] duration-150 hover:border-app-border-strong hover:shadow-sm max-[560px]:px-4 max-[560px]:py-3.5", live ? "border-[color:var(--accent-tint)]" : "border-app-border")}>
-        <header className="flex items-baseline gap-2.5 max-[560px]:items-start">
+        <header className="flex items-start gap-2.5">
           <Avatar name={actor.name} initials={actor.initials} size={24} className="hidden shrink-0 max-[560px]:inline-grid" />
-          <p className="m-0 min-w-0 flex-1 text-sm text-app-text-secondary">
-            <b className="font-semibold text-app-text">{actor.name}</b> {verb}{" "}
-            <a href={initiative.href ?? "#"} onClick={e => { e.preventDefault(); initiative.onOpen(); }} className={cx("font-semibold text-app-text no-underline hover:underline hover:underline-offset-[3px]", ring)}>{initiative.title}</a>
-          </p>
-          {live && <span className="inline-flex h-5 items-center gap-1.5 self-center rounded-sm bg-app-accent-soft px-2 text-xs font-semibold text-app-accent-text"><span className="size-1.5 rounded-full bg-app-accent-strong" />Live</span>}
-          <time title={timeTitle} className="whitespace-nowrap text-xs tabular-nums text-app-text-tertiary">{time}</time>
+          <div className="grid min-w-0 flex-1 gap-0.5">
+            <p className="m-0 min-w-0 text-sm text-app-text-secondary">
+              <b className="font-semibold text-app-text">{actor.name}</b> {verb}{" "}
+              <a href={initiative.href ?? "#"} onClick={e => { e.preventDefault(); initiative.onOpen(); }} className={cx("font-semibold text-app-text no-underline hover:underline hover:underline-offset-[3px]", ring)}>{initiative.title}</a>
+            </p>
+            {/* One quiet line instead of a row of tags: the System and how much has happened. */}
+            <p className="m-0 flex flex-wrap items-center gap-1.5 text-xs text-app-text-tertiary">
+              <span className="inline-flex items-center gap-1"><Box aria-hidden strokeWidth={1.75} className="size-3" />{system}</span>
+              <span aria-hidden>·</span>
+              <a href={initiative.href ?? "#"} onClick={e => { e.preventDefault(); initiative.onOpen(); }} className="text-app-text-tertiary no-underline hover:text-app-text hover:underline">{updates} updates</a>
+            </p>
+          </div>
+          {live && <span className="inline-flex h-5 items-center gap-1.5 rounded-sm bg-app-accent-soft px-2 text-xs font-semibold text-app-accent-text"><span className="size-1.5 rounded-full bg-app-accent-strong" />Live</span>}
+          <time title={timeTitle} className="whitespace-nowrap text-xs leading-5 tabular-nums text-app-text-tertiary">{time}</time>
         </header>
-        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
-          <span className="rounded-sm border border-app-border-strong px-1.5 text-xs text-app-text-secondary">{system}</span>
-          <span className="inline-flex items-center gap-1.5 text-xs text-app-text-secondary"><span className="size-2 rounded-full border border-app-text-tertiary" />{stage}</span>
-          <a href={initiative.href ?? "#"} onClick={e => { e.preventDefault(); initiative.onOpen(); }} className="text-xs text-app-text-tertiary no-underline hover:text-app-text hover:underline">{updates} updates</a>
-        </div>
         {children}
         {reply}
         <footer className="flex flex-wrap items-center justify-between gap-2">
@@ -85,13 +89,14 @@ export function ActivityCard({ actor, verb, initiative, time, timeTitle, system,
   );
 }
 
-/** The person's request as the card's body text (clamped to three lines); no box inside the card. */
-export function ActivityQuote({ children }: { children: React.ReactNode }) {
-  return <p className="m-0 line-clamp-3 text-sm text-app-text">{children}</p>;
+/** The person's request as the card's body text, two lines at most (the full text lives on the initiative). */
+export function ActivityQuote({ children, full }: { children: React.ReactNode; full?: string }) {
+  return <p title={full} className="m-0 line-clamp-2 text-sm text-app-text">{children}</p>;
 }
 
 export interface AgentReplyProps {
-  /** What Konteks did, in its own words: "Wrote the plan", "Delivering TKT-2 of 3 on rf-01". */
+  /** What Konteks did, in its own words: "Wrote the plan", "Delivering TKT-2 of 3 on rf-01". The children add only
+      what this line does not already say (a ticket bar, two lines of detail, the quoted figures). */
   did: string;
   time: string;
   children?: React.ReactNode;
@@ -103,11 +108,11 @@ export function AgentReply({ did, time, children }: AgentReplyProps) {
     <div className="grid grid-cols-[22px_minmax(0,1fr)] gap-2.5 border-t border-app-border pt-3">
       <Avatar name="Konteks" agent size={22} />
       <div className="grid min-w-0 gap-2">
-        <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-app-text-secondary">
+        <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-app-text-secondary">
           <b className="font-semibold text-app-text">Konteks</b>
-          <span className="rounded-sm border border-app-border px-1 font-medium text-app-text-tertiary">Agent</span>
+          <span className="rounded-sm border border-app-border px-1 text-xs font-medium text-app-text-tertiary">Agent</span>
           <span>{did}</span>
-          <time className="ml-auto tabular-nums text-app-text-tertiary">{time}</time>
+          <time className="ml-auto text-xs tabular-nums text-app-text-tertiary">{time}</time>
         </p>
         {children}
       </div>

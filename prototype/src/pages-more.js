@@ -119,23 +119,26 @@ const actWho = p => PEOPLE[p].name;
 const actAv = p => av(p);
 function actBody(e, i) {
   /* The request as its author wrote it (the first note), without the title it repeats. */
-  if (e.kind === "started") { const req = THREADS[i.id]?.[0]?.text || REQUESTS[i.id]; return req ? `<p class="tl-text tl-quoted">${esc(req)}</p>` : ""; }
-  if (e.kind === "stopped") return `<p class="tl-text">${esc(i.detail)}</p>`;
+  /* Two lines at most; the full text is one click away on the initiative (and in the tooltip). */
+  if (e.kind === "started") { const req = THREADS[i.id]?.[0]?.text || REQUESTS[i.id]; return req ? `<p class="tl-text tl-quoted" title="${esc(req)}">${esc(req)}</p>` : ""; }
+  /* The header already says who stopped what, so the body starts after that sentence. */
+  if (e.kind === "stopped") { const rest = i.detail.split(/(?<=\.)\s+/).slice(1).join(" "); return rest ? `<p class="tl-text">${esc(rest)}</p>` : ""; }
   return "";
 }
 /* Konteks's answer to the person who called it: a reply inside their card, never an entry of its own. */
 function actReply(e, i) {
   const r = e.reply; if (!r) return "";
+  /* One line says what Konteks did; below it only what that line does not already say. */
   let body = `<p class="tl-text">${esc(i.detail)}</p>`;
-  if (r.kind === "estimate" && i.quote) body = `<div class="tl-quote"><div><span>Story Points, at most</span><b>${i.quote[0]}</b></div><div><span>Model cost on your subscription</span><b>${i.quote[1]}</b></div></div>`;
-  if (r.kind === "delivering") body = `<p class="tl-text">${esc(i.detail)}</p><div class="tl-prog" role="img" aria-label="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering">${Array.from({ length: e.of }, (_, n) => `<span class="${n < e.done ? "done" : n === e.done ? "now" : ""}"></span>`).join("")}</div>`;
-  return `<div class="tl-reply"><span class="av av-kx" title="Konteks">${ic("bot")}</span><div class="tl-reply-b"><p class="tl-reply-h"><b>Konteks</b><span class="agent-chip">Agent</span><span>${esc(REPLY_HEAD[r.kind](e))}</span>${tlTime(r.m)}</p>${body}</div></div>`;
+  if (r.kind === "estimate" && i.quote) body = `<p class="tl-quote"><b>${i.quote[0]}</b> at most<span aria-hidden="true">·</span><b>${i.quote[1]}</b> model cost on your subscription</p>`;
+  if (r.kind === "delivering") body = `<div class="tl-prog" role="img" aria-label="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering" title="${e.done} of ${e.of} merged · ${e.ticket} delivering">${Array.from({ length: e.of }, (_, n) => `<span class="${n < e.done ? "done" : n === e.done ? "now" : ""}"></span>`).join("")}</div>`;
+  return `<div class="tl-reply"><span class="av av-kx" title="Konteks">${ic("bot")}</span><div class="tl-reply-b"><p class="tl-reply-h"><b>Konteks</b><span class="agent-chip">Agent</span><span class="tl-did">${esc(REPLY_HEAD[r.kind](e))}</span>${tlTime(r.m)}</p>${body}</div></div>`;
 }
 function actCard({ e, earlier }) { const i = iniById[e.ini], live = e.reply?.kind === "delivering" && e.reply.m < 60, cta = actsNow(i) && e === ACTIVITY.find(x => x.ini === e.ini);
     const when = new Date(NOW - e.m * 60000);
     return `<li class="tl-item ${live ? "live" : ""}"><span class="tl-node">${actAv(e.p)}</span><article class="tl-card" aria-label="${esc(actWho(e.p))} ${esc(ACT_VERB[e.kind](e))} ${esc(i.title)}">
-      <header class="tl-h"><span class="tl-av-m" aria-hidden="true">${actAv(e.p)}</span><p class="tl-t"><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e)} <a href="#initiative/activities" data-ini="${i.id}">${esc(i.title)}</a></p>${live ? `<span class="tl-live"><span class="dot"></span>Live</span>` : ""}${tlTime(e.m)}</header>
-      <div class="tl-meta">${sysTag(i.sys)}${st("muted", i.stage)}<a href="#initiative/activities" data-ini="${i.id}" class="tl-upd">${i.updates} updates</a></div>
+      <header class="tl-h"><span class="tl-av-m" aria-hidden="true">${actAv(e.p)}</span><div class="tl-hb"><p class="tl-t"><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e)} <a href="#initiative/activities" data-ini="${i.id}">${esc(i.title)}</a></p>
+        <p class="tl-sub"><span class="tl-sys">${ic("box")}${esc(sysById[i.sys].name)}</span><span aria-hidden="true">·</span><a href="#initiative/activities" data-ini="${i.id}" class="tl-upd">${i.updates} updates</a></p></div>${live ? `<span class="tl-live"><span class="dot"></span>Live</span>` : ""}${tlTime(e.m)}</header>
       ${actBody(e, i)}${actReply(e, i)}
       ${earlier.length ? `<details class="tl-thread"><summary>${ic("chevron-right")}${earlier.length} earlier ${e.m < 1440 ? "today" : "that day"}</summary><ol>${earlier.map(x => `<li>${actAv(x.p)}<span><b>${actWho(x.p)}</b> ${x.kind === "started" ? "started it" : ACT_VERB[x.kind](x).replace(/ (in|for)$/, "")}</span>${tlTime(x.m)}</li>`).join("")}</ol></details>` : ""}
       <footer class="tl-f"><div class="reacts">${e.re.map(([em, n]) => `<button class="react" type="button" aria-pressed="false" data-react>${em} <span>${n}</span></button>`).join("")}<button class="react react-add" type="button" aria-label="Add a reaction" aria-haspopup="true" aria-expanded="false">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm" type="button" data-cmt aria-label="Comment on ${esc(i.title)}">${ic("message-square")}Comment</button></div>
