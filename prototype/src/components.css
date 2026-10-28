@@ -1417,20 +1417,22 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .s-form .btn.google{width:100%;margin-top:12px}
 .s-form .auth-help{text-align:center;margin-top:0}
 .auth-s .auth-base{padding-left:56px;padding-right:56px;background:none}
-.s-right{position:relative;margin:14px 14px 14px 0;border-radius:20px;background:var(--split-panel);border:1px solid var(--split-edge);overflow:hidden;isolation:isolate}
+.s-right{position:relative;display:flex;flex-direction:column;margin:14px 14px 14px 0;border-radius:20px;background:var(--split-panel);border:1px solid var(--split-edge);overflow:hidden;isolation:isolate}
 .s-right::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(70% 60% at 72% 18%,var(--split-glow),transparent 70%)}
 /* The real Work In Progress page, rendered at 1280px and scaled; it bleeds off the right and fades at the bottom. */
+.s-stage{position:relative;flex:1;min-height:0;overflow:hidden}
 .s-shot{--k:.6;position:absolute;left:56px;top:48px;width:1040px;outline:1px solid var(--line);aspect-ratio:1280/800;border-radius:12px;overflow:hidden;background:var(--bg);box-shadow:var(--split-shot-shadow);-webkit-mask-image:linear-gradient(to bottom,var(--deep) 55%,transparent 85%);mask-image:linear-gradient(to bottom,var(--deep) 55%,transparent 85%);animation:sshot .7s var(--ease) both}
 @keyframes sshot{from{opacity:0;translate:24px 0}}
-.s-card{position:absolute;right:40px;top:250px;width:520px;transform:scale(.9);transform-origin:100% 0;border-radius:var(--r10);box-shadow:var(--split-lift);animation:scard .6s var(--ease) both .15s}
+.s-card{position:absolute;right:40px;bottom:12px;width:520px;transform:scale(.9);transform-origin:100% 100%;border-radius:var(--r10);box-shadow:var(--split-lift);animation:scard .6s var(--ease) both .15s}
 /* A pool of moss under the card hides the queue rows it lands on, so the card reads alone. */
 .s-card::before{content:"";position:absolute;inset:-90px -70px;z-index:-1;background:radial-gradient(closest-side,var(--split-panel) 62%,transparent);pointer-events:none}
 @keyframes scard{from{opacity:0;translate:0 16px}}
 .s-card .dc{margin:0}
-.s-cap{position:absolute;left:56px;right:56px;bottom:44px;color:var(--split-ink)}
+.s-cap{position:relative;padding:24px 56px 44px;color:var(--split-ink)}
 .s-cap b{display:block;font-size:var(--t28);font-weight:600;letter-spacing:-.025em;line-height:1.12;max-width:20ch}
 .s-cap span{display:block;margin-top:10px;font-size:var(--t14);color:var(--split-ink-2);max-width:52ch}
-@media (max-width:1100px){.s-card{transform:scale(.8);top:230px;right:28px}.s-cap b{font-size:var(--t20)}}
+@media (max-width:1100px){.s-card{transform:scale(.8);right:28px}.s-cap b{font-size:var(--t20)}}
+@media (max-height:820px){.s-card{transform:scale(.78)}.s-cap{padding-top:16px;padding-bottom:32px}.s-cap b{font-size:var(--t20)}}
 .s-card-m{display:none}
 @media (max-width:900px){.auth-s{grid-template-columns:1fr}.s-right{display:none}.s-form{padding:40px 0 32px}.s-form h1{font-size:var(--t28)}.s-card-m{display:block;margin-top:16px;border-radius:var(--r10);box-shadow:var(--split-lift)}.s-card-m .dc{margin:0}.s-top{padding:24px 24px 0}.s-form{margin:0 auto}.auth-s .auth-base{padding-left:24px;padding-right:24px}}
 @media (prefers-reduced-motion:reduce){.n-lines g,.n-track,.n-col,.s-shot,.s-card,.s-form{animation:none}}

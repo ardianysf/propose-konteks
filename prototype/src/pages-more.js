@@ -329,8 +329,8 @@ function pageLoginSplit() {
       ${b.base}
     </section>
     <aside class="s-right" aria-hidden="true" inert>
-      <div class="s-shot"><div class="ov-shot-in">${shotOf(pageWork())}</div></div>
-      <div class="s-card">${card}</div>
+      <div class="s-stage"><div class="s-shot"><div class="ov-shot-in">${shotOf(pageWork())}</div></div>
+      <div class="s-card">${card}</div></div>
       <div class="s-cap"><b>Nothing runs until a person approves it.</b><span>Agents plan, estimate and deliver on your own runtimes. You decide what spends.</span></div>
     </aside>
   </div>`;
