@@ -35,7 +35,9 @@ function flowTrack(i) {
   const e = i.tone === "running" && deliveryOf(i);
   /* A delivering step carries the ticket bar (the segments Activities uses, at track scale). */
   const bar = e ? `<span class="flow-bar" role="img" aria-label="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering" title="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering">${Array.from({ length: e.of }, (_, n) => `<b class="${n < e.done ? "done" : n === e.done ? "now" : ""}"></b>`).join("")}</span>` : "";
-  return `<ol class="flow" aria-label="Flow: ${FLOW[cur]} of ${FLOW.join(", ")}">${FLOW.map((n, k) => `<li class="${k < cur ? "done" : k === cur ? "cur " + tone : ""}" ${k === cur ? 'aria-current="step"' : `title="${n}"`}><i></i><span>${n}</span>${k === cur ? bar : ""}</li>`).join("")}</ol>`;
+  /* Quiet track: no connector lines (eight rows would draw 32 of them). Dots at a fixed pitch still line up as
+     columns down the queue; the step's name sits once after them, so names line up too. */
+  return `<div class="flow"><ol aria-label="Flow: ${FLOW[cur]} of ${FLOW.join(", ")}">${FLOW.map((n, k) => `<li class="${k < cur ? "done" : k === cur ? "cur " + tone : ""}" ${k === cur ? 'aria-current="step"' : ""} title="${n}"><i></i><span class="sr">${n}</span></li>`).join("")}</ol><span class="flow-now ${tone}">${FLOW[cur]}</span>${bar}</div>`;
 }
 function queueRow(i, mine) {
   /* Whose move: an estimate the viewer cannot approve is the approver's move. */
@@ -46,10 +48,10 @@ function queueRow(i, mine) {
   return `<li class="q-row ${mine ? "mine" : ""}" data-go="${i.id}">
     <div class="q-who"><span class="q-mover">${i.tone === "running" ? `<span class="av av-kx" title="Konteks">${ic("bot")}</span>` : av(mover)}<b>${esc(who)}</b></span>
       <span class="q-wait ${aged}">${i.tone === "running" ? "for" : "waiting"} <b>${i.wait}</b></span></div>
-    <div class="q-main"><p class="q-title"><a href="#initiative" data-ini="${i.id}">${esc(i.title.replace(/[\s,.;:]+$/, ""))}</a>${sysTag(i.sys)}${i.fresh ? `<span class="newup" title="${i.fresh} new updates since you last looked"><span class="unread"></span>${i.fresh} new</span>` : ""}</p>
+    <div class="q-main"><p class="q-title"><a href="#initiative" data-ini="${i.id}">${esc(i.title.replace(/[\s,.;:]+$/, ""))}</a><span class="q-meta"><span class="tl-sys">${ic("box")}${esc(sysById[i.sys].name)}</span>${i.fresh ? `<span class="q-new" title="${i.fresh} new updates since you last looked"><span class="unread"></span>${i.fresh} new</span>` : ""}</span></p>
       <p class="q-why ${toneCls[i.tone]}">${ic(toneIc[i.tone])}<span>${esc(i.cause)}${i.more ? ` · <button class="linkbtn" type="button" data-more="${i.id}">+1 more</button>` : ""}</span></p>
       ${flowTrack(i)}</div>
-    <div class="q-act">${rowAction(i)}</div>
+    <div class="q-act">${rowAction(i).replace('class="btn btn-sm "', 'class="btn btn-ghost btn-sm q-quiet"')}</div>
   </li>`;
 }
 
@@ -62,7 +64,7 @@ function pageWork() {
   const list = INITIATIVES.filter(i => !S.sys || i.sys === S.sys).sort((x, y) => waitMin(x.wait) - waitMin(y.wait));
   const f = S.wipF || "all", count = k => k === "all" ? list.length : list.filter(i => wipKind(i) === k).length;
   const shown = f === "all" ? list : list.filter(i => wipKind(i) === f);
-  const banner = S.bannerGone ? "" : `<div class="banner" id="connBanner">${ic("plug-zap")}<span class="grow"><b style="color:var(--ink);font-weight:500">Rentify was connected</b> from sari@debian on 30 Sep 2026.</span><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Dismiss" id="connX">${ic("x")}</button></div>`;
+  const banner = S.bannerGone ? "" : `<div class="banner quiet" id="connBanner">${ic("plug-zap")}<span class="grow"><b style="color:var(--ink);font-weight:500">Rentify was connected</b> from sari@debian on 30 Sep 2026.</span><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Dismiss" id="connX">${ic("x")}</button></div>`;
   const bar = list.length ? `<div class="seg q-filter" role="group" aria-label="Whose move, most recent movement first">${WIP_FILTERS.map(([k, l]) => `<button type="button" data-wipf="${k}" aria-pressed="${f === k}">${l}<span class="count">${count(k)}</span></button>`).join("")}</div>` : "";
   const head = `<div class="pagehead framed">${phead("Work In Progress", "What people are driving. Agents do the rest.", `<button class="btn btn-primary" id="newInit">${ic("plus")}New initiative</button>`)}${sysFilter(bar)}${banner}</div>`;
   const none = { mine: "Nothing waits on you right now.", others: "Nobody else is holding anything up.", agents: "No agent is delivering right now." }[f];

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Clock, CornerDownRight, Loader, Lock, OctagonAlert } from "lucide-react";
+import { Clock, CornerDownRight, Loader, Lock, OctagonAlert, Box } from "lucide-react";
 import { Avatar } from "./Avatar";
 import { FlowTrack, FlowTone } from "./FlowTrack";
 import { cx, ring } from "./cx";
@@ -57,13 +57,15 @@ export interface QueueRowProps {
   /** Second thing that also needs the mover, e.g. a question from the agent. */
   more?: { label: string; onClick: () => void };
   flow: { current: number; delivery?: { done: number; of: number; ticket: string } };
-  /** The one action the viewer may take; pass `gate` instead when they may not (e.g. approve). */
+  /** The one action the viewer may take; pass `gate` instead when they may not (e.g. approve).
+      Only your own move gets a primary button; other rows' actions are ghost buttons, so the queue has one or two filled buttons, not eight. */
   action?: React.ReactNode;
   gate?: string;
 }
 
 const causeIcon = { decision: CornerDownRight, blocked: OctagonAlert, waiting: Clock, running: Loader };
-const causeTone = { decision: "text-app-accent-text", blocked: "text-app-danger", waiting: "text-app-text-secondary", running: "text-app-text-secondary" };
+/* Colour marks, text reads: the cause icon carries the tone, the words stay secondary ink. */
+const causeTone = { decision: "text-app-accent-strong", blocked: "text-app-danger", waiting: "text-app-text-tertiary", running: "text-app-text-tertiary" };
 const days = (w: string) => +(w.match(/(\d+)d/)?.[1] ?? 0);
 
 /** One queue row: whose move and how long (184px), then title · System · N new, the toned cause and the flow track,
@@ -80,17 +82,22 @@ export function QueueRow({ mover, wait, title, onOpen, href = "#", system, fresh
         </span>
         <span className="pl-[34px] text-xs tabular-nums text-app-text-tertiary max-[720px]:pl-0">
           {tone === "running" ? "for" : "waiting"}{" "}
-          <b className={cx("font-semibold", d >= 3 ? "text-app-danger" : d >= 1 ? "text-[color:var(--warn)]" : "text-app-text")}>{wait}</b>
+          <b className="font-semibold text-app-text">{wait}</b>
+          {/* Aging is a 6px dot after the wait (amber after a day, red after three), not coloured text. */}
+          {d >= 1 && <span aria-label={d >= 3 ? "waiting three days or more" : "waiting a day or more"} className={cx("ml-1.5 inline-block size-1.5 rounded-full align-[1px]", d >= 3 ? "bg-app-danger" : "bg-[color:var(--warn)]")} />}
         </span>
       </div>
       <div className="grid min-w-0 gap-1.5 [container-type:inline-size]">
         <p className="m-0 flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
           <a href={href} onClick={e => { e.preventDefault(); onOpen(); }} className={cx("text-base font-semibold text-app-text no-underline hover:underline hover:underline-offset-[3px]", ring)}>{title}</a>
-          <span className="rounded-sm border border-app-border-strong px-1.5 text-xs text-app-text-secondary">{system}</span>
-          {!!fresh && <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[color:var(--info)]"><span className="size-1.5 rounded-full bg-current" />{fresh} new</span>}
+          {/* System and N new as quiet 12px text: no bordered tag, no blue text (the unread dot stays blue). */}
+          <span className="inline-flex items-center gap-2.5 text-xs text-app-text-tertiary">
+            <span className="inline-flex items-center gap-1"><Box aria-hidden strokeWidth={1.75} className="size-3" />{system}</span>
+            {!!fresh && <span className="inline-flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-[color:var(--info)]" />{fresh} new</span>}
+          </span>
         </p>
-        <p className={cx("m-0 flex items-start gap-1.5 text-sm", causeTone[tone])}>
-          <Icon aria-hidden strokeWidth={1.75} className="mt-[3px] size-3.5 shrink-0" />
+        <p className="m-0 flex items-start gap-1.5 text-sm text-app-text-secondary">
+          <Icon aria-hidden strokeWidth={1.75} className={cx("mt-[3px] size-3.5 shrink-0", causeTone[tone])} />
           <span>{cause}{more && <> · <button type="button" onClick={more.onClick} className={cx("cursor-pointer border-0 bg-transparent p-0 text-inherit underline underline-offset-[3px]", ring)}>{more.label}</button></>}</span>
         </p>
         <FlowTrack current={flow.current} delivery={flow.delivery} tone={tone as FlowTone} />

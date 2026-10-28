@@ -1684,7 +1684,7 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .queue-wrap{padding:20px 24px 80px}
 .q-filter{max-width:100%;overflow-x:auto;scrollbar-width:none;margin-left:4px}
 .q-filter button{white-space:nowrap}
-.q-filter .count{margin-left:6px}
+.q-filter .count{margin-left:6px;border:0;background:none;padding:0}
 .queue{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r10);overflow:hidden}
 .q-row{display:grid;grid-template-columns:168px minmax(0,1fr) auto;gap:24px;padding:18px 20px;border-top:1px solid var(--line);cursor:pointer;transition:background-color .15s}
 .q-row:first-child{border-top:0}
@@ -1698,40 +1698,37 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .q-row.mine .q-mover .av{background:var(--accent-soft);color:var(--accent-ink);box-shadow:0 0 0 1px var(--line-accent)}
 .q-wait{padding-left:34px;font-size:var(--t12);color:var(--ink-3);font-variant-numeric:tabular-nums}
 .q-wait b{font-weight:600;color:var(--ink)}
-.q-wait.aging b{color:var(--warn)}
-.q-wait.late b{color:var(--danger)}
+/* Aging is a 6px dot after the wait (amber after a day, red after three), not coloured text; after, so "waiting" stays aligned. */
+.q-wait.aging::after,.q-wait.late::after{content:"";display:inline-block;width:6px;height:6px;margin-left:6px;border-radius:50%;background:var(--warn);vertical-align:1px}
+.q-wait.late::after{background:var(--danger)}
 .q-main{display:grid;gap:6px;min-width:0;container-type:inline-size}
 .q-title{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
 .q-title a{font-size:var(--t14);font-weight:600;color:var(--ink);text-decoration:none}
 .q-title a:hover{text-decoration:underline;text-underline-offset:3px}
 .q-why{display:flex;gap:6px;align-items:flex-start;font-size:var(--t13);color:var(--ink-2)}
 .q-why svg{width:14px;height:14px;flex:none;margin-top:3px}
-.q-why.ok{color:var(--accent-ink)}
-.q-why.danger{color:var(--danger)}
+/* Colour marks, text reads: the icon carries the tone, the words stay ink. */
+.q-why svg{color:var(--ink-3)}
+.q-why.ok svg{color:var(--accent-strong)}
+.q-why.danger svg{color:var(--danger)}
 .q-act{display:flex;align-items:flex-start;justify-content:flex-end}
 .q-empty{padding:24px;border:1px dashed var(--line-strong);border-radius:var(--r10);display:grid;gap:8px;justify-items:start}
 .q-empty h3{font-size:var(--t14);font-weight:600}
 .q-empty p{color:var(--ink-2)}
-/* Flow track: where the initiative stands on the governed flow. Five fixed slots, so a step reads as a column down the queue. */
-.flow{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,124px));font-size:var(--t12);color:var(--ink-3)}
-.flow li{display:flex;align-items:center;gap:6px;min-width:0}
-.flow li:not(:last-child)::after{content:"";flex:1;min-width:8px;height:1px;margin:0 6px 0 4px;background:var(--line-strong)}
-.flow li.done::after{background:var(--accent-strong)}
-.flow li.cur::after{min-width:0}
-.flow .cur span{flex:none}
-.flow span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* One name per row: the current step. The others are dots on the line, named on hover. */
-.flow li:not(.cur) span{display:none}
-.flow i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line-strong);background:var(--surface);flex:none}
+/* Flow track: where the initiative stands on the governed flow. Five dots at a fixed pitch and no connector lines,
+   so a step still reads as a column down the queue without drawing 4 lines per row; the step is named once, after the dots. */
+.flow{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:var(--t12);color:var(--ink-3)}
+.flow ol{display:flex;align-items:center;gap:6px;list-style:none;margin:0;padding:0}
+.flow li{display:grid;place-items:center;width:11px;height:14px}
+.flow i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line-strong);background:var(--surface)}
 .flow .done i{background:var(--accent-strong);border-color:var(--accent-strong)}
-.flow .done{color:var(--ink-2)}
-.flow .cur{color:var(--ink);font-weight:600}
 .flow .cur i{width:11px;height:11px;border-width:2px}
 .flow .cur.f-ok i{border-color:var(--accent-strong);box-shadow:0 0 0 3px var(--accent-soft)}
 .flow .cur.f-danger i{border-color:var(--danger);box-shadow:0 0 0 3px var(--danger-soft)}
 .flow .cur.f-idle i{border-color:var(--ink-3);box-shadow:0 0 0 3px var(--sunken)}
 .flow .cur.f-run i{border-color:var(--info);box-shadow:0 0 0 3px var(--info-soft);animation:flowrun 2.4s var(--ease) infinite}
-.flow-bar{display:flex;gap:2px;flex:none;margin-left:2px}
+.flow-now{font-weight:600;color:var(--ink)}
+.flow-bar{display:flex;gap:2px;flex:none}
 .flow-bar b{padding:0;width:8px;height:5px;border-radius:999px;background:var(--line-strong)}
 .flow-bar .done{background:var(--accent-strong)}
 .flow-bar .now{background:var(--info)}
@@ -1742,11 +1739,6 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
   .q-who{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .q-wait{padding-left:0}
   .q-act{justify-content:flex-start}
-}
-/* Narrow main column: the track packs to the left instead of keeping five fixed slots. */
-@container (max-width:600px){
-  .flow{display:flex;flex-wrap:wrap;row-gap:4px}
-  .flow li:not(:last-child)::after{flex:none;width:16px;margin:0 6px}
 }
 @media (prefers-reduced-motion:reduce){.flow .cur.f-run i{animation:none}}
 @media (prefers-reduced-motion:reduce){.tl-item.live .tl-node .av,.tl-prog .now{animation:none}}
@@ -1783,3 +1775,10 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .filters #newSys{margin-right:-8px}
 .filters .q-filter{min-width:0}
 @media (max-width:1100px){.filters .q-filter{order:3;margin-left:0}}
+
+/* Work In Progress, quieter (28 Oct 2026): the System and N new are 12px text beside the title, not a bordered tag and blue text;
+   only your own move gets a filled button, other rows' actions are ghost; the connection notice is a line, not a tinted box. */
+.q-meta{display:inline-flex;align-items:center;gap:10px;font-size:var(--t12);color:var(--ink-3)}
+.q-new{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.banner.quiet{padding:0;background:none;border:0;color:var(--ink-3)}
+.banner.quiet svg{color:var(--ink-3)}

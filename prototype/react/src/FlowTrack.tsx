@@ -11,8 +11,7 @@ export interface FlowTrackProps {
   tone?: FlowTone;
   /** Tickets of a running delivery; draws the segmented bar after the Delivery step. */
   delivery?: { done: number; of: number; ticket: string };
-  /** Packs the track to the left instead of five fixed slots. "auto" (default) does this when the track's container is
-      under 600px: put the track inside an element with `[container-type:inline-size]` (QueueRow does). */
+  /** Kept for compatibility; the track is always packed now (fixed-pitch dots, no lines). */
   compact?: boolean | "auto";
 }
 
@@ -23,35 +22,34 @@ const ringTone: Record<FlowTone, string> = {
   running: "border-[color:var(--info)] shadow-[0_0_0_3px_var(--info-soft)] animate-[kx-flow-run_2.4s_cubic-bezier(.16,1,.3,1)_infinite]",
 };
 
-/** Flow track (signature): where an initiative stands on the governed flow. Done steps are filled moss dots,
-    the current step is a ring in the row's tone and the only one named (600); the others are named on hover. Five fixed
-    slots of up to 124px, so a step reads as a column down the queue. The step is read from the stage and the cause the row shows. */
-export function FlowTrack({ current, tone = "decision", delivery, compact = "auto" }: FlowTrackProps) {
+/** Flow track (signature): where an initiative stands on the governed flow. Five dots at a fixed pitch and no
+    connector lines (a queue of eight would draw 32): done steps are filled moss, the current step is a ring in the
+    row's tone, upcoming steps are hollow. The current step is named once, after the dots, so dots and names both line
+    up as columns down the queue; the other names are on hover and for screen readers. A delivery adds its ticket bar. */
+export function FlowTrack({ current, tone = "decision", delivery }: FlowTrackProps) {
   return (
-    <ol aria-label={`Flow: ${FLOW[current]} of ${FLOW.join(", ")}`}
-      className={cx("m-0 mt-1.5 list-none p-0 text-xs text-app-text-tertiary",
-        compact === true ? "flex flex-wrap items-center gap-y-1" : "grid grid-cols-[repeat(5,minmax(0,124px))]",
-        compact === "auto" && "[@container(max-width:600px)]:flex [@container(max-width:600px)]:flex-wrap [@container(max-width:600px)]:items-center [@container(max-width:600px)]:gap-y-1")}>
-      {FLOW.map((step, k) => {
-        const done = k < current, cur = k === current, last = k === FLOW.length - 1;
-        return (
-          <li key={step} aria-current={cur ? "step" : undefined} title={cur ? undefined : step} className={cx("flex min-w-0 items-center gap-1.5", done && "text-app-text-secondary", cur && "font-semibold text-app-text")}>
-            <i className={cx("block shrink-0 rounded-full",
-              cur ? cx("size-[11px] border-2 bg-app-card", ringTone[tone]) : done ? "size-[9px] border-[1.5px] border-app-accent-strong bg-app-accent-strong" : "size-[9px] border-[1.5px] border-app-border-strong bg-app-card")} />
-            {cur ? <span className="shrink-0">{step}</span> : <span className="sr-only">{step}</span>}
-            {cur && delivery && (
-              <span role="img" title={`${delivery.done} of ${delivery.of} tickets merged, ${delivery.ticket} delivering`}
-                aria-label={`${delivery.done} of ${delivery.of} tickets merged, ${delivery.ticket} delivering`} className="ml-0.5 flex shrink-0 gap-0.5">
-                {Array.from({ length: delivery.of }, (_, n) => (
-                  <b key={n} className={cx("block h-[5px] w-2 rounded-sm", n < delivery.done ? "bg-app-accent-strong" : n === delivery.done ? "bg-[color:var(--info)]" : "bg-app-border-strong")} />
-                ))}
-              </span>
-            )}
-            {!last && <span aria-hidden className={cx("ml-1 mr-1.5 h-px flex-1", cur ? "min-w-0" : "min-w-2", done ? "bg-app-accent-strong" : "bg-app-border-strong",
-              compact === true ? "w-4 flex-none" : compact === "auto" ? "[@container(max-width:600px)]:w-4 [@container(max-width:600px)]:flex-none" : "")} />}
-          </li>
-        );
-      })}
-    </ol>
+    <div className="mt-1.5 flex items-center gap-2.5 text-xs text-app-text-tertiary">
+      <ol aria-label={`Flow: ${FLOW[current]} of ${FLOW.join(", ")}`} className="m-0 flex list-none items-center gap-1.5 p-0">
+        {FLOW.map((step, k) => {
+          const done = k < current, cur = k === current;
+          return (
+            <li key={step} title={step} aria-current={cur ? "step" : undefined} className="grid h-3.5 w-[11px] place-items-center">
+              <i className={cx("block rounded-full",
+                cur ? cx("size-[11px] border-2 bg-app-card", ringTone[tone]) : done ? "size-2 border-[1.5px] border-app-accent-strong bg-app-accent-strong" : "size-2 border-[1.5px] border-app-border-strong bg-app-card")} />
+              <span className="sr-only">{step}</span>
+            </li>
+          );
+        })}
+      </ol>
+      <span className="font-semibold text-app-text">{FLOW[current]}</span>
+      {delivery && (
+        <span role="img" title={`${delivery.done} of ${delivery.of} tickets merged, ${delivery.ticket} delivering`}
+          aria-label={`${delivery.done} of ${delivery.of} tickets merged, ${delivery.ticket} delivering`} className="flex shrink-0 gap-0.5">
+          {Array.from({ length: delivery.of }, (_, n) => (
+            <b key={n} className={cx("block h-[5px] w-2 rounded-sm", n < delivery.done ? "bg-app-accent-strong" : n === delivery.done ? "bg-[color:var(--info)]" : "bg-app-border-strong")} />
+          ))}
+        </span>
+      )}
+    </div>
   );
 }
