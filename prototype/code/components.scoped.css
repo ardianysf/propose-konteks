@@ -1691,6 +1691,7 @@
 .kx .ico-search{display:flex;align-items:center;gap:8px;width:min(320px,100%);height:32px;padding:0 10px;border:1px solid var(--line-input);border-radius:var(--r6);background:var(--surface)}
 .kx .ico-search svg{width:14px;height:14px;color:var(--ink-3)}
 .kx .ico-search input{flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;font-size:var(--t13);color:var(--ink)}
+.kx #icoN{white-space:nowrap}
 .kx .ico-search:focus-within{border-color:var(--accent-strong);box-shadow:0 0 0 3px var(--focus)}
 .kx .ico-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:6px}
 .kx .ico{width:100%;display:grid;justify-items:center;gap:8px;padding:16px 8px 10px;border:1px solid var(--line);border-radius:var(--r6);background:var(--surface);color:var(--ink);cursor:pointer;transition:border-color .15s,background-color .15s}
@@ -1698,6 +1699,11 @@
 .kx .ico svg{width:20px;height:20px}
 .kx .ico span{font-family:var(--mono);font-size:var(--t12);color:var(--ink-2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kx .ico-empty{padding:16px 0}
+@media (max-width:520px){
+.kx .ico-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kx .ico{padding:12px 4px 8px}
+.kx .ico span{white-space:normal;overflow-wrap:anywhere;text-align:center}
+}
 .kx .sec-sub{margin:24px 0 10px;display:grid;gap:4px}
 .kx .sec-sub h3{font-size:var(--t14);font-weight:600}
 .kx .ico-marks{gap:20px;flex-wrap:wrap}
