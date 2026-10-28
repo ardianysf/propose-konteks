@@ -313,6 +313,10 @@ function pageLoginNight() {
     ${b.base}
   </div>`;
 }
+/* What Konteks stands for, as the product states it (PRODUCT.md › Positioning). */
+const SPLIT_PROS = [["server", "On your runtimes", "Agents run on your team's computers. Konteks never holds a provider key."],
+  ["calculator", "Quoted before it runs", "Every delivery has a price in Story Points before anything starts."],
+  ["receipt", "Settled on use", "Only what was used is charged, with a receipt for each delivery."]];
 /* C · Split: sign in on paper; the product itself on the moss panel beside it (the real Work In Progress page and a real decision card). */
 function pageLoginSplit() {
   const b = loginBits(), v = S.viewAs; S.viewAs = "approver";
@@ -329,9 +333,10 @@ function pageLoginSplit() {
       ${b.base}
     </section>
     <aside class="s-right" aria-hidden="true" inert>
+      <div class="s-head"><b>Nothing runs until a person approves it.</b><span>Agents plan, estimate and deliver on your own runtimes. You decide what spends.</span></div>
       <div class="s-stage"><div class="s-shot"><div class="ov-shot-in">${shotOf(pageWork())}</div></div>
       <div class="s-card">${card}</div></div>
-      <div class="s-cap"><b>Nothing runs until a person approves it.</b><span>Agents plan, estimate and deliver on your own runtimes. You decide what spends.</span></div>
+      <ul class="s-pros">${SPLIT_PROS.map(([i, t, d]) => `<li>${ic(i)}<b>${t}</b><span>${d}</span></li>`).join("")}</ul>
     </aside>
   </div>`;
 }
