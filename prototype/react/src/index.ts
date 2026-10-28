@@ -20,6 +20,6 @@ export { FlowTrack, FLOW } from "./FlowTrack";
 export type { FlowTrackProps, FlowTone } from "./FlowTrack";
 export { Queue, QueueFilter, QueueRow } from "./Queue";
 export type { QueueFilterProps, QueueRowProps, QueueTone } from "./Queue";
-export { ActivityFeed, ActivityDay, ActivityCard, ActivityQuote, AgentReply, TicketBar } from "./Activity";
-export type { ActivityCardProps, AgentReplyProps } from "./Activity";
+export { ActivityFeed, ActivityDay, ActivityCard, ActivityQuote, AgentReply, TicketBar, CommentCount, HandoffNotice, KONTEKS_MENTION } from "./Activity";
+export type { ActivityCardProps, AgentReplyProps, ActivityComment } from "./Activity";
 export { cx } from "./cx";

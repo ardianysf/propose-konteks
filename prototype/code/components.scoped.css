@@ -1553,9 +1553,28 @@
 .kx .tl-f{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .kx .tl-f .hint{display:inline-flex;align-items:center;gap:6px}
 .kx .tl-f .hint svg{width:14px;height:14px}
-.kx .tl-cmt{display:flex;gap:12px;align-items:flex-start;margin:4px -20px -16px;padding:16px 20px 20px;border-top:1px solid var(--line);background:var(--sunken);border-radius:0 0 var(--r10) var(--r10)}
+.kx .tl-band{display:grid;gap:16px;margin:4px -20px -16px;padding:16px 20px 20px;border-top:1px solid var(--line);background:var(--sunken);border-radius:0 0 var(--r10) var(--r10)}
+.kx .tl-cmts{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.kx .tl-cmts>li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px}
+.kx .tl-cmts .av{width:24px;height:24px;font-size:var(--t12)}
+.kx .tl-cmt-h{display:flex;align-items:baseline;gap:8px;font-size:var(--t12);color:var(--ink-3)}
+.kx .tl-cmt-h b{font-size:var(--t13);font-weight:600;color:var(--ink)}
+.kx .tl-cmt-t{font-size:var(--t13);color:var(--ink)}
+.kx .tl-cmts .reacts{margin-top:4px}
+.kx .tl-cmt{display:flex;gap:12px;align-items:flex-start}
 .kx .tl-cmt .av{width:28px;height:28px;font-size:var(--t12);margin-top:10px}
-.kx .tl-cmt .compose{flex:1}
+.kx .tl-cmt-b{flex:1;min-width:0;display:grid;gap:6px}
+.kx .tl-cmt-b .hint a{color:var(--ink-2)}
+.kx .cmt-count{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 8px 0 6px;border:0;border-radius:var(--r6);background:none;color:var(--ink-2);font:inherit;font-size:var(--t12);cursor:pointer}
+.kx .cmt-count:hover{background:var(--hover);color:var(--ink)}
+.kx .cmt-count .av{width:20px;height:20px;font-size:var(--t12);letter-spacing:-.02em;box-shadow:0 0 0 2px var(--surface)}
+.kx .cmt-count .av+.av{margin-left:-6px}
+.kx .cmt-count .av-kx svg{width:10px;height:10px}
+.kx .cmt-count[aria-expanded="true"]{color:var(--ink)}
+.kx .cmt-new{display:grid;gap:8px;margin-left:38px}
+.kx .cmt-hand{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:var(--r6);background:var(--accent-soft);color:var(--ink-2);font-size:var(--t12)}
+.kx .cmt-hand svg{width:14px;height:14px;flex:none;margin-top:1px;color:var(--accent-strong)}
+.kx .cmt-hand b{font-weight:600;color:var(--ink)}
 .kx .react.bump{animation:kx-bump .3s var(--ease)}
 .kx .tl-empty{margin-left:44px;padding:24px;border:1px dashed var(--line-strong);border-radius:var(--r10);display:grid;gap:8px;justify-items:start}
 .kx .tl-empty h3{font-size:var(--t14);font-weight:600}
@@ -1611,7 +1630,7 @@
 .kx .tl-day{padding:24px 0 10px}
 .kx .tl-day:first-child{padding-top:12px}
 .kx .tl-card{padding:14px 16px}
-.kx .tl-cmt{margin:4px -16px -14px;padding:14px 16px 16px}
+.kx .tl-band{margin:4px -16px -14px;padding:14px 16px 16px}
 .kx .tl-h{align-items:flex-start}
 .kx .tl-av-m{display:block;flex:none}
 .kx .tl-av-m .av{width:24px;height:24px;font-size:var(--t12)}

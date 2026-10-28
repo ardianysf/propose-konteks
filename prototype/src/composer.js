@@ -128,7 +128,7 @@ function agentPlan(text, picks, mode) {
 }
 
 /* Renders the working state into `host`, streams the reply, and returns { stop }. */
-function agentRun(host, { text, picks, mode = "note", scroller }) {
+function agentRun(host, { text, picks, mode = "note", scroller, after }) {
   const plan = agentPlan(text, picks, mode);
   const el = document.createElement("div");
   el.className = (mode === "session" ? "msg-agent" : "cmt reply") + " msg-in agent-run";
@@ -139,7 +139,8 @@ function agentRun(host, { text, picks, mode = "note", scroller }) {
     <ol class="ar-steps" aria-label="What Konteks is doing"></ol>
     <div class="ar-reply" hidden></div>
     <div class="ar-acts"><button class="btn btn-ghost btn-sm" type="button" data-stop>${ic("square")}Stop</button></div></div>`;
-  host.append(el); drawIcons();
+  /* A comment that called Konteks gets its answer right under it, in the same note's comments. */
+  if (after) after.after(el); else host.append(el); drawIcons();
   const steps = el.querySelector(".ar-steps"), out = el.querySelector(".ar-reply"), state = el.querySelector(".ar-state");
   const follow = () => { if (scroller) scroller.scrollTop = scroller.scrollHeight; else el.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); };
   follow();

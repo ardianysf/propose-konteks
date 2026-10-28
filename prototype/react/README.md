@@ -14,7 +14,8 @@ The interactive components of the redesign as React components styled with Tailw
 | `Reactions` | `Reactions.tsx` | reaction chips you toggle and a horizontal picker (one row, ←/→, Escape); picking one that exists adds you to it |
 | `FlowTrack` | `FlowTrack.tsx` | Plan · Breakdown · Estimate · Delivery · Receipt, only the current step named (in the row's tone), the others named on hover, ticket bar on a delivery; packs to the left when its container is under 600px |
 | `Queue`, `QueueFilter`, `QueueRow` | `Queue.tsx` | Work In Progress as a work queue: whose move and how long, title, System, N new, cause, flow track, the one action or a gate; whose move is a filter over one list, newest movement first |
-| `ActivityFeed`, `ActivityDay`, `ActivityCard`, `ActivityQuote`, `AgentReply`, `TicketBar` | `Activity.tsx` | Activities as a feed of what people did; Konteks never appears as an entry, its answer is an `AgentReply` inside the caller's card |
+| `ActivityFeed`, `ActivityDay`, `ActivityCard`, `ActivityQuote`, `AgentReply`, `TicketBar` | `Activity.tsx` | Activities as a feed of what people did; Konteks never appears as an entry, its answer is an `AgentReply` inside the caller's card. A card's comments (`comments`, `onAddComment`) belong to the card, as live |
+| `CommentCount`, `HandoffNotice`, `KONTEKS_MENTION` | `Activity.tsx` | The "N comments" fold for notes and cards; the notice a note's comment box shows while the text mentions @konteks |
 
 ## Install
 
@@ -100,6 +101,7 @@ Colours come from the preset's `app-*` names (filled by `tokens.live-map.css`). 
 - Touch targets are at least 24px; fields are 16px on phones so iOS does not zoom.
 - Activities lists people only. Agents answer when a person calls them, so an agent never gets its own `ActivityCard`.
 - Work In Progress is a queue, not a feed: no avatar rail, no reactions; whose move is a filter, not a grouping.
+- Comments go one level deep: a comment takes reactions, never a reply. On a note, @konteks hands the work to Konteks: show `HandoffNotice` while the text matches `KONTEKS_MENTION` and say the send is a hand-off. On an Activities card, comments stay on the card and @konteks calls nobody (checked in the live app, 28 Oct 2026).
 
 ## Verified
 

@@ -45,7 +45,15 @@ custom plugin UI uses Tailwind `app-*` token classes and a `.dark` class.
 - Estimate variant (from audit): Approve, Change (inline form: Create revised proposal, Decline), Details,
   "Models for this delivery".
 - Notes composer "Draft your thinking… notes feed the plan", Attach, Post note. Thread: notes, Konteks replies,
-  React, Comment.
+  React, Comment. Checked by posting, 28 Oct 2026:
+  - The text typed in New initiative becomes the first note. Empty thread: "No notes yet — The first note sets the
+    direction. Reactions and comments feed the plan too."
+  - Comments sit one level under a note (people and Konteks, "AGENT" tag); a comment has React only, no reply.
+    The note shows "<faces> N comments", which folds them; the latest Konteks comment shows with "+N more".
+  - Comment box: "Add a comment… type @konteks to hand it to Konteks". Typing @konteks shows "This comment hands the
+    work to Konteks. Usual usage charges apply."; posting starts the planning session ("Agent working").
+  - A role without plan saving gets "You can't save this plan: your role doesn't include planning" (Request access,
+    Try again) after the agent runs.
 - PRD drawer: title, Ready · Revision 1 · updated…, summary, GOALS, REQUIREMENTS (R1…), risks.
 - Breakdown drawer: plan title, "Approved up to 2.15 SP", "0 of 1 merged · 1 needs you", Accepted, filter
   "Needs you 1", milestone, work item group, ticket TKT-1 (Settled 0.47 SP, Stopped, Continue, More →
@@ -67,6 +75,9 @@ custom plugin UI uses Tailwind `app-*` token classes and a `.dark` class.
 ## Activities / Issues / Releases / Leaders
 - Activities: "What happened across your Systems." System filter. Feed by day; entry = "<person> started <initiative>",
   relative + absolute time, tags Initiative + stage (Planning / Executing / Closed), Comment, "N updates · time". Load more.
+  Comment (checked by posting, 28 Oct 2026): box "Add a comment…"; the comment stays on the Activities entry
+  ("<face> N comments", React only) and does not appear on the initiative, open or Closed. @konteks there shows no
+  hand-off notice and starts nothing.
 - Issues: "What is wrong, by severity." System filter. Empty: "Nothing is open — When something breaks, whether a person
   reports it or a telemetry channel sends an alert, it appears here."
 - Releases: "Ready to ship first, then what shipped." System filter. Empty: "Nothing here yet — Accepted initiatives

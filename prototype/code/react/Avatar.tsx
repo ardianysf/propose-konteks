@@ -9,7 +9,7 @@ export interface AvatarProps {
   name: string;
   /** Konteks itself: the bot mark on Deep Moss. */
   agent?: boolean;
-  size?: 22 | 24 | 26 | 28 | 32;
+  size?: 20 | 22 | 24 | 26 | 28 | 32;
   /** Accent ring for "your move" (Work In Progress). */
   mine?: boolean;
   className?: string;

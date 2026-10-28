@@ -134,15 +134,18 @@ function actReply(e, i) {
   if (r.kind === "delivering") body = `<div class="tl-prog" role="img" aria-label="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering" title="${e.done} of ${e.of} merged · ${e.ticket} delivering">${Array.from({ length: e.of }, (_, n) => `<span class="${n < e.done ? "done" : n === e.done ? "now" : ""}"></span>`).join("")}</div>`;
   return `<div class="tl-reply"><span class="av av-kx" title="Konteks">${ic("bot")}</span><div class="tl-reply-b"><p class="tl-reply-h"><b>Konteks</b><span class="agent-chip">Agent</span><span class="tl-did">${esc(REPLY_HEAD[r.kind](e))}</span>${tlTime(r.m)}</p>${body}</div></div>`;
 }
+/* One comment on an Activities card: avatar, name, time, text, reactions only (no reply to a comment, as live). */
+const actCmt = c => `<li>${actAv(c.p)}<div><p class="tl-cmt-h"><b>${actWho(c.p)}</b>${tlTime(c.m)}</p><p class="tl-cmt-t">${esc(c.text)}</p><div class="reacts"><button class="react react-add" type="button" aria-label="Add a reaction" aria-haspopup="true" aria-expanded="false">${ic("smile-plus")}</button></div></div></li>`;
 function actCard({ e, earlier }) { const i = iniById[e.ini], live = e.reply?.kind === "delivering" && e.reply.m < 60, cta = actsNow(i) && e === ACTIVITY.find(x => x.ini === e.ini);
     const when = new Date(NOW - e.m * 60000);
-    return `<li class="tl-item ${live ? "live" : ""}"><span class="tl-node">${actAv(e.p)}</span><article class="tl-card" aria-label="${esc(actWho(e.p))} ${esc(ACT_VERB[e.kind](e))} ${esc(i.title)}">
+    return `<li class="tl-item ${live ? "live" : ""}"><span class="tl-node">${actAv(e.p)}</span><article class="tl-card" data-ini="${i.id}" aria-label="${esc(actWho(e.p))} ${esc(ACT_VERB[e.kind](e))} ${esc(i.title)}">
       <header class="tl-h"><span class="tl-av-m" aria-hidden="true">${actAv(e.p)}</span><div class="tl-hb"><p class="tl-t"><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e)} <a href="#initiative/activities" data-ini="${i.id}">${esc(i.title)}</a></p>
         <p class="tl-sub"><span class="tl-sys">${ic("box")}${esc(sysById[i.sys].name)}</span><span aria-hidden="true">·</span><a href="#initiative/activities" data-ini="${i.id}" class="tl-upd">${i.updates} updates</a></p></div>${live ? `<span class="tl-live"><span class="dot"></span>Live</span>` : ""}${tlTime(e.m)}</header>
       ${actBody(e, i)}${actReply(e, i)}
       ${earlier.length ? `<details class="tl-thread"><summary>${ic("chevron-right")}${earlier.length} earlier ${e.m < 1440 ? "today" : "that day"}</summary><ol>${earlier.map(x => `<li>${actAv(x.p)}<span><b>${actWho(x.p)}</b> ${x.kind === "started" ? "started it" : ACT_VERB[x.kind](x).replace(/ (in|for)$/, "")}</span>${tlTime(x.m)}</li>`).join("")}</ol></details>` : ""}
-      <footer class="tl-f"><div class="reacts">${e.re.map(([em, n]) => `<button class="react" type="button" aria-pressed="false" data-react>${em} <span>${n}</span></button>`).join("")}<button class="react react-add" type="button" aria-label="Add a reaction" aria-haspopup="true" aria-expanded="false">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm" type="button" data-cmt aria-label="Comment on ${esc(i.title)}">${ic("message-square")}Comment</button></div>
+      <footer class="tl-f"><div class="reacts">${e.re.map(([em, n]) => `<button class="react" type="button" aria-pressed="false" data-react>${em} <span>${n}</span></button>`).join("")}<button class="react react-add" type="button" aria-label="Add a reaction" aria-haspopup="true" aria-expanded="false">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm" type="button" data-cmt aria-label="Comment on ${esc(i.title)}">${ic("message-square")}Comment</button>${(e.cm || []).length ? `<button class="cmt-count" type="button" data-cmts aria-expanded="false">${[...new Set(e.cm.map(c => c.p))].slice(0, 3).map(p => actAv(p)).join("")}<span>${e.cm.length} comment${e.cm.length > 1 ? "s" : ""}</span></button>` : ""}</div>
         ${cta ? `<a class="btn btn-primary btn-sm" href="#initiative/activities" data-ini="${i.id}">${esc(i.action)}${ic("arrow-right")}</a>` : e.reply?.kind === "estimate" && !S.approved ? `<span class="hint">${ic("lock")}Maya Lestari approves</span>` : ""}</footer>
+      <div class="tl-band" hidden><ol class="tl-cmts" hidden>${(e.cm || []).map(actCmt).join("")}</ol></div>
     </article></li>`; }
 function pageActivities() {
   const evs = ACTIVITY.filter(e => (S.actMore || !e.more) && (!S.sys || iniById[e.ini].sys === S.sys)).sort((a, b) => a.m - b.m);
@@ -189,18 +192,35 @@ function bindActivities() {
     new MutationObserver((_, o) => { if (!pp.el.isConnected) { sticker.setAttribute("aria-expanded", "false"); o.disconnect(); } }).observe(document.body, { childList: true });
   };
   $$("[data-react]").forEach(b => b.onclick = () => { const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on); const c = b.querySelector("span"); c.textContent = +c.textContent + (on ? 1 : -1); b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); });
-  /* Comment toggles its box inside the card: a second press (or Escape, or Cancel) closes it and returns focus. */
-  $$("[data-cmt]").forEach(b => { b.setAttribute("aria-expanded", "false"); b.onclick = () => {
-    const card = b.closest(".tl-card");
-    const shut = () => { card.querySelector(".tl-cmt")?.remove(); b.setAttribute("aria-expanded", "false"); b.focus(); };
+  /* Comments on an Activities card (live, checked 28 Oct 2026) belong to the card: they do not appear on the initiative,
+     and @konteks here calls nobody. The band at the foot of the card holds them (folded behind the count) and the box,
+     which says so and points to the initiative's notes for handing work to Konteks. */
+  const band = card => card.querySelector(".tl-band");
+  const setCount = card => { const n = card.querySelectorAll(".tl-cmts > li").length, f = card.querySelector("[data-cmts]");
+    if (!n) { f?.remove(); return; }
+    if (!f) card.querySelector("[data-cmt]").insertAdjacentHTML("afterend", `<button class="cmt-count" type="button" data-cmts aria-expanded="true"><span></span></button>`);
+    const c = card.querySelector("[data-cmts]"); c.querySelector("span:last-child").textContent = `${n} comment${n > 1 ? "s" : ""}`; };
+  $$(".tl-card").forEach(card => card.addEventListener("click", e => {
+    const fold = e.target.closest("[data-cmts]");
+    if (fold) { const open = fold.getAttribute("aria-expanded") !== "true"; fold.setAttribute("aria-expanded", open); card.querySelector(".tl-cmts").hidden = !open; band(card).hidden = !open && !card.querySelector(".tl-cmt"); return; }
+    const b = e.target.closest("[data-cmt]"); if (!b) return;
+    const shut = () => { card.querySelector(".tl-cmt")?.remove(); b.setAttribute("aria-expanded", "false"); if (!card.querySelectorAll(".tl-cmts > li").length || card.querySelector(".tl-cmts").hidden) band(card).hidden = true; b.focus(); };
     if (card.querySelector(".tl-cmt")) return shut();
-    b.closest(".tl-f").insertAdjacentHTML("afterend", `<div class="tl-cmt"><span class="av">AY</span><div class="compose"><textarea rows="1" placeholder="Write a comment" aria-label="Comment"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div></div>`);
+    const i = iniById[card.dataset.ini];
+    band(card).hidden = false;
+    band(card).insertAdjacentHTML("beforeend", `<div class="tl-cmt"><span class="av">AY</span><div class="tl-cmt-b"><div class="compose"><textarea rows="1" placeholder="Add a comment…" aria-label="Comment on this card" aria-describedby="cmtNote-${i.id}"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div>
+      <p class="hint" id="cmtNote-${i.id}">Stays on this card. To hand work to Konteks, comment on a note in <a href="#initiative/activities" data-ini="${i.id}">${esc(i.title)}</a> with @konteks.</p></div></div>`);
     const box = card.querySelector(".tl-cmt"), ta = box.querySelector("textarea");
+    box.querySelector("[data-ini]").onclick = () => { S.cur = i.id; };
     b.setAttribute("aria-expanded", "true"); ta.focus();
     box.querySelector("[data-cx]").onclick = shut;
-    box.querySelector("[data-cp]").onclick = () => { if (!ta.value.trim()) return ta.focus(); shut(); toast("Comment posted"); };
-    ta.onkeydown = e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); shut(); } };
-  }; });
+    box.querySelector("[data-cp]").onclick = () => { const t = ta.value.trim(); if (!t) return ta.focus();
+      const list = card.querySelector(".tl-cmts"); list.hidden = false;
+      list.insertAdjacentHTML("beforeend", actCmt({ p: "ay", m: 0, text: t }).replace("<li>", '<li class="msg-in">'));
+      list.lastElementChild.querySelector("time").outerHTML = "<time>now</time>";
+      bindNoteTools(list.lastElementChild); drawIcons(); setCount(card); card.querySelector("[data-cmts]")?.setAttribute("aria-expanded", "true"); shut(); sfx("send"); toast("Comment posted on this card"); };
+    ta.onkeydown = ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); shut(); } };
+  }));
   $("#moreAct")?.addEventListener("click", () => { S.actMore = true; render(); });
 }
 

@@ -37,6 +37,33 @@ Dicek 28 Oktober, form dibuka tanpa dikirim. Ada tiga opsi:
 
 Prototipe sekarang sama persis, dan catatan paritasnya sudah diperbarui. Langkah sesudah Start pada opsi kedua tidak saya jalankan karena memicu sesi agen.
 
+### Model komentar sudah dicek di aplikasi live
+
+Dicek 28 Oktober dengan mengirim data uji, atas izin pemilik akun. Yang dikirim:
+
+- satu initiative uji di System Technical Support Test;
+- satu komentar ber-@konteks di note-nya;
+- tiga komentar dari Activities: di initiative uji, di "guidance" (Closed), dan di "hris-frontend update README" milik rekan.
+
+Hasilnya:
+
+1. **Note.** Teks yang diketik saat membuat initiative menjadi note pertama. Note dan komentar sama-sama dibaca saat agen menyusun plan ("Reactions and comments feed the plan too").
+2. **Komentar di note hanya satu tingkat.** Komentar dari orang maupun dari Konteks berada di bawah note dan hanya bisa diberi reaksi. Tidak ada tombol balas, jadi tidak ada sub-komentar. Hitungan "N comments" melipatnya.
+3. **@konteks menyerahkan pekerjaan ke agen.** Begitu @konteks diketik, muncul "This comment hands the work to Konteks. Usual usage charges apply." Setelah dikirim, sesi planning langsung berjalan.
+4. **Komentar di Activities milik entri itu sendiri.** Komentarnya tidak muncul di halaman initiative, baik yang aktif maupun yang Closed. @konteks di sana tidak memunculkan catatan dan tidak memicu agen.
+5. **Temuan sampingan.** Role akun penguji tidak bisa menyimpan plan. Setelah agen bekerja, muncul "You can't save this plan: your role doesn't include planning".
+
+Yang diubah di prototipe:
+
+- tombol Comment pada balasan dihapus;
+- hitungan "N comments" yang melipat komentar;
+- catatan @konteks dan tombol "Hand to Konteks", lalu jawaban Konteks masuk sebagai komentar di note yang sama;
+- kartu Activities punya thread komentar sendiri di dasar kartu, dengan keterangan bahwa komentar itu tetap di kartu dan tautan ke note initiative untuk menyerahkan pekerjaan ke Konteks.
+
+Ini juga tercatat di DESIGN.md (bagian "The comment model"), LIVE_PARITY.md, inventory, komponen `c-thread`, dan paket React (`ActivityCard` dengan `comments`/`onAddComment`, `CommentCount`, `HandoffNotice`).
+
+Data uji masih ada di aplikasi live. Untuk membersihkannya, tutup initiative "UI review test by Ardian…" dan hapus tiga komentar uji di Activities.
+
 ## Konsistensi modal, drawer, dan dialog
 
 ### Masalahnya
@@ -135,7 +162,7 @@ Aturan ini juga tercatat di DESIGN.md bagian Overlays dan di deskripsi komponen 
 | UX-024 | Story Points seperti mata uang | Selesai | Dua desimal konsisten: Estimate 2.15 SP, Breakdown "Settled 0.47 SP", Usage 3.40, Plan "10,000.00 SP", Payments "500.00 SP" + "Rp 1.920 per SP". | Nama tetap "Story Points" (istilah live), bukan "kredit". |
 | UX-025 | Empty state tanpa aksi | Selesai | #issues: ikon `shield-check` + "Set up a telemetry channel" (→ #operations). #releases: ikon `rocket` + "See initiatives in progress". | – |
 | UX-026 | Leaders sulit ditafsirkan | Di luar lingkup | Rumus poin terlihat, "1 point", dan "Value not reported yet". Filter periode/System tetap tidak ada. LIVE_PARITY mencatat "No period filter", jadi menambahkannya berarti menambah proses dan butuh backend. | Backend/produk. |
-| UX-027 | Feed hanya "started" | Selesai | Feed memuat peristiwa perubahan state (estimate ready, stopped, plan ready). Setelah Load more, blokir izin INI-131 ("The plan could not be saved in Role editor for SensePortal") muncul di grup 23 Oct 2026. Tombol Comment selalu terlihat. | – |
+| UX-027 | Feed hanya "started" | Selesai | Feed memuat peristiwa perubahan state (estimate ready, stopped, plan ready). Setelah Load more, blokir izin INI-131 ("The plan could not be saved in Role editor for SensePortal") muncul di grup 23 Oct 2026. Tombol Comment selalu terlihat. Komentar di kartu kini menjadi thread milik kartu itu, sama seperti live (dicek 28 Okt). | – |
 | UX-028 | Read-only tidak konsisten | Selesai | Satu pola read-only di Models, Runtimes, dan Settings › General: kontrol sunken bergaris putus-putus, lalu lock strip yang menyebut nama peran ("Only the Workspace Owner can rename it.") dengan Request access. | – |
 | UX-029 | Daftar model | Selesai | Pilihan aktif menyebut harness ("Auto · Default (recommended) · $5 / $25…", "Codex · GPT-6-Luna…"). Daftar lengkap ada dalam tabel per harness. | Isi 123 opsi dan harga ganda adalah data (di luar lingkup); pencarian tidak bisa diuji karena kontrolnya read-only. |
 | UX-030 | VCS banner dan kartu | Selesai | Tabel VCS kini punya kolom Owner. Baris bisa diklik dan membuka drawer "Rentify org" berisi Provider, URL, Token, Owner, Used by, dan Status, dengan catatan izin. | – |

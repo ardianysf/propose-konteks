@@ -198,12 +198,18 @@ function noteHtml(n) {
   const atts = n.atts ? `<div class="atts">${n.atts.map(([f, s]) => `<span class="att">${ic(/\.png|\.jpe?g/.test(f) ? "image" : "file-text")}<b>${esc(f)}</b><span>${s}</span></span>`).join("")}</div>` : "";
   const uses = n.uses ? `<div class="ar-uses">${n.uses.map(([k, u]) => `<span class="tag">${ic(k === "skill" ? "sparkles" : "wrench")}${k === "skill" ? "Skill" : "Tool"} · ${esc(u)}</span>`).join("")}</div>` : "";
   const trace = n.steps ? `<details class="trace ar-trace"><summary>${ic("chevron-right")}${n.steps.length} steps</summary><ol>${n.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol></details>` : "";
-  const reacts = agent ? "" : `<div class="reacts">${(n.re || []).map(([e, c]) => `<button class="react" type="button" aria-pressed="false" data-react>${e} <span>${c}</span></button>`).join("")}<button class="react react-add" type="button" aria-label="Add a reaction" aria-haspopup="true" aria-expanded="false">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm" type="button" data-comment>Comment</button></div>`;
+  /* Live (checked 28 Oct 2026): comments sit one level under a note and only take reactions; there is no reply to a comment.
+     A note carries Comment and, when it has comments, a count that folds them. */
+  const count = n.count ? `<button class="cmt-count" type="button" data-fold aria-expanded="true" aria-label="${n.count} comment${n.count > 1 ? "s" : ""}, hide them">${(n.by || []).slice(0, 3).map(p => p === "kx" ? `<span class="av av-kx">${ic("bot")}</span>` : av(p)).join("")}<span>${n.count} comment${n.count > 1 ? "s" : ""}</span></button>` : "";
+  const reacts = `<div class="reacts">${(n.re || []).map(([e, c]) => `<button class="react" type="button" aria-pressed="false" data-react>${e} <span>${c}</span></button>`).join("")}<button class="react react-add" type="button" aria-label="Add a reaction" aria-haspopup="true" aria-expanded="false">${ic("smile-plus")}</button>${n.r ? "" : `<button class="btn btn-ghost btn-sm" type="button" data-comment>${ic("message-square")}Comment</button>${count}`}</div>`;
   return `<article class="cmt ${n.r ? "reply" : ""}">${agent ? `<span class="agent-av">${ic("bot")}</span>` : av(n.who, 1)}<div class="cmt-b"><div class="cmt-h"><b>${name}</b>${agent ? '<span class="agent-chip">Agent</span>' : ""}${ago(n.m)}</div>${fmtMsg(n.text)}${atts}${uses}${trace}${reacts}</div></article>`;
 }
 function threadHtml(i) {
   let day = "";
-  return threadFor(i).map(n => {
+  const all = threadFor(i);
+  /* Each note learns how many comments follow it, and whose, for its count. */
+  all.forEach((n, k) => { if (n.r) return; let j = k + 1; const by = []; while (all[j]?.r) { if (!by.includes(all[j].who)) by.push(all[j].who); j++; } n.count = j - k - 1; n.by = by; });
+  return all.map(n => {
     const d = new Date(NOW - n.m * 60000), k = d.toDateString();
     const sep = k !== day ? `<div class="day-sep" role="separator"><span>${k === NOW.toDateString() ? "Today" : k === new Date(NOW - 86400000).toDateString() ? "Yesterday" : ""}${k === NOW.toDateString() || k === new Date(NOW - 86400000).toDateString() ? " · " : ""}${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}</span></div>` : "";
     day = k; return sep + noteHtml(n);
@@ -266,18 +272,59 @@ Every documented command runs on rf-01; outcomes are recorded as passed, failed 
     const n = $("#notesH + .hint"); if (n) n.textContent = `${list.querySelectorAll(".cmt").length + 1} · notes feed the plan`;
   } });
   $$("[data-react]").forEach(b => b.onclick = () => { const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on); const c = b.querySelector("span"); c.textContent = +c.textContent + (on ? 1 : -1); });
-  /* Comment toggles its reply box: a second press (or Escape, or Cancel) closes it and returns focus to the button. */
-  $$("[data-comment]").forEach(b => { b.setAttribute("aria-expanded", "false"); b.onclick = () => {
-    const host = b.closest(".cmt-b"), open = host.querySelector(".compose");
-    const shut = () => { host.querySelector(".compose")?.remove(); b.setAttribute("aria-expanded", "false"); b.focus(); };
+  bindThreadComments(list);
+}
+
+/* Comments on a note (live, checked 28 Oct 2026): one level, newest last, reactions only.
+   Comment opens a box under the note's comments; a second press, Escape or Cancel closes it and returns focus.
+   Typing @konteks hands the work to Konteks: the live app then says so and that usual usage charges apply,
+   and Konteks answers as a comment under the same note. Without @konteks nobody is called, but the comment
+   still feeds the next plan. The count folds the note's comments. */
+const NOTE_MENTION = /(^|\s)@konteks\b/i;
+function noteComments(note) { const out = []; let n = note.nextElementSibling; while (n && n.classList.contains("reply")) { out.push(n); n = n.nextElementSibling; } return out; }
+function bindThreadComments(list) {
+  list.addEventListener("click", e => {
+    const fold = e.target.closest("[data-fold]");
+    if (fold) { const note = fold.closest(".cmt"), open = fold.getAttribute("aria-expanded") !== "true"; noteComments(note).forEach(c => c.hidden = !open);
+      fold.setAttribute("aria-expanded", open); const n = fold.querySelector("span:last-child").textContent; fold.setAttribute("aria-label", `${n}, ${open ? "hide" : "show"} them`); return; }
+    const b = e.target.closest("[data-comment]"); if (!b) return;
+    /* The box comes after the note's comments, as in the live app: you read the thread, then add to it. */
+    const note = b.closest(".cmt"), open = note._box?.isConnected;
+    const shut = () => { note._box?.remove(); note._box = null; b.setAttribute("aria-expanded", "false"); b.focus(); };
     if (open) return shut();
-    host.insertAdjacentHTML("beforeend", `<div class="compose"><textarea rows="1" placeholder="Reply to this note" aria-label="Comment"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div>`);
-    const box = host.querySelector(".compose"), ta = box.querySelector("textarea");
-    b.setAttribute("aria-expanded", "true"); ta.focus();
+    const fb = note.querySelector("[data-fold]"); if (fb && fb.getAttribute("aria-expanded") !== "true") fb.click();
+    const last = noteComments(note).pop() || note;
+    last.insertAdjacentHTML("afterend", `<div class="cmt-new"><p class="cmt-hand" hidden>${ic("sparkles")}<span><b>This comment hands the work to Konteks.</b> Usual usage charges apply.</span></p>
+      <div class="compose"><textarea rows="1" placeholder="Add a comment… type @konteks to hand it to Konteks" aria-label="Comment on this note"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div></div>`);
+    drawIcons(); b.setAttribute("aria-expanded", "true");
+    const box = note._box = last.nextElementSibling, ta = box.querySelector("textarea"), hand = box.querySelector(".cmt-hand"), send = box.querySelector("[data-cp]");
+    ta.focus();
+    ta.oninput = () => { const on = NOTE_MENTION.test(ta.value); hand.hidden = !on; send.textContent = on ? "Hand to Konteks" : "Comment"; };
+    ta.onkeydown = ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); shut(); } };
     box.querySelector("[data-cx]").onclick = shut;
-    box.querySelector("[data-cp]").onclick = () => { shut(); toast("Comment posted"); };
-    ta.onkeydown = e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); shut(); } };
-  }; });
+    send.onclick = () => {
+      const text = ta.value.trim(); if (!text) return ta.focus();
+      const mention = NOTE_MENTION.test(text);
+      box.remove(); note._box = null; b.setAttribute("aria-expanded", "false");
+      const prior = noteComments(note), after = prior[prior.length - 1] || note;
+      after.insertAdjacentHTML("afterend", noteHtml({ who: "ay", m: 0, text, r: 1 }).replace('class="cmt ', 'class="cmt msg-in '));
+      const mine = after.nextElementSibling; mine.querySelector("time").outerHTML = `<time>now</time>`;
+      bindNoteTools(mine); mine.querySelectorAll("[data-react]").forEach(r => r.onclick = () => r.setAttribute("aria-pressed", r.getAttribute("aria-pressed") !== "true")); drawIcons(); sfx("send");
+      recount(note);
+      if (mention) { agentRun(list, { text: text.replace(NOTE_MENTION, " ").trim(), picks: [], mode: "note", after: mine }); recount(note); }
+      else toast("Comment posted. It feeds the next plan");
+    };
+  });
+  function recount(note, extra = 0) {
+    const n = noteComments(note).length + extra, row = note.querySelector(".reacts"); let fb = row.querySelector("[data-fold]");
+    if (!fb) { row.insertAdjacentHTML("beforeend", `<button class="cmt-count" type="button" data-fold aria-expanded="true"><span></span></button>`); fb = row.querySelector("[data-fold]"); }
+    /* Faces: up to three distinct commenters, read from the comments themselves. */
+    const seen = new Set(), faces = [];
+    noteComments(note).forEach(c => { const a = c.querySelector(":scope > .av, :scope > .agent-av"); if (!a) return; const k = a.classList.contains("agent-av") ? "kx" : a.textContent.trim();
+      if (seen.has(k) || faces.length > 2) return; seen.add(k); faces.push(k === "kx" ? `<span class="av av-kx">${ic("bot")}</span>` : `<span class="av">${esc(k)}</span>`); });
+    fb.innerHTML = faces.join("") + `<span>${n} comment${n > 1 ? "s" : ""}</span>`; drawIcons();
+    fb.setAttribute("aria-label", `${n} comment${n > 1 ? "s" : ""}, hide them`);
+  }
 }
 
 /* Attach opens the file picker and shows chips; React offers a small set of reactions. */

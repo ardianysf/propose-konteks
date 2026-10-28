@@ -194,12 +194,12 @@ const THREADS = {
    so its answer rides inside that person's card as a reply (reply.kind, reply.m), never as an entry of its own. */
 const ACTIVITY = [
   { id: "a1", p: "ds", ini: "INI-144", kind: "approved", m: 14, ticket: "TKT-2", of: 3, done: 1, re: [["🚀", 2]], reply: { kind: "delivering", m: 12 } },
-  { id: "a2", p: "sw", ini: "INI-137", kind: "started", m: 129, re: [["👍", 2]] },
+  { id: "a2", p: "sw", ini: "INI-137", kind: "started", m: 129, re: [["👍", 2]], cm: [{ p: "ml", m: 112, text: "Ping me when the draft is up, I'll check the Azure DevOps part." }, { p: "sw", m: 104, text: "Will do. It should land this afternoon." }] },
   { id: "a3", p: "bh", ini: "INI-128", kind: "stopped", m: 141, ticket: "TKT-1", re: [] },
   { id: "a4", p: "ay", ini: "INI-139", kind: "quote", m: 368, ticket: "TKT-1", re: [["👀", 1]], reply: { kind: "estimate", m: 366 } },
   { id: "a6", p: "bh", ini: "INI-128", kind: "started", m: 465, re: [] },
   { id: "b2", p: "ay", ini: "INI-142", kind: "started", m: 1457, re: [["🎉", 2]], reply: { kind: "plan", m: 1440 } },
-  { id: "b4", p: "np", ini: "INI-125", kind: "started", m: 1610, re: [["👀", 1]] },
+  { id: "b4", p: "np", ini: "INI-125", kind: "started", m: 1610, re: [["👀", 1]], cm: [{ p: "bh", m: 1580, text: "Bug 3 only shows with a vendor account that has no contracts yet." }] },
   { id: "a5", p: "ay", ini: "INI-139", kind: "started", m: 1720, re: [["👍", 3]] },
   { id: "b5", p: "ds", ini: "INI-144", kind: "started", m: 2008, re: [["👍", 4]] },
   { id: "c3", p: "ay", ini: "INI-131", kind: "started", m: 6455, re: [], more: true, reply: { kind: "unsaved", m: 5897 } },
