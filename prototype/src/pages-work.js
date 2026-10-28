@@ -35,7 +35,7 @@ function flowTrack(i) {
   const e = i.tone === "running" && deliveryOf(i);
   /* A delivering step carries the ticket bar (the segments Activities uses, at track scale). */
   const bar = e ? `<span class="flow-bar" role="img" aria-label="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering" title="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering">${Array.from({ length: e.of }, (_, n) => `<b class="${n < e.done ? "done" : n === e.done ? "now" : ""}"></b>`).join("")}</span>` : "";
-  return `<ol class="flow" aria-label="Flow: ${FLOW[cur]} of ${FLOW.join(", ")}">${FLOW.map((n, k) => `<li class="${k < cur ? "done" : k === cur ? "cur " + tone : ""}" ${k === cur ? 'aria-current="step"' : ""}><i></i><span>${n}</span>${k === cur ? bar : ""}</li>`).join("")}</ol>`;
+  return `<ol class="flow" aria-label="Flow: ${FLOW[cur]} of ${FLOW.join(", ")}">${FLOW.map((n, k) => `<li class="${k < cur ? "done" : k === cur ? "cur " + tone : ""}" ${k === cur ? 'aria-current="step"' : `title="${n}"`}><i></i><span>${n}</span>${k === cur ? bar : ""}</li>`).join("")}</ol>`;
 }
 function queueRow(i, mine) {
   /* Whose move: an estimate the viewer cannot approve is the approver's move. */
@@ -63,11 +63,11 @@ function pageWork() {
   const f = S.wipF || "all", count = k => k === "all" ? list.length : list.filter(i => wipKind(i) === k).length;
   const shown = f === "all" ? list : list.filter(i => wipKind(i) === f);
   const banner = S.bannerGone ? "" : `<div class="banner" id="connBanner">${ic("plug-zap")}<span class="grow"><b style="color:var(--ink);font-weight:500">Rentify was connected</b> from sari@debian on 30 Sep 2026.</span><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Dismiss" id="connX">${ic("x")}</button></div>`;
-  const head = `<div class="pagehead">${phead("Work In Progress", "What people are driving. Agents do the rest.", `<button class="btn btn-primary" id="newInit">${ic("plus")}New initiative</button>`)}${sysFilter()}${banner}</div>`;
-  const bar = `<div class="q-bar"><div class="seg q-filter" role="group" aria-label="Whose move">${WIP_FILTERS.map(([k, l]) => `<button type="button" data-wipf="${k}" aria-pressed="${f === k}">${l}<span class="count">${count(k)}</span></button>`).join("")}</div><span class="hint">Most recent movement first</span></div>`;
+  const bar = list.length ? `<div class="seg q-filter" role="group" aria-label="Whose move, most recent movement first">${WIP_FILTERS.map(([k, l]) => `<button type="button" data-wipf="${k}" aria-pressed="${f === k}">${l}<span class="count">${count(k)}</span></button>`).join("")}</div>` : "";
+  const head = `<div class="pagehead framed">${phead("Work In Progress", "What people are driving. Agents do the rest.", `<button class="btn btn-primary" id="newInit">${ic("plus")}New initiative</button>`)}${sysFilter(bar)}${banner}</div>`;
   const none = { mine: "Nothing waits on you right now.", others: "Nobody else is holding anything up.", agents: "No agent is delivering right now." }[f];
   const body = !list.length ? `<div class="queue-wrap"><div class="q-empty"><h3>Nothing in progress in ${esc(sysById[S.sys].name)}</h3><p>Start an initiative and a planning session opens behind it, ready to read your notes.</p><button class="btn btn-sm" id="newInit2">${ic("plus")}New initiative</button></div></div>`
-    : `<div class="queue-wrap">${bar}${shown.length ? `<ul class="queue" aria-label="Work In Progress">${shown.map(i => queueRow(i, wipKind(i) === "mine")).join("")}</ul>` : `<div class="q-empty"><h3>${none}</h3><p><button class="linkbtn" type="button" data-wipf="all">Show everything</button></p></div>`}</div>`;
+    : `<div class="queue-wrap">${shown.length ? `<ul class="queue" aria-label="Work In Progress">${shown.map(i => queueRow(i, wipKind(i) === "mine")).join("")}</ul>` : `<div class="q-empty"><h3>${none}</h3><p><button class="linkbtn" type="button" data-wipf="all">Show everything</button></p></div>`}</div>`;
   return shell("work", "", head + body, { flush: true });
 }
 function bindWork() {

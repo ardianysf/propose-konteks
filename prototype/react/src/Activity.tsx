@@ -10,7 +10,7 @@ import { cx, ring } from "./cx";
 
 export function ActivityFeed({ children }: { children: React.ReactNode }) {
   return (
-    <ol role="feed" aria-label="Activities" className="relative m-0 list-none p-0 before:absolute before:bottom-3 before:left-[15.5px] before:top-3 before:w-px before:bg-app-border-strong">
+    <ol role="feed" aria-label="Activities" className="relative m-0 list-none p-0 before:absolute before:bottom-3 before:left-[15.5px] before:top-3 before:w-px before:bg-app-border-strong max-[560px]:before:hidden">
       {children}
     </ol>
   );
@@ -19,7 +19,7 @@ export function ActivityFeed({ children }: { children: React.ReactNode }) {
 /** Sticky day heading inside the feed: "Today · 27 Oct 2026". */
 export function ActivityDay({ day, date }: { day: string; date: string }) {
   return (
-    <li className="sticky top-0 z-[2] bg-gradient-to-b from-app-bg from-70% to-transparent pb-2.5 pl-11 pt-3.5">
+    <li className="sticky top-0 z-[2] bg-gradient-to-b from-app-bg from-70% to-transparent pb-3 pl-11 pt-7 first:pt-4 max-[560px]:pb-2.5 max-[560px]:pl-0 max-[560px]:pt-6 max-[560px]:first:pt-3">
       <h2 className="flex items-baseline gap-2 text-sm font-semibold">{day}<span className="text-xs font-normal text-app-text-tertiary">{date}</span></h2>
     </li>
   );
@@ -51,13 +51,15 @@ export interface ActivityCardProps {
 
 export function ActivityCard({ actor, verb, initiative, time, timeTitle, system, stage, updates, children, reply, live, reactions, onReactions, onComment, action }: ActivityCardProps) {
   return (
-    <li className="relative grid grid-cols-[32px_minmax(0,1fr)] gap-3 pb-3.5 max-[560px]:grid-cols-[28px_minmax(0,1fr)] max-[560px]:gap-2.5">
-      <span className="relative z-[1] pt-3">
+    <li className="relative grid grid-cols-[32px_minmax(0,1fr)] gap-3 pb-4 max-[560px]:grid-cols-1 max-[560px]:pb-3">
+      {/* On phones the rail goes and the avatar moves into the card header, so the card gets the full width. */}
+      <span className="relative z-[1] pt-3 max-[560px]:hidden">
         <Avatar name={actor.name} initials={actor.initials} size={32} className={cx("shadow-[0_0_0_4px_rgb(var(--color-app-bg))]", live && "animate-[kx-node-pulse_2.4s_cubic-bezier(.16,1,.3,1)_infinite]")} />
       </span>
       <article aria-label={`${actor.name} ${verb} ${initiative.title}`}
-        className={cx("grid min-w-0 gap-2.5 rounded-lg border bg-app-card px-4 py-3.5 transition-[border-color,box-shadow] duration-150 hover:border-app-border-strong hover:shadow-sm max-[560px]:p-3", live ? "border-[color:var(--accent-tint)]" : "border-app-border")}>
-        <header className="flex items-baseline gap-2.5">
+        className={cx("grid min-w-0 gap-3 rounded-lg border bg-app-card px-5 py-4 transition-[border-color,box-shadow] duration-150 hover:border-app-border-strong hover:shadow-sm max-[560px]:px-4 max-[560px]:py-3.5", live ? "border-[color:var(--accent-tint)]" : "border-app-border")}>
+        <header className="flex items-baseline gap-2.5 max-[560px]:items-start">
+          <Avatar name={actor.name} initials={actor.initials} size={24} className="hidden shrink-0 max-[560px]:inline-grid" />
           <p className="m-0 min-w-0 flex-1 text-sm text-app-text-secondary">
             <b className="font-semibold text-app-text">{actor.name}</b> {verb}{" "}
             <a href={initiative.href ?? "#"} onClick={e => { e.preventDefault(); initiative.onOpen(); }} className={cx("font-semibold text-app-text no-underline hover:underline hover:underline-offset-[3px]", ring)}>{initiative.title}</a>
@@ -83,9 +85,9 @@ export function ActivityCard({ actor, verb, initiative, time, timeTitle, system,
   );
 }
 
-/** The person's request, quoted on Sunken Rice (clamped to three lines). */
+/** The person's request as the card's body text (clamped to three lines); no box inside the card. */
 export function ActivityQuote({ children }: { children: React.ReactNode }) {
-  return <div className="rounded bg-[color:var(--sunken)] px-3 py-2.5"><p className="m-0 line-clamp-3 text-sm text-app-text">{children}</p></div>;
+  return <p className="m-0 line-clamp-3 text-sm text-app-text">{children}</p>;
 }
 
 export interface AgentReplyProps {
@@ -98,7 +100,7 @@ export interface AgentReplyProps {
 /** Konteks's answer inside the card of the person who called it: hairline above, the mark, the Agent chip, its own time. */
 export function AgentReply({ did, time, children }: AgentReplyProps) {
   return (
-    <div className="grid grid-cols-[22px_minmax(0,1fr)] gap-2.5 border-t border-app-border pt-2.5">
+    <div className="grid grid-cols-[22px_minmax(0,1fr)] gap-2.5 border-t border-app-border pt-3">
       <Avatar name="Konteks" agent size={22} />
       <div className="grid min-w-0 gap-2">
         <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-app-text-secondary">

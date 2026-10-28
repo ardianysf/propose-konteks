@@ -11,7 +11,7 @@ export interface QueueFilterProps<K extends string> {
   options: Array<{ key: K; label: string; count: number }>;
   value: K;
   onChange: (key: K) => void;
-  /** Right-hand note, e.g. "Most recent movement first". Hidden below 720px. */
+  /** Optional right-hand note. The app puts the sort order in the group's accessible name instead of showing it. Hidden below 720px. */
   note?: React.ReactNode;
 }
 
@@ -72,7 +72,7 @@ export function QueueRow({ mover, wait, title, onOpen, href = "#", system, fresh
   const Icon = causeIcon[tone], d = days(wait);
   return (
     <li onClick={e => { if (!(e.target as HTMLElement).closest("a,button")) onOpen(); }}
-      className="grid cursor-pointer grid-cols-[184px_minmax(0,1fr)_auto] gap-5 border-t border-app-border px-[18px] py-4 transition-colors duration-150 first:border-t-0 hover:bg-[color:var(--hover)] max-[720px]:grid-cols-1 max-[720px]:gap-2.5 max-[720px]:p-3.5">
+      className="grid cursor-pointer grid-cols-[168px_minmax(0,1fr)_auto] gap-6 border-t border-app-border px-5 py-[18px] transition-colors duration-150 first:border-t-0 hover:bg-[color:var(--hover)] max-[720px]:grid-cols-1 max-[720px]:gap-2.5 max-[720px]:p-3.5">
       <div className="grid content-start gap-1.5 max-[720px]:flex max-[720px]:items-center max-[720px]:justify-between">
         <span className="flex min-w-0 items-center gap-2">
           <Avatar name={mover.name} initials={mover.initials} agent={mover.agent} mine={mover.you} />
@@ -83,7 +83,7 @@ export function QueueRow({ mover, wait, title, onOpen, href = "#", system, fresh
           <b className={cx("font-semibold", d >= 3 ? "text-app-danger" : d >= 1 ? "text-[color:var(--warn)]" : "text-app-text")}>{wait}</b>
         </span>
       </div>
-      <div className="grid min-w-0 gap-2 [container-type:inline-size]">
+      <div className="grid min-w-0 gap-1.5 [container-type:inline-size]">
         <p className="m-0 flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
           <a href={href} onClick={e => { e.preventDefault(); onOpen(); }} className={cx("text-base font-semibold text-app-text no-underline hover:underline hover:underline-offset-[3px]", ring)}>{title}</a>
           <span className="rounded-sm border border-app-border-strong px-1.5 text-xs text-app-text-secondary">{system}</span>

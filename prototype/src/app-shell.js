@@ -77,11 +77,11 @@ function shell(active, top, body, { flush = false } = {}) {
 const phead = (title, sub, actions = "") => `<div class="phead"><div class="phead-row"><h1 class="ph-t">${title}</h1>${actions ? `<div class="ph-a">${actions}</div>` : ""}</div>${sub ? `<p>${sub}</p>` : ""}</div>`;
 
 /* System filter: one searchable combobox instead of a 24-chip row (UX-044). Same filter, shared across pages. */
-function sysFilter() {
+function sysFilter(extra = "") {
   const cur = S.sys ? sysById[S.sys].name : null;
   return `<div class="filters">
     <div class="combo sysf" id="sysCombo"><button class="chipbtn ${cur ? "on" : ""} combo-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" data-val="${cur ? esc(cur) : "All systems"}">${ic("box")}<span>${cur ? `System: <b>${esc(cur)}</b>` : "All systems"}</span>${ic("chevron-down")}</button></div>
-    ${cur ? `<button class="btn btn-ghost btn-icon btn-sm" type="button" id="editSys" aria-label="Edit ${esc(cur)}" data-tip="Edit ${esc(cur)}">${ic("pencil")}</button><button class="btn btn-ghost btn-sm" type="button" id="clearSys">Show all systems</button>` : ""}
+    ${cur ? `<button class="btn btn-ghost btn-icon btn-sm" type="button" id="editSys" aria-label="Edit ${esc(cur)}" data-tip="Edit ${esc(cur)}">${ic("pencil")}</button><button class="btn btn-ghost btn-sm" type="button" id="clearSys">Show all systems</button>` : ""}${extra}
     <button class="btn btn-ghost btn-sm" type="button" id="newSys" style="margin-left:auto">${ic("plus")}New System</button>
   </div>`;
 }

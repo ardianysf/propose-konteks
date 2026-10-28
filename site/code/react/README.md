@@ -73,7 +73,7 @@ Colours come from the preset's `app-*` names (filled by `tokens.live-map.css`). 
 ```
 
 ```tsx
-<QueueFilter value={who} onChange={setWho} note="Most recent movement first"
+<QueueFilter value={who} onChange={setWho}
   options={[{ key: "all", label: "All", count: 8 }, { key: "mine", label: "Needs you", count: 2 }]} />
 <Queue>
   <QueueRow mover={{ name: "Ardian Yusuf", initials: "AY", label: "Your move", you: true }} wait="7h 11m"

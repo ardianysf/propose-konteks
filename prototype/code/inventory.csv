@@ -50,7 +50,7 @@ Changes drawer: files and diff,"Breakdown, session",c-diff,app,covered,,session
 "Composer: Attach file, Create text attachment, voice, Send",Session,c-chat c-attach,app,covered,,session
 "System map: nodes, zoom in/out/reset, Start a session","Session, Edit System",c-map,app,covered,,session
 Session files popover,Session,c-empty,app,covered,,session
-"Feed: “X started Y” and the state changes from Updates, as a timeline with React, Comment, N updates, the action you can take, Load more; rail: Moving now, Waiting on you, Systems with no initiative",Activities,c-pager c-thread,app,covered,,activities
+"Feed: “X started Y” and the state changes from Updates, as a timeline with React, Comment, N updates, the action you can take, Load more; rail: Waiting on you, Systems with no initiative",Activities,c-pager c-thread,app,covered,,activities
 Empty state “Nothing is open”,Issues,c-empty,app,covered,,issues
 "Empty state “Nothing here yet”, release candidates",Releases,c-empty c-cards,app,covered,,releases
 People ranked with points; agents and models,Leaders,c-table,app,covered,,leaders

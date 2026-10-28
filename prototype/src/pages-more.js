@@ -108,7 +108,8 @@ function systemMap(name = "Rentify") {
 /* Activities: a timeline of what people did, built to make the next move obvious. Every entry is a person;
    an agent's answer to that person sits inside the card as a reply.
    Feed = cards on a rail, newest first, the same initiative's earlier events that day folded into its card.
-   Rail = Moving now (live work), Waiting on you (existing actions), Start something (Systems with nothing in progress). */
+   Rail = Waiting on you (existing actions), Start something (Systems with nothing in progress). Live work is marked
+   in the feed itself (the Live chip), so the rail does not repeat it. */
 const actDay = m => { const t = new Date(NOW - m * 60000), today = new Date(NOW); today.setHours(0, 0, 0, 0);
   const diff = Math.round((today - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 864e5);
   return diff === 0 ? "Today" : diff === 1 ? "Yesterday" : t.toLocaleDateString("en-GB", { weekday: "long" }); };
@@ -118,7 +119,7 @@ const actWho = p => PEOPLE[p].name;
 const actAv = p => av(p);
 function actBody(e, i) {
   /* The request as its author wrote it (the first note), without the title it repeats. */
-  if (e.kind === "started") { const req = THREADS[i.id]?.[0]?.text || REQUESTS[i.id]; return req ? `<div class="tl-quoted"><p class="tl-text">${esc(req)}</p></div>` : ""; }
+  if (e.kind === "started") { const req = THREADS[i.id]?.[0]?.text || REQUESTS[i.id]; return req ? `<p class="tl-text tl-quoted">${esc(req)}</p>` : ""; }
   if (e.kind === "stopped") return `<p class="tl-text">${esc(i.detail)}</p>`;
   return "";
 }
@@ -133,7 +134,7 @@ function actReply(e, i) {
 function actCard({ e, earlier }) { const i = iniById[e.ini], live = e.reply?.kind === "delivering" && e.reply.m < 60, cta = actsNow(i) && e === ACTIVITY.find(x => x.ini === e.ini);
     const when = new Date(NOW - e.m * 60000);
     return `<li class="tl-item ${live ? "live" : ""}"><span class="tl-node">${actAv(e.p)}</span><article class="tl-card" aria-label="${esc(actWho(e.p))} ${esc(ACT_VERB[e.kind](e))} ${esc(i.title)}">
-      <header class="tl-h"><p class="tl-t"><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e)} <a href="#initiative/activities" data-ini="${i.id}">${esc(i.title)}</a></p>${live ? `<span class="tl-live"><span class="dot"></span>Live</span>` : ""}${tlTime(e.m)}</header>
+      <header class="tl-h"><span class="tl-av-m" aria-hidden="true">${actAv(e.p)}</span><p class="tl-t"><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e)} <a href="#initiative/activities" data-ini="${i.id}">${esc(i.title)}</a></p>${live ? `<span class="tl-live"><span class="dot"></span>Live</span>` : ""}${tlTime(e.m)}</header>
       <div class="tl-meta">${sysTag(i.sys)}${st("muted", i.stage)}<a href="#initiative/activities" data-ini="${i.id}" class="tl-upd">${i.updates} updates</a></div>
       ${actBody(e, i)}${actReply(e, i)}
       ${earlier.length ? `<details class="tl-thread"><summary>${ic("chevron-right")}${earlier.length} earlier ${e.m < 1440 ? "today" : "that day"}</summary><ol>${earlier.map(x => `<li>${actAv(x.p)}<span><b>${actWho(x.p)}</b> ${x.kind === "started" ? "started it" : ACT_VERB[x.kind](x).replace(/ (in|for)$/, "")}</span>${tlTime(x.m)}</li>`).join("")}</ol></details>` : ""}
@@ -151,12 +152,9 @@ function pageActivities() {
     : `<li class="tl-empty"><h3>Nothing moved in ${esc(sysById[S.sys].name)} yet</h3><p>Start an initiative and the planning agent picks it up.</p><button class="btn btn-primary btn-sm" type="button" data-start="${S.sys}">${ic("plus")}New initiative</button></li>`;
   const cardCount = days.reduce((n, g) => n + g.cards.length, 0);
   const cardTotal = new Set(ACTIVITY.filter(e => !S.sys || iniById[e.ini].sys === S.sys).map(e => actDay(e.m) + e.ini)).size;
-  const moving = ACTIVITY.filter(e => e.m < 180 && ["started", "approved", "quote"].includes(e.kind) && (!S.sys || iniById[e.ini].sys === S.sys)).filter((e, n, a) => a.findIndex(x => x.ini === e.ini) === n);
   const waiting = INITIATIVES.filter(actsNow);
   const quiet = SYSTEMS.filter(s => !INITIATIVES.some(i => i.sys === s.id));
   const rail = `<aside class="act-rail" aria-label="Around you">
-    <section class="rail-now"><h3><span class="dot"></span>Moving now<span class="count">${moving.length}</span></h3>
-      ${moving.length ? `<ul class="now-list">${moving.map(e => { const i = iniById[e.ini]; return `<li class="${e.reply?.kind === "delivering" ? "live" : ""}"><a href="#initiative/activities" data-ini="${i.id}">${actAv(e.p)}<span><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e).replace(/ (in|for)$/, "")}<small>${esc(i.title)} · ${sysById[i.sys].name}</small></span>${tlTime(e.m)}</a></li>`; }).join("")}</ul>` : `<p class="hint">Nothing in the last 3 hours.</p>`}</section>
     <div class="rail-rest">
     <section class="rail-wait"><h3>Waiting on you<span class="count hot">${waiting.length}</span></h3>
       ${waiting.length ? `<ul class="wait-list">${waiting.map(i => `<li><span><b>${esc(i.title)}</b><small>${esc(i.cause)}</small></span><a class="btn btn-sm" href="#initiative/activities" data-ini="${i.id}">${esc(i.action)}</a></li>`).join("")}</ul>` : `<p class="hint">Nothing needs you right now.</p>`}</section>
@@ -165,7 +163,7 @@ function pageActivities() {
       <button class="btn btn-primary btn-sm" type="button" data-start="">${ic("plus")}New initiative</button></section>
     </div></aside>
     <button class="start-sticker" type="button" id="startSticker" aria-haspopup="dialog" aria-expanded="false">${ic("plus")}<span>Start something</span>${quiet.length ? `<span class="ss-n" title="${quiet.length} Systems with nothing in progress" aria-label="${quiet.length} Systems with nothing in progress">${quiet.length}</span>` : ""}</button>`;
-  const body = `<div class="pagehead">${phead("Activities", "What your team is moving across your Systems.")}${sysFilter()}</div>
+  const body = `<div class="pagehead framed">${phead("Activities", "What your team is moving across your Systems.")}${sysFilter()}</div>
     <div class="act"><div class="act-feed"><ol class="tl" role="feed" aria-label="Activities">${feed}</ol>
       ${days.length ? `<div class="pager list-pager">${S.actMore ? `<span>You're all caught up · ${cardCount} cards</span>` : `<button class="btn btn-sm" id="moreAct">Load more</button><span>Showing ${cardCount} of ${cardTotal}</span>`}</div>` : ""}</div>${rail}</div>`;
   return shell("activities", "", body, { flush: true });
