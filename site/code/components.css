@@ -1421,7 +1421,7 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 @media (max-width:560px){.cx-meta{flex-wrap:wrap;row-gap:4px}.cx-meta>.hint{text-align:left}}
 /* Agents on a runtime as compact tiles: the vendor's mark with a status badge (icon + colour), the selected one named below. */
 .harnsel.tiles{gap:8px}
-.htile{position:relative;display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid var(--line-strong);border-radius:var(--r10);background:var(--surface);cursor:pointer;transition:border-color .15s,background-color .15s,box-shadow .15s}
+.harnsel .htile{position:relative;display:grid;place-items:center;width:44px;height:44px;padding:0;border:1px solid var(--line-strong);border-radius:var(--r10);background:var(--surface);cursor:pointer;transition:border-color .15s,background-color .15s,box-shadow .15s}
 .htile:hover{border-color:var(--ink-3);background:var(--sunken)}
 .htile[aria-pressed="true"]{border-color:var(--accent-strong);background:var(--accent-soft);box-shadow:0 0 0 3px var(--focus)}
 .htile .hm-img{width:22px;height:22px;object-fit:contain}
@@ -1434,5 +1434,5 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .hsel b{font-weight:600}
 [data-comment][aria-expanded="true"],[data-cmt][aria-expanded="true"]{background:var(--press);color:var(--ink)}
 /* Official agent marks: square, drawn in currentColor so they follow light and dark. */
-.htile .hm-svg{width:26px;height:26px;color:var(--ink-2)}
+.htile .hm-svg{width:28px;height:28px;color:var(--ink-2)}
 .htile:hover .hm-svg,.htile[aria-pressed="true"] .hm-svg{color:var(--ink)}
