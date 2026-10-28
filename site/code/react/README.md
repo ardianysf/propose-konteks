@@ -12,7 +12,7 @@ The interactive components of the redesign as React components styled with Tailw
 | `Composer` | `Composer.tsx` | notes and the agent session; "/" picker for skills and tools, picks as chips, ⌘↵ to send, compact one-row form |
 | `Avatar` | `Avatar.tsx` | initials on Mist Green, or the Konteks mark for the agent; accent ring for "your move" |
 | `Reactions` | `Reactions.tsx` | reaction chips you toggle and a horizontal picker (one row, ←/→, Escape); picking one that exists adds you to it |
-| `FlowTrack` | `FlowTrack.tsx` | Plan · Breakdown · Estimate · Delivery · Receipt, current step in the row's tone, ticket bar on a delivery; names collapse to the current step when its container is under 600px |
+| `FlowTrack` | `FlowTrack.tsx` | Plan · Breakdown · Estimate · Delivery · Receipt, only the current step named (in the row's tone), the others named on hover, ticket bar on a delivery; packs to the left when its container is under 600px |
 | `Queue`, `QueueFilter`, `QueueRow` | `Queue.tsx` | Work In Progress as a work queue: whose move and how long, title, System, N new, cause, flow track, the one action or a gate; whose move is a filter over one list, newest movement first |
 | `ActivityFeed`, `ActivityDay`, `ActivityCard`, `ActivityQuote`, `AgentReply`, `TicketBar` | `Activity.tsx` | Activities as a feed of what people did; Konteks never appears as an entry, its answer is an `AgentReply` inside the caller's card |
 
