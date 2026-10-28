@@ -14,7 +14,8 @@ Instructions for a coding agent (Claude Code, Codex, Cursor) working in the live
 4. `components.scoped.css`: the components, scoped under `.kx`. Put `class="kx"` on a migrated page root **and** on the portal host (drawers, dialogs, menus, toasts).
 5. `inventory.csv`: every live element → component → audit finding → demo screen in the prototype. Use it to find what to change on a screen and what "done" looks like.
    The findings themselves are in `docs/konteks-audit-ui-ux.pdf` (or `docs/audit-ui-ux.md`); their status and acceptance criteria are in `AUDIT-STATUS.md`.
-6. `prototype/`: the reference rendering. Open `prototype/index.html#<route>` to see the target for any screen.
+6. `react/`: React + Tailwind versions of Button, Field/Input/Textarea, Combobox, Menu, Drawer/Modal/Dialog and Composer. Use them instead of re-deriving these from the CSS; they already implement the overlay and keyboard rules below.
+7. `prototype/`: the reference rendering. Open `prototype/index.html#<route>` to see the target for any screen.
 
 ## Work order (each step ships on its own)
 

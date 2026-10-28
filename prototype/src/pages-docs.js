@@ -168,17 +168,33 @@ function cssFor(html) {
     } }
   return rules.join("\n").replace(/; /g, ";\n  ").replace(/\{ /g, "{\n  ").replace(/ \}/g, "\n}");
 }
+/* Behaviour behind a specimen: the prototype's own functions (read live, so they match what runs) and the
+   React + Tailwind version from the package, for the components that have one. */
+const SPEC_JS = {
+  "c-combo": ["comboBind"], "c-chat": ["composerHtml", "bindComposer"], "c-thread": ["composerHtml", "bindComposer"],
+  "c-overlay": ["openLayer", "closeOverlay", "overlayKey", "drawer", "modal", "modalStep", "dialog", "menu", "popover"],
+  "c-toast": ["toast"], "c-copy": ["copyText", "bindCopy"], "c-shell": ["bindShell"],
+};
+const SPEC_REACT = {
+  "c-btn": ["Button.tsx"], "c-input": ["Field.tsx", "Input.tsx"], "c-combo": ["Combobox.tsx"], "c-nav": ["Combobox.tsx"],
+  "c-overlay": ["Overlay.tsx", "Menu.tsx"], "c-chat": ["Composer.tsx"], "c-thread": ["Composer.tsx"],
+};
+const jsFor = id => (SPEC_JS[id] || []).map(n => typeof window[n] === "function" ? window[n].toString() : "").filter(Boolean).join("\n\n");
+const reactFor = id => (SPEC_REACT[id] || []).filter(f => typeof REACT_FILES !== "undefined" && REACT_FILES[f]).map(f => `// ${f}\n${REACT_FILES[f]}`).join("\n\n");
 function bindCodeViews() {
   $$("[data-code]").forEach(b => b.onclick = () => {
     const id = b.dataset.code, box = document.getElementById("code-" + id), open = box.hidden;
     box.hidden = !open; b.setAttribute("aria-expanded", open);
     if (open && !box.dataset.ready) {
-      const html = prettyHtml(SPEC_SRC[id] || ""), css = cssFor(SPEC_SRC[id] || "");
-      box.innerHTML = `<div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-cv="html">HTML</button><button class="tab" role="tab" aria-selected="false" data-cv="css">CSS · ${css.split("\n}").length - 1} rules</button></div>
-        <div class="code"><div class="code-h"><span data-cvl>Markup · icons are Lucide <code>&lt;i data-lucide&gt;</code></span><button class="btn btn-ghost btn-sm" type="button" data-cvcopy>${ic("copy")}Copy</button></div><pre data-cvpre>${esc(html)}</pre></div>`;
+      const html = prettyHtml(SPEC_SRC[id] || ""), css = cssFor(SPEC_SRC[id] || ""), js = jsFor(id), rx = reactFor(id);
+      const views = [["html", "HTML", html, "Markup · icons are Lucide <code>&lt;i data-lucide&gt;</code>"], ["css", `CSS · ${css.split("\n}").length - 1} rules`, css, "Rules from components.css that style these classes, including responsive ones"]];
+      if (js) views.push(["js", "JS", js, "Behaviour in the prototype, read from the running functions (vanilla JS)"]);
+      if (rx) views.push(["react", "React", rx, `React + Tailwind from the package: <code>code/react/${(SPEC_REACT[id] || []).join("</code>, <code>")}</code>`]);
+      box.innerHTML = `<div class="tabs" role="tablist">${views.map(([k, l], i) => `<button class="tab" role="tab" aria-selected="${i === 0}" data-cv="${k}">${l}</button>`).join("")}</div>
+        <div class="code"><div class="code-h"><span data-cvl>${views[0][3]}</span><button class="btn btn-ghost btn-sm" type="button" data-cvcopy>${ic("copy")}Copy</button></div><pre data-cvpre>${esc(html)}</pre></div>`;
       box.dataset.ready = 1; drawIcons();
       const pre = box.querySelector("[data-cvpre]");
-      $$("[data-cv]", box).forEach(t => t.onclick = () => { $$("[data-cv]", box).forEach(x => x.setAttribute("aria-selected", x === t)); const isCss = t.dataset.cv === "css"; pre.textContent = isCss ? css : html; box.querySelector("[data-cvl]").innerHTML = isCss ? "Rules from components.css that style these classes, including responsive ones" : "Markup · icons are Lucide <code>&lt;i data-lucide&gt;</code>"; });
+      $$("[data-cv]", box).forEach(t => t.onclick = () => { $$("[data-cv]", box).forEach(x => x.setAttribute("aria-selected", x === t)); const v = views.find(x => x[0] === t.dataset.cv); pre.textContent = v[2]; box.querySelector("[data-cvl]").innerHTML = v[3]; });
       box.querySelector("[data-cvcopy]").onclick = () => copyText(pre.textContent, pre);
     }
   });

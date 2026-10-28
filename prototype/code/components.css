@@ -40,7 +40,7 @@ svg.lucide{width:16px;height:16px;flex:none;vertical-align:-3px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .btn .cost{font-family:var(--mono);font-size:var(--t12);opacity:.85;padding-left:6px;border-left:1px solid var(--edge-current)}
 
-.field{display:grid;gap:6px}
+.field{display:grid;gap:6px;align-content:start}
 .field>label,.flabel{font-size:var(--t13);font-weight:500}
 .hint{font-size:var(--t12);color:var(--ink-3)}
 .err{font-size:var(--t12);color:var(--danger);display:flex;gap:6px;align-items:center}

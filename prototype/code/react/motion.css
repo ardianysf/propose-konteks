@@ -1,0 +1,14 @@
+/* Keyframes for the Konteks React components. Load once, next to tokens.css and tokens.live-map.css.
+   Motion only conveys a change of state; all of it stops under prefers-reduced-motion. */
+@keyframes kx-fade { from { opacity: 0 } }
+@keyframes kx-fade-out { to { opacity: 0 } }
+@keyframes kx-drawer-in { from { translate: 24px 0; opacity: .4 } }
+@keyframes kx-drawer-out { to { translate: 16px 0; opacity: 0 } }
+@keyframes kx-pop-in { from { opacity: 0; scale: .98 } }
+@keyframes kx-pop-out { to { opacity: 0; scale: .98 } }
+@keyframes kx-list-down { from { opacity: 0; translate: 0 -4px } }
+@keyframes kx-list-up { from { opacity: 0; translate: 0 4px } }
+@keyframes kx-pick-in { from { opacity: 0; scale: .92 } }
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-[kx-"] { animation: none !important; }
+}

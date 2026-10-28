@@ -26,6 +26,15 @@ const PROTO_LIST = [
   ["prototype/src/", "Sumber prototipe: token, komponen, dan setiap halaman sebagai JS dan CSS biasa, tanpa framework."],
   ["prototype/build.sh, tools/", "Menyusun ulang index.html dan paket kode dari src/, dan menolak warna mentah di luar tokens.css."],
 ];
+const REACT_LIST = [
+  ["Button.tsx", "Default, primary, ghost, danger; tiga ukuran; ikon saja; loading; jumlah biaya di dalam tombol."],
+  ["Field.tsx · Input.tsx", "Label, petunjuk, error yang menyebut cara memperbaiki; id dan aria tersambung; textarea yang membesar."],
+  ["Combobox.tsx", "Daftar yang bisa dicari, berkelompok, dengan petunjuk di kanan; tidak pernah terpotong, membuka ke atas bila perlu."],
+  ["Menu.tsx", "Pilih atau navigasi; keyboard lengkap, fokus kembali ke pemicu."],
+  ["Overlay.tsx", "Drawer, Modal, Dialog: Escape menutup lapisan teratas saja, fokus terkunci dan kembali."],
+  ["Composer.tsx", "Catatan dan sesi agen: picker \"/\" untuk skill dan tool, chip, ⌘↵ kirim, bentuk ringkas satu baris."],
+  ["README.md", "Cara memasang di aplikasi live (preset Tailwind, token, motion.css) dan contoh pemakaian."],
+];
 const FULL_ZIP = "downloads/konteks-ui-lengkap.zip";
 /* Inside a Claude artifact, files go through the downloads capability; on an ordinary website (e.g. Vercel)
    the browser saves them directly from a blob link. */
@@ -40,6 +49,7 @@ async function saveZip(btn) {
     if (!window.JSZip) await new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"; sc.onload = ok; sc.onerror = no; document.head.append(sc); });
     const zip = new JSZip(), dir = zip.folder("konteks-ui");
     for (const f of ZIP_FILES) dir.file(f, CODE_FILES[f] || await (await fetch("code/" + f)).text());
+    if (typeof REACT_FILES !== "undefined") { const rd = dir.folder("react"); Object.entries(REACT_FILES).forEach(([n, t]) => rd.file(n, t)); }
     await dl.save({ filename: "konteks-ui.zip", data: await zip.generateAsync({ type: "blob" }) });
   } catch (e) { if (e?.code !== "declined") toast(e?.code === "rate_limited" ? "Satu unduhan masih menunggu konfirmasi" : "Zip tidak bisa disiapkan", "err"); }
   btn.disabled = false; btn.innerHTML = label;
@@ -79,6 +89,7 @@ function pageCode() {
     <section class="sec"><div class="sec-head"><h2>Isi paket</h2><p>Paket lengkap berisi kode, dokumen acuan, dan sumber prototipe, tersusun seperti yang dirujuk AGENTS.md, jadi bisa langsung disalin ke samping repo aplikasi. Inventaris berisi ${INVENTORY.length} baris.</p></div>
       <div class="cta-row" style="margin-top:0"><button class="btn btn-primary" type="button" id="dlFull">${ic("download")}Unduh paket lengkap (.zip)</button><button class="btn" type="button" id="dlZip">${ic("package")}Kode saja (.zip)</button></div>
       <div class="pkg-g"><h3>Kode</h3><div class="card res">${CODE_LIST.map(([n, d, k]) => `<div class="res-item">${ic(k === "js" ? "file-code-2" : k === "csv" ? "sheet" : k === "md" ? "file-text" : "file-code", "os")}<div><div class="ttl"><span class="mono">${n}</span></div><div class="meta"><span>${d}</span></div></div>${k === "md" || k === "csv" || k === "dl" ? `<button class="btn btn-sm" type="button" data-dl="code/${n}" data-fn="${n}">${ic("download")}Unduh</button>` : `<button class="btn btn-sm" type="button" data-view="${n}">${ic("eye")}Lihat</button>`}</div>`).join("")}</div></div>
+      <div class="pkg-g"><h3>Komponen React + Tailwind</h3><p class="hint">Untuk aplikasi live. Tampilan dan perilakunya sama dengan katalog; tab <b>React</b> di setiap komponen menampilkan sumbernya. Ada di kedua zip, di folder <code>react/</code>.</p><div class="card res">${REACT_LIST.map(([n, d]) => `<div class="res-item">${ic("atom", "os")}<div><div class="ttl"><span class="mono">react/${n}</span></div><div class="meta"><span>${d}</span></div></div><button class="btn btn-sm" type="button" data-rx="${n.split(" · ").join(",")}">${ic("download")}Unduh</button></div>`).join("")}</div></div>
       <div class="pkg-g"><h3>Dokumen acuan</h3><div class="card res">${DOC_LIST.map(([n, d, p, k]) => `<div class="res-item">${ic(k === "pdf" ? "book-open" : "file-text", "os")}<div><div class="ttl"><span class="mono">${n}</span></div><div class="meta"><span>${d}</span></div></div>${k === "pdf" ? `<a class="btn btn-sm" href="${p}" target="_blank" rel="noopener">${ic("external-link")}Baca</a>` : `<button class="btn btn-sm" type="button" data-dl="${p}" data-fn="${n.split("/").pop()}">${ic("download")}Unduh</button>`}</div>`).join("")}</div></div>
       <div class="pkg-g"><h3>Prototipe</h3><div class="card res">${PROTO_LIST.map(([n, d]) => `<div class="res-item">${ic("folder-code", "os")}<div><div class="ttl"><span class="mono">${n}</span></div><div class="meta"><span>${d}</span></div></div><span class="hint">Di paket lengkap</span></div>`).join("")}</div></div></section>
     <section class="sec"><div class="sec-head"><h2>Langkah adopsi</h2></div>
@@ -104,5 +115,9 @@ function bindCode() {
   $$("[data-dl]").forEach(b => b.onclick = () => saveFile(b.dataset.dl, b.dataset.fn));
   $("#dlZip")?.addEventListener("click", e => saveZip(e.currentTarget));
   $("#dlFull")?.addEventListener("click", e => saveFullZip(e.currentTarget));
+  $$("[data-rx]").forEach(b => b.onclick = async () => {
+    const dl = await saver().catch(() => null); if (!dl) return toast("Unduhan tidak tersedia di tampilan ini", "err");
+    for (const n of b.dataset.rx.split(",")) { try { await dl.save({ filename: n, data: new Blob([REACT_FILES[n]], { type: "text/plain" }) }); } catch (e) { if (e?.code !== "declined") toast("Berkas tidak bisa disiapkan", "err"); } }
+  });
   $("#cfCopy")?.addEventListener("click", () => copyText($("#cfPre").textContent, $("#cfPre")));
 }

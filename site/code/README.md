@@ -17,6 +17,7 @@ Paket lengkap `konteks-ui-lengkap.zip` (tombol utama di halaman Kode) berisi sem
 | `components.css` | Stylesheet yang sama tanpa batasan, seperti yang dipakai prototipe. Hanya untuk dibaca; jangan dimuat di Backstage. |
 | `inventory.csv` | Setiap elemen aplikasi dan temuan audit, dengan komponen dan layar demonya. |
 | `AGENTS.md` | Aturan untuk coding agent (Claude Code, Codex, Cursor) yang menerapkan redesign ini di repo live: sumber acuan, urutan kerja, aturan yang mudah dilanggar, dan definisi selesai per PR. |
+| `react/` | Komponen React + Tailwind untuk aplikasi live: Button, Field/Input/Textarea, Combobox, Menu, Drawer/Modal/Dialog, Composer. Cara pasang di `react/README.md`. |
 | `.stylelintrc.json` | Lint warna: hex, rgb/hsl, dan color-mix hanya boleh ada di `tokens.css`. |
 | `DESIGN.md` | Spesifikasi design system: token, tipe, komponen, pola overlay, gerak, suara, dan keputusan, beserta alasannya. |
 | `PRODUCT.md` | Pengguna, tujuan produk, dan prinsip yang dipakai untuk keputusan desain. |

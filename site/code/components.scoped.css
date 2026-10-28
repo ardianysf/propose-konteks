@@ -38,7 +38,7 @@
 .kx .btn .spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:kx-spin .7s linear infinite}
 @keyframes kx-spin{to{transform:rotate(360deg)}}
 .kx .btn .cost{font-family:var(--mono);font-size:var(--t12);opacity:.85;padding-left:6px;border-left:1px solid var(--edge-current)}
-.kx .field{display:grid;gap:6px}
+.kx .field{display:grid;gap:6px;align-content:start}
 .kx .field>label,.kx .flabel{font-size:var(--t13);font-weight:500}
 .kx .hint{font-size:var(--t12);color:var(--ink-3)}
 .kx .err{font-size:var(--t12);color:var(--danger);display:flex;gap:6px;align-items:center}

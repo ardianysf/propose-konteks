@@ -5,8 +5,8 @@ R = P.parent                                                # repo root
 out = pathlib.Path(sys.argv[1])
 site_index = R / "site" / "index.html"
 entries = []
-for f in sorted((P / "code").iterdir()):
-    if f.is_file(): entries.append((f, f.name))
+for f in sorted((P / "code").rglob("*")):
+    if f.is_file(): entries.append((f, str(f.relative_to(P / "code"))))
 entries += [(R / "DESIGN.md", "DESIGN.md"), (R / "PRODUCT.md", "PRODUCT.md"), (R / "AUDIT-STATUS.md", "AUDIT-STATUS.md"),
             (R / "docs" / "LIVE_PARITY.md", "parity/LIVE_PARITY.md"),
             (R / "docs" / "konteks-audit-ui-ux.pdf", "docs/konteks-audit-ui-ux.pdf"), (R / "docs" / "audit-ui-ux.md", "docs/audit-ui-ux.md"),

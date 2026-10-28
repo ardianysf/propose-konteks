@@ -11,6 +11,7 @@ sh build.sh
 mkdir -p ../site/code ../site/docs ../site/downloads
 cp code/README.md code/AGENTS.md code/components.css code/components.scoped.css code/inventory.csv code/tailwind.preset.js code/tokens.css code/tokens.live-map.css code/.stylelintrc.json ../site/code/
 cp ../DESIGN.md ../PRODUCT.md ../AUDIT-STATUS.md ../docs/LIVE_PARITY.md ../docs/overlays.md ../docs/audit-ui-ux.md ../docs/konteks-audit-ui-ux.pdf ../site/docs/
+mkdir -p ../site/code/react && cp code/react/* ../site/code/react/
 cp code/AGENTS.md ../AGENTS.md
 python3 tools/make_full_zip.py ../site/downloads/konteks-ui-lengkap.zip
 echo "site/ updated"

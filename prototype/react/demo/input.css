@@ -1,0 +1,4 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body { background: rgb(var(--color-app-bg)); color: rgb(var(--color-app-text)); font-family: Inter, system-ui, sans-serif; font-size: 13px; margin: 0; }
