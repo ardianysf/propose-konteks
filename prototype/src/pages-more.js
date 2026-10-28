@@ -147,6 +147,9 @@ function actCard({ e, earlier }) { const i = iniById[e.ini], live = e.reply?.kin
         ${cta ? `<a class="btn btn-primary btn-sm" href="#initiative/activities" data-ini="${i.id}">${esc(i.action)}${ic("arrow-right")}</a>` : e.reply?.kind === "estimate" && !S.approved ? `<span class="hint">${ic("lock")}Maya Lestari approves</span>` : ""}</footer>
       <div class="tl-band" hidden><ol class="tl-cmts" hidden>${(e.cm || []).map(actCmt).join("")}</ol></div>
     </article></li>`; }
+/* Start something: each idle System is one row and one button. The name reads as a name (box icon, ink, no frame);
+   the action reads as an action ("Start" and an arrow in accent ink), so the two no longer look alike. */
+const quietRows = quiet => quiet.map(s => `<li><button class="qs-row" type="button" data-start="${s.id}" aria-label="Start an initiative in ${esc(s.name)}"><span class="qs-sys">${ic("box")}${esc(s.name)}</span><span class="qs-go">Start${ic("arrow-right")}</span></button></li>`).join("");
 function pageActivities() {
   const evs = ACTIVITY.filter(e => (S.actMore || !e.more) && (!S.sys || iniById[e.ini].sys === S.sys)).sort((a, b) => a.m - b.m);
   /* Fold: per day, an initiative appears once; its older events that day ride inside the newest one. */
@@ -165,7 +168,7 @@ function pageActivities() {
     <section class="rail-wait"><h3>Waiting on you<span class="count hot">${waiting.length}</span></h3>
       ${waiting.length ? `<ul class="wait-list">${waiting.map(i => `<li><span><b>${esc(i.title)}</b><small>${esc(i.cause)}</small></span><a class="btn btn-sm" href="#initiative/activities" data-ini="${i.id}">${esc(i.action)}</a></li>`).join("")}</ul>` : `<p class="hint">Nothing needs you right now.</p>`}</section>
     <section class="rail-start"><h3>Start something</h3><p class="hint">Systems with no initiative yet. The planning agent starts from a few sentences.</p>
-      <ul class="quiet-list">${quiet.map(s => `<li><span>${sysTag(s.id)}</span><button class="btn btn-sm" type="button" data-start="${s.id}">${ic("plus")}Start</button></li>`).join("")}</ul>
+      <ul class="quiet-list">${quietRows(quiet)}</ul>
       <button class="btn btn-primary btn-sm" type="button" data-start="">${ic("plus")}New initiative</button></section>
     </div></aside>
     <button class="start-sticker" type="button" id="startSticker" aria-haspopup="dialog" aria-expanded="false">${ic("plus")}<span>Start something</span>${quiet.length ? `<span class="ss-n" title="${quiet.length} Systems with nothing in progress" aria-label="${quiet.length} Systems with nothing in progress">${quiet.length}</span>` : ""}</button>`;
@@ -185,7 +188,7 @@ function bindActivities() {
     if ($(".floatpop")) { $$(".floatpop").forEach(p => p.remove()); sticker.setAttribute("aria-expanded", "false"); return; }
     const quiet = SYSTEMS.filter(s => !INITIATIVES.some(i => i.sys === s.id));
     const pp = popover(sticker, "Start something", `<div class="ss-pop"><b>Start something</b><p class="hint">Systems with no initiative yet. The planning agent starts from a few sentences.</p>
-      <ul class="quiet-list">${quiet.map(s => `<li><span>${sysTag(s.id)}</span><button class="btn btn-sm" type="button" data-start="${s.id}">${ic("plus")}Start</button></li>`).join("")}</ul>
+      <ul class="quiet-list">${quietRows(quiet)}</ul>
       <button class="btn btn-primary btn-sm" type="button" data-start="">${ic("plus")}New initiative</button></div>`);
     drawIcons(); sticker.setAttribute("aria-expanded", "true");
     $$("[data-start]", pp.el).forEach(b => b.onclick = () => { pp.close(false); sticker.setAttribute("aria-expanded", "false"); newInitiative(b.dataset.start || S.sys); });
@@ -209,7 +212,7 @@ function bindActivities() {
     const i = iniById[card.dataset.ini];
     band(card).hidden = false;
     band(card).insertAdjacentHTML("beforeend", `<div class="tl-cmt"><span class="av">AY</span><div class="tl-cmt-b"><div class="compose"><textarea rows="1" placeholder="Add a comment…" aria-label="Comment on this card" aria-describedby="cmtNote-${i.id}"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div>
-      <p class="hint" id="cmtNote-${i.id}">Stays on this card. To hand work to Konteks, comment on a note in <a href="#initiative/activities" data-ini="${i.id}">${esc(i.title)}</a> with @konteks.</p></div></div>`);
+      <p class="hint tl-cmt-note" id="cmtNote-${i.id}">Stays on this card. To hand work to Konteks, use @konteks on a note in <a href="#initiative/activities" data-ini="${i.id}" title="${esc(i.title)}">the initiative</a>.</p></div></div>`);
     const box = card.querySelector(".tl-cmt"), ta = box.querySelector("textarea");
     box.querySelector("[data-ini]").onclick = () => { S.cur = i.id; };
     b.setAttribute("aria-expanded", "true"); ta.focus();

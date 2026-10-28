@@ -1590,14 +1590,28 @@
 .kx .wait-list b{display:block;font-size:var(--t13);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kx .wait-list small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:var(--t12);color:var(--ink-3)}
 .kx .wait-list li>span{min-width:0;max-width:100%}
-.kx .quiet-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
+.kx .quiet-list{list-style:none;margin:0;padding:0;display:grid}
+.kx .quiet-list li+li{border-top:1px solid var(--line)}
+.kx .qs-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:36px;margin:0;padding:0 8px;border:0;border-radius:var(--r6);background:none;font:inherit;color:var(--ink);cursor:pointer;text-align:left}
+.kx .qs-row:hover{background:var(--hover)}
+.kx .qs-sys{display:inline-flex;align-items:center;gap:8px;min-width:0;font-size:var(--t13);font-weight:500}
+.kx .qs-sys svg{width:14px;height:14px;color:var(--ink-3);flex:none}
+.kx .qs-go{display:inline-flex;align-items:center;gap:4px;font-size:var(--t12);font-weight:600;color:var(--accent-ink);white-space:nowrap}
+.kx .qs-go svg{width:14px;height:14px;transition:translate .15s var(--ease)}
+.kx .qs-row:hover .qs-go svg{translate:2px 0}
+@media (min-width:561px){
+.kx .tl-cmt-note{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
 .kx .act-rail section>.btn-primary{justify-self:start}
 .kx .start-sticker{display:none}
 .kx .ss-pop{display:grid;gap:10px;width:min(300px,calc(100vw - 32px))}
 .kx .ss-pop>b{font-size:var(--t13);font-weight:600}
-.kx .ss-pop .quiet-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.kx .ss-pop .quiet-list{margin:0 -8px}
 .kx .ss-pop>.btn-primary{justify-self:start}
-.kx .act-rail .rail-start{border:1px solid var(--line-accent);border-radius:var(--r10);background:var(--surface);padding:14px 14px 16px}
+.kx .act-rail .rail-start{border:1px solid var(--line-accent);border-radius:var(--r10);background:var(--surface);padding:16px;gap:0}
+.kx .rail-start h3+.hint{margin-top:4px}
+.kx .rail-start .quiet-list{margin:12px -8px 0}
+.kx .rail-start>.btn-primary{margin-top:16px}
 @media (max-width:1100px){
 .kx .act-rail .rail-start{display:none}
 .kx .start-sticker{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px 0 12px;border:1px solid var(--line-accent);border-radius:999px;background:var(--surface);color:var(--accent-ink);font-size:var(--t13);font-weight:600;box-shadow:var(--shadow-2);rotate:-2deg;cursor:pointer;transition:rotate .2s var(--ease),scale .2s var(--ease),background-color .15s}

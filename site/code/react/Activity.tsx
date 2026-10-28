@@ -126,7 +126,7 @@ export function ActivityCard({ actor, verb, initiative, time, timeTitle, system,
                     <Button variant="ghost" size="sm" onClick={close}>Cancel</Button>
                     <Button variant="primary" size="sm" onClick={post}>Comment</Button>
                   </div>
-                  <p id={noteId} className="m-0 text-xs text-app-text-tertiary">Stays on this card. To hand work to Konteks, comment on a note in the initiative with @konteks.</p>
+                  <p id={noteId} className="m-0 text-xs text-app-text-tertiary">Stays on this card. To hand work to Konteks, use @konteks on a note in the initiative.</p>
                 </div>
               </div>
             )}

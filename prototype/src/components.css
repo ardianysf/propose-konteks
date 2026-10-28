@@ -1612,16 +1612,29 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .wait-list b{display:block;font-size:var(--t13);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wait-list small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:var(--t12);color:var(--ink-3)}
 .wait-list li>span{min-width:0;max-width:100%}
-.quiet-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
+.quiet-list{list-style:none;margin:0;padding:0;display:grid}
+.quiet-list li+li{border-top:1px solid var(--line)}
+.qs-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:36px;margin:0;padding:0 8px;border:0;border-radius:var(--r6);background:none;font:inherit;color:var(--ink);cursor:pointer;text-align:left}
+.qs-row:hover{background:var(--hover)}
+.qs-sys{display:inline-flex;align-items:center;gap:8px;min-width:0;font-size:var(--t13);font-weight:500}
+.qs-sys svg{width:14px;height:14px;color:var(--ink-3);flex:none}
+.qs-go{display:inline-flex;align-items:center;gap:4px;font-size:var(--t12);font-weight:600;color:var(--accent-ink);white-space:nowrap}
+.qs-go svg{width:14px;height:14px;transition:translate .15s var(--ease)}
+.qs-row:hover .qs-go svg{translate:2px 0}
+@media (min-width:561px){.tl-cmt-note{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 .act-rail section>.btn-primary{justify-self:start}
 /* Start something on narrow screens: a small sticker that stays in view instead of a section after the feed. */
 .start-sticker{display:none}
 .ss-pop{display:grid;gap:10px;width:min(300px,calc(100vw - 32px))}
 .ss-pop>b{font-size:var(--t13);font-weight:600}
-.ss-pop .quiet-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.ss-pop .quiet-list{margin:0 -8px}
 .ss-pop>.btn-primary{justify-self:start}
 /* Start something is the page's invitation: a quiet accent border sets it apart from the lists around it. */
-.act-rail .rail-start{border:1px solid var(--line-accent);border-radius:var(--r10);background:var(--surface);padding:14px 14px 16px}
+.act-rail .rail-start{border:1px solid var(--line-accent);border-radius:var(--r10);background:var(--surface);padding:16px;gap:0}
+/* Rhythm inside the box: title 4px over its line, 12px to the list, 16px to the button. Rows bleed 8px so names align with the text. */
+.rail-start h3+.hint{margin-top:4px}
+.rail-start .quiet-list{margin:12px -8px 0}
+.rail-start>.btn-primary{margin-top:16px}
 @media (max-width:1100px){
   .act-rail .rail-start{display:none}
   .start-sticker{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px 0 12px;border:1px solid var(--line-accent);border-radius:999px;background:var(--surface);color:var(--accent-ink);font-size:var(--t13);font-weight:600;box-shadow:var(--shadow-2);rotate:-2deg;cursor:pointer;transition:rotate .2s var(--ease),scale .2s var(--ease),background-color .15s}
