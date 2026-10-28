@@ -1368,6 +1368,8 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .cx-compact .cx-bar{gap:2px}
 .cx-compact .cx-hint{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .cx-compact .cx-send{margin-left:4px}
+.cx-compact.cx-multi{grid-template-columns:minmax(0,1fr);padding:8px 8px 6px}
+.cx-compact.cx-multi .cx-send{margin-left:auto}
 @media (max-width:560px){.cx-compact{grid-template-columns:minmax(0,1fr)}.cx-compact .cx-send{margin-left:auto}}
 .sess-foot{padding-top:10px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
 .sess-foot .sess-col{gap:6px}

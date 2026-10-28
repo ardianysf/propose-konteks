@@ -48,10 +48,18 @@ export function Composer({ placeholder, cta = "Send", items, onSend, tools, onAt
   const matches = slash ? items.filter(i => (i.name + " " + i.desc).toLowerCase().includes(slash.q.toLowerCase())) : [];
   const canSend = !disabled && (text.trim().length > 0 || picks.length > 0);
 
+  /* Compact: once the message needs a second line, the tools move under the text so it gets the full width;
+     back to one row only when the field is empty again (no flip-flopping while typing). */
+  const [multi, setMulti] = React.useState(false);
   React.useLayoutEffect(() => {
     const t = ta.current; if (!t) return;
-    t.style.height = "auto"; t.style.height = Math.min(MAX, t.scrollHeight) + "px";
-  }, [text]);
+    t.style.height = "auto";
+    if (compact) {
+      if (!text) setMulti(false);
+      else if (!multi && (t.scrollHeight > 40 || text.includes("\n"))) { setMulti(true); return; }
+    }
+    t.style.height = Math.min(MAX, t.scrollHeight) + "px";
+  }, [text, multi, compact]);
 
   /* The picker sits above the composer, or below it when there is no room. */
   React.useLayoutEffect(() => {
@@ -114,7 +122,7 @@ export function Composer({ placeholder, cta = "Send", items, onSend, tools, onAt
       className={cx(
         "grid cursor-text gap-1 rounded-lg border border-app-border-input bg-app-card transition-[border-color,box-shadow] duration-150",
         "focus-within:border-app-accent-strong focus-within:shadow-[0_0_0_3px_var(--focus)]",
-        compact ? "grid-cols-[minmax(0,1fr)_auto] items-end gap-x-1.5 py-1.5 pl-2 pr-1.5 max-[560px]:grid-cols-1" : "px-2 pb-1.5 pt-2",
+        compact && !multi ? "grid-cols-[minmax(0,1fr)_auto] items-end gap-x-1.5 py-1.5 pl-2 pr-1.5 max-[560px]:grid-cols-1" : "px-2 pb-1.5 pt-2",
       )}
     >
       {above && <div className={cx("flex flex-wrap gap-1.5", compact && "col-span-full")}>{above}</div>}
@@ -152,7 +160,7 @@ export function Composer({ placeholder, cta = "Send", items, onSend, tools, onAt
         onBlur={() => setTimeout(() => { if (document.activeElement !== ta.current) setSlash(null); }, 120)}
         className={cx(
           "w-full resize-none border-0 bg-transparent text-sm leading-normal text-app-text outline-none placeholder:text-app-text-tertiary max-[860px]:text-[16px]",
-          compact ? "min-h-[28px] px-1 py-1" : "min-h-[24px] px-1.5 py-1",
+          compact && !multi ? "min-h-[28px] px-1 py-1" : "min-h-[24px] px-1.5 py-1",
         )}
         style={{ maxHeight: MAX }}
       />
@@ -166,7 +174,7 @@ export function Composer({ placeholder, cta = "Send", items, onSend, tools, onAt
           <span className="ml-0.5 rounded-sm border border-b-2 border-app-border-strong bg-app-card px-1 font-mono text-xs text-app-text-secondary">/</span>
         </Button>
         <span id={hintId} className={cx("text-xs text-app-text-tertiary", compact ? "sr-only" : "ml-auto pr-1.5 max-[860px]:hidden")}>⌘↵ to send</span>
-        <Button variant="primary" size="sm" disabled={!canSend} onClick={send} title="⌘↵ to send" className={compact ? "ml-1 max-[560px]:ml-auto" : undefined}>
+        <Button variant="primary" size="sm" disabled={!canSend} onClick={send} title="⌘↵ to send" className={compact && !multi ? "ml-1 max-[560px]:ml-auto" : compact ? "ml-auto" : undefined}>
           {cta}
         </Button>
       </div>

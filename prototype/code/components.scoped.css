@@ -1334,6 +1334,8 @@
 .kx .cx-compact .cx-bar{gap:2px}
 .kx .cx-compact .cx-hint{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .kx .cx-compact .cx-send{margin-left:4px}
+.kx .cx-compact.cx-multi{grid-template-columns:minmax(0,1fr);padding:8px 8px 6px}
+.kx .cx-compact.cx-multi .cx-send{margin-left:auto}
 @media (max-width:560px){
 .kx .cx-compact{grid-template-columns:minmax(0,1fr)}
 .kx .cx-compact .cx-send{margin-left:auto}

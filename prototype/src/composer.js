@@ -23,7 +23,17 @@ function composerHtml({ id, placeholder, cta = "Post note", attachId, lead = "",
 function bindComposer(root, { onSend }) {
   const ta = root.querySelector("textarea"), send = root.querySelector(".cx-send"), picksEl = root.querySelector(".cx-picks");
   const picks = [];
-  const grow = () => { ta.style.height = "auto"; ta.style.height = Math.min(200, ta.scrollHeight) + "px"; };
+  /* Compact composer: once the message needs a second line, the tools move under the text so the text gets the full width;
+     it returns to one row only when the field is empty again (no flip-flopping while typing). */
+  const compact = root.classList.contains("cx-compact");
+  const grow = () => {
+    ta.style.height = "auto";
+    if (compact) {
+      if (!ta.value) root.classList.remove("cx-multi");
+      else if (!root.classList.contains("cx-multi") && (ta.scrollHeight > 40 || ta.value.includes("\n"))) { root.classList.add("cx-multi"); ta.style.height = "auto"; }
+    }
+    ta.style.height = Math.min(200, ta.scrollHeight) + "px";
+  };
   const sync = () => { send.disabled = !ta.value.trim() && !picks.length; };
   const drawPicks = () => {
     picksEl.hidden = !picks.length;
