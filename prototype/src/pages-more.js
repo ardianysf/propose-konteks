@@ -202,14 +202,14 @@ function bindActivities() {
 }
 
 function pageIssues() {
-  const body = `<div class="pagehead">${phead("Issues", "What is wrong, by severity.")}${sysFilter()}</div>
+  const body = `<div class="pagehead framed">${phead("Issues", "What is wrong, by severity.")}${sysFilter()}</div>
     <div class="empty page"><div class="ic">${ic("shield-check")}</div><h3>Nothing is open</h3><p>When something breaks, whether a person reports it or a telemetry channel sends an alert, it appears here, highest severity first.</p><a class="btn btn-sm" href="#operations">${ic("radio-tower")}Set up a telemetry channel</a></div>`;
   return shell("issues", "", body, { flush: true });
 }
 
 function pageReleases() {
-  const body = `<div class="pagehead">${phead("Releases", "Ready to ship first, then what shipped.")}${sysFilter()}</div>
-    <div class="content"><div class="empty page"><div class="ic">${ic("rocket")}</div><h3>Nothing here yet</h3><p>Accepted initiatives gather into a release candidate for their System. When one is ready, it shows here first with a Ship action for people allowed to ship.</p><a class="btn btn-sm" href="#work">${ic("square-kanban")}See initiatives in progress</a></div>
+  const body = `<div class="pagehead framed">${phead("Releases", "Ready to ship first, then what shipped.")}${sysFilter()}</div>
+    <div class="content framed-body"><div class="empty page"><div class="ic">${ic("rocket")}</div><h3>Nothing here yet</h3><p>Accepted initiatives gather into a release candidate for their System. When one is ready, it shows here first with a Ship action for people allowed to ship.</p><a class="btn btn-sm" href="#work">${ic("square-kanban")}See initiatives in progress</a></div>
     <section class="sec illus"><div class="sec-title"><div><h2 class="h-sec">How a release candidate will look</h2><p id="illusNote">Illustration with sample data, so Ship is off. The release fields come from the app as they are; nothing here adds a step.</p></div></div>
     <div class="card"><div class="card-h">${ic("rocket")}<h3>Ledgerline · release candidate</h3>${st("ok", "Ready to ship")}</div>
       <div class="rc">${[["Invoice export for Ledgerline"], ["Tax line rounding fix"], ["CSV import validation"]].map(([t]) => `<div class="rc-item">${sg("Done", "done")}<span>${esc(t)}</span><span class="hint">Accepted</span></div>`).join("")}</div>
@@ -230,7 +230,7 @@ function pageLeaders() {
       <span class="lb-who">${av(l.p)}<span class="lb-name"><b>${PEOPLE[l.p].name}</b>${l.p === "ay" ? '<span class="lb-you">You</span>' : ""}<small class="lb-sub">${pl(l.s, "started", "started")} · ${pl(l.c, "contribution", "contributions")} · ${pl(l.r, "reaction", "reactions")}</small></span></span>
       <span class="lb-n num">${l.s}</span><span class="lb-n num">${l.c}</span><span class="lb-n num">${l.r}</span>
       <span class="lb-pts"><b class="num">${l.pts}</b><span class="lb-bar" aria-hidden="true"><i style="width:${Math.max(2, Math.round(l.pts / max * 100))}%"></i></span></span></li>`;
-  const body = `<div class="pagehead">${phead("Leaders", "People by involvement. Agents and models by value.")}</div><div class="content">
+  const body = `<div class="pagehead framed">${phead("Leaders", "People by involvement. Agents and models by value.")}</div><div class="content framed-body">
     <section class="sec lb"><div class="sec-title"><div><h2 class="h-sec">People</h2><p class="hint">Points = 5 for each initiative started, 2 for each contribution, 1 for each reaction.</p></div></div>
       <div class="lb-list" role="table" aria-label="People by points">
         <div class="lb-row lb-head" role="row" aria-hidden="true"><span>#</span><span>Person</span><span class="num">Started</span><span class="num">Contributions</span><span class="num">Reactions</span><span class="lb-pts"><span class="num">Points</span><span></span></span></div>
