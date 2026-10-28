@@ -27,7 +27,7 @@ function rowHtml(i) {
    whose move it is, how long it has waited and how far along the governed flow the initiative is.
    Same fields as the live list; the flow step is read from the stage and the cause it already shows. */
 const FLOW = ["Plan", "Breakdown", "Estimate", "Delivery", "Receipt"];
-const deliveryOf = i => ACTIVITY.find(e => e.ini === i.id && e.kind === "delivering");
+const deliveryOf = i => ACTIVITY.find(e => e.ini === i.id && e.reply?.kind === "delivering");
 const flowStep = i => i.stage === "Planning" ? (i.kind === "breakdown" ? 1 : 0) : (i.kind === "estimate" && !S.approved ? 2 : 3);
 const waitDays = w => +(w.match(/(\d+)d/) || [0, 0])[1];
 function flowTrack(i) {

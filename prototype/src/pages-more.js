@@ -105,7 +105,8 @@ function systemMap(name = "Rentify") {
 }
 
 /* ---------- Activities / Issues / Releases / Leaders ---------- */
-/* Activities: a timeline of what people and their agents are moving, built to make the next move obvious.
+/* Activities: a timeline of what people did, built to make the next move obvious. Every entry is a person;
+   an agent's answer to that person sits inside the card as a reply.
    Feed = cards on a rail, newest first, the same initiative's earlier events that day folded into its card.
    Rail = Moving now (live work), Waiting on you (existing actions), Start something (Systems with nothing in progress). */
 const actDay = m => { const t = new Date(NOW - m * 60000), today = new Date(NOW); today.setHours(0, 0, 0, 0);
@@ -113,24 +114,31 @@ const actDay = m => { const t = new Date(NOW - m * 60000), today = new Date(NOW)
   return diff === 0 ? "Today" : diff === 1 ? "Yesterday" : t.toLocaleDateString("en-GB", { weekday: "long" }); };
 /* Inside a day group the time alone is enough; the full date and the relative time sit in the tooltip. */
 const tlTime = m => { const d = new Date(NOW - m * 60000); return `<time datetime="${d.toISOString()}" title="${relTime(m)} · ${fmtDate(d)}">${pad2(d.getHours())}.${pad2(d.getMinutes())}</time>`; };
-const actWho = p => p === "kx" ? "Konteks" : PEOPLE[p].name;
-const actAv = p => p === "kx" ? `<span class="av av-kx" title="Konteks">${ic("bot")}</span>` : av(p);
+const actWho = p => PEOPLE[p].name;
+const actAv = p => av(p);
 function actBody(e, i) {
-  if (e.kind === "estimate" && i.quote) return `<div class="tl-quote"><div><span>Story Points, at most</span><b>${i.quote[0]}</b></div><div><span>Model cost on your subscription</span><b>${i.quote[1]}</b></div></div>`;
-  if (e.kind === "delivering") return `<p class="tl-text">${esc(i.detail)}</p><div class="tl-prog" role="img" aria-label="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering">${Array.from({ length: e.of }, (_, n) => `<span class="${n < e.done ? "done" : n === e.done ? "now" : ""}"></span>`).join("")}</div>`;
   /* The request as its author wrote it (the first note), without the title it repeats. */
   if (e.kind === "started") { const req = THREADS[i.id]?.[0]?.text || REQUESTS[i.id]; return req ? `<div class="tl-quoted"><p class="tl-text">${esc(req)}</p></div>` : ""; }
-  return `<p class="tl-text">${esc(i.detail)}</p>`;
+  if (e.kind === "stopped") return `<p class="tl-text">${esc(i.detail)}</p>`;
+  return "";
 }
-function actCard({ e, earlier }) { const i = iniById[e.ini], live = e.kind === "delivering" && e.m < 60, cta = actsNow(i) && e === ACTIVITY.find(x => x.ini === e.ini);
+/* Konteks's answer to the person who called it: a reply inside their card, never an entry of its own. */
+function actReply(e, i) {
+  const r = e.reply; if (!r) return "";
+  let body = `<p class="tl-text">${esc(i.detail)}</p>`;
+  if (r.kind === "estimate" && i.quote) body = `<div class="tl-quote"><div><span>Story Points, at most</span><b>${i.quote[0]}</b></div><div><span>Model cost on your subscription</span><b>${i.quote[1]}</b></div></div>`;
+  if (r.kind === "delivering") body = `<p class="tl-text">${esc(i.detail)}</p><div class="tl-prog" role="img" aria-label="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering">${Array.from({ length: e.of }, (_, n) => `<span class="${n < e.done ? "done" : n === e.done ? "now" : ""}"></span>`).join("")}</div>`;
+  return `<div class="tl-reply"><span class="av av-kx" title="Konteks">${ic("bot")}</span><div class="tl-reply-b"><p class="tl-reply-h"><b>Konteks</b><span class="agent-chip">Agent</span><span>${esc(REPLY_HEAD[r.kind](e))}</span>${tlTime(r.m)}</p>${body}</div></div>`;
+}
+function actCard({ e, earlier }) { const i = iniById[e.ini], live = e.reply?.kind === "delivering" && e.reply.m < 60, cta = actsNow(i) && e === ACTIVITY.find(x => x.ini === e.ini);
     const when = new Date(NOW - e.m * 60000);
     return `<li class="tl-item ${live ? "live" : ""}"><span class="tl-node">${actAv(e.p)}</span><article class="tl-card" aria-label="${esc(actWho(e.p))} ${esc(ACT_VERB[e.kind](e))} ${esc(i.title)}">
       <header class="tl-h"><p class="tl-t"><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e)} <a href="#initiative/activities" data-ini="${i.id}">${esc(i.title)}</a></p>${live ? `<span class="tl-live"><span class="dot"></span>Live</span>` : ""}${tlTime(e.m)}</header>
       <div class="tl-meta">${sysTag(i.sys)}${st("muted", i.stage)}<a href="#initiative/activities" data-ini="${i.id}" class="tl-upd">${i.updates} updates</a></div>
-      ${actBody(e, i)}
+      ${actBody(e, i)}${actReply(e, i)}
       ${earlier.length ? `<details class="tl-thread"><summary>${ic("chevron-right")}${earlier.length} earlier ${e.m < 1440 ? "today" : "that day"}</summary><ol>${earlier.map(x => `<li>${actAv(x.p)}<span><b>${actWho(x.p)}</b> ${x.kind === "started" ? "started it" : ACT_VERB[x.kind](x).replace(/ (in|for)$/, "")}</span>${tlTime(x.m)}</li>`).join("")}</ol></details>` : ""}
       <footer class="tl-f"><div class="reacts">${e.re.map(([em, n]) => `<button class="react" type="button" aria-pressed="false" data-react>${em} <span>${n}</span></button>`).join("")}<button class="react react-add" type="button" aria-label="React">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm" type="button" data-cmt aria-label="Comment on ${esc(i.title)}">${ic("message-square")}Comment</button></div>
-        ${cta ? `<a class="btn btn-primary btn-sm" href="#initiative/activities" data-ini="${i.id}">${esc(i.action)}${ic("arrow-right")}</a>` : e.kind === "estimate" && !S.approved ? `<span class="hint">${ic("lock")}Maya Lestari approves</span>` : ""}</footer>
+        ${cta ? `<a class="btn btn-primary btn-sm" href="#initiative/activities" data-ini="${i.id}">${esc(i.action)}${ic("arrow-right")}</a>` : e.reply?.kind === "estimate" && !S.approved ? `<span class="hint">${ic("lock")}Maya Lestari approves</span>` : ""}</footer>
     </article></li>`; }
 function pageActivities() {
   const evs = ACTIVITY.filter(e => (S.actMore || !e.more) && (!S.sys || iniById[e.ini].sys === S.sys)).sort((a, b) => a.m - b.m);
@@ -143,12 +151,12 @@ function pageActivities() {
     : `<li class="tl-empty"><h3>Nothing moved in ${esc(sysById[S.sys].name)} yet</h3><p>Start an initiative and the planning agent picks it up.</p><button class="btn btn-primary btn-sm" type="button" data-start="${S.sys}">${ic("plus")}New initiative</button></li>`;
   const cardCount = days.reduce((n, g) => n + g.cards.length, 0);
   const cardTotal = new Set(ACTIVITY.filter(e => !S.sys || iniById[e.ini].sys === S.sys).map(e => actDay(e.m) + e.ini)).size;
-  const moving = ACTIVITY.filter(e => e.m < 180 && ["started", "plan", "estimate", "delivering"].includes(e.kind) && (!S.sys || iniById[e.ini].sys === S.sys)).filter((e, n, a) => a.findIndex(x => x.ini === e.ini) === n);
+  const moving = ACTIVITY.filter(e => e.m < 180 && ["started", "approved", "quote"].includes(e.kind) && (!S.sys || iniById[e.ini].sys === S.sys)).filter((e, n, a) => a.findIndex(x => x.ini === e.ini) === n);
   const waiting = INITIATIVES.filter(actsNow);
   const quiet = SYSTEMS.filter(s => !INITIATIVES.some(i => i.sys === s.id));
   const rail = `<aside class="act-rail" aria-label="Around you">
     <section class="rail-now"><h3><span class="dot"></span>Moving now<span class="count">${moving.length}</span></h3>
-      ${moving.length ? `<ul class="now-list">${moving.map(e => { const i = iniById[e.ini]; return `<li class="${e.kind === "delivering" ? "live" : ""}"><a href="#initiative/activities" data-ini="${i.id}">${actAv(e.p)}<span><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e).replace(/ (in|for)$/, "")}<small>${esc(i.title)} · ${sysById[i.sys].name}</small></span>${tlTime(e.m)}</a></li>`; }).join("")}</ul>` : `<p class="hint">Nothing in the last 3 hours.</p>`}</section>
+      ${moving.length ? `<ul class="now-list">${moving.map(e => { const i = iniById[e.ini]; return `<li class="${e.reply?.kind === "delivering" ? "live" : ""}"><a href="#initiative/activities" data-ini="${i.id}">${actAv(e.p)}<span><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e).replace(/ (in|for)$/, "")}<small>${esc(i.title)} · ${sysById[i.sys].name}</small></span>${tlTime(e.m)}</a></li>`; }).join("")}</ul>` : `<p class="hint">Nothing in the last 3 hours.</p>`}</section>
     <div class="rail-rest">
     <section class="rail-wait"><h3>Waiting on you<span class="count hot">${waiting.length}</span></h3>
       ${waiting.length ? `<ul class="wait-list">${waiting.map(i => `<li><span><b>${esc(i.title)}</b><small>${esc(i.cause)}</small></span><a class="btn btn-sm" href="#initiative/activities" data-ini="${i.id}">${esc(i.action)}</a></li>`).join("")}</ul>` : `<p class="hint">Nothing needs you right now.</p>`}</section>
@@ -156,7 +164,7 @@ function pageActivities() {
       <ul class="quiet-list">${quiet.map(s => `<li><span>${sysTag(s.id)}</span><button class="btn btn-sm" type="button" data-start="${s.id}">${ic("plus")}Start</button></li>`).join("")}</ul>
       <button class="btn btn-primary btn-sm" type="button" data-start="">${ic("plus")}New initiative</button></section>
     </div></aside>`;
-  const body = `<div class="pagehead">${phead("Activities", "What your team and its agents are moving across your Systems.", `<button class="btn btn-primary btn-sm act-new" type="button" data-start="">${ic("plus")}New initiative</button>`)}${sysFilter()}</div>
+  const body = `<div class="pagehead">${phead("Activities", "What your team is moving across your Systems.", `<button class="btn btn-primary btn-sm act-new" type="button" data-start="">${ic("plus")}New initiative</button>`)}${sysFilter()}</div>
     <div class="act"><div class="act-feed"><ol class="tl" role="feed" aria-label="Activities">${feed}</ol>
       ${days.length ? `<div class="pager list-pager">${S.actMore ? `<span>You're all caught up · ${cardCount} cards</span>` : `<button class="btn btn-sm" id="moreAct">Load more</button><span>Showing ${cardCount} of ${cardTotal}</span>`}</div>` : ""}</div>${rail}</div>`;
   return shell("activities", "", body, { flush: true });

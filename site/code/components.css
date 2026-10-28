@@ -1479,6 +1479,14 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .tl-prog .done{background:var(--accent-strong)}
 .tl-prog .now{background:linear-gradient(90deg,var(--info) 0 40%,var(--line) 40%);background-size:250% 100%;animation:tlrun 1.8s linear infinite}
 @keyframes tlrun{from{background-position:100% 0}to{background-position:-150% 0}}
+/* An agent's answer to the person who called it, inside that person's card. */
+.tl-reply{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;padding-top:10px;border-top:1px solid var(--line)}
+.tl-reply .av{width:22px;height:22px}
+.tl-reply .av-kx svg{width:12px;height:12px}
+.tl-reply-b{display:grid;gap:8px;min-width:0}
+.tl-reply-h{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;font-size:var(--t12);color:var(--ink-2)}
+.tl-reply-h b{font-weight:600;color:var(--ink)}
+.tl-reply-h time{margin-left:auto;font-size:var(--t12);color:var(--ink-3);font-variant-numeric:tabular-nums}
 .tl-thread summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:var(--t12);color:var(--ink-3)}
 .tl-thread summary::-webkit-details-marker{display:none}
 .tl-thread summary:hover{color:var(--ink)}

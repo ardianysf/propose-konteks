@@ -230,7 +230,7 @@ decide resume not available → new proposal</pre></details>
       <div class="specimen-row"><details class="inline-disc"><summary>${ic("chevron-right")}More options</summary><div class="disc-in hint">Channel name and other settings.</div></details>
       <details class="inline-disc"><summary>${ic("chevron-right")}Konteks learned · 1 note</summary><div class="disc-in hint">The verify script prints an expected error from a logging test.</div></details>
       <details class="inline-disc"><summary>${ic("chevron-right")}Show 11 commands</summary><div class="disc-in hint">/plan, /mcp, /skills, /status…</div></details></div>`,
-    "c-pager": () => `<ol class="tl" role="feed" aria-label="Activities"><li class="tl-day"><h2>Today<span>27 Oct 2026</span></h2></li>${actCard({ e: ACTIVITY[0], earlier: [] })}${actCard({ e: ACTIVITY[2], earlier: [ACTIVITY[5]] })}</ol><div class="pager list-pager"><button class="btn btn-sm" type="button">Load more</button><span>Showing 11 of 44</span></div>`,
+    "c-pager": () => `<ol class="tl" role="feed" aria-label="Activities"><li class="tl-day"><h2>Today<span>27 Oct 2026</span></h2></li>${actCard({ e: ACTIVITY[0], earlier: [] })}${actCard({ e: ACTIVITY[2], earlier: [ACTIVITY.find(x => x.id === "a6")] })}</ol><div class="pager list-pager"><button class="btn btn-sm" type="button">Load more</button><span>Showing 11 of 44</span></div>`,
   };
   return fx[id] ? fx[id]() : "";
 }

@@ -190,22 +190,24 @@ const THREADS = {
 /* Activity feed. Every event is something the live app already records: an initiative started (the feed today),
    and the state changes its Updates log carries (plan ready, estimate ready, stopped, delivering). m = minutes before NOW.
    Reactions are the feed's existing React; nothing here is a new kind of data. */
+/* Activities lists only what people did. Agents never act on their own here: Konteks answers when a person calls it,
+   so its answer rides inside that person's card as a reply (reply.kind, reply.m), never as an entry of its own. */
 const ACTIVITY = [
-  { id: "a1", p: "kx", ini: "INI-144", kind: "delivering", m: 12, ticket: "TKT-2", of: 3, done: 1, re: [["🚀", 2]] },
+  { id: "a1", p: "ds", ini: "INI-144", kind: "approved", m: 14, ticket: "TKT-2", of: 3, done: 1, re: [["🚀", 2]], reply: { kind: "delivering", m: 12 } },
   { id: "a2", p: "sw", ini: "INI-137", kind: "started", m: 129, re: [["👍", 2]] },
   { id: "a3", p: "bh", ini: "INI-128", kind: "stopped", m: 141, ticket: "TKT-1", re: [] },
-  { id: "a4", p: "kx", ini: "INI-139", kind: "estimate", m: 366, ticket: "TKT-1", re: [["👀", 1]] },
+  { id: "a4", p: "ay", ini: "INI-139", kind: "quote", m: 368, ticket: "TKT-1", re: [["👀", 1]], reply: { kind: "estimate", m: 366 } },
   { id: "a6", p: "bh", ini: "INI-128", kind: "started", m: 465, re: [] },
-  { id: "b1", p: "kx", ini: "INI-142", kind: "plan", m: 1440, re: [["🎉", 2]] },
-  { id: "b2", p: "ay", ini: "INI-142", kind: "started", m: 1457, re: [["👍", 1]] },
+  { id: "b2", p: "ay", ini: "INI-142", kind: "started", m: 1457, re: [["🎉", 2]], reply: { kind: "plan", m: 1440 } },
   { id: "b4", p: "np", ini: "INI-125", kind: "started", m: 1610, re: [["👀", 1]] },
   { id: "a5", p: "ay", ini: "INI-139", kind: "started", m: 1720, re: [["👍", 3]] },
   { id: "b5", p: "ds", ini: "INI-144", kind: "started", m: 2008, re: [["👍", 4]] },
-  { id: "c1", p: "kx", ini: "INI-131", kind: "unsaved", m: 5897, re: [], more: true },
-  { id: "c3", p: "ay", ini: "INI-131", kind: "started", m: 6455, re: [], more: true },
+  { id: "c3", p: "ay", ini: "INI-131", kind: "started", m: 6455, re: [], more: true, reply: { kind: "unsaved", m: 5897 } },
   { id: "c2", p: "ra", ini: "INI-120", kind: "started", m: 6515, re: [["👍", 1]], more: true },
 ];
-const ACT_VERB = { started: () => "started", plan: () => "wrote the plan for", estimate: e => `estimated ${e.ticket} in`, stopped: e => `stopped ${e.ticket} in`, delivering: e => `is delivering ${e.ticket} of ${e.of} in`, unsaved: () => "could not save the plan for" };
+const ACT_VERB = { started: () => "started", approved: e => `approved ${e.ticket}'s delivery in`, quote: e => `asked for a quote on ${e.ticket} in`, stopped: e => `stopped ${e.ticket} in` };
+/* What Konteks answered, in its own words. */
+const REPLY_HEAD = { delivering: e => `Delivering ${e.ticket} of ${e.of} on rf-01`, estimate: e => `Estimated ${e.ticket}`, plan: () => "Wrote the plan", unsaved: () => "Could not save the plan" };
 /* The request each initiative started from (its first note), for initiatives whose full thread is not in the demo. */
 const REQUESTS = {
   "INI-142": "Document the rental checkout flow end to end: cart, deposit, payment and the confirmation email. Write it for the support team, not for developers.",
