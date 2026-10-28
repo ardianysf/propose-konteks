@@ -45,7 +45,7 @@ const CAT_GROUPS = [
     ["c-toast", "Toast", "Konfirmasi singkat setelah aksi; versi error dengan sebab."],
     ["c-overlay", "Menu, modal, drawer, dialog", "Satu aturan: drawer untuk melihat atau meninjau objek tanpa meninggalkan halaman, modal untuk mengisi form lalu mengirim, dialog untuk mengonfirmasi satu akibat, menu untuk memilih. Escape menutup lapisan teratas saja (UX-012); hapus permanen meminta nama diketik (UX-016)."],
     ["c-disclosure", "Disclosure", "Untuk detail sekunder: tiket, opsi lanjutan, “Why?”, model per delivery."],
-    ["c-pager", "Daftar aktivitas & muat lebih banyak", "Baris penuh dengan kolom sejajar dan header hari yang menempel; Load more dengan jumlah yang terlihat."],
+    ["c-pager", "Timeline aktivitas", "Kartu di atas garis waktu, terbaru di atas, kejadian lain di inisiatif yang sama pada hari itu dilipat ke dalam kartunya. Setiap kartu punya reaksi, komentar, dan aksi yang memang tersedia untuk penonton; yang sedang berjalan ditandai Live. Load more dengan jumlah yang terlihat."],
   ]],
 ];
 
@@ -230,8 +230,7 @@ decide resume not available → new proposal</pre></details>
       <div class="specimen-row"><details class="inline-disc"><summary>${ic("chevron-right")}More options</summary><div class="disc-in hint">Channel name and other settings.</div></details>
       <details class="inline-disc"><summary>${ic("chevron-right")}Konteks learned · 1 note</summary><div class="disc-in hint">The verify script prints an expected error from a logging test.</div></details>
       <details class="inline-disc"><summary>${ic("chevron-right")}Show 11 commands</summary><div class="disc-in hint">/plan, /mcp, /skills, /status…</div></details></div>`,
-    "c-pager": () => `<div class="panel" style="overflow:hidden"><div class="group-h" style="position:static">Today<span class="gh-note">27 Oct 2026</span></div>${[["sw", "HRIS frontend developer README", "hris", "Planning", "17.31"], ["ay", "Refresh the Support API README", "rentify", "Executing", "12.53"]].map(([p, t, sy, stg, at]) => `<article class="arow"><span class="arow-av">${av(p)}</span><p class="arow-t"><b>${PEOPLE[p].name}</b> started <a href="#components">${t}</a></p><span class="arow-m"><span class="arow-c c-sys">${sysTag(sy)}</span><span class="arow-c c-stage">${st("ok", stg)}</span><span class="arow-c c-upd">2 updates<small>last ${ago(120)}</small></span><time class="arow-c c-time">${at}</time></span><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Comment" data-tip="Comment">${ic("message-square")}</button></article>`).join("")}</div>
-      <div class="pager"><button class="btn btn-sm" id="cMore">Load more</button><span id="cMoreC">Showing 20 of 186</span></div>`,
+    "c-pager": () => `<ol class="tl" role="feed" aria-label="Activities"><li class="tl-day"><h2>Today<span>27 Oct 2026</span></h2></li>${actCard({ e: ACTIVITY[0], earlier: [] })}${actCard({ e: ACTIVITY[2], earlier: [ACTIVITY[5]] })}</ol><div class="pager list-pager"><button class="btn btn-sm" type="button">Load more</button><span>Showing 11 of 44</span></div>`,
   };
   return fx[id] ? fx[id]() : "";
 }

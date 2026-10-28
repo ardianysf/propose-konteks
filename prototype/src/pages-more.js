@@ -105,41 +105,78 @@ function systemMap(name = "Rentify") {
 }
 
 /* ---------- Activities / Issues / Releases / Leaders ---------- */
+/* Activities: a timeline of what people and their agents are moving, built to make the next move obvious.
+   Feed = cards on a rail, newest first, the same initiative's earlier events that day folded into its card.
+   Rail = Moving now (live work), Waiting on you (existing actions), Start something (Systems with nothing in progress). */
+const actDay = m => { const t = new Date(NOW - m * 60000), today = new Date(NOW); today.setHours(0, 0, 0, 0);
+  const diff = Math.round((today - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 864e5);
+  return diff === 0 ? "Today" : diff === 1 ? "Yesterday" : t.toLocaleDateString("en-GB", { weekday: "long" }); };
+/* Inside a day group the time alone is enough; the full date and the relative time sit in the tooltip. */
+const tlTime = m => { const d = new Date(NOW - m * 60000); return `<time datetime="${d.toISOString()}" title="${relTime(m)} · ${fmtDate(d)}">${pad2(d.getHours())}.${pad2(d.getMinutes())}</time>`; };
+const actWho = p => p === "kx" ? "Konteks" : PEOPLE[p].name;
+const actAv = p => p === "kx" ? `<span class="av av-kx" title="Konteks">${ic("bot")}</span>` : av(p);
+function actBody(e, i) {
+  if (e.kind === "estimate" && i.quote) return `<div class="tl-quote"><div><span>Story Points, at most</span><b>${i.quote[0]}</b></div><div><span>Model cost on your subscription</span><b>${i.quote[1]}</b></div></div>`;
+  if (e.kind === "delivering") return `<p class="tl-text">${esc(i.detail)}</p><div class="tl-prog" role="img" aria-label="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering">${Array.from({ length: e.of }, (_, n) => `<span class="${n < e.done ? "done" : n === e.done ? "now" : ""}"></span>`).join("")}</div>`;
+  /* The request as its author wrote it (the first note), without the title it repeats. */
+  if (e.kind === "started") { const req = THREADS[i.id]?.[0]?.text || REQUESTS[i.id]; return req ? `<div class="tl-quoted"><p class="tl-text">${esc(req)}</p></div>` : ""; }
+  return `<p class="tl-text">${esc(i.detail)}</p>`;
+}
+function actCard({ e, earlier }) { const i = iniById[e.ini], live = e.kind === "delivering" && e.m < 60, cta = actsNow(i) && e === ACTIVITY.find(x => x.ini === e.ini);
+    const when = new Date(NOW - e.m * 60000);
+    return `<li class="tl-item ${live ? "live" : ""}"><span class="tl-node">${actAv(e.p)}</span><article class="tl-card" aria-label="${esc(actWho(e.p))} ${esc(ACT_VERB[e.kind](e))} ${esc(i.title)}">
+      <header class="tl-h"><p class="tl-t"><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e)} <a href="#initiative" data-ini="${i.id}">${esc(i.title)}</a></p>${live ? `<span class="tl-live"><span class="dot"></span>Live</span>` : ""}${tlTime(e.m)}</header>
+      <div class="tl-meta">${sysTag(i.sys)}${st("muted", i.stage)}<a href="#initiative" data-ini="${i.id}" class="tl-upd">${i.updates} updates</a></div>
+      ${actBody(e, i)}
+      ${earlier.length ? `<details class="tl-thread"><summary>${ic("chevron-right")}${earlier.length} earlier ${e.m < 1440 ? "today" : "that day"}</summary><ol>${earlier.map(x => `<li>${actAv(x.p)}<span><b>${actWho(x.p)}</b> ${x.kind === "started" ? "started it" : ACT_VERB[x.kind](x).replace(/ (in|for)$/, "")}</span>${tlTime(x.m)}</li>`).join("")}</ol></details>` : ""}
+      <footer class="tl-f"><div class="reacts">${e.re.map(([em, n]) => `<button class="react" type="button" aria-pressed="false" data-react>${em} <span>${n}</span></button>`).join("")}<button class="react react-add" type="button" aria-label="React">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm" type="button" data-cmt aria-label="Comment on ${esc(i.title)}">${ic("message-square")}Comment</button></div>
+        ${cta ? `<a class="btn btn-primary btn-sm" href="#initiative" data-ini="${i.id}">${esc(i.action)}${ic("arrow-right")}</a>` : e.kind === "estimate" && !S.approved ? `<span class="hint">${ic("lock")}Maya Lestari approves</span>` : ""}</footer>
+    </article></li>`; }
 function pageActivities() {
-  const days = [
-    ["Today", "27 Oct 2026", [["sw", "INI-137", "Planning", 2, 120, "17.31", "2 hours ago"], ["bh", "INI-128", "Executing", 5, 140, "17.19", "2 hours ago", "stopped TKT-1 in"], ["kx", "INI-139", "Executing", 1, 360, "13.34", "6 hours ago", "TKT-1's estimate is ready in"], ["ay", "INI-139", "Executing", 1, 420, "12.53", "7 hours ago"], ["bh", "INI-128", "Executing", 5, 30, "11.55", "8 hours ago"]]],
-    ["Yesterday", "26 Oct 2026", [["kx", "INI-142", "Planning", 1, 1460, "19.40", "yesterday", "The plan is ready in"], ["ay", "INI-142", "Planning", 1, 1460, "19.23", "yesterday"], ["ay", "INI-131", "Planning", 1, 1500, "18.37", "yesterday"], ["np", "INI-125", "Planning", 0, 0, "16.50", "yesterday"], ["ds", "INI-144", "Executing", 10, 13, "10.12", "yesterday"]]],
-    ...(S.actMore ? [["23 Oct 2026", "Friday", [["kx", "INI-131", "Planning", 1, 5897, "17.23", "4 days ago", "The plan could not be saved in"], ["ay", "INI-131", "Planning", 1, 5897, "09.05", "4 days ago"]]]] : []),
-  ];
-  /* One list primitive with Work In Progress: full-bleed rows, aligned columns, a sticky day header. */
-  const row = (d, date, [p, id, stg, n, last, at, rel, verb]) => { const i = iniById[id];
-    return `<article class="arow"><span class="arow-av">${p === "kx" ? '<span class="av av-kx" title="Konteks">K</span>' : av(p)}</span>
-      <p class="arow-t">${p === "kx" ? "" : `<b>${PEOPLE[p].name}</b> `}${verb || "started"} <a href="#initiative" data-ini="${id}">${esc(i.title)}</a></p>
-      <span class="arow-m"><span class="arow-c c-sys">${sysTag(i.sys)}</span>
-      <span class="arow-c c-stage">${st(stg === "Closed" ? "muted" : "ok", stg)}</span>
-      <span class="arow-c c-upd">${n ? `${n} ${n === 1 ? "update" : "updates"}<small>${ago(last)}</small>` : `<span class="hint">No updates</span>`}</span>
-      <time class="arow-c c-time" datetime="${date}" title="${rel} · ${date}, ${at}">${at}</time></span>
-      <button class="btn btn-ghost btn-icon btn-sm" type="button" data-cmt aria-label="Comment on ${esc(i.title)}" data-tip="Comment">${ic("message-square")}</button></article>`; };
-  const groups = days.map(([d, date, evs]) => { const list = evs.filter(([, id]) => !S.sys || iniById[id].sys === S.sys);
-    return `<section aria-label="${d}"><div class="group-h">${d}<span class="gh-note">${date}</span></div>${list.length ? list.map(e => row(d, date, e)).join("") : `<p class="hint row-empty">Nothing happened in this System ${d === "Today" ? "today" : d === "Yesterday" ? "yesterday" : "that day"}.</p>`}</section>`; }).join("");
-  const body = `<div class="pagehead">${phead("Activities", "What happened across your Systems.")}${sysFilter()}</div>
-    <div class="alist" role="feed" aria-label="Activities"><div class="alist-h" aria-hidden="true"><span></span><span>Initiative</span><span class="c-sys">System</span><span class="c-stage">Stage</span><span class="c-upd">Updates</span><span class="c-time">Time</span><span></span></div>${groups}</div>
-    <div class="pager list-pager"><button class="btn btn-sm" id="moreAct">Load more</button><span>Showing ${S.actMore ? 12 : 10} of 44</span></div>`;
+  const evs = ACTIVITY.filter(e => (S.actMore || !e.more) && (!S.sys || iniById[e.ini].sys === S.sys)).sort((a, b) => a.m - b.m);
+  /* Fold: per day, an initiative appears once; its older events that day ride inside the newest one. */
+  const days = [];
+  evs.forEach(e => { const d = actDay(e.m); let g = days.find(x => x.d === d); if (!g) days.push(g = { d, date: (t => `${t.getDate()} ${MON[t.getMonth()]} ${t.getFullYear()}`)(new Date(NOW - e.m * 60000)), cards: [] });
+    const c = g.cards.find(x => x.e.ini === e.ini); c ? c.earlier.push(e) : g.cards.push({ e, earlier: [] }); });
+
+  const feed = days.length ? days.map(g => `<li class="tl-day"><h2>${g.d}<span>${g.date}</span></h2></li>${g.cards.map(actCard).join("")}`).join("")
+    : `<li class="tl-empty"><h3>Nothing moved in ${esc(sysById[S.sys].name)} yet</h3><p>Start an initiative and the planning agent picks it up.</p><button class="btn btn-primary btn-sm" type="button" data-start="${S.sys}">${ic("plus")}New initiative</button></li>`;
+  const cardCount = days.reduce((n, g) => n + g.cards.length, 0);
+  const cardTotal = new Set(ACTIVITY.filter(e => !S.sys || iniById[e.ini].sys === S.sys).map(e => actDay(e.m) + e.ini)).size;
+  const moving = ACTIVITY.filter(e => e.m < 180 && ["started", "plan", "estimate", "delivering"].includes(e.kind) && (!S.sys || iniById[e.ini].sys === S.sys)).filter((e, n, a) => a.findIndex(x => x.ini === e.ini) === n);
+  const waiting = INITIATIVES.filter(actsNow);
+  const quiet = SYSTEMS.filter(s => !INITIATIVES.some(i => i.sys === s.id));
+  const rail = `<aside class="act-rail" aria-label="Around you">
+    <section class="rail-now"><h3><span class="dot"></span>Moving now<span class="count">${moving.length}</span></h3>
+      ${moving.length ? `<ul class="now-list">${moving.map(e => { const i = iniById[e.ini]; return `<li class="${e.kind === "delivering" ? "live" : ""}"><a href="#initiative" data-ini="${i.id}">${actAv(e.p)}<span><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e).replace(/ (in|for)$/, "")}<small>${esc(i.title)} · ${sysById[i.sys].name}</small></span>${tlTime(e.m)}</a></li>`; }).join("")}</ul>` : `<p class="hint">Nothing in the last 3 hours.</p>`}</section>
+    <div class="rail-rest">
+    <section class="rail-wait"><h3>Waiting on you<span class="count hot">${waiting.length}</span></h3>
+      ${waiting.length ? `<ul class="wait-list">${waiting.map(i => `<li><span><b>${esc(i.title)}</b><small>${esc(i.cause)}</small></span><a class="btn btn-sm" href="#initiative" data-ini="${i.id}">${esc(i.action)}</a></li>`).join("")}</ul>` : `<p class="hint">Nothing needs you right now.</p>`}</section>
+    <section class="rail-start"><h3>Start something</h3><p class="hint">Systems with no initiative yet. The planning agent starts from a few sentences.</p>
+      <ul class="quiet-list">${quiet.map(s => `<li><span>${sysTag(s.id)}</span><button class="btn btn-sm" type="button" data-start="${s.id}">${ic("plus")}Start</button></li>`).join("")}</ul>
+      <button class="btn btn-primary btn-sm" type="button" data-start="">${ic("plus")}New initiative</button></section>
+    </div></aside>`;
+  const body = `<div class="pagehead">${phead("Activities", "What your team and its agents are moving across your Systems.", `<button class="btn btn-primary btn-sm act-new" type="button" data-start="">${ic("plus")}New initiative</button>`)}${sysFilter()}</div>
+    <div class="act"><div class="act-feed"><ol class="tl" role="feed" aria-label="Activities">${feed}</ol>
+      ${days.length ? `<div class="pager list-pager">${S.actMore ? `<span>You're all caught up · ${cardCount} cards</span>` : `<button class="btn btn-sm" id="moreAct">Load more</button><span>Showing ${cardCount} of ${cardTotal}</span>`}</div>` : ""}</div>${rail}</div>`;
   return shell("activities", "", body, { flush: true });
 }
 function bindActivities() {
   bindSysFilter();
-  $$("[data-ini]").forEach(a => a.onclick = () => { S.cur = a.dataset.ini; });
-  /* Comment toggles its box: a second press (or Escape, or Cancel) closes it and returns focus to the button. */
+  bindNoteTools();
+  $$("[data-ini]").forEach(a => a.addEventListener("click", () => { S.cur = a.dataset.ini; }));
+  $$("[data-start]").forEach(b => b.onclick = () => newInitiative(b.dataset.start || S.sys));
+  $$("[data-react]").forEach(b => b.onclick = () => { const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on); const c = b.querySelector("span"); c.textContent = +c.textContent + (on ? 1 : -1); b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); });
+  /* Comment toggles its box inside the card: a second press (or Escape, or Cancel) closes it and returns focus. */
   $$("[data-cmt]").forEach(b => { b.setAttribute("aria-expanded", "false"); b.onclick = () => {
-    const art = b.closest(".arow"), next = art.nextElementSibling;
-    const shut = () => { if (art.nextElementSibling?.classList.contains("arow-cmt")) art.nextElementSibling.remove(); b.setAttribute("aria-expanded", "false"); b.classList.remove("on"); b.focus(); };
-    if (next?.classList.contains("arow-cmt")) return shut();
-    art.insertAdjacentHTML("afterend", `<div class="arow-cmt"><div class="compose"><textarea rows="1" placeholder="Write a comment" aria-label="Comment"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div></div>`);
-    const box = art.nextElementSibling, ta = box.querySelector("textarea");
-    b.setAttribute("aria-expanded", "true"); b.classList.add("on"); ta.focus();
+    const card = b.closest(".tl-card");
+    const shut = () => { card.querySelector(".tl-cmt")?.remove(); b.setAttribute("aria-expanded", "false"); b.focus(); };
+    if (card.querySelector(".tl-cmt")) return shut();
+    b.closest(".tl-f").insertAdjacentHTML("afterend", `<div class="tl-cmt"><span class="av">AY</span><div class="compose"><textarea rows="1" placeholder="Write a comment" aria-label="Comment"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div></div>`);
+    const box = card.querySelector(".tl-cmt"), ta = box.querySelector("textarea");
+    b.setAttribute("aria-expanded", "true"); ta.focus();
     box.querySelector("[data-cx]").onclick = shut;
-    box.querySelector("[data-cp]").onclick = () => { shut(); toast("Comment posted"); };
+    box.querySelector("[data-cp]").onclick = () => { if (!ta.value.trim()) return ta.focus(); shut(); toast("Comment posted"); };
     ta.onkeydown = e => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); shut(); } };
   }; });
   $("#moreAct")?.addEventListener("click", () => { S.actMore = true; render(); });

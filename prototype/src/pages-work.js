@@ -61,14 +61,14 @@ function approveDialog(onOk) {
     <div class="quote"><div class="qrow"><span>Story Points, at most</span><b>2.15 SP</b></div><div class="qrow"><span>Model cost on your subscription</span><b>$0.57 – $2.02</b></div></div><p>`,
     "Approve", onOk, false, { confirmHtml: `${ic("check")}Approve<span class="cost">2.15 SP</span>` });
 }
-function newInitiative() {
+function newInitiative(pre = S.sys) {
   const d = modal("New initiative", `
     <div class="field"><label for="niBody">What is this initiative about?</label><textarea id="niBody" class="textarea" data-autosize rows="5" placeholder="The outcome you want, what is in scope, and how you'll know it's done"></textarea><span class="hint">Konteks names the initiative from the plan it writes.</span></div>
-    <div class="field"><span class="flabel" id="niSysL">Software System</span><div class="combo" id="niSys" style="width:100%"><button class="btn combo-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="niSysL" ${S.sys ? `data-val="${esc(sysById[S.sys].name)}"` : ""}><span class="${S.sys ? "" : "ph"}">${S.sys ? esc(sysById[S.sys].name) : "Choose a System"}</span>${ic("chevrons-up-down")}</button></div></div>
+    <div class="field"><span class="flabel" id="niSysL">Software System</span><div class="combo" id="niSys" style="width:100%"><button class="btn combo-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="niSysL" ${pre ? `data-val="${esc(sysById[pre].name)}"` : ""}><span class="${pre ? "" : "ph"}">${pre ? esc(sysById[pre].name) : "Choose a System"}</span>${ic("chevrons-up-down")}</button></div></div>
     <div><button class="btn btn-ghost btn-sm" type="button" id="niAttach">${ic("paperclip")}Attach meeting transcript</button><div class="atts" id="niAtts" style="margin-top:6px"></div><input type="file" id="niFile" accept=".txt,.md,.vtt,.pdf" hidden></div>`,
     `<button class="btn" data-close>Cancel</button><button class="btn btn-primary" id="niStart" disabled>Start</button>`,
     { sub: "A planning session opens behind it, ready to read your notes." });
-  let sys = S.sys ? sysById[S.sys].name : "";
+  let sys = pre ? sysById[pre].name : "";
   const check = () => { d.querySelector("#niStart").disabled = !(d.querySelector("#niBody").value.trim() && sys); };
   comboBind("niSys", [["", SYSTEMS.map(s => [s.name, ""])]], n => { sys = n; check(); });
   autosize(d); d.querySelector("#niBody").addEventListener("input", check);

@@ -49,7 +49,7 @@ const INVENTORY = [
   ["Composer: Attach file, Create text attachment, voice, Send", "Session", ["c-chat", "c-attach"], "app", "", "", "session"],
   ["System map: nodes, zoom in/out/reset, Start a session", "Session, Edit System", "c-map", "app", "", "", "session"],
   ["Session files popover", "Session", "c-empty", "app", "", "", "session"],
-  ["Feed: “X started Y”, Initiative, stage, Comment, N updates, Load more", "Activities", ["c-pager", "c-thread"], "app", "", "", "activities"],
+  ["Feed: “X started Y” and the state changes from Updates, as a timeline with React, Comment, N updates, the action you can take, Load more; rail: Moving now, Waiting on you, Systems with no initiative", "Activities", ["c-pager", "c-thread"], "app", "", "", "activities"],
   ["Empty state “Nothing is open”", "Issues", "c-empty", "app", "", "", "issues"],
   ["Empty state “Nothing here yet”, release candidates", "Releases", ["c-empty", "c-cards"], "app", "", "", "releases"],
   ["People ranked with points; agents and models", "Leaders", "c-table", "app", "", "", "leaders"],
