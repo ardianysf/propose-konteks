@@ -22,7 +22,7 @@ custom plugin UI uses Tailwind `app-*` token classes and a `.dark` class.
 ## Work In Progress (/work)
 - Title "Work In Progress", subtitle "What people are driving. Agents do the rest.", button "New initiative".
 - System filter row: All systems + every System, "New System"; pencil "Edit <System>" on the active chip.
-- Banner "RecRe was connected from sari@debian on 9/30/2026."
+- Banner "<System> was connected from <pengguna>@<perangkat> on 9/30/2026."
 - Section "Needs your attention" (count). Card: title, "N new updates", System, stage ("Planning:" / "Executing:"),
   "Needs you · 1d 3h", waiting time, driver avatar, cause line + one action:
   Try again (+1 more: "Konteks asked you something about the plan"), See what happened, Continue, Create tickets,

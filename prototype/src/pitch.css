@@ -92,17 +92,26 @@
 .ov .doc-in{gap:72px}
 .ov-hero h1{max-width:none;text-wrap:balance}
 .ov-hero .lede{max-width:64ch}
-/* The real Work In Progress page at 1280px, scaled to the column (--k is set by bindOverview). Desktop layouts only. */
-.ov-shot{--k:.84;display:block;position:relative;margin-top:40px;aspect-ratio:1280/720;overflow:hidden;border:1px solid var(--line);border-radius:var(--r10);background:var(--bg);box-shadow:var(--shadow-2);
-  -webkit-mask-image:linear-gradient(to bottom,var(--ink) 72%,transparent);mask-image:linear-gradient(to bottom,var(--ink) 72%,transparent);transition:translate .25s var(--ease),box-shadow .25s var(--ease)}
-.ov-shot-link{position:absolute;inset:0;z-index:1}
-.ov-shot:hover{translate:0 -2px;box-shadow:var(--shadow-3)}
+/* Hero stage: the real Work In Progress page in front, two more demo pages behind it, softened.
+   Each layer renders its page at 1280px and scales to its own width (--k, set by bindOverview). Desktop layouts only. */
+.cta-meta{font-size:var(--t12);font-weight:500;color:var(--ink-3);padding-left:8px;margin-left:2px;border-left:1px solid var(--line)}
+.ov-stage{position:relative;margin-top:48px;aspect-ratio:1080/600;-webkit-mask-image:linear-gradient(to bottom,var(--ink) 70%,transparent);mask-image:linear-gradient(to bottom,var(--ink) 70%,transparent)}
+.ov-shot{--k:.6;position:absolute;aspect-ratio:1280/760;overflow:hidden;border:1px solid var(--line);border-radius:var(--r10);background:var(--bg)}
+.ov-front{left:14%;width:72%;top:9%;z-index:2;box-shadow:var(--shadow-3);transition:translate .3s var(--ease)}
+.ov-back{width:58%;filter:blur(2.5px) saturate(.85);opacity:.55;box-shadow:var(--shadow-2);transition:translate .4s var(--ease),opacity .4s var(--ease)}
+.ov-b1{left:0;top:0}
+.ov-b2{right:0;top:4%}
+.ov-stage:hover .ov-front{translate:0 -3px}
+.ov-stage:hover .ov-b1{translate:-6px 0;opacity:.62}
+.ov-stage:hover .ov-b2{translate:6px 0;opacity:.62}
+.ov-shot-link{position:absolute;inset:0;z-index:3}
 .ov-shot-in{width:1280px;height:800px;transform:scale(var(--k));transform-origin:0 0;pointer-events:none;user-select:none}
 .ov-shot-in .app{min-height:800px}
 .ov-shot-in .side{position:relative;top:0;height:800px}
 .ov-shot-in .top,.ov-shot-in .banner{position:static}
 .ov-shot-in .newver,.ov-shot-in .side-resize,.ov-shot-in [data-tip]::after{display:none}
-@media (max-width:860px){.ov-shot{display:none}}
+@media (prefers-reduced-motion:reduce){.ov-front,.ov-back{transition:none}}
+@media (max-width:860px){.ov-stage{display:none}}
 
 /* What stays: a definition grid that uses the full column instead of one narrow list. */
 .keep{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:0 var(--s6);margin:0}
@@ -137,3 +146,6 @@
 .sm-g a:hover svg,.sm-g a:focus-visible svg{opacity:1;translate:0 0}
 @media (max-width:860px){.smap{grid-template-columns:1fr 1fr}.sm-wide{grid-column:1/-1}.ov .doc-in{gap:56px}}
 @media (max-width:560px){.smap{grid-template-columns:1fr;padding:var(--s4)}.sm-wide .sm-g ul{columns:1}}
+/* Kode page package groups */
+.pkg-g{display:grid;gap:8px}
+.pkg-g h3{font-size:var(--t14);font-weight:600}

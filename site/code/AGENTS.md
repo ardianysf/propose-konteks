@@ -4,7 +4,7 @@ Instructions for a coding agent (Claude Code, Codex, Cursor) working in the live
 
 ## The one rule
 
-**Change how it looks, never what it does.** Pages, menus, form fields, steps, actions, API calls and permissions stay exactly as they are. `parity/LIVE_PARITY.md` is the list of what exists. If a change would add, remove or reorder a step, field or action, stop and ask.
+**Change how it looks, never what it does.** Pages, menus, form fields, steps, actions, API calls and permissions stay exactly as they are. `parity/LIVE_PARITY.md` is the list of what exists; `PRODUCT.md` says who the product is for and which principles decide trade-offs. If a change would add, remove or reorder a step, field or action, stop and ask.
 
 ## Sources of truth, in order
 
@@ -13,6 +13,7 @@ Instructions for a coding agent (Claude Code, Codex, Cursor) working in the live
 3. `tailwind.preset.js`: keeps the `app-*` class names. Old font sizes and radii fall onto the new steps.
 4. `components.scoped.css`: the components, scoped under `.kx`. Put `class="kx"` on a migrated page root **and** on the portal host (drawers, dialogs, menus, toasts).
 5. `inventory.csv`: every live element → component → audit finding → demo screen in the prototype. Use it to find what to change on a screen and what "done" looks like.
+   The findings themselves are in `docs/konteks-audit-ui-ux.pdf` (or `docs/audit-ui-ux.md`); their status and acceptance criteria are in `AUDIT-STATUS.md`.
 6. `prototype/`: the reference rendering. Open `prototype/index.html#<route>` to see the target for any screen.
 
 ## Work order (each step ships on its own)

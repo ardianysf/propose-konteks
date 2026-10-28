@@ -3,3 +3,4 @@ node_modules/
 .vercel/
 prototype/index.html
 .impeccable/
+docs/tools/audit.html

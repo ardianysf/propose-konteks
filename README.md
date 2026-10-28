@@ -13,13 +13,13 @@ The redesign keeps every process and flow of app.konteks.io and changes only how
 
 | Path | Purpose |
 |---|---|
-| `site/` | What Vercel serves (static, no build step). `index.html` is the built prototype; `code/` holds the developer package the Kode page downloads; `landingpage.html` with its assets. |
+| `site/` | What Vercel serves (static, no build step). `index.html` is the built prototype; `code/` holds the developer package the Kode page downloads; `docs/` the reference documents; `downloads/konteks-ui-lengkap.zip` the full package (code, documents, prototype); `landingpage.html` with its assets. |
 | `prototype/` | Source of the prototype: `src/` (tokens, components, pages as plain JS/CSS), `tools/` (package generator, colour lint), `build.sh`, `publish.sh`. |
 | `DESIGN.md` | The design system: tokens, type, components, overlay grammar, motion, sound, decisions. |
 | `PRODUCT.md` | Product truth used for design decisions. |
 | `AGENTS.md` | Rules for coding agents applying the redesign to the live codebase. |
 | `AUDIT-STATUS.md` | Status of every finding from the UI/UX audit, with evidence. |
-| `docs/` | The audit report and the live-app parity spec. |
+| `docs/` | The UI/UX audit of the live app (`konteks-audit-ui-ux.pdf`, Markdown source `audit-ui-ux.md`, rebuilt with `python3 docs/tools/build_audit_pdf.py`), the live-app parity spec, and the overlay decisions. Names of Systems, people, devices and credentials are anonymised. |
 
 ## Update the site
 

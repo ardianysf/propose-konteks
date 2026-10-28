@@ -12,7 +12,7 @@ function pageOverview() {
     ["Mengapa macet", "“Nothing is moving” padahal penyebabnya izin ditolak, tersembunyi di log.", "Kartu menyebut penyebab terakhir dan aksi yang sudah ada di aplikasi.", "UX-005"],
     ["Satu status, satu arti", "“19 connected” padahal 8 tidak terhubung.", "Ringkasan runtime dihitung dari daftar yang sama.", "UX-013, UX-031"],
     ["Bahasa agen", "Istilah internal, handle mesin, token di setiap pesan.", "Ringkasan untuk manusia lebih dulu, nama orang, jejak agen dilipat.", "UX-019"],
-    ["Sistem visual", "9 ukuran font, 7 radius, 7 format tanggal, checkbox biru bawaan browser.", "7 ukuran, 3 radius, satu format tanggal, semua kontrol bertema.", "DS-01 s.d. DS-09"],
+    ["Sistem visual", "9 ukuran font, 7 radius, 7 format tanggal, checkbox biru bawaan browser.", "6 ukuran, 3 radius, satu format tanggal, semua kontrol bertema.", "DS-01 s.d. DS-09"],
   ];
   const keep = [
     ["Menu dan urutannya", `<p>Activities, Work In Progress, Issues, Releases, Leaders, Customize, runtime, dan menu akun (Settings, EN/ID, Support, Sign Out).</p><p class="k-note">Runtime di sidebar diringkas jadi satu bar status, lalu komputer Anda dan Work Locally.</p>`],
@@ -25,10 +25,10 @@ function pageOverview() {
   const grp = g => { const [name, ps] = DEMO_PAGES.find(d => d[0] === g); return `<div class="sm-g"><span class="label">${name}</span><ul>${ps.map(([h, l]) => `<li><a href="#${h}">${l}${ic("arrow-right")}</a></li>`).join("")}</ul></div>`; };
   return `<div class="doc ov"><div class="doc-in">
     <header class="ov-hero">
-      <h1>Proses yang sama.<br>Tampilan produk yang matang.</h1>
-      <p class="lede">Usulan redesign Konteks untuk tim internal. Setiap halaman, menu, form, langkah, dan aksi di aplikasi yang sekarang berjalan tetap ada dengan arti yang sama. Yang berubah hanya cara layar menampilkannya.</p>
-      <div class="cta-row"><a class="btn btn-primary btn-lg" href="#work">${ic("play")}Buka demo</a><a class="btn btn-lg" href="#foundations">Design system</a><a class="btn btn-lg" href="#components">Katalog komponen</a><a class="btn btn-lg" href="#code">${ic("code")}Kode</a></div>
-      <div class="ov-shot"><div class="ov-shot-in" inert aria-hidden="true">${pageWork().replace(/ id="[^"]*"/g, "").replace(/<(\/?)main\b/g, "<$1div")}</div><a class="ov-shot-link" href="#work" tabindex="-1" aria-label="Buka demo: Work In Progress"></a></div>
+      <h1>Alur yang sama,<br>kini lebih jelas di setiap layar.</h1>
+      <p class="lede">Usulan redesign Konteks untuk tim internal. Fondasinya sudah kuat: palet yang tenang, alur yang dijaga persetujuan, dan bahasa keamanan yang konsisten. Usulan ini mempertahankan setiap halaman, menu, form, langkah, dan aksi, lalu merapikan cara layar menampilkannya.</p>
+      <div class="cta-row"><a class="btn btn-primary btn-lg" href="#work">${ic("play")}Buka demo</a><a class="btn btn-lg" href="${AUDIT_PDF}" target="_blank" rel="noopener">${ic("file-text")}Baca hasil audit<span class="cta-meta">PDF</span></a></div>
+      ${heroStage()}
     </header>
     <section class="sec">
       <div class="sec-head"><h2>Yang tidak berubah</h2><p>Dicocokkan langsung dengan app.konteks.io secara read-only pada 27 Oktober 2026.</p></div>
@@ -53,13 +53,18 @@ function pageOverview() {
     </section>
   </div></div>`;
 }
+
+/* Static copy of a demo page for the hero: ids removed so nothing collides with the live page, <main> demoted. */
+const shotOf = html => html.replace(/ id="[^"]*"/g, "").replace(/<(\/?)main\b/g, "<$1div");
+function heroStage() {
+  const layer = (cls, html) => `<div class="ov-shot ${cls}"><div class="ov-shot-in" inert aria-hidden="true">${shotOf(html)}</div></div>`;
+  return `<div class="ov-stage">${layer("ov-back ov-b1", pageInitiative())}${layer("ov-back ov-b2", pageRuntimes())}${layer("ov-front", pageWork())}<a class="ov-shot-link" href="#work" tabindex="-1" aria-label="Buka demo: Work In Progress"></a></div>`;
+}
 function flowList(steps) { return `<ol class="flow">${steps.map((x, i) => `<li><b>${x}</b>${i < steps.length - 1 ? ic("chevron-right") : ""}</li>`).join("")}</ol>`; }
 /* The hero preview is the real Work In Progress page, rendered at 1280px and scaled to the column. */
 function bindOverview() {
   bindDocs();
-  const box = $(".ov-shot"); if (!box) return;
-  const fit = () => box.style.setProperty("--k", box.clientWidth / 1280);
-  fit(); new ResizeObserver(fit).observe(box);
+  $$(".ov-shot").forEach(box => { const fit = () => box.style.setProperty("--k", box.clientWidth / 1280); fit(); new ResizeObserver(fit).observe(box); });
 }
 
 /* ---------- Foundations ---------- */
@@ -93,7 +98,7 @@ function pageFoundations() {
       </div>
     </section>
 
-    <section class="sec" id="ftype"><div class="sec-head"><h2>Pilihan huruf</h2><p>Lima kandidat, ditulis dengan potongan UI yang sama. Pakai tombol huruf di bilah atas untuk mengganti huruf di seluruh prototipe dan membandingkannya di layar sungguhan. Skala tujuh ukuran tidak berubah; yang berganti hanya token <code>--sans</code> (dan <code>--mono</code> untuk keluarga yang punya mono sendiri).</p></div>
+    <section class="sec" id="ftype"><div class="sec-head"><h2>Pilihan huruf</h2><p>Lima kandidat, ditulis dengan potongan UI yang sama. Pakai tombol huruf di bilah atas untuk mengganti huruf di seluruh prototipe dan membandingkannya di layar sungguhan. Skala enam ukuran tidak berubah; yang berganti hanya token <code>--sans</code> (dan <code>--mono</code> untuk keluarga yang punya mono sendiri).</p></div>
       <div class="fspec">${TYPE_CANDIDATES.map(([k, fam, mono, verdict, notes]) => `<article class="panel fs-c ${S.font === k ? "on" : ""}" style="--fs:${fam};--fm:${mono}">
         <div class="fs-h"><b>${FONTS.find(f => f[0] === k)[1]}</b>${verdict ? `<span class="tag">${verdict}</span>` : ""}<button class="btn btn-sm" type="button" data-font="${k}" ${S.font === k ? "disabled" : ""}>${S.font === k ? "Dipakai" : "Coba"}</button></div>
         <div class="fs-s">
@@ -124,7 +129,7 @@ function pageFoundations() {
 
     <section class="sec" id="f6"><div class="sec-head"><h2>Bahasa</h2><p>Tulis dari sisi pengguna. Tombol menyebut aksinya; pesan error menyebut masalah dan cara memperbaikinya.</p></div>
       <div class="dodont">
-        ${[["Approve · 2.15 SP", "Proceed"], ["Plan could not be saved: you don't have Plan Save in SensePortal", "access_denied"], ["Maya Lestari approved this delivery", "sari-20260811-53ad94 approved this delivery"], ["10 registered · 6 ready · 3 not connected", "19 connected"]].map(([g, b]) => `<div class="panel dd do"><span class="label">${ic("check")}Tulis</span><p>${esc(g)}</p></div><div class="panel dd dont"><span class="label">${ic("x")}Bukan</span><p class="mono" style="font-size:12px">${esc(b)}</p></div>`).join("")}
+        ${[["Approve · 2.15 SP", "Proceed"], ["Plan could not be saved: you don't have Plan Save in SensePortal", "access_denied"], ["Maya Lestari approved this delivery", "mlestari-20260811-53ad94 approved this delivery"], ["10 registered · 6 ready · 3 not connected", "19 connected"]].map(([g, b]) => `<div class="panel dd do"><span class="label">${ic("check")}Tulis</span><p>${esc(g)}</p></div><div class="panel dd dont"><span class="label">${ic("x")}Bukan</span><p class="mono" style="font-size:12px">${esc(b)}</p></div>`).join("")}
       </div>
     </section>
 

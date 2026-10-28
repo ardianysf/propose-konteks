@@ -6,7 +6,7 @@ Prosesnya tidak berubah. Halaman, menu, form, langkah, dan aksinya sama dengan a
 
 ## Isi
 
-Paket lengkap `konteks-ui.zip` berisi semua berkas di tabel ini. Halaman Kode di prototipe menyediakan zip berisi berkas di folder utama saja; `prototype/` dan `parity/` hanya ada di paket lengkap.
+Paket lengkap `konteks-ui-lengkap.zip` (tombol utama di halaman Kode) berisi semua berkas di tabel ini. Tombol "Kode saja" memberi berkas kode di folder utama tanpa dokumen dan prototipe.
 
 | Berkas | Untuk apa |
 |---|---|
@@ -18,9 +18,13 @@ Paket lengkap `konteks-ui.zip` berisi semua berkas di tabel ini. Halaman Kode di
 | `inventory.csv` | Setiap elemen aplikasi dan temuan audit, dengan komponen dan layar demonya. |
 | `AGENTS.md` | Aturan untuk coding agent (Claude Code, Codex, Cursor) yang menerapkan redesign ini di repo live: sumber acuan, urutan kerja, aturan yang mudah dilanggar, dan definisi selesai per PR. |
 | `.stylelintrc.json` | Lint warna: hex, rgb/hsl, dan color-mix hanya boleh ada di `tokens.css`. |
-| `AUDIT-STATUS.md` | Status setiap temuan audit beserta kriteria penerimaannya (hanya di paket lengkap). |
-| `prototype/` | Sumber prototipe pitch: `src/*.js`, `src/*.css`, `build.sh`, `index.html`. |
-| `parity/LIVE_PARITY.md` | Spesifikasi alur aplikasi live yang dipakai sebagai acuan. |
+| `DESIGN.md` | Spesifikasi design system: token, tipe, komponen, pola overlay, gerak, suara, dan keputusan, beserta alasannya. |
+| `PRODUCT.md` | Pengguna, tujuan produk, dan prinsip yang dipakai untuk keputusan desain. |
+| `AUDIT-STATUS.md` | Status setiap temuan audit beserta bukti dan kriteria penerimaannya. |
+| `parity/LIVE_PARITY.md` | Spesifikasi alur aplikasi live yang dipakai sebagai acuan, termasuk token yang dibaca dari stylesheet live. |
+| `docs/konteks-audit-ui-ux.pdf` | Audit UI/UX app.konteks.io (27 Oktober 2026). Versi Markdown: `docs/audit-ui-ux.md`. |
+| `docs/overlays.md` | Keputusan modal, drawer, dialog, dan popover. |
+| `prototype/` | Prototipe dalam satu berkas (`index.html`) dan sumbernya: `src/*.js`, `src/*.css`, `tools/`, `build.sh`. |
 
 ## Langkah adopsi
 
