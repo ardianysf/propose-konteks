@@ -7,7 +7,7 @@ const toneCls = { decision: "ok", blocked: "danger", waiting: "", running: "" };
    everyone else sees who can, as text, not as a button. */
 function rowAction(i) {
   if (i.tone === "running") return "";
-  if (i.kind === "estimate" && S.viewAs !== "approver") return `<span class="gate">${ic("lock")}Maya Lestari approves</span>`;
+  if (i.kind === "estimate" && S.viewAs !== "approver") return `<span class="gate">${ic("lock")}Approvers only</span>`;
   const primary = i.tone === "decision" || i.tone === "blocked";
   return `<button class="btn btn-sm ${primary && i.driver === "ay" ? "btn-primary" : ""}" type="button" data-act="${i.id}">${esc(i.action)}${i.kind === "estimate" && i.quote ? `<span class="cost">${i.quote[0]}</span>` : ""}</button>`;
 }
@@ -23,26 +23,34 @@ function rowHtml(i) {
   </div>`;
 }
 
-/* Work In Progress as a stream, the sibling of Activities: one card per initiative that waits on a person.
-   Each card names the next move, shows what is being decided (the estimate, the delivery bar, the agent's
-   summary) and carries the one action the viewer may take. Same fields as the live list, nothing invented. */
+/* Work In Progress is a work queue, not a feed (Activities is the feed): one panel of rows that answers
+   whose move it is, how long it has waited and how far along the governed flow the initiative is.
+   Same fields as the live list; the flow step is read from the stage and the cause it already shows. */
+const FLOW = ["Plan", "Breakdown", "Estimate", "Delivery", "Receipt"];
 const deliveryOf = i => ACTIVITY.find(e => e.ini === i.id && e.kind === "delivering");
-function wipBody(i, mine) {
-  if (i.kind === "estimate" && i.quote) return `<div class="tl-quote"><div><span>Story Points, at most</span><b>${i.quote[0]}</b></div><div><span>Model cost on your subscription</span><b>${i.quote[1]}</b></div></div>`;
+const flowStep = i => i.stage === "Planning" ? (i.kind === "breakdown" ? 1 : 0) : (i.kind === "estimate" && !S.approved ? 2 : 3);
+const waitDays = w => +(w.match(/(\d+)d/) || [0, 0])[1];
+function flowTrack(i) {
+  const cur = flowStep(i), tone = "f-" + (i.tone === "blocked" ? "danger" : i.tone === "running" ? "run" : i.tone === "waiting" ? "idle" : "ok");
   const e = i.tone === "running" && deliveryOf(i);
-  if (e) return `<div class="tl-prog" role="img" aria-label="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering">${Array.from({ length: e.of }, (_, n) => `<span class="${n < e.done ? "done" : n === e.done ? "now" : ""}"></span>`).join("")}</div>`;
-  /* Only your own cards carry the agent's summary; follow-along cards stay to the cause line. */
-  return mine ? `<p class="tl-text wip-detail">${esc(i.detail)}</p>` : "";
+  /* A delivering step carries the ticket bar (the segments Activities uses, at track scale). */
+  const bar = e ? `<span class="flow-bar" role="img" aria-label="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering" title="${e.done} of ${e.of} tickets merged, ${e.ticket} delivering">${Array.from({ length: e.of }, (_, n) => `<b class="${n < e.done ? "done" : n === e.done ? "now" : ""}"></b>`).join("")}</span>` : "";
+  return `<ol class="flow" aria-label="Flow: ${FLOW[cur]} of ${FLOW.join(", ")}">${FLOW.map((n, k) => `<li class="${k < cur ? "done" : k === cur ? "cur " + tone : ""}" ${k === cur ? 'aria-current="step"' : ""}><i></i><span>${n}</span>${k === cur ? bar : ""}</li>`).join("")}</ol>`;
 }
-function wipCard(i, mine) {
-  /* The node is the driver, as live; an estimate the viewer cannot approve says it needs approval and the gate names who. */
-  const who = i.driver === "ay" ? (i.kind === "estimate" && !mine ? "Needs approval" : "Your move") : `${PEOPLE[i.driver].name.split(" ")[0]}'s move`;
-  return `<li class="tl-item wip-item ${mine ? "mine" : ""}" data-go="${i.id}"><span class="tl-node">${av(i.driver)}</span><article class="tl-card" aria-label="${esc(i.title)}: ${esc(i.cause)}">
-    <header class="tl-h"><p class="tl-t wip-t"><a href="#initiative" data-ini="${i.id}">${esc(i.title.replace(/[\s,.;:]+$/, ""))}</a>${i.fresh ? `<span class="newup" title="${i.fresh} new updates since you last looked"><span class="unread"></span>${i.fresh} new</span>` : ""}</p><span class="wip-wait" title="Waiting ${i.wait}">${ic("clock")}waiting ${i.wait}</span></header>
-    <p class="wip-why ${toneCls[i.tone]}">${ic(toneIc[i.tone])}<span>${esc(i.cause)}${i.more ? ` · <button class="linkbtn" type="button" data-more="${i.id}">+1 more</button>` : ""}</span></p>
-    ${wipBody(i, mine)}
-    <footer class="tl-f"><div class="tl-meta"><span class="wip-who ${mine ? "you" : ""}">${esc(who)}</span>${sysTag(i.sys)}${st("muted", i.stage)}<a href="#initiative" data-ini="${i.id}" class="tl-upd">${i.updates} updates</a></div>${rowAction(i)}</footer>
-  </article></li>`;
+function queueRow(i, mine) {
+  /* Whose move: an estimate the viewer cannot approve is the approver's move. */
+  const approval = i.kind === "estimate" && i.driver === "ay" && !mine;
+  const mover = approval ? "ml" : i.driver;
+  const who = i.tone === "running" ? "Konteks" : approval ? "Maya's approval" : i.driver === "ay" ? "Your move" : `${PEOPLE[i.driver].name.split(" ")[0]}'s move`;
+  const d = waitDays(i.wait), aged = d >= 3 ? "late" : d >= 1 ? "aging" : "";
+  return `<li class="q-row ${mine ? "mine" : ""}" data-go="${i.id}">
+    <div class="q-who"><span class="q-mover">${i.tone === "running" ? `<span class="av av-kx" title="Konteks">${ic("bot")}</span>` : av(mover)}<b>${esc(who)}</b></span>
+      <span class="q-wait ${aged}">${i.tone === "running" ? "for" : "waiting"} <b>${i.wait}</b></span></div>
+    <div class="q-main"><p class="q-title"><a href="#initiative" data-ini="${i.id}">${esc(i.title.replace(/[\s,.;:]+$/, ""))}</a>${sysTag(i.sys)}${i.fresh ? `<span class="newup" title="${i.fresh} new updates since you last looked"><span class="unread"></span>${i.fresh} new</span>` : ""}</p>
+      <p class="q-why ${toneCls[i.tone]}">${ic(toneIc[i.tone])}<span>${esc(i.cause)}${i.more ? ` · <button class="linkbtn" type="button" data-more="${i.id}">+1 more</button>` : ""}</span></p>
+      ${flowTrack(i)}</div>
+    <div class="q-act">${rowAction(i)}</div>
+  </li>`;
 }
 
 function pageWork() {
@@ -50,28 +58,19 @@ function pageWork() {
   const mine = list.filter(actsNow);
   const others = list.filter(i => !actsNow(i) && i.tone !== "running");
   const moving = list.filter(i => i.tone === "running");
-  const group = (title, note, items, isMine) => items.length ? `<li class="tl-day wip-gh"><h2>${title}<span class="count">${items.length}</span><span>${note}</span></h2></li>${items.map(i => wipCard(i, isMine)).join("")}` : "";
+  const group = (title, note, items, isMine, quiet) => items.length ? `<li class="q-band ${quiet ? "quiet" : ""}"><h2>${title}<span class="count">${items.length}</span></h2><span>${note}</span></li>${items.map(i => queueRow(i, isMine)).join("")}` : "";
   const banner = S.bannerGone ? "" : `<div class="banner" id="connBanner">${ic("plug-zap")}<span class="grow"><b style="color:var(--ink);font-weight:500">Rentify was connected</b> from sari@debian on 30 Sep 2026.</span><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Dismiss" id="connX">${ic("x")}</button></div>`;
   const head = `<div class="pagehead">${phead("Work In Progress", "What people are driving. Agents do the rest.", `<button class="btn btn-primary" id="newInit">${ic("plus")}New initiative</button>`)}${sysFilter()}${banner}</div>`;
-  const recent = ACTIVITY.filter(e => !S.sys || iniById[e.ini].sys === S.sys).sort((a, b) => a.m - b.m).slice(0, 4);
-  const rail = `<aside class="act-rail wip-rail" aria-label="Around your work">
-    <section class="rail-now"><h3><span class="dot"></span>Agents are working<span class="count">${moving.length}</span></h3>
-      ${moving.length ? `<ul class="now-list">${moving.map(i => { const e = deliveryOf(i); return `<li class="live"><a href="#initiative" data-ini="${i.id}"><span class="av av-kx" title="Konteks">${ic("bot")}</span><span><b>${esc(i.title)}</b><small>${esc(i.cause).replace(/(rf-\d+)/g, '<span class="nw">$1</span>')}</small>${e ? `<span class="tl-prog" role="img" aria-label="${e.done} of ${e.of} tickets merged">${Array.from({ length: e.of }, (_, n) => `<span class="${n < e.done ? "done" : n === e.done ? "now" : ""}"></span>`).join("")}</span>` : ""}</span><time>${i.wait}</time></a></li>`; }).join("")}</ul>` : `<p class="hint">No agent is delivering right now.</p>`}</section>
-    <section class="rail-recent"><h3>Moved recently</h3>
-      ${recent.length ? `<ul class="now-list">${recent.map(e => { const i = iniById[e.ini]; return `<li><a href="#initiative" data-ini="${i.id}">${actAv(e.p)}<span><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e).replace(/ (in|for)$/, "")}<small>${esc(i.title)}</small></span>${tlTime(e.m)}</a></li>`; }).join("")}</ul>` : `<p class="hint">Nothing moved yet.</p>`}
-      <a class="rail-more" href="#activities">All activity${ic("arrow-right")}</a></section>
-  </aside>`;
-  const feed = (mine.length + others.length) ? `<ol class="tl wip-tl" aria-label="Work In Progress">${group("Needs you", "You drive these", mine, true)}${group("Needs someone else", "Follow along; the named person acts", others, false)}</ol>`
-    : moving.length ? `<div class="tl-empty"><h3>Nothing waits on a person</h3><p>Agents are delivering; you'll be asked when something needs a decision.</p></div>`
-    : `<div class="tl-empty"><h3>Nothing in progress in ${esc(sysById[S.sys].name)}</h3><p>Start an initiative and a planning session opens behind it, ready to read your notes.</p><button class="btn btn-sm" id="newInit2">${ic("plus")}New initiative</button></div>`;
-  return shell("work", "", head + `<div class="act wip"><div class="act-feed">${feed}</div>${rail}</div>`, { flush: true });
+  const body = list.length ? `<div class="queue-wrap"><ul class="queue" aria-label="Work In Progress">${group("Needs you", "You drive these", mine, true)}${group("Needs someone else", "Follow along; the named person acts", others, false)}${group("Agents are delivering", "Nothing to do until they report back", moving, false, true)}</ul></div>`
+    : `<div class="queue-wrap"><div class="q-empty"><h3>Nothing in progress in ${esc(sysById[S.sys].name)}</h3><p>Start an initiative and a planning session opens behind it, ready to read your notes.</p><button class="btn btn-sm" id="newInit2">${ic("plus")}New initiative</button></div></div>`;
+  return shell("work", "", head + body, { flush: true });
 }
 function bindWork() {
   bindSysFilter();
   $("#newInit")?.addEventListener("click", () => newInitiative()); $("#newInit2")?.addEventListener("click", () => newInitiative());
   $("#connX")?.addEventListener("click", () => { S.bannerGone = true; try { localStorage.setItem("kx-conn-banner", "gone"); } catch (e) {} $("#connBanner").remove(); });
   $$("[data-ini]").forEach(a => a.onclick = () => { S.cur = a.dataset.ini; });
-  /* The whole card opens the initiative; its own links and buttons keep their job. */
+  /* The whole row opens the initiative; its own links and buttons keep their job. */
   $$("[data-go]").forEach(r => r.onclick = e => { if (e.target.closest("button,a,summary")) return; S.cur = r.dataset.go; location.hash = "initiative"; });
   bindMore();
   $$("[data-act]").forEach(b => b.onclick = () => runAction(iniById[b.dataset.act], b));
