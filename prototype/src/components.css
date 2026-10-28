@@ -1365,6 +1365,104 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .field-tip{position:fixed;z-index:20;translate:-50% -100%;pointer-events:none;background:var(--ink);color:var(--ink-inv);font-size:var(--t12);font-weight:500;padding:4px 8px;border-radius:var(--r6);white-space:nowrap;box-shadow:var(--shadow-2);animation:tipin .15s var(--ease)}
 @keyframes tipin{from{opacity:0;translate:-50% -80%}}
 @media (max-width:640px){.auth-base{justify-content:center;text-align:center;background:var(--bg);border-top:1px solid var(--line)}}
+
+/* Sign-in design switcher (demo only). */
+.auth-vars{display:inline-flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:var(--r6);background:var(--surface)}
+.auth-vars a{padding:2px 8px;border-radius:var(--r4);color:var(--ink-2);text-decoration:none;font-weight:500}
+.auth-vars a:hover{background:var(--hover);color:var(--ink)}
+.auth-vars a[aria-current="page"]{background:var(--nav-on);color:var(--ink)}
+
+/* ---------- Sign-in B · Receipt: the stub of a delivery receipt on a deep moss ground ---------- */
+.auth-r{background:var(--deep);color:var(--on-deep)}
+.r-stage{position:relative;display:grid;justify-items:center;align-content:start;padding:40px 24px 8px;outline:none}
+.r-slot{width:min(452px,calc(100% - 8px));height:16px;border-radius:999px;background:var(--deep-2);box-shadow:var(--slot-shadow);position:relative;z-index:2}
+/* The receipt comes out of the slot: it is clipped at the slot's lip and slides down once. */
+.r-feed{width:min(484px,100%);margin-top:-8px;overflow:hidden;padding:0 40px 72px}
+.receipt{position:relative;display:grid;gap:18px;padding:30px 28px 22px;background:var(--paper);color:var(--paper-ink);box-shadow:var(--paper-shadow);animation:rfeed 1.8s cubic-bezier(.3,.7,.2,1) both}
+.receipt::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:8px;background:radial-gradient(circle at 6px 0,var(--paper) 5.5px,transparent 6px) 0 0/12px 8px repeat-x}
+@keyframes rfeed{from{translate:0 -100%}}
+.r-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:14px;border-bottom:1px dashed var(--paper-rule)}
+.r-head .auth-mark{font-size:var(--t14)}
+.r-head .auth-mark .brand-mark{width:26px;height:26px;font-size:var(--t13);border-radius:var(--r6)}
+.r-kind{font-family:var(--mono);font-size:var(--t12);letter-spacing:.06em;text-transform:uppercase;color:var(--paper-ink-2)}
+.receipt h1{font-size:var(--t28);line-height:1.12;letter-spacing:-.025em;font-weight:650;text-wrap:balance}
+.r-lines{margin:0;display:grid;gap:7px;font-family:var(--mono);font-size:var(--t12)}
+.r-lines>div{display:flex;align-items:baseline;gap:10px;animation:rline .3s var(--ease) both;animation-delay:calc(.9s + var(--i) * .07s)}
+.r-lines dt{color:var(--paper-ink-2);flex:0 1 auto;min-width:0}
+.r-lines>div::after{content:"";order:1;flex:1;border-bottom:1px dotted var(--paper-rule);translate:0 -3px}
+.r-lines dd{order:2;margin:0;min-width:0;text-align:right;color:var(--paper-ink);font-weight:500;overflow-wrap:anywhere}
+.r-lines .r-rule{height:0;border-top:1px dashed var(--paper-rule);margin:4px 0}
+.r-lines .r-rule::after{display:none}
+@keyframes rline{from{opacity:0}}
+.r-total{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0 2px;border-top:2px solid var(--paper-ink);font-family:var(--mono);font-size:var(--t13);text-transform:uppercase;letter-spacing:.04em;animation:rline .3s var(--ease) both;animation-delay:calc(.9s + var(--i) * .07s)}
+.r-total b{font-size:var(--t20);letter-spacing:0;text-transform:none}
+.r-perf{position:relative;height:18px;margin:2px -28px 0;border-top:2px dashed var(--paper-rule)}
+.r-perf svg{position:absolute;left:14px;top:-10px;width:18px;height:18px;padding:1px;background:var(--paper);color:var(--paper-ink-2);rotate:-90deg}
+.r-stub{display:grid;justify-items:center;text-align:center;gap:14px}
+.r-stub h2{font-size:var(--t16);font-weight:600}
+.auth-r .auth-help{color:var(--paper-ink-2)}
+.auth-r .auth-base{background:none;color:var(--on-deep-2)}
+.auth-r .auth-base svg{color:var(--on-deep-2)}
+.auth-r .auth-vars{background:var(--deep-2);border-color:var(--deep-line)}
+.auth-r .auth-vars a{color:var(--on-deep-2)}
+.auth-r .auth-vars a:hover{background:var(--deep-hover);color:var(--on-deep)}
+.auth-r .auth-vars a[aria-current="page"]{background:var(--deep-on);color:var(--on-deep)}
+.auth-r .auth-demo .label{color:var(--on-deep-2)}
+.auth-r .auth-demo .btn-ghost{color:var(--on-deep-2)}
+.auth-r .auth-demo .btn-ghost:hover{background:var(--deep-hover);color:var(--on-deep)}
+@media (max-width:640px){.auth-r .auth-base{background:var(--deep);border-top-color:var(--deep-line)}.r-stage{padding:28px 12px 8px}.r-feed{padding:0 6px 48px}.receipt{padding:24px 20px 18px}.r-perf{margin:2px -20px 0}.receipt h1{font-size:var(--t20)}}
+
+/* ---------- Sign-in C · Flow: the governed flow is the page; it stops at Approve ---------- */
+.auth-f{grid-template-rows:auto 1fr auto}
+.f-top{padding:22px 24px 0}
+.f-main{display:grid;align-content:center;gap:28px;padding:24px 0 40px;outline:none;width:100%}
+.f-copy{display:grid;gap:8px;max-width:1240px;width:100%;margin:0 auto;padding:0 24px}
+.f-copy h1{font-size:var(--t28);line-height:1.15;letter-spacing:-.025em;font-weight:650}
+.f-copy .auth-lede{font-size:var(--t14);max-width:60ch}
+/* The band: a full-width moss field that carries the track at display scale. */
+.f-trackwrap{position:relative;padding:64px max(24px,calc(50% - 620px)) 40px;background:var(--accent-soft);border-top:1px solid var(--line-accent);border-bottom:1px solid var(--line-accent);margin-bottom:220px}
+.f-track{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));position:relative}
+.f-track::before{content:"";position:absolute;left:calc(100%/12);right:calc(100%/12);top:8px;height:4px;border-radius:999px;background:var(--line-strong)}
+.f-track::after{content:"";position:absolute;left:calc(100%/12);top:8px;height:4px;border-radius:999px;width:calc(100%/2);background:var(--accent-strong);transform-origin:left;animation:fline 1.9s var(--ease) both .2s}
+@keyframes fline{from{scale:0 1}}
+.f-track li{position:relative;display:grid;justify-items:center;align-content:start;text-align:center;gap:10px;padding:0 6px}
+.f-track i{position:relative;z-index:1;width:20px;height:20px;border-radius:50%;border:3px solid var(--line-strong);background:var(--accent-soft)}
+.f-track li.done i{border-color:var(--accent-strong);background:var(--accent-strong);animation:fdot .3s var(--ease) both;animation-delay:calc(.2s + var(--k) * .55s)}
+@keyframes fdot{from{background:var(--accent-soft);border-color:var(--line-strong)}}
+.f-track b{font-size:clamp(20px,2.4vw,34px);font-weight:650;letter-spacing:-.025em;line-height:1.05;color:var(--ink-3)}
+.f-track li.done b{color:var(--accent-ink)}
+.f-track span{font-size:var(--t12);color:var(--ink-3);max-width:20ch;text-wrap:balance}
+.f-track li.done>span{color:var(--ink-2)}
+.f-track li.gate i{width:36px;height:36px;margin-top:-8px;border:5px solid var(--accent);background:var(--surface);animation:fgate 2.6s var(--ease) infinite 2s}
+@keyframes fgate{0%{box-shadow:0 0 0 0 var(--focus)}60%{box-shadow:0 0 0 18px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.f-track li.gate b{color:var(--ink);font-size:clamp(28px,3.6vw,52px);font-weight:700}
+.f-track li.gate>span{color:var(--ink-2)}
+/* The token rides the line and stops above Approve. */
+.f-token{position:absolute;top:18px;left:calc(max(24px,50% - 620px) + (100% - 2 * max(24px,50% - 620px)) * 7 / 12);translate:-50% 0;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line-accent);box-shadow:var(--shadow-2);font-size:var(--t12);font-weight:500;white-space:nowrap;animation:ftoken 1.9s var(--ease) both .2s}
+.f-token svg{width:14px;height:14px;color:var(--accent-strong)}
+@keyframes ftoken{from{left:calc(max(24px,50% - 620px) + (100% - 2 * max(24px,50% - 620px)) / 12)}}
+.f-token-m{display:none}
+.f-card{position:absolute;top:calc(100% + 58px);left:50%;translate:-50% 0;width:340px;display:grid;justify-items:center;gap:14px;padding:22px 22px 18px;background:var(--surface);border:1px solid var(--line-accent);border-radius:var(--r10);box-shadow:var(--shadow-3);animation:authin .5s var(--ease) both 2s;z-index:2}
+.f-card::before{content:"";position:absolute;top:-7px;left:50%;width:12px;height:12px;translate:-50% 0;rotate:45deg;background:var(--surface);border-left:1px solid var(--line-accent);border-top:1px solid var(--line-accent)}
+.f-card h2{font-size:var(--t16);font-weight:600}
+@media (max-width:860px){
+  .f-main{gap:20px;align-content:start}
+  .f-trackwrap{padding:28px 16px 12px;margin-bottom:0}
+  .f-token{display:none}
+  .f-token-m{display:inline-flex;position:static;translate:none;animation:none;justify-self:start;margin:2px 0 4px}
+  .f-track{grid-template-columns:1fr;gap:0}
+  .f-track::before{left:8px;right:auto;top:10px;bottom:10px;width:4px;height:auto}
+  .f-track::after{display:none}
+  .f-track li{grid-template-columns:20px minmax(0,1fr);justify-items:start;text-align:left;column-gap:14px;row-gap:2px;padding:0 0 18px}
+  .f-track li>i{grid-row:span 3;margin-top:4px}
+  .f-track li.gate>i{width:30px;height:30px;margin:-2px 0 0 -5px;border-width:4px}
+  .f-track b{font-size:var(--t20)}
+  .f-track li.gate b{font-size:var(--t28)}
+  .f-track span{max-width:none}
+  .f-card{position:static;translate:none;grid-column:2;width:auto;justify-self:stretch;margin-top:10px;animation:none}
+  .f-card::before{display:none}
+}
+@media (prefers-reduced-motion:reduce){.receipt,.r-lines>div,.r-total,.f-track::after,.f-track li.done i,.f-token,.f-card,.f-track li.gate i{animation:none}.start-sticker{rotate:0deg}}
 @media (prefers-reduced-motion:reduce){.auth-card{animation:none}}
 
 /* ---------- Session dock: a progress pill and a one-row composer ---------- */
@@ -1511,13 +1609,23 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .wait-list li>span{min-width:0}
 .quiet-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
 .act-rail section>.btn-primary{justify-self:start}
-.act-new{display:none}
+/* Start something on narrow screens: a small sticker that stays in view instead of a section after the feed. */
+.start-sticker{display:none}
+.ss-pop{display:grid;gap:10px;width:min(300px,calc(100vw - 32px))}
+.ss-pop>b{font-size:var(--t13);font-weight:600}
+.ss-pop .quiet-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.ss-pop>.btn-primary{justify-self:start}
 /* Start something is the page's invitation: a quiet accent border sets it apart from the lists around it. */
 .act-rail .rail-start{border:1px solid var(--line-accent);border-radius:var(--r10);background:var(--surface);padding:14px 14px 16px}
 @media (max-width:1100px){
-  /* The rail's New initiative sits after the feed here, so the page head carries it instead. */
-  .phead .act-new{display:inline-flex}
-  .rail-start>.btn-primary{display:none}
+  .act-rail .rail-start{display:none}
+  .start-sticker{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px 0 12px;border:1px solid var(--line-accent);border-radius:999px;background:var(--surface);color:var(--accent-ink);font-size:var(--t13);font-weight:600;box-shadow:var(--shadow-2);rotate:-2deg;cursor:pointer;transition:rotate .2s var(--ease),scale .2s var(--ease),background-color .15s}
+  .start-sticker:hover{rotate:0deg;background:var(--accent-soft)}
+  .start-sticker:active{scale:.97}
+  .start-sticker[aria-expanded="true"]{rotate:0deg;background:var(--accent-soft)}
+  .start-sticker svg{width:15px;height:15px}
+  .start-sticker .ss-n{display:grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;border:1px solid var(--line-strong);color:var(--ink-3);font-size:var(--t12);font-weight:500;font-variant-numeric:tabular-nums}
+  .act{padding-bottom:96px}
   .act{grid-template-columns:minmax(0,1fr);gap:8px}
   .act-rail{display:contents}
   .rail-now{order:-1;padding:4px 0 8px}
@@ -1530,7 +1638,8 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
   .now-list li{flex:0 0 260px}
   .now-list a{margin:0;border:1px solid var(--line);background:var(--surface);height:100%}
 }
-@media (max-width:860px){.act{padding:0 16px 72px}.tl-day{top:calc(var(--pb) + 52px)}}
+@media (max-width:860px){.act{padding:0 16px 132px}.tl-day{top:calc(var(--pb) + 52px)}.start-sticker{bottom:calc(76px + env(safe-area-inset-bottom,0px))}}
+@media (prefers-reduced-motion:reduce){.start-sticker{rotate:0deg;transition:none}}
 @media (max-width:560px){
   .tl-item{grid-template-columns:28px minmax(0,1fr);gap:10px}
   .tl::before{left:13.5px}
@@ -1590,7 +1699,7 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .flow .cur.f-idle i{border-color:var(--ink-3);box-shadow:0 0 0 3px var(--sunken)}
 .flow .cur.f-run i{border-color:var(--info);box-shadow:0 0 0 3px var(--info-soft);animation:flowrun 2.4s var(--ease) infinite}
 .flow-bar{display:flex;gap:2px;flex:none;margin-left:2px}
-.flow-bar b{padding:0;width:12px;height:5px;border-radius:2px;background:var(--line-strong)}
+.flow-bar b{padding:0;width:12px;height:5px;border-radius:999px;background:var(--line-strong)}
 .flow-bar .done{background:var(--accent-strong)}
 .flow-bar .now{background:var(--info)}
 @keyframes flowrun{0%{box-shadow:0 0 0 3px var(--info-soft)}60%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 3px transparent}}

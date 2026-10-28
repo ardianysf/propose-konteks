@@ -163,8 +163,9 @@ function pageActivities() {
     <section class="rail-start"><h3>Start something</h3><p class="hint">Systems with no initiative yet. The planning agent starts from a few sentences.</p>
       <ul class="quiet-list">${quiet.map(s => `<li><span>${sysTag(s.id)}</span><button class="btn btn-sm" type="button" data-start="${s.id}">${ic("plus")}Start</button></li>`).join("")}</ul>
       <button class="btn btn-primary btn-sm" type="button" data-start="">${ic("plus")}New initiative</button></section>
-    </div></aside>`;
-  const body = `<div class="pagehead">${phead("Activities", "What your team is moving across your Systems.", `<button class="btn btn-primary btn-sm act-new" type="button" data-start="">${ic("plus")}New initiative</button>`)}${sysFilter()}</div>
+    </div></aside>
+    <button class="start-sticker" type="button" id="startSticker" aria-haspopup="dialog" aria-expanded="false">${ic("plus")}<span>Start something</span>${quiet.length ? `<span class="ss-n" title="${quiet.length} Systems with nothing in progress" aria-label="${quiet.length} Systems with nothing in progress">${quiet.length}</span>` : ""}</button>`;
+  const body = `<div class="pagehead">${phead("Activities", "What your team is moving across your Systems.")}${sysFilter()}</div>
     <div class="act"><div class="act-feed"><ol class="tl" role="feed" aria-label="Activities">${feed}</ol>
       ${days.length ? `<div class="pager list-pager">${S.actMore ? `<span>You're all caught up · ${cardCount} cards</span>` : `<button class="btn btn-sm" id="moreAct">Load more</button><span>Showing ${cardCount} of ${cardTotal}</span>`}</div>` : ""}</div>${rail}</div>`;
   return shell("activities", "", body, { flush: true });
@@ -174,6 +175,18 @@ function bindActivities() {
   bindNoteTools();
   $$("[data-ini]").forEach(a => a.addEventListener("click", () => { S.cur = a.dataset.ini; }));
   $$("[data-start]").forEach(b => b.onclick = () => newInitiative(b.dataset.start || S.sys));
+  /* Narrow screens: Start something is a small sticker that stays in view; it opens the same list in a popover. */
+  const sticker = $("#startSticker");
+  if (sticker) sticker.onclick = () => {
+    if ($(".floatpop")) { $$(".floatpop").forEach(p => p.remove()); sticker.setAttribute("aria-expanded", "false"); return; }
+    const quiet = SYSTEMS.filter(s => !INITIATIVES.some(i => i.sys === s.id));
+    const pp = popover(sticker, "Start something", `<div class="ss-pop"><b>Start something</b><p class="hint">Systems with no initiative yet. The planning agent starts from a few sentences.</p>
+      <ul class="quiet-list">${quiet.map(s => `<li><span>${sysTag(s.id)}</span><button class="btn btn-sm" type="button" data-start="${s.id}">${ic("plus")}Start</button></li>`).join("")}</ul>
+      <button class="btn btn-primary btn-sm" type="button" data-start="">${ic("plus")}New initiative</button></div>`);
+    drawIcons(); sticker.setAttribute("aria-expanded", "true");
+    $$("[data-start]", pp.el).forEach(b => b.onclick = () => { pp.close(false); sticker.setAttribute("aria-expanded", "false"); newInitiative(b.dataset.start || S.sys); });
+    new MutationObserver((_, o) => { if (!pp.el.isConnected) { sticker.setAttribute("aria-expanded", "false"); o.disconnect(); } }).observe(document.body, { childList: true });
+  };
   $$("[data-react]").forEach(b => b.onclick = () => { const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", on); const c = b.querySelector("span"); c.textContent = +c.textContent + (on ? 1 : -1); b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); });
   /* Comment toggles its box inside the card: a second press (or Escape, or Cancel) closes it and returns focus. */
   $$("[data-cmt]").forEach(b => { b.setAttribute("aria-expanded", "false"); b.onclick = () => {
@@ -235,7 +248,21 @@ function pageLeaders() {
 /* Sign in: the live Backstage page with the Google provider only. The page is a field of stage glyphs, the product's
    own mark: work queued, moving, delivered, and the few waiting for a person. The sign-in sits in a clearing at the
    centre. Hover a waiting glyph to see what it waits for; pressing Sign in sets the waiting ones moving again. */
+/* Three sign-in designs for comparison, one process: Google-only Backstage sign-in with the same help and error.
+   A (#login) the field, B (#login/receipt) the receipt stub, C (#login/flow) the Approve station. */
+const LOGIN_VARIANTS = [["", "Field"], ["receipt", "Receipt"], ["flow", "Flow"]];
+function loginBits() {
+  const busy = S.loginStep === "busy", err = S.loginStep === "error";
+  return {
+    err: err ? `<div class="callout danger" role="alert">${ic("circle-alert")}<span class="grow"><b>The Google sign-in window closed before it finished.</b> Allow pop-ups for app.konteks.io and try again.</span></div>` : "",
+    btn: `<button class="btn btn-primary google" type="button" id="gBtn" ${busy ? 'disabled aria-busy="true"' : ""}>${busy ? `<span class="spin"></span>Waiting for Google…` : `${ic("log-in")}Sign in with Google`}</button>`,
+    help: `<p class="auth-help">Use the Google account your workspace invited.</p>`,
+    base: `<footer class="auth-base"><span>${ic("shield-check")}Runs on your team's computers. Konteks never holds a provider key.</span><span class="auth-demo"><span class="label">Demo</span><nav class="auth-vars" aria-label="Sign-in designs">${LOGIN_VARIANTS.map(([k, l]) => `<a href="#login${k ? "/" + k : ""}" ${(S.loginVar || "") === k ? 'aria-current="page"' : ""}>${l}</a>`).join("")}</nav><button class="btn btn-ghost btn-sm" type="button" id="gErr">Show the error state</button></span></footer>`,
+  };
+}
 function pageLogin() {
+  if (S.loginVar === "receipt") return pageLoginReceipt();
+  if (S.loginVar === "flow") return pageLoginFlow();
   const busy = S.loginStep === "busy", err = S.loginStep === "error";
   return `<div class="auth">
     <canvas class="field" id="field" aria-hidden="true"></canvas>
@@ -251,7 +278,50 @@ function pageLogin() {
         <ul class="auth-legend" aria-label="What the field shows"><li><i class="lg-d"></i>Delivered</li><li><i class="lg-p"></i>In progress</li><li><i class="lg-y"></i>Needs a person</li></ul>
       </div>
     </main>
-    <footer class="auth-base"><span>${ic("shield-check")}Runs on your team's computers. Konteks never holds a provider key.</span><span class="auth-demo"><span class="label">Demo</span><button class="btn btn-ghost btn-sm" type="button" id="gErr">Show the error state</button></span></footer>
+    ${loginBits().base}
+  </div>`;
+}
+/* B · Receipt: the sign-in is the stub of a delivery receipt, the proof that nothing ran until a person approved it. */
+function pageLoginReceipt() {
+  const b = loginBits();
+  const lines = [["Initiative", "Refresh the Support API README"], ["Ticket", "TKT-1"], ["Ran on", "rf-01 · your server"], ["Approved by", "Maya Lestari · 27 Oct, 14.36"], "-",
+    ["Quoted, at most", "2.15 SP"], ["Used", "1.84 SP"], ["Model cost", "$1.12 · your plan"], ["Pull request", "#142 · merged"]];
+  return `<div class="auth auth-r">
+    <main class="r-stage" id="main" tabindex="-1">
+      <div class="r-slot" aria-hidden="true"></div>
+      <div class="r-feed">
+        <article class="receipt" aria-label="Sample delivery receipt, with sign-in">
+          <header class="r-head"><span class="auth-mark"><span class="brand-mark">K</span>Konteks</span><span class="r-kind">Delivery receipt · Sample</span></header>
+          <h1>Nothing ran until someone approved it.</h1>
+          <dl class="r-lines">${lines.map((l, n) => l === "-" ? `<div class="r-rule" style="--i:${n}" aria-hidden="true"></div>` : `<div style="--i:${n}"><dt>${l[0]}</dt><dd>${l[1]}</dd></div>`).join("")}</dl>
+          <p class="r-total" style="--i:${lines.length}"><span>Settled</span><b>1.84 SP</b></p>
+          <div class="r-perf" aria-hidden="true">${ic("scissors")}</div>
+          <section class="r-stub" aria-labelledby="stubH">
+            <h2 id="stubH">Sign in to see yours</h2>
+            ${b.err}${b.btn}${b.help}
+          </section>
+        </article>
+      </div>
+    </main>
+    ${b.base}
+  </div>`;
+}
+/* C · Flow: the governed flow at page scale. Agents carry the work to Approve, the one station that needs a person. */
+const LOGIN_FLOW = [["Plan", "The agent writes the plan from your request."], ["Breakdown", "Tickets, each with its repository."], ["Estimate", "A quote in Story Points before anything runs."],
+  ["Approve", "A person signs off. Nothing runs before that."], ["Delivery", "On your team's runtime, as a pull request."], ["Receipt", "Only what was used is settled."]];
+function pageLoginFlow() {
+  const b = loginBits();
+  return `<div class="auth auth-f">
+    <header class="f-top"><span class="auth-mark"><span class="brand-mark">K</span>Konteks</span></header>
+    <main class="f-main" id="main" tabindex="-1">
+      <div class="f-copy"><h1>Agents do the work.<br>Approving is yours.</h1>
+        <p class="auth-lede">Konteks plans, breaks down, estimates and delivers on your team's computers. It stops at one station and waits for a person.</p></div>
+      <div class="f-trackwrap">
+        <span class="f-token" aria-hidden="true">${ic("bot")}Refresh the Support API README</span>
+        <ol class="f-track" aria-label="The governed flow">${LOGIN_FLOW.map(([n, d], k) => `<li class="${k < 3 ? "done" : k === 3 ? "gate" : ""}" style="--k:${k}" ${k === 3 ? 'aria-current="step"' : ""}><i></i><b>${n}</b><span>${d}</span>${k === 3 ? `<span class="f-token f-token-m" aria-hidden="true">${ic("bot")}Refresh the Support API README · waiting here</span><section class="f-card" aria-labelledby="fH"><h2 id="fH">This step needs you</h2>${b.err}${b.btn}${b.help}</section>` : ""}</li>`).join("")}</ol>
+      </div>
+    </main>
+    ${b.base}
   </div>`;
 }
 /* The field: one canvas, a glyph every 32px. Colours come from the tokens, so dark mode follows. */

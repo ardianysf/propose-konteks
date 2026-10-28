@@ -40,7 +40,8 @@ function render() {
   if (key === "access") S.accessTab = ACCESS_TABS.some(([k]) => k === sub) ? sub : "overview";
   /* "#initiative/activities": the same detail page, opened from Activities, goes back there (live: ?from=activities). */
   if (key === "initiative") S.iniFrom = sub === "activities" ? "activities" : "work";
-  const badSub = sub && !(key === "access" && ACCESS_TABS.some(([k]) => k === sub)) && !(key === "initiative" && sub === "activities");
+  if (key === "login") S.loginVar = ["receipt", "flow"].includes(sub) ? sub : "";
+  const badSub = sub && !(key === "access" && ACCESS_TABS.some(([k]) => k === sub)) && !(key === "initiative" && sub === "activities") && !(key === "login" && ["receipt", "flow"].includes(sub));
   const known = badSub ? null : ROUTES[key];
   const [page, bind, section, title] = known || [notFound, () => {}, "demo", "Not found"];
   /* The pitch bar steps aside in the demo app so it reads like the product; a pull tab brings it back. */
