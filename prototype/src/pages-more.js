@@ -324,13 +324,13 @@ function pageLoginSplit() {
         <h1>Welcome back.</h1>
         <p class="auth-lede">Sign in to see what your agents moved and what is waiting for you.</p>
         ${b.err}${b.btn}${b.help}
-        <div class="s-card-m s-light" aria-hidden="true" inert>${card}</div>
+        <div class="s-card-m" aria-hidden="true" inert>${card}</div>
       </main>
       ${b.base}
     </section>
     <aside class="s-right" aria-hidden="true" inert>
-      <div class="s-shot s-light"><div class="ov-shot-in">${shotOf(pageWork())}</div></div>
-      <div class="s-card s-light">${card}</div>
+      <div class="s-shot"><div class="ov-shot-in">${shotOf(pageWork())}</div></div>
+      <div class="s-card">${card}</div>
       <div class="s-cap"><b>Nothing runs until a person approves it.</b><span>Agents plan, estimate and deliver on your own runtimes. You decide what spends.</span></div>
     </aside>
   </div>`;

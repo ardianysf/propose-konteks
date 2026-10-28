@@ -1420,7 +1420,7 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .s-right{position:relative;margin:14px 14px 14px 0;border-radius:20px;background:var(--deep);border:1px solid var(--deep-line);overflow:hidden;isolation:isolate}
 .s-right::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(70% 60% at 72% 18%,var(--night-glow),transparent 70%)}
 /* The real Work In Progress page, rendered at 1280px and scaled; it bleeds off the right and fades at the bottom. */
-.s-shot{--k:.6;position:absolute;left:56px;top:48px;width:1040px;aspect-ratio:1280/800;border-radius:12px;overflow:hidden;background:var(--bg);box-shadow:var(--shadow-3);-webkit-mask-image:linear-gradient(to bottom,var(--deep) 55%,transparent 85%);mask-image:linear-gradient(to bottom,var(--deep) 55%,transparent 85%);animation:sshot .7s var(--ease) both}
+.s-shot{--k:.6;position:absolute;left:56px;top:48px;width:1040px;outline:1px solid var(--line);aspect-ratio:1280/800;border-radius:12px;overflow:hidden;background:var(--bg);box-shadow:var(--shadow-3);-webkit-mask-image:linear-gradient(to bottom,var(--deep) 55%,transparent 85%);mask-image:linear-gradient(to bottom,var(--deep) 55%,transparent 85%);animation:sshot .7s var(--ease) both}
 @keyframes sshot{from{opacity:0;translate:24px 0}}
 .s-card{position:absolute;right:40px;top:250px;width:520px;transform:scale(.9);transform-origin:100% 0;border-radius:var(--r10);box-shadow:var(--paper-lift);animation:scard .6s var(--ease) both .15s}
 /* A pool of moss under the card hides the queue rows it lands on, so the card reads alone. */
