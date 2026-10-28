@@ -125,12 +125,12 @@ function actBody(e, i) {
 function actCard({ e, earlier }) { const i = iniById[e.ini], live = e.kind === "delivering" && e.m < 60, cta = actsNow(i) && e === ACTIVITY.find(x => x.ini === e.ini);
     const when = new Date(NOW - e.m * 60000);
     return `<li class="tl-item ${live ? "live" : ""}"><span class="tl-node">${actAv(e.p)}</span><article class="tl-card" aria-label="${esc(actWho(e.p))} ${esc(ACT_VERB[e.kind](e))} ${esc(i.title)}">
-      <header class="tl-h"><p class="tl-t"><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e)} <a href="#initiative" data-ini="${i.id}">${esc(i.title)}</a></p>${live ? `<span class="tl-live"><span class="dot"></span>Live</span>` : ""}${tlTime(e.m)}</header>
-      <div class="tl-meta">${sysTag(i.sys)}${st("muted", i.stage)}<a href="#initiative" data-ini="${i.id}" class="tl-upd">${i.updates} updates</a></div>
+      <header class="tl-h"><p class="tl-t"><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e)} <a href="#initiative/activities" data-ini="${i.id}">${esc(i.title)}</a></p>${live ? `<span class="tl-live"><span class="dot"></span>Live</span>` : ""}${tlTime(e.m)}</header>
+      <div class="tl-meta">${sysTag(i.sys)}${st("muted", i.stage)}<a href="#initiative/activities" data-ini="${i.id}" class="tl-upd">${i.updates} updates</a></div>
       ${actBody(e, i)}
       ${earlier.length ? `<details class="tl-thread"><summary>${ic("chevron-right")}${earlier.length} earlier ${e.m < 1440 ? "today" : "that day"}</summary><ol>${earlier.map(x => `<li>${actAv(x.p)}<span><b>${actWho(x.p)}</b> ${x.kind === "started" ? "started it" : ACT_VERB[x.kind](x).replace(/ (in|for)$/, "")}</span>${tlTime(x.m)}</li>`).join("")}</ol></details>` : ""}
       <footer class="tl-f"><div class="reacts">${e.re.map(([em, n]) => `<button class="react" type="button" aria-pressed="false" data-react>${em} <span>${n}</span></button>`).join("")}<button class="react react-add" type="button" aria-label="React">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm" type="button" data-cmt aria-label="Comment on ${esc(i.title)}">${ic("message-square")}Comment</button></div>
-        ${cta ? `<a class="btn btn-primary btn-sm" href="#initiative" data-ini="${i.id}">${esc(i.action)}${ic("arrow-right")}</a>` : e.kind === "estimate" && !S.approved ? `<span class="hint">${ic("lock")}Maya Lestari approves</span>` : ""}</footer>
+        ${cta ? `<a class="btn btn-primary btn-sm" href="#initiative/activities" data-ini="${i.id}">${esc(i.action)}${ic("arrow-right")}</a>` : e.kind === "estimate" && !S.approved ? `<span class="hint">${ic("lock")}Maya Lestari approves</span>` : ""}</footer>
     </article></li>`; }
 function pageActivities() {
   const evs = ACTIVITY.filter(e => (S.actMore || !e.more) && (!S.sys || iniById[e.ini].sys === S.sys)).sort((a, b) => a.m - b.m);
@@ -148,10 +148,10 @@ function pageActivities() {
   const quiet = SYSTEMS.filter(s => !INITIATIVES.some(i => i.sys === s.id));
   const rail = `<aside class="act-rail" aria-label="Around you">
     <section class="rail-now"><h3><span class="dot"></span>Moving now<span class="count">${moving.length}</span></h3>
-      ${moving.length ? `<ul class="now-list">${moving.map(e => { const i = iniById[e.ini]; return `<li class="${e.kind === "delivering" ? "live" : ""}"><a href="#initiative" data-ini="${i.id}">${actAv(e.p)}<span><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e).replace(/ (in|for)$/, "")}<small>${esc(i.title)} · ${sysById[i.sys].name}</small></span>${tlTime(e.m)}</a></li>`; }).join("")}</ul>` : `<p class="hint">Nothing in the last 3 hours.</p>`}</section>
+      ${moving.length ? `<ul class="now-list">${moving.map(e => { const i = iniById[e.ini]; return `<li class="${e.kind === "delivering" ? "live" : ""}"><a href="#initiative/activities" data-ini="${i.id}">${actAv(e.p)}<span><b>${actWho(e.p)}</b> ${ACT_VERB[e.kind](e).replace(/ (in|for)$/, "")}<small>${esc(i.title)} · ${sysById[i.sys].name}</small></span>${tlTime(e.m)}</a></li>`; }).join("")}</ul>` : `<p class="hint">Nothing in the last 3 hours.</p>`}</section>
     <div class="rail-rest">
     <section class="rail-wait"><h3>Waiting on you<span class="count hot">${waiting.length}</span></h3>
-      ${waiting.length ? `<ul class="wait-list">${waiting.map(i => `<li><span><b>${esc(i.title)}</b><small>${esc(i.cause)}</small></span><a class="btn btn-sm" href="#initiative" data-ini="${i.id}">${esc(i.action)}</a></li>`).join("")}</ul>` : `<p class="hint">Nothing needs you right now.</p>`}</section>
+      ${waiting.length ? `<ul class="wait-list">${waiting.map(i => `<li><span><b>${esc(i.title)}</b><small>${esc(i.cause)}</small></span><a class="btn btn-sm" href="#initiative/activities" data-ini="${i.id}">${esc(i.action)}</a></li>`).join("")}</ul>` : `<p class="hint">Nothing needs you right now.</p>`}</section>
     <section class="rail-start"><h3>Start something</h3><p class="hint">Systems with no initiative yet. The planning agent starts from a few sentences.</p>
       <ul class="quiet-list">${quiet.map(s => `<li><span>${sysTag(s.id)}</span><button class="btn btn-sm" type="button" data-start="${s.id}">${ic("plus")}Start</button></li>`).join("")}</ul>
       <button class="btn btn-primary btn-sm" type="button" data-start="">${ic("plus")}New initiative</button></section>

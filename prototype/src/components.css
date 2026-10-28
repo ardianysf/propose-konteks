@@ -1497,6 +1497,8 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .quiet-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
 .act-rail section>.btn-primary{justify-self:start}
 .act-new{display:none}
+/* Start something is the page's invitation: a quiet accent border sets it apart from the lists around it. */
+.act-rail .rail-start{border:1px solid var(--line-accent);border-radius:var(--r10);background:var(--surface);padding:14px 14px 16px}
 @media (max-width:1100px){
   /* The rail's New initiative sits after the feed here, so the page head carries it instead. */
   .phead .act-new{display:inline-flex}
@@ -1507,7 +1509,7 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
   .act-feed{order:0}
   .rail-rest{display:contents}
   .rail-wait{order:-1;padding:4px 0 8px}
-  .rail-start{order:1;padding-top:16px;border-top:1px solid var(--line)}
+  .rail-start{order:1;margin-top:8px}
   .rail-wait .wait-list{border:1px solid var(--line);border-radius:var(--r10);background:var(--surface);padding:0 12px}
   .now-list{display:flex!important;gap:8px!important;overflow-x:auto;scrollbar-width:none;padding-bottom:2px!important}
   .now-list li{flex:0 0 260px}
@@ -1522,5 +1524,49 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
   .tl-card{padding:12px}
   .tl-quote{grid-template-columns:1fr 1fr}
   .tl-empty{margin-left:0}
+}
+
+/* ---------- Work In Progress: the Activities stream, one card per initiative waiting on a person ---------- */
+.wip .tl-day.wip-gh{padding-top:18px}
+.wip .tl-day.wip-gh:first-child{padding-top:8px}
+.wip-gh h2 .count{font-weight:500;color:var(--ink-2)}
+.wip-item .tl-card{cursor:pointer}
+.wip-item.mine .tl-card{border-color:var(--line-accent)}
+.wip-item.mine .tl-card:hover{border-color:var(--accent-strong)}
+.wip-item.mine .tl-node .av{background:var(--accent-soft);color:var(--accent-ink);box-shadow:0 0 0 4px var(--bg),0 0 0 5px var(--line-accent)}
+.wip-t{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;font-size:var(--t14)}
+.wip-t a{font-weight:600}
+.wip-wait{display:inline-flex;align-items:center;gap:4px;font-size:var(--t12);color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.wip-wait svg{width:13px;height:13px}
+.wip-why{display:flex;gap:6px;align-items:flex-start;font-size:var(--t13);font-weight:500;color:var(--ink-2)}
+.wip-why svg{width:14px;height:14px;flex:none;margin-top:3px}
+.wip-why.ok{color:var(--accent-ink)}
+.wip-why.danger{color:var(--danger)}
+.wip-detail{-webkit-line-clamp:2}
+.wip-who{font-size:var(--t12);font-weight:600;color:var(--ink-2)}
+.wip-who.you{color:var(--accent-ink)}
+.wip-rail .now-list .tl-prog{margin-top:8px}
+.wip-rail .now-list li.live a{grid-template-columns:24px minmax(0,1fr) auto}
+.rail-more{display:inline-flex;align-items:center;gap:4px;justify-self:start;font-size:var(--t12);color:var(--ink-3);text-decoration:none}
+.rail-more:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.rail-more svg{width:13px;height:13px}
+.wip .tl-empty{margin-left:0}
+.wip-gh h2{flex-wrap:wrap;row-gap:2px}
+@media (max-width:560px){
+  .wip-gh h2>span:last-child{flex-basis:100%}
+  .wip .tl-f .tl-upd{display:none}
+  .wip .rail-now small{white-space:normal}
+  .wip .rail-now small .nw{white-space:nowrap}
+  /* The title keeps the full width; the new count and the wait share the line under it. */
+  .wip .tl-h{flex-wrap:wrap;align-items:center;row-gap:2px;column-gap:12px}
+  .wip .wip-t{display:contents}
+  .wip .wip-t a{flex-basis:100%}
+}
+@media (max-width:1100px){
+  .wip .rail-recent{order:1;margin-top:8px}
+  .wip .rail-recent .now-list{display:grid!important;overflow:visible}
+  .wip .rail-recent .now-list li{flex:none}
+  .wip .rail-recent .now-list a{border:0;background:none;margin:0 -8px}
+  .wip .rail-now .now-list li{flex-basis:300px}
 }
 @media (prefers-reduced-motion:reduce){.tl-item.live .tl-node .av,.tl-prog .now{animation:none}}

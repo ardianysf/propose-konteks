@@ -38,7 +38,9 @@ function render() {
   /* Sub-routes: "#access/people" gives every Access tab its own URL (UX-032). */
   const [key, sub] = (location.hash.slice(1) || "overview").split("/");
   if (key === "access") S.accessTab = ACCESS_TABS.some(([k]) => k === sub) ? sub : "overview";
-  const badSub = sub && !(key === "access" && ACCESS_TABS.some(([k]) => k === sub));
+  /* "#initiative/activities": the same detail page, opened from Activities, goes back there (live: ?from=activities). */
+  if (key === "initiative") S.iniFrom = sub === "activities" ? "activities" : "work";
+  const badSub = sub && !(key === "access" && ACCESS_TABS.some(([k]) => k === sub)) && !(key === "initiative" && sub === "activities");
   const known = badSub ? null : ROUTES[key];
   const [page, bind, section, title] = known || [notFound, () => {}, "demo", "Not found"];
   /* The pitch bar steps aside in the demo app so it reads like the product; a pull tab brings it back. */
@@ -47,7 +49,7 @@ function render() {
   const keepScroll = render._last === key + (sub ? "/" + sub : ""), y = scrollY;
   /* Loading state (DS-10): an initiative opened for the first time shows a skeleton shaped like the page, not "Loading…". */
   if (key === "initiative" && S.iniLoaded !== S.cur) {
-    document.getElementById("root").innerHTML = topbar(section) + shell("work", `<a class="back" href="#work">${ic("arrow-left")}Back to Work In Progress</a>`, iniSkeleton());
+    document.getElementById("root").innerHTML = topbar(section) + shell(iniBack()[0], iniBack()[1], iniSkeleton());
     drawIcons(); bindShell(); bindTopbar(); render._last = key;
     document.title = "Loading · Konteks"; document.documentElement.lang = S.lang === "id" ? "id" : "en";
     clearTimeout(render._sk); render._sk = setTimeout(() => { S.iniLoaded = S.cur; if (location.hash.slice(1).split("/")[0] === "initiative") render(); }, 550);
