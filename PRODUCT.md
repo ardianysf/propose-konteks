@@ -6,56 +6,52 @@
 
 web
 
+## Stack
+
+Static HTML/CSS/JS prototype (user chose "interactive HTML prototype" for the pitch). Production app stack is not part of this work.
+
 ## Users
 
-- **Engineers and AI coding agents** adopting Konteks components into product work: they read the manifest (`src/catalog/components.json`), the registry previews, API contracts, usage snippets, and token dependencies to consume real source — not wrappers.
-- **Public showcase visitors** (confirmed by owner, this redesign): designers, engineers, and evaluators who arrive to judge the craft and coherence of the Konteks design system itself.
+Primary for this work: the internal Konteks team (founders, PM, engineers) evaluating a redesign pitch. They must come away convinced the redesign is worth building.
+
+End users of the product (observed in the live app, workspace "Refactory"): software engineers and engineering leads at agencies/consultancies who start "initiatives" against a Software System, let AI agents plan and deliver the work on runtimes they own, and step in at decision points (review a plan, approve a cost estimate, choose a repository, merge). Many users per workspace, each with a role (Engineering Contributor, Delivery Approver, Workspace Owner, and 13 more built-in roles).
 
 ## Product Purpose
 
-Konteks is a dual-output repository: a working product app (`/`) and a living design-system catalog (`/catalog`). The catalog documents and demos every production component with live previews, prop/context contracts, generated usage snippets, and token dependencies. Success means a consumer — human or AI — can find, understand, and correctly adopt any component from the catalog alone, and a public visitor leaves convinced the system is real and well-made.
+Konteks ("Governed AI Software Delivery") lets a team hand software work to AI agents while keeping humans in control: every initiative moves through planning → PRD → breakdown into tickets → costed estimate → approval → delivery (PR) → receipt, and nothing runs or costs money until an authorized person approves. Success: people know at a glance what needs them, trust what the agents did, and approve spend with confidence.
 
 ## Positioning
 
-Source-first catalog: it renders the actual production components with their real state machinery (same tokens, same CSS, same reducers, same providers) — not wrappers, not a mirrored npm package, not screenshots.
+- Agents run on the customer's own computers ("runtimes"); Konteks never holds a provider key or account.
+- Spend is quoted before it happens ("Nothing runs until you approve"), settled in Story Points with a receipt.
+- Governance is first-class: roles, permissions, access requests, audit.
 
 ## Operating Context
 
-- Consumers work in editors/terminals next to the repo; the catalog is read alongside code during adoption.
-- AI agents follow `docs/ai-adoption.md`: manifest → registry → tokens → fixture contracts.
-- Public visitors browse on desktop, arrive via link, and scan quickly before deciding to stay.
+Core objects: Workspace, Software System, Initiative, PRD, Breakdown, Ticket, Estimate/Quote, Delivery, PR, Receipt, Story Points, Runtime, Workloads, VCS connectors, Ops channels, Skills, Tools, MCPs, Context files. UI in English and Indonesian.
 
 ## Capabilities and Constraints
 
-- 35 manifest entries across domains: account, composer, context, customize, reviews, session, shell, system (+ internal & utility).
-- Clean-URL routing: `/catalog`, `/catalog/tokens`, `/catalog/components`, `/catalog/components/<slug>` (History API, Vite rewrites, Vercel rewrites).
-- Live previews run real components through `MockupFixtureProvider` with real reducers/providers.
-- Light/dark theming via `konteks-theme` storage + pre-paint stamp; must not flash wrong theme.
-- Constraint (owner decision, this redesign): **production component previews and `src/styles/tokens.css` stay untouched** — the redesign owns the catalog shell (`.kx-cat-*` surface) only.
-- Constraint (owner clarification): **component previews must keep using the existing production tokens** (`--kx-*`) so they stay consistent in both light and dark themes. The shell owns its palette but must ship both themes via the existing `data-theme` mechanism.
-- Existing contracts must keep passing: 9 vitest suites in `src/catalog/`, Playwright catalog-shell/catalog-content/catalog-component-detail specs including WCAG2AA at 1440×900 and 1200×720.
+- Approval is permission-gated (Delivery Approver role).
+- Sign-in (live): Backstage sign-in page with the Google provider only.
 
 ## Brand Commitments
 
-- Name: **Konteks**.
-- The product app's **Warm Enterprise** visual world (sage greens `#8fbf6a`/`#243025`, cream canvas `#faf8ef`, DM Sans) is binding for product surfaces and component previews.
-- The catalog shell is its own surface with its own visual world — chosen in this redesign.
+- Keep the existing base colour family: matcha/olive greens (#4F7044, #5F8D4E, #8FBF6A), warm off-white ground (#FAF8EF), deep green-black ink (#243025), amber #9A6212, danger #B3261E, blue #2F6F8F. (User-pinned.)
+- Name: Konteks. Voice: plain, reassuring about safety.
 
 ## Evidence on Hand
 
-- Real components in `src/components/` (the only demo material; no fabricated screenshots needed).
-- `src/styles/tokens.css` light+dark palettes; `src/catalog/tokens.ts` token inventory.
-- `docs/ai-adoption.md`, `README.md`, dual-output pivot plans under `docs/plans/`.
-- No customer quotes, metrics, or press — do not fabricate any.
+- Full UI/UX audit of the live app. No real customer data; all demo data synthetic and labeled.
 
 ## Product Principles
 
-1. **Real over represented**: only live production components, never mockups-of-mockups.
-2. **Source-first**: every page exists to make adoption from source trivial.
-3. **Legible to machines and humans alike**: the same page serves an AI agent parsing contracts and a designer judging craft.
-4. **Showcase earns trust**: the catalog's own craft is evidence of the system's quality.
-5. **Dual-output discipline**: app and catalog share components and tokens; neither forks the other.
+1. Show who must act, and why, before anything else.
+2. Money and agent work never start without a visible, authorized decision.
+3. One status truth per object.
+4. Human summary first, agent trace on demand.
+5. Governance is visible, not buried.
 
-## Accessibility & Inclusion
+### Direction preference (user, 2026-10-27)
 
-WCAG2AA is the enforced floor (catalog-content.spec.ts Axe checks at 1440×900 and 1200×720); both light and dark themes must pass.
+Keep every existing process and flow; make the UI dramatically better, not different. Craft bar = Linear.

@@ -1,0 +1,11 @@
+{
+  "$comment": "Colour lint for the live app (audit checklist: no colour outside the tokens). Raw colours are allowed only in tokens.css and tokens.live-map.css. Install: npm i -D stylelint",
+  "rules": {
+    "color-no-hex": true,
+    "color-named": "never",
+    "function-disallowed-list": ["rgb", "rgba", "hsl", "hsla", "color-mix"]
+  },
+  "overrides": [
+    { "files": ["**/tokens.css", "**/tokens.live-map.css"], "rules": { "color-no-hex": null, "color-named": null, "function-disallowed-list": null } }
+  ]
+}

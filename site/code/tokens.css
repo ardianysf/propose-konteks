@@ -1,0 +1,37 @@
+/* Konteks design tokens. Colour strategy: restrained warm ground, one green voice for action and selection,
+   state colours only where they mean something. Every value has a dark-mode counterpart.
+   Mapping to the tokens the live app already uses (--kx-*, --color-app-*) is in code/tokens.live-map.css. */
+:root{
+  --bg:#FAF8EF; --surface:#FFFFFF; --sidebar:#F1F1E5; --sunken:#F5F4EB; --hover:rgba(36,48,37,.045); --press:rgba(36,48,37,.08);
+  --line:#E5E7D9; --line-strong:#D4D9C5; --line-input:#8C9680;
+  --ink:#243025; --ink-2:#4D644F; --ink-3:#5E705E; --ink-inv:#FAF8EF;
+  --accent:#4F7044; --accent-hover:#43603A; --accent-strong:#5F8D4E; --accent-fill:#8FBF6A; --accent-soft:#EEF3E6; --accent-tint:#E3EBD6; --accent-ink:#3F5C36; --on-accent:#FFFFFF;
+  --warn:#9A6212; --warn-soft:#FAF0DC; --danger:#B3261E; --danger-soft:#FBEAE7; --info:#2F6F8F; --info-soft:#E7F0F4; --ok:#4F7044;
+  --focus:rgba(95,141,78,.42);
+  --shadow-1:0 1px 2px rgba(36,48,37,.06),0 1px 1px rgba(36,48,37,.03);
+  --shadow-2:0 8px 24px -6px rgba(36,48,37,.16),0 2px 6px rgba(36,48,37,.06);
+  --shadow-3:0 24px 56px -12px rgba(36,48,37,.28),0 4px 12px rgba(36,48,37,.08);
+  --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --t12:12px; --t13:13px; --t14:14px; --t16:16px; --t20:20px; --t28:28px;
+  --r4:4px; --r6:6px; --r10:10px; --scrim:rgba(15,21,16,.32);
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  /* Derived edges and tints: computed from the tokens above, so they follow dark mode automatically. */
+  --edge-info:color-mix(in srgb,var(--info) 25%,transparent); --edge-warn:color-mix(in srgb,var(--warn) 25%,transparent); --edge-danger:color-mix(in srgb,var(--danger) 25%,transparent);
+  --line-danger:color-mix(in srgb,var(--danger) 35%,var(--line)); --line-accent:color-mix(in srgb,var(--accent-strong) 45%,var(--line));
+  --diff-add:color-mix(in srgb,var(--accent-fill) 14%,transparent); --diff-del:color-mix(in srgb,var(--danger) 9%,transparent);
+  --on-accent-dim:color-mix(in srgb,var(--on-accent) 20%,transparent); --knob:#FFFFFF; --shadow-edge:rgba(36,48,37,.14); --edge-current:color-mix(in srgb,currentColor 35%,transparent);
+  color-scheme:light;
+}
+/* The app sets .dark itself (System / Light / Dark in Settings), so there is no media query here. */
+.dark,:root[data-theme="dark"]{
+  --bg:#0F1510; --surface:#161E17; --sidebar:#121913; --sunken:#131A14; --hover:rgba(232,237,232,.05); --press:rgba(232,237,232,.09);
+  --line:#253325; --line-strong:#33453A; --line-input:#5E705F;
+  --ink:#E8EDE8; --ink-2:#C2CDC3; --ink-3:#9AAA9B; --ink-inv:#0F1510;
+  --accent:#8FBF6A; --accent-hover:#A3CC83; --accent-strong:#8FBF6A; --accent-fill:#8FBF6A; --accent-soft:#18261A; --accent-tint:#203222; --accent-ink:#C5D9A6; --on-accent:#0F1510;
+  --warn:#E6B366; --warn-soft:#2A2214; --danger:#EF9A8F; --danger-soft:#2E1817; --info:#7CC4E0; --info-soft:#14262E; --ok:#8FBF6A;
+  --focus:rgba(143,191,106,.45);
+  --shadow-1:0 1px 2px rgba(0,0,0,.4); --shadow-2:0 8px 24px -6px rgba(0,0,0,.55),0 2px 6px rgba(0,0,0,.4); --shadow-3:0 24px 56px -12px rgba(0,0,0,.7);
+  --shadow-edge:rgba(0,0,0,.5); --knob:#E8EDE8;
+  color-scheme:dark;}

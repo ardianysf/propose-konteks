@@ -1,0 +1,22 @@
+[hidden]{display:none!important}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 var(--t13)/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent-tint);color:var(--ink)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--surface)}
+a{color:var(--accent-ink);text-underline-offset:3px;text-decoration-thickness:1px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent-strong);outline-offset:2px;border-radius:var(--r4)}
+h1,h2,h3,h4{margin:0;text-wrap:balance;letter-spacing:-.011em}
+p{margin:0}
+code,.mono{font-family:var(--mono);font-size:var(--t13);font-feature-settings:normal}
+.hint .mono,.hint code,.meta .mono,small .mono,.tag .mono,.dtable .mono,.idc,.prop .mono,.cellname .mono{font-size:var(--t12)}
+svg.lucide{width:16px;height:16px;flex:none;vertical-align:-3px}
+.prop svg.lucide,.hint svg.lucide,.matrix svg.lucide{width:14px;height:14px}
+.card-h svg.lucide,.drawer-h svg.lucide{width:16px;height:16px;color:var(--ink-3)}
+*{scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Tabular figures only where numbers line up; on body it would widen Inter's hyphen ("rf-01"). */
+.num,.count,.wait,.ss b,.qrow b,.pkg-sp,.step .n,time,.meta-line,.share,.dtable td.num,.tkt-m,.newup{font-variant-numeric:tabular-nums}

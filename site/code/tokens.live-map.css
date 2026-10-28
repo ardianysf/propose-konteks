@@ -1,0 +1,104 @@
+/* Drop-in bridge for the live app (Backstage + Tailwind `app-*` classes).
+   Load after tokens.css. Every variable the app already reads (--kx-*, --color-app-* as RGB triplets) now takes the
+   redesign value, so existing components pick up the new palette, radius and borders without a rewrite.
+   Generated from tokens.css by tools/make_package.py. Do not edit by hand. */
+:root {
+  --kx-canvas: var(--bg);
+  --kx-raised: var(--surface);
+  --kx-sidebar-bg: var(--sidebar);
+  --kx-primary: var(--ink);
+  --kx-secondary: var(--ink-2);
+  --kx-muted: var(--ink-3);
+  --kx-muted-text-aa: var(--ink-3);
+  --kx-accent-text-aa: var(--accent-ink);
+  --kx-accent-solid-aa: var(--accent);
+  --kx-accent-solid-ink: var(--on-accent);
+  --kx-accent-fill-ink: var(--ink);
+  --kx-border: var(--line);
+  --kx-pale: var(--accent-soft);
+  --kx-accent: var(--accent-fill);
+  --kx-accent-strong: var(--accent-strong);
+  --kx-attention: var(--warn);
+  --kx-danger: var(--danger);
+  --kx-bubble-bg: var(--accent-tint);
+  --kx-bubble-border: var(--line-strong);
+  --kx-tech-code-bg: var(--sunken);
+  --kx-tech-code-border: var(--line);
+  --kx-second: var(--info);
+  --kx-second-text-aa: var(--info);
+  --kx-second-solid-aa: var(--info);
+  --kx-second-pale: var(--info-soft);
+  --kx-radius-main: var(--r10);
+  --kx-second-border: color-mix(in srgb, var(--info) 30%, var(--line));
+  --kx-ink-rgb: 36 48 37;
+  --color-app-bg: 250 248 239; /* bg #FAF8EF */
+  --color-app-card: 255 255 255; /* surface #FFFFFF */
+  --color-app-text: 36 48 37; /* ink #243025 */
+  --color-app-text-secondary: 77 100 79; /* ink-2 #4D644F */
+  --color-app-text-tertiary: 94 112 94; /* ink-3 #5E705E */
+  --color-app-border: 229 231 217; /* line #E5E7D9 */
+  --color-app-border-strong: 212 217 197; /* line-strong #D4D9C5 */
+  --color-app-border-input: 140 150 128; /* line-input #8C9680 */
+  --color-app-accent-soft: 238 243 230; /* accent-soft #EEF3E6 */
+  --color-app-accent: 227 235 214; /* accent-tint #E3EBD6 */
+  --color-app-accent-fill: 143 191 106; /* accent-fill #8FBF6A */
+  --color-app-accent-strong: 95 141 78; /* accent-strong #5F8D4E */
+  --color-app-accent-solid: 79 112 68; /* accent #4F7044 */
+  --color-app-accent-text: 63 92 54; /* accent-ink #3F5C36 */
+  --color-app-success: 95 141 78; /* accent-strong #5F8D4E */
+  --color-app-warning: 154 98 18; /* warn #9A6212 */
+  --color-app-danger: 179 38 30; /* danger #B3261E */
+  --color-app-second: 47 111 143; /* info #2F6F8F */
+  --color-app-second-soft: 231 240 244; /* info-soft #E7F0F4 */
+  --app-attention-surface: 250 240 220; /* warn-soft #FAF0DC */
+}
+.dark, :root[data-theme="dark"] {
+  --kx-canvas: var(--bg);
+  --kx-raised: var(--surface);
+  --kx-sidebar-bg: var(--sidebar);
+  --kx-primary: var(--ink);
+  --kx-secondary: var(--ink-2);
+  --kx-muted: var(--ink-3);
+  --kx-muted-text-aa: var(--ink-3);
+  --kx-accent-text-aa: var(--accent-ink);
+  --kx-accent-solid-aa: var(--accent);
+  --kx-accent-solid-ink: var(--on-accent);
+  --kx-accent-fill-ink: var(--ink);
+  --kx-border: var(--line);
+  --kx-pale: var(--accent-soft);
+  --kx-accent: var(--accent-fill);
+  --kx-accent-strong: var(--accent-strong);
+  --kx-attention: var(--warn);
+  --kx-danger: var(--danger);
+  --kx-bubble-bg: var(--accent-tint);
+  --kx-bubble-border: var(--line-strong);
+  --kx-tech-code-bg: var(--sunken);
+  --kx-tech-code-border: var(--line);
+  --kx-second: var(--info);
+  --kx-second-text-aa: var(--info);
+  --kx-second-solid-aa: var(--info);
+  --kx-second-pale: var(--info-soft);
+  --kx-radius-main: var(--r10);
+  --kx-second-border: color-mix(in srgb, var(--info) 30%, var(--line));
+  --kx-ink-rgb: 232 237 232;
+  --color-app-bg: 15 21 16; /* bg #0F1510 */
+  --color-app-card: 22 30 23; /* surface #161E17 */
+  --color-app-text: 232 237 232; /* ink #E8EDE8 */
+  --color-app-text-secondary: 194 205 195; /* ink-2 #C2CDC3 */
+  --color-app-text-tertiary: 154 170 155; /* ink-3 #9AAA9B */
+  --color-app-border: 37 51 37; /* line #253325 */
+  --color-app-border-strong: 51 69 58; /* line-strong #33453A */
+  --color-app-border-input: 94 112 95; /* line-input #5E705F */
+  --color-app-accent-soft: 24 38 26; /* accent-soft #18261A */
+  --color-app-accent: 32 50 34; /* accent-tint #203222 */
+  --color-app-accent-fill: 143 191 106; /* accent-fill #8FBF6A */
+  --color-app-accent-strong: 143 191 106; /* accent-strong #8FBF6A */
+  --color-app-accent-solid: 143 191 106; /* accent #8FBF6A */
+  --color-app-accent-text: 197 217 166; /* accent-ink #C5D9A6 */
+  --color-app-success: 143 191 106; /* accent-strong #8FBF6A */
+  --color-app-warning: 230 179 102; /* warn #E6B366 */
+  --color-app-danger: 239 154 143; /* danger #EF9A8F */
+  --color-app-second: 124 196 224; /* info #7CC4E0 */
+  --color-app-second-soft: 20 38 46; /* info-soft #14262E */
+  --app-attention-surface: 42 34 20; /* warn-soft #2A2214 */
+}

@@ -1,55 +1,15 @@
 {
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/catalog",
-      "permanent": false
-    }
-  ],
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo \"static site, nothing to install\"",
+  "buildCommand": "echo \"static site, nothing to build\"",
+  "outputDirectory": "site",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
-    {
-      "source": "/v2",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/v2/:path*",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/landingpage",
-      "destination": "/landingpage.html"
-    },
-    {
-      "source": "/pricing",
-      "destination": "/pricing.html"
-    },
-    {
-      "source": "/pricing/",
-      "destination": "/pricing.html"
-    },
-    {
-      "source": "/docs",
-      "destination": "/docs.html"
-    },
-    {
-      "source": "/docs/",
-      "destination": "/docs.html"
-    },
-    {
-      "source": "/blog",
-      "destination": "/journal.html"
-    },
-    {
-      "source": "/blog/",
-      "destination": "/journal.html"
-    },
-    {
-      "source": "/catalog",
-      "destination": "/catalog.html"
-    },
-    {
-      "source": "/catalog/:path*",
-      "destination": "/catalog.html"
-    }
+    { "source": "/landingpage", "destination": "/landingpage.html" }
+  ],
+  "headers": [
+    { "source": "/code/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300" }] }
   ]
 }

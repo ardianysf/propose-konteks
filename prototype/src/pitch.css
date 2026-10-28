@@ -1,0 +1,89 @@
+/* ---------- Pitch top bar ---------- */
+.pbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--surface);border-bottom:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pbar-in{display:flex;align-items:center;gap:var(--s4);height:48px;max-width:1440px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:var(--t14);letter-spacing:-.01em;white-space:nowrap}
+.brand-mark{width:22px;height:22px;border-radius:6px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-size:12px;font-weight:700}
+.brand small{font-weight:500;color:var(--ink-3);font-size:var(--t12)}
+.pnav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.pnav a{flex:none;display:inline-flex;align-items:center;height:30px;padding:0 10px;border-radius:var(--r6);color:var(--ink-2);text-decoration:none;font-size:var(--t13);font-weight:500}
+.pnav a:hover{background:var(--hover);color:var(--ink)}
+.pnav a[aria-current="page"]{background:var(--accent-soft);color:var(--accent-ink)}
+.pbar-tools{display:flex;align-items:center;gap:var(--s2)}
+.synthetic{font-size:var(--t12);color:var(--ink-3);white-space:nowrap}
+
+/* ---------- Docs pages (pitch, foundations, components) ---------- */
+.doc{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:var(--s7) 96px}
+.doc-in{max-width:1080px;margin:0 auto;display:grid;gap:var(--s7)}
+.doc h1{font-size:var(--t28);line-height:1.2;font-weight:600;letter-spacing:-.022em;max-width:22ch}
+.doc .lede{font-size:var(--t16);color:var(--ink-2);max-width:62ch;margin-top:var(--s3);line-height:1.6}
+.doc h2{font-size:var(--t20);font-weight:600;line-height:1.3}
+.doc h3{font-size:var(--t14);font-weight:600}
+.sec{display:grid;gap:var(--s4)}
+.sec-head{display:grid;gap:6px;max-width:68ch}
+.sec-head p{color:var(--ink-2)}
+.prose{max-width:68ch;color:var(--ink-2);display:grid;gap:var(--s3)}
+.toc{display:flex;flex-wrap:wrap;gap:6px}
+.toc a{font-size:var(--t13);color:var(--ink-2);text-decoration:none;padding:4px 10px;border:1px solid var(--line);border-radius:var(--r6);background:var(--surface)}
+.toc a:hover{border-color:var(--line-strong);color:var(--ink)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r10)}
+.specimen{padding:var(--s5);display:grid;gap:var(--s4)}
+.specimen-row{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center}
+.label{font-size:var(--t12);color:var(--ink-3);font-weight:500}
+.scroll-x{overflow-x:auto;min-width:0}
+.cta-row{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s5)}
+
+/* comparison table on pitch page */
+.tbl{width:100%;border-collapse:collapse;font-size:var(--t13)}
+.tbl th{text-align:left;font-weight:500;color:var(--ink-3);font-size:var(--t12);padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.num,.tbl th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tbl tbody tr:hover td{background:var(--hover)}
+
+/* color swatches */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--s3)}
+.sw{border:1px solid var(--line);border-radius:var(--r10);overflow:hidden;background:var(--surface)}
+.sw-chip{height:64px;border-bottom:1px solid var(--line)}
+.sw-body{padding:10px 12px;display:grid;gap:2px}
+.sw-body b{font-weight:500;font-size:var(--t13)}
+.sw-body span{font-size:var(--t12);color:var(--ink-3)}
+.typeline{display:grid;grid-template-columns:120px 1fr;gap:var(--s4);align-items:baseline;padding:14px 0;border-bottom:1px solid var(--line)}
+.typeline:last-child{border-bottom:0}
+.scale{display:flex;align-items:flex-end;gap:var(--s3);flex-wrap:wrap}
+.scale div{background:var(--accent-tint);border-radius:var(--r4)}
+.dodont{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--s3)}
+.dd{padding:var(--s4);display:grid;gap:6px}
+.dd .label{display:flex;align-items:center;gap:6px}
+.dd.do .label{color:var(--accent-ink)} .dd.dont .label{color:var(--danger)}
+.dd p{font-size:var(--t13)}
+
+/* component catalog */
+.cat{display:grid;grid-template-columns:200px minmax(0,1fr);gap:var(--s6);align-items:start}
+.cat-nav{position:sticky;top:72px;display:grid;gap:1px}
+.cat-nav a{font-size:var(--t13);color:var(--ink-2);text-decoration:none;padding:5px 10px;border-radius:var(--r6)}
+.cat-nav a:hover{background:var(--hover);color:var(--ink)}
+.cat-body{display:grid;gap:var(--s7);min-width:0}
+.demo{padding:var(--s5);display:grid;gap:var(--s5);background:var(--bg);border-radius:0 0 var(--r10) var(--r10)}
+.demo-head{padding:var(--s4) var(--s5);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:var(--s4);flex-wrap:wrap}
+.demo-head p{font-size:var(--t13);color:var(--ink-2);max-width:60ch}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--s4)}
+@media (max-width:860px){.cat{grid-template-columns:1fr}.cat-nav{position:static;display:flex;flex-wrap:wrap;gap:4px}}
+/* Pitch bar visibility: always on for the pitch pages; in the demo it starts hidden and a pull tab brings it back. */
+:root{--pb:48px}
+:root.pb-off{--pb:0px}
+:root.pb-off .pbar{display:none}
+.pb-tab{display:none}
+:root.pb-off .pb-tab{position:fixed;top:0;right:16px;z-index:60;display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 9px 0 7px;border:1px solid var(--line);border-top:0;border-radius:0 0 var(--r6) var(--r6);background:var(--surface);color:var(--ink-3);font-size:var(--t12);font-weight:500;cursor:pointer;box-shadow:var(--shadow-1);animation:tabin .25s var(--ease)}
+:root.pb-off .pb-tab:hover{color:var(--ink);background:var(--sunken)}
+.pb-tab svg{width:14px;height:14px}
+@keyframes tabin{from{translate:0 -100%}}
+:root.pb-in .pbar{animation:pbin .22s var(--ease)}
+@keyframes pbin{from{translate:0 -8px;opacity:.6}}
+.pb-tab-m,.top .pb-tab-m{display:none}
+@media (max-width:860px){
+  :root.pb-off .pb-tab{display:none}
+  :root.pb-off .pb-tab-m{display:inline-flex;margin-left:auto}
+}
+/* The tab hangs in the top-right corner; the rows it would touch keep clear of it. */
+@media (min-width:861px){:root.pb-off .newver,:root.pb-off .main>.top{padding-right:96px}}
