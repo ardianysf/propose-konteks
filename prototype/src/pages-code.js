@@ -33,6 +33,9 @@ const REACT_LIST = [
   ["Menu.tsx", "Pilih atau navigasi; keyboard lengkap, fokus kembali ke pemicu."],
   ["Overlay.tsx", "Drawer, Modal, Dialog: Escape menutup lapisan teratas saja, fokus terkunci dan kembali."],
   ["Composer.tsx", "Catatan dan sesi agen: picker \"/\" untuk skill dan tool, chip, ⌘↵ kirim, bentuk ringkas satu baris."],
+  ["Queue.tsx · FlowTrack.tsx", "Work In Progress sebagai antrean: giliran siapa dan lama menunggu, jalur alur Plan sampai Receipt, filter giliran di atas satu daftar."],
+  ["Activity.tsx", "Activities sebagai feed orang: kartu di garis waktu, jawaban Konteks sebagai balasan di dalam kartu pemanggilnya, bar tiket."],
+  ["Reactions.tsx · Avatar.tsx", "Chip reaksi dengan picker horizontal (←/→, Escape); avatar inisial atau tanda Konteks."],
   ["README.md", "Cara memasang di aplikasi live (preset Tailwind, token, motion.css) dan contoh pemakaian."],
 ];
 const FULL_ZIP = "downloads/konteks-ui-lengkap.zip";

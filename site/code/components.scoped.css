@@ -559,6 +559,15 @@
 .kx .react{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:var(--r10);border:1px solid var(--line);background:var(--surface);font-size:var(--t12);cursor:pointer}
 .kx .react[aria-pressed="true"]{border-color:var(--accent-strong);background:var(--accent-soft);color:var(--accent-ink)}
 .kx .react-add{width:24px;padding:0;justify-content:center;color:var(--ink-3)}
+.kx .react-add[aria-expanded="true"]{border-color:var(--line-strong);background:var(--press);color:var(--ink)}
+.kx .react-pick{position:fixed;z-index:90;display:flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r10);box-shadow:var(--shadow-2);animation:kx-pickin .14s var(--ease)}
+.kx .react-pick button{display:grid;place-items:center;width:32px;height:32px;border:0;border-radius:var(--r6);background:none;font-size:var(--t16);line-height:1;cursor:pointer;transition:background-color .12s,transform .12s var(--ease)}
+.kx .react-pick button:hover,.kx .react-pick button:focus-visible{background:var(--hover);transform:translateY(-2px)}
+@keyframes kx-pickin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+.kx .react-pick{animation:none}
+.kx .react-pick button:hover,.kx .react-pick button:focus-visible{transform:none}
+}
 .kx .cmt.reply{margin-left:38px}
 .kx .agent-chip{display:inline-flex;align-items:center;gap:4px;font-size:var(--t12);font-weight:500;color:var(--ink-3);border:1px solid var(--line);border-radius:var(--r4);padding:0 5px}
 .kx .more-replies{border:0;background:none;color:var(--accent-ink);font-size:var(--t12);font-weight:500;cursor:pointer;padding:0;justify-self:start;margin-left:38px}
@@ -1520,7 +1529,7 @@
 .kx .q-wait b{font-weight:600;color:var(--ink)}
 .kx .q-wait.aging b{color:var(--warn)}
 .kx .q-wait.late b{color:var(--danger)}
-.kx .q-main{display:grid;gap:8px;min-width:0}
+.kx .q-main{display:grid;gap:8px;min-width:0;container-type:inline-size}
 .kx .q-title{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px}
 .kx .q-title a{font-size:var(--t14);font-weight:600;color:var(--ink);text-decoration:none}
 .kx .q-title a:hover{text-decoration:underline;text-underline-offset:3px}
@@ -1532,11 +1541,11 @@
 .kx .q-empty{padding:24px;border:1px dashed var(--line-strong);border-radius:var(--r10);display:grid;gap:8px;justify-items:start}
 .kx .q-empty h3{font-size:var(--t14);font-weight:600}
 .kx .q-empty p{color:var(--ink-2)}
-.kx .flow{list-style:none;margin:2px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,140px);font-size:var(--t12);color:var(--ink-3)}
+.kx .flow{list-style:none;margin:2px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,140px));font-size:var(--t12);color:var(--ink-3)}
 .kx .flow li{display:flex;align-items:center;gap:6px;min-width:0}
 .kx .flow li:not(:last-child)::after{content:"";flex:1;min-width:8px;height:1px;margin:0 6px 0 4px;background:var(--line-strong)}
 .kx .flow li.done::after{background:var(--accent-strong)}
-.kx .flow span{white-space:nowrap}
+.kx .flow span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kx .flow i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line-strong);background:var(--surface);flex:none}
 .kx .flow .done i{background:var(--accent-strong);border-color:var(--accent-strong)}
 .kx .flow .done{color:var(--ink-2)}
@@ -1561,11 +1570,9 @@
 .kx .q-act{justify-content:flex-start}
 .kx .q-bar .hint{display:none}
 }
-@media (max-width:1280px){
-.kx .flow{display:flex;flex-wrap:wrap;row-gap:4px}
-.kx .flow li:not(.cur) span{display:none}
-.kx .flow li:not(:last-child)::after{flex:none;width:16px;margin:0 6px}
-}
+.kx @container (max-width:600px){.flow{display:flex;flex-wrap:wrap;row-gap:4px}
+  .flow li:not(.cur) span{display:none}
+  .flow li:not(:last-child)::after{flex:none;width:16px;margin:0 6px}}
 @media (prefers-reduced-motion:reduce){
 .kx .flow .cur.f-run i{animation:none}
 }

@@ -186,6 +186,31 @@ function menu(anchor, items) {
 }
 
 /* Popover: a small anchored card for a glance (one question, one link). Closes on outside click and Escape. */
+/* Reaction picker: one horizontal row of emoji above the React button (below it when there is no room).
+   ←/→ move, Home/End jump, Enter or a click picks, Escape or a click outside closes and returns focus. */
+const REACTIONS = [["👍", "Thumbs up"], ["🎉", "Celebrate"], ["👀", "Looking"], ["✅", "Done"], ["🚀", "Ship it"], ["❤️", "Love"]];
+function reactPicker(anchor, onPick) {
+  $$(".react-pick").forEach(p => p.remove());
+  const p = document.createElement("div"); p.className = "react-pick"; p.setAttribute("role", "toolbar"); p.setAttribute("aria-label", "Add a reaction");
+  p.innerHTML = REACTIONS.map(([e, n]) => `<button type="button" aria-label="${n}" data-tip="${n}">${e}</button>`).join("");
+  document.body.append(p);
+  const r = anchor.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight;
+  p.style.top = (r.top - h - 6 > 8 ? r.top - h - 6 : r.bottom + 6) + "px"; p.style.left = Math.max(8, Math.min(r.left - 4, innerWidth - w - 8)) + "px";
+  const btns = $$("button", p);
+  const close = (refocus = true) => { p.remove(); document.removeEventListener("mousedown", out); document.removeEventListener("keydown", key, true); if (refocus) anchor.focus(); };
+  const out = e => { if (!p.contains(e.target) && e.target !== anchor && !anchor.contains(e.target)) close(false); };
+  const key = e => {
+    const i = btns.indexOf(document.activeElement), go = n => { e.preventDefault(); btns[(n + btns.length) % btns.length].focus(); };
+    if (e.key === "Escape") { e.preventDefault(); e.stopImmediatePropagation(); close(); }
+    else if (e.key === "ArrowRight") go(i + 1); else if (e.key === "ArrowLeft") go(i - 1);
+    else if (e.key === "Home") go(0); else if (e.key === "End") go(btns.length - 1);
+    else if (e.key === "Tab") close(false);
+  };
+  btns.forEach((b, n) => b.onclick = () => { close(); onPick(REACTIONS[n][0]); });
+  btns[0].focus();
+  setTimeout(() => { document.addEventListener("mousedown", out); document.addEventListener("keydown", key, true); });
+  return { el: p, close };
+}
 function popover(anchor, label, html) {
   $$(".floatpop").forEach(p => p.remove());
   const p = document.createElement("div"); p.className = "floatpop qpop"; p.setAttribute("role", "dialog"); p.setAttribute("aria-label", label);

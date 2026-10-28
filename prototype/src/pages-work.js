@@ -28,7 +28,7 @@ function rowHtml(i) {
    Same fields as the live list; the flow step is read from the stage and the cause it already shows. */
 const FLOW = ["Plan", "Breakdown", "Estimate", "Delivery", "Receipt"];
 const deliveryOf = i => ACTIVITY.find(e => e.ini === i.id && e.reply?.kind === "delivering");
-const flowStep = i => i.stage === "Planning" ? (i.kind === "breakdown" ? 1 : 0) : (i.kind === "estimate" && !S.approved ? 2 : 3);
+function flowStep(i) { return i.stage === "Planning" ? (i.kind === "breakdown" ? 1 : 0) : (i.kind === "estimate" && !S.approved ? 2 : 3); }
 const waitDays = w => +(w.match(/(\d+)d/) || [0, 0])[1];
 function flowTrack(i) {
   const cur = flowStep(i), tone = "f-" + (i.tone === "blocked" ? "danger" : i.tone === "running" ? "run" : i.tone === "waiting" ? "idle" : "ok");
@@ -54,10 +54,10 @@ function queueRow(i, mine) {
 }
 
 /* Minutes since the initiative last moved, from its "waiting" time ("1d 3h", "7h 11m", "18m"). */
-const waitMin = w => { const g = k => +(w.match(new RegExp("(\\d+)" + k)) || [0, 0])[1]; return g("d") * 1440 + g("h") * 60 + g("m"); };
+function waitMin(w) { const g = k => +(w.match(new RegExp("(\\d+)" + k)) || [0, 0])[1]; return g("d") * 1440 + g("h") * 60 + g("m"); }
 /* Whose move, as a filter over one list: everything mixed and newest movement first, like a timeline. */
 const WIP_FILTERS = [["all", "All"], ["mine", "Needs you"], ["others", "Needs someone else"], ["agents", "Agents delivering"]];
-const wipKind = i => actsNow(i) ? "mine" : i.tone === "running" ? "agents" : "others";
+function wipKind(i) { return actsNow(i) ? "mine" : i.tone === "running" ? "agents" : "others"; }
 function pageWork() {
   const list = INITIATIVES.filter(i => !S.sys || i.sys === S.sys).sort((x, y) => waitMin(x.wait) - waitMin(y.wait));
   const f = S.wipF || "all", count = k => k === "all" ? list.length : list.filter(i => wipKind(i) === k).length;
@@ -198,7 +198,7 @@ function noteHtml(n) {
   const atts = n.atts ? `<div class="atts">${n.atts.map(([f, s]) => `<span class="att">${ic(/\.png|\.jpe?g/.test(f) ? "image" : "file-text")}<b>${esc(f)}</b><span>${s}</span></span>`).join("")}</div>` : "";
   const uses = n.uses ? `<div class="ar-uses">${n.uses.map(([k, u]) => `<span class="tag">${ic(k === "skill" ? "sparkles" : "wrench")}${k === "skill" ? "Skill" : "Tool"} · ${esc(u)}</span>`).join("")}</div>` : "";
   const trace = n.steps ? `<details class="trace ar-trace"><summary>${ic("chevron-right")}${n.steps.length} steps</summary><ol>${n.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol></details>` : "";
-  const reacts = agent ? "" : `<div class="reacts">${(n.re || []).map(([e, c]) => `<button class="react" type="button" aria-pressed="false" data-react>${e} <span>${c}</span></button>`).join("")}<button class="react react-add" type="button" aria-label="React">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm" type="button" data-comment>Comment</button></div>`;
+  const reacts = agent ? "" : `<div class="reacts">${(n.re || []).map(([e, c]) => `<button class="react" type="button" aria-pressed="false" data-react>${e} <span>${c}</span></button>`).join("")}<button class="react react-add" type="button" aria-label="Add a reaction" aria-haspopup="true" aria-expanded="false">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm" type="button" data-comment>Comment</button></div>`;
   return `<article class="cmt ${n.r ? "reply" : ""}">${agent ? `<span class="agent-av">${ic("bot")}</span>` : av(n.who, 1)}<div class="cmt-b"><div class="cmt-h"><b>${name}</b>${agent ? '<span class="agent-chip">Agent</span>' : ""}${ago(n.m)}</div>${fmtMsg(n.text)}${atts}${uses}${trace}${reacts}</div></article>`;
 }
 function threadHtml(i) {
@@ -283,7 +283,18 @@ Every documented command runs on rf-01; outcomes are recorded as passed, failed 
 /* Attach opens the file picker and shows chips; React offers a small set of reactions. */
 function bindNoteTools(root = document) {
   $$("[data-attach]", root).forEach(b => b.onclick = () => { const inp = document.createElement("input"); inp.type = "file"; inp.multiple = true; inp.onchange = () => { const box = document.getElementById(b.dataset.attach); [...inp.files].forEach(f => box.insertAdjacentHTML("beforeend", `<span class="att">${ic("file-text")}<b>${esc(f.name)}</b><span>${Math.max(1, Math.round(f.size / 1024))} KB</span><button class="btn btn-ghost btn-icon" type="button" aria-label="Remove ${esc(f.name)}" onclick="this.closest('.att').remove()">${ic("x")}</button></span>`)); drawIcons(); }; inp.click(); });
-  $$(".react-add", root).forEach(b => b.onclick = () => menu(b, ["👍", "🎉", "👀", "✅"].map(e => ({ label: e, run: () => { b.insertAdjacentHTML("beforebegin", `<button class="react" type="button" aria-pressed="true" data-react>${e} <span>1</span></button>`); const nb = b.previousElementSibling; nb.onclick = () => { const on = nb.getAttribute("aria-pressed") !== "true"; nb.setAttribute("aria-pressed", on); const c = nb.querySelector("span"); c.textContent = +c.textContent + (on ? 1 : -1); }; } }))));
+  /* React: a horizontal picker; picking an emoji the note already has adds you to it instead of a duplicate. */
+  $$(".react-add", root).forEach(b => b.onclick = () => {
+    if ($(".react-pick")) return $$(".react-pick").forEach(p => p.remove());
+    b.setAttribute("aria-expanded", "true");
+    const pk = reactPicker(b, e => {
+      const same = [...b.parentElement.querySelectorAll(".react")].find(x => x !== b && x.textContent.trim().startsWith(e));
+      if (same) { if (same.getAttribute("aria-pressed") !== "true") same.click(); same.classList.remove("bump"); void same.offsetWidth; same.classList.add("bump"); return; }
+      b.insertAdjacentHTML("beforebegin", `<button class="react bump" type="button" aria-pressed="true" data-react>${e} <span>1</span></button>`);
+      const nb = b.previousElementSibling; nb.onclick = () => { const on = nb.getAttribute("aria-pressed") !== "true"; nb.setAttribute("aria-pressed", on); const c = nb.querySelector("span"); c.textContent = +c.textContent + (on ? 1 : -1); };
+    });
+    new MutationObserver((_, o) => { if (!pk.el.isConnected) { b.setAttribute("aria-expanded", "false"); o.disconnect(); } }).observe(document.body, { childList: true });
+  });
 }
 
 function prdDrawer(i) {

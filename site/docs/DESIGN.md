@@ -744,6 +744,9 @@ One composer for notes and the agent session. The textarea grows to 200px; a bar
 - Work In Progress is a queue, not a second feed (28 Oct 2026): after a first pass copied Activities, the user asked for the two pages to read as different purposes. WIP became one panel of queue rows with a "whose move" column and the flow track, no side panel; Activities keeps the avatar rail and feed cards. Later the same day the groups became a filter over one time-ordered list (user).
 - One detail page, two origins: an initiative opened from Activities is "#initiative/activities" (live: "?from=activities"); its back link and nav highlight follow the origin.
 
+- Reactions open a horizontal picker (28 Oct 2026): one row of six emoji above the React button (below when there is no room), ←/→ to move, Enter to pick, Escape or a click outside to close with focus back on the button; picking one that is already there adds you to it. The vertical menu is gone.
+- The React package follows the pages (28 Oct 2026): `Queue`, `QueueFilter`, `QueueRow` and `FlowTrack` for Work In Progress, `ActivityFeed`, `ActivityCard`, `AgentReply`, `TicketBar` for Activities, `Reactions` and `Avatar` shared. The flow track collapses to the current step's name by a container query (under 600px), not the viewport.
+
 ## Implementation
 
 The developer package lives in `konteks-redesign/code/` and is generated from `konteks-redesign/src/` by `tools/make_package.py` (run through `build.sh`); edit the sources, not the outputs.

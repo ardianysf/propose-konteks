@@ -12,3 +12,7 @@
 @media (prefers-reduced-motion: reduce) {
   [class*="animate-[kx-"] { animation: none !important; }
 }
+/* Work In Progress and Activities: the one live moment on each page. */
+@keyframes kx-flow-run { 0% { box-shadow: 0 0 0 3px var(--info-soft) } 60% { box-shadow: 0 0 0 7px transparent } 100% { box-shadow: 0 0 0 3px transparent } }
+@keyframes kx-node-pulse { 0% { box-shadow: 0 0 0 4px rgb(var(--color-app-bg)), 0 0 0 4px var(--focus) } 70% { box-shadow: 0 0 0 4px rgb(var(--color-app-bg)), 0 0 0 12px transparent } 100% { box-shadow: 0 0 0 4px rgb(var(--color-app-bg)), 0 0 0 4px transparent } }
+@keyframes kx-run { from { background-position: 100% 0 } to { background-position: -150% 0 } }

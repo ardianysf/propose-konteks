@@ -174,10 +174,14 @@ const SPEC_JS = {
   "c-combo": ["comboBind"], "c-chat": ["composerHtml", "bindComposer"], "c-thread": ["composerHtml", "bindComposer"],
   "c-overlay": ["openLayer", "closeOverlay", "overlayKey", "drawer", "modal", "modalStep", "dialog", "menu", "popover"],
   "c-toast": ["toast"], "c-copy": ["copyText", "bindCopy"], "c-shell": ["bindShell"],
+  "c-row": ["waitMin", "wipKind", "flowStep", "flowTrack", "queueRow", "pageWork"],
+  "c-pager": ["actBody", "actReply", "actCard"],
 };
+SPEC_JS["c-thread"] = [...SPEC_JS["c-thread"], "reactPicker", "bindNoteTools"];
 const SPEC_REACT = {
   "c-btn": ["Button.tsx"], "c-input": ["Field.tsx", "Input.tsx"], "c-combo": ["Combobox.tsx"], "c-nav": ["Combobox.tsx"],
-  "c-overlay": ["Overlay.tsx", "Menu.tsx"], "c-chat": ["Composer.tsx"], "c-thread": ["Composer.tsx"],
+  "c-overlay": ["Overlay.tsx", "Menu.tsx"], "c-chat": ["Composer.tsx"], "c-thread": ["Composer.tsx", "Reactions.tsx"],
+  "c-row": ["Queue.tsx", "FlowTrack.tsx", "Avatar.tsx"], "c-pager": ["Activity.tsx", "Reactions.tsx", "Avatar.tsx"], "c-status": ["Avatar.tsx"],
 };
 const jsFor = id => (SPEC_JS[id] || []).map(n => typeof window[n] === "function" ? window[n].toString() : "").filter(Boolean).join("\n\n");
 const reactFor = id => (SPEC_REACT[id] || []).filter(f => typeof REACT_FILES !== "undefined" && REACT_FILES[f]).map(f => `// ${f}\n${REACT_FILES[f]}`).join("\n\n");

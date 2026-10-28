@@ -10,6 +10,11 @@ The interactive components of the redesign as React components styled with Tailw
 | `Menu` | `Menu.tsx` | pick or navigate; ↑↓ Home End, Escape returns focus, opens upward near the bottom |
 | `Drawer`, `Modal`, `Dialog` | `Overlay.tsx` | the overlay grammar: Escape closes the top layer only, focus trapped and returned, stacked scrim stays clear (UX-012, UX-035) |
 | `Composer` | `Composer.tsx` | notes and the agent session; "/" picker for skills and tools, picks as chips, ⌘↵ to send, compact one-row form |
+| `Avatar` | `Avatar.tsx` | initials on Mist Green, or the Konteks mark for the agent; accent ring for "your move" |
+| `Reactions` | `Reactions.tsx` | reaction chips you toggle and a horizontal picker (one row, ←/→, Escape); picking one that exists adds you to it |
+| `FlowTrack` | `FlowTrack.tsx` | Plan · Breakdown · Estimate · Delivery · Receipt, current step in the row's tone, ticket bar on a delivery; names collapse to the current step when its container is under 600px |
+| `Queue`, `QueueFilter`, `QueueRow` | `Queue.tsx` | Work In Progress as a work queue: whose move and how long, title, System, N new, cause, flow track, the one action or a gate; whose move is a filter over one list, newest movement first |
+| `ActivityFeed`, `ActivityDay`, `ActivityCard`, `ActivityQuote`, `AgentReply`, `TicketBar` | `Activity.tsx` | Activities as a feed of what people did; Konteks never appears as an entry, its answer is an `AgentReply` inside the caller's card |
 
 ## Install
 
@@ -67,6 +72,25 @@ Colours come from the preset's `app-*` names (filled by `tokens.live-map.css`). 
   items={skillsAndTools} onSend={({ text, picks }) => post(text, picks)} />
 ```
 
+```tsx
+<QueueFilter value={who} onChange={setWho} note="Most recent movement first"
+  options={[{ key: "all", label: "All", count: 8 }, { key: "mine", label: "Needs you", count: 2 }]} />
+<Queue>
+  <QueueRow mover={{ name: "Ardian Yusuf", initials: "AY", label: "Your move", you: true }} wait="7h 11m"
+    title="Rental checkout documentation" system="Rentify" fresh={21} tone="decision"
+    cause="The plan is ready. Break it into tickets" flow={{ current: 0 }} onOpen={open}
+    action={<Button size="sm" variant="primary">Create tickets</Button>} />
+</Queue>
+
+<ActivityFeed>
+  <ActivityDay day="Today" date="27 Oct 2026" />
+  <ActivityCard actor={{ name: "Dimas Pratama", initials: "DP" }} verb="approved TKT-2's delivery in"
+    initiative={{ title: "Invoice export for Ledgerline", onOpen: open }} time="19.26" live
+    system="Ledgerline" stage="Executing" updates={10} reactions={reactions} onReactions={setReactions}
+    reply={<AgentReply did="Delivering TKT-2 of 3 on rf-01" time="19.28"><TicketBar done={1} of={3} ticket="TKT-2" /></AgentReply>} />
+</ActivityFeed>
+```
+
 ## Rules the components already enforce
 
 - A modal's or drawer's title is the label of the button that opened it; pass the same words.
@@ -74,7 +98,9 @@ Colours come from the preset's `app-*` names (filled by `tokens.live-map.css`). 
 - Dialogs only for actions that spend money or cannot be undone; name the action ("Approve", "Revoke token"), never "OK".
 - Escape closes one layer at a time. A menu or combobox inside a drawer closes first, without closing the drawer.
 - Touch targets are at least 24px; fields are 16px on phones so iOS does not zoom.
+- Activities lists people only. Agents answer when a person calls them, so an agent never gets its own `ActivityCard`.
+- Work In Progress is a queue, not a feed: no avatar rail, no reactions; whose move is a filter, not a grouping.
 
 ## Verified
 
-Type-checked with TypeScript 5.6 (strict). Rendered with Tailwind 3.4 in light and dark and driven with Playwright: combobox search and keyboard pick, menu keyboard and focus return, two stacked drawers closed one Escape at a time with focus returned to each opener, focus trap, modal autofocus, dialog confirm, composer "/" pick and ⌘↵ send.
+Type-checked with TypeScript 5.6 (strict). Rendered with Tailwind 3.4 in light and dark and driven with Playwright: combobox search and keyboard pick, menu keyboard and focus return, two stacked drawers closed one Escape at a time with focus returned to each opener, focus trap, modal autofocus, dialog confirm, composer "/" pick and ⌘↵ send, queue filter and row open, reaction picker keyboard pick and focus return.

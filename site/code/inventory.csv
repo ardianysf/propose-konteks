@@ -20,6 +20,8 @@ System filter row (24 Systems) and pencil “Edit System”,"Work, Activities, I
 Banner “… was connected from … on …”,Work,c-callout,app,covered,,work
 "Card: title, N new updates, System, stage, Needs you, waiting, driver, cause, action",Work,c-row,app,covered,,work
 “+1 more” on a card,Work,c-row,app,covered,Now a button that opens the other item (UX-005),work
+"Where the initiative stands: Plan, Breakdown, Estimate, Delivery, Receipt",Work,c-row,app,covered,Flow track read from the stage and the cause the row already shows,work
+"Whose move as a filter over one list, newest movement first",Work,c-row c-nav,app,covered,Replaces the Needs you / Needs someone else groups,work
 "New initiative: description, Software System, Attach meeting transcript, Start",Work,c-overlay c-input c-combo c-attach,app,covered,,work
 "Create System: three start options, VCS connections to read",Work,c-choice c-msel,app,covered,,work
 "Edit System: Open System map, Delete System",Work,c-overlay,app,covered,,work
@@ -31,6 +33,8 @@ Banner “… was connected from … on …”,Work,c-callout,app,covered,,work
 "Details → Session history drawer: Refresh, Open session, Previous/Next",Initiative,c-overlay c-log,app,covered,,initiative
 "Notes: “Draft your thinking…”, Attach, Post note",Initiative,c-thread,app,covered,,initiative
 "Thread: notes, Konteks replies, React, Comment",Initiative,c-thread,app,covered,,initiative
+Reaction picker: one horizontal row of emoji,"Initiative, Activities",c-thread c-pager,app,covered,Was a vertical menu,activities
+Konteks's answer inside the card of the person who called it,Activities,c-pager,app,covered,Agents are never an entry of their own,activities
 "PRD drawer: status, revision, goals, requirements, risks",Initiative,c-overlay,app,covered,,initiative
 "Breakdown drawer: status, merged count, milestone, tickets, SP",Initiative,c-overlay c-disclosure,app,covered,,initiative
 "Ticket menu: View changes, Open Engineering session",Breakdown,c-overlay,app,covered,,initiative

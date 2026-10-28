@@ -32,7 +32,7 @@ const CAT_GROUPS = [
     ["c-row", "Baris antrean inisiatif", "Satu inisiatif di Work In Progress: giliran siapa dan berapa lama menunggu, judul, System, update baru, penyebab, posisinya di alur (Plan sampai Receipt), dan aksi sesuai izin (UX-002)."],
     ["c-quote", "Estimasi & stepper siklus", "Angka uang dalam mono. Stepper siklus Estimate → Quote → Plan → Delivery → Receipt dengan siklus sebelumnya."],
     ["c-log", "Log pembaruan", "Per hari, belum dibaca ditandai dengan legenda, siklus gagal/coba-lagi dikelompokkan dengan jumlah dan penyebab (UX-008)."],
-    ["c-thread", "Catatan & komentar", "“Draft your thinking”, Attach, Post note, komentar, React, balasan Konteks."],
+    ["c-thread", "Catatan & komentar", "“Draft your thinking”, Attach, Post note, komentar, balasan Konteks. React membuka picker emoji satu baris horizontal."],
     ["c-chat", "Pesan sesi agen", "Ringkasan manusia lebih dulu, jejak agen dilipat, nama orang bukan handle mesin (UX-019)."],
     ["c-map", "System map", "Node System dan Component dengan garis relasi, kontrol zoom berlabel, tanpa chip “unknown” (UX-021)."],
     ["c-harness", "Agen di runtime", "Satu ubin per agen: logo resmi (atau tanda dua huruf sampai logonya dipasang) dengan lencana status berbentuk ikon. Nama dan status ada di nama aksesibel dan tooltip; agen terpilih disebut dalam teks di bawahnya, beserta perintah perbaikannya (UX-038)."],
@@ -45,7 +45,7 @@ const CAT_GROUPS = [
     ["c-toast", "Toast", "Konfirmasi singkat setelah aksi; versi error dengan sebab."],
     ["c-overlay", "Menu, modal, drawer, dialog", "Satu aturan: drawer untuk melihat atau meninjau objek tanpa meninggalkan halaman, modal untuk mengisi form lalu mengirim, dialog untuk mengonfirmasi satu akibat, menu untuk memilih. Escape menutup lapisan teratas saja (UX-012); hapus permanen meminta nama diketik (UX-016)."],
     ["c-disclosure", "Disclosure", "Untuk detail sekunder: tiket, opsi lanjutan, “Why?”, model per delivery."],
-    ["c-pager", "Timeline aktivitas", "Kartu di atas garis waktu, terbaru di atas, kejadian lain di inisiatif yang sama pada hari itu dilipat ke dalam kartunya. Setiap kartu punya reaksi, komentar, dan aksi yang memang tersedia untuk penonton; yang sedang berjalan ditandai Live. Load more dengan jumlah yang terlihat."],
+    ["c-pager", "Timeline aktivitas", "Hanya berisi orang; jawaban Konteks menempel sebagai balasan di kartu orang yang memanggilnya. Kartu di atas garis waktu, terbaru di atas, kejadian lain di inisiatif yang sama pada hari itu dilipat ke dalam kartunya. Setiap kartu punya reaksi, komentar, dan aksi yang memang tersedia untuk penonton; yang sedang berjalan ditandai Live. Load more dengan jumlah yang terlihat."],
   ]],
 ];
 
@@ -80,6 +80,7 @@ function catSection(id) {
       <div class="specimen-row"><div class="seg" role="group" aria-label="Source"><button type="button" aria-pressed="true">Public Git</button><button type="button" aria-pressed="false">Connected Git</button></div>
       <div class="seg" role="group" aria-label="Theme"><button type="button" aria-pressed="true">System</button><button type="button" aria-pressed="false">Light</button><button type="button" aria-pressed="false">Dark</button></div>
       <div class="seg" role="group" aria-label="Duration"><button type="button" aria-pressed="true">30 days</button><button type="button" aria-pressed="false">90 days</button></div></div>
+      <div class="specimen-row"><div class="seg q-filter" role="group" aria-label="Whose move"><button type="button" aria-pressed="true">All<span class="count">8</span></button><button type="button" aria-pressed="false">Needs you<span class="count">2</span></button><button type="button" aria-pressed="false">Needs someone else<span class="count">5</span></button><button type="button" aria-pressed="false">Agents delivering<span class="count">1</span></button></div><span class="hint">Filter with counts (Work In Progress)</span></div>
       <div class="specimen-row"><button class="chipbtn">${ic("box")}All systems${ic("chevron-down")}</button><button class="chipbtn on">${ic("box")}System: <b>Rentify</b>${ic("chevron-down")}</button><button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Edit Rentify" data-tip="Edit Rentify">${ic("pencil")}</button><button class="btn btn-ghost btn-sm">Show all systems</button></div>`,
     "c-combo": () => `<div class="grid2">
       <div class="field"><span class="flabel" id="cbL">Software System</span><div class="combo" id="cb1"><button class="btn combo-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="cbL"><span class="ph">Choose a System</span>${ic("chevrons-up-down")}</button></div><span class="hint">Ketik untuk mencari 24 System.</span></div>
@@ -190,7 +191,7 @@ Use this skill to document a feature from current source.
         <div class="log-e">${ic("message-square-text")}<span>Rizky added a note</span><time>16.17</time></div></div></div>`,
     "c-thread": () => `<div class="thread">
       <div class="compose"><textarea rows="1" placeholder="Draft your thinking… notes feed the plan" aria-label="Add a note"></textarea><button class="btn btn-ghost btn-icon btn-sm" aria-label="Attach file" data-tip="Attach">${ic("paperclip")}</button><button class="btn btn-primary btn-sm">Post note</button></div>
-      <div class="cmt">${av("ra", 1)}<div class="cmt-b"><div class="cmt-h"><b>Rizky Aditya</b><time>yesterday, 16.17</time></div><p>Analyse all three Kurir Hub repositories first, then propose the manual's outline before writing.</p><div class="reacts"><button class="react" type="button" aria-pressed="true" data-react>👍 <span>2</span></button><button class="react react-add" type="button" aria-label="React">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm">Comment</button></div></div></div>
+      <div class="cmt">${av("ra", 1)}<div class="cmt-b"><div class="cmt-h"><b>Rizky Aditya</b><time>yesterday, 16.17</time></div><p>Analyse all three Kurir Hub repositories first, then propose the manual's outline before writing.</p><div class="reacts"><button class="react" type="button" aria-pressed="true" data-react>👍 <span>2</span></button><button class="react react-add" type="button" aria-label="Add a reaction" aria-haspopup="true" aria-expanded="false">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm">Comment</button></div></div></div>
       <div class="cmt reply"><span class="agent-av">${ic("bot")}</span><div class="cmt-b"><div class="cmt-h"><b>Konteks</b><span class="agent-chip">Agent</span><time>16.20</time></div><p>Proposed one ticket per repository, then a combined manual. The outline is in the PRD.</p></div></div>
       <button class="more-replies" type="button">Show 1 more</button></div>`,
     "c-chat": () => `<div class="sess-col" style="margin:0;max-width:680px">
