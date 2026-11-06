@@ -36,7 +36,7 @@ function shell(active, top, body, { flush = false } = {}) {
   <aside class="side" aria-label="Workspace navigation">
     <div class="side-top"><button class="ws" type="button" id="wsBtn" aria-haspopup="menu" aria-label="Workspace: Refactory" data-tip="Refactory"><span class="brand-mark">R</span><b class="lbl">Refactory</b>${ic("chevrons-up-down")}</button><button class="btn btn-ghost btn-icon btn-sm rel" type="button" id="bellBtn" aria-label="Notifications, ${notifItems().filter(n => n[0]).length} unread" data-tip="Notifications">${ic("bell")}<span class="unread" style="position:absolute;top:5px;right:5px"></span></button></div>
     <nav class="nav" aria-label="Main">
-      ${NAV.map(([k, h, i, l]) => `<a href="${h}" data-tip="${l}" ${active === k ? 'aria-current="page"' : ""} ${k === "work" ? `aria-label="Work In Progress: ${need} need you"` : ""}>${ic(i)}<span class="lbl">${l}</span>${k === "work" ? `<span class="count hot">${need}</span>` : ""}</a>`).join("")}
+      ${NAV.map(([k, h, i, l]) => `<a href="${h}" data-tip="${l}" ${active === k ? 'aria-current="page"' : ""} ${k === "work" ? `aria-label="Work In Progress: ${need} need you"` : k === "releases" ? `aria-label="Releases: ${RELEASES.filter(r => r.status === "candidate").length} needing attention"` : ""}>${ic(i)}<span class="lbl">${l}</span>${k === "work" ? `<span class="count hot">${need}</span>` : k === "releases" ? `<span class="count">${RELEASES.filter(r => r.status === "candidate").length}</span>` : ""}</a>`).join("")}
     </nav>
     <section class="side-sec" aria-labelledby="rtH">
       <div class="side-h"><span id="rtH">Runtimes</span><button type="button" id="sideConnect" aria-label="Connect a runtime" data-tip="Connect a runtime">${ic("plus")}</button></div>

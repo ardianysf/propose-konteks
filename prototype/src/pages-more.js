@@ -233,17 +233,59 @@ function pageIssues() {
   return shell("issues", "", body, { flush: true });
 }
 
+/* Releases, as live (read 6 Nov 2026): "Release candidates" first, then "Released". A row: what it is (Release candidate, or
+   the version in mono), the System, when, the summary, and "N initiatives · SP". The row opens the release. */
+const relWhen = m => `<time title="${relTime(m)} · ${fmtDate(new Date(NOW - m * 60000))}">${relTime(m)}</time>`;
+function relRow(r) {
+  const cand = r.status === "candidate";
+  return `<li><a class="rel-row" href="#release" data-rel="${r.id}">
+    <span class="rel-ic">${ic(cand ? "rocket" : "package")}</span>
+    <span class="rel-b"><span class="rel-h"><b class="${cand ? "" : "mono"}">${cand ? "Release candidate" : esc(r.version)}</b><span class="tl-sys">${ic("box")}${esc(sysById[r.sys].name)}</span>${relWhen(r.m)}</span>
+      <span class="rel-sum">${esc(r.summary)}</span>
+      <span class="rel-meta">${r.items.length} initiative${r.items.length > 1 ? "s" : ""}<span aria-hidden="true">·</span><span class="mono">${r.sp} SP</span></span></span></a></li>`;
+}
 function pageReleases() {
+  const mine = RELEASES.filter(r => !S.sys || r.sys === S.sys), cand = mine.filter(r => r.status === "candidate"), done = mine.filter(r => r.status === "released");
+  const group = (h, list) => list.length ? `<section class="rel-sec" aria-labelledby="rel-${h.replace(/\s/g, "")}"><h2 class="grp-h" id="rel-${h.replace(/\s/g, "")}">${h}<span class="count">${list.length}</span></h2><ul class="rel-list">${list.map(relRow).join("")}</ul></section>` : "";
   const body = `<div class="pagehead framed">${phead("Releases", "Ready to ship first, then what shipped.")}${sysFilter()}</div>
-    <div class="content framed-body"><div class="empty page"><div class="ic">${ic("rocket")}</div><h3>Nothing here yet</h3><p>Accepted initiatives gather into a release candidate for their System. When one is ready, it shows here first with a Ship action for people allowed to ship.</p><a class="btn btn-sm" href="#work">${ic("square-kanban")}See initiatives in progress</a></div>
-    <section class="sec illus"><div class="sec-title"><div><h2 class="h-sec">How a release candidate will look</h2><p id="illusNote">Illustration with sample data, so Ship is off. The release fields come from the app as they are; nothing here adds a step.</p></div></div>
-    <div class="card"><div class="card-h">${ic("rocket")}<h3>Ledgerline · release candidate</h3>${st("ok", "Ready to ship")}</div>
-      <div class="rc">${[["Invoice export for Ledgerline"], ["Tax line rounding fix"], ["CSV import validation"]].map(([t]) => `<div class="rc-item">${sg("Done", "done")}<span>${esc(t)}</span><span class="hint">Accepted</span></div>`).join("")}</div>
-      <div class="card-f"><span class="hint">3 accepted initiatives</span><button class="btn btn-primary btn-sm" type="button" disabled aria-describedby="illusNote">Ship</button></div></div></section></div>`;
+    <div class="content framed-body">${mine.length ? group("Release candidates", cand) + group("Released", done)
+      : `<div class="empty page"><div class="ic">${ic("rocket")}</div><h3>Nothing here yet</h3><p>Accepted initiatives gather into a release candidate for their System.</p><a class="btn btn-sm" href="#work">${ic("square-kanban")}See initiatives in progress</a></div>`}</div>`;
   return shell("releases", "", body, { flush: true });
 }
 function bindReleases() {
   bindSysFilter();
+  $$("[data-rel]").forEach(a => a.addEventListener("click", () => { S.rel = a.dataset.rel; }));
+}
+
+/* Release detail, as live: back link, System and status, the name (Release candidate / version), one action
+   (Ship for a candidate, Announce for a release), then one card: what will ship / what shipped, the state line,
+   the settlement ("Settled over N deliveries · SP"), and below it the release's comments. */
+function pageRelease() {
+  const r = relById[S.rel] || RELEASES[0], cand = r.status === "candidate";
+  const items = r.items.map(it => `<li>${actAv(it.p)}<div><b>${esc(it.title)}</b><small>${esc(it.note)}</small></div>${cand ? `<button class="btn btn-ghost btn-sm" type="button" data-unrel aria-label="Remove from release: ${esc(it.title)}">Remove from release</button>` : ""}</li>`).join("");
+  const top = `<a class="back" href="#releases">${ic("arrow-left")}Back to Releases</a>`;
+  const body = `<div class="page-col rel-page">
+    <header class="rel-head"><div><p class="rel-tags"><span class="tl-sys">${ic("box")}${esc(sysById[r.sys].name)}</span><span class="tl-sys">${ic("tag")}${cand ? "Release candidate" : "Released"}</span></p>
+      <h1 class="ph-t ${cand ? "" : "mono"}">${cand ? "Release candidate" : esc(r.version)}</h1></div>
+      ${cand ? `<button class="btn btn-primary" type="button" id="relShip">${ic("rocket")}Ship</button>` : `<button class="btn btn-primary" type="button" id="relAnnounce">${ic("megaphone")}Announce</button>`}</header>
+    <section class="dc rel-card" aria-labelledby="relWhat"><h2 class="h-sub" id="relWhat">${cand ? "What will ship" : "What shipped"}</h2>
+      <ul class="rel-items">${items}</ul>
+      ${cand ? `<p class="hint">Waiting to ship</p>` : `<p class="rel-sumtext">${esc(r.summary)}</p><p class="hint">Shipped by ${esc(PEOPLE[r.by].name)} · ${relWhen(r.m)}</p>`}
+      <div class="rel-settle"><span>Settled over ${r.deliveries} deliver${r.deliveries > 1 ? "ies" : "y"}</span><i aria-hidden="true"></i><b class="mono">${r.sp} SP</b></div></section>
+    <section class="rel-thread" aria-label="Comments"><ol class="tl-cmts" id="relCmts">${r.cm.map(actCmt).join("")}</ol>
+      <div class="compose rel-compose"><textarea rows="1" placeholder="Add a comment…" aria-label="Comment on this release"></textarea><button class="btn btn-primary btn-sm" type="button" id="relPost">Post comment</button></div></section></div>`;
+  return shell("releases", top, body);
+}
+function bindRelease() {
+  const r = relById[S.rel] || RELEASES[0];
+  $("#relShip")?.addEventListener("click", () => dialog(`Ship the release candidate for ${sysById[r.sys].name}?`, `${r.items.length} initiative${r.items.length > 1 ? "s" : ""} ship together. Settled so far: ${r.sp} SP.`, "Ship", () => toast("Demo: shipping is not simulated")));
+  $("#relAnnounce")?.addEventListener("click", () => toast("Demo: Announce was not opened during the read-only check, so it is not simulated"));
+  $$("[data-unrel]").forEach(b => b.addEventListener("click", () => dialog("Remove from release?", "The initiative stays accepted and joins the next release candidate.", "Remove", () => toast("Demo: not removed"))));
+  const ta = $(".rel-compose textarea");
+  $("#relPost").onclick = () => { const t = ta.value.trim(); if (!t) return ta.focus();
+    $("#relCmts").insertAdjacentHTML("beforeend", actCmt({ p: "ay", m: 0, text: t })); $("#relCmts").lastElementChild.querySelector("time").outerHTML = "<time>now</time>";
+    bindNoteTools($("#relCmts").lastElementChild); drawIcons(); ta.value = ""; sfx("send"); toast("Comment posted"); };
+  $$("#relCmts > li").forEach(li => bindNoteTools(li));
 }
 
 /* Leaders: a ranked list, not a spreadsheet. Fixed columns so numbers line up; the points bar shows distance

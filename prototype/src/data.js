@@ -222,3 +222,17 @@ const threadFor = i => THREADS[i.id] || [
   { who: i.driver, m: 420, text: `${i.title}. Change only what the request needs; keep application behaviour, security and billing untouched. Record the exact commands and their outcomes.`, re: [["👍", 1]] },
   { who: "kx", m: 416, r: 1, steps: ["Read the request", "Drafted the PRD"], text: "Drafted the PRD and proposed its breakdown from this. Have a look." },
 ];
+
+/* Releases (live, read 6 Nov 2026): accepted initiatives gather into one release candidate per System; shipping turns it
+   into a numbered release. List: candidates first, then what shipped. Sample data, same fields as live. */
+const RELEASES = [
+  { id: "rel-ledger", status: "candidate", sys: "ledger", m: 1140, summary: "Invoice export for Ledgerline and the rounding fix on tax lines, ready for customers.",
+    items: [{ title: "Invoice export for Ledgerline", p: "ds", note: "Accepted by Dimas Pratama" }, { title: "Round tax lines per invoice, not per item", p: "np", note: "Accepted by Maya Lestari" }],
+    deliveries: 4, sp: "2.62", cm: [] },
+  { id: "rel-rentify-110", status: "released", version: "v1.1.0", sys: "rentify", m: 5760, by: "ml", summary: "Updated the Support API README: run, test and the health endpoints.",
+    items: [{ title: "Refresh the Support API README", p: "ay", note: "Added when its last ticket merged" }], deliveries: 3, sp: "0.88",
+    cm: [{ p: "sw", m: 4320, text: "Checked it against the staging setup, all steps work." }] },
+  { id: "rel-hris-100", status: "released", version: "v1.0.0", sys: "hris", m: 11520, by: "sw", summary: "First onboarding README for the HRIS frontend.",
+    items: [{ title: "HRIS frontend developer README", p: "sw", note: "Added when its last ticket merged" }], deliveries: 2, sp: "0.47", cm: [] },
+];
+const relById = Object.fromEntries(RELEASES.map(r => [r.id, r]));

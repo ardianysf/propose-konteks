@@ -82,6 +82,14 @@ custom plugin UI uses Tailwind `app-*` token classes and a `.dark` class.
   reports it or a telemetry channel sends an alert, it appears here."
 - Releases: "Ready to ship first, then what shipped." System filter. Empty: "Nothing here yet — Accepted initiatives
   gather into a release candidate for their System." (Release Ship permission exists.)
+  With data (read 6 Nov 2026, read-only): groups RELEASE CANDIDATES then RELEASED. Row: rocket icon + "Release candidate"
+  (or box icon + version in mono, e.g. "v1.0.0"), System tag, relative + absolute time, summary line, "N initiative · X SP".
+  Sidebar: "Releases: 1 needing attention" (count of candidates). Row opens /releases/rel_…:
+  "Back to Releases"; System + status tag (Release candidate / Released); title; one action: Ship (candidate) or
+  Announce (released). Card "What will ship" (avatar, initiative link, "Accepted by <person>", "Remove from release"),
+  "Waiting to ship", "Settled over N delivery · X SP". Released: "What shipped" (initiative, "Added when its last ticket
+  merged"), summary, "Shipped by <person> · time", settlement. Then comments (React only) and "Add a comment…" + Post comment.
+  Ship, Announce and Remove were not pressed.
 - Leaders (/leaderboard): "People by involvement. Agents and models by value." PEOPLE ranked: N started · N contributions ·
   N reactions, POINTS; AGENTS AND MODELS: Codex · Not reported · 32M tokens. No period filter.
 

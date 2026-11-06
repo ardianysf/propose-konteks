@@ -59,6 +59,8 @@ const INVENTORY = [
   ["Feed: “X started Y” and the state changes from Updates, as a timeline with React, Comment, N updates, the action you can take, Load more; rail: Waiting on you, Systems with no initiative", "Activities", ["c-pager", "c-thread"], "app", "", "", "activities"],
   ["Empty state “Nothing is open”", "Issues", "c-empty", "app", "", "", "issues"],
   ["Empty state “Nothing here yet”, release candidates", "Releases", ["c-empty", "c-cards"], "app", "", "", "releases"],
+  ["Releases list: Release candidates, then Released; row = name or version, System, time, summary, N initiatives · SP (read 6 Nov 2026)", "Releases", ["c-row", "c-nav"], "app", "", "Sidebar shows a count of candidates", "releases"],
+  ["Release detail: Back to Releases, System + status, Ship or Announce, What will ship / What shipped, Remove from release, Waiting to ship / Shipped by, Settled over N deliveries · SP, comments", "Release", ["c-header", "c-cards", "c-thread"], "app", "", "Ship and Announce were not pressed during the check; Ship confirms with a dialog here", "release"],
   ["People ranked with points; agents and models", "Leaders", "c-table", "app", "", "", "leaders"],
   ["Customize subnav (10 sections)", "Customize", "c-subnav", "app", "", "", "runtimes"],
   ["Runtime cards: status, reasons, sessions, workloads, update line", "Customize › Runtimes", ["c-table", "c-status"], "app", "", "", "runtimes"],

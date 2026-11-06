@@ -6,7 +6,7 @@ const ROUTES = {
   login: [pageLogin, bindLogin, "login", "Sign in"],
   work: [pageWork, bindWork, "demo", "Work In Progress"], initiative: [pageInitiative, bindInitiative, "demo", () => (iniById[S.cur] || INITIATIVES[0]).title],
   session: [pageSession, bindSession, "demo", "TKT-1 session"], activities: [pageActivities, bindActivities, "demo", "Activities"],
-  issues: [pageIssues, bindSysFilter, "demo", "Issues"], releases: [pageReleases, bindReleases, "demo", "Releases"], leaders: [pageLeaders, () => {}, "demo", "Leaders"],
+  issues: [pageIssues, bindSysFilter, "demo", "Issues"], releases: [pageReleases, bindReleases, "demo", "Releases"], release: [pageRelease, bindRelease, "demo", () => { const r = relById[S.rel] || RELEASES[0]; return r.status === "candidate" ? "Release candidate" : r.version; }], leaders: [pageLeaders, () => {}, "demo", "Leaders"],
   runtimes: [pageRuntimes, bindRuntimes, "demo", "Runtimes · Customize"], runtime: [pageRuntime, bindRuntime, "demo", () => (rtById[S.rt] || RUNTIMES[0]).name],
   access: [pageAccess, bindAccess, "demo", "Access · Customize"], models: [pageModels, () => { bindCz(); bindLock(); }, "demo", "Models · Customize"],
   context: [pageContext, bindContext, "demo", "Context · Customize"], skills: [pageSkills, bindSkills, "demo", "Skills · Customize"],
