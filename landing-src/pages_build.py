@@ -129,12 +129,14 @@ PRICING_CSS = r'''
 .px-hero{padding-top:clamp(56px,8vw,120px)}
 .ref{margin-top:24px;display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;padding:10px 16px;border-radius:12px;background:var(--accent-soft);border:1px solid var(--line-accent);font-size:14px;color:var(--ink-2)}
 .ref b{font:640 18px/1 var(--display);color:var(--accent-ink)}
-.bills{margin-top:clamp(48px,6vw,80px);background:linear-gradient(var(--paper) 0 50%,var(--moss) 50% 100%)}
+.bills{margin-top:clamp(32px,4vw,56px);background:linear-gradient(var(--paper) 0 50%,var(--moss) 50% 100%)}
 .bills-in{display:grid;grid-template-rows:auto auto auto}
-.bill{display:flex;gap:18px;align-items:flex-start;max-width:640px;padding:28px 0}
+.bill{display:flex;gap:20px;align-items:flex-start;max-width:720px;padding:clamp(48px,6vw,80px) 0}
+.bill.up{padding-bottom:clamp(56px,7vw,88px)}
+.bill.dn{padding-top:clamp(64px,8vw,104px)}
 .bill h2{font-size:clamp(22px,1rem + 1vw,30px)}
 .bill p{margin-top:6px;font-size:16px;color:var(--ink-2)}
-.bill.dn{color:var(--on-moss);justify-self:end}
+.bill.dn{color:var(--on-moss)}
 .bill.dn p{color:var(--on-moss-2)}
 .bi{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--accent-soft);color:var(--accent-ink)}
 .bill.dn .bi{background:rgba(143,191,106,.16);color:var(--live)}
@@ -256,16 +258,24 @@ CONTROLS = [
   ("revoke", "i-route", "Revocable access", "MCP and connector credentials can be scoped, rotated, revoked, and replaced. Access should be removed promptly when a person, agent, or integration no longer needs it."),
 ]
 
-SCOPE_SVG = r'''<svg class="scope" viewBox="0 0 420 420" role="img" aria-label="An agent's scope sits inside the person who supervises it, inside the workspace, inside the tenant">
-  <g class="ring r-tenant"><rect x="10" y="10" width="400" height="400" rx="36"/><text x="34" y="44">Tenant</text></g>
-  <g class="ring r-ws"><rect x="54" y="70" width="312" height="300" rx="30"/><text x="76" y="102">Workspace</text></g>
-  <g class="ring r-person"><rect x="98" y="128" width="224" height="200" rx="24"/><text x="120" y="158">Person</text></g>
-  <g class="ring r-agent"><rect x="146" y="186" width="128" height="96" rx="18"/><text x="210" y="240">Agent</text></g>
-  <g class="gate"><rect x="176" y="164" width="68" height="28" rx="14"/><text x="210" y="183">Yes</text></g>
-  <g class="vault"><rect x="300" y="300" width="88" height="70" rx="14"/><path d="M332 326v-6a12 12 0 0 1 24 0v6"/><rect x="324" y="326" width="40" height="28" rx="6"/></g>
-  <g class="trail"><circle cx="70" cy="390" r="5"/><circle cx="120" cy="390" r="5"/><circle cx="170" cy="390" r="5"/><circle cx="220" cy="390" r="5"/><path d="M70 390H220"/></g>
-  <g class="key"><circle cx="300" cy="226" r="12"/><path d="M312 226h34M334 226v10M342 226v8"/><path class="cut" d="M290 206 352 250"/></g>
-</svg>'''
+SCOPE_SVG = r'''<div class="auth" role="img" aria-label="Example: what Rina may do, and what the agent acting for her may do">
+  <div class="auth-h"><b>Authority in one session</b><span class="eg">Example</span></div>
+  <div class="auth-who"><span></span><span class="who-p"><i class="av-s">R</i>Rina<small>Product lead</small></span><span class="who-a"><i class="av-s ag">CC</i>Claude Code<small>acts for Rina</small></span></div>
+  <ul class="auth-rows">
+    <li data-r="tenant"><span>Read billing-web and invoices-api</span><em class="ok">Allowed</em><em class="ok">Allowed</em></li>
+    <li data-r="human"><span>Run costed work</span><em class="ok">Allowed</em><em class="ask">Waits for her yes</em></li>
+    <li data-r="human"><span>Merge to main</span><em class="ok">Allowed</em><em class="ask">Waits for her yes</em></li>
+    <li data-r="secret"><span>See provider keys</span><em class="mask">Masked</em><em class="no">Never</em></li>
+    <li data-r="tenant"><span>Another tenant’s data</span><em class="no">Never</em><em class="no">Never</em></li>
+  </ul>
+  <div class="auth-foot">
+    <div class="af af-audit"><b>Record</b><ol><li><time>09:20</time>Rina approved plan v2</li><li><time>09:21</time>Claude Code opened pull request #318</li><li><time>09:40</time>Tests passed, receipt settled</li></ol></div>
+    <div class="af af-revoke"><b>MCP credential for Claude Code</b><div class="cred"><code>kx_live_••••••7f2</code><span class="st">Active</span><span class="st off">Revoked</span></div><div class="cred-acts"><span>Rotate</span><span class="rv">Revoke</span></div></div>
+    <div class="af af-secret"><b>Never shown</b><div class="nv"><span>Prompts</span><span>Screenshots</span><span>Logs</span><span>MCP discovery</span></div></div>
+    <div class="af af-tenant"><b>Tenant</b><p>Refactory workspace only. Nothing crosses to another tenant.</p></div>
+    <div class="af af-human"><b>Approval boundary</b><p>Costed work and high-impact changes wait for a person with the right role.</p></div>
+  </div>
+</div>'''
 
 def security():
     items = "".join(f'<li data-k="{k}"><span class="pi"><svg class="ico"><use href="#{ic}"/></svg></span><div><h3>{esc(t)}</h3><p>{esc(d)}</p></div></li>' for k, ic, t, d in CONTROLS)
@@ -277,7 +287,7 @@ def security():
 </section>
 <section class="sx-body" aria-label="Controls">
   <div class="wrap sx-g">
-    <div class="sx-l"><figure class="scope-fig" id="scope" data-k="tenant">{SCOPE_SVG}<figcaption id="scopeCap">Every scope sits inside the one above it.</figcaption></figure></div>
+    <div class="sx-l"><figure class="scope-fig" id="scope" data-k="tenant">{SCOPE_SVG}</figure></div>
     <ol class="ctrl" id="ctrl">{items}</ol>
   </div>
 </section>
@@ -289,14 +299,14 @@ def security():
   </div>
 </section>'''
     js = jb.COMMON_JS + r'''
-const fig = $("#scope"), cap = $("#scopeCap"), items = $$("#ctrl li");
+const fig = $("#scope"), items = $$("#ctrl li");
 const CAPS = { tenant: "Access ends at the tenant boundary.", secret: "Secrets live in protected storage, never in prompts, screenshots or logs.", human: "Costed work waits for a person's yes.", audit: "Every step leaves a trail that ties together.", revoke: "An agent's key can be rotated or revoked at any time." };
 let cur = "";
 const onS = () => {
   const vh = innerHeight; let best = 0, bd = 1e9;
   items.forEach((li, i) => { const r = li.getBoundingClientRect(), d = Math.abs(r.top + Math.min(r.height, 200) / 2 - vh * .45); if (d < bd) { bd = d; best = i; } });
   items.forEach((li, i) => li.classList.toggle("on", i === best));
-  const k = items[best].dataset.k; if (k !== cur) { cur = k; fig.dataset.k = k; cap.textContent = CAPS[k]; }
+  const k = items[best].dataset.k; if (k !== cur) { cur = k; fig.dataset.k = k; }
 };
 addEventListener("scroll", onS, { passive: true }); onS();
 '''
@@ -308,30 +318,51 @@ SECURITY_CSS = r'''
 .sx-body{padding:clamp(72px,9vw,128px) 0 clamp(96px,12vw,176px)}
 .sx-g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(40px,7vw,112px);align-items:start}
 .sx-l{position:sticky;top:110px}
-.scope-fig{margin:0;padding:clamp(20px,3vw,32px);border-radius:28px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-2)}
-.scope{width:100%;height:auto;display:block}
-.scope .ring rect{fill:none;stroke:var(--line-strong);stroke-width:1.5;transition:stroke .4s,fill .4s,stroke-width .4s}
-.scope .ring text{font:600 14px var(--sans);fill:var(--ink-3);transition:fill .4s}
-.scope .r-agent rect{fill:var(--moss);stroke:var(--moss)}
-.scope .r-agent text{fill:var(--on-moss);text-anchor:middle;font:640 18px var(--display)}
-.scope .gate rect{fill:var(--accent)}.scope .gate text{fill:var(--on-accent);text-anchor:middle;font:700 14px var(--display)}
-.scope .gate,.scope .vault,.scope .trail,.scope .key{opacity:0;transition:opacity .5s var(--ease),transform .6s var(--ease)}
-.scope .vault rect,.scope .vault path{fill:none;stroke:var(--accent-ink);stroke-width:2.2;stroke-linecap:round}
-.scope .vault > rect:first-child{fill:var(--accent-soft)}
-.scope .trail circle{fill:var(--accent-strong)}.scope .trail path{stroke:var(--accent-strong);stroke-width:2;stroke-dasharray:4 5}
-.scope .key circle,.scope .key path{fill:none;stroke:var(--live);stroke-width:3;stroke-linecap:round}
-.scope .key .cut{stroke:var(--danger);stroke-dasharray:80;stroke-dashoffset:80;transition:stroke-dashoffset .8s var(--ease) .3s}
-[data-k="tenant"] .r-tenant rect{stroke:var(--accent-strong);stroke-width:3;fill:var(--accent-soft)}
-[data-k="tenant"] .r-tenant text{fill:var(--accent-ink)}
-[data-k="secret"] .vault{opacity:1}
-[data-k="human"] .r-person rect{stroke:var(--accent-strong);stroke-width:3;fill:var(--accent-soft)}
-[data-k="human"] .r-person text{fill:var(--accent-ink)}
-[data-k="human"] .gate{opacity:1}
-[data-k="audit"] .trail{opacity:1}
-[data-k="revoke"] .key{opacity:1}
-[data-k="revoke"] .key .cut{stroke-dashoffset:0}
-[data-k="revoke"] .r-agent rect{stroke-dasharray:6 6;fill:color-mix(in srgb,var(--moss) 70%,var(--surface))}
-.scope-fig figcaption{margin-top:16px;font-size:15px;color:var(--ink-2);min-height:3em}
+.scope-fig{margin:0}
+.auth{border-radius:24px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-2);overflow:hidden}
+.auth-h{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line);font-size:14px}
+.auth-h b{font-weight:600}
+.auth-who,.auth-rows li{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center;padding:0 20px}
+.auth-who{padding-top:16px;padding-bottom:12px;font:600 14px/1.2 var(--sans)}
+.auth-who span{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center}
+.auth-who small{grid-column:2;font-weight:400;font-size:12px;color:var(--ink-3)}
+.av-s{grid-row:span 2;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 11px/1 var(--sans);font-style:normal;background:var(--accent);color:var(--on-accent)}
+.av-s.ag{border-radius:9px;background:var(--moss);color:var(--live)}
+.auth-rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.auth-rows li{padding-top:13px;padding-bottom:13px;border-bottom:1px solid var(--line);font-size:14px;transition:background .4s var(--ease),opacity .4s}
+.auth-rows li > span{color:var(--ink)}
+.auth-rows em{font-style:normal;justify-self:start;display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 var(--sans);padding:6px 9px;border-radius:999px}
+.auth-rows em::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.auth-rows .ok{color:var(--accent-ink);background:var(--accent-soft)}
+.auth-rows .ask{color:var(--warn);background:var(--warn-soft)}
+.auth-rows .no{color:var(--danger);background:var(--danger-soft,color-mix(in srgb,var(--danger) 12%,transparent))}
+.auth-rows .mask{color:var(--ink-2);background:var(--sunken)}
+.scope-fig .auth-rows li{opacity:.4}
+[data-k="tenant"] .auth-rows li[data-r="tenant"],[data-k="human"] .auth-rows li[data-r="human"],[data-k="secret"] .auth-rows li[data-r="secret"]{opacity:1;background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+[data-k="audit"] .auth-rows li,[data-k="revoke"] .auth-rows li{opacity:.7}
+.auth-foot{position:relative;min-height:150px;background:var(--sunken)}
+.af{position:absolute;inset:0;padding:16px 20px;opacity:0;transform:translateY(8px);transition:opacity .45s var(--ease),transform .5s var(--ease)}
+.af b{display:block;font:600 13px/1 var(--sans);color:var(--ink-3);margin-bottom:12px}
+.af p{font-size:15px;color:var(--ink-2);max-width:44ch}
+[data-k="tenant"] .af-tenant,[data-k="human"] .af-human,[data-k="secret"] .af-secret,[data-k="audit"] .af-audit,[data-k="revoke"] .af-revoke{opacity:1;transform:none}
+.af-audit ol{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:14px}
+.af-audit li{display:flex;gap:12px}
+.af-audit time{font:500 12.5px/1.5 var(--mono);color:var(--accent-ink)}
+.af-audit li{opacity:0;transform:translateX(-6px);transition:opacity .4s,transform .4s var(--ease)}
+[data-k="audit"] .af-audit li{opacity:1;transform:none}
+[data-k="audit"] .af-audit li:nth-child(2){transition-delay:.2s}[data-k="audit"] .af-audit li:nth-child(3){transition-delay:.4s}
+.cred{display:flex;align-items:center;gap:10px}
+.cred code{font:500 14px/1 var(--mono);padding:8px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line);transition:text-decoration-color .4s}
+.cred .st{font:600 12.5px/1 var(--sans);padding:6px 9px;border-radius:999px;color:var(--accent-ink);background:var(--accent-soft)}
+.cred .st.off{display:none;color:var(--danger);background:color-mix(in srgb,var(--danger) 12%,transparent)}
+.cred-acts{margin-top:12px;display:flex;gap:8px}
+.cred-acts span{font:600 13px/1 var(--sans);padding:8px 12px;border-radius:999px;border:1px solid var(--line-strong);color:var(--ink-2)}
+.cred-acts .rv{border-color:var(--danger);color:var(--danger)}
+[data-k="revoke"] .cred code{text-decoration:line-through;text-decoration-color:var(--danger);color:var(--ink-3)}
+[data-k="revoke"] .cred .st{display:none}[data-k="revoke"] .cred .st.off{display:inline-block}
+[data-k="revoke"] .cred-acts .rv{background:var(--danger);color:#fff}
+.nv{display:flex;flex-wrap:wrap;gap:8px}
+.nv span{font:600 13px/1 var(--sans);padding:8px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink-2);text-decoration:line-through;text-decoration-color:var(--danger)}
 .ctrl{list-style:none;margin:0;padding:6vh 0 20vh;display:grid;gap:clamp(64px,14vh,160px)}
 .ctrl li{display:grid;grid-template-columns:56px minmax(0,1fr);gap:20px;opacity:.35;transform:translateX(12px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
 .ctrl li.on{opacity:1;transform:none}
@@ -344,7 +375,7 @@ SECURITY_CSS = r'''
 .disc-g h2{font-size:clamp(2rem,1.2rem + 2.4vw,3.5rem);color:var(--on-moss)}
 .disc-g p{font-size:18px;color:var(--on-moss-2);max-width:52ch;margin-bottom:24px}
 .disclose .btn-go{background:var(--live);color:#1F2B20}
-@media (max-width:900px){.sx-g,.disc-g{grid-template-columns:1fr}.sx-l{position:sticky;top:72px;z-index:2}.scope-fig{padding:12px;display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center;border-radius:18px}.scope-fig figcaption{margin:0;font-size:14px;min-height:0}.ctrl{padding:24px 0 30vh;gap:56px}.ctrl li{grid-template-columns:44px minmax(0,1fr);gap:14px}.pi{width:44px;height:44px;border-radius:12px}}
+@media (max-width:900px){.sx-g,.disc-g{grid-template-columns:1fr}.sx-l{position:static}.scope-fig .auth-rows li{opacity:1}.auth-foot{display:none}.auth-who,.auth-rows li{grid-template-columns:minmax(0,1.2fr) auto auto;padding:0 14px}.auth-rows li{padding-top:11px;padding-bottom:11px;font-size:13px}.auth-rows em{font-size:11.5px;padding:5px 7px}.ctrl{padding:24px 0 30vh;gap:56px}.ctrl li{grid-template-columns:44px minmax(0,1fr);gap:14px}.pi{width:44px;height:44px;border-radius:12px}}
 '''
 
 if __name__ == "__main__":

@@ -201,12 +201,14 @@ h1 span{display:block;color:var(--accent)}
 .px-hero{padding-top:clamp(56px,8vw,120px)}
 .ref{margin-top:24px;display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;padding:10px 16px;border-radius:12px;background:var(--accent-soft);border:1px solid var(--line-accent);font-size:14px;color:var(--ink-2)}
 .ref b{font:640 18px/1 var(--display);color:var(--accent-ink)}
-.bills{margin-top:clamp(48px,6vw,80px);background:linear-gradient(var(--paper) 0 50%,var(--moss) 50% 100%)}
+.bills{margin-top:clamp(32px,4vw,56px);background:linear-gradient(var(--paper) 0 50%,var(--moss) 50% 100%)}
 .bills-in{display:grid;grid-template-rows:auto auto auto}
-.bill{display:flex;gap:18px;align-items:flex-start;max-width:640px;padding:28px 0}
+.bill{display:flex;gap:20px;align-items:flex-start;max-width:720px;padding:clamp(48px,6vw,80px) 0}
+.bill.up{padding-bottom:clamp(56px,7vw,88px)}
+.bill.dn{padding-top:clamp(64px,8vw,104px)}
 .bill h2{font-size:clamp(22px,1rem + 1vw,30px)}
 .bill p{margin-top:6px;font-size:16px;color:var(--ink-2)}
-.bill.dn{color:var(--on-moss);justify-self:end}
+.bill.dn{color:var(--on-moss)}
 .bill.dn p{color:var(--on-moss-2)}
 .bi{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--accent-soft);color:var(--accent-ink)}
 .bill.dn .bi{background:rgba(143,191,106,.16);color:var(--live)}
