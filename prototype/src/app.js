@@ -45,7 +45,9 @@ const composeGrow = ta => { ta.style.height = "auto"; ta.style.height = Math.min
 document.addEventListener("input", e => { if (e.target.matches(".compose textarea")) composeGrow(e.target); });
 document.addEventListener("focusin", e => {
   if (!e.target.matches("textarea") || innerWidth > 860) return;
-  setTimeout(() => (e.target.closest(".cx-dock") ? null : e.target.closest(".tl-cmt, .compose"))?.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }), 280);
+  /* The composer is docked at the foot of the screen, so bring what it talks about into view above it. */
+  const t = e.target, about = t.closest(".tl-cmt") ? t.closest(".tl-card") : t.closest(".cmt-new") ? t.closest(".cmt-new").previousElementSibling : null;
+  if (about) setTimeout(() => about.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }), 280);
 });
 function render() {
   /* Sub-routes: "#access/people" gives every Access tab its own URL (UX-032). */
@@ -64,6 +66,8 @@ function render() {
   const badSub = sub && !(key === "access" && ACCESS_TABS.some(([k]) => k === sub)) && !(key === "initiative" && sub === "activities") && !(key === "login" && ["night", "split"].includes(sub));
   const known = badSub ? null : ROUTES[key];
   const [page, bind, section, title] = known || [notFound, () => {}, "demo", "Not found"];
+  /* Detail pages (one initiative, session, release or runtime) have a back link and a composer at the foot, so no tab bar on a phone. */
+  document.documentElement.classList.toggle("is-detail", ["initiative", "session", "release", "runtime"].includes(key));
   /* Only the design system has the top bar; sign in and the demo app read like the product. */
   document.documentElement.classList.toggle("pb-off", VIEW !== "ds");
   if (render._last !== key + (sub ? "/" + sub : "")) { $$(".scrim,.drawer,.dialog,.menu,.floatpop,.pop-fixed").forEach(e => e.remove()); document.removeEventListener("keydown", overlayKey); }

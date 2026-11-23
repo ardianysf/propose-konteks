@@ -296,12 +296,12 @@ function bindThreadComments(list) {
     if (open) return shut();
     const fb = note.querySelector("[data-fold]"); if (fb && fb.getAttribute("aria-expanded") !== "true") fb.click();
     const last = noteComments(note).pop() || note;
-    last.insertAdjacentHTML("afterend", `<div class="cmt-new"><p class="cmt-hand" hidden>${ic("sparkles")}<span><b>This comment hands the work to Konteks.</b> Usual usage charges apply.</span></p>
-      <div class="compose"><textarea rows="1" placeholder="Add a comment… type @konteks to hand it to Konteks" aria-label="Comment on this note"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div></div>`);
+    last.insertAdjacentHTML("afterend", `<div class="cmt-new"><p class="cx-ctx">Comment on <b>${esc(note.querySelector(".who, .cmt-h b")?.textContent || "this note")}</b>’s note</p><p class="cmt-hand" hidden>${ic("sparkles")}<span><b>This comment hands the work to Konteks.</b> Usual usage charges apply.</span></p>
+      <div class="compose"><textarea rows="1" placeholder="Add a comment… type @konteks to hand it to Konteks" aria-label="Comment on this note"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp aria-label="Comment">${ic("arrow-up")}<span class="send-l">Comment</span></button></div></div>`);
     drawIcons(); b.setAttribute("aria-expanded", "true");
     const box = note._box = last.nextElementSibling, ta = box.querySelector("textarea"), hand = box.querySelector(".cmt-hand"), send = box.querySelector("[data-cp]");
     ta.focus();
-    ta.oninput = () => { const on = NOTE_MENTION.test(ta.value); hand.hidden = !on; send.textContent = on ? "Hand to Konteks" : "Comment"; };
+    ta.oninput = () => { const on = NOTE_MENTION.test(ta.value); hand.hidden = !on; send.querySelector(".send-l").textContent = on ? "Hand to Konteks" : "Comment"; send.setAttribute("aria-label", on ? "Hand to Konteks" : "Comment"); };
     ta.onkeydown = ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); shut(); } };
     box.querySelector("[data-cx]").onclick = shut;
     send.onclick = () => {

@@ -16,7 +16,7 @@ function composerHtml({ id, placeholder, cta = "Post note", attachId, lead = "",
       ${lead}<button class="btn btn-ghost btn-icon btn-sm" type="button" aria-label="Attach file" data-tip="Attach file" data-attach="${attachId}">${ic("paperclip")}</button>
       <button class="btn btn-ghost btn-sm cx-slash" type="button" aria-haspopup="listbox" data-tip="Use a skill or tool">${ic("sparkles")}Skill<span class="kbd">/</span></button>
       <span class="cx-hint" id="${id}-hint">⌘↵ to send</span>
-      <button class="btn btn-primary btn-sm cx-send" type="button" disabled data-tip="⌘↵ to send">${esc(cta)}</button>
+      <button class="btn btn-primary btn-sm cx-send" type="button" disabled data-tip="⌘↵ to send" aria-label="${esc(cta)}">${ic("arrow-up")}<span class="send-l">${esc(cta)}</span></button>
     </div></div>`;
 }
 
@@ -48,15 +48,24 @@ function bindComposer(root, { onSend }) {
   const openPop = (q = "") => {
     const items = SLASH().filter(i => (i.name + " " + i.desc).toLowerCase().includes(q.toLowerCase()));
     if (!pop) { pop = document.createElement("div"); pop.className = "floatpop cx-pop"; pop.setAttribute("role", "listbox"); pop.setAttribute("aria-label", "Skills and tools"); document.body.append(pop); }
+    const head = innerWidth <= 860 ? `<div class="cx-pop-h"><b>Skills and tools</b><button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Close" data-popx>${ic("x")}</button></div>` : "";
     sel = Math.min(sel, Math.max(0, items.length - 1));
     const groups = [["skill", "Skills"], ["tool", "Tools"]];
-    pop.innerHTML = items.length ? groups.map(([k, l]) => { const g = items.filter(i => i.kind === k); return g.length ? `<div class="og">${l}</div>` + g.map(i => `<button type="button" role="option" class="cx-opt" aria-selected="${items.indexOf(i) === sel}" data-i="${items.indexOf(i)}">${ic(i.icon)}<span><b>${esc(i.name)}</b><small>${esc(i.desc)}</small></span></button>`).join("") : ""; }).join("")
+    pop.innerHTML = head + (items.length ? groups.map(([k, l]) => { const g = items.filter(i => i.kind === k); return g.length ? `<div class="og">${l}</div>` + g.map(i => `<button type="button" role="option" class="cx-opt" aria-selected="${items.indexOf(i) === sel}" data-i="${items.indexOf(i)}">${ic(i.icon)}<span><b>${esc(i.name)}</b><small>${esc(i.desc)}</small></span></button>`).join("") : ""; }).join("")
       + `<div class="cx-pop-f"><span class="kbd">↑</span><span class="kbd">↓</span> move · <span class="kbd">↵</span> use · <span class="kbd">esc</span> close</div>`
-      : `<p class="hint" style="padding:10px">No skill or tool matches “${esc(q)}”.</p>`;
+      : `<p class="hint" style="padding:10px">No skill or tool matches “${esc(q)}”.</p>`);
     drawIcons();
-    const r = root.getBoundingClientRect(), h = pop.offsetHeight;
-    pop.style.left = Math.max(8, Math.min(r.left, innerWidth - pop.offsetWidth - 8)) + "px";
-    pop.style.top = (r.top - h - 6 > 8 ? r.top - h - 6 : r.bottom + 6) + "px";
+    const r = root.getBoundingClientRect();
+    if (innerWidth <= 860) {
+      /* Phone: a sheet the width of the composer, resting on top of it. */
+      pop.classList.add("cx-pop-m");
+      Object.assign(pop.style, { left: r.left + "px", width: r.width + "px", top: "auto", bottom: (innerHeight - r.top + 8) + "px", maxHeight: Math.max(160, Math.min(360, r.top - 72)) + "px" });
+    } else {
+      const h = pop.offsetHeight;
+      pop.style.left = Math.max(8, Math.min(r.left, innerWidth - pop.offsetWidth - 8)) + "px";
+      pop.style.top = (r.top - h - 6 > 8 ? r.top - h - 6 : r.bottom + 6) + "px";
+    }
+    pop.querySelector("[data-popx]")?.addEventListener("click", () => { closePop(); ta.focus(); });
     $$(".cx-opt", pop).forEach(b => { b.onmousedown = e => e.preventDefault(); b.onclick = () => choose(items[+b.dataset.i]); });
     pop._items = items; ta.setAttribute("aria-expanded", "true");
   };

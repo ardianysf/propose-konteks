@@ -1212,7 +1212,7 @@ tr.clickable{cursor:pointer} tr.clickable:hover td{background:var(--hover)} tr.c
 /* The composer docks under the last note and stays in reach while a long thread scrolls. */
 .cx-dock{position:sticky;bottom:12px;z-index:4;display:grid;gap:6px;padding-top:8px;background:linear-gradient(to bottom,transparent,var(--bg) 14px)}
 .cx-dock .cx{box-shadow:var(--shadow-2)}
-@media (max-width:860px){.cx-dock{bottom:76px}.cx-hint{display:none}}
+@media (max-width:860px){.cx-hint{display:none}}
 .sess-foot .cx{box-shadow:none}
 /* ---------- Thread ---------- */
 .thread-h{display:flex;align-items:baseline;gap:10px}
@@ -1857,29 +1857,70 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 @media (max-width:560px){.rel-row{padding:14px 16px}.rel-h time{margin-left:0}.rel-items li{grid-template-columns:24px minmax(0,1fr)}.rel-items .btn{grid-column:2;justify-self:start}}
 
 /* ===== Composers on a phone =====
-   Comment on a card: the text gets the full width and grows with what is typed; Cancel and Comment sit under it, thumb-height.
-   Note on an initiative: one quiet row while idle; once focused it becomes the whole bottom of the screen (tab bar and the
-   Start something sticker step aside), and the tools appear under the text. */
+   One composer, one place: on a phone every composer (note, comment on a note, comment on a card, release comment, session)
+   is the same rounded box resting on the bottom edge of the screen, the way chat apps do it. The text gets the full width;
+   the tools and a round send button sit under it. Detail pages have no tab bar; on a list page an open comment box takes the
+   tab bar's place until it is sent or cancelled. Desktop is untouched. */
 html,body{overflow-x:clip}
-@media (max-width:560px){
-  .tl-cmt{gap:0}
-  .tl-cmt>.av{display:none}
-  .tl-cmt .compose{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 10px 8px}
-  .tl-cmt .compose textarea{grid-column:1/-1;min-height:44px;max-height:40vh;padding:4px 4px 2px;line-height:1.45;overflow-y:auto}
-  .tl-cmt .compose [data-cx]{grid-column:2}
-  .tl-cmt .compose .btn{height:40px;padding:0 14px}
-  .tl-cmt-note{font-size:var(--t12)}
-}
+.send-l{display:inline}
+.cx-send svg,[data-cp] svg,#relPost svg{display:none}
+.cx-ctx{display:none}
 @media (max-width:860px){
+  /* no tab bar on detail pages, nor while a comment box is open */
+  .is-detail .tabbar,html:has(.tl-cmt) .tabbar,html:has(.tl-cmt) .start-sticker,html:has(.tl-cmt) .kxv,.is-detail .kxv{display:none}
+  .is-detail .app .main{padding-bottom:0}
+  .is-detail .toasts{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+
+  /* the dock: the same frame for every composer */
+  .cx-dock,.tl-cmt,.cmt-new,.rel-compose-wrap,.is-detail .sess-foot{position:fixed;left:0;right:0;bottom:0;z-index:55;margin:0;
+    padding:10px max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));
+    background:linear-gradient(to bottom,transparent,var(--bg) 14px);border:0;display:grid;gap:6px}
+  .is-detail .sess-foot{position:sticky;bottom:0;padding-top:8px}
+  .is-detail .sess{height:auto;min-height:calc(100vh - var(--pb) - 53px)}
+  .is-detail .det-main,.is-detail .content,.is-detail .page-col{padding-bottom:132px}
+  .tl-cmt>.av{display:none}
+  .tl-cmt .tl-cmt-b{display:grid;gap:6px}
+  .tl-cmt-note{display:none}
+  .cx-ctx{display:block;margin:0 4px;font-size:var(--t12);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cx-ctx b{color:var(--ink-2);font-weight:600}
+
+  /* the box itself */
+  .cx,.tl-cmt .compose,.cmt-new .compose,.rel-compose{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:10px 8px 8px 14px;
+    border:1px solid var(--line-input);border-radius:20px;background:var(--surface);box-shadow:var(--shadow-2)}
+  .cx:focus-within,.compose:focus-within{border-color:var(--accent-strong);box-shadow:var(--shadow-2),0 0 0 3px var(--focus)}
+  .cx textarea,.compose textarea{min-height:24px;max-height:min(200px,30vh);padding:2px 0;font-size:var(--t13);line-height:1.5;overflow-y:auto}
+  .cx .cx-bar{gap:2px;margin-left:-6px}
+  .compose>.btn{justify-self:end}
+  .tl-cmt .compose,.cmt-new .compose{grid-template-columns:minmax(0,1fr) auto auto;align-items:center}
+  .tl-cmt .compose textarea,.cmt-new .compose textarea{grid-column:1/-1}
+  .tl-cmt .compose [data-cx],.cmt-new .compose [data-cx]{grid-column:2}
+  .rel-compose{grid-template-columns:minmax(0,1fr) auto;align-items:end}
+
+  /* one send button everywhere: round, arrow up, label kept for screen readers */
+  .cx-send,[data-cp],#relPost{width:34px;height:34px;min-width:34px;padding:0;border-radius:50%;display:inline-grid;place-items:center;margin-left:auto}
+  .cx-send svg,[data-cp] svg,#relPost svg{display:block;width:17px;height:17px}
+  .cx-send .send-l,[data-cp] .send-l,#relPost .send-l{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .cx-send:disabled{opacity:.45}
+
+  /* idle note box: one quiet row */
+  .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown){grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:6px 6px 6px 14px}
+  .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown) .cx-bar>:not(.cx-send){display:none}
+  .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown) textarea{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* commenting on a note replaces the note box for the moment */
+  html:has(.cmt-new) .cx-dock{display:none}
+  /* while typing on a list page, nothing else floats */
   html:has(:is(textarea,input[type=text],input:not([type])):focus) .tabbar,
   html:has(:is(textarea,input[type=text],input:not([type])):focus) .start-sticker,
   html:has(:is(textarea,input[type=text],input:not([type])):focus) .kxv{display:none}
-  html:has(.cx-dock textarea:focus) .cx-dock{bottom:0;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
-  .cx-dock .cx textarea{max-height:min(200px,32vh);line-height:1.45}
-  .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown){grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:6px 6px 6px 10px}
-  .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown) .cx-bar>:not(.cx-send){display:none}
-  .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown) textarea{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .cx-dock .cx .cx-send{height:36px;padding:0 14px}
+
+  /* the skill sheet rests on the composer */
+  .cx-pop.cx-pop-m{border-radius:16px;padding:4px 4px 6px;overflow:auto;box-shadow:var(--shadow-2)}
+  .cx-pop-h{position:sticky;top:-4px;z-index:1;display:flex;align-items:center;justify-content:space-between;margin:-4px -4px 2px;padding:8px 6px 6px 14px;background:var(--surface);border-bottom:1px solid var(--line)}
+  .cx-pop-h b{font-size:var(--t13);font-weight:600}
+  .cx-pop-m .og{padding:10px 10px 4px}
+  .cx-pop-m .cx-opt{padding:10px;min-height:48px}
+  .cx-pop-m .cx-opt small{-webkit-line-clamp:1}
+  .cx-pop-m .cx-pop-f{display:none}
 }
 /* The design-system bar on a phone: brand and tools on one row, the four pages on their own row beneath. */
 @media (max-width:640px){:root:not(.pb-off){--pb:88px}}

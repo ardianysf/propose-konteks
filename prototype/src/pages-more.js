@@ -213,7 +213,7 @@ function bindActivities() {
     $$(".tl-cmt").forEach(o => { const oc = o.closest(".tl-card"); S.cmtDraft[oc.dataset.ini] = o.querySelector("textarea").value; o._shut?.(); });
     const i = iniById[card.dataset.ini];
     band(card).hidden = false;
-    band(card).insertAdjacentHTML("beforeend", `<div class="tl-cmt"><span class="av">AY</span><div class="tl-cmt-b"><div class="compose"><textarea rows="1" placeholder="Add a comment…" aria-label="Comment on this card" aria-describedby="cmtNote-${i.id}"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div>
+    band(card).insertAdjacentHTML("beforeend", `<div class="tl-cmt"><span class="av">AY</span><div class="tl-cmt-b"><p class="cx-ctx">Comment on <b>${esc(i.title)}</b></p><div class="compose"><textarea rows="1" placeholder="Add a comment…" aria-label="Comment on this card" aria-describedby="cmtNote-${i.id}"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp aria-label="Comment">${ic("arrow-up")}<span class="send-l">Comment</span></button></div>
       <p class="hint tl-cmt-note" id="cmtNote-${i.id}">Stays on this card. To hand work to Konteks, use @konteks on a note in <a href="#initiative/activities" data-ini="${i.id}" title="${esc(i.title)}">the initiative</a>.</p></div></div>`);
     const box = card.querySelector(".tl-cmt"), ta = box.querySelector("textarea");
     box.querySelector("[data-ini]").onclick = () => { S.cur = i.id; };
@@ -276,7 +276,7 @@ function pageRelease() {
       ${cand ? `<p class="hint">Waiting to ship</p>` : `<p class="rel-sumtext">${esc(r.summary)}</p><p class="hint">Shipped by ${esc(PEOPLE[r.by].name)} · ${relWhen(r.m)}</p>`}
       <div class="rel-settle"><span>Settled over ${r.deliveries} deliver${r.deliveries > 1 ? "ies" : "y"}</span><i aria-hidden="true"></i><b class="mono">${r.sp} SP</b></div></section>
     <section class="rel-thread" aria-label="Comments"><ol class="tl-cmts" id="relCmts">${r.cm.map(actCmt).join("")}</ol>
-      <div class="compose rel-compose"><textarea rows="1" placeholder="Add a comment…" aria-label="Comment on this release"></textarea><button class="btn btn-primary btn-sm" type="button" id="relPost">Post comment</button></div></section></div>`;
+      <div class="rel-compose-wrap"><p class="cx-ctx">Comment on this release</p><div class="compose rel-compose"><textarea rows="1" placeholder="Add a comment…" aria-label="Comment on this release"></textarea><button class="btn btn-primary btn-sm" type="button" id="relPost" aria-label="Post comment">${ic("arrow-up")}<span class="send-l">Post comment</span></button></div></div></section></div>`;
   return shell("releases", top, body);
 }
 function bindRelease() {

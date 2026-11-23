@@ -1162,7 +1162,6 @@
 .kx .cx-dock{position:sticky;bottom:12px;z-index:4;display:grid;gap:6px;padding-top:8px;background:linear-gradient(to bottom,transparent,var(--bg) 14px)}
 .kx .cx-dock .cx{box-shadow:var(--shadow-2)}
 @media (max-width:860px){
-.kx .cx-dock{bottom:76px}
 .kx .cx-hint{display:none}
 }
 .kx .sess-foot .cx{box-shadow:none}
@@ -1812,23 +1811,50 @@
 .kx .rel-items .btn{grid-column:2;justify-self:start}
 }
 .kx{overflow-x:clip}
-@media (max-width:560px){
-.kx .tl-cmt{gap:0}
-.kx .tl-cmt>.av{display:none}
-.kx .tl-cmt .compose{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 10px 8px}
-.kx .tl-cmt .compose textarea{grid-column:1/-1;min-height:44px;max-height:40vh;padding:4px 4px 2px;line-height:1.45;overflow-y:auto}
-.kx .tl-cmt .compose [data-cx]{grid-column:2}
-.kx .tl-cmt .compose .btn{height:40px;padding:0 14px}
-.kx .tl-cmt-note{font-size:var(--t12)}
-}
+.kx .send-l{display:inline}
+.kx .cx-send svg,.kx [data-cp] svg,.kx #relPost svg{display:none}
+.kx .cx-ctx{display:none}
 @media (max-width:860px){
-.kx html:has(:is(textarea,input[type=text],input:not([type])):focus) .tabbar,.kx html:has(:is(textarea,input[type=text],input:not([type])):focus) .start-sticker,.kx html:has(:is(textarea,input[type=text],input:not([type])):focus) .kxv{display:none}
-.kx html:has(.cx-dock textarea:focus) .cx-dock{bottom:0;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
-.kx .cx-dock .cx textarea{max-height:min(200px,32vh);line-height:1.45}
-.kx .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown){grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:6px 6px 6px 10px}
+.kx .is-detail .tabbar,.kx html:has(.tl-cmt) .tabbar,.kx html:has(.tl-cmt) .start-sticker,.kx html:has(.tl-cmt) .kxv,.kx .is-detail .kxv{display:none}
+.kx .is-detail .app .main{padding-bottom:0}
+.kx .is-detail .toasts{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.kx .cx-dock,.kx .tl-cmt,.kx .cmt-new,.kx .rel-compose-wrap,.kx .is-detail .sess-foot{position:fixed;left:0;right:0;bottom:0;z-index:55;margin:0;
+    padding:10px max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));
+    background:linear-gradient(to bottom,transparent,var(--bg) 14px);border:0;display:grid;gap:6px}
+.kx .is-detail .sess-foot{position:sticky;bottom:0;padding-top:8px}
+.kx .is-detail .sess{height:auto;min-height:calc(100vh - var(--pb) - 53px)}
+.kx .is-detail .det-main,.kx .is-detail .content,.kx .is-detail .page-col{padding-bottom:132px}
+.kx .tl-cmt>.av{display:none}
+.kx .tl-cmt .tl-cmt-b{display:grid;gap:6px}
+.kx .tl-cmt-note{display:none}
+.kx .cx-ctx{display:block;margin:0 4px;font-size:var(--t12);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kx .cx-ctx b{color:var(--ink-2);font-weight:600}
+.kx .cx,.kx .tl-cmt .compose,.kx .cmt-new .compose,.kx .rel-compose{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:10px 8px 8px 14px;
+    border:1px solid var(--line-input);border-radius:20px;background:var(--surface);box-shadow:var(--shadow-2)}
+.kx .cx:focus-within,.kx .compose:focus-within{border-color:var(--accent-strong);box-shadow:var(--shadow-2),0 0 0 3px var(--focus)}
+.kx .cx textarea,.kx .compose textarea{min-height:24px;max-height:min(200px,30vh);padding:2px 0;font-size:var(--t13);line-height:1.5;overflow-y:auto}
+.kx .cx .cx-bar{gap:2px;margin-left:-6px}
+.kx .compose>.btn{justify-self:end}
+.kx .tl-cmt .compose,.kx .cmt-new .compose{grid-template-columns:minmax(0,1fr) auto auto;align-items:center}
+.kx .tl-cmt .compose textarea,.kx .cmt-new .compose textarea{grid-column:1/-1}
+.kx .tl-cmt .compose [data-cx],.kx .cmt-new .compose [data-cx]{grid-column:2}
+.kx .rel-compose{grid-template-columns:minmax(0,1fr) auto;align-items:end}
+.kx .cx-send,.kx [data-cp],.kx #relPost{width:34px;height:34px;min-width:34px;padding:0;border-radius:50%;display:inline-grid;place-items:center;margin-left:auto}
+.kx .cx-send svg,.kx [data-cp] svg,.kx #relPost svg{display:block;width:17px;height:17px}
+.kx .cx-send .send-l,.kx [data-cp] .send-l,.kx #relPost .send-l{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.kx .cx-send:disabled{opacity:.45}
+.kx .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown){grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:6px 6px 6px 14px}
 .kx .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown) .cx-bar>:not(.cx-send){display:none}
 .kx .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown) textarea{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kx .cx-dock .cx .cx-send{height:36px;padding:0 14px}
+.kx html:has(.cmt-new) .cx-dock{display:none}
+.kx html:has(:is(textarea,input[type=text],input:not([type])):focus) .tabbar,.kx html:has(:is(textarea,input[type=text],input:not([type])):focus) .start-sticker,.kx html:has(:is(textarea,input[type=text],input:not([type])):focus) .kxv{display:none}
+.kx .cx-pop.cx-pop-m{border-radius:16px;padding:4px 4px 6px;overflow:auto;box-shadow:var(--shadow-2)}
+.kx .cx-pop-h{position:sticky;top:-4px;z-index:1;display:flex;align-items:center;justify-content:space-between;margin:-4px -4px 2px;padding:8px 6px 6px 14px;background:var(--surface);border-bottom:1px solid var(--line)}
+.kx .cx-pop-h b{font-size:var(--t13);font-weight:600}
+.kx .cx-pop-m .og{padding:10px 10px 4px}
+.kx .cx-pop-m .cx-opt{padding:10px;min-height:48px}
+.kx .cx-pop-m .cx-opt small{-webkit-line-clamp:1}
+.kx .cx-pop-m .cx-pop-f{display:none}
 }
 @media (max-width:640px){
 .kx :root:not(.pb-off){--pb:88px}
