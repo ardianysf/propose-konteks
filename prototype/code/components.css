@@ -1881,7 +1881,7 @@ html,body{overflow-x:clip}
   .tl-cmt>.av{display:none}
   .tl-cmt .tl-cmt-b{display:grid;gap:6px}
   .tl-cmt-note{display:none}
-  .cx-ctx{display:block;margin:0 4px;font-size:var(--t12);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cx-ctx{display:block;margin:0 15px;font-size:var(--t12);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .cx-ctx b{color:var(--ink-2);font-weight:600}
 
   /* the box itself */
@@ -1942,4 +1942,23 @@ html,body{overflow-x:clip}
   .used-t td:first-child{font-size:var(--t14);color:var(--ink);line-height:1.45}
   .used-t td.end{text-align:left;margin-top:6px}
   .used-t td.end a{min-height:32px}
+}
+
+/* Pemetaan on a phone: no sticky header inside the sideways scroller (it floated below the first row); each row is one card,
+   the element on top, then Di mana, Komponen, Demo and Status as labelled lines with their icons in view. */
+@media (max-width:640px){
+  .inv-wrap{overflow:visible}
+  .dtable.inv{min-width:0;table-layout:auto;width:100%}
+  .dtable.inv thead,.dtable.inv colgroup{display:none}
+  .dtable.inv,.dtable.inv tbody,.dtable.inv tr{display:block}
+  .dtable.inv tr{padding:12px 14px;border-bottom:1px solid var(--line)}
+  .dtable.inv tr:last-child{border-bottom:0}
+  .dtable.inv td{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px;align-items:baseline;padding:3px 0;border:0;background:none}
+  .dtable.inv td:first-child{display:block;padding:0 0 8px;font-size:var(--t14);color:var(--ink)}
+  .dtable.inv td:nth-child(2)::before{content:"Di mana"}
+  .dtable.inv td:nth-child(3)::before{content:"Komponen"}
+  .dtable.inv td:nth-child(4)::before{content:"Demo"}
+  .dtable.inv td:nth-child(5)::before{content:"Status"}
+  .dtable.inv td:not(:first-child)::before{font-size:var(--t12);color:var(--ink-3)}
+  .dtable.inv .cell-links{display:flex;flex-wrap:wrap;gap:4px 10px}
 }

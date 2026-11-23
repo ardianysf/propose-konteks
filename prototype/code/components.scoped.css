@@ -1827,7 +1827,7 @@
 .kx .tl-cmt>.av{display:none}
 .kx .tl-cmt .tl-cmt-b{display:grid;gap:6px}
 .kx .tl-cmt-note{display:none}
-.kx .cx-ctx{display:block;margin:0 4px;font-size:var(--t12);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kx .cx-ctx{display:block;margin:0 15px;font-size:var(--t12);color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kx .cx-ctx b{color:var(--ink-2);font-weight:600}
 .kx .cx,.kx .tl-cmt .compose,.kx .cmt-new .compose,.kx .rel-compose{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:10px 8px 8px 14px;
     border:1px solid var(--line-input);border-radius:20px;background:var(--surface);box-shadow:var(--shadow-2)}
@@ -1875,4 +1875,20 @@
 .kx .used-t td:first-child{font-size:var(--t14);color:var(--ink);line-height:1.45}
 .kx .used-t td.end{text-align:left;margin-top:6px}
 .kx .used-t td.end a{min-height:32px}
+}
+@media (max-width:640px){
+.kx .inv-wrap{overflow:visible}
+.kx .dtable.inv{min-width:0;table-layout:auto;width:100%}
+.kx .dtable.inv thead,.kx .dtable.inv colgroup{display:none}
+.kx .dtable.inv,.kx .dtable.inv tbody,.kx .dtable.inv tr{display:block}
+.kx .dtable.inv tr{padding:12px 14px;border-bottom:1px solid var(--line)}
+.kx .dtable.inv tr:last-child{border-bottom:0}
+.kx .dtable.inv td{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px;align-items:baseline;padding:3px 0;border:0;background:none}
+.kx .dtable.inv td:first-child{display:block;padding:0 0 8px;font-size:var(--t14);color:var(--ink)}
+.kx .dtable.inv td:nth-child(2)::before{content:"Di mana"}
+.kx .dtable.inv td:nth-child(3)::before{content:"Komponen"}
+.kx .dtable.inv td:nth-child(4)::before{content:"Demo"}
+.kx .dtable.inv td:nth-child(5)::before{content:"Status"}
+.kx .dtable.inv td:not(:first-child)::before{font-size:var(--t12);color:var(--ink-3)}
+.kx .dtable.inv .cell-links{display:flex;flex-wrap:wrap;gap:4px 10px}
 }
