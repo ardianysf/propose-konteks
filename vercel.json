@@ -9,15 +9,15 @@
   "rewrites": [
     {
       "source": "/design-system",
-      "destination": "/prototype.html"
+      "destination": "/prototype"
     },
     {
       "source": "/login",
-      "destination": "/prototype.html"
+      "destination": "/prototype"
     },
     {
       "source": "/app",
-      "destination": "/prototype.html"
+      "destination": "/prototype"
     }
   ],
   "headers": [
@@ -35,11 +35,6 @@
     {
       "source": "/landingpage",
       "destination": "/",
-      "permanent": false
-    },
-    {
-      "source": "/prototype",
-      "destination": "/design-system",
       "permanent": false
     },
     {
