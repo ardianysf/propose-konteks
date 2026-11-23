@@ -1399,6 +1399,7 @@
 .kx .s-pros{list-style:none;margin:0;padding:20px 56px 36px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;border-top:1px solid var(--split-edge);color:var(--split-ink)}
 .kx .s-pros li{display:grid;grid-template-columns:18px minmax(0,1fr);column-gap:10px;row-gap:4px;align-content:start}
 .kx .s-pros svg{width:18px;height:18px;color:var(--accent-strong);grid-row:span 2;margin-top:1px}
+.kx .s-pros li>:first-child{grid-row:span 2}
 .kx .s-pros b{font-size:var(--t14);font-weight:600}
 .kx .s-pros span{font-size:var(--t13);color:var(--split-ink-2);line-height:1.45}
 @media (max-width:1100px){
@@ -1415,15 +1416,34 @@
 }
 .kx .s-card-m{display:none}
 @media (max-width:900px){
-.kx .auth-s{grid-template-columns:1fr}
-.kx .s-right{display:none}
-.kx .s-form{padding:40px 0 32px}
-.kx .s-form h1{font-size:var(--t28)}
-.kx .s-card-m{display:block;margin-top:16px;border-radius:var(--r10);box-shadow:var(--split-lift)}
-.kx .s-card-m .dc{margin:0}
-.kx .s-top{padding:24px 24px 0}
-.kx .s-form{margin:0 auto}
-.kx .auth-s .auth-base{padding-left:24px;padding-right:24px}
+.kx .auth-s{grid-template-columns:minmax(0,1fr);grid-template-rows:none;min-height:0}
+.kx .auth-s .s-left{display:contents}
+.kx .s-top{order:1;padding:20px 20px 0}
+.kx .s-form{order:2;width:auto;max-width:440px;margin:0;padding:clamp(48px,12vh,96px) 20px 40px;gap:14px;align-self:start}
+.kx .s-form h1{font-size:clamp(36px,10vw,44px);line-height:1.02}
+.kx .s-form .btn.google{margin-top:14px}
+.kx .s-card-m{display:none}
+.kx .s-right{order:3;display:flex;margin:0 12px 12px;border-radius:20px}
+.kx .s-head{padding:28px 20px 4px}
+.kx .s-head b{font-size:clamp(26px,7.4vw,32px);max-width:16ch}
+.kx .s-head span{font-size:var(--t14);margin-top:10px}
+.kx .s-stage{flex:none;overflow:visible;padding:20px 16px 4px;display:grid;justify-items:center}
+.kx .s-stage::after,.kx .s-shot{display:none}
+.kx .auth-s .s-card{position:relative;right:auto;bottom:auto;width:440px;transform:none;zoom:.74;animation:none}
+.kx .s-card::before{display:none}
+.kx .auth-s .s-pros{grid-template-columns:minmax(0,1fr);gap:14px;padding:20px 20px 24px;margin-top:16px}
+.kx .auth-s .s-pros span{display:block}
+.kx .auth-s .auth-base{order:4;padding:16px 20px calc(18px + env(safe-area-inset-bottom,0px));background:none;border-top:0;justify-content:center;text-align:center}
+}
+@media (max-width:900px) and (min-width:481px){
+.kx .auth-s .s-card{zoom:1}
+.kx .s-right{margin:0 20px 20px}
+}
+@media (max-width:420px){
+.kx .auth-s .s-card{zoom:.72}
+}
+@media (max-width:370px){
+.kx .auth-s .s-card{zoom:.65}
 }
 @media (prefers-reduced-motion:reduce){
 .kx .n-lines g,.kx .n-track,.kx .n-col,.kx .s-shot,.kx .s-card,.kx .s-form{animation:none}

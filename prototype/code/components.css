@@ -1460,12 +1460,37 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .s-pros{list-style:none;margin:0;padding:20px 56px 36px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;border-top:1px solid var(--split-edge);color:var(--split-ink)}
 .s-pros li{display:grid;grid-template-columns:18px minmax(0,1fr);column-gap:10px;row-gap:4px;align-content:start}
 .s-pros svg{width:18px;height:18px;color:var(--accent-strong);grid-row:span 2;margin-top:1px}
+.s-pros li>:first-child{grid-row:span 2}
 .s-pros b{font-size:var(--t14);font-weight:600}
 .s-pros span{font-size:var(--t13);color:var(--split-ink-2);line-height:1.45}
 @media (max-width:1100px){.s-card{transform:scale(.72);right:20px}.s-pros{grid-template-columns:1fr;gap:10px}.s-pros span{display:none}}
 @media (max-height:820px){.s-card{transform:scale(.7)}.s-head{padding-top:32px}.s-head b{font-size:clamp(28px,2.4vw,36px)}.s-pros{padding-top:14px;padding-bottom:24px}.s-pros span{display:none}}
 .s-card-m{display:none}
-@media (max-width:900px){.auth-s{grid-template-columns:1fr}.s-right{display:none}.s-form{padding:40px 0 32px}.s-form h1{font-size:var(--t28)}.s-card-m{display:block;margin-top:16px;border-radius:var(--r10);box-shadow:var(--split-lift)}.s-card-m .dc{margin:0}.s-top{padding:24px 24px 0}.s-form{margin:0 auto}.auth-s .auth-base{padding-left:24px;padding-right:24px}}
+/* Split on a phone: the sign-in comes first and fills the first screen; the same product panel follows below it,
+   as a short story (headline, the decision card at its own proportions, three proofs), and the demo switch closes the page. */
+@media (max-width:900px){
+  .auth-s{grid-template-columns:minmax(0,1fr);grid-template-rows:none;min-height:0}
+  .auth-s .s-left{display:contents}
+  .s-top{order:1;padding:20px 20px 0}
+  .s-form{order:2;width:auto;max-width:440px;margin:0;padding:clamp(48px,12vh,96px) 20px 40px;gap:14px;align-self:start}
+  .s-form h1{font-size:clamp(36px,10vw,44px);line-height:1.02}
+  .s-form .btn.google{margin-top:14px}
+  .s-card-m{display:none}
+  .s-right{order:3;display:flex;margin:0 12px 12px;border-radius:20px}
+  .s-head{padding:28px 20px 4px}
+  .s-head b{font-size:clamp(26px,7.4vw,32px);max-width:16ch}
+  .s-head span{font-size:var(--t14);margin-top:10px}
+  .s-stage{flex:none;overflow:visible;padding:20px 16px 4px;display:grid;justify-items:center}
+  .s-stage::after,.s-shot{display:none}
+  .auth-s .s-card{position:relative;right:auto;bottom:auto;width:440px;transform:none;zoom:.74;animation:none}
+  .s-card::before{display:none}
+  .auth-s .s-pros{grid-template-columns:minmax(0,1fr);gap:14px;padding:20px 20px 24px;margin-top:16px}
+  .auth-s .s-pros span{display:block}
+  .auth-s .auth-base{order:4;padding:16px 20px calc(18px + env(safe-area-inset-bottom,0px));background:none;border-top:0;justify-content:center;text-align:center}
+}
+@media (max-width:900px) and (min-width:481px){.auth-s .s-card{zoom:1}.s-right{margin:0 20px 20px}}
+@media (max-width:420px){.auth-s .s-card{zoom:.72}}
+@media (max-width:370px){.auth-s .s-card{zoom:.65}}
 @media (prefers-reduced-motion:reduce){.n-lines g,.n-track,.n-col,.s-shot,.s-card,.s-form{animation:none}}
 @media (prefers-reduced-motion:reduce){.auth-card{animation:none}}
 
