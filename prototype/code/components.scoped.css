@@ -1838,7 +1838,8 @@
 .kx .tl-cmt .compose,.kx .cmt-new .compose{grid-template-columns:minmax(0,1fr) auto auto;align-items:center}
 .kx .tl-cmt .compose textarea,.kx .cmt-new .compose textarea{grid-column:1/-1}
 .kx .tl-cmt .compose [data-cx],.kx .cmt-new .compose [data-cx]{grid-column:2}
-.kx .rel-compose{grid-template-columns:minmax(0,1fr) auto;align-items:end}
+.kx .rel-compose{grid-template-columns:minmax(0,1fr) auto;align-items:end;padding:6px 6px 6px 14px}
+.kx .rel-compose textarea,.kx .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown) textarea{min-height:34px;padding:7px 0;line-height:20px}
 .kx .cx-send,.kx [data-cp],.kx #relPost{width:34px;height:34px;min-width:34px;padding:0;border-radius:50%;display:inline-grid;place-items:center;margin-left:auto}
 .kx .cx-send svg,.kx [data-cp] svg,.kx #relPost svg{display:block;width:17px;height:17px}
 .kx .cx-send .send-l,.kx [data-cp] .send-l,.kx #relPost .send-l{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

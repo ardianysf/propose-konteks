@@ -1894,7 +1894,9 @@ html,body{overflow-x:clip}
   .tl-cmt .compose,.cmt-new .compose{grid-template-columns:minmax(0,1fr) auto auto;align-items:center}
   .tl-cmt .compose textarea,.cmt-new .compose textarea{grid-column:1/-1}
   .tl-cmt .compose [data-cx],.cmt-new .compose [data-cx]{grid-column:2}
-  .rel-compose{grid-template-columns:minmax(0,1fr) auto;align-items:end}
+  /* one-line boxes: the text line sits on the send button's centre line, and stays there as the box grows */
+  .rel-compose{grid-template-columns:minmax(0,1fr) auto;align-items:end;padding:6px 6px 6px 14px}
+  .rel-compose textarea,.cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown) textarea{min-height:34px;padding:7px 0;line-height:20px}
 
   /* one send button everywhere: round, arrow up, label kept for screen readers */
   .cx-send,[data-cp],#relPost{width:34px;height:34px;min-width:34px;padding:0;border-radius:50%;display:inline-grid;place-items:center;margin-left:auto}
