@@ -750,6 +750,122 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .era-cap .yr{order:3;margin-top:14px}
 .era-cap h3{order:1;margin-top:0}.era-cap p{order:2}
 
+/* ===== round 5 ===== */
+/* week: the hours come back */
+.cal-top{display:flex;align-items:baseline;gap:12px;padding:2px 4px 14px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.cal-top span:first-child{font:500 14px/1.2 var(--sans);color:var(--ink-2)}
+.cal-top b{font:640 28px/1 var(--display);color:var(--accent);letter-spacing:-.02em;transition:color .3s}
+.cal-top .eg{margin-left:auto}
+.blk .ag{top:6px;bottom:auto;left:6px;right:6px;padding:5px 8px;font-size:11.5px;transform:translateY(-6px)}
+.blk.night .ag{top:3px;bottom:auto;left:6px;right:6px}
+.blk .free{position:absolute;left:6px;right:6px;bottom:6px;top:40px;display:grid;place-items:center;border-radius:8px;font:600 12.5px/1.2 var(--sans);color:var(--accent-ink);background:repeating-linear-gradient(135deg,var(--accent-soft) 0 6px,transparent 6px 12px);border:1px dashed var(--line-accent);opacity:0;transform:scale(.96);transition:opacity .5s var(--ease) .35s,transform .6s var(--ease) .35s}
+.blk.night .free{top:3px;bottom:3px;left:auto;right:6px;width:44%;display:none}
+.blk.gone{background:transparent;border-color:var(--line);border-style:dashed}
+.blk.gone b,.blk.gone small{opacity:0;transition:opacity .3s}
+.blk.gone::before{display:none}
+.blk.gone .free{opacity:1;transform:none}
+.blk.night.gone .ag{right:auto}
+.blk.night.gone .free{display:grid}
+@media (max-width:900px){.blk .free{top:34px;font-size:10.5px}.blk.night .free{display:none!important}.cal-top b{font-size:22px}}
+
+/* rules: sticky stage, items scroll past */
+.rules2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(40px,7vw,112px);align-items:start}
+.rules-l{position:sticky;top:100px}
+.rules-l h2{font-size:clamp(2.1rem,1.25rem + 2.7vw,3.75rem)}
+.rules-p{margin-top:16px;font-size:18px;color:var(--on-moss-2);max-width:44ch}
+.rstage{position:relative;margin-top:36px;height:330px}
+.rstage .rule{display:block;padding:0;border:0;position:absolute;inset:0;opacity:0;transform:translateY(16px) scale(.98);transition:opacity .5s var(--ease),transform .6s var(--ease);pointer-events:none}
+.rstage .rule.show{opacity:1;transform:none;pointer-events:auto}
+.rstage .rule-v{height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center}
+.rlist{list-style:none;margin:0;padding:12vh 0 18vh;display:grid;gap:clamp(96px,22vh,220px)}
+.rlist li{display:grid;grid-template-columns:72px minmax(0,1fr);gap:22px;align-items:start;opacity:.32;transform:translateX(12px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.rlist li.on{opacity:1;transform:none}
+.rlist .dz{width:72px;height:72px;padding:12px;border-radius:20px;background:rgba(143,191,106,.12);border:1px solid rgba(143,191,106,.3);stroke:var(--live)}
+.rlist li.on .dz{background:var(--live);stroke:#1F2B20}
+.rlist h3{font-size:clamp(34px,1.4rem + 2.4vw,56px);font-weight:600;color:var(--on-moss)}
+.rlist .big{margin-top:14px;font:560 clamp(19px,1rem + .5vw,23px)/1.3 var(--display);letter-spacing:-.015em;color:var(--live)}
+.rlist .rule-t p:not(.big){margin-top:12px;font-size:16.5px;color:var(--on-moss-2);max-width:44ch}
+.rlist .rules-end{margin-top:28px}
+.rm .rstage{height:auto}.rm .rstage .rule{position:static;opacity:1;transform:none;margin-bottom:16px}
+@media (max-width:900px){.rules2{grid-template-columns:1fr}.rules-l{position:static}.rstage{display:none}.rlist{padding:0;gap:48px}.rlist li{opacity:1;transform:none;grid-template-columns:56px minmax(0,1fr)}.rlist .dz{width:56px;height:56px;padding:9px}}
+/* mobile keeps each example under its rule */
+.rlist .rule-v.inline{display:none}
+.rlist .rule-v.inline .mx td,.rlist .rule-v.inline .ev li{opacity:1;transform:none}.rlist .rule-v.inline .meter-t .fill{transform:scaleX(.567)}.rlist .rule-v.inline .seal{opacity:1;transform:rotate(-10deg)}
+@media (max-width:900px){.rlist .rule-v.inline{display:block;margin-top:18px}}
+
+/* sessions: horizontal tabs, scroll moves between them */
+.kinds-track{position:relative}
+.js .kinds-track{height:calc(100svh + 200svh)}
+.kinds-stage{padding:var(--sec) 0}
+.js .kinds-stage{position:sticky;top:64px;height:calc(100svh - 64px);padding:clamp(20px,4vh,48px) 0;display:flex;align-items:center}
+.kinds-stage > .wrap{width:100%}
+.ktabs{margin-top:clamp(24px,4vh,44px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;border-bottom:1px solid var(--line)}
+.ktabs button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;padding:14px 4px 16px;font:620 clamp(16px,.9rem + .5vw,21px)/1.2 var(--display);letter-spacing:-.015em;color:var(--ink-3);transition:color .3s}
+.ktabs button[aria-selected="true"]{color:var(--ink)}
+.ktabs button:hover{color:var(--ink)}
+.ktabs button:focus-visible{outline:2px solid var(--accent-strong);outline-offset:2px;border-radius:6px}
+.ktabs i{position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:3px;overflow:hidden}
+.ktabs i b{position:absolute;inset:0;background:var(--accent-strong);transform-origin:left;transform:scaleX(var(--f,0))}
+.kpanel{margin-top:clamp(20px,3.5vh,40px);display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.6fr);gap:clamp(24px,4vw,56px);align-items:center}
+.kp-t h3{font-size:clamp(26px,1.2rem + 1.3vw,40px);font-weight:620}
+.kp-t p{margin-top:12px;font-size:17px;color:var(--ink-2);max-width:36ch}
+.kp-t .eg{display:block;margin-top:16px;max-width:30ch;line-height:1.5}
+.kp-t > *{animation:rise .5s var(--ease) both}
+.kdia{position:relative;height:clamp(260px,36vh,340px);border-radius:22px;overflow:hidden;border:1px solid var(--line);background:linear-gradient(var(--surface) 0 50%,var(--moss) 50% 100%)}
+.kline{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--live);z-index:1}
+.kpath{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1}
+.kpath .base{fill:none;stroke:var(--accent-strong);stroke-width:1.6;stroke-dasharray:4 5}
+.kpath .tok{fill:var(--live);stroke:var(--paper);stroke-width:3}
+.knode{position:absolute;z-index:2;transform:translate(-50%,-50%);width:min(150px,22%);padding:10px 12px;border-radius:14px;background:var(--paper);border:1px solid var(--line-strong);box-shadow:var(--shadow-1);font-size:12.5px;color:var(--ink-2);animation:pop .5s var(--ease) both;animation-delay:calc(var(--k)*90ms)}
+.knode b{display:flex;align-items:center;gap:6px;font:600 13.5px/1.2 var(--sans);color:var(--ink);margin-bottom:3px}
+.knode b svg{color:var(--accent);flex:none}
+.knode.a{background:rgba(238,241,232,.06);border-color:var(--moss-line-2);color:var(--on-moss-2)}
+.knode.a b{color:var(--on-moss)}.knode.a b svg{color:var(--live)}
+.knode.y{width:auto;padding:10px 18px;border-radius:999px;background:var(--accent);border-color:var(--accent);color:var(--on-accent);font:700 15px/1 var(--display)}
+.knode.hot{box-shadow:0 0 0 3px var(--accent-fill),var(--shadow-2)}
+@keyframes pop{from{opacity:0;transform:translate(-50%,-40%) scale(.94)}to{opacity:1;transform:translate(-50%,-50%)}}
+.rm .kinds-track{height:auto}.rm .kinds-stage{position:static;height:auto}
+@media (max-width:900px){
+  .ktabs{grid-template-columns:repeat(4,max-content);overflow-x:auto;gap:18px;scrollbar-width:none}
+  .ktabs button{font-size:16px}
+  .kpanel{grid-template-columns:1fr;gap:16px}
+  .kp-t p{font-size:15px}.kp-t .eg{display:none}
+  .kdia{height:clamp(300px,46vh,420px);background:linear-gradient(90deg,var(--surface) 0 50%,var(--moss) 50% 100%)}
+  .kline{left:50%;right:auto;top:0;bottom:0;width:1px;height:auto}
+  .knode{width:42%;padding:8px 9px;font-size:11.5px}
+  .knode b{font-size:12.5px}
+  .js .kinds-track{height:calc(100svh + 240svh)}
+  .js .kinds-stage{align-items:flex-start}
+  .kinds-stage .sec-h p{display:none}
+}
+
+/* journal: its own band */
+.journal-sec{padding:0 0 var(--sec)}
+.jcard{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:clamp(24px,4vw,56px);align-items:center;padding:clamp(28px,4vw,48px);border-radius:28px;background:var(--accent-soft);border:1px solid var(--line-accent);text-decoration:none;transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
+.jcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
+.jday{font:640 clamp(64px,3rem + 4vw,128px)/.85 var(--display);letter-spacing:-.05em;color:var(--accent)}
+.jbody{display:grid;gap:12px}
+.jmeta{font-size:14px;color:var(--ink-3)}
+.jbody h2{font-size:clamp(26px,1.2rem + 1.6vw,44px);max-width:22ch}
+.jlink{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--accent-ink);font-size:15px}
+.jcard:hover .jlink svg{transform:translateX(4px)}
+.jlink svg{transition:transform .3s var(--ease)}
+.jart{position:relative;width:220px;height:150px}
+.jn{position:absolute;left:0;top:0;width:170px;padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-2);display:grid;gap:7px;transform:rotate(-4deg);transition:transform .5s var(--ease)}
+.jn b{font:600 13px/1 var(--sans)}
+.jn i{height:6px;border-radius:3px;background:var(--line)}
+.jn i:nth-child(3){width:80%}.jn i:nth-child(4){width:60%}
+.jyes{position:absolute;right:6px;bottom:8px;background:var(--accent);color:var(--on-accent);font:700 15px/1 var(--display);padding:11px 20px;border-radius:999px;box-shadow:0 0 0 6px var(--accent-soft);transition:transform .5s var(--ease)}
+.jcard:hover .jn{transform:rotate(-1deg) translateY(-4px)}.jcard:hover .jyes{transform:scale(1.06)}
+.enable-end{padding-bottom:clamp(64px,8vw,112px)}
+@media (max-width:900px){.jcard{grid-template-columns:1fr}.jart{display:none}}
+
+.rlist li > .rule-v.inline,.rlist li > .rules-end{grid-column:2}
+@media (max-width:900px){.rlist li > .rule-v.inline,.rlist li > .rules-end{grid-column:1/-1}}
+.blk.night .free{display:none!important}
+.cal-top{flex-wrap:wrap}
+.kdia{height:clamp(300px,40vh,380px)}
+
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 </head>
@@ -930,27 +1046,28 @@ bob    tty1</pre></div>
   <div class="wrap">
     <div class="sec-h">
       <h2 id="h-2026">The same work, done differently.</h2>
-      <p>A normal week used to fill up with work around the work. Scroll through that week to see who does each part now.</p>
+      <p>A normal week used to fill up with work around the work. Scroll through it: each part goes to an agent, runs in the background, and the hours come back to the team.</p>
     </div>
     <div class="week" id="week">
       <div class="cal" aria-hidden="true">
+        <div class="cal-top"><span>Time handed back this week</span><b class="tab" id="hback">0 h</b><span class="eg">Example week</span></div>
         <div class="cal-h"><span></span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span></div>
         <div class="cal-b">
           <div class="hours"><span>9:00</span><span>11:00</span><span>13:00</span><span>15:00</span><span class="nt">3 a.m.</span></div>
           <div class="grid"></div>
-          <div class="blk" data-i="0" style="--c:2;--r1:2;--r2:6"><b>Estimation meetings</b><small>Mon, 10:00 to 12:00</small><span class="ag"><svg class="ico"><use href="#i-note"/></svg>Plan with a ceiling</span></div>
-          <div class="blk" data-i="1" style="--c:3;--r1:9;--r2:15"><b>Code review queues</b><small>Tue afternoon</small><span class="ag"><svg class="ico"><use href="#i-eye"/></svg>Second agent</span></div>
-          <div class="blk" data-i="2" style="--c:5;--r1:1;--r2:8"><b>Manual test passes</b><small>Thu morning</small><span class="ag"><svg class="ico"><use href="#i-pointer"/></svg>Browser agent</span></div>
-          <div class="blk night" data-i="3" style="--c:4;--r1:18;--r2:20"><b>On-call at 3 a.m.</b><span class="ag"><svg class="ico"><use href="#i-pulse"/></svg>Agent on watch</span></div>
-          <div class="blk" data-i="4" style="--c:6;--r1:12;--r2:16"><b>Status reports</b><small>Fri, 15:00</small><span class="ag"><svg class="ico"><use href="#i-receipt"/></svg>The record</span></div>
+          <div class="blk" data-i="0" data-h="2" style="--c:2;--r1:2;--r2:6"><b>Estimation meetings</b><small>Mon, 10:00 to 12:00</small><span class="ag"><svg class="ico"><use href="#i-note"/></svg>Plan in minutes</span><span class="free">2 h back</span></div>
+          <div class="blk" data-i="1" data-h="3" style="--c:3;--r1:9;--r2:15"><b>Code review queues</b><small>Tue afternoon</small><span class="ag"><svg class="ico"><use href="#i-eye"/></svg>Second agent</span><span class="free">3 h back</span></div>
+          <div class="blk" data-i="2" data-h="3.5" style="--c:5;--r1:1;--r2:8"><b>Manual test passes</b><small>Thu morning</small><span class="ag"><svg class="ico"><use href="#i-pointer"/></svg>Browser agent</span><span class="free">3.5 h back</span></div>
+          <div class="blk night" data-i="3" data-h="1" style="--c:4;--r1:18;--r2:20"><b>On-call at 3 a.m.</b><span class="ag"><svg class="ico"><use href="#i-pulse"/></svg>Agent on watch</span><span class="free">1 h back</span></div>
+          <div class="blk" data-i="4" data-h="2" style="--c:6;--r1:12;--r2:16"><b>Status reports</b><small>Fri, 15:00</small><span class="ag"><svg class="ico"><use href="#i-receipt"/></svg>The record</span><span class="free">2 h back</span></div>
         </div>
       </div>
       <ol class="now-list" role="table" aria-label="What is gone and what does that job now">
-        <li data-i="0" role="row"><s role="cell">Estimation meetings</s><span role="cell">A plan comes back with a price ceiling in minutes.</span></li>
-        <li data-i="1" role="row"><s role="cell">Code review queues</s><span role="cell">A second agent reviews.</span></li>
-        <li data-i="2" role="row"><s role="cell">Manual test passes</s><span role="cell">A browser agent tests.</span></li>
-        <li data-i="3" role="row"><s role="cell">On-call at 3 a.m.</s><span role="cell">An agent keeps watch.</span></li>
-        <li data-i="4" role="row"><s role="cell">Status reports</s><span role="cell">The record is the report.</span></li>
+        <li data-i="0" role="row"><s role="cell">Estimation meetings, 2 h</s><span role="cell">A plan comes back with a price ceiling in minutes.</span></li>
+        <li data-i="1" role="row"><s role="cell">Code review queues, 3 h</s><span role="cell">A second agent reviews.</span></li>
+        <li data-i="2" role="row"><s role="cell">Manual test passes, 3.5 h</s><span role="cell">A browser agent tests.</span></li>
+        <li data-i="3" role="row"><s role="cell">On-call at 3 a.m., 1 h of sleep</s><span role="cell">An agent keeps watch.</span></li>
+        <li data-i="4" role="row"><s role="cell">Status reports, 2 h</s><span role="cell">The record is the report.</span></li>
       </ol>
     </div>
   </div>
@@ -1023,12 +1140,12 @@ bob    tty1</pre></div>
 </section>
 
 <section class="sec moss" id="rules" aria-labelledby="h-rules">
-  <div class="wrap">
-    <div class="sec-h"><h2 id="h-rules">Authority, money, evidence.</h2><p>One set of rules, the same for every person and every agent. Enforced on the server, never by a prompt.</p></div>
-    <div class="rules">
-      <div class="rule" data-k="a">
-        <div class="rule-t"><h3>Authority</h3><p class="big">Enterprise IAM is built in.</p><p>Roles decide who may write a note, who may say yes, and what each agent may touch. A person and an agent pass the same checks.</p></div>
-        <div class="rule-v">
+  <div class="wrap rules2">
+    <div class="rules-l">
+      <h2 id="h-rules">Authority, money, evidence.</h2>
+      <p class="rules-p">One set of rules, the same for every person and every agent. Enforced on the server, never by a prompt.</p>
+      <div class="rstage">
+        <div class="rule-v-wrap rule" data-k="a"><div class="rule-v">
           <table class="mx" aria-label="Example permissions">
             <thead><tr><th></th><th scope="col">Write a note</th><th scope="col">Say yes</th><th scope="col">Touch billing-web</th></tr></thead>
             <tbody>
@@ -1038,43 +1155,61 @@ bob    tty1</pre></div>
             </tbody>
           </table>
           <span class="eg">Example</span>
-        </div>
-      </div>
-      <div class="rule" data-k="m">
-        <div class="rule-t"><h3>Money</h3><p class="big">Every piece of work is quoted as a ceiling before it runs.</p><p>You see the ceiling before you say yes. Your provider bills you directly, never marked up.</p></div>
-        <div class="rule-v">
+        </div></div>
+        <div class="rule-v-wrap rule" data-k="m"><div class="rule-v">
           <div class="meter"><div class="meter-l"><span>Spent</span><b class="tab" id="spent">$0.00</b></div><div class="meter-t"><i class="fill"></i><i class="cap"><span>Ceiling $6.00</span></i></div><div class="meter-s"><span>Quoted 09:14</span><span>Approved 09:20</span><span>Delivered 11:40</span></div></div>
           <span class="eg">Example</span>
-        </div>
-      </div>
-      <div class="rule" data-k="e">
-        <div class="rule-t"><h3>Evidence</h3><p class="big">A permanent receipt for every delivery.</p><p>The plan, who said yes, the pull requests, the tests and what the browser agent ran. Every tool call and transcript stays in the record too.</p></div>
-        <div class="rule-v">
+        </div></div>
+        <div class="rule-v-wrap rule" data-k="e"><div class="rule-v">
           <ul class="ev"><li style="--d:0"><svg class="ico"><use href="#i-note"/></svg>Plan approved by Rina</li><li style="--d:1"><svg class="ico"><use href="#i-pr"/></svg>Pull requests #318, #319</li><li style="--d:2"><svg class="ico"><use href="#i-check"/></svg>18 tests passed</li><li style="--d:3"><svg class="ico"><use href="#i-pointer"/></svg>Browser check, 3 steps run</li></ul>
           <span class="seal">Kept</span>
           <span class="eg">Example</span>
-        </div>
+        </div></div>
       </div>
     </div>
-    <div class="rules-end"><a class="lnk" href="https://konteks.io/security/">Security <svg class="ico"><use href="#i-arrow"/></svg></a><a class="lnk" href="https://konteks.io/pricing/">Pricing <svg class="ico"><use href="#i-arrow"/></svg></a></div>
+    <ol class="rlist" id="rlist">
+      <li data-k="a"><svg class="dz" viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="14" width="44" height="36" rx="6"/><circle cx="24" cy="30" r="6"/><path d="M16 44c1.5-4 4.5-6 8-6s6.5 2 8 6M38 26h10M38 33h7"/></svg><div class="rule-t"><h3>Authority</h3><p class="big">Enterprise IAM is built in.</p><p>Roles decide who may write a note, who may say yes, and what each agent may touch. A person and an agent pass the same checks.</p></div><div class="rule-v inline">
+          <table class="mx" aria-label="Example permissions">
+            <thead><tr><th></th><th scope="col">Write a note</th><th scope="col">Say yes</th><th scope="col">Touch billing-web</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Rina<small>Product lead</small></th><td class="y" style="--d:0">Yes</td><td class="y" style="--d:1">Yes</td><td class="n" style="--d:2">No</td></tr>
+              <tr><th scope="row">Dimas<small>Engineer</small></th><td class="y" style="--d:3">Yes</td><td class="n" style="--d:4">No</td><td class="y" style="--d:5">Yes</td></tr>
+              <tr><th scope="row">Claude Code<small>Agent</small></th><td class="n" style="--d:6">No</td><td class="n" style="--d:7">No</td><td class="y" style="--d:8">Yes</td></tr>
+            </tbody>
+          </table>
+          <span class="eg">Example</span>
+        </div></li>
+      <li data-k="m"><svg class="dz" viewBox="0 0 64 64" aria-hidden="true"><path d="M10 44a22 22 0 0 1 44 0"/><path d="M47 25 52 21"/><path d="M32 44 40 28"/><circle cx="32" cy="44" r="3"/></svg><div class="rule-t"><h3>Money</h3><p class="big">Every piece of work is quoted as a ceiling before it runs.</p><p>You see the ceiling before you say yes. Your provider bills you directly, never marked up.</p></div><div class="rule-v inline">
+          <div class="meter"><div class="meter-l"><span>Spent</span><b class="tab">$3.40</b></div><div class="meter-t"><i class="fill"></i><i class="cap"><span>Ceiling $6.00</span></i></div><div class="meter-s"><span>Quoted 09:14</span><span>Approved 09:20</span><span>Delivered 11:40</span></div></div>
+          <span class="eg">Example</span>
+        </div></li>
+      <li data-k="e"><svg class="dz" viewBox="0 0 64 64" aria-hidden="true"><path d="M16 8h32v48l-4-3-4 3-4-3-4 3-4-3-4 3-4-3-4 3V8Z"/><path d="M22 18h20M22 25h20M22 32h12"/></svg><div class="rule-t"><h3>Evidence</h3><p class="big">A permanent receipt for every delivery.</p><p>The plan, who said yes, the pull requests, the tests and what the browser agent ran. Every tool call and transcript stays in the record too.</p></div><div class="rule-v inline">
+          <ul class="ev"><li style="--d:0"><svg class="ico"><use href="#i-note"/></svg>Plan approved by Rina</li><li style="--d:1"><svg class="ico"><use href="#i-pr"/></svg>Pull requests #318, #319</li><li style="--d:2"><svg class="ico"><use href="#i-check"/></svg>18 tests passed</li><li style="--d:3"><svg class="ico"><use href="#i-pointer"/></svg>Browser check, 3 steps run</li></ul>
+          <span class="seal">Kept</span>
+          <span class="eg">Example</span>
+        </div><div class="rules-end"><a class="lnk" href="https://konteks.io/security/">Security <svg class="ico"><use href="#i-arrow"/></svg></a><a class="lnk" href="https://konteks.io/pricing/">Pricing <svg class="ico"><use href="#i-arrow"/></svg></a></div></li>
+    </ol>
   </div>
 </section>
 
-<section class="sec" id="sessions" aria-labelledby="h-kinds">
-  <div class="wrap">
+<section class="kinds-sec" id="sessions" aria-labelledby="h-kinds">
+ <div class="kinds-track" id="ktrack">
+  <div class="kinds-stage">
+   <div class="wrap">
     <div class="sec-h"><h2 id="h-kinds">Four kinds of session.</h2><p>Every session starts from a note and waits for a yes. What changes is what goes in, and what comes back.</p></div>
-    <div class="kinds2">
-      <div class="kind" style="--n:4"><div class="kind-t"><h3>Project Management</h3><p>A requirement becomes milestones, sprints, and tickets. Each ticket becomes a plan.</p></div>
-        <ol class="pipe"><li style="--i:0"><svg class="ico"><use href="#i-note"/></svg>Requirement</li><li style="--i:1" class="ag"><svg class="ico"><use href="#i-layers"/></svg>Milestones and sprints</li><li style="--i:2" class="ag"><svg class="ico"><use href="#i-ticket"/></svg>Tickets</li><li style="--i:3"><svg class="ico"><use href="#i-check"/></svg>A plan per ticket</li></ol></div>
-      <div class="kind" style="--n:4"><div class="kind-t"><h3>Engineering</h3><p>A plan, your yes, tested pull requests, and a receipt.</p></div>
-        <ol class="pipe"><li style="--i:0"><svg class="ico"><use href="#i-note"/></svg>Plan</li><li style="--i:1" class="y">Yes</li><li style="--i:2" class="ag"><svg class="ico"><use href="#i-pr"/></svg>Tested pull requests</li><li style="--i:3"><svg class="ico"><use href="#i-receipt"/></svg>Receipt</li></ol></div>
-      <div class="kind" style="--n:3"><div class="kind-t"><h3>QA</h3><p>A browser agent clicks through what shipped and reports only what it ran.</p></div>
-        <ol class="pipe"><li style="--i:0"><svg class="ico"><use href="#i-check"/></svg>What shipped</li><li style="--i:1" class="ag"><svg class="ico"><use href="#i-pointer"/></svg>Browser agent</li><li style="--i:2"><svg class="ico"><use href="#i-receipt"/></svg>Report of what ran</li></ol></div>
-      <div class="kind" style="--n:4"><div class="kind-t"><h3>Ops</h3><p>The agent watches logs and alerts, opens the issue, and works the fix.</p></div>
-        <ol class="pipe"><li style="--i:0" class="ag"><svg class="ico"><use href="#i-pulse"/></svg>Logs and alerts</li><li style="--i:1" class="ag"><svg class="ico"><use href="#i-alert"/></svg>Issue</li><li style="--i:2" class="ag"><svg class="ico"><use href="#i-hammer"/></svg>The fix</li><li style="--i:3" class="y">Yes</li></ol></div>
+    <div class="ktabs" role="tablist" aria-label="Kinds of session" id="ktabs">
+     <button role="tab" id="kt0" aria-controls="kp" aria-selected="true">Project Management<i><b></b></i></button>
+     <button role="tab" id="kt1" aria-controls="kp" aria-selected="false" tabindex="-1">Engineering<i><b></b></i></button>
+     <button role="tab" id="kt2" aria-controls="kp" aria-selected="false" tabindex="-1">QA<i><b></b></i></button>
+     <button role="tab" id="kt3" aria-controls="kp" aria-selected="false" tabindex="-1">Ops<i><b></b></i></button>
     </div>
-    <p class="eg kinds-eg">Each row runs on its own; agent steps are shaded.</p>
+    <div class="kpanel" id="kp" role="tabpanel" aria-labelledby="kt0">
+     <div class="kp-t"><h3 id="kp-h"></h3><p id="kp-p"></p><span class="eg">Example session. People above the line, agents below it.</span></div>
+     <div class="kdia" id="kdia"><span class="kline" aria-hidden="true"></span><svg class="kpath" aria-hidden="true"><path class="base"/><circle class="tok" r="6"/></svg></div>
+    </div>
+   </div>
   </div>
+ </div>
 </section>
 
 <section class="sec moss" id="agents" aria-labelledby="h-agents">
@@ -1137,10 +1272,19 @@ bob    tty1</pre></div>
         <a class="btn btn-go" href="mailto:hello@konteks.io?subject=Agentic%20training%20and%20onboarding">Talk to us about training <svg class="ico"><use href="#i-arrow"/></svg></a>
       </div>
     </div>
-    <a class="journal" href="https://konteks.io/blog/day-1-introducing-project-management-mode/">
-      <span class="when"><b>Day 1</b>From the journal, August 17, 2026</span>
-      <span class="t">Delivery was never the hard part. The plan was.</span>
-      <span class="arr"><svg class="ico"><use href="#i-arrow"/></svg></span>
+  </div>
+</section>
+
+<section class="journal-sec" aria-labelledby="h-journal">
+  <div class="wrap">
+    <a class="jcard" href="https://konteks.io/blog/day-1-introducing-project-management-mode/">
+      <span class="jday" aria-hidden="true">Day 1</span>
+      <span class="jbody">
+        <span class="jmeta">From the journal, August 17, 2026</span>
+        <h2 id="h-journal">Delivery was never the hard part. The plan was.</h2>
+        <span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span>
+      </span>
+      <span class="jart" aria-hidden="true"><span class="jn"><b>Plan</b><i></i><i></i><i></i></span><span class="jyes">Yes</span></span>
     </a>
   </div>
 </section>
@@ -1307,8 +1451,11 @@ const week = $("#week"), blks = $$(".blk", week), nows = $$(".now-list li", week
 const weekDraw = () => {
   const r = week.getBoundingClientRect(), vh = innerHeight;
   const k = RM ? 1 : clamp((vh * .8 - r.top) / (r.height * .95));
-  blks.forEach((b, i) => { const on = k > (i + 1) / 6.2; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); });
+  let hrs = 0;
+  blks.forEach((b, i) => { const on = k > (i + 1) / 6.2; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); if (on) hrs += +b.dataset.h; });
+  if (hback._v !== hrs) { hback._v = hrs; hback.textContent = (hrs % 1 ? hrs.toFixed(1) : hrs) + " h"; }
 };
+const hback = $("#hback");
 [...blks, ...nows].forEach(el => {
   const i = el.dataset.i;
   el.addEventListener("pointerenter", () => { blks[i].classList.add("hl"); nows[i].classList.add("hl"); });
@@ -1494,26 +1641,122 @@ const pushEvent = () => {
 };
 if (!RM) { seen(feed, v => feedOn = v, .3); setInterval(pushEvent, 3400); }
 
-/* ============ rules: each example plays when it comes into view ============ */
-const spent = $("#spent");
-$$(".rule").forEach(r => seen(r, v => {
-  if (!v || r.classList.contains("on")) return;
-  r.classList.add("on");
-  if (r.dataset.k === "m") {
-    if (RM) { spent.textContent = "$3.40"; return; }
-    const t0 = performance.now();
-    const tick = now => { const k = clamp((now - t0 - 200) / 2200); spent.textContent = "$" + (3.4 * ease(k)).toFixed(2); if (k < 1) requestAnimationFrame(tick); };
-    requestAnimationFrame(tick);
+/* ============ rules: the item in view drives the example on the left ============ */
+const spent = $("#spent"), rItems = $$("#rlist > li"), rVis = $$(".rstage .rule");
+let rCur = -1, spentRun = false;
+const runSpent = () => {
+  if (spentRun) return; spentRun = true;
+  if (RM) { spent.textContent = "$3.40"; return; }
+  const t0 = performance.now();
+  const tick = now => { const k = clamp((now - t0 - 200) / 2200); spent.textContent = "$" + (3.4 * ease(k)).toFixed(2); if (k < 1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+};
+const rulesDraw = () => {
+  const vh = innerHeight; let best = 0, bd = 1e9;
+  rItems.forEach((li, i) => { const b = li.getBoundingClientRect(), c = b.top + Math.min(b.height, 260) / 2, d = Math.abs(c - vh * .45); if (d < bd) { bd = d; best = i; } });
+  if (best === rCur) return; rCur = best;
+  rItems.forEach((li, i) => li.classList.toggle("on", i === best));
+  rVis.forEach((v, i) => { v.classList.toggle("show", i === best); if (i === best) v.classList.add("on"); });
+  if (rVis[best] && rVis[best].dataset.k === "m") runSpent();
+};
+if (RM) { rItems.forEach(li => li.classList.add("on")); rVis.forEach(v => v.classList.add("on", "show")); spent.textContent = "$3.40"; }
+
+/* ============ four kinds of session: scroll moves across the tabs ============ */
+const KINDS = [
+  { h: "Project Management", p: "A requirement becomes milestones, sprints, and tickets. Each ticket becomes a plan.",
+    s: [["p", "i-note", "Requirement", "Billing exports for Finance"], ["a", "i-layers", "Milestones and sprints", "2 milestones, 3 sprints"], ["a", "i-ticket", "Tickets", "9 tickets"], ["a", "i-note", "A plan per ticket", "Each with a ceiling"], ["y", "", "Yes", ""]] },
+  { h: "Engineering", p: "A plan, your yes, tested pull requests, and a receipt.",
+    s: [["p", "i-note", "Note", "Invoices: export to CSV"], ["a", "i-note", "Plan", "4 steps, ceiling $6.00"], ["y", "", "Yes", ""], ["a", "i-pr", "Tested pull requests", "#318, #319, 18 tests"], ["p", "i-receipt", "Receipt", "You accept it"]] },
+  { h: "QA", p: "A browser agent clicks through what shipped and reports only what it ran.",
+    s: [["p", "i-check", "What shipped", "CSV export for Finance"], ["a", "i-pointer", "Browser agent", "Opens /invoices, clicks Export CSV"], ["p", "i-receipt", "Report", "Only what it ran: 3 steps"]] },
+  { h: "Ops", p: "The agent watches logs and alerts, opens the issue, and works the fix.",
+    s: [["a", "i-pulse", "Watches", "Logs and alerts"], ["a", "i-alert", "Opens the issue", "Export times out past 5,000 rows"], ["a", "i-hammer", "Works the fix", "A plan with a ceiling"], ["y", "", "Yes", ""], ["a", "i-pr", "Fix shipped", "Tested pull request"]] },
+];
+const ktrack = $("#ktrack"), ktabs = $$("#ktabs [role=tab]"), kdia = $("#kdia"), kpH = $("#kp-h"), kpP = $("#kp-p"), kpan = $("#kp");
+const kpathEl = $(".kpath .base", kdia), ktok = $(".kpath .tok", kdia);
+let kCur = -1, kLen = 0, kNodes = [];
+const kVertical = () => innerWidth <= 900;
+const kRoute = pts => {
+  let d = `M${pts[0][0]} ${pts[0][1]}`; const R = 16, V = kVertical();
+  for (let i = 1; i < pts.length; i++) {
+    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+    if (!V) {
+      if (Math.abs(y1 - y0) < 2) { d += ` L${x1} ${y1}`; continue; }
+      const sy = Math.sign(y1 - y0), mx = (x0 + x1) / 2;
+      d += ` L${mx - R} ${y0} Q${mx} ${y0} ${mx} ${y0 + sy * R} L${mx} ${y1 - sy * R} Q${mx} ${y1} ${mx + R} ${y1} L${x1} ${y1}`;
+    } else {
+      if (Math.abs(x1 - x0) < 2) { d += ` L${x1} ${y1}`; continue; }
+      const sx = Math.sign(x1 - x0), my = (y0 + y1) / 2;
+      d += ` L${x0} ${my - R} Q${x0} ${my} ${x0 + sx * R} ${my} L${x1 - sx * R} ${my} Q${x1} ${my} ${x1} ${my + R} L${x1} ${y1}`;
+    }
   }
-}, .35));
-if (RM) $$(".rule").forEach(r => r.classList.add("on"));
+  return d;
+};
+const kLayout = () => {
+  if (kCur < 0) return;
+  const r = kdia.getBoundingClientRect(), V = kVertical(), n = kNodes.length;
+  const pts = kNodes.map((el, i) => {
+    const side = el.dataset.side, along = (i + .5) / n, across = side === "p" ? .24 : side === "a" ? .76 : .5;
+    const x = V ? across : along, y = V ? along : across;
+    el.style.left = (x * 100) + "%"; el.style.top = (y * 100) + "%";
+    return [x * r.width, y * r.height];
+  });
+  kpathEl.setAttribute("d", kRoute(pts)); kLen = kpathEl.getTotalLength();
+  kNodes._t = pts.map(([x, y]) => { let best = 0, bd = 1e9; for (let l = 0; l <= kLen; l += 4) { const q = kpathEl.getPointAtLength(l), dd = (q.x - x) ** 2 + (q.y - y) ** 2; if (dd < bd) { bd = dd; best = l; } } return best; });
+};
+const kShow = i => {
+  if (i === kCur) return; kCur = i;
+  ktabs.forEach((b, j) => { b.setAttribute("aria-selected", j === i); b.tabIndex = j === i ? 0 : -1; });
+  kpan.setAttribute("aria-labelledby", ktabs[i].id);
+  const k = KINDS[i];
+  kpH.textContent = k.h; kpP.textContent = k.p;
+  [kpH, kpP].forEach(e => { e.style.animation = "none"; void e.offsetWidth; e.style.animation = ""; });
+  kNodes.forEach(n => n.remove());
+  kNodes = k.s.map(([side, ic, t, d], n) => {
+    const el = document.createElement("div"); el.className = "knode " + side; el.dataset.side = side; el.style.setProperty("--k", n);
+    el.innerHTML = side === "y" ? t : `<b><svg class="ico"><use href="#${ic}"/></svg>${escT(t)}</b>${escT(d)}`;
+    kdia.append(el); return el;
+  });
+  kLayout(); kt0 = 0;
+};
+const kTrackP = () => { const r = ktrack.getBoundingClientRect(), span = ktrack.offsetHeight - (innerHeight - 64); return clamp((64 - r.top) / Math.max(1, span)); };
+const kDraw = () => {
+  if (RM) return;
+  const p = kTrackP(), pos = p * KINDS.length * .999, i = Math.min(KINDS.length - 1, Math.floor(pos));
+  ktabs.forEach((b, j) => $("b", b).style.setProperty("--f", j < i ? 1 : j > i ? 0 : pos - i));
+  kShow(i);
+};
+ktabs.forEach((b, i) => {
+  b.addEventListener("click", () => {
+    if (RM) { kShow(i); return; }
+    const top = ktrack.getBoundingClientRect().top + scrollY - 64, span = ktrack.offsetHeight - (innerHeight - 64);
+    scrollTo({ top: top + span * (i + .5) / KINDS.length, behavior: "smooth" });
+  });
+  b.addEventListener("keydown", e => {
+    const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (!d) return; e.preventDefault();
+    const n = (i + d + ktabs.length) % ktabs.length; ktabs[n].focus(); ktabs[n].click();
+  });
+});
+let kt0 = 0, kOn = false;
+seen(ktrack, v => kOn = v, 0);
+const kFrame = now => {
+  if (kOn && !RM && kLen) {
+    if (!kt0) kt0 = now;
+    const T = 1600 * kNodes.length, f = ((now - kt0) % (T + 900)) / T, l = kLen * smooth(clamp(f));
+    const q = kpathEl.getPointAtLength(l); ktok.setAttribute("cx", q.x); ktok.setAttribute("cy", q.y);
+    kNodes.forEach((n, j) => n.classList.toggle("hot", f <= 1 && Math.abs(l - kNodes._t[j]) < 26));
+  }
+  requestAnimationFrame(kFrame);
+};
+kShow(0); requestAnimationFrame(kFrame);
+if (RM) ktok.style.display = "none";
 
 /* ============ scroll + resize ============ */
 let raf = 0;
-const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); };
+const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); };
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
-addEventListener("resize", () => { requestAnimationFrame(() => { if (!RM) measurePin(); layout(); drawMerge(); onScroll(); }); });
-const relayout = () => { if (!RM) measurePin(); layout(); drawMerge(); onScroll(); };
+addEventListener("resize", () => { requestAnimationFrame(relayout); });
+const relayout = () => { if (!RM) measurePin(); layout(); drawMerge(); kLayout(); onScroll(); };
 document.fonts && document.fonts.ready.then(relayout);
 addEventListener("load", relayout);
 relayout();

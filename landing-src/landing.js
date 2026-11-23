@@ -132,8 +132,11 @@ const week = $("#week"), blks = $$(".blk", week), nows = $$(".now-list li", week
 const weekDraw = () => {
   const r = week.getBoundingClientRect(), vh = innerHeight;
   const k = RM ? 1 : clamp((vh * .8 - r.top) / (r.height * .95));
-  blks.forEach((b, i) => { const on = k > (i + 1) / 6.2; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); });
+  let hrs = 0;
+  blks.forEach((b, i) => { const on = k > (i + 1) / 6.2; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); if (on) hrs += +b.dataset.h; });
+  if (hback._v !== hrs) { hback._v = hrs; hback.textContent = (hrs % 1 ? hrs.toFixed(1) : hrs) + " h"; }
 };
+const hback = $("#hback");
 [...blks, ...nows].forEach(el => {
   const i = el.dataset.i;
   el.addEventListener("pointerenter", () => { blks[i].classList.add("hl"); nows[i].classList.add("hl"); });
@@ -319,26 +322,122 @@ const pushEvent = () => {
 };
 if (!RM) { seen(feed, v => feedOn = v, .3); setInterval(pushEvent, 3400); }
 
-/* ============ rules: each example plays when it comes into view ============ */
-const spent = $("#spent");
-$$(".rule").forEach(r => seen(r, v => {
-  if (!v || r.classList.contains("on")) return;
-  r.classList.add("on");
-  if (r.dataset.k === "m") {
-    if (RM) { spent.textContent = "$3.40"; return; }
-    const t0 = performance.now();
-    const tick = now => { const k = clamp((now - t0 - 200) / 2200); spent.textContent = "$" + (3.4 * ease(k)).toFixed(2); if (k < 1) requestAnimationFrame(tick); };
-    requestAnimationFrame(tick);
+/* ============ rules: the item in view drives the example on the left ============ */
+const spent = $("#spent"), rItems = $$("#rlist > li"), rVis = $$(".rstage .rule");
+let rCur = -1, spentRun = false;
+const runSpent = () => {
+  if (spentRun) return; spentRun = true;
+  if (RM) { spent.textContent = "$3.40"; return; }
+  const t0 = performance.now();
+  const tick = now => { const k = clamp((now - t0 - 200) / 2200); spent.textContent = "$" + (3.4 * ease(k)).toFixed(2); if (k < 1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+};
+const rulesDraw = () => {
+  const vh = innerHeight; let best = 0, bd = 1e9;
+  rItems.forEach((li, i) => { const b = li.getBoundingClientRect(), c = b.top + Math.min(b.height, 260) / 2, d = Math.abs(c - vh * .45); if (d < bd) { bd = d; best = i; } });
+  if (best === rCur) return; rCur = best;
+  rItems.forEach((li, i) => li.classList.toggle("on", i === best));
+  rVis.forEach((v, i) => { v.classList.toggle("show", i === best); if (i === best) v.classList.add("on"); });
+  if (rVis[best] && rVis[best].dataset.k === "m") runSpent();
+};
+if (RM) { rItems.forEach(li => li.classList.add("on")); rVis.forEach(v => v.classList.add("on", "show")); spent.textContent = "$3.40"; }
+
+/* ============ four kinds of session: scroll moves across the tabs ============ */
+const KINDS = [
+  { h: "Project Management", p: "A requirement becomes milestones, sprints, and tickets. Each ticket becomes a plan.",
+    s: [["p", "i-note", "Requirement", "Billing exports for Finance"], ["a", "i-layers", "Milestones and sprints", "2 milestones, 3 sprints"], ["a", "i-ticket", "Tickets", "9 tickets"], ["a", "i-note", "A plan per ticket", "Each with a ceiling"], ["y", "", "Yes", ""]] },
+  { h: "Engineering", p: "A plan, your yes, tested pull requests, and a receipt.",
+    s: [["p", "i-note", "Note", "Invoices: export to CSV"], ["a", "i-note", "Plan", "4 steps, ceiling $6.00"], ["y", "", "Yes", ""], ["a", "i-pr", "Tested pull requests", "#318, #319, 18 tests"], ["p", "i-receipt", "Receipt", "You accept it"]] },
+  { h: "QA", p: "A browser agent clicks through what shipped and reports only what it ran.",
+    s: [["p", "i-check", "What shipped", "CSV export for Finance"], ["a", "i-pointer", "Browser agent", "Opens /invoices, clicks Export CSV"], ["p", "i-receipt", "Report", "Only what it ran: 3 steps"]] },
+  { h: "Ops", p: "The agent watches logs and alerts, opens the issue, and works the fix.",
+    s: [["a", "i-pulse", "Watches", "Logs and alerts"], ["a", "i-alert", "Opens the issue", "Export times out past 5,000 rows"], ["a", "i-hammer", "Works the fix", "A plan with a ceiling"], ["y", "", "Yes", ""], ["a", "i-pr", "Fix shipped", "Tested pull request"]] },
+];
+const ktrack = $("#ktrack"), ktabs = $$("#ktabs [role=tab]"), kdia = $("#kdia"), kpH = $("#kp-h"), kpP = $("#kp-p"), kpan = $("#kp");
+const kpathEl = $(".kpath .base", kdia), ktok = $(".kpath .tok", kdia);
+let kCur = -1, kLen = 0, kNodes = [];
+const kVertical = () => innerWidth <= 900;
+const kRoute = pts => {
+  let d = `M${pts[0][0]} ${pts[0][1]}`; const R = 16, V = kVertical();
+  for (let i = 1; i < pts.length; i++) {
+    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+    if (!V) {
+      if (Math.abs(y1 - y0) < 2) { d += ` L${x1} ${y1}`; continue; }
+      const sy = Math.sign(y1 - y0), mx = (x0 + x1) / 2;
+      d += ` L${mx - R} ${y0} Q${mx} ${y0} ${mx} ${y0 + sy * R} L${mx} ${y1 - sy * R} Q${mx} ${y1} ${mx + R} ${y1} L${x1} ${y1}`;
+    } else {
+      if (Math.abs(x1 - x0) < 2) { d += ` L${x1} ${y1}`; continue; }
+      const sx = Math.sign(x1 - x0), my = (y0 + y1) / 2;
+      d += ` L${x0} ${my - R} Q${x0} ${my} ${x0 + sx * R} ${my} L${x1 - sx * R} ${my} Q${x1} ${my} ${x1} ${my + R} L${x1} ${y1}`;
+    }
   }
-}, .35));
-if (RM) $$(".rule").forEach(r => r.classList.add("on"));
+  return d;
+};
+const kLayout = () => {
+  if (kCur < 0) return;
+  const r = kdia.getBoundingClientRect(), V = kVertical(), n = kNodes.length;
+  const pts = kNodes.map((el, i) => {
+    const side = el.dataset.side, along = (i + .5) / n, across = side === "p" ? .24 : side === "a" ? .76 : .5;
+    const x = V ? across : along, y = V ? along : across;
+    el.style.left = (x * 100) + "%"; el.style.top = (y * 100) + "%";
+    return [x * r.width, y * r.height];
+  });
+  kpathEl.setAttribute("d", kRoute(pts)); kLen = kpathEl.getTotalLength();
+  kNodes._t = pts.map(([x, y]) => { let best = 0, bd = 1e9; for (let l = 0; l <= kLen; l += 4) { const q = kpathEl.getPointAtLength(l), dd = (q.x - x) ** 2 + (q.y - y) ** 2; if (dd < bd) { bd = dd; best = l; } } return best; });
+};
+const kShow = i => {
+  if (i === kCur) return; kCur = i;
+  ktabs.forEach((b, j) => { b.setAttribute("aria-selected", j === i); b.tabIndex = j === i ? 0 : -1; });
+  kpan.setAttribute("aria-labelledby", ktabs[i].id);
+  const k = KINDS[i];
+  kpH.textContent = k.h; kpP.textContent = k.p;
+  [kpH, kpP].forEach(e => { e.style.animation = "none"; void e.offsetWidth; e.style.animation = ""; });
+  kNodes.forEach(n => n.remove());
+  kNodes = k.s.map(([side, ic, t, d], n) => {
+    const el = document.createElement("div"); el.className = "knode " + side; el.dataset.side = side; el.style.setProperty("--k", n);
+    el.innerHTML = side === "y" ? t : `<b><svg class="ico"><use href="#${ic}"/></svg>${escT(t)}</b>${escT(d)}`;
+    kdia.append(el); return el;
+  });
+  kLayout(); kt0 = 0;
+};
+const kTrackP = () => { const r = ktrack.getBoundingClientRect(), span = ktrack.offsetHeight - (innerHeight - 64); return clamp((64 - r.top) / Math.max(1, span)); };
+const kDraw = () => {
+  if (RM) return;
+  const p = kTrackP(), pos = p * KINDS.length * .999, i = Math.min(KINDS.length - 1, Math.floor(pos));
+  ktabs.forEach((b, j) => $("b", b).style.setProperty("--f", j < i ? 1 : j > i ? 0 : pos - i));
+  kShow(i);
+};
+ktabs.forEach((b, i) => {
+  b.addEventListener("click", () => {
+    if (RM) { kShow(i); return; }
+    const top = ktrack.getBoundingClientRect().top + scrollY - 64, span = ktrack.offsetHeight - (innerHeight - 64);
+    scrollTo({ top: top + span * (i + .5) / KINDS.length, behavior: "smooth" });
+  });
+  b.addEventListener("keydown", e => {
+    const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (!d) return; e.preventDefault();
+    const n = (i + d + ktabs.length) % ktabs.length; ktabs[n].focus(); ktabs[n].click();
+  });
+});
+let kt0 = 0, kOn = false;
+seen(ktrack, v => kOn = v, 0);
+const kFrame = now => {
+  if (kOn && !RM && kLen) {
+    if (!kt0) kt0 = now;
+    const T = 1600 * kNodes.length, f = ((now - kt0) % (T + 900)) / T, l = kLen * smooth(clamp(f));
+    const q = kpathEl.getPointAtLength(l); ktok.setAttribute("cx", q.x); ktok.setAttribute("cy", q.y);
+    kNodes.forEach((n, j) => n.classList.toggle("hot", f <= 1 && Math.abs(l - kNodes._t[j]) < 26));
+  }
+  requestAnimationFrame(kFrame);
+};
+kShow(0); requestAnimationFrame(kFrame);
+if (RM) ktok.style.display = "none";
 
 /* ============ scroll + resize ============ */
 let raf = 0;
-const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); };
+const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); };
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
-addEventListener("resize", () => { requestAnimationFrame(() => { if (!RM) measurePin(); layout(); drawMerge(); onScroll(); }); });
-const relayout = () => { if (!RM) measurePin(); layout(); drawMerge(); onScroll(); };
+addEventListener("resize", () => { requestAnimationFrame(relayout); });
+const relayout = () => { if (!RM) measurePin(); layout(); drawMerge(); kLayout(); onScroll(); };
 document.fonts && document.fonts.ready.then(relayout);
 addEventListener("load", relayout);
 relayout();
