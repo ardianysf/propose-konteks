@@ -11,7 +11,7 @@
     ["login", "/login", "Sign in", "Sign in", "The sign-in page and its variants"],
     ["app", "/app", "Demo app", "Demo", "Work In Progress, sessions, releases, settings"],
   ];
-  const cur = path.startsWith("/design-system") ? "ds" : path.startsWith("/login") ? "login" : path.startsWith("/app") ? "app" : "site";
+  const cur = path.startsWith("/design-system") || path.startsWith("/prototype") ? "ds" : path.startsWith("/login") ? "login" : path.startsWith("/app") ? "app" : "site";
   const curV = VIEWS.find(v => v[0] === cur);
 
   const css = `
