@@ -197,7 +197,7 @@ const theoryDraw = () => {
   words.forEach((w, i) => w.classList.toggle("on", i / words.length < q));
   let best = -1, bd = 1e9;
   duties.forEach((d, i) => { const b = d.getBoundingClientRect(), c = b.top + b.height / 2, dd = Math.abs(c - vh * .5); if (dd < bd) { bd = dd; best = i; } });
-  duties.forEach((d, i) => d.classList.toggle("on", RM || i === best));
+  if (!document.documentElement.classList.contains("rvm")) duties.forEach((d, i) => d.classList.toggle("on", RM || i === best));
 };
 
 /* ============ FOUR ERAS: vertical scroll drives a horizontal rail; each scene runs on its own clock ============ */
@@ -389,6 +389,9 @@ if (!RM && "IntersectionObserver" in window && matchMedia("(max-width:900px)").m
   document.documentElement.classList.add("rvm");
   const rio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); const mb = e.target.querySelector(".rule-v.inline .meter-l b"); if (mb) { const t0 = performance.now(); const tick = now => { const k = clamp((now - t0 - 700) / 1200); mb.textContent = "$" + (3.4 * ease(k)).toFixed(2); if (k < 1) requestAnimationFrame(tick); }; mb.textContent = "$0.00"; requestAnimationFrame(tick); } } }), { rootMargin: "0px 0px -18% 0px" });
   rItems.forEach(li => rio.observe(li));
+  /* the four duties and the record's pieces arrive the same way */
+  const aio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in", "on"); aio.unobserve(e.target); } }), { rootMargin: "0px 0px -12% 0px" });
+  [...duties, ...$$(".teams li"), $(".merge-cap"), $(".rec")].forEach(el => el && aio.observe(el));
 }
 if (RM) { rItems.forEach(li => li.classList.add("on")); rVis.forEach(v => v.classList.add("on", "show")); spent.textContent = "$3.40"; }
 

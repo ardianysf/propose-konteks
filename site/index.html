@@ -1082,6 +1082,19 @@ a:hover .cv-shot{transform:translate(-6px,-6px)}
   .rvm .rlist .rule-v.inline .seal{opacity:0;transform:rotate(-24deg) scale(1.3);transition:opacity .4s,transform .5s var(--ease) 1.2s}
   .rvm .rlist>li.in .rule-v.inline .seal{opacity:1;transform:rotate(-10deg)}
 }
+
+/* ===== round: duties icon, record spacing, smooth arrivals on phones ===== */
+.duties2 li.on .dz-x rect{fill:var(--accent)}
+@media (max-width:900px){
+  .merge-cap{margin:44px 0 28px;position:relative}
+  .merge-cap::before{left:-23px;top:50%;margin-top:-6px}
+  .merge::before{bottom:48px}
+  /* arrivals: each piece fades and slides up once, then stays lit */
+  .rvm .duties2 li,.rvm .teams li,.rvm .merge-cap,.rvm .rec{opacity:0;translate:0 24px;transition:opacity .7s var(--ease),translate .8s var(--ease)}
+  .rvm .duties2 li.in,.rvm .teams li.in,.rvm .merge-cap.in,.rvm .rec.in{opacity:1;translate:0 0}
+  .rvm .teams li:nth-child(2){transition-delay:.08s}.rvm .teams li:nth-child(3){transition-delay:.16s}
+  .rvm .duties2 li .dz{transition:background .5s var(--ease) .25s,stroke .5s var(--ease) .25s}
+}
 </style>
 </head>
 <body>
@@ -1745,7 +1758,7 @@ const theoryDraw = () => {
   words.forEach((w, i) => w.classList.toggle("on", i / words.length < q));
   let best = -1, bd = 1e9;
   duties.forEach((d, i) => { const b = d.getBoundingClientRect(), c = b.top + b.height / 2, dd = Math.abs(c - vh * .5); if (dd < bd) { bd = dd; best = i; } });
-  duties.forEach((d, i) => d.classList.toggle("on", RM || i === best));
+  if (!document.documentElement.classList.contains("rvm")) duties.forEach((d, i) => d.classList.toggle("on", RM || i === best));
 };
 
 /* ============ FOUR ERAS: vertical scroll drives a horizontal rail; each scene runs on its own clock ============ */
@@ -1937,6 +1950,9 @@ if (!RM && "IntersectionObserver" in window && matchMedia("(max-width:900px)").m
   document.documentElement.classList.add("rvm");
   const rio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); const mb = e.target.querySelector(".rule-v.inline .meter-l b"); if (mb) { const t0 = performance.now(); const tick = now => { const k = clamp((now - t0 - 700) / 1200); mb.textContent = "$" + (3.4 * ease(k)).toFixed(2); if (k < 1) requestAnimationFrame(tick); }; mb.textContent = "$0.00"; requestAnimationFrame(tick); } } }), { rootMargin: "0px 0px -18% 0px" });
   rItems.forEach(li => rio.observe(li));
+  /* the four duties and the record's pieces arrive the same way */
+  const aio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in", "on"); aio.unobserve(e.target); } }), { rootMargin: "0px 0px -12% 0px" });
+  [...duties, ...$$(".teams li"), $(".merge-cap"), $(".rec")].forEach(el => el && aio.observe(el));
 }
 if (RM) { rItems.forEach(li => li.classList.add("on")); rVis.forEach(v => v.classList.add("on", "show")); spent.textContent = "$3.40"; }
 

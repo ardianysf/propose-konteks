@@ -960,6 +960,19 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   .rvm .rlist .rule-v.inline .seal{opacity:0;transform:rotate(-24deg) scale(1.3);transition:opacity .4s,transform .5s var(--ease) 1.2s}
   .rvm .rlist>li.in .rule-v.inline .seal{opacity:1;transform:rotate(-10deg)}
 }
+
+/* ===== round: duties icon, record spacing, smooth arrivals on phones ===== */
+.duties2 li.on .dz-x rect{fill:var(--accent)}
+@media (max-width:900px){
+  .merge-cap{margin:44px 0 28px;position:relative}
+  .merge-cap::before{left:-23px;top:50%;margin-top:-6px}
+  .merge::before{bottom:48px}
+  /* arrivals: each piece fades and slides up once, then stays lit */
+  .rvm .duties2 li,.rvm .teams li,.rvm .merge-cap,.rvm .rec{opacity:0;translate:0 24px;transition:opacity .7s var(--ease),translate .8s var(--ease)}
+  .rvm .duties2 li.in,.rvm .teams li.in,.rvm .merge-cap.in,.rvm .rec.in{opacity:1;translate:0 0}
+  .rvm .teams li:nth-child(2){transition-delay:.08s}.rvm .teams li:nth-child(3){transition-delay:.16s}
+  .rvm .duties2 li .dz{transition:background .5s var(--ease) .25s,stroke .5s var(--ease) .25s}
+}
 </style>
 </head>
 <body>
