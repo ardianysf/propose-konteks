@@ -384,6 +384,12 @@ const rulesDraw = () => {
   rVis.forEach((v, i) => { v.classList.toggle("show", i === best); if (i === best) v.classList.add("on"); });
   if (rVis[best] && rVis[best].dataset.k === "m") runSpent();
 };
+/* Phones: each rule arrives on its own as it scrolls in (no pinned stage there). */
+if (!RM && "IntersectionObserver" in window && matchMedia("(max-width:900px)").matches) {
+  document.documentElement.classList.add("rvm");
+  const rio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); const mb = e.target.querySelector(".rule-v.inline .meter-l b"); if (mb) { const t0 = performance.now(); const tick = now => { const k = clamp((now - t0 - 700) / 1200); mb.textContent = "$" + (3.4 * ease(k)).toFixed(2); if (k < 1) requestAnimationFrame(tick); }; mb.textContent = "$0.00"; requestAnimationFrame(tick); } } }), { rootMargin: "0px 0px -18% 0px" });
+  rItems.forEach(li => rio.observe(li));
+}
 if (RM) { rItems.forEach(li => li.classList.add("on")); rVis.forEach(v => v.classList.add("on", "show")); spent.textContent = "$3.40"; }
 
 /* ============ four kinds of session: scroll moves across the tabs ============ */
