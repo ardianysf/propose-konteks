@@ -979,6 +979,16 @@ a:hover .cv-shot{transform:translate(-6px,-6px)}
 .week-sum{gap:12px;padding:clamp(20px,2.4vw,30px)}
 .week-stick > .wrap{padding-top:8px;padding-bottom:48px}
 
+/* ===== round 9 ===== */
+.ktok{display:none}
+.blk.night .free{display:none!important}
+.blk .ag{white-space:normal}
+.week.gather .blk[data-i="0"] .free{opacity:0}
+.week.gather .blk .ag{width:var(--gw,auto)!important;box-sizing:border-box}
+/* section transitions: content rises in, moss bands lift over the paper */
+[data-rise] > .wrap{will-change:transform}
+.moss[data-rise]{border-radius:var(--lift,0px) var(--lift,0px) 0 0}
+
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 </head>
@@ -1019,12 +1029,12 @@ a:hover .cv-shot{transform:translate(-6px,-6px)}
       Konteks <span class="beta">Beta</span>
     </a>
     <nav class="nav-links" aria-label="Main">
-      <a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="/pricing">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="/journal">Journal</a>
+      <a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/journal">Journal</a>
     </nav>
     <div class="nav-end">
       <button class="icon-btn" id="theme" type="button" aria-label="Switch between light and dark"><svg class="ico moon"><use href="#i-moon"/></svg><svg class="ico sun"><use href="#i-sun"/></svg></button>
       <details class="menu"><summary class="icon-btn" aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></summary>
-        <div class="menu-pop"><a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="/pricing">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="/journal">Journal</a></div>
+        <div class="menu-pop"><a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/journal">Journal</a></div>
       </details>
       <a class="btn btn-go" href="https://app.konteks.io/" aria-label="Open the app"><span class="long">Open the app</span><svg class="ico"><use href="#i-out"/></svg></a>
     </div>
@@ -1160,7 +1170,7 @@ bob    tty1</pre></div>
   <div class="wrap">
     <div class="sec-h">
       <h2 id="h-2026">The same work, done differently.</h2>
-      <p>A normal week used to fill up with work around the work. Scroll through it: each part goes to an agent, runs in the background, and the hours come back to the team.</p>
+      <p>A normal week fills up with work around the work. Scroll, and each chore goes to an agent while the hours come back to the team.</p>
     </div>
     <div class="week" id="week">
       <div class="cal" aria-hidden="true">
@@ -1169,12 +1179,12 @@ bob    tty1</pre></div>
         <div class="cal-b">
           <div class="hours"><span>9:00</span><span>11:00</span><span>13:00</span><span>15:00</span><span class="nt">3 a.m.</span></div>
           <div class="grid"></div>
-          <div class="handoff" aria-hidden="true"><span>Handed off Mon</span></div>
+          <div class="handoff" aria-hidden="true"><span>Handed off</span></div>
           <div class="blk" data-i="0" data-h="2" style="--c:2;--r1:2;--r2:6"><b>Estimation meetings</b><small>Mon, 10:00 to 12:00</small><span class="ag"><svg class="ico"><use href="#i-note"/></svg>Plan in minutes</span><span class="free">2 h back</span></div>
-          <div class="blk" data-i="1" data-h="3" style="--c:3;--r1:9;--r2:15"><b>Code review queues</b><small>Tue afternoon</small><span class="ag"><svg class="ico"><use href="#i-eye"/></svg>Second agent</span><span class="free">3 h back</span></div>
-          <div class="blk" data-i="2" data-h="3.5" style="--c:5;--r1:1;--r2:8"><b>Manual test passes</b><small>Thu morning</small><span class="ag"><svg class="ico"><use href="#i-pointer"/></svg>Browser agent</span><span class="free">3.5 h back</span></div>
-          <div class="blk night" data-i="3" data-h="1" style="--c:4;--r1:18;--r2:20"><b>On-call at 3 a.m.</b><span class="ag"><svg class="ico"><use href="#i-pulse"/></svg>Agent on watch</span><span class="free">1 h back</span></div>
-          <div class="blk" data-i="4" data-h="2" style="--c:6;--r1:12;--r2:16"><b>Status reports</b><small>Fri, 15:00</small><span class="ag"><svg class="ico"><use href="#i-receipt"/></svg>The record</span><span class="free">2 h back</span></div>
+          <div class="blk" data-i="1" data-h="3" style="--c:3;--r1:9;--r2:15"><b>Code review queues</b><small>Tue afternoon</small><span class="ag"><svg class="ico"><use href="#i-eye"/></svg>Agent review</span><span class="free">3 h back</span></div>
+          <div class="blk" data-i="2" data-h="3.5" style="--c:5;--r1:1;--r2:8"><b>Manual test passes</b><small>Thu morning</small><span class="ag"><svg class="ico"><use href="#i-pointer"/></svg>Browser test</span><span class="free">3.5 h back</span></div>
+          <div class="blk night" data-i="3" data-h="1" style="--c:4;--r1:18;--r2:20"><b>On-call at 3 a.m.</b><span class="ag"><svg class="ico"><use href="#i-pulse"/></svg>On watch</span><span class="free">1 h back</span></div>
+          <div class="blk" data-i="4" data-h="2" style="--c:6;--r1:12;--r2:16"><b>Status reports</b><small>Fri, 15:00</small><span class="ag"><svg class="ico"><use href="#i-receipt"/></svg>From the record</span><span class="free">2 h back</span></div>
         </div>
       </div>
       <ol class="now-list" role="table" aria-label="What is gone and what does that job now">
@@ -1185,10 +1195,10 @@ bob    tty1</pre></div>
         <li data-i="4" role="row"><s role="cell">Status reports, 2 h</s><span role="cell">The record is the report.</span></li>
       </ol>
       <div class="week-sum" aria-live="polite">
-        <p class="ws-k">A week of work around the work, handed off on Monday morning.</p>
-        <p class="ws-n"><b class="tab">11.5 h</b> back to the team</p>
-        <p class="ws-d">People spend that time on what agents cannot do: the vision, the constraints, the yes, and judging the evidence.</p>
-        <p class="ws-f"><b>How this example is counted.</b> The hours are the meeting, review, testing, on-call and reporting time in this sample calendar that people no longer spend. How long the agents take depends on the work: Konteks quotes every run before it starts, and its receipt records what it actually took.</p>
+        <p class="ws-k">Five chores, handed to agents on Monday morning.</p>
+        <p class="ws-n"><b class="tab">11.5 h</b> back to the team this week</p>
+        <p class="ws-d">Time for what agents cannot do: the vision, the constraints, the yes, and judging the evidence.</p>
+        <p class="ws-f"><b>How we counted.</b> 11.5 h is the meeting, review, testing, on-call and reporting time in this sample week. How long an agent takes depends on the work: each run is quoted before it starts, and its receipt records what it took.</p>
       </div>
       <div class="week-meter" aria-hidden="true"><i><b></b></i><span>Keep scrolling</span></div>
     </div>
@@ -1216,7 +1226,7 @@ bob    tty1</pre></div>
   </div>
 </section>
 
-<section class="sec" id="workflow" aria-labelledby="h-how" style="padding-bottom:0">
+<section class="sec" id="workflow" data-rise aria-labelledby="h-how" style="padding-bottom:0">
   <div class="wrap">
     <h2 class="h2" id="h-how" data-px=".05" style="max-width:19ch">Write a note. Say yes to the plan. Accept tested pull requests and a receipt.</h2>
     <div class="how-notes">
@@ -1234,7 +1244,7 @@ bob    tty1</pre></div>
   </div>
 </section>
 
-<section class="sec" id="record" aria-labelledby="h-co">
+<section class="sec" id="record" data-rise aria-labelledby="h-co">
   <div class="wrap">
     <div class="sec-h"><h2 id="h-co" data-px=".05">Many notes. Many agents. One record.</h2><p>Every team writes notes and runs agents. It all lands in one record, under the same rules.</p></div>
     <div class="merge" id="merge">
@@ -1335,7 +1345,7 @@ bob    tty1</pre></div>
  </div>
 </section>
 
-<section class="sec moss" id="agents" aria-labelledby="h-agents">
+<section class="sec moss" id="agents" data-rise aria-labelledby="h-agents">
   <div class="wrap">
     <div class="sec-h"><h2 id="h-agents" data-px=".05">Five agents. Your own computer. One set of rules.</h2><p>Konteks speaks ACP, the Agent Client Protocol, so the agent your engineers already use connects as it is. No agent runs on a Konteks server.</p></div>
     <div class="agents-g">
@@ -1370,12 +1380,12 @@ bob    tty1</pre></div>
     </div>
     <div class="agents-end">
       <p>Your provider bills you. Never marked up. Secrets never reach a prompt, a screenshot, or a log.</p>
-      <div><a class="lnk" href="https://konteks.io/docs/#mcp">Connect through MCP <svg class="ico"><use href="#i-arrow"/></svg></a><a class="lnk" href="/security">Security <svg class="ico"><use href="#i-arrow"/></svg></a><a class="lnk" href="/pricing">Pricing <svg class="ico"><use href="#i-arrow"/></svg></a></div>
+      <div><a class="lnk" href="/docs#mcp">Connect through MCP <svg class="ico"><use href="#i-arrow"/></svg></a><a class="lnk" href="/security">Security <svg class="ico"><use href="#i-arrow"/></svg></a><a class="lnk" href="/pricing">Pricing <svg class="ico"><use href="#i-arrow"/></svg></a></div>
     </div>
   </div>
 </section>
 
-<section class="sec" id="enablement" aria-labelledby="h-learn">
+<section class="sec" id="enablement" data-rise aria-labelledby="h-learn">
   <div class="wrap">
     <div class="sec-h"><h2 id="h-learn" data-px=".05">The work changed. So does how we learn it.</h2><p>Working with agents is a skill of its own, and each role learns a different part of it.</p></div>
     <div class="learn2">
@@ -1398,7 +1408,7 @@ bob    tty1</pre></div>
   </div>
 </section>
 
-<section class="jsec" id="journal" aria-labelledby="h-journal">
+<section class="jsec" id="journal" data-rise aria-labelledby="h-journal">
   <div class="wrap">
     <div class="sec-h"><h2 id="h-journal">Notes from the part where the product becomes real.</h2><p>Launch notes, engineering scars, and the decisions behind software that remembers. From the Konteks journal.</p></div>
     <div class="jgrid">
@@ -1415,7 +1425,7 @@ bob    tty1</pre></div>
   </div>
 </section>
 
-<section class="close" aria-labelledby="h-close">
+<section class="close" data-rise aria-labelledby="h-close">
   <div class="wrap"><h2 id="h-close" data-px=".05">Unlearn the old way. <span>Learn to work with agents.</span></h2></div>
   <div class="wrap close-bar">
     <div class="close-acts">
@@ -1436,8 +1446,8 @@ bob    tty1</pre></div>
         <a class="mail" href="mailto:hello@konteks.io">hello@konteks.io</a>
       </div>
       <div><h3>Product</h3><ul><li><a href="#product">Product overview</a></li><li><a href="#workflow">How it works</a></li><li><a href="#sessions">Four kinds of session</a></li><li><a href="#enablement">Training &amp; onboarding</a></li><li><a href="/pricing">Pricing</a></li><li><a href="#connect">Connect your agent</a></li><li><a href="https://app.konteks.io/">Open the app ↗</a></li></ul></div>
-      <div><h3>Resources</h3><ul><li><a href="https://konteks.io/docs/#app">Konteks</a></li><li><a href="https://konteks.io/docs/#mcp">MCP</a></li><li><a href="https://konteks.io/docs/#api-reference">API reference</a></li><li><a href="/journal">Journal</a></li></ul></div>
-      <div><h3>Company</h3><ul><li><a href="https://konteks.io/about/">About</a></li><li><a href="https://konteks.io/contact/">Contact</a></li><li><a href="/security">Security</a></li><li><a href="https://konteks.io/privacy/">Privacy</a></li><li><a href="https://konteks.io/terms/">Terms</a></li></ul></div>
+      <div><h3>Resources</h3><ul><li><a href="/docs#app">Konteks</a></li><li><a href="/docs#mcp">MCP</a></li><li><a href="/docs#api-reference">API reference</a></li><li><a href="/journal">Journal</a></li></ul></div>
+      <div><h3>Company</h3><ul><li><a href="/about">About</a></li><li><a href="/contact">Contact</a></li><li><a href="/security">Security</a></li><li><a href="/privacy">Privacy</a></li><li><a href="/terms">Terms</a></li></ul></div>
     </div>
     <div class="foot-b"><span>Made by <a href="https://refactory.id/">Refactory ↗</a>, the team behind Konteks.</span><span>© 2026 Konteks · konteks.io</span></div>
   </div>
@@ -1595,16 +1605,19 @@ const gatherTargets = () => {
   const handoff = $(".handoff", week);
   week.classList.remove("gather");
   const hb = handoff.getBoundingClientRect();
+  let y = hb.top + 30, total = 0;
+  blks.forEach(b => { const ag = $(".ag", b); ag.style.setProperty("--gw", (hb.width - 12) + "px"); ag.style.width = (hb.width - 12) + "px"; });
   blks.forEach((b, i) => {
     const ag = $(".ag", b); ag.style.removeProperty("--gx"); ag.style.removeProperty("--gy");
     const a = ag.getBoundingClientRect();
     ag.style.setProperty("--gx", (hb.left + 6 - a.left) + "px");
-    ag.style.setProperty("--gy", (hb.top + 26 + i * (a.height + 4) - a.top) + "px");
-    ag.style.setProperty("--gw", (hb.width - 12) + "px");
+    ag.style.setProperty("--gy", (y - a.top) + "px");
+    y += a.height + 4; total += a.height + 4;
   });
+  blks.forEach(b => { $(".ag", b).style.width = ""; });
   const rowPx = parseFloat(getComputedStyle($(".cal-b", week)).gridTemplateRows) || 26;
   const chipH = $(".ag", blks[0]).getBoundingClientRect().height || 30;
-  week.style.setProperty("--he", Math.ceil((26 + blks.length * (chipH + 4) + 8) / rowPx) + 1);
+  week.style.setProperty("--he", Math.min(17, Math.ceil((30 + total + 8) / rowPx) + 1));
   wGathered = true;
 };
 const weekDraw = () => {
@@ -1904,9 +1917,23 @@ if (!RM && matchMedia("(pointer:fine)").matches) {
   hero.addEventListener("pointerleave", () => { sh.style.transform = ""; });
 }
 
+/* ============ section transitions: each section's content rises in, moss bands lift as they arrive ============ */
+const rises = RM ? [] : $$("[data-rise]").map(sec => [sec, $(":scope > .wrap", sec), sec.classList.contains("moss")]);
+const riseDraw = () => {
+  const vh = innerHeight;
+  for (const [sec, wrap, moss] of rises) {
+    const r = sec.getBoundingClientRect();
+    if (r.top > vh || r.bottom < 0) continue;
+    const enter = clamp((vh - r.top) / (vh * .75));        // 0 when the top touches the fold, 1 well inside
+    const leave = clamp((-r.bottom + vh * .55) / (vh * .55)); // starts as the bottom passes the upper half
+    if (wrap) wrap.style.transform = `translate3d(0,${((1 - ease(enter)) * 90 - leave * 40).toFixed(1)}px,0)`;
+    if (moss) sec.style.setProperty("--lift", ((1 - ease(enter)) * 64).toFixed(1) + "px");
+  }
+};
+
 /* ============ scroll + resize ============ */
 let raf = 0;
-const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); pxDraw(); };
+const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); pxDraw(); riseDraw(); };
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
 addEventListener("resize", () => { requestAnimationFrame(relayout); });
 const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); onScroll(); };

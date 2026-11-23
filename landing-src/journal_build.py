@@ -35,7 +35,7 @@ a:hover .cv-shot{transform:translate(-6px,-6px)}
 def landing_section():
     f, rest = ENTRIES[0], ENTRIES[1:4]
     rows = "".join(f'''<li><a class="jrow" href="/journal/{e["slug"]}"><span class="jthumb">{cover(e,"thumb")}</span><span class="jrow-t"><span class="jmeta"><time datetime="{e["iso"]}">{e["date"]}</time><span class="jtag">{e["tag"]}</span></span><b>{esc(e["title"])}</b><span class="jdek">{esc(e["dek"])}</span></span></a></li>''' for e in rest)
-    return f'''<section class="jsec" id="journal" aria-labelledby="h-journal">
+    return f'''<section class="jsec" id="journal" data-rise aria-labelledby="h-journal">
   <div class="wrap">
     <div class="sec-h"><h2 id="h-journal">Notes from the part where the product becomes real.</h2><p>Launch notes, engineering scars, and the decisions behind software that remembers. From the Konteks journal.</p></div>
     <div class="jgrid">
@@ -95,7 +95,7 @@ def page(title, desc, body, extra_css, js, active="journal"):
     foot = land[land.index("/* footer */"):land.index("/* ===== motion additions")]
     sym = land[land.index('<svg width="0" height="0"'):land.index("</svg>", land.index('<svg width="0" height="0"')) + 6]
     navh = land[land.index('<header class="nav"'):land.index("</header>") + 9]
-    footh = land[land.index('<footer class="foot moss">'):land.index("</footer>") + 9]
+    fs = land.index('<footer class="foot moss">'); footh = land[fs:land.index("</footer>", fs) + 9]
     for a in ("product", "workflow", "sessions", "enablement", "connect", "top"):
         navh = navh.replace(f'href="#{a}"', f'href="/landingpage#{a}"'); footh = footh.replace(f'href="#{a}"', f'href="/landingpage#{a}"')
     navh = navh.replace(f'href="/{active}"', f'href="/{active}" aria-current="page"', 1)

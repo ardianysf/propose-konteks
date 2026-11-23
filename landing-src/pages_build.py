@@ -101,7 +101,7 @@ def pricing():
 <section class="notes-sec" aria-labelledby="h-notes">
   <div class="wrap notes-g">
     <h2 id="h-notes">Pricing notes</h2>
-    <div><ul class="notes">{notes}</ul><a class="lnk" href="https://konteks.io/terms/">See the Terms <svg class="ico"><use href="#i-arrow"/></svg></a></div>
+    <div><ul class="notes">{notes}</ul><a class="lnk" href="/terms">See the Terms <svg class="ico"><use href="#i-arrow"/></svg></a></div>
   </div>
 </section>
 

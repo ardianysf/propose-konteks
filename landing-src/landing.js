@@ -150,16 +150,19 @@ const gatherTargets = () => {
   const handoff = $(".handoff", week);
   week.classList.remove("gather");
   const hb = handoff.getBoundingClientRect();
+  let y = hb.top + 30, total = 0;
+  blks.forEach(b => { const ag = $(".ag", b); ag.style.setProperty("--gw", (hb.width - 12) + "px"); ag.style.width = (hb.width - 12) + "px"; });
   blks.forEach((b, i) => {
     const ag = $(".ag", b); ag.style.removeProperty("--gx"); ag.style.removeProperty("--gy");
     const a = ag.getBoundingClientRect();
     ag.style.setProperty("--gx", (hb.left + 6 - a.left) + "px");
-    ag.style.setProperty("--gy", (hb.top + 26 + i * (a.height + 4) - a.top) + "px");
-    ag.style.setProperty("--gw", (hb.width - 12) + "px");
+    ag.style.setProperty("--gy", (y - a.top) + "px");
+    y += a.height + 4; total += a.height + 4;
   });
+  blks.forEach(b => { $(".ag", b).style.width = ""; });
   const rowPx = parseFloat(getComputedStyle($(".cal-b", week)).gridTemplateRows) || 26;
   const chipH = $(".ag", blks[0]).getBoundingClientRect().height || 30;
-  week.style.setProperty("--he", Math.ceil((26 + blks.length * (chipH + 4) + 8) / rowPx) + 1);
+  week.style.setProperty("--he", Math.min(17, Math.ceil((30 + total + 8) / rowPx) + 1));
   wGathered = true;
 };
 const weekDraw = () => {
@@ -459,9 +462,23 @@ if (!RM && matchMedia("(pointer:fine)").matches) {
   hero.addEventListener("pointerleave", () => { sh.style.transform = ""; });
 }
 
+/* ============ section transitions: each section's content rises in, moss bands lift as they arrive ============ */
+const rises = RM ? [] : $$("[data-rise]").map(sec => [sec, $(":scope > .wrap", sec), sec.classList.contains("moss")]);
+const riseDraw = () => {
+  const vh = innerHeight;
+  for (const [sec, wrap, moss] of rises) {
+    const r = sec.getBoundingClientRect();
+    if (r.top > vh || r.bottom < 0) continue;
+    const enter = clamp((vh - r.top) / (vh * .75));        // 0 when the top touches the fold, 1 well inside
+    const leave = clamp((-r.bottom + vh * .55) / (vh * .55)); // starts as the bottom passes the upper half
+    if (wrap) wrap.style.transform = `translate3d(0,${((1 - ease(enter)) * 90 - leave * 40).toFixed(1)}px,0)`;
+    if (moss) sec.style.setProperty("--lift", ((1 - ease(enter)) * 64).toFixed(1) + "px");
+  }
+};
+
 /* ============ scroll + resize ============ */
 let raf = 0;
-const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); pxDraw(); };
+const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); pxDraw(); riseDraw(); };
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
 addEventListener("resize", () => { requestAnimationFrame(relayout); });
 const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); onScroll(); };
