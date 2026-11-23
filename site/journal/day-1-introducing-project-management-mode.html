@@ -160,6 +160,20 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
 @media (prefers-color-scheme:dark){html:not([data-theme="light"]) .sun{display:block}html:not([data-theme="light"]) .moon{display:none}}
 @media (max-width:1100px){.nav-links{display:none}.menu{display:block}}
 @media (max-width:400px){.nav .btn .long{display:none}.nav .btn{padding:0 12px}}
+.menu-theme{display:none}
+@media (max-width:560px){
+  .nav .wrap{gap:10px}
+  .brand{gap:8px;font-size:17px}.brand-mark{width:36px}
+  #theme{display:none}
+  .menu-pop{position:fixed;left:16px;right:16px;top:68px;width:auto;max-width:none}
+  .menu-theme{display:flex;align-items:center;gap:10px;padding:11px 12px;border:0;border-radius:8px;background:none;color:inherit;font:500 15px/1.2 var(--sans);text-align:left;cursor:pointer;border-top:1px solid var(--line);margin-top:4px}
+  .menu-theme:hover{background:var(--hover)}
+  .nav .btn{padding:0 14px;font-size:13.5px;gap:0}
+  .nav .btn .long{display:inline}
+  .nav .btn .ico{display:none}
+}
+@media (max-width:380px){.beta{display:none}}
+html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
 
 
 /* footer */
@@ -330,7 +344,7 @@ html[data-theme="dark"] .byline img{filter:invert(.92) hue-rotate(180deg)}
     <div class="nav-end">
       <button class="icon-btn" id="theme" type="button" aria-label="Switch between light and dark"><svg class="ico moon"><use href="#i-moon"/></svg><svg class="ico sun"><use href="#i-sun"/></svg></button>
       <details class="menu"><summary class="icon-btn" aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></summary>
-        <div class="menu-pop"><a href="/#product">Product</a><a href="/#workflow">How it works</a><a href="/#sessions">Four kinds of session</a><a href="/#enablement">Enablement</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/journal">Journal</a></div>
+        <div class="menu-pop"><a href="/#product">Product</a><a href="/#workflow">How it works</a><a href="/#sessions">Four kinds of session</a><a href="/#enablement">Enablement</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/journal">Journal</a><button class="menu-theme" type="button" data-theme-alt><svg class="ico moon"><use href="#i-moon"/></svg><svg class="ico sun"><use href="#i-sun"/></svg>Switch theme</button></div>
       </details>
       <a class="btn btn-go" href="/login" aria-label="Open the app"><span class="long">Open the app</span><svg class="ico"><use href="#i-arrow"/></svg></a>
     </div>
@@ -383,6 +397,7 @@ html[data-theme="dark"] .byline img{filter:invert(.92) hue-rotate(180deg)}
 
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 $("#theme").onclick = () => { const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; r.dataset.theme = dark ? "light" : "dark"; try { localStorage.setItem("kx-theme", r.dataset.theme); } catch (e) {} };
+$$("[data-theme-alt]").forEach(b => b.onclick = () => $("#theme").onclick());
 $$(".menu-pop a").forEach(a => a.addEventListener("click", () => $(".menu").removeAttribute("open")));
 const nav = $("#nav"); const stuck = () => nav.classList.toggle("stuck", scrollY > 8); addEventListener("scroll", stuck, { passive: true }); stuck();
 

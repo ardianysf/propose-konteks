@@ -7,12 +7,17 @@ const smooth = t => t * t * (3 - 2 * t);
 const seen = (el, cb, th = .25) => new IntersectionObserver(es => es.forEach(e => cb(e.isIntersecting)), { threshold: th }).observe(el);
 
 /* theme */
-$("#theme").onclick = () => {
+const flipTheme = () => {
   const r = document.documentElement;
   const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
   r.dataset.theme = dark ? "light" : "dark";
   try { localStorage.setItem("kx-theme", r.dataset.theme); } catch (e) {}
 };
+$("#theme").onclick = flipTheme;
+$$("[data-theme-alt]").forEach(b => b.onclick = flipTheme);
+/* record on a phone: the rail fills as the teams scroll into the record */
+const railDraw = () => { if (innerWidth > 900) return; const r = merge.getBoundingClientRect(); const p = Math.min(1, Math.max(0, (innerHeight * .8 - r.top) / (r.height * .9))); merge.style.setProperty("--railp", (RM ? 100 : p * 100).toFixed(1) + "%"); };
+
 
 /* nav edge, menu closes on pick */
 const nav = $("#nav");
@@ -478,7 +483,7 @@ const riseDraw = () => {
 
 /* ============ scroll + resize ============ */
 let raf = 0;
-const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); pxDraw(); riseDraw(); };
+const onScroll = () => { if (typeof railDraw === "function") railDraw(); nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); pxDraw(); riseDraw(); };
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
 addEventListener("resize", () => { requestAnimationFrame(relayout); });
 const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); onScroll(); };

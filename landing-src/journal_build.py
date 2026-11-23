@@ -139,6 +139,7 @@ def page(title, desc, body, extra_css, js, active="journal"):
 COMMON_JS = r'''
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
 $("#theme").onclick = () => { const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; r.dataset.theme = dark ? "light" : "dark"; try { localStorage.setItem("kx-theme", r.dataset.theme); } catch (e) {} };
+$$("[data-theme-alt]").forEach(b => b.onclick = () => $("#theme").onclick());
 $$(".menu-pop a").forEach(a => a.addEventListener("click", () => $(".menu").removeAttribute("open")));
 const nav = $("#nav"); const stuck = () => nav.classList.toggle("stuck", scrollY > 8); addEventListener("scroll", stuck, { passive: true }); stuck();
 '''
