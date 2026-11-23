@@ -1141,6 +1141,8 @@
 .kx .cx:focus-within{border-color:var(--accent-strong);box-shadow:0 0 0 3px var(--focus)}
 .kx .cx textarea{border:0;background:none;resize:none;min-height:24px;max-height:200px;padding:4px 6px;font:inherit;font-size:var(--t13);line-height:1.5;outline:none;width:100%}
 .kx .cx textarea::placeholder{color:var(--ink-3)}
+.kx .textarea.textarea-cx{min-height:96px;max-height:240px;padding:10px 12px;border-radius:var(--r10);resize:none;font-size:var(--t13);line-height:1.5;overflow-y:auto}
+.kx .textarea.textarea-cx:focus{border-color:var(--accent-strong);box-shadow:0 0 0 3px var(--focus)}
 .kx .cx-bar{display:flex;align-items:center;gap:4px}
 .kx .cx-slash{color:var(--ink-2)}
 .kx .cx-slash .kbd{margin-left:2px}
@@ -1835,6 +1837,7 @@
 .kx .cx textarea,.kx .compose textarea{min-height:24px;max-height:min(200px,30vh);padding:2px 0;font-size:var(--t13);line-height:1.5;overflow-y:auto}
 .kx .cx .cx-bar{gap:2px;margin-left:-6px}
 .kx .compose>.btn{justify-self:end}
+.kx .textarea.textarea-cx{padding:10px 14px;border-radius:20px;font-size:var(--t13);max-height:min(240px,30vh)}
 .kx .tl-cmt .compose,.kx .cmt-new .compose{grid-template-columns:minmax(0,1fr) auto auto;align-items:center}
 .kx .tl-cmt .compose textarea,.kx .cmt-new .compose textarea{grid-column:1/-1}
 .kx .tl-cmt .compose [data-cx],.kx .cmt-new .compose [data-cx]{grid-column:2}

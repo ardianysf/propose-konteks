@@ -103,7 +103,7 @@ function approveDialog(onOk) {
 }
 function newInitiative(pre = S.sys) {
   const d = modal("New initiative", `
-    <div class="field"><label for="niBody">What is this initiative about?</label><textarea id="niBody" class="textarea" data-autosize rows="5" placeholder="The outcome you want, what is in scope, and how you'll know it's done"></textarea><span class="hint">Konteks names the initiative from the plan it writes.</span></div>
+    <div class="field"><label for="niBody">What is this initiative about?</label><textarea id="niBody" class="textarea textarea-cx" data-autosize rows="4" placeholder="The outcome you want, what is in scope, and how you'll know it's done"></textarea><span class="hint">Konteks names the initiative from the plan it writes.</span></div>
     <div class="field"><span class="flabel" id="niSysL">Software System</span><div class="combo" id="niSys" style="width:100%"><button class="btn combo-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="niSysL" ${pre ? `data-val="${esc(sysById[pre].name)}"` : ""}><span class="${pre ? "" : "ph"}">${pre ? esc(sysById[pre].name) : "Choose a System"}</span>${ic("chevrons-up-down")}</button></div></div>
     <div><button class="btn btn-ghost btn-sm" type="button" id="niAttach">${ic("paperclip")}Attach meeting transcript</button><div class="atts" id="niAtts" style="margin-top:6px"></div><input type="file" id="niFile" accept=".txt,.md,.vtt,.pdf" hidden></div>`,
     `<button class="btn" data-close>Cancel</button><button class="btn btn-primary" id="niStart" disabled>Start</button>`,
