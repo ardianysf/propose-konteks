@@ -441,6 +441,8 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .pin-meter i{width:120px;height:2px;background:var(--moss-line-2);border-radius:2px;overflow:hidden;position:relative}
 .pin-meter i b{position:absolute;inset:0;background:var(--live);transform-origin:left;transform:scaleX(var(--pp,0))}
 .h-copy{padding:clamp(28px,3.6vw,56px) 0 clamp(32px,3.4vw,48px)}
+/* On a phone the headline needs air under the nav, so it reads as the start of the page, not a continuation of the bar. */
+@media (max-width:620px){.h-copy{padding-top:64px}}
 .h-copy h1{font-size:clamp(2.6rem,1.4rem + 3.3vw,4.25rem)}
 .lede{margin-top:20px;font-size:clamp(16.5px,.95rem + .2vw,18.5px)}
 .h-act{padding:32px 0 28px}
