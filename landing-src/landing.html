@@ -735,10 +735,10 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .kpath{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1}
 .kpath .base{fill:none;stroke:var(--accent-strong);stroke-width:1.6;stroke-dasharray:4 5}
 .kpath .tok{fill:var(--live);stroke:var(--paper);stroke-width:3}
-.knode{position:absolute;z-index:2;transform:translate(-50%,-50%);width:min(150px,22%);padding:10px 12px;border-radius:14px;background:var(--paper);border:1px solid var(--line-strong);box-shadow:var(--shadow-1);font-size:12.5px;color:var(--ink-2);animation:pop .5s var(--ease) both;animation-delay:calc(var(--k)*90ms)}
+.knode{position:absolute;z-index:2;transform:translate(-50%,-50%);box-sizing:border-box;padding:10px 12px;border-radius:14px;background:var(--paper);border:1px solid var(--line-strong);box-shadow:var(--shadow-1);font-size:12.5px;color:var(--ink-2);animation:pop .5s var(--ease) both;animation-delay:calc(var(--k)*90ms)}
 .knode b{display:flex;align-items:center;gap:6px;font:600 13.5px/1.2 var(--sans);color:var(--ink);margin-bottom:3px}
 .knode b svg{color:var(--accent);flex:none}
-.knode.a{background:rgba(238,241,232,.06);border-color:var(--moss-line-2);color:var(--on-moss-2)}
+.knode.a{background:color-mix(in srgb,var(--on-moss) 9%,var(--moss));border-color:var(--moss-line-2);color:var(--on-moss-2)}
 .knode.a b{color:var(--on-moss)}.knode.a b svg{color:var(--live)}
 .knode.y{width:auto;padding:10px 18px;border-radius:999px;background:var(--accent);border-color:var(--accent);color:var(--on-accent);font:700 15px/1 var(--display)}
 .knode.hot{box-shadow:0 0 0 3px var(--accent-fill),var(--shadow-2)}
@@ -751,39 +751,47 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   .kp-t p{font-size:15px}.kp-t .eg{display:none}
   .kdia{height:clamp(300px,46vh,420px);background:linear-gradient(90deg,var(--surface) 0 50%,var(--moss) 50% 100%)}
   .kline{left:50%;right:auto;top:0;bottom:0;width:1px;height:auto}
-  .knode{width:42%;padding:8px 9px;font-size:11.5px}
+  .knode{padding:8px 10px;font-size:11.5px}
   .knode b{font-size:12.5px}
   .js .kinds-track{height:calc(100svh + 240svh)}
   .js .kinds-stage{align-items:flex-start}
   .kinds-stage .sec-h p{display:none}
 }
 
-/* journal: its own band */
-.journal-sec{padding:0 0 var(--sec)}
-.jcard{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:clamp(24px,4vw,56px);align-items:center;padding:clamp(28px,4vw,48px);border-radius:28px;background:var(--accent-soft);border:1px solid var(--line-accent);text-decoration:none;transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
-.jcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
-.jday{font:640 clamp(64px,3rem + 4vw,128px)/.85 var(--display);letter-spacing:-.05em;color:var(--accent)}
-.jbody{display:grid;gap:12px}
-.jmeta{font-size:14px;color:var(--ink-3)}
-.jbody h2{font-size:clamp(26px,1.2rem + 1.6vw,44px);max-width:22ch}
-.jlink{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--accent-ink);font-size:15px}
-.jcard:hover .jlink svg{transform:translateX(4px)}
-.jlink svg{transition:transform .3s var(--ease)}
-.jart{position:relative;width:220px;height:150px}
-.jn{position:absolute;left:0;top:0;width:170px;padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-2);display:grid;gap:7px;transform:rotate(-4deg);transition:transform .5s var(--ease)}
-.jn b{font:600 13px/1 var(--sans)}
-.jn i{height:6px;border-radius:3px;background:var(--line)}
-.jn i:nth-child(3){width:80%}.jn i:nth-child(4){width:60%}
-.jyes{position:absolute;right:6px;bottom:8px;background:var(--accent);color:var(--on-accent);font:700 15px/1 var(--display);padding:11px 20px;border-radius:999px;box-shadow:0 0 0 6px var(--accent-soft);transition:transform .5s var(--ease)}
-.jcard:hover .jn{transform:rotate(-1deg) translateY(-4px)}.jcard:hover .jyes{transform:scale(1.06)}
-.enable-end{padding-bottom:clamp(64px,8vw,112px)}
-@media (max-width:900px){.jcard{grid-template-columns:1fr}.jart{display:none}}
+/*@@JCSS@@*/
+/* ===== round 6: week pinned with a hold, sessions diagram, journal ===== */
+.week-sec{padding-bottom:0}
+.week-track.wpin{height:calc(var(--wh,100svh) + 240svh)}
+.wpin .week-stick{position:sticky;top:var(--wt,64px)}
+@media (min-width:901px){.week-sec .cal-b{grid-template-rows:repeat(16,22px) 12px repeat(3,22px)}.week-sec .hours{grid-template-rows:repeat(4,88px) 12px 66px}.week-sec .grid{background:repeating-linear-gradient(var(--line) 0 1px,transparent 1px 44px)}.week-sec .grid::after{top:calc(16*22px + 5px)}.week-sec .sec-h p{font-size:16.5px}}
+.week-stick > .wrap{padding-bottom:clamp(40px,5vw,72px)}
+.week{position:relative}
+.week-sum{grid-column:2;grid-row:1;align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:clamp(24px,3vw,36px);border-radius:20px;background:var(--moss);color:var(--on-moss);opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .6s var(--ease),transform .7s var(--ease)}
+.week.done .week-sum{opacity:1;transform:none;pointer-events:auto}
+.week.done .now-list{opacity:0;transform:translateY(-12px);pointer-events:none}
+.now-list{grid-column:2;grid-row:1;transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.ws-k{font:560 clamp(20px,1rem + .6vw,25px)/1.3 var(--display);letter-spacing:-.015em}
+.ws-n{font-size:16px;color:var(--on-moss-2)}
+.ws-n b{display:block;font:640 clamp(56px,2.5rem + 3vw,96px)/.95 var(--display);letter-spacing:-.04em;color:var(--live);margin-bottom:6px}
+.ws-d{font-size:16px;color:var(--on-moss-2);max-width:42ch}
+.ws-f{margin-top:6px;padding-top:14px;border-top:1px solid var(--moss-line);font-size:13px;line-height:1.55;color:var(--on-moss-2)}
+.ws-f b{color:var(--on-moss);font-weight:600}
+.handoff{grid-column:2;grid-row:1/3;z-index:0;border-radius:10px;border:1.5px solid var(--accent-strong);background:var(--accent-soft);opacity:0;transform:scaleY(.4);transform-origin:top;transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.handoff span{display:block;padding:4px 8px;font:600 11.5px/1.2 var(--sans);color:var(--accent-ink)}
+.week.gather .handoff{opacity:1;transform:none}
+.week.gather .blk{overflow:visible;z-index:3}
+.week.gather .blk .ag{transform:translate(var(--gx,0),var(--gy,0));transition:transform .9s var(--ease),opacity .4s;z-index:4;right:auto;width:var(--gw,auto)}
+.week.gather .blk .free{opacity:.9}
+.week.gather .handoff{grid-row:1/var(--he,4)}
+.week-meter{position:absolute;right:0;bottom:-34px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3)}
+.week-meter i{width:120px;height:2px;background:var(--line);border-radius:2px;overflow:hidden;position:relative}
+.week-meter i b{position:absolute;inset:0;background:var(--accent-strong);transform-origin:left;transform:scaleX(var(--wk,0))}
+.week.done .week-meter{opacity:0}
+.week-track:not(.wpin) .week-meter{display:none}
+@media (min-width:901px) and (max-height:860px){.week-sec .cal-b{grid-template-rows:repeat(16,19px) 10px repeat(3,19px)}.week-sec .hours{grid-template-rows:repeat(4,76px) 10px 57px}.week-sec .grid{background:repeating-linear-gradient(var(--line) 0 1px,transparent 1px 38px)}.week-sec .grid::after{top:calc(16*19px + 4px)}.week-sec .sec-h h2{font-size:2.5rem}.week-sec .blk small{display:none}.now-list li{padding:12px 16px}.week-stick > .wrap{padding-bottom:40px}.week{margin-top:28px}}
 
-.rlist li > .rule-v.inline,.rlist li > .rules-end{grid-column:2}
-@media (max-width:900px){.rlist li > .rule-v.inline,.rlist li > .rules-end{grid-column:1/-1}}
-.blk.night .free{display:none!important}
-.cal-top{flex-wrap:wrap}
-.kdia{height:clamp(300px,40vh,380px)}
+@media (max-width:900px){.week-sum,.now-list{grid-column:1;grid-row:2}.ws-n b{font-size:56px}}
+.rm .week-sum{opacity:1;transform:none;grid-row:auto}.rm .now-list{opacity:1}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
@@ -825,12 +833,12 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
       Konteks <span class="beta">Beta</span>
     </a>
     <nav class="nav-links" aria-label="Main">
-      <a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="https://konteks.io/pricing/">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="https://konteks.io/blog/">Journal</a>
+      <a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="https://konteks.io/pricing/">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="/journal">Journal</a>
     </nav>
     <div class="nav-end">
       <button class="icon-btn" id="theme" type="button" aria-label="Switch between light and dark"><svg class="ico moon"><use href="#i-moon"/></svg><svg class="ico sun"><use href="#i-sun"/></svg></button>
       <details class="menu"><summary class="icon-btn" aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></summary>
-        <div class="menu-pop"><a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="https://konteks.io/pricing/">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="https://konteks.io/blog/">Journal</a></div>
+        <div class="menu-pop"><a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="https://konteks.io/pricing/">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="/journal">Journal</a></div>
       </details>
       <a class="btn btn-go" href="https://app.konteks.io/" aria-label="Open the app"><span class="long">Open the app</span><svg class="ico"><use href="#i-out"/></svg></a>
     </div>
@@ -961,7 +969,8 @@ bob    tty1</pre></div>
  </div>
 </section>
 
-<section class="sec" id="week-sec" aria-labelledby="h-2026">
+<section class="sec week-sec" id="week-sec" aria-labelledby="h-2026">
+ <div class="week-track" id="weekTrack"><div class="week-stick" id="weekStick">
   <div class="wrap">
     <div class="sec-h">
       <h2 id="h-2026">The same work, done differently.</h2>
@@ -974,6 +983,7 @@ bob    tty1</pre></div>
         <div class="cal-b">
           <div class="hours"><span>9:00</span><span>11:00</span><span>13:00</span><span>15:00</span><span class="nt">3 a.m.</span></div>
           <div class="grid"></div>
+          <div class="handoff" aria-hidden="true"><span>Handed off Mon</span></div>
           <div class="blk" data-i="0" data-h="2" style="--c:2;--r1:2;--r2:6"><b>Estimation meetings</b><small>Mon, 10:00 to 12:00</small><span class="ag"><svg class="ico"><use href="#i-note"/></svg>Plan in minutes</span><span class="free">2 h back</span></div>
           <div class="blk" data-i="1" data-h="3" style="--c:3;--r1:9;--r2:15"><b>Code review queues</b><small>Tue afternoon</small><span class="ag"><svg class="ico"><use href="#i-eye"/></svg>Second agent</span><span class="free">3 h back</span></div>
           <div class="blk" data-i="2" data-h="3.5" style="--c:5;--r1:1;--r2:8"><b>Manual test passes</b><small>Thu morning</small><span class="ag"><svg class="ico"><use href="#i-pointer"/></svg>Browser agent</span><span class="free">3.5 h back</span></div>
@@ -988,8 +998,16 @@ bob    tty1</pre></div>
         <li data-i="3" role="row"><s role="cell">On-call at 3 a.m., 1 h of sleep</s><span role="cell">An agent keeps watch.</span></li>
         <li data-i="4" role="row"><s role="cell">Status reports, 2 h</s><span role="cell">The record is the report.</span></li>
       </ol>
+      <div class="week-sum" aria-live="polite">
+        <p class="ws-k">A week of work around the work, handed off on Monday morning.</p>
+        <p class="ws-n"><b class="tab">11.5 h</b> back to the team</p>
+        <p class="ws-d">People spend that time on what agents cannot do: the vision, the constraints, the yes, and judging the evidence.</p>
+        <p class="ws-f"><b>How this example is counted.</b> The hours are the meeting, review, testing, on-call and reporting time in this sample calendar that people no longer spend. How long the agents take depends on the work: Konteks quotes every run before it starts, and its receipt records what it actually took.</p>
+      </div>
+      <div class="week-meter" aria-hidden="true"><i><b></b></i><span>Keep scrolling</span></div>
     </div>
   </div>
+ </div></div>
 </section>
 
 <section class="sec theory" id="theory" aria-labelledby="h-people">
@@ -1194,19 +1212,7 @@ bob    tty1</pre></div>
   </div>
 </section>
 
-<section class="journal-sec" aria-labelledby="h-journal">
-  <div class="wrap">
-    <a class="jcard" href="https://konteks.io/blog/day-1-introducing-project-management-mode/">
-      <span class="jday" aria-hidden="true">Day 1</span>
-      <span class="jbody">
-        <span class="jmeta">From the journal, August 17, 2026</span>
-        <h2 id="h-journal">Delivery was never the hard part. The plan was.</h2>
-        <span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span>
-      </span>
-      <span class="jart" aria-hidden="true"><span class="jn"><b>Plan</b><i></i><i></i><i></i></span><span class="jyes">Yes</span></span>
-    </a>
-  </div>
-</section>
+<!--@@JOURNAL@@-->
 
 <section class="close" aria-labelledby="h-close">
   <div class="wrap"><h2 id="h-close">Unlearn the old way. <span>Learn to work with agents.</span></h2></div>
@@ -1229,7 +1235,7 @@ bob    tty1</pre></div>
         <a class="mail" href="mailto:hello@konteks.io">hello@konteks.io</a>
       </div>
       <div><h3>Product</h3><ul><li><a href="#product">Product overview</a></li><li><a href="#workflow">How it works</a></li><li><a href="#sessions">Four kinds of session</a></li><li><a href="#enablement">Training &amp; onboarding</a></li><li><a href="https://konteks.io/pricing/">Pricing</a></li><li><a href="#connect">Connect your agent</a></li><li><a href="https://app.konteks.io/">Open the app ↗</a></li></ul></div>
-      <div><h3>Resources</h3><ul><li><a href="https://konteks.io/docs/#app">Konteks</a></li><li><a href="https://konteks.io/docs/#mcp">MCP</a></li><li><a href="https://konteks.io/docs/#api-reference">API reference</a></li><li><a href="https://konteks.io/blog/">Journal</a></li></ul></div>
+      <div><h3>Resources</h3><ul><li><a href="https://konteks.io/docs/#app">Konteks</a></li><li><a href="https://konteks.io/docs/#mcp">MCP</a></li><li><a href="https://konteks.io/docs/#api-reference">API reference</a></li><li><a href="/journal">Journal</a></li></ul></div>
       <div><h3>Company</h3><ul><li><a href="https://konteks.io/about/">About</a></li><li><a href="https://konteks.io/contact/">Contact</a></li><li><a href="https://konteks.io/security/">Security</a></li><li><a href="https://konteks.io/privacy/">Privacy</a></li><li><a href="https://konteks.io/terms/">Terms</a></li></ul></div>
     </div>
     <div class="foot-b"><span>Made by <a href="https://refactory.id/">Refactory ↗</a>, the team behind Konteks.</span><span>© 2026 Konteks · konteks.io</span></div>

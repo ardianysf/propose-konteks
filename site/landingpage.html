@@ -816,10 +816,10 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .kpath{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1}
 .kpath .base{fill:none;stroke:var(--accent-strong);stroke-width:1.6;stroke-dasharray:4 5}
 .kpath .tok{fill:var(--live);stroke:var(--paper);stroke-width:3}
-.knode{position:absolute;z-index:2;transform:translate(-50%,-50%);width:min(150px,22%);padding:10px 12px;border-radius:14px;background:var(--paper);border:1px solid var(--line-strong);box-shadow:var(--shadow-1);font-size:12.5px;color:var(--ink-2);animation:pop .5s var(--ease) both;animation-delay:calc(var(--k)*90ms)}
+.knode{position:absolute;z-index:2;transform:translate(-50%,-50%);box-sizing:border-box;padding:10px 12px;border-radius:14px;background:var(--paper);border:1px solid var(--line-strong);box-shadow:var(--shadow-1);font-size:12.5px;color:var(--ink-2);animation:pop .5s var(--ease) both;animation-delay:calc(var(--k)*90ms)}
 .knode b{display:flex;align-items:center;gap:6px;font:600 13.5px/1.2 var(--sans);color:var(--ink);margin-bottom:3px}
 .knode b svg{color:var(--accent);flex:none}
-.knode.a{background:rgba(238,241,232,.06);border-color:var(--moss-line-2);color:var(--on-moss-2)}
+.knode.a{background:color-mix(in srgb,var(--on-moss) 9%,var(--moss));border-color:var(--moss-line-2);color:var(--on-moss-2)}
 .knode.a b{color:var(--on-moss)}.knode.a b svg{color:var(--live)}
 .knode.y{width:auto;padding:10px 18px;border-radius:999px;background:var(--accent);border-color:var(--accent);color:var(--on-accent);font:700 15px/1 var(--display)}
 .knode.hot{box-shadow:0 0 0 3px var(--accent-fill),var(--shadow-2)}
@@ -832,39 +832,89 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   .kp-t p{font-size:15px}.kp-t .eg{display:none}
   .kdia{height:clamp(300px,46vh,420px);background:linear-gradient(90deg,var(--surface) 0 50%,var(--moss) 50% 100%)}
   .kline{left:50%;right:auto;top:0;bottom:0;width:1px;height:auto}
-  .knode{width:42%;padding:8px 9px;font-size:11.5px}
+  .knode{padding:8px 10px;font-size:11.5px}
   .knode b{font-size:12.5px}
   .js .kinds-track{height:calc(100svh + 240svh)}
   .js .kinds-stage{align-items:flex-start}
   .kinds-stage .sec-h p{display:none}
 }
 
-/* journal: its own band */
-.journal-sec{padding:0 0 var(--sec)}
-.jcard{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:clamp(24px,4vw,56px);align-items:center;padding:clamp(28px,4vw,48px);border-radius:28px;background:var(--accent-soft);border:1px solid var(--line-accent);text-decoration:none;transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
-.jcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
-.jday{font:640 clamp(64px,3rem + 4vw,128px)/.85 var(--display);letter-spacing:-.05em;color:var(--accent)}
-.jbody{display:grid;gap:12px}
-.jmeta{font-size:14px;color:var(--ink-3)}
-.jbody h2{font-size:clamp(26px,1.2rem + 1.6vw,44px);max-width:22ch}
-.jlink{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--accent-ink);font-size:15px}
-.jcard:hover .jlink svg{transform:translateX(4px)}
-.jlink svg{transition:transform .3s var(--ease)}
-.jart{position:relative;width:220px;height:150px}
-.jn{position:absolute;left:0;top:0;width:170px;padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-2);display:grid;gap:7px;transform:rotate(-4deg);transition:transform .5s var(--ease)}
-.jn b{font:600 13px/1 var(--sans)}
-.jn i{height:6px;border-radius:3px;background:var(--line)}
-.jn i:nth-child(3){width:80%}.jn i:nth-child(4){width:60%}
-.jyes{position:absolute;right:6px;bottom:8px;background:var(--accent);color:var(--on-accent);font:700 15px/1 var(--display);padding:11px 20px;border-radius:999px;box-shadow:0 0 0 6px var(--accent-soft);transition:transform .5s var(--ease)}
-.jcard:hover .jn{transform:rotate(-1deg) translateY(-4px)}.jcard:hover .jyes{transform:scale(1.06)}
-.enable-end{padding-bottom:clamp(64px,8vw,112px)}
-@media (max-width:900px){.jcard{grid-template-columns:1fr}.jart{display:none}}
 
-.rlist li > .rule-v.inline,.rlist li > .rules-end{grid-column:2}
-@media (max-width:900px){.rlist li > .rule-v.inline,.rlist li > .rules-end{grid-column:1/-1}}
-.blk.night .free{display:none!important}
-.cal-top{flex-wrap:wrap}
-.kdia{height:clamp(300px,40vh,380px)}
+.cv{display:block;width:100%;height:100%}
+.cv .c-moss{fill:#1F2B20}.cv .c-paper{fill:#F1EFE3}.cv .c-paper2{fill:#EEF3E6}
+.cv .c-line{stroke:#8FBF6A;stroke-width:2}
+.cv .c-card{fill:#FFFFFF;stroke:#D4D9C5}
+.cv .c-av{fill:#4F7044}.cv .c-ink{fill:#243025;opacity:.75}.cv .c-soft{fill:#D4D9C5}.cv .c-tag{fill:#E3EBD6}
+.cv .c-wire{fill:none;stroke:#5F8D4E;stroke-width:2;stroke-dasharray:4 5}
+.cv .c-yes{fill:#4F7044}.cv .c-yt{fill:#fff;font:700 20px var(--display);text-anchor:middle}
+.cv .c-chip{fill:rgba(238,241,232,.08);stroke:rgba(238,241,232,.22)}.cv .c-dot{fill:#8FBF6A}.cv .c-chipink{fill:#EEF1E8;opacity:.75}
+.cv .c-road{fill:none;stroke:#C9D8B6;stroke-width:26;stroke-linecap:round}
+.cv .c-roaddash{fill:none;stroke:#fff;stroke-width:3;stroke-dasharray:10 12}
+.cv .c-ms circle{fill:#4F7044;stroke:#fff;stroke-width:3}
+.cv .c-cal{fill:#4F7044}.cv .c-mon{fill:#fff;font:700 16px var(--sans);text-anchor:middle;letter-spacing:.08em}
+.cv .c-big{fill:#243025;font:700 72px var(--display);text-anchor:middle;letter-spacing:-3px}.cv .c-sub{fill:#5E705E;font:500 14px var(--sans);text-anchor:middle}
+
+/* journal on the landing page */
+.jsec{padding:var(--sec) 0}
+.jgrid{margin-top:clamp(40px,5vw,64px);display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:start}
+.jfeat{display:grid;text-decoration:none;border-radius:24px;overflow:hidden;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-1);transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
+.jfeat:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
+.jcover{position:relative;display:block;aspect-ratio:16/8.5;overflow:hidden;border-bottom:1px solid var(--line)}
+.jcover .cv{transition:transform .8s var(--ease)}
+.jfeat:hover .jcover .cv{transform:scale(1.03)}
+.jday{position:absolute;left:20px;bottom:16px;font:640 clamp(28px,1.2rem + 1.4vw,44px)/1 var(--display);letter-spacing:-.03em;color:#FAF8EF;text-shadow:0 2px 12px rgba(0,0,0,.35)}
+.jfeat-t{display:grid;gap:12px;padding:clamp(20px,2.4vw,30px)}
+.jmeta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:13px;color:var(--ink-3)}
+.jtag{font-weight:600;color:var(--accent-ink);background:var(--accent-soft);border:1px solid var(--line-accent);padding:3px 8px;border-radius:999px;font-size:12px}
+.jtitle{font:620 clamp(22px,1rem + 1vw,32px)/1.15 var(--display);letter-spacing:-.025em;color:var(--ink)}
+.jdek{font-size:15.5px;color:var(--ink-2);line-height:1.55}
+.jlink{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--accent-ink);font-size:15px}
+.jlink svg{transition:transform .3s var(--ease)}.jfeat:hover .jlink svg{transform:translateX(4px)}
+.jside{display:grid;gap:20px}
+.jlist{list-style:none;margin:0;padding:0;display:grid;border-top:1px solid var(--line-strong)}
+.jrow{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;align-items:start;padding:18px 0;border-bottom:1px solid var(--line);text-decoration:none}
+.jthumb{display:block;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.jrow-t{display:grid;gap:6px}
+.jrow b{font:620 18px/1.25 var(--display);letter-spacing:-.015em;color:var(--ink)}
+.jrow:hover b{text-decoration:underline;text-underline-offset:.18em;text-decoration-thickness:1px}
+.jrow .jdek{font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.jall{justify-self:start}
+@media (max-width:600px){.jcover .jday{top:12px;left:12px;bottom:auto;font-size:22px;background:rgba(31,43,32,.85);padding:6px 12px;border-radius:12px;text-shadow:none}}
+@media (max-width:900px){.jgrid{grid-template-columns:1fr}.jrow{grid-template-columns:96px minmax(0,1fr)}}
+
+/* ===== round 6: week pinned with a hold, sessions diagram, journal ===== */
+.week-sec{padding-bottom:0}
+.week-track.wpin{height:calc(var(--wh,100svh) + 240svh)}
+.wpin .week-stick{position:sticky;top:var(--wt,64px)}
+@media (min-width:901px){.week-sec .cal-b{grid-template-rows:repeat(16,22px) 12px repeat(3,22px)}.week-sec .hours{grid-template-rows:repeat(4,88px) 12px 66px}.week-sec .grid{background:repeating-linear-gradient(var(--line) 0 1px,transparent 1px 44px)}.week-sec .grid::after{top:calc(16*22px + 5px)}.week-sec .sec-h p{font-size:16.5px}}
+.week-stick > .wrap{padding-bottom:clamp(40px,5vw,72px)}
+.week{position:relative}
+.week-sum{grid-column:2;grid-row:1;align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:clamp(24px,3vw,36px);border-radius:20px;background:var(--moss);color:var(--on-moss);opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .6s var(--ease),transform .7s var(--ease)}
+.week.done .week-sum{opacity:1;transform:none;pointer-events:auto}
+.week.done .now-list{opacity:0;transform:translateY(-12px);pointer-events:none}
+.now-list{grid-column:2;grid-row:1;transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.ws-k{font:560 clamp(20px,1rem + .6vw,25px)/1.3 var(--display);letter-spacing:-.015em}
+.ws-n{font-size:16px;color:var(--on-moss-2)}
+.ws-n b{display:block;font:640 clamp(56px,2.5rem + 3vw,96px)/.95 var(--display);letter-spacing:-.04em;color:var(--live);margin-bottom:6px}
+.ws-d{font-size:16px;color:var(--on-moss-2);max-width:42ch}
+.ws-f{margin-top:6px;padding-top:14px;border-top:1px solid var(--moss-line);font-size:13px;line-height:1.55;color:var(--on-moss-2)}
+.ws-f b{color:var(--on-moss);font-weight:600}
+.handoff{grid-column:2;grid-row:1/3;z-index:0;border-radius:10px;border:1.5px solid var(--accent-strong);background:var(--accent-soft);opacity:0;transform:scaleY(.4);transform-origin:top;transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.handoff span{display:block;padding:4px 8px;font:600 11.5px/1.2 var(--sans);color:var(--accent-ink)}
+.week.gather .handoff{opacity:1;transform:none}
+.week.gather .blk{overflow:visible;z-index:3}
+.week.gather .blk .ag{transform:translate(var(--gx,0),var(--gy,0));transition:transform .9s var(--ease),opacity .4s;z-index:4;right:auto;width:var(--gw,auto)}
+.week.gather .blk .free{opacity:.9}
+.week.gather .handoff{grid-row:1/var(--he,4)}
+.week-meter{position:absolute;right:0;bottom:-34px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3)}
+.week-meter i{width:120px;height:2px;background:var(--line);border-radius:2px;overflow:hidden;position:relative}
+.week-meter i b{position:absolute;inset:0;background:var(--accent-strong);transform-origin:left;transform:scaleX(var(--wk,0))}
+.week.done .week-meter{opacity:0}
+.week-track:not(.wpin) .week-meter{display:none}
+@media (min-width:901px) and (max-height:860px){.week-sec .cal-b{grid-template-rows:repeat(16,19px) 10px repeat(3,19px)}.week-sec .hours{grid-template-rows:repeat(4,76px) 10px 57px}.week-sec .grid{background:repeating-linear-gradient(var(--line) 0 1px,transparent 1px 38px)}.week-sec .grid::after{top:calc(16*19px + 4px)}.week-sec .sec-h h2{font-size:2.5rem}.week-sec .blk small{display:none}.now-list li{padding:12px 16px}.week-stick > .wrap{padding-bottom:40px}.week{margin-top:28px}}
+
+@media (max-width:900px){.week-sum,.now-list{grid-column:1;grid-row:2}.ws-n b{font-size:56px}}
+.rm .week-sum{opacity:1;transform:none;grid-row:auto}.rm .now-list{opacity:1}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
@@ -906,12 +956,12 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
       Konteks <span class="beta">Beta</span>
     </a>
     <nav class="nav-links" aria-label="Main">
-      <a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="https://konteks.io/pricing/">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="https://konteks.io/blog/">Journal</a>
+      <a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="https://konteks.io/pricing/">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="/journal">Journal</a>
     </nav>
     <div class="nav-end">
       <button class="icon-btn" id="theme" type="button" aria-label="Switch between light and dark"><svg class="ico moon"><use href="#i-moon"/></svg><svg class="ico sun"><use href="#i-sun"/></svg></button>
       <details class="menu"><summary class="icon-btn" aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></summary>
-        <div class="menu-pop"><a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="https://konteks.io/pricing/">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="https://konteks.io/blog/">Journal</a></div>
+        <div class="menu-pop"><a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="https://konteks.io/pricing/">Pricing</a><a href="https://konteks.io/docs/">Docs</a><a href="/journal">Journal</a></div>
       </details>
       <a class="btn btn-go" href="https://app.konteks.io/" aria-label="Open the app"><span class="long">Open the app</span><svg class="ico"><use href="#i-out"/></svg></a>
     </div>
@@ -1042,7 +1092,8 @@ bob    tty1</pre></div>
  </div>
 </section>
 
-<section class="sec" id="week-sec" aria-labelledby="h-2026">
+<section class="sec week-sec" id="week-sec" aria-labelledby="h-2026">
+ <div class="week-track" id="weekTrack"><div class="week-stick" id="weekStick">
   <div class="wrap">
     <div class="sec-h">
       <h2 id="h-2026">The same work, done differently.</h2>
@@ -1055,6 +1106,7 @@ bob    tty1</pre></div>
         <div class="cal-b">
           <div class="hours"><span>9:00</span><span>11:00</span><span>13:00</span><span>15:00</span><span class="nt">3 a.m.</span></div>
           <div class="grid"></div>
+          <div class="handoff" aria-hidden="true"><span>Handed off Mon</span></div>
           <div class="blk" data-i="0" data-h="2" style="--c:2;--r1:2;--r2:6"><b>Estimation meetings</b><small>Mon, 10:00 to 12:00</small><span class="ag"><svg class="ico"><use href="#i-note"/></svg>Plan in minutes</span><span class="free">2 h back</span></div>
           <div class="blk" data-i="1" data-h="3" style="--c:3;--r1:9;--r2:15"><b>Code review queues</b><small>Tue afternoon</small><span class="ag"><svg class="ico"><use href="#i-eye"/></svg>Second agent</span><span class="free">3 h back</span></div>
           <div class="blk" data-i="2" data-h="3.5" style="--c:5;--r1:1;--r2:8"><b>Manual test passes</b><small>Thu morning</small><span class="ag"><svg class="ico"><use href="#i-pointer"/></svg>Browser agent</span><span class="free">3.5 h back</span></div>
@@ -1069,8 +1121,16 @@ bob    tty1</pre></div>
         <li data-i="3" role="row"><s role="cell">On-call at 3 a.m., 1 h of sleep</s><span role="cell">An agent keeps watch.</span></li>
         <li data-i="4" role="row"><s role="cell">Status reports, 2 h</s><span role="cell">The record is the report.</span></li>
       </ol>
+      <div class="week-sum" aria-live="polite">
+        <p class="ws-k">A week of work around the work, handed off on Monday morning.</p>
+        <p class="ws-n"><b class="tab">11.5 h</b> back to the team</p>
+        <p class="ws-d">People spend that time on what agents cannot do: the vision, the constraints, the yes, and judging the evidence.</p>
+        <p class="ws-f"><b>How this example is counted.</b> The hours are the meeting, review, testing, on-call and reporting time in this sample calendar that people no longer spend. How long the agents take depends on the work: Konteks quotes every run before it starts, and its receipt records what it actually took.</p>
+      </div>
+      <div class="week-meter" aria-hidden="true"><i><b></b></i><span>Keep scrolling</span></div>
     </div>
   </div>
+ </div></div>
 </section>
 
 <section class="sec theory" id="theory" aria-labelledby="h-people">
@@ -1275,17 +1335,40 @@ bob    tty1</pre></div>
   </div>
 </section>
 
-<section class="journal-sec" aria-labelledby="h-journal">
+<section class="jsec" id="journal" aria-labelledby="h-journal">
   <div class="wrap">
-    <a class="jcard" href="https://konteks.io/blog/day-1-introducing-project-management-mode/">
-      <span class="jday" aria-hidden="true">Day 1</span>
-      <span class="jbody">
-        <span class="jmeta">From the journal, August 17, 2026</span>
-        <h2 id="h-journal">Delivery was never the hard part. The plan was.</h2>
-        <span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span>
-      </span>
-      <span class="jart" aria-hidden="true"><span class="jn"><b>Plan</b><i></i><i></i><i></i></span><span class="jyes">Yes</span></span>
-    </a>
+    <div class="sec-h"><h2 id="h-journal">Notes from the part where the product becomes real.</h2><p>Launch notes, engineering scars, and the decisions behind software that remembers. From the Konteks journal.</p></div>
+    <div class="jgrid">
+      <a class="jfeat" href="/journal/day-1-introducing-project-management-mode">
+        <span class="jcover"><svg class="cv cv-plan" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<rect width="640" height="360" class="c-moss"/><rect width="640" height="200" class="c-paper"/><path d="M0 200H640" class="c-line"/>
+<g class="c-note" transform="translate(84 46)"><rect width="250" height="128" rx="14" class="c-card"/><circle cx="26" cy="28" r="10" class="c-av"/><rect x="46" y="22" width="120" height="10" rx="5" class="c-ink"/>
+<rect x="18" y="54" width="210" height="8" rx="4" class="c-soft"/><rect x="18" y="72" width="180" height="8" rx="4" class="c-soft"/><rect x="18" y="98" width="88" height="16" rx="8" class="c-tag"/></g>
+<g class="c-tix"><rect x="380" y="40" width="170" height="34" rx="10" class="c-card"/><rect x="396" y="52" width="80" height="10" rx="5" class="c-ink"/>
+<rect x="400" y="86" width="170" height="34" rx="10" class="c-card"/><rect x="416" y="98" width="64" height="10" rx="5" class="c-ink"/>
+<rect x="420" y="132" width="170" height="34" rx="10" class="c-card"/><rect x="436" y="144" width="96" height="10" rx="5" class="c-ink"/></g>
+<path d="M334 110 C360 110 360 57 380 57 M334 110 C362 110 372 103 400 103 M334 110 C366 110 386 149 420 149" class="c-wire"/>
+<g transform="translate(272 200)"><rect x="-44" y="-21" width="88" height="42" rx="21" class="c-yes"/><text x="0" y="7" class="c-yt">Yes</text></g>
+<g class="c-agents"><rect x="96" y="254" width="132" height="40" rx="20" class="c-chip"/><circle cx="118" cy="274" r="6" class="c-dot"/><rect x="132" y="268" width="76" height="10" rx="5" class="c-chipink"/>
+<rect x="254" y="254" width="132" height="40" rx="20" class="c-chip"/><circle cx="276" cy="274" r="6" class="c-dot"/><rect x="290" y="268" width="66" height="10" rx="5" class="c-chipink"/>
+<rect x="412" y="254" width="132" height="40" rx="20" class="c-chip"/><circle cx="434" cy="274" r="6" class="c-dot"/><rect x="448" y="268" width="82" height="10" rx="5" class="c-chipink"/></g>
+</svg><span class="jday">Day 1</span></span>
+        <span class="jfeat-t"><span class="jmeta"><time datetime="2026-08-17">August 17, 2026</time><span class="jtag">Launch notes</span><span>6 min read</span></span>
+        <b class="jtitle">Day 1: introducing Project Management mode, and why it matters</b><span class="jdek">Konteks is live in beta on August 17. Delivery was never the hard part. Deciding what to build, in what order, at what cost, that was. Here is what we shipped for it.</span><span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span></span>
+      </a>
+      <div class="jside">
+        <ul class="jlist"><li><a class="jrow" href="/journal/the-road-to-august-17"><span class="jthumb"><svg class="cv cv-road" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<rect width="640" height="360" class="c-paper2"/>
+<path d="M-20 320 C120 300 150 220 260 220 S420 260 470 170 S560 70 660 60" class="c-road"/>
+<path d="M-20 320 C120 300 150 220 260 220 S420 260 470 170 S560 70 660 60" class="c-roaddash"/>
+<g class="c-ms"><circle cx="118" cy="292" r="7"/><circle cx="260" cy="220" r="7"/><circle cx="398" cy="226" r="7"/></g>
+<g transform="translate(440 36)"><rect width="150" height="168" rx="16" class="c-card"/><rect width="150" height="44" rx="16" class="c-cal"/><rect y="26" width="150" height="18" class="c-cal"/>
+<text x="75" y="31" class="c-mon">AUG</text><text x="75" y="128" class="c-big">17</text><text x="75" y="156" class="c-sub">2026</text></g>
+<g transform="translate(60 64)"><rect width="230" height="96" rx="14" class="c-card"/><rect x="18" y="20" width="150" height="10" rx="5" class="c-ink"/><rect x="18" y="42" width="190" height="8" rx="4" class="c-soft"/><rect x="18" y="58" width="160" height="8" rx="4" class="c-soft"/><rect x="18" y="74" width="120" height="8" rx="4" class="c-soft"/></g>
+</svg></span><span class="jrow-t"><span class="jmeta"><time datetime="2026-07-16">July 16, 2026</time><span class="jtag">Launch notes</span></span><b>The road to August 17: software should remember</b><span class="jdek">A launch countdown, and the story of how years of real engineering work turned into a system that gives humans and agents the same durable context.</span></span></a></li></ul>
+        <a class="btn btn-line jall" href="/journal">All journal entries <svg class="ico"><use href="#i-arrow"/></svg></a>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1310,7 +1393,7 @@ bob    tty1</pre></div>
         <a class="mail" href="mailto:hello@konteks.io">hello@konteks.io</a>
       </div>
       <div><h3>Product</h3><ul><li><a href="#product">Product overview</a></li><li><a href="#workflow">How it works</a></li><li><a href="#sessions">Four kinds of session</a></li><li><a href="#enablement">Training &amp; onboarding</a></li><li><a href="https://konteks.io/pricing/">Pricing</a></li><li><a href="#connect">Connect your agent</a></li><li><a href="https://app.konteks.io/">Open the app ↗</a></li></ul></div>
-      <div><h3>Resources</h3><ul><li><a href="https://konteks.io/docs/#app">Konteks</a></li><li><a href="https://konteks.io/docs/#mcp">MCP</a></li><li><a href="https://konteks.io/docs/#api-reference">API reference</a></li><li><a href="https://konteks.io/blog/">Journal</a></li></ul></div>
+      <div><h3>Resources</h3><ul><li><a href="https://konteks.io/docs/#app">Konteks</a></li><li><a href="https://konteks.io/docs/#mcp">MCP</a></li><li><a href="https://konteks.io/docs/#api-reference">API reference</a></li><li><a href="/journal">Journal</a></li></ul></div>
       <div><h3>Company</h3><ul><li><a href="https://konteks.io/about/">About</a></li><li><a href="https://konteks.io/contact/">Contact</a></li><li><a href="https://konteks.io/security/">Security</a></li><li><a href="https://konteks.io/privacy/">Privacy</a></li><li><a href="https://konteks.io/terms/">Terms</a></li></ul></div>
     </div>
     <div class="foot-b"><span>Made by <a href="https://refactory.id/">Refactory ↗</a>, the team behind Konteks.</span><span>© 2026 Konteks · konteks.io</span></div>
@@ -1446,16 +1529,51 @@ $("#replay").addEventListener("click", () => { clock = 0; replayFrom = pinProgre
 if (RM) renderHero(TOTAL);
 else { seen(hero, v => heroVisible = v, .15); measurePin(); requestAnimationFrame(heroFrame); }
 
-/* ============ the same week: blocks leave the calendar as you scroll ============ */
-const week = $("#week"), blks = $$(".blk", week), nows = $$(".now-list li", week);
-const weekDraw = () => {
-  const r = week.getBoundingClientRect(), vh = innerHeight;
-  const k = RM ? 1 : clamp((vh * .8 - r.top) / (r.height * .95));
-  let hrs = 0;
-  blks.forEach((b, i) => { const on = k > (i + 1) / 6.2; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); if (on) hrs += +b.dataset.h; });
-  if (hback._v !== hrs) { hback._v = hrs; hback.textContent = (hrs % 1 ? hrs.toFixed(1) : hrs) + " h"; }
+/* ============ the same week: pinned; blocks hand off, gather on Monday morning, then a held summary ============ */
+const week = $("#week"), blks = $$(".blk", week), nows = $$(".now-list li", week), hback = $("#hback");
+const wTrack = $("#weekTrack"), wStick = $("#weekStick");
+let wTop = 64, wH = 0, wGathered = false;
+const measureWeek = () => {
+  if (RM) return;
+  wTrack.classList.remove("wpin");
+  wH = wStick.offsetHeight; wTop = Math.min(64, innerHeight - wH);
+  wTrack.classList.toggle("wpin", wH <= innerHeight - 64 + 24);
+  wTrack.style.setProperty("--wh", wH + "px"); wTrack.style.setProperty("--wt", wTop + "px");
+  wGathered = false;
 };
-const hback = $("#hback");
+const weekProgress = () => {
+  if (!wTrack.classList.contains("wpin")) { const r = week.getBoundingClientRect(); return clamp((innerHeight * .8 - r.top) / (r.height * 1.4)); }
+  const r = wTrack.getBoundingClientRect(), span = wTrack.offsetHeight - wH;
+  return clamp((wTop - r.top) / Math.max(1, span));
+};
+const gatherTargets = () => {
+  // each agent chip flies to a stacked slot in Monday's first hours
+  const handoff = $(".handoff", week);
+  week.classList.remove("gather");
+  const hb = handoff.getBoundingClientRect();
+  blks.forEach((b, i) => {
+    const ag = $(".ag", b); ag.style.removeProperty("--gx"); ag.style.removeProperty("--gy");
+    const a = ag.getBoundingClientRect();
+    ag.style.setProperty("--gx", (hb.left + 6 - a.left) + "px");
+    ag.style.setProperty("--gy", (hb.top + 26 + i * (a.height + 4) - a.top) + "px");
+    ag.style.setProperty("--gw", (hb.width - 12) + "px");
+  });
+  const rowPx = parseFloat(getComputedStyle($(".cal-b", week)).gridTemplateRows) || 26;
+  const chipH = $(".ag", blks[0]).getBoundingClientRect().height || 30;
+  week.style.setProperty("--he", Math.ceil((26 + blks.length * (chipH + 4) + 8) / rowPx) + 1);
+  wGathered = true;
+};
+const weekDraw = () => {
+  const k = RM ? 1 : weekProgress();
+  let hrs = 0;
+  blks.forEach((b, i) => { const on = k > (i + 1) / 5 * .48; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); if (on) hrs += +b.dataset.h; });
+  if (hback._v !== hrs) { hback._v = hrs; hback.textContent = (hrs % 1 ? hrs.toFixed(1) : hrs) + " h"; }
+  const g = k > .55;
+  if (g && !week.classList.contains("gather")) { if (!wGathered) gatherTargets(); week.classList.add("gather"); }
+  if (!g && week.classList.contains("gather")) week.classList.remove("gather");
+  week.classList.toggle("done", k > .7);
+  week.style.setProperty("--wk", clamp(k / .7));
+};
 [...blks, ...nows].forEach(el => {
   const i = el.dataset.i;
   el.addEventListener("pointerenter", () => { blks[i].classList.add("hl"); nows[i].classList.add("hl"); });
@@ -1676,33 +1794,46 @@ const ktrack = $("#ktrack"), ktabs = $$("#ktabs [role=tab]"), kdia = $("#kdia"),
 const kpathEl = $(".kpath .base", kdia), ktok = $(".kpath .tok", kdia);
 let kCur = -1, kLen = 0, kNodes = [];
 const kVertical = () => innerWidth <= 900;
-const kRoute = pts => {
-  let d = `M${pts[0][0]} ${pts[0][1]}`; const R = 16, V = kVertical();
-  for (let i = 1; i < pts.length; i++) {
-    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
-    if (!V) {
-      if (Math.abs(y1 - y0) < 2) { d += ` L${x1} ${y1}`; continue; }
-      const sy = Math.sign(y1 - y0), mx = (x0 + x1) / 2;
-      d += ` L${mx - R} ${y0} Q${mx} ${y0} ${mx} ${y0 + sy * R} L${mx} ${y1 - sy * R} Q${mx} ${y1} ${mx + R} ${y1} L${x1} ${y1}`;
-    } else {
-      if (Math.abs(x1 - x0) < 2) { d += ` L${x1} ${y1}`; continue; }
-      const sx = Math.sign(x1 - x0), my = (y0 + y1) / 2;
-      d += ` L${x0} ${my - R} Q${x0} ${my} ${x0 + sx * R} ${my} L${x1 - sx * R} ${my} Q${x1} ${my} ${x1} ${my + R} L${x1} ${y1}`;
-    }
-  }
-  return d;
-};
 const kLayout = () => {
   if (kCur < 0) return;
-  const r = kdia.getBoundingClientRect(), V = kVertical(), n = kNodes.length;
-  const pts = kNodes.map((el, i) => {
-    const side = el.dataset.side, along = (i + .5) / n, across = side === "p" ? .24 : side === "a" ? .76 : .5;
-    const x = V ? across : along, y = V ? along : across;
-    el.style.left = (x * 100) + "%"; el.style.top = (y * 100) + "%";
-    return [x * r.width, y * r.height];
+  const V = kVertical(), n = kNodes.length, pad = V ? 16 : 22, gap = V ? 22 : 30;
+  kdia.style.height = V ? (n * 78 + (n - 1) * gap + pad * 2) + "px" : "";
+  const r = kdia.getBoundingClientRect();
+  if (!V) {
+    const colW = (r.width - pad * 2 - gap * (n - 1)) / n;
+    kNodes.forEach((el, i) => {
+      const side = el.dataset.side, cx = pad + i * (colW + gap) + colW / 2, cy = r.height * (side === "p" ? .25 : side === "a" ? .75 : .5);
+      el.style.width = side === "y" ? "" : colW + "px"; el.style.left = cx + "px"; el.style.top = cy + "px";
+    });
+  } else {
+    const rowH = (r.height - pad * 2 - gap * (n - 1)) / n, colW = r.width * .44;
+    kNodes.forEach((el, i) => {
+      const side = el.dataset.side, cy = pad + i * (rowH + gap) + rowH / 2, cx = r.width * (side === "p" ? .25 : side === "a" ? .75 : .5);
+      el.style.width = side === "y" ? "" : colW + "px"; el.style.left = cx + "px"; el.style.top = cy + "px";
+    });
+  }
+  // route edge to edge through the gaps, never across a node
+  const box = kNodes.map(el => { const b = el.getBoundingClientRect(); return { l: b.left - r.left, r: b.right - r.left, t: b.top - r.top, b: b.bottom - r.top, cx: b.left - r.left + b.width / 2, cy: b.top - r.top + b.height / 2 }; });
+  const R = 12; let d = "", entries = [];
+  box.forEach((q, i) => {
+    if (i === 0) { d = V ? `M${q.cx} ${q.b}` : `M${q.r} ${q.cy}`; entries.push(0); return; }
+    const p = box[i - 1];
+    if (!V) {
+      const mx = (p.r + q.l) / 2, y0 = p.cy, y1 = q.cy;
+      if (Math.abs(y1 - y0) < 8) d += ` L${q.l} ${y0}`;
+      else { const s = Math.sign(y1 - y0); d += ` L${mx - R} ${y0} Q${mx} ${y0} ${mx} ${y0 + s * R} L${mx} ${y1 - s * R} Q${mx} ${y1} ${mx + R} ${y1} L${q.l} ${y1}`; }
+      kpathEl.setAttribute("d", d); entries.push(kpathEl.getTotalLength());
+      d += ` M${q.r} ${q.cy}`;
+    } else {
+      const my = (p.b + q.t) / 2, x0 = p.cx, x1 = q.cx;
+      if (Math.abs(x1 - x0) < 2) d += ` L${x1} ${q.t}`;
+      else { const s = Math.sign(x1 - x0); d += ` L${x0} ${my - R} Q${x0} ${my} ${x0 + s * R} ${my} L${x1 - s * R} ${my} Q${x1} ${my} ${x1} ${my + R} L${x1} ${q.t}`; }
+      kpathEl.setAttribute("d", d); entries.push(kpathEl.getTotalLength());
+      d += ` M${q.cx} ${q.b}`;
+    }
   });
-  kpathEl.setAttribute("d", kRoute(pts)); kLen = kpathEl.getTotalLength();
-  kNodes._t = pts.map(([x, y]) => { let best = 0, bd = 1e9; for (let l = 0; l <= kLen; l += 4) { const q = kpathEl.getPointAtLength(l), dd = (q.x - x) ** 2 + (q.y - y) ** 2; if (dd < bd) { bd = dd; best = l; } } return best; });
+  kpathEl.setAttribute("d", d); kLen = kpathEl.getTotalLength();
+  kNodes._t = entries;
 };
 const kShow = i => {
   if (i === kCur) return; kCur = i;
@@ -1756,7 +1887,7 @@ let raf = 0;
 const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); };
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
 addEventListener("resize", () => { requestAnimationFrame(relayout); });
-const relayout = () => { if (!RM) measurePin(); layout(); drawMerge(); kLayout(); onScroll(); };
+const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); onScroll(); };
 document.fonts && document.fonts.ready.then(relayout);
 addEventListener("load", relayout);
 relayout();

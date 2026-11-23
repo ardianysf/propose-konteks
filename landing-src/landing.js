@@ -127,16 +127,51 @@ $("#replay").addEventListener("click", () => { clock = 0; replayFrom = pinProgre
 if (RM) renderHero(TOTAL);
 else { seen(hero, v => heroVisible = v, .15); measurePin(); requestAnimationFrame(heroFrame); }
 
-/* ============ the same week: blocks leave the calendar as you scroll ============ */
-const week = $("#week"), blks = $$(".blk", week), nows = $$(".now-list li", week);
-const weekDraw = () => {
-  const r = week.getBoundingClientRect(), vh = innerHeight;
-  const k = RM ? 1 : clamp((vh * .8 - r.top) / (r.height * .95));
-  let hrs = 0;
-  blks.forEach((b, i) => { const on = k > (i + 1) / 6.2; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); if (on) hrs += +b.dataset.h; });
-  if (hback._v !== hrs) { hback._v = hrs; hback.textContent = (hrs % 1 ? hrs.toFixed(1) : hrs) + " h"; }
+/* ============ the same week: pinned; blocks hand off, gather on Monday morning, then a held summary ============ */
+const week = $("#week"), blks = $$(".blk", week), nows = $$(".now-list li", week), hback = $("#hback");
+const wTrack = $("#weekTrack"), wStick = $("#weekStick");
+let wTop = 64, wH = 0, wGathered = false;
+const measureWeek = () => {
+  if (RM) return;
+  wTrack.classList.remove("wpin");
+  wH = wStick.offsetHeight; wTop = Math.min(64, innerHeight - wH);
+  wTrack.classList.toggle("wpin", wH <= innerHeight - 64 + 24);
+  wTrack.style.setProperty("--wh", wH + "px"); wTrack.style.setProperty("--wt", wTop + "px");
+  wGathered = false;
 };
-const hback = $("#hback");
+const weekProgress = () => {
+  if (!wTrack.classList.contains("wpin")) { const r = week.getBoundingClientRect(); return clamp((innerHeight * .8 - r.top) / (r.height * 1.4)); }
+  const r = wTrack.getBoundingClientRect(), span = wTrack.offsetHeight - wH;
+  return clamp((wTop - r.top) / Math.max(1, span));
+};
+const gatherTargets = () => {
+  // each agent chip flies to a stacked slot in Monday's first hours
+  const handoff = $(".handoff", week);
+  week.classList.remove("gather");
+  const hb = handoff.getBoundingClientRect();
+  blks.forEach((b, i) => {
+    const ag = $(".ag", b); ag.style.removeProperty("--gx"); ag.style.removeProperty("--gy");
+    const a = ag.getBoundingClientRect();
+    ag.style.setProperty("--gx", (hb.left + 6 - a.left) + "px");
+    ag.style.setProperty("--gy", (hb.top + 26 + i * (a.height + 4) - a.top) + "px");
+    ag.style.setProperty("--gw", (hb.width - 12) + "px");
+  });
+  const rowPx = parseFloat(getComputedStyle($(".cal-b", week)).gridTemplateRows) || 26;
+  const chipH = $(".ag", blks[0]).getBoundingClientRect().height || 30;
+  week.style.setProperty("--he", Math.ceil((26 + blks.length * (chipH + 4) + 8) / rowPx) + 1);
+  wGathered = true;
+};
+const weekDraw = () => {
+  const k = RM ? 1 : weekProgress();
+  let hrs = 0;
+  blks.forEach((b, i) => { const on = k > (i + 1) / 5 * .48; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); if (on) hrs += +b.dataset.h; });
+  if (hback._v !== hrs) { hback._v = hrs; hback.textContent = (hrs % 1 ? hrs.toFixed(1) : hrs) + " h"; }
+  const g = k > .55;
+  if (g && !week.classList.contains("gather")) { if (!wGathered) gatherTargets(); week.classList.add("gather"); }
+  if (!g && week.classList.contains("gather")) week.classList.remove("gather");
+  week.classList.toggle("done", k > .7);
+  week.style.setProperty("--wk", clamp(k / .7));
+};
 [...blks, ...nows].forEach(el => {
   const i = el.dataset.i;
   el.addEventListener("pointerenter", () => { blks[i].classList.add("hl"); nows[i].classList.add("hl"); });
@@ -357,33 +392,46 @@ const ktrack = $("#ktrack"), ktabs = $$("#ktabs [role=tab]"), kdia = $("#kdia"),
 const kpathEl = $(".kpath .base", kdia), ktok = $(".kpath .tok", kdia);
 let kCur = -1, kLen = 0, kNodes = [];
 const kVertical = () => innerWidth <= 900;
-const kRoute = pts => {
-  let d = `M${pts[0][0]} ${pts[0][1]}`; const R = 16, V = kVertical();
-  for (let i = 1; i < pts.length; i++) {
-    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
-    if (!V) {
-      if (Math.abs(y1 - y0) < 2) { d += ` L${x1} ${y1}`; continue; }
-      const sy = Math.sign(y1 - y0), mx = (x0 + x1) / 2;
-      d += ` L${mx - R} ${y0} Q${mx} ${y0} ${mx} ${y0 + sy * R} L${mx} ${y1 - sy * R} Q${mx} ${y1} ${mx + R} ${y1} L${x1} ${y1}`;
-    } else {
-      if (Math.abs(x1 - x0) < 2) { d += ` L${x1} ${y1}`; continue; }
-      const sx = Math.sign(x1 - x0), my = (y0 + y1) / 2;
-      d += ` L${x0} ${my - R} Q${x0} ${my} ${x0 + sx * R} ${my} L${x1 - sx * R} ${my} Q${x1} ${my} ${x1} ${my + R} L${x1} ${y1}`;
-    }
-  }
-  return d;
-};
 const kLayout = () => {
   if (kCur < 0) return;
-  const r = kdia.getBoundingClientRect(), V = kVertical(), n = kNodes.length;
-  const pts = kNodes.map((el, i) => {
-    const side = el.dataset.side, along = (i + .5) / n, across = side === "p" ? .24 : side === "a" ? .76 : .5;
-    const x = V ? across : along, y = V ? along : across;
-    el.style.left = (x * 100) + "%"; el.style.top = (y * 100) + "%";
-    return [x * r.width, y * r.height];
+  const V = kVertical(), n = kNodes.length, pad = V ? 16 : 22, gap = V ? 22 : 30;
+  kdia.style.height = V ? (n * 78 + (n - 1) * gap + pad * 2) + "px" : "";
+  const r = kdia.getBoundingClientRect();
+  if (!V) {
+    const colW = (r.width - pad * 2 - gap * (n - 1)) / n;
+    kNodes.forEach((el, i) => {
+      const side = el.dataset.side, cx = pad + i * (colW + gap) + colW / 2, cy = r.height * (side === "p" ? .25 : side === "a" ? .75 : .5);
+      el.style.width = side === "y" ? "" : colW + "px"; el.style.left = cx + "px"; el.style.top = cy + "px";
+    });
+  } else {
+    const rowH = (r.height - pad * 2 - gap * (n - 1)) / n, colW = r.width * .44;
+    kNodes.forEach((el, i) => {
+      const side = el.dataset.side, cy = pad + i * (rowH + gap) + rowH / 2, cx = r.width * (side === "p" ? .25 : side === "a" ? .75 : .5);
+      el.style.width = side === "y" ? "" : colW + "px"; el.style.left = cx + "px"; el.style.top = cy + "px";
+    });
+  }
+  // route edge to edge through the gaps, never across a node
+  const box = kNodes.map(el => { const b = el.getBoundingClientRect(); return { l: b.left - r.left, r: b.right - r.left, t: b.top - r.top, b: b.bottom - r.top, cx: b.left - r.left + b.width / 2, cy: b.top - r.top + b.height / 2 }; });
+  const R = 12; let d = "", entries = [];
+  box.forEach((q, i) => {
+    if (i === 0) { d = V ? `M${q.cx} ${q.b}` : `M${q.r} ${q.cy}`; entries.push(0); return; }
+    const p = box[i - 1];
+    if (!V) {
+      const mx = (p.r + q.l) / 2, y0 = p.cy, y1 = q.cy;
+      if (Math.abs(y1 - y0) < 8) d += ` L${q.l} ${y0}`;
+      else { const s = Math.sign(y1 - y0); d += ` L${mx - R} ${y0} Q${mx} ${y0} ${mx} ${y0 + s * R} L${mx} ${y1 - s * R} Q${mx} ${y1} ${mx + R} ${y1} L${q.l} ${y1}`; }
+      kpathEl.setAttribute("d", d); entries.push(kpathEl.getTotalLength());
+      d += ` M${q.r} ${q.cy}`;
+    } else {
+      const my = (p.b + q.t) / 2, x0 = p.cx, x1 = q.cx;
+      if (Math.abs(x1 - x0) < 2) d += ` L${x1} ${q.t}`;
+      else { const s = Math.sign(x1 - x0); d += ` L${x0} ${my - R} Q${x0} ${my} ${x0 + s * R} ${my} L${x1 - s * R} ${my} Q${x1} ${my} ${x1} ${my + R} L${x1} ${q.t}`; }
+      kpathEl.setAttribute("d", d); entries.push(kpathEl.getTotalLength());
+      d += ` M${q.cx} ${q.b}`;
+    }
   });
-  kpathEl.setAttribute("d", kRoute(pts)); kLen = kpathEl.getTotalLength();
-  kNodes._t = pts.map(([x, y]) => { let best = 0, bd = 1e9; for (let l = 0; l <= kLen; l += 4) { const q = kpathEl.getPointAtLength(l), dd = (q.x - x) ** 2 + (q.y - y) ** 2; if (dd < bd) { bd = dd; best = l; } } return best; });
+  kpathEl.setAttribute("d", d); kLen = kpathEl.getTotalLength();
+  kNodes._t = entries;
 };
 const kShow = i => {
   if (i === kCur) return; kCur = i;
@@ -437,7 +485,7 @@ let raf = 0;
 const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); };
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
 addEventListener("resize", () => { requestAnimationFrame(relayout); });
-const relayout = () => { if (!RM) measurePin(); layout(); drawMerge(); kLayout(); onScroll(); };
+const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); onScroll(); };
 document.fonts && document.fonts.ready.then(relayout);
 addEventListener("load", relayout);
 relayout();
