@@ -134,8 +134,9 @@ let wTop = 64, wH = 0, wGathered = false;
 const measureWeek = () => {
   if (RM) return;
   wTrack.classList.remove("wpin");
-  wH = wStick.offsetHeight; wTop = Math.min(64, innerHeight - wH);
-  wTrack.classList.toggle("wpin", wH <= innerHeight - 64 + 24);
+  wH = wStick.offsetHeight; const air = 40;
+  wTop = Math.min(64 + air, innerHeight - wH);
+  wTrack.classList.toggle("wpin", wH <= innerHeight - 64 - 8);
   wTrack.style.setProperty("--wh", wH + "px"); wTrack.style.setProperty("--wt", wTop + "px");
   wGathered = false;
 };
@@ -389,28 +390,8 @@ const KINDS = [
     s: [["a", "i-pulse", "Watches", "Logs and alerts"], ["a", "i-alert", "Opens the issue", "Export times out past 5,000 rows"], ["a", "i-hammer", "Works the fix", "A plan with a ceiling"], ["y", "", "Yes", ""], ["a", "i-pr", "Fix shipped", "Tested pull request"]] },
 ];
 const ktrack = $("#ktrack"), ktabs = $$("#ktabs [role=tab]"), kdia = $("#kdia"), kpH = $("#kp-h"), kpP = $("#kp-p"), kpan = $("#kp");
-const kpathEl = $(".kpath .base", kdia), ktok = $(".kpath .tok", kdia);
-let kCur = -1, kLen = 0, kNodes = [];
-const kVertical = () => innerWidth <= 900;
-const kLayout = () => {
-  if (kCur < 0) return;
-  // one line: every step sits on it, people light, agents dark, the yes on the line itself
-  const V = kVertical(), n = kNodes.length, pad = V ? 16 : 22, gap = V ? 18 : 26;
-  kdia.style.height = V ? (n * 70 + (n - 1) * gap + pad * 2) + "px" : "";
-  const r = kdia.getBoundingClientRect();
-  const cell = ((V ? r.height : r.width) - pad * 2 - gap * (n - 1)) / n;
-  kNodes.forEach((el, i) => {
-    const c = pad + i * (cell + gap) + cell / 2;
-    el.style.width = el.dataset.side === "y" ? "" : (V ? Math.min(r.width * .72, 320) : cell) + "px";
-    el.style.left = (V ? r.width / 2 : c) + "px"; el.style.top = (V ? c : r.height / 2) + "px";
-  });
-  const first = kNodes[0].getBoundingClientRect(), last = kNodes[n - 1].getBoundingClientRect();
-  const d = V ? `M${r.width / 2} ${first.top - r.top + first.height / 2} L${r.width / 2} ${last.top - r.top + last.height / 2}`
-              : `M${first.left - r.left + first.width / 2} ${r.height / 2} L${last.left - r.left + last.width / 2} ${r.height / 2}`;
-  kpathEl.setAttribute("d", d); kLen = kpathEl.getTotalLength();
-  const s0 = V ? first.top - r.top + first.height / 2 : first.left - r.left + first.width / 2;
-  kNodes._t = kNodes.map(el => { const b = el.getBoundingClientRect(); return (V ? b.top - r.top + b.height / 2 : b.left - r.left + b.width / 2) - s0; });
-};
+let kCur = -1, kSteps = [], kTok = null, kFlow = null;
+const kLayout = () => {};
 const kShow = i => {
   if (i === kCur) return; kCur = i;
   ktabs.forEach((b, j) => { b.setAttribute("aria-selected", j === i); b.tabIndex = j === i ? 0 : -1; });
@@ -418,13 +399,10 @@ const kShow = i => {
   const k = KINDS[i];
   kpH.textContent = k.h; kpP.textContent = k.p;
   [kpH, kpP].forEach(e => { e.style.animation = "none"; void e.offsetWidth; e.style.animation = ""; });
-  kNodes.forEach(n => n.remove());
-  kNodes = k.s.map(([side, ic, t, d], n) => {
-    const el = document.createElement("div"); el.className = "knode " + side; el.dataset.side = side; el.style.setProperty("--k", n);
-    el.innerHTML = side === "y" ? t : `<b><svg class="ico"><use href="#${ic}"/></svg>${escT(t)}</b>${escT(d)}`;
-    kdia.append(el); return el;
-  });
-  kLayout(); kt0 = 0;
+  const who = { p: "You", a: "Agent", y: "You" };
+  kdia.innerHTML = `<div class="kflow" style="--n:${k.s.length}"><span class="ktrack" aria-hidden="true"><i class="ktok"></i></span><ol class="ksteps">${k.s.map(([side, ic, t, d], n) =>
+    `<li class="kst ${side}" style="--k:${n}"><span class="kdot">${side === "y" ? "Yes" : `<svg class="ico"><use href="#${ic}"/></svg>`}</span><span class="klab"><em>${who[side]}</em><b>${escT(t)}</b>${d ? `<small>${escT(d)}</small>` : ""}</span></li>`).join("")}</ol></div>`;
+  kFlow = $(".kflow", kdia); kTok = $(".ktok", kdia); kSteps = $$(".kst", kdia); kt0 = 0;
 };
 const kTrackP = () => { const r = ktrack.getBoundingClientRect(), span = ktrack.offsetHeight - (innerHeight - 64); return clamp((64 - r.top) / Math.max(1, span)); };
 const kDraw = () => {
@@ -447,16 +425,17 @@ ktabs.forEach((b, i) => {
 let kt0 = 0, kOn = false;
 seen(ktrack, v => kOn = v, 0);
 const kFrame = now => {
-  if (kOn && !RM && kLen) {
+  if (kOn && !RM && kFlow) {
     if (!kt0) kt0 = now;
-    const T = 1600 * kNodes.length, f = ((now - kt0) % (T + 900)) / T, l = kLen * smooth(clamp(f));
-    const q = kpathEl.getPointAtLength(l); ktok.setAttribute("cx", q.x); ktok.setAttribute("cy", q.y);
-    kNodes.forEach((n, j) => n.classList.toggle("hot", f <= 1 && Math.abs(l - kNodes._t[j]) < 30));
+    const n = kSteps.length, T = 1300 * n, f = ((now - kt0) % (T + 1000)) / T, p = smooth(clamp(f));
+    kFlow.style.setProperty("--tp", p);
+    const at = p * (n - 1);
+    kSteps.forEach((s, j) => { s.classList.toggle("hot", f <= 1 && Math.abs(at - j) < .22); s.classList.toggle("past", f <= 1 && at > j + .2); });
   }
   requestAnimationFrame(kFrame);
 };
 kShow(0); requestAnimationFrame(kFrame);
-if (RM) ktok.style.display = "none";
+
 
 /* ============ parallax: layers drift at their own speed as they pass ============ */
 const pxEls = RM ? [] : $$("[data-px]").map(el => [el, +el.dataset.px]);

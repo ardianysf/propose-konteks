@@ -840,23 +840,16 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 }
 
 
-.cv{position:relative;display:flex;flex-direction:column;justify-content:space-between;width:100%;height:100%;padding:7cqh 6cqw;box-sizing:border-box;overflow:hidden}
-.jthumb,.jth,.jpx,.jc,.acover{container-type:size}
-.cv-moss{background:var(--moss);color:var(--on-moss)}
-.cv-matcha{background:var(--split-panel);color:var(--split-ink)}
-.cv-q{font:600 clamp(16px,7.4cqw,64px)/1.08 var(--display);letter-spacing:-.03em;max-width:15ch;text-wrap:balance}
-.cv-moss .cv-q{color:var(--on-moss)}
-.cv-line{position:absolute;left:0;right:0;top:68%;height:1px;background:var(--live);opacity:.9}
-.cv-matcha .cv-line{background:var(--accent-strong)}
-.cv-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
-.cv-mk{font:640 clamp(18px,9cqw,84px)/.9 var(--display);letter-spacing:-.04em}
+.cv{position:relative;display:block;width:100%;height:100%;overflow:hidden}
+.cv-moss{background:var(--moss)}
+.cv-matcha{background:var(--split-panel)}
+.cv-mk{position:absolute;left:6%;top:9%;font:640 clamp(20px,7cqw,64px)/.9 var(--display);letter-spacing:-.04em;z-index:1}
 .cv-moss .cv-mk{color:var(--live)}.cv-matcha .cv-mk{color:var(--accent-ink)}
-.cv-src{font:500 clamp(11px,2.2cqw,15px)/1.2 var(--sans);opacity:.75;padding-bottom:.4em}
-.cv-thumb{justify-content:flex-end;padding:10cqh 9cqw}
-.cv-thumb .cv-mk{font-size:clamp(16px,19cqw,40px);white-space:nowrap}
-.cv-thumb .cv-line{top:42%}
-.cv-wide .cv-q{font-size:clamp(20px,5.2cqw,68px);max-width:18ch}
-.cv-wide .cv-line{top:64%}
+.cv-shot{position:absolute;left:30%;top:28%;width:88%;height:auto;border-radius:14px;border:1px solid rgba(36,48,37,.12);box-shadow:0 30px 60px -24px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.12);transition:transform .8s var(--ease)}
+.cv-thumb .cv-shot{left:12%;top:16%;width:150%;border-radius:8px}
+.cv-wide .cv-shot{left:34%;top:16%;width:62%}
+.cv-wide .cv-mk{font-size:clamp(28px,6cqw,88px)}
+a:hover .cv-shot{transform:translate(-6px,-6px)}
 
 /* journal on the landing page */
 .jsec{padding:var(--sec) 0}
@@ -938,6 +931,53 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 /* parallax layers */
 [data-px]{will-change:transform}
 .sheet{transform-style:preserve-3d;transition:transform .6s var(--ease)}
+
+/* ===== round 8: tidy flow, compact week ===== */
+.kdia{height:auto!important;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:36px 20px 30px;overflow:visible}
+.kflow{--n:4;--dot:46px;position:relative}
+.ksteps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:12px}
+.ktrack{position:absolute;top:calc(var(--dot) / 2 - 1px);left:calc(50% / var(--n));right:calc(50% / var(--n));height:2px;background:var(--line-strong);border-radius:2px}
+.ktrack::after{content:"";position:absolute;inset:0;background:var(--accent-strong);transform-origin:left;transform:scaleX(var(--tp,0));border-radius:2px}
+.ktok{position:absolute;top:50%;left:0;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--live);box-shadow:0 0 0 4px var(--surface);transform:translateX(calc(var(--tp,0) * (100cqw)));z-index:2}
+.ktrack{container-type:inline-size}
+.kst{position:relative;z-index:1;display:grid;justify-items:center;text-align:center;gap:12px;animation:rise .5s var(--ease) both;animation-delay:calc(var(--k)*80ms)}
+.kdot{width:var(--dot);height:var(--dot);border-radius:50%;display:grid;place-items:center;background:var(--paper);border:1.5px solid var(--line-strong);color:var(--accent-ink);transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .35s}
+.kst.a .kdot{background:var(--moss);border-color:var(--moss);color:var(--live)}
+.kst.y .kdot{width:auto;padding:0 18px;border-radius:999px;background:var(--accent);border-color:var(--accent);color:var(--on-accent);font:700 15px/1 var(--display)}
+.kst.hot .kdot{transform:scale(1.12);box-shadow:0 0 0 5px var(--accent-soft)}
+.klab{display:grid;gap:4px;max-width:18ch}
+.klab em{font-style:normal;font:600 11.5px/1 var(--sans);color:var(--ink-3)}
+.kst.a .klab em{color:var(--accent-ink)}
+.klab b{font:620 15px/1.25 var(--sans);color:var(--ink)}
+.klab small{font-size:13px;line-height:1.4;color:var(--ink-2)}
+.kst.y .klab b{display:none}
+@media (max-width:900px){
+  .kdia{padding:22px 18px}
+  .ksteps{grid-template-columns:1fr;gap:18px}
+  .ktrack{top:calc(var(--dot) / 2);bottom:calc(var(--dot) / 2);left:calc(var(--dot) / 2 - 1px);right:auto;width:2px;height:auto;container-type:size}
+  .ktrack::after{transform-origin:top;transform:scaleY(var(--tp,0))}
+  .ktok{top:0;left:50%;margin:-7px 0 0 -7px;transform:translateY(calc(var(--tp,0) * 100cqh))}
+  .kst{grid-template-columns:var(--dot) minmax(0,1fr);justify-items:start;text-align:left;gap:14px;align-items:center}
+  .kst.y .kdot{padding:0;width:var(--dot);font-size:13px}
+  .klab{max-width:none}
+}
+.rm .ktok{display:none}
+/* the week: smaller parts and air under the nav while pinned */
+.week-sec .sec-h h2{font-size:clamp(2rem,1.2rem + 2vw,3rem)}
+.week-sec .sec-h p{font-size:16px}
+.week{margin-top:clamp(24px,3vw,36px)}
+.cal{padding:12px 16px 14px}
+.cal-top{padding:0 4px 10px;margin-bottom:8px}
+.cal-top b{font-size:24px}
+.cal-h span{padding:2px 6px 8px;font-size:12px}
+@media (min-width:901px){.week-sec .cal-b{grid-template-rows:repeat(16,18px) 10px repeat(3,18px)}.week-sec .hours{grid-template-rows:repeat(4,72px) 10px 54px}.week-sec .grid{background:repeating-linear-gradient(var(--line) 0 1px,transparent 1px 36px)}.week-sec .grid::after{top:calc(16*18px + 4px)}.week-sec .blk small{display:none}.week-sec .blk b{font-size:12.5px}}
+.now-list{gap:8px}
+.now-list li{padding:12px 16px;border-radius:14px}
+.now-list s{font-size:13px}
+.now-list span{font-size:clamp(15.5px,.9rem + .3vw,18px)}
+.ws-n b{font-size:clamp(48px,2rem + 2.6vw,80px)}
+.week-sum{gap:12px;padding:clamp(20px,2.4vw,30px)}
+.week-stick > .wrap{padding-top:8px;padding-bottom:48px}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
@@ -1287,8 +1327,8 @@ bob    tty1</pre></div>
      <button role="tab" id="kt3" aria-controls="kp" aria-selected="false" tabindex="-1">Ops<i><b></b></i></button>
     </div>
     <div class="kpanel" id="kp" role="tabpanel" aria-labelledby="kt0">
-     <div class="kp-t"><h3 id="kp-h"></h3><p id="kp-p"></p><span class="eg">Example session. Light steps are people, dark steps are agents.</span></div>
-     <div class="kdia" id="kdia"><span class="kline" aria-hidden="true"></span><svg class="kpath" aria-hidden="true"><path class="base"/><circle class="tok" r="6"/></svg></div>
+     <div class="kp-t"><h3 id="kp-h"></h3><p id="kp-p"></p><span class="eg">Example session.</span></div>
+     <div class="kdia" id="kdia"></div>
     </div>
    </div>
   </div>
@@ -1363,12 +1403,12 @@ bob    tty1</pre></div>
     <div class="sec-h"><h2 id="h-journal">Notes from the part where the product becomes real.</h2><p>Launch notes, engineering scars, and the decisions behind software that remembers. From the Konteks journal.</p></div>
     <div class="jgrid">
       <a class="jfeat" href="/journal/day-1-introducing-project-management-mode">
-        <span class="jcover"><span class="jpx" data-px="-.08"><span class="cv cv-moss cv-full" aria-hidden="true"><span class="cv-q">“We had solved delivery. We had not solved the plan.”</span><i class="cv-line"></i><span class="cv-foot"><span class="cv-mk">Day 1</span><span class="cv-src">Konteks journal</span></span></span></span></span>
+        <span class="jcover"><span class="jpx" data-px="-.08"><span class="cv cv-moss cv-full" aria-hidden="true"><span class="cv-mk">Day 1</span><img class="cv-shot" src="/journal-assets/estimate.webp" alt="" loading="lazy" decoding="async"></span></span></span>
         <span class="jfeat-t"><span class="jmeta"><time datetime="2026-08-17">August 17, 2026</time><span class="jtag">Launch notes</span><span>6 min read</span></span>
         <b class="jtitle">Day 1: introducing Project Management mode, and why it matters</b><span class="jdek">Konteks is live in beta on August 17. Delivery was never the hard part. Deciding what to build, in what order, at what cost, that was. Here is what we shipped for it.</span><span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span></span>
       </a>
       <div class="jside" data-px=".06">
-        <ul class="jlist"><li><a class="jrow" href="/journal/the-road-to-august-17"><span class="jthumb"><span class="cv cv-matcha cv-thumb" aria-hidden="true"><span class="cv-mk">17 Aug</span><i class="cv-line"></i></span></span><span class="jrow-t"><span class="jmeta"><time datetime="2026-07-16">July 16, 2026</time><span class="jtag">Launch notes</span></span><b>The road to August 17: software should remember</b><span class="jdek">A launch countdown, and the story of how years of real engineering work turned into a system that gives humans and agents the same durable context.</span></span></a></li></ul>
+        <ul class="jlist"><li><a class="jrow" href="/journal/the-road-to-august-17"><span class="jthumb"><span class="cv cv-matcha cv-thumb" aria-hidden="true"><img class="cv-shot" src="/journal-assets/activities.webp" alt="" loading="lazy" decoding="async"></span></span><span class="jrow-t"><span class="jmeta"><time datetime="2026-07-16">July 16, 2026</time><span class="jtag">Launch notes</span></span><b>The road to August 17: software should remember</b><span class="jdek">A launch countdown, and the story of how years of real engineering work turned into a system that gives humans and agents the same durable context.</span></span></a></li></ul>
         <a class="btn btn-line jall" href="/journal">All journal entries <svg class="ico"><use href="#i-arrow"/></svg></a>
       </div>
     </div>
@@ -1539,8 +1579,9 @@ let wTop = 64, wH = 0, wGathered = false;
 const measureWeek = () => {
   if (RM) return;
   wTrack.classList.remove("wpin");
-  wH = wStick.offsetHeight; wTop = Math.min(64, innerHeight - wH);
-  wTrack.classList.toggle("wpin", wH <= innerHeight - 64 + 24);
+  wH = wStick.offsetHeight; const air = 40;
+  wTop = Math.min(64 + air, innerHeight - wH);
+  wTrack.classList.toggle("wpin", wH <= innerHeight - 64 - 8);
   wTrack.style.setProperty("--wh", wH + "px"); wTrack.style.setProperty("--wt", wTop + "px");
   wGathered = false;
 };
@@ -1794,28 +1835,8 @@ const KINDS = [
     s: [["a", "i-pulse", "Watches", "Logs and alerts"], ["a", "i-alert", "Opens the issue", "Export times out past 5,000 rows"], ["a", "i-hammer", "Works the fix", "A plan with a ceiling"], ["y", "", "Yes", ""], ["a", "i-pr", "Fix shipped", "Tested pull request"]] },
 ];
 const ktrack = $("#ktrack"), ktabs = $$("#ktabs [role=tab]"), kdia = $("#kdia"), kpH = $("#kp-h"), kpP = $("#kp-p"), kpan = $("#kp");
-const kpathEl = $(".kpath .base", kdia), ktok = $(".kpath .tok", kdia);
-let kCur = -1, kLen = 0, kNodes = [];
-const kVertical = () => innerWidth <= 900;
-const kLayout = () => {
-  if (kCur < 0) return;
-  // one line: every step sits on it, people light, agents dark, the yes on the line itself
-  const V = kVertical(), n = kNodes.length, pad = V ? 16 : 22, gap = V ? 18 : 26;
-  kdia.style.height = V ? (n * 70 + (n - 1) * gap + pad * 2) + "px" : "";
-  const r = kdia.getBoundingClientRect();
-  const cell = ((V ? r.height : r.width) - pad * 2 - gap * (n - 1)) / n;
-  kNodes.forEach((el, i) => {
-    const c = pad + i * (cell + gap) + cell / 2;
-    el.style.width = el.dataset.side === "y" ? "" : (V ? Math.min(r.width * .72, 320) : cell) + "px";
-    el.style.left = (V ? r.width / 2 : c) + "px"; el.style.top = (V ? c : r.height / 2) + "px";
-  });
-  const first = kNodes[0].getBoundingClientRect(), last = kNodes[n - 1].getBoundingClientRect();
-  const d = V ? `M${r.width / 2} ${first.top - r.top + first.height / 2} L${r.width / 2} ${last.top - r.top + last.height / 2}`
-              : `M${first.left - r.left + first.width / 2} ${r.height / 2} L${last.left - r.left + last.width / 2} ${r.height / 2}`;
-  kpathEl.setAttribute("d", d); kLen = kpathEl.getTotalLength();
-  const s0 = V ? first.top - r.top + first.height / 2 : first.left - r.left + first.width / 2;
-  kNodes._t = kNodes.map(el => { const b = el.getBoundingClientRect(); return (V ? b.top - r.top + b.height / 2 : b.left - r.left + b.width / 2) - s0; });
-};
+let kCur = -1, kSteps = [], kTok = null, kFlow = null;
+const kLayout = () => {};
 const kShow = i => {
   if (i === kCur) return; kCur = i;
   ktabs.forEach((b, j) => { b.setAttribute("aria-selected", j === i); b.tabIndex = j === i ? 0 : -1; });
@@ -1823,13 +1844,10 @@ const kShow = i => {
   const k = KINDS[i];
   kpH.textContent = k.h; kpP.textContent = k.p;
   [kpH, kpP].forEach(e => { e.style.animation = "none"; void e.offsetWidth; e.style.animation = ""; });
-  kNodes.forEach(n => n.remove());
-  kNodes = k.s.map(([side, ic, t, d], n) => {
-    const el = document.createElement("div"); el.className = "knode " + side; el.dataset.side = side; el.style.setProperty("--k", n);
-    el.innerHTML = side === "y" ? t : `<b><svg class="ico"><use href="#${ic}"/></svg>${escT(t)}</b>${escT(d)}`;
-    kdia.append(el); return el;
-  });
-  kLayout(); kt0 = 0;
+  const who = { p: "You", a: "Agent", y: "You" };
+  kdia.innerHTML = `<div class="kflow" style="--n:${k.s.length}"><span class="ktrack" aria-hidden="true"><i class="ktok"></i></span><ol class="ksteps">${k.s.map(([side, ic, t, d], n) =>
+    `<li class="kst ${side}" style="--k:${n}"><span class="kdot">${side === "y" ? "Yes" : `<svg class="ico"><use href="#${ic}"/></svg>`}</span><span class="klab"><em>${who[side]}</em><b>${escT(t)}</b>${d ? `<small>${escT(d)}</small>` : ""}</span></li>`).join("")}</ol></div>`;
+  kFlow = $(".kflow", kdia); kTok = $(".ktok", kdia); kSteps = $$(".kst", kdia); kt0 = 0;
 };
 const kTrackP = () => { const r = ktrack.getBoundingClientRect(), span = ktrack.offsetHeight - (innerHeight - 64); return clamp((64 - r.top) / Math.max(1, span)); };
 const kDraw = () => {
@@ -1852,16 +1870,17 @@ ktabs.forEach((b, i) => {
 let kt0 = 0, kOn = false;
 seen(ktrack, v => kOn = v, 0);
 const kFrame = now => {
-  if (kOn && !RM && kLen) {
+  if (kOn && !RM && kFlow) {
     if (!kt0) kt0 = now;
-    const T = 1600 * kNodes.length, f = ((now - kt0) % (T + 900)) / T, l = kLen * smooth(clamp(f));
-    const q = kpathEl.getPointAtLength(l); ktok.setAttribute("cx", q.x); ktok.setAttribute("cy", q.y);
-    kNodes.forEach((n, j) => n.classList.toggle("hot", f <= 1 && Math.abs(l - kNodes._t[j]) < 30));
+    const n = kSteps.length, T = 1300 * n, f = ((now - kt0) % (T + 1000)) / T, p = smooth(clamp(f));
+    kFlow.style.setProperty("--tp", p);
+    const at = p * (n - 1);
+    kSteps.forEach((s, j) => { s.classList.toggle("hot", f <= 1 && Math.abs(at - j) < .22); s.classList.toggle("past", f <= 1 && at > j + .2); });
   }
   requestAnimationFrame(kFrame);
 };
 kShow(0); requestAnimationFrame(kFrame);
-if (RM) ktok.style.display = "none";
+
 
 /* ============ parallax: layers drift at their own speed as they pass ============ */
 const pxEls = RM ? [] : $$("[data-px]").map(el => [el, +el.dataset.px]);

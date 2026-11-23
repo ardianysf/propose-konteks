@@ -810,6 +810,53 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 [data-px]{will-change:transform}
 .sheet{transform-style:preserve-3d;transition:transform .6s var(--ease)}
 
+/* ===== round 8: tidy flow, compact week ===== */
+.kdia{height:auto!important;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:36px 20px 30px;overflow:visible}
+.kflow{--n:4;--dot:46px;position:relative}
+.ksteps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:12px}
+.ktrack{position:absolute;top:calc(var(--dot) / 2 - 1px);left:calc(50% / var(--n));right:calc(50% / var(--n));height:2px;background:var(--line-strong);border-radius:2px}
+.ktrack::after{content:"";position:absolute;inset:0;background:var(--accent-strong);transform-origin:left;transform:scaleX(var(--tp,0));border-radius:2px}
+.ktok{position:absolute;top:50%;left:0;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--live);box-shadow:0 0 0 4px var(--surface);transform:translateX(calc(var(--tp,0) * (100cqw)));z-index:2}
+.ktrack{container-type:inline-size}
+.kst{position:relative;z-index:1;display:grid;justify-items:center;text-align:center;gap:12px;animation:rise .5s var(--ease) both;animation-delay:calc(var(--k)*80ms)}
+.kdot{width:var(--dot);height:var(--dot);border-radius:50%;display:grid;place-items:center;background:var(--paper);border:1.5px solid var(--line-strong);color:var(--accent-ink);transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .35s}
+.kst.a .kdot{background:var(--moss);border-color:var(--moss);color:var(--live)}
+.kst.y .kdot{width:auto;padding:0 18px;border-radius:999px;background:var(--accent);border-color:var(--accent);color:var(--on-accent);font:700 15px/1 var(--display)}
+.kst.hot .kdot{transform:scale(1.12);box-shadow:0 0 0 5px var(--accent-soft)}
+.klab{display:grid;gap:4px;max-width:18ch}
+.klab em{font-style:normal;font:600 11.5px/1 var(--sans);color:var(--ink-3)}
+.kst.a .klab em{color:var(--accent-ink)}
+.klab b{font:620 15px/1.25 var(--sans);color:var(--ink)}
+.klab small{font-size:13px;line-height:1.4;color:var(--ink-2)}
+.kst.y .klab b{display:none}
+@media (max-width:900px){
+  .kdia{padding:22px 18px}
+  .ksteps{grid-template-columns:1fr;gap:18px}
+  .ktrack{top:calc(var(--dot) / 2);bottom:calc(var(--dot) / 2);left:calc(var(--dot) / 2 - 1px);right:auto;width:2px;height:auto;container-type:size}
+  .ktrack::after{transform-origin:top;transform:scaleY(var(--tp,0))}
+  .ktok{top:0;left:50%;margin:-7px 0 0 -7px;transform:translateY(calc(var(--tp,0) * 100cqh))}
+  .kst{grid-template-columns:var(--dot) minmax(0,1fr);justify-items:start;text-align:left;gap:14px;align-items:center}
+  .kst.y .kdot{padding:0;width:var(--dot);font-size:13px}
+  .klab{max-width:none}
+}
+.rm .ktok{display:none}
+/* the week: smaller parts and air under the nav while pinned */
+.week-sec .sec-h h2{font-size:clamp(2rem,1.2rem + 2vw,3rem)}
+.week-sec .sec-h p{font-size:16px}
+.week{margin-top:clamp(24px,3vw,36px)}
+.cal{padding:12px 16px 14px}
+.cal-top{padding:0 4px 10px;margin-bottom:8px}
+.cal-top b{font-size:24px}
+.cal-h span{padding:2px 6px 8px;font-size:12px}
+@media (min-width:901px){.week-sec .cal-b{grid-template-rows:repeat(16,18px) 10px repeat(3,18px)}.week-sec .hours{grid-template-rows:repeat(4,72px) 10px 54px}.week-sec .grid{background:repeating-linear-gradient(var(--line) 0 1px,transparent 1px 36px)}.week-sec .grid::after{top:calc(16*18px + 4px)}.week-sec .blk small{display:none}.week-sec .blk b{font-size:12.5px}}
+.now-list{gap:8px}
+.now-list li{padding:12px 16px;border-radius:14px}
+.now-list s{font-size:13px}
+.now-list span{font-size:clamp(15.5px,.9rem + .3vw,18px)}
+.ws-n b{font-size:clamp(48px,2rem + 2.6vw,80px)}
+.week-sum{gap:12px;padding:clamp(20px,2.4vw,30px)}
+.week-stick > .wrap{padding-top:8px;padding-bottom:48px}
+
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 </head>
@@ -1158,8 +1205,8 @@ bob    tty1</pre></div>
      <button role="tab" id="kt3" aria-controls="kp" aria-selected="false" tabindex="-1">Ops<i><b></b></i></button>
     </div>
     <div class="kpanel" id="kp" role="tabpanel" aria-labelledby="kt0">
-     <div class="kp-t"><h3 id="kp-h"></h3><p id="kp-p"></p><span class="eg">Example session. Light steps are people, dark steps are agents.</span></div>
-     <div class="kdia" id="kdia"><span class="kline" aria-hidden="true"></span><svg class="kpath" aria-hidden="true"><path class="base"/><circle class="tok" r="6"/></svg></div>
+     <div class="kp-t"><h3 id="kp-h"></h3><p id="kp-p"></p><span class="eg">Example session.</span></div>
+     <div class="kdia" id="kdia"></div>
     </div>
    </div>
   </div>

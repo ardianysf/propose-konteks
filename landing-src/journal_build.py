@@ -12,31 +12,23 @@ def month(e): return " ".join([e["date"].split()[0], e["date"].split()[-1]])
 
 # ---------- covers: authored SVG in the page's own world ----------
 def cover(e, mode="full"):
-    """Typographic cover: the entry's own line, set large on a field from the palette."""
-    f = e.get("field", "moss")
+    """A real screen from the product, set on a palette field."""
+    f = e.get("field", "moss"); shot = f'<img class="cv-shot" src="/journal-assets/{e["shot"]}.webp" alt="" loading="lazy" decoding="async">'
     if mode == "thumb":
-        return f'<span class="cv cv-{f} cv-thumb" aria-hidden="true"><span class="cv-mk">{esc(e["mark"])}</span><i class="cv-line"></i></span>'
-    return (f'<span class="cv cv-{f} cv-{mode}" aria-hidden="true"><span class="cv-q">\u201c{esc(e["pull"])}\u201d</span>'
-            f'<i class="cv-line"></i><span class="cv-foot"><span class="cv-mk">{esc(e["mark"])}</span><span class="cv-src">Konteks journal</span></span></span>')
+        return f'<span class="cv cv-{f} cv-thumb" aria-hidden="true">{shot}</span>'
+    return f'<span class="cv cv-{f} cv-{mode}" aria-hidden="true"><span class="cv-mk">{esc(e["mark"])}</span>{shot}</span>'
 
 COVER_CSS = r'''
-.cv{position:relative;display:flex;flex-direction:column;justify-content:space-between;width:100%;height:100%;padding:7cqh 6cqw;box-sizing:border-box;overflow:hidden}
-.jthumb,.jth,.jpx,.jc,.acover{container-type:size}
-.cv-moss{background:var(--moss);color:var(--on-moss)}
-.cv-matcha{background:var(--split-panel);color:var(--split-ink)}
-.cv-q{font:600 clamp(16px,7.4cqw,64px)/1.08 var(--display);letter-spacing:-.03em;max-width:15ch;text-wrap:balance}
-.cv-moss .cv-q{color:var(--on-moss)}
-.cv-line{position:absolute;left:0;right:0;top:68%;height:1px;background:var(--live);opacity:.9}
-.cv-matcha .cv-line{background:var(--accent-strong)}
-.cv-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
-.cv-mk{font:640 clamp(18px,9cqw,84px)/.9 var(--display);letter-spacing:-.04em}
+.cv{position:relative;display:block;width:100%;height:100%;overflow:hidden}
+.cv-moss{background:var(--moss)}
+.cv-matcha{background:var(--split-panel)}
+.cv-mk{position:absolute;left:6%;top:9%;font:640 clamp(20px,7cqw,64px)/.9 var(--display);letter-spacing:-.04em;z-index:1}
 .cv-moss .cv-mk{color:var(--live)}.cv-matcha .cv-mk{color:var(--accent-ink)}
-.cv-src{font:500 clamp(11px,2.2cqw,15px)/1.2 var(--sans);opacity:.75;padding-bottom:.4em}
-.cv-thumb{justify-content:flex-end;padding:10cqh 9cqw}
-.cv-thumb .cv-mk{font-size:clamp(16px,19cqw,40px);white-space:nowrap}
-.cv-thumb .cv-line{top:42%}
-.cv-wide .cv-q{font-size:clamp(20px,5.2cqw,68px);max-width:18ch}
-.cv-wide .cv-line{top:64%}
+.cv-shot{position:absolute;left:30%;top:28%;width:88%;height:auto;border-radius:14px;border:1px solid rgba(36,48,37,.12);box-shadow:0 30px 60px -24px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.12);transition:transform .8s var(--ease)}
+.cv-thumb .cv-shot{left:12%;top:16%;width:150%;border-radius:8px}
+.cv-wide .cv-shot{left:34%;top:16%;width:62%}
+.cv-wide .cv-mk{font-size:clamp(28px,6cqw,88px)}
+a:hover .cv-shot{transform:translate(-6px,-6px)}
 '''
 
 # ---------- the landing section ----------
