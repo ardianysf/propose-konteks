@@ -1831,3 +1831,37 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
 .rel-thread{display:grid;gap:16px}
 .rel-thread .tl-cmts:empty{display:none}
 @media (max-width:560px){.rel-row{padding:14px 16px}.rel-h time{margin-left:0}.rel-items li{grid-template-columns:24px minmax(0,1fr)}.rel-items .btn{grid-column:2;justify-self:start}}
+
+/* ===== Composers on a phone =====
+   Comment on a card: the text gets the full width and grows with what is typed; Cancel and Comment sit under it, thumb-height.
+   Note on an initiative: one quiet row while idle; once focused it becomes the whole bottom of the screen (tab bar and the
+   Start something sticker step aside), and the tools appear under the text. */
+html,body{overflow-x:clip}
+@media (max-width:560px){
+  .tl-cmt{gap:0}
+  .tl-cmt>.av{display:none}
+  .tl-cmt .compose{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 10px 8px}
+  .tl-cmt .compose textarea{grid-column:1/-1;min-height:44px;max-height:40vh;padding:4px 4px 2px;line-height:1.45;overflow-y:auto}
+  .tl-cmt .compose [data-cx]{grid-column:2}
+  .tl-cmt .compose .btn{height:40px;padding:0 14px}
+  .tl-cmt-note{font-size:var(--t12)}
+}
+@media (max-width:860px){
+  html:has(:is(textarea,input[type=text],input:not([type])):focus) .tabbar,
+  html:has(:is(textarea,input[type=text],input:not([type])):focus) .start-sticker,
+  html:has(:is(textarea,input[type=text],input:not([type])):focus) .kxv{display:none}
+  html:has(.cx-dock textarea:focus) .cx-dock{bottom:0;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+  .cx-dock .cx textarea{max-height:min(200px,32vh);line-height:1.45}
+  .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown){grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:6px 6px 6px 10px}
+  .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown) .cx-bar>:not(.cx-send){display:none}
+  .cx-dock .cx:not(:focus-within):has(textarea:placeholder-shown) textarea{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cx-dock .cx .cx-send{height:36px;padding:0 14px}
+}
+/* The design-system bar on a phone: brand and tools on one row, the four pages on their own row beneath. */
+@media (max-width:640px){:root:not(.pb-off){--pb:88px}}
+@media (max-width:640px){
+  .pbar-in{flex-wrap:wrap;height:auto;row-gap:0;padding-top:6px}
+  .pbar-in .brand{flex:1}
+  .pnav{order:3;flex:0 0 100%;margin:0 -6px;padding:2px 0 6px}
+  .pbar .synthetic{display:none}
+}

@@ -40,6 +40,13 @@ function bindTopbar() {
   $("#soundBtn").onclick = () => { setSound(!S.sound); render(); };
   $("#themeBtn").onclick = () => { const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; r.dataset.theme = dark ? "light" : "dark"; try { localStorage.setItem("kx-theme", r.dataset.theme); } catch (e) {} };
 }
+/* Every comment box grows with its text, and on a phone it scrolls itself clear of the keyboard. */
+const composeGrow = ta => { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, innerHeight * .4) + "px"; };
+document.addEventListener("input", e => { if (e.target.matches(".compose textarea")) composeGrow(e.target); });
+document.addEventListener("focusin", e => {
+  if (!e.target.matches("textarea") || innerWidth > 860) return;
+  setTimeout(() => (e.target.closest(".cx-dock") ? null : e.target.closest(".tl-cmt, .compose"))?.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }), 280);
+});
 function render() {
   /* Sub-routes: "#access/people" gives every Access tab its own URL (UX-032). */
   let [key, sub] = location.hash.slice(1).split("/");
