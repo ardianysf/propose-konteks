@@ -1472,7 +1472,7 @@ input[type=checkbox].switch:disabled{opacity:.45;cursor:not-allowed}
   .auth-s{grid-template-columns:minmax(0,1fr);grid-template-rows:none;min-height:0}
   .auth-s .s-left{display:contents}
   .s-top{order:1;padding:20px 20px 0}
-  .s-form{order:2;width:auto;max-width:440px;margin:0;padding:clamp(48px,12vh,96px) 20px 40px;gap:14px;align-self:start}
+  .s-form{order:2;width:auto;max-width:440px;margin:0;padding:32px 20px 56px;gap:14px;align-self:start;align-content:center;min-height:calc(100svh - 132px)}
   .s-form h1{font-size:clamp(36px,10vw,44px);line-height:1.02}
   .s-form .btn.google{margin-top:14px}
   .s-card-m{display:none}
