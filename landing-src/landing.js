@@ -11,7 +11,7 @@ $("#theme").onclick = () => {
   const r = document.documentElement;
   const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
   r.dataset.theme = dark ? "light" : "dark";
-  try { localStorage.setItem("kx-lp-theme", r.dataset.theme); } catch (e) {}
+  try { localStorage.setItem("kx-theme", r.dataset.theme); } catch (e) {}
 };
 
 /* nav edge, menu closes on pick */

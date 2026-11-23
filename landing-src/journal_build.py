@@ -97,7 +97,7 @@ def page(title, desc, body, extra_css, js, active="journal"):
     navh = land[land.index('<header class="nav"'):land.index("</header>") + 9]
     fs = land.index('<footer class="foot moss">'); footh = land[fs:land.index("</footer>", fs) + 9]
     for a in ("product", "workflow", "sessions", "enablement", "connect", "top"):
-        navh = navh.replace(f'href="#{a}"', f'href="/landingpage#{a}"'); footh = footh.replace(f'href="#{a}"', f'href="/landingpage#{a}"')
+        navh = navh.replace(f'href="#{a}"', f'href="/#{a}"'); footh = footh.replace(f'href="#{a}"', f'href="/#{a}"')
     navh = navh.replace(f'href="/{active}"', f'href="/{active}" aria-current="page"', 1)
     logo = "data:image/png;base64," + base64.b64encode(open(os.path.join(HERE, "assets/konteks.png"), "rb").read()).decode()
     out = f'''<!doctype html>
@@ -107,8 +107,9 @@ def page(title, desc, body, extra_css, js, active="journal"):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
-<script>document.documentElement.classList.add("js");try{{var t=localStorage.getItem("kx-lp-theme");if(t)document.documentElement.dataset.theme=t}}catch(e){{}}</script>
+<script>document.documentElement.classList.add("js");try{{var t=localStorage.getItem("kx-theme")||localStorage.getItem("kx-lp-theme");if(t)document.documentElement.dataset.theme=t}}catch(e){{}}</script>
 <style>
+@view-transition{{navigation:auto}}
 {fonts}
 {disp}
 {tokens}
@@ -130,13 +131,14 @@ def page(title, desc, body, extra_css, js, active="journal"):
 <script>
 {js}
 </script>
+<script src="/kx-views.js" defer></script>
 </body>
 </html>'''
     return out.replace("@@IMG:konteks@@", logo)
 
 COMMON_JS = r'''
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
-$("#theme").onclick = () => { const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; r.dataset.theme = dark ? "light" : "dark"; try { localStorage.setItem("kx-lp-theme", r.dataset.theme); } catch (e) {} };
+$("#theme").onclick = () => { const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; r.dataset.theme = dark ? "light" : "dark"; try { localStorage.setItem("kx-theme", r.dataset.theme); } catch (e) {} };
 $$(".menu-pop a").forEach(a => a.addEventListener("click", () => $(".menu").removeAttribute("open")));
 const nav = $("#nav"); const stuck = () => nav.classList.toggle("stuck", scrollY > 8); addEventListener("scroll", stuck, { passive: true }); stuck();
 '''
@@ -304,12 +306,12 @@ def article_page(i):
       <div class="prose" id="prose">{"".join(parts)}</div>
       <aside class="aside" aria-label="Share and next steps">
         <button class="share" type="button" id="share"><svg class="ico"><use href="#i-copy"/></svg><span>Copy link</span></button>
-        <a class="btn btn-go" href="https://app.konteks.io/">Open the app <svg class="ico"><use href="#i-out"/></svg></a>
+        <a class="btn btn-go" href="/login">Open the app <svg class="ico"><use href="#i-arrow"/></svg></a>
         <p>{e["read"].capitalize()}. Published {e["date"]}.</p>
       </aside>
     </div>
     <footer class="aend">
-      <div class="cta"><div><h2>Start building in Konteks.</h2><p>Or write to hello@konteks.io if you would like a human first.</p></div><div class="acts"><a class="btn btn-go" href="/landingpage#connect">Connect your agent <svg class="ico"><use href="#i-arrow"/></svg></a><a class="btn btn-line" href="mailto:hello@konteks.io">Email us</a></div></div>
+      <div class="cta"><div><h2>Start building in Konteks.</h2><p>Or write to hello@konteks.io if you would like a human first.</p></div><div class="acts"><a class="btn btn-go" href="/#connect">Connect your agent <svg class="ico"><use href="#i-arrow"/></svg></a><a class="btn btn-line" href="mailto:hello@konteks.io">Email us</a></div></div>
       <nav class="pn" aria-label="More entries">{prev}{nxt}</nav>
     </footer>
   </div>

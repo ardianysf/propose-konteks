@@ -315,7 +315,7 @@ function pageLeaders() {
    own mark: work queued, moving, delivered, and the few waiting for a person. The sign-in sits in a clearing at the
    centre. Hover a waiting glyph to see what it waits for; pressing Sign in sets the waiting ones moving again. */
 /* Three sign-in designs for comparison, one process: Google-only Backstage sign-in with the same help and error.
-   A (#login) the field, B (#login/night) the dark contour night, C (#login/split) sign-in beside the product. */
+   A (/login) the field, B (/login#night) the dark contour night, C (/login#split) sign-in beside the product. */
 const LOGIN_VARIANTS = [["", "Field"], ["night", "Night"], ["split", "Split"]];
 function loginBits() {
   const busy = S.loginStep === "busy", err = S.loginStep === "error";
@@ -323,7 +323,7 @@ function loginBits() {
     err: err ? `<div class="callout danger" role="alert">${ic("circle-alert")}<span class="grow"><b>The Google sign-in window closed before it finished.</b> Allow pop-ups for app.konteks.io and try again.</span></div>` : "",
     btn: `<button class="btn btn-primary google" type="button" id="gBtn" ${busy ? 'disabled aria-busy="true"' : ""}>${busy ? `<span class="spin"></span>Waiting for Google…` : `${ic("log-in")}Sign in with Google`}</button>`,
     help: `<p class="auth-help">Use the Google account your workspace invited.</p>`,
-    base: `<footer class="auth-base"><span>${ic("shield-check")}Runs on your team's computers. Konteks never holds a provider key.</span><span class="auth-demo"><span class="label">Demo</span><nav class="auth-vars" aria-label="Sign-in designs">${LOGIN_VARIANTS.map(([k, l]) => `<a href="#login${k ? "/" + k : ""}" ${(S.loginVar || "") === k ? 'aria-current="page"' : ""}>${l}</a>`).join("")}</nav><button class="btn btn-ghost btn-sm" type="button" id="gErr">Show the error state</button></span></footer>`,
+    base: `<footer class="auth-base"><span>${ic("shield-check")}Runs on your team's computers. Konteks never holds a provider key.</span><span class="auth-demo"><span class="label">Demo</span><nav class="auth-vars" aria-label="Sign-in designs">${LOGIN_VARIANTS.map(([k, l]) => `<a href="#${k}" ${(S.loginVar || "") === k ? 'aria-current="page"' : ""}>${l}</a>`).join("")}</nav><button class="btn btn-ghost btn-sm" type="button" id="gErr">Show the error state</button></span></footer>`,
   };
 }
 function pageLogin() {

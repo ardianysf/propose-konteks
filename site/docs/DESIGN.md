@@ -781,3 +781,28 @@ The developer package lives in `konteks-redesign/code/` and is generated from `k
 - **`components.css`** and **`inventory.csv`:** every catalog component, and every live element and audit finding mapped to its component and demo screen.
 - Comments follow the live app, not a guess (28 Oct 2026): the user asked how initiatives and comments work; the live app was tested with the user's approval (one test initiative in Technical Support Test, one @konteks comment, three Activities comments). The prototype had a Comment button on replies and treated an Activities comment as part of the initiative; both were wrong and are fixed. Sub-comments stay out by design: a flat thread under the note is easier to follow when an agent answers in it too.
 - Releases follow the live page (6 Nov 2026): the list groups "Release candidates" before "Released" in one bordered list each; a row is the icon (rocket / box), the name ("Release candidate" or the version in mono), the System as quiet text, the time on the right, the summary, and "N initiatives · SP". The row opens the release: back link, System and status as quiet text, one primary action (Ship for a candidate, behind a confirm dialog because it changes what customers get; Announce for a release), one card with what will ship or what shipped, the state line, and the settlement as a Sunken Rice row with a hairline leader to the SP, then the release's comments (one level, reactions only). The sidebar shows the number of candidates on Releases, as live.
+
+## Landing page (/landingpage)
+
+The marketing page is a Persuade surface on top of the app's tokens. It adds one display face and one compositional rule. It brings in no new colours.
+
+- **Concept: the Yes line.** A 1px matcha (`#8FBF6A`) rule runs full-bleed and divides people's paper (`--bg`) from the agents' moss (`--deep`).
+  - Above the line sits what people own: the note, the plan, the vision.
+  - Below it sits what agents run: lanes, review, browser test.
+  - The hero note sheet ends exactly on the line, with a pill **Yes** knob straddling it.
+  - The loop in *How it works* and the closing actions reuse the same line.
+- **Type.** Bricolage Grotesque (variable 200–800, self-hosted woff2 inlined at build) is used only for display: headings, the big ledger words, and the Yes knob. Inter stays the body face. JetBrains Mono is reserved for agent logs, code and data.
+  - Display sizes are fluid and off the app ramp on purpose: h1 is `clamp(2.75rem, …, 4.75rem)`, section h2 is `clamp(2.1rem, …, 3.75rem)`, and the close h2 goes up to 6rem.
+- **Structure.** Hairline ledgers, sheets and tables, never rows of equal feature cards. There are no eyebrows above headings: a heading pairs with a short line beside it (`.sec-h`).
+- **Motion.** There is one authored moment: pressing Yes, or a single autoplay when the knob is seen.
+  1. The knob fills.
+  2. A light sweeps along the line.
+  3. Three lanes type their logs.
+  4. A receipt prints.
+
+  Supporting motion:
+  - The *Gone* items get a strike drawn through them.
+  - The loop path draws with scroll and lights each node it reaches.
+
+  Under reduced motion, the end state shows at once.
+- **Demonstration data.** Every invented sample (note, lanes, receipt, Activities, systems, computers, session flows) carries an "Example" label.

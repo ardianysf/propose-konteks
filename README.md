@@ -4,8 +4,12 @@ Live: https://propose-konteks.vercel.app
 
 | Path | What it is |
 |---|---|
-| `/` | The UI release prototype: pitch, design system, component catalog, code package, and the full demo app with sample data. |
-| `/landingpage` | The marketing landing page from the earlier proposal. |
+| `/` | The landing page, with `/pricing`, `/security`, `/docs`, `/journal`, `/about`, `/contact`, `/privacy`, `/terms`. |
+| `/design-system` | Pitch, foundations, component catalog and code package (`#foundations`, `#components`, `#code`). |
+| `/login` | The sign-in page and its variants (`#night`, `#split`). |
+| `/app` | The full demo app with sample data (`#session`, `#releases`, `#runtimes`, …). |
+
+Every page carries the same "View" tab (`site/kx-views.js`) to move between the four, with Alt+1…4 as shortcuts; on a phone the demo app lists them in its More drawer. Old links (`/#components`, `/#work`, `/landingpage`) forward to the new addresses. Moves between views use cross-document view transitions, and the theme carries across.
 
 The redesign keeps every process and flow of app.konteks.io and changes only how it looks and behaves on screen. All data in the demo is synthetic.
 
@@ -13,7 +17,7 @@ The redesign keeps every process and flow of app.konteks.io and changes only how
 
 | Path | Purpose |
 |---|---|
-| `site/` | What Vercel serves (static, no build step). `index.html` is the built prototype; `code/` holds the developer package the Kode page downloads; `docs/` the reference documents; `downloads/konteks-ui-lengkap.zip` the full package (code, documents, prototype); `landingpage.html` with its assets. |
+| `site/` | What Vercel serves (static, no build step). `index.html` is the landing page (built by `landing-src/build.sh`), `prototype.html` the built prototype served at `/design-system`, `/login` and `/app`; `code/` holds the developer package the Kode page downloads; `docs/` the reference documents; `downloads/konteks-ui-lengkap.zip` the full package (code, documents, prototype). |
 | `prototype/` | Source of the prototype: `src/` (tokens, components, pages as plain JS/CSS), `tools/` (package generator, colour lint), `build.sh`, `publish.sh`. |
 | `DESIGN.md` | The design system: tokens, type, components, overlay grammar, motion, sound, decisions. |
 | `PRODUCT.md` | Product truth used for design decisions. |
@@ -24,7 +28,8 @@ The redesign keeps every process and flow of app.konteks.io and changes only how
 ## Update the site
 
 ```sh
-sh prototype/publish.sh   # rebuilds prototype/index.html and copies it to site/
+sh prototype/publish.sh      # rebuilds the prototype into site/prototype.html
+(cd landing-src && sh build.sh)   # rebuilds the landing page and its pages into site/
 git add -A && git commit -m "Update prototype" && git push
 ```
 
@@ -32,4 +37,4 @@ git add -A && git commit -m "Update prototype" && git push
 
 ## Deploy
 
-`vercel.json` sets the project to a static site: no install, no build, output `site/`, clean URLs, and `/landingpage` → `landingpage.html`. It overrides the framework settings of the old Vite project, so no dashboard change is needed.
+`vercel.json` sets the project to a static site: no install, no build, output `site/`, clean URLs, rewrites of `/design-system`, `/login` and `/app` to `prototype.html`, and a redirect from `/landingpage` to `/`. It overrides the framework settings of the old Vite project, so no dashboard change is needed.

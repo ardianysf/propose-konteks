@@ -7,9 +7,45 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/landingpage", "destination": "/landingpage.html" }
+    {
+      "source": "/design-system",
+      "destination": "/prototype.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/prototype.html"
+    },
+    {
+      "source": "/app",
+      "destination": "/prototype.html"
+    }
   ],
   "headers": [
-    { "source": "/code/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=300" }] }
+    {
+      "source": "/code/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/landingpage",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/prototype",
+      "destination": "/design-system",
+      "permanent": false
+    },
+    {
+      "source": "/index",
+      "destination": "/",
+      "permanent": false
+    }
   ]
 }

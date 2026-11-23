@@ -15,9 +15,10 @@ import journal_build as jb
 out=out.replace('<!--@@JOURNAL@@-->',jb.landing_section()).replace('/*@@JCSS@@*/',jb.COVER_CSS+jb.JSEC_CSS)
 for n in ['claude','codex','konteks']:
     out=out.replace('@@IMG:'+n+'@@','data:image/png;base64,'+base64.b64encode(open('assets/'+n+'.png','rb').read()).decode())
-open('../site/landingpage.html','w').write(out)
+open('../site/index.html','w').write(out)
 print(len(out))
 PY
+cp kx-views.js ../site/kx-views.js
 python3 journal_build.py ../site ../prototype/src
 python3 pages_build.py ../site ../prototype/src
 python3 site_pages.py ../site ../prototype/src

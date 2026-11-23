@@ -11,19 +11,19 @@ PLANS = [
   dict(k="free", name="Free", for_="Explore one real Software System with your own model key.", price=0, unit="forever", minSeats=1, maxSeats=1, perSeat=0, pooled=False,
        priceLabel="Rp0", note="1 user", sp="0 monthly, plus a 0.5 SP one-time onboarding grant",
        feats=["1 user, 1 System, 2 repositories", "1 concurrent agent run", "Read-only Core MCP", "Automatic catalog generation", "Story Point top-ups available"],
-       cta=("Start building", "https://app.konteks.io/")),
+       cta=("Start building", "/login")),
   dict(k="builder", name="Builder", for_="For an individual builder shipping governed repository work.", price=304000, unit="per user / month", minSeats=1, perSeat=2, pooled=False,
        priceLabel="Rp304,000", note="1 seat minimum", sp="2 SP per seat / month",
        feats=["Up to 3 Systems and 10 repositories", "1 concurrent agent run", "Read and write Core MCP", "Basic validation runtime", "Standard support"],
-       cta=("Start building", "https://app.konteks.io/")),
+       cta=("Start building", "/login")),
   dict(k="team", name="Team", for_="For engineering teams coordinating agents across a shared catalog.", price=624000, unit="per user / month", minSeats=3, perSeat=6, pooled=True,
        priceLabel="Rp624,000", note="3 seats, Rp1,872,000 minimum", sp="6 pooled SP per seat / month", star="Most teams start here",
        feats=["Up to 25 Systems and 100 repositories", "3 concurrent agent runs", "Advanced validation and team presence", "Audit logs and advanced budgets", "Provider policy controls"],
-       cta=("Start building", "https://app.konteks.io/")),
+       cta=("Start building", "/login")),
   dict(k="scale", name="Scale", for_="For larger organizations that need identity automation and dedicated capacity.", price=1264000, unit="per user / month", minSeats=10, perSeat=15, pooled=True,
        priceLabel="Rp1,264,000", note="10 seats, Rp12,640,000 minimum", sp="15 pooled SP per seat / month",
        feats=["Up to 100 Systems and 500 repositories", "10 concurrent agent runs", "SSO and SCIM", "Dedicated runtime", "Priority support"],
-       cta=("Start building", "https://app.konteks.io/")),
+       cta=("Start building", "/login")),
   dict(k="enterprise", name="Enterprise", for_="For unrestricted estates, deployment control, and enterprise evidence requirements.", price=None, unit="annual agreement", minSeats=None, perSeat=None,
        priceLabel="Custom", note="USD 2,500 monthly platform minimum", sp="USD 1,000 monthly committed SP spend minimum",
        feats=["Unlimited users, Systems, repositories, and runs", "On-premise and VPC deployment", "Dedicated runtime and support", "Enterprise audit export", "Custom governance and commercial terms"],
@@ -108,7 +108,7 @@ def pricing():
 <section class="px-close moss" aria-labelledby="h-pclose">
   <div class="wrap px-close-in">
     <h2 id="h-pclose">Start with Free. Say yes when the quote is right.</h2>
-    <div class="acts"><a class="btn btn-go" href="https://app.konteks.io/">Start building <svg class="ico"><use href="#i-out"/></svg></a><a class="btn btn-line" href="mailto:hello@konteks.io?subject=Konteks%20Enterprise">Talk to us about Enterprise <svg class="ico"><use href="#i-arrow"/></svg></a></div>
+    <div class="acts"><a class="btn btn-go" href="/login">Start building <svg class="ico"><use href="#i-arrow"/></svg></a><a class="btn btn-line" href="mailto:hello@konteks.io?subject=Konteks%20Enterprise">Talk to us about Enterprise <svg class="ico"><use href="#i-arrow"/></svg></a></div>
   </div>
 </section>'''
     css = SHARED_CSS + PRICING_CSS

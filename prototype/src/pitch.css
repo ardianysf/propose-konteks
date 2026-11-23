@@ -86,7 +86,7 @@
   :root.pb-off .pb-tab-m{display:inline-flex;margin-left:auto}
 }
 /* The tab hangs in the top-right corner; the rows it would touch keep clear of it. */
-@media (min-width:861px){:root.pb-off .newver,:root.pb-off .main>.top{padding-right:96px}}
+@media (min-width:861px){:root.pb-off .newver,:root.pb-off .main>.top{padding-right:140px}}
 
 /* ---------- Pitch overview ---------- */
 .ov .doc-in{gap:72px}
