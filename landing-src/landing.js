@@ -35,8 +35,8 @@ copyBtn.onclick = async () => {
   copyBtn._t = setTimeout(() => { l.textContent = "Copy"; copyBtn.classList.remove("done"); }, 2400);
 };
 
-/* ============ HERO: a teammate types, Rina says yes, agents run, a receipt prints. Loops on its own. ============ */
-const hero = $(".hero"), sheet = $("#sheet"), yes = $("#yes"), yesL = $("#yes-l"), lanes = $$(".lane"), cur = $("#cursor"), rc = $("#rcount");
+/* ============ HERO: pinned until the demo is done. Time plays it; scrolling plays it faster. ============ */
+const pin = $("#heroPin"), hero = $(".hero"), sheet = $("#sheet"), yes = $("#yes"), yesL = $("#yes-l"), lanes = $$(".lane"), cur = $("#cursor"), rc = $("#rcount"), react = $(".react", sheet);
 const SCRIPT = [
   [300, 0, "run", "Reading the Software System: <b>billing-web</b>, <b>invoices-api</b>"],
   [1900, 0, "run", "Editing <b>export.ts</b> and <b>InvoiceTable.tsx</b>"],
@@ -51,67 +51,107 @@ const SCRIPT = [
   [11000, 2, "done", "Checked the file: <b>120 rows</b>, tax column there"],
 ];
 const LABEL = { run: "Running", done: "Done", idle: "Idle" };
-let timers = [], phase = "idle", heroVisible = true;
-const later = (ms, fn) => timers.push(setTimeout(fn, ms));
-const setLane = (i, st, html, type) => {
+const YES_AT = 3700, FOLD_AT = 16000, PRINT_AT = 16400, TOTAL = 17200;
+const laneKey = [];
+const strip = h => h.replace(/<[^>]+>/g, "");
+const escT = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+const drawLane = (i, lm) => {
+  let step = null; for (const s of SCRIPT) if (s[1] === i && s[0] <= lm) step = s;
+  const st = step ? step[2] : "idle";
   const ln = lanes[i], log = $(".log", ln);
-  ln.classList.remove("run", "done"); if (st !== "idle") ln.classList.add(st);
+  let html;
+  if (!step) html = "Waiting for yes";
+  else {
+    const plain = strip(step[3]), n = Math.floor((lm - step[0]) / 9);
+    html = n >= plain.length ? step[3] + (st === "run" ? '<span class="car"></span>' : "") : escT(plain.slice(0, n)) + '<span class="car"></span>';
+  }
+  const key = st + "|" + html;
+  if (laneKey[i] === key) return; laneKey[i] = key;
+  ln.classList.toggle("run", st === "run"); ln.classList.toggle("done", st === "done");
   $(".state span", ln).textContent = LABEL[st];
-  if (!type) { log.innerHTML = html; return; }
-  const plain = html.replace(/<[^>]+>/g, ""); let n = 0;
-  const car = '<span class="car"></span>';
-  const tick = () => {
-    n += 2; log.innerHTML = plain.slice(0, n).replace(/&/g, "&amp;").replace(/</g, "&lt;") + car;
-    if (n < plain.length) later(16, tick); else log.innerHTML = html + (st === "run" ? car : "");
-  };
-  tick();
+  log.innerHTML = html;
 };
-const finalState = () => {
-  timers.forEach(clearTimeout); timers = [];
-  sheet.classList.remove("wait"); cur.className = "cursor"; rc.textContent = "3";
-  hero.classList.add("go", "printed"); yesL.textContent = "Yes, approved";
-  const last = {}; SCRIPT.forEach(s => last[s[1]] = s);
-  Object.values(last).forEach(s => setLane(s[1], "done", s[3]));
-  phase = "done";
+let lastMs = -1;
+const renderHero = ms => {
+  if (lastMs < 1400 && ms >= 1400 && ms < 2600) { react.classList.remove("bump"); void react.offsetWidth; react.classList.add("bump"); }
+  sheet.classList.toggle("wait", ms < 1400);
+  rc.textContent = ms < 1400 ? "2" : "3";
+  cur.classList.toggle("on", ms >= 2300 && ms < 4300);
+  cur.classList.toggle("go", ms >= 2700 && ms < 4300);
+  cur.classList.toggle("click", ms >= 3550 && ms < 3900);
+  const go = ms >= YES_AT;
+  if (go !== hero.classList.contains("go")) { hero.classList.toggle("go", go); yesL.textContent = go ? "Yes, approved" : "Yes"; }
+  const lm = ms - YES_AT; for (let i = 0; i < lanes.length; i++) drawLane(i, lm);
+  hero.classList.toggle("folded", ms >= FOLD_AT);
+  hero.classList.toggle("printed", ms >= PRINT_AT);
+  pin.style.setProperty("--pp", clamp(ms / TOTAL));
+  lastMs = ms;
 };
-const reset = () => {
-  timers.forEach(clearTimeout); timers = [];
-  hero.classList.remove("go", "printed"); yesL.textContent = "Yes";
-  sheet.classList.add("wait"); rc.textContent = "2"; cur.className = "cursor";
-  lanes.forEach((_, i) => setLane(i, "idle", "Waiting for yes"));
-  phase = "idle";
+let clock = 0, heroVisible = true, replayFrom = 0, scrollMs = 0, pinned = false, prevT = 0;
+let stTop = 64, heroH = 0;
+const measurePin = () => {
+  document.documentElement.classList.remove("pinned");
+  const had = [hero.classList.contains("folded"), hero.classList.contains("printed")];
+  const lanesEl = $(".lanes", hero); lanesEl.style.minHeight = "";
+  hero.classList.add("measure");
+  hero.classList.remove("folded", "printed"); const l1 = lanesEl.offsetHeight;
+  hero.classList.add("folded", "printed"); const l2 = lanesEl.offsetHeight;
+  lanesEl.style.minHeight = Math.max(l1, l2) + "px";
+  const h1 = hero.offsetHeight, h2 = h1;
+  hero.classList.remove("measure");
+  hero.classList.toggle("folded", had[0]); hero.classList.toggle("printed", had[1]);
+  heroH = Math.max(h1, h2);
+  stTop = Math.min(64, innerHeight - heroH);
+  pinned = !RM;
+  pin.style.setProperty("--hh", heroH + "px"); pin.style.setProperty("--st", stTop + "px");
+  document.documentElement.classList.toggle("pinned", pinned);
 };
-const run = () => {
-  if (phase === "run") return;
-  timers.forEach(clearTimeout); timers = [];
-  sheet.classList.remove("wait");
-  phase = "run";
-  hero.classList.remove("go"); void hero.offsetWidth; hero.classList.add("go");
-  yesL.textContent = "Yes, approved";
-  SCRIPT.forEach(([t, i, st, h]) => later(t, () => setLane(i, st, h, true)));
-  later(11800, () => { hero.classList.add("printed"); phase = "done"; });
-  later(19000, () => { if (heroVisible) cycle(); else phase = "waiting"; });
+const pinProgress = () => {
+  if (!pinned) return 0;
+  const r = pin.getBoundingClientRect(), span = pin.offsetHeight - heroH;
+  return clamp((stTop - r.top) / Math.max(1, span));
 };
-/* one cycle: Ayu finishes typing, a reaction lands, Rina's cursor presses yes */
-const cycle = () => {
-  reset();
-  later(1400, () => { sheet.classList.remove("wait"); rc.textContent = "3"; $(".react", sheet).classList.add("bump"); later(600, () => $(".react", sheet).classList.remove("bump")); });
-  later(2300, () => cur.classList.add("on"));
-  later(2700, () => cur.classList.add("go"));
-  later(3700, () => { cur.classList.add("click"); run(); });
-  later(4300, () => cur.classList.remove("on", "click"));
+const heroFrame = now => {
+  const dt = prevT ? Math.min(100, now - prevT) : 0; prevT = now;
+  if (heroVisible) clock += dt;
+  const sp = pinProgress();
+  scrollMs = sp > replayFrom ? (sp - replayFrom) / Math.max(.001, 1 - replayFrom) * TOTAL * 1.18 : 0;
+  let ms = Math.min(TOTAL, Math.max(clock, scrollMs));
+  // after a long hold at the top, play it again
+  if (clock > TOTAL + 9000 && sp < .02) { clock = 0; replayFrom = 0; }
+  renderHero(ms);
+  requestAnimationFrame(heroFrame);
 };
-yes.addEventListener("click", () => { if (phase !== "run") { cur.className = "cursor"; run(); } });
-$("#replay").addEventListener("click", () => cycle());
-if (RM) finalState();
-else {
-  seen(hero, v => { heroVisible = v; if (v && (phase === "waiting" || phase === "idle" && !timers.length)) cycle(); }, .15);
-}
+yes.addEventListener("click", () => { clock = Math.max(clock, YES_AT); });
+$("#replay").addEventListener("click", () => { clock = 0; replayFrom = pinProgress(); });
+if (RM) renderHero(TOTAL);
+else { seen(hero, v => heroVisible = v, .15); measurePin(); requestAnimationFrame(heroFrame); }
 
-/* ============ ledger: strike the old, slide in the new ============ */
-const ledger = $("#ledger");
-if (RM) ledger.classList.add("still");
-else { ledger.classList.add("arm"); seen(ledger, v => { if (v) ledger.classList.add("on"); }, .3); }
+/* ============ the same week: blocks leave the calendar as you scroll ============ */
+const week = $("#week"), blks = $$(".blk", week), nows = $$(".now-list li", week);
+const weekDraw = () => {
+  const r = week.getBoundingClientRect(), vh = innerHeight;
+  const k = RM ? 1 : clamp((vh * .8 - r.top) / (r.height * .95));
+  blks.forEach((b, i) => { const on = k > (i + 1) / 6.2; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); });
+};
+[...blks, ...nows].forEach(el => {
+  const i = el.dataset.i;
+  el.addEventListener("pointerenter", () => { blks[i].classList.add("hl"); nows[i].classList.add("hl"); });
+  el.addEventListener("pointerleave", () => { blks[i].classList.remove("hl"); nows[i].classList.remove("hl"); });
+});
+
+/* ============ theory: the quote writes itself, the duty in view comes forward ============ */
+const naurP = $("#naur p"), theory = $("#theory"), duties = $$("#duties li");
+naurP.innerHTML = naurP.textContent.split(/(\s+)/).map(w => /\s+/.test(w) ? w : `<span class="w${/theory|insight/.test(w) ? " key" : ""}">${escT(w)}</span>`).join("");
+const words = $$(".w", naurP);
+const theoryDraw = () => {
+  const r = theory.getBoundingClientRect(), vh = innerHeight;
+  const q = RM ? 1 : clamp((vh * .75 - r.top) / (vh * .9));
+  words.forEach((w, i) => w.classList.toggle("on", i / words.length < q));
+  let best = -1, bd = 1e9;
+  duties.forEach((d, i) => { const b = d.getBoundingClientRect(), c = b.top + b.height / 2, dd = Math.abs(c - vh * .5); if (dd < bd) { bd = dd; best = i; } });
+  duties.forEach((d, i) => d.classList.toggle("on", RM || i === best));
+};
 
 /* ============ FOUR ERAS: vertical scroll drives a horizontal rail; each scene runs on its own clock ============ */
 const eras = $("#eras"), rail = $("#erail"), eraEls = $$(".era", rail), N = eraEls.length;
@@ -243,69 +283,63 @@ seen(loop, v => { loopOn = v; if (!v) lt0 = 0; }, .2);
 if (RM) steps.forEach(s => s.classList.add("lit"));
 requestAnimationFrame(loopFrame);
 
-/* ============ scroll + resize ============ */
-let raf = 0;
-const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); };
-addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
-addEventListener("resize", () => { requestAnimationFrame(() => { layout(); onScroll(); }); });
-document.fonts && document.fonts.ready.then(() => { layout(); onScroll(); });
-layout(); onScroll();
 
-/* ============ Activities: new turning points keep arriving ============ */
+/* ============ the record: three teams flow into one timeline ============ */
+const merge = $("#merge"), mlines = $(".merge-lines", merge), teamEls = $$(".teams li", merge), recEl = $(".rec", merge);
+const drawMerge = () => {
+  if (innerWidth <= 900) { mlines.innerHTML = ""; return; }
+  const mr = merge.getBoundingClientRect(), rr = recEl.getBoundingClientRect();
+  const x1 = rr.left - mr.left, y1 = rr.top - mr.top + rr.height * .42;
+  let out = "";
+  teamEls.forEach((t, i) => {
+    const b = t.getBoundingClientRect(), x0 = b.right - mr.left, y0 = b.top - mr.top + b.height / 2, mx = (x0 + x1) / 2;
+    const d = `M${x0} ${y0} C${mx} ${y0} ${mx} ${y1} ${x1} ${y1}`;
+    out += `<path id="ml${i}" d="${d}"/>` + (RM ? "" : `<circle r="4"><animateMotion dur="2.2s" begin="${i * .6}s" repeatCount="indefinite"><mpath href="#ml${i}"/></animateMotion></circle>`);
+  });
+  mlines.innerHTML = out;
+};
 const feed = $("#feed");
 const EVENTS = [
-  ["sh", "Shipped", "CSV export is live for Finance", "Downloaded March. All 120 rows are there.", "Ayu"],
-  ["", "Started", "Dark mode for the billing portal", "Customers keep asking for it.", "Dimas"],
-  ["ap", "Approved", "Plan, ceiling $4.50", "Two steps, fine by me.", "Rina"],
-  ["fx", "Fixed", "Timezone off by one on receipts", "The browser agent caught it.", "Ayu"],
-  ["sh", "Shipped", "Dark mode for the billing portal", "Looks right on my phone too.", "Dimas"],
-  ["", "Started", "Export invoices as PDF", "Same columns as the CSV, please.", "Rina"],
+  ["", "Started", "Export invoices as PDF", "Same columns as the CSV, please.", "Billing", "Rina"],
+  ["ap", "Approved", "Plan, ceiling $3.20", "Offline first, sync later.", "Mobile", "Ayu"],
+  ["fx", "Fixed", "Revenue report missed refunds", "The second agent spotted it.", "Data", "Dimas"],
+  ["sh", "Shipped", "Offline mode for orders", "Tested on a slow train. Works.", "Mobile", "Ayu"],
+  ["sh", "Shipped", "Nightly revenue report", "Finance has it by 7 a.m.", "Data", "Rina"],
+  ["", "Started", "Dark mode for the billing portal", "Customers keep asking for it.", "Billing", "Dimas"],
 ];
 let ev = 0, feedOn = false;
 const stamp = () => { const d = new Date(); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
 const pushEvent = () => {
   if (!feedOn || document.hidden) return;
-  const [c, tag, title, quote, who] = EVENTS[ev++ % EVENTS.length];
+  const [c, tag, title, quote, team, who] = EVENTS[ev++ % EVENTS.length];
   const li = document.createElement("li"); li.className = "enter";
-  li.innerHTML = `<span class="tag ${c}">${tag}</span><div><b>${title}</b><q>${quote}</q><div class="m">${who} · ${stamp()}</div></div>`;
+  li.innerHTML = `<span class="tag ${c}">${tag}</span><div><b>${title}</b><q>${quote}</q><div class="m"><em>${team}</em> ${who}, ${stamp()}</div></div>`;
   const last = feed.lastElementChild; last.classList.add("leave");
   setTimeout(() => { last.remove(); feed.prepend(li); }, 380);
 };
-if (!RM) { seen(feed, v => feedOn = v, .3); setInterval(pushEvent, 3600); }
+if (!RM) { seen(feed, v => feedOn = v, .3); setInterval(pushEvent, 3400); }
 
-/* ============ four kinds of session: advances on its own, pauses on hover or focus ============ */
-const KINDS = [
-  { t: "A requirement becomes milestones, sprints, and tickets. Each ticket becomes a plan.",
-    f: [["", "i-note", "Requirement", "Billing exports for Finance"], ["ag", "i-layers", "Milestones and sprints", "2 milestones, 3 sprints"], ["ag", "i-ticket", "Tickets", "9 tickets"], ["", "i-check", "Plans", "One per ticket, each with a ceiling"]] },
-  { t: "A plan, your yes, tested pull requests, and a receipt.",
-    f: [["", "i-note", "Plan", "4 steps, ceiling $6.00"], ["y", "", "Yes", ""], ["ag", "i-pr", "Pull requests", "2, tests passed"], ["", "i-receipt", "Receipt", "Kept in the record"]] },
-  { t: "A browser agent clicks through what shipped and reports only what it ran.",
-    f: [["", "i-check", "Shipped", "CSV export for Finance"], ["ag", "i-pointer", "Browser agent", "Opened /invoices, clicked Export CSV"], ["", "i-receipt", "Report", "3 steps run, 3 passed"]] },
-  { t: "The agent watches logs and alerts, opens the issue, and works the fix.",
-    f: [["ag", "i-pulse", "Watches", "A timeout in the invoices-api logs"], ["ag", "i-alert", "Issue", "CSV export times out past 5,000 rows"], ["ag", "i-hammer", "Fix", "A plan for the fix, with a ceiling"], ["y", "", "Yes", ""]] },
-];
-const tabs = $$("#ktabs [role=tab]"), panel = $("#kp"), kinds = $(".kinds");
-let curTab = 0;
-const show = (i, focus) => {
-  curTab = i;
-  tabs.forEach((b, j) => { b.setAttribute("aria-selected", j === i); b.tabIndex = j === i ? 0 : -1; const bar = $(".bar", b); bar.style.animation = "none"; void bar.offsetWidth; bar.style.animation = ""; });
-  panel.setAttribute("aria-labelledby", tabs[i].id);
-  const k = KINDS[i];
-  panel.innerHTML = `<p>${esc(k.t)}</p><div class="flow">${k.f.map(([c, ic, b, s], n) =>
-    c === "y" ? `<div class="y" style="--i:${n}">${b}</div>` : `<div class="${c}" style="--i:${n}"><span class="fi"><svg class="ico"><use href="#${ic}"/></svg></span><b>${esc(b)}</b>${esc(s)}</div>`).join("")}</div><span class="eg">Example</span>`;
-  if (focus) tabs[i].focus();
-};
-tabs.forEach((b, i) => {
-  b.addEventListener("click", () => show(i));
-  $(".bar", b).addEventListener("animationend", () => { if (!RM && curTab === i) show((i + 1) % tabs.length); });
-  b.addEventListener("keydown", e => {
-    const k = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
-    if (k) { e.preventDefault(); show((i + k + tabs.length) % tabs.length, true); }
-    if (e.key === "Home") { e.preventDefault(); show(0, true); }
-    if (e.key === "End") { e.preventDefault(); show(tabs.length - 1, true); }
-  });
-});
-seen(kinds, v => kinds.classList.toggle("hold", !v), .3);
-if (RM) kinds.classList.add("hold");
-show(0);
+/* ============ rules: each example plays when it comes into view ============ */
+const spent = $("#spent");
+$$(".rule").forEach(r => seen(r, v => {
+  if (!v || r.classList.contains("on")) return;
+  r.classList.add("on");
+  if (r.dataset.k === "m") {
+    if (RM) { spent.textContent = "$3.40"; return; }
+    const t0 = performance.now();
+    const tick = now => { const k = clamp((now - t0 - 200) / 2200); spent.textContent = "$" + (3.4 * ease(k)).toFixed(2); if (k < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  }
+}, .35));
+if (RM) $$(".rule").forEach(r => r.classList.add("on"));
+
+/* ============ scroll + resize ============ */
+let raf = 0;
+const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); };
+addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
+addEventListener("resize", () => { requestAnimationFrame(() => { if (!RM) measurePin(); layout(); drawMerge(); onScroll(); }); });
+const relayout = () => { if (!RM) measurePin(); layout(); drawMerge(); onScroll(); };
+document.fonts && document.fonts.ready.then(relayout);
+addEventListener("load", relayout);
+relayout();
 })();
