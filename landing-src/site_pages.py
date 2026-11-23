@@ -35,21 +35,14 @@ READ_CSS = r'''
 .legal .ask .btn-go{background:var(--live);color:#1F2B20}
 @media (max-width:900px){.rd{grid-template-columns:1fr}.toc{display:none}}
 /* docs */
-.smap{margin-top:clamp(40px,5vw,64px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px;max-width:920px}
-.surf{display:grid;gap:8px;align-content:start;padding:22px 24px;border-radius:20px;background:var(--surface);border:1px solid var(--line-strong);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s}
+.smap{margin-top:clamp(40px,5vw,64px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.surf{display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;padding:24px;border-radius:20px;background:var(--surface);border:1px solid var(--line-strong);text-decoration:none;transition:transform .3s var(--ease),box-shadow .3s var(--ease),border-color .3s}
 .surf:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);border-color:var(--accent-strong)}
+.surf:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .surf .who{font-size:13px;color:var(--ink-3)}
 .surf b{font:620 26px/1.1 var(--display);letter-spacing:-.02em}
 .surf .what{font-size:15px;color:var(--ink-2);line-height:1.5}
-.surf .go{margin-top:6px;display:inline-flex;align-items:center;gap:6px;font:600 14px/1 var(--sans);color:var(--accent-ink)}
-.surf.ag{background:var(--moss);border-color:var(--moss);color:var(--on-moss)}
-.surf.ag .who,.surf.ag .what{color:var(--on-moss-2)}.surf.ag .go{color:var(--live)}
-.smap-join{grid-column:1/-1;position:relative;height:44px}
-.smap-join i{position:absolute;top:0;bottom:0;width:2px;background:var(--accent-strong)}
-.smap-join i:first-child{left:25%}.smap-join i:last-child{left:75%}
-.smap-join::after{content:"";position:absolute;left:25%;right:25%;bottom:0;height:2px;background:var(--accent-strong)}
-.surf.base{grid-column:1/-1;background:var(--sunken);border-style:solid;position:relative}
-.surf.base::before{content:"";position:absolute;left:50%;top:-1px;width:2px;height:0;background:var(--accent-strong)}
+.surf .go{margin-top:12px;display:inline-flex;align-items:center;gap:6px;font:600 14px/1 var(--sans);color:var(--accent-ink)}
 .dsec{padding:clamp(40px,5vw,64px) 0;border-bottom:1px solid var(--line)}
 .dsec > h2{font-size:clamp(2rem,1.2rem + 2vw,3.25rem);scroll-margin-top:96px}
 .dsec > p{margin-top:14px;font-size:18px;color:var(--ink-2);max-width:62ch}
@@ -65,7 +58,7 @@ READ_CSS = r'''
 .code-h button:focus-visible{outline:2px solid var(--live);outline-offset:2px}
 .code pre{margin:0;padding:18px 20px;font:500 14px/1.75 var(--mono);overflow-x:auto}
 .note{margin-top:22px;padding:14px 18px;border-radius:14px;background:var(--warn-soft);border:1px solid var(--edge-warn);color:var(--ink);font-size:15px}
-@media (max-width:760px){.smap{grid-template-columns:1fr;gap:12px}.smap-join{display:none}.dgrid{grid-template-columns:1fr}}
+@media (max-width:860px){.smap{grid-template-columns:1fr;gap:12px}}@media (max-width:760px){.dgrid{grid-template-columns:1fr}}
 /* about */
 .about-p{max-width:68ch}
 .about-p p{font-size:19px;line-height:1.7;color:color-mix(in srgb,var(--ink) 88%,var(--paper))}
@@ -159,9 +152,8 @@ def docs():
   <header class="rd-hero"><h1>Three surfaces. <span>One product contract.</span></h1><p class="lede">Konteks for people. MCP for agents. Tenant-scoped APIs underneath both. Konteks is model-neutral by design, so your team can choose the model and coding agent that fit the work.</p>
     <div class="smap" aria-label="How the three surfaces fit together">
       <a class="surf" href="#app"><span class="who">People use</span><b>Konteks</b><span class="what">The workspace for Systems, sessions, approvals and evidence.</span><span class="go">Read the Konteks docs <svg class="ico"><use href="#i-down"/></svg></span></a>
-      <a class="surf ag" href="#mcp"><span class="who">Agents use</span><b>Core MCP</b><span class="what">One tenant-scoped connection for authorized external agents.</span><span class="go">Read the MCP docs <svg class="ico"><use href="#i-down"/></svg></span></a>
-      <span class="smap-join" aria-hidden="true"><i></i><i></i></span>
-      <a class="surf base" href="#api-reference"><span class="who">Both run on</span><b>Tenant-scoped APIs</b><span class="what">Usually reached through Konteks or MCP. Direct integrations use the documented endpoints.</span><span class="go">Read the API reference <svg class="ico"><use href="#i-down"/></svg></span></a>
+      <a class="surf" href="#mcp"><span class="who">Agents use</span><b>Core MCP</b><span class="what">One tenant-scoped connection for authorized external agents.</span><span class="go">Read the MCP docs <svg class="ico"><use href="#i-down"/></svg></span></a>
+      <a class="surf" href="#api-reference"><span class="who">Both run on</span><b>Tenant-scoped APIs</b><span class="what">Usually reached through Konteks or MCP. Direct integrations use the documented endpoints.</span><span class="go">Read the API reference <svg class="ico"><use href="#i-down"/></svg></span></a>
     </div>
   </header>
   <div class="rd"><nav class="toc" aria-label="On this page"><b>On this page</b><ol><li><a href="#app">Konteks</a></li><li><a href="#mcp">Core MCP</a></li><li><a href="#api-reference">API reference</a></li><li><a href="#contract">Need the contract clarified?</a></li></ol></nav>
