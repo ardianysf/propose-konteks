@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Konteks · People lead the vision. Agents do the rest.</title>
 <meta name="description" content="Write what should exist, in plain words. The coding agents you already use plan it, price it, build it, and test it on your own computer. Nothing runs until you say yes.">
-<script>try{var t=localStorage.getItem("kx-lp-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>document.documentElement.classList.add("js");if(matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("rm");try{var t=localStorage.getItem("kx-lp-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
 /*@@FONTS@@*/
 /*@@DISPLAY@@*/
@@ -195,30 +195,6 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
 .moss .sec-h p{color:var(--on-moss-2)}
 @media (max-width:860px){.sec-h{grid-template-columns:1fr}}
 
-/* history as specimens */
-.spec{margin-top:clamp(48px,6vw,80px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line-strong)}
-.spec article{padding:28px clamp(16px,2vw,28px) 0;border-left:1px solid var(--line);display:grid;grid-template-rows:auto minmax(150px,auto) auto;gap:22px;min-width:0}
-.spec article:first-child{border-left:0;padding-left:0}
-.yr{font:600 15px/1 var(--display);color:var(--ink-3)}
-.spec .now .yr{color:var(--accent)}
-.glyph{align-self:center;color:var(--ink);margin:0}
-.g-ada{font:italic 400 16px/2 "Times New Roman",Times,serif;border-collapse:collapse}
-.g-ada td{padding:0 12px 0 0;border-bottom:1px solid var(--line);white-space:nowrap}
-.g-ada td:first-child{font:500 11.5px/2 var(--mono);color:var(--ink-3);font-style:normal}
-.g-ada sub,.g-ada sup{font-size:.62em}
-.g-tur{font:500 13.5px/2.1 var(--mono)}
-.g-tur div{border-bottom:1px solid var(--line)}
-.g-tur span{color:var(--accent-ink);font-weight:700}
-.g-c{font:500 13.5px/1.75 var(--mono);white-space:pre}
-.g-c .s{color:var(--accent-ink)}
-.g-now{font:540 clamp(20px,1rem + .7vw,26px)/1.2 var(--display);letter-spacing:-.02em;color:var(--accent-ink)}
-.spec h3{font:650 17px/1.3 var(--sans);letter-spacing:-.01em}
-.spec p:not(.glyph){margin-top:8px;font-size:15px;color:var(--ink-2);line-height:1.55}
-.dist{margin-top:28px;display:flex;align-items:center;gap:14px;font-size:13px;color:var(--ink-3)}
-.dist i{height:1px;flex:1;background:linear-gradient(90deg,var(--line-strong),var(--accent-fill))}
-@media (max-width:1000px){.spec{grid-template-columns:repeat(2,minmax(0,1fr))}.spec article:nth-child(3){border-left:0;padding-left:0}.spec article{padding-bottom:36px;border-bottom:1px solid var(--line)}}
-@media (max-width:560px){.spec{grid-template-columns:1fr}.spec article{border-left:0;padding-left:0;grid-template-rows:auto auto auto}.dist{display:none}}
-
 /* gone / now ledger */
 .ledger{margin-top:clamp(40px,5vw,64px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-radius:20px;overflow:hidden;border:1px solid var(--line-strong)}
 .ledger .col-h{padding:18px 28px;font:600 13px/1 var(--sans);color:var(--ink-3);border-bottom:1px solid var(--line)}
@@ -393,6 +369,224 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
 .foot .brand{color:var(--on-moss)}
 @media (max-width:860px){.foot-g{grid-template-columns:repeat(2,minmax(0,1fr))}.foot-g > div:first-child{grid-column:1/-1}}
 
+
+/* ===== motion additions ===== */
+.moss,.hero::before{background-image:var(--grain)}
+.av.a{background:#9A6212}
+/* hero: Ayu types, Rina's cursor presses yes */
+#ayu .typing{display:none;gap:3px;align-items:center;margin-left:6px;vertical-align:2px}
+#ayu .typing i{width:5px;height:5px;border-radius:50%;background:var(--ink-3);animation:dots 1s infinite}
+#ayu .typing i:nth-child(2){animation-delay:.15s}#ayu .typing i:nth-child(3){animation-delay:.3s}
+@keyframes dots{0%,60%,100%{opacity:.25;transform:none}30%{opacity:1;transform:translateY(-2px)}}
+.sheet.wait #ayu .said{display:none}.sheet.wait #ayu .typing{display:inline-flex}
+#ayu .said{animation:rise .45s var(--ease)}
+.react.bump{animation:bump .5s var(--ease)}
+@keyframes bump{40%{transform:scale(1.25);border-color:var(--accent-strong);color:var(--accent-ink)}}
+.cursor{position:absolute;left:78%;top:44%;z-index:4;display:flex;align-items:flex-start;gap:2px;opacity:0;pointer-events:none;transition:left .9s cubic-bezier(.65,0,.35,1),top .9s cubic-bezier(.65,0,.35,1),opacity .3s}
+.cursor svg{width:22px;height:22px;fill:#243025;stroke:#fff;stroke-width:1.4;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25))}
+.cursor span{margin-top:16px;font:600 11.5px/1 var(--sans);color:#fff;background:#4F7044;padding:4px 7px;border-radius:999px}
+.cursor.on{opacity:1}.cursor.go{left:calc(50% + 6px);top:calc(100% - 8px)}
+.cursor.click svg{transform:scale(.85);transition:transform .15s}
+.lane{grid-template-columns:auto minmax(0,1fr) auto}
+.lane .log{grid-column:2/-1}
+.lic{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:rgba(238,241,232,.06);border:1px solid var(--moss-line);color:var(--on-moss-2);transition:background .4s,color .4s,border-color .4s}
+.lane.run .lic{background:rgba(143,191,106,.14);color:var(--live);border-color:rgba(143,191,106,.4)}
+.lane.done .lic{background:var(--live);color:#1F2B20;border-color:var(--live)}
+.lane.run .lic svg{animation:wob 1s ease-in-out infinite}
+@keyframes wob{50%{transform:rotate(-12deg) translateY(-1px)}}
+.hero.go .flash{animation:sweep 1.4s var(--ease) forwards}
+
+/* ===== four eras: scroll-driven rail with parallax scenes ===== */
+.eras{position:relative}
+.eras-track{position:relative}
+.js .eras-track{height:calc(100svh + 270svh)}
+.eras-stage{padding:clamp(72px,8vw,112px) 0 48px}
+.js .eras-stage{position:sticky;top:64px;height:calc(100svh - 64px);overflow:hidden;padding:clamp(20px,3.2vh,40px) 0 clamp(16px,2.5vh,28px);display:flex;flex-direction:column}
+.eras-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 48px;align-items:end;width:100%}
+.eras-title h2{font-size:clamp(1.9rem,1.1rem + 2.2vw,3.25rem);max-width:17ch}
+.eras-title p{margin-top:12px;font-size:16.5px;color:var(--ink-2);max-width:56ch}
+.eras-meter{display:grid;justify-items:end;gap:10px}
+.yr-big{font:640 clamp(56px,3rem + 3.4vw,112px)/.85 var(--display);letter-spacing:-.05em;color:var(--hue-now,var(--accent));transition:color .5s}
+.ticks{position:relative;display:grid;grid-template-columns:repeat(4,auto);gap:22px;font:600 12.5px/1 var(--sans);color:var(--ink-3);padding-top:12px}
+.ticks span{transition:color .3s}.ticks span.on{color:var(--ink)}
+.ticks i{position:absolute;left:0;right:0;top:0;height:2px;background:var(--line)}
+.ticks i b{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--accent-strong)}
+.eras-rail{flex:1;min-height:0;display:flex;margin-top:clamp(16px,3vh,36px);will-change:transform}
+.era{flex:0 0 100%;min-width:0;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:center;padding:0 max(var(--gut),calc((100vw - var(--wrap))/2 + var(--gut)))}
+.scene{position:relative;height:100%;max-height:520px;min-height:300px;border-radius:24px;overflow:hidden;background:color-mix(in srgb,var(--hue) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--hue) 22%,var(--line));box-shadow:var(--shadow-2)}
+.scene::after{content:"";position:absolute;inset:0;background-image:var(--grain);pointer-events:none;opacity:.8}
+.L{position:absolute;will-change:transform}
+.era-cap .yr{display:inline-flex;align-items:center;gap:8px;font:600 13px/1 var(--sans);color:var(--hue)}
+.era-cap .yr::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--hue)}
+.era-cap h3{margin-top:14px;font-size:clamp(24px,1rem + 1.3vw,36px);font-weight:620;letter-spacing:-.03em;line-height:1.08}
+.era-cap p{margin-top:14px;font-size:16.5px;color:var(--ink-2);max-width:44ch}
+.era-cap{transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.js .era:not(.cur) .era-cap{opacity:.25;transform:translateY(10px)}
+.eras-dist{display:flex;align-items:center;gap:14px;margin-top:clamp(12px,2.4vh,26px);font-size:12.5px;color:var(--ink-3);width:100%}
+.eras-dist i{flex:1;height:2px;background:var(--line);position:relative;border-radius:2px;overflow:hidden}
+.eras-dist i b{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#9A6212,#2F6F8F,#4F7044,#8FBF6A)}
+
+/* 1843 */
+.s-ada .sheetp{inset:8% 10% 8% 8%;background:#FBF6E6;border-radius:6px;box-shadow:0 18px 40px -20px rgba(80,50,10,.45);background-image:repeating-linear-gradient(transparent 0 27px,rgba(154,98,18,.14) 27px 28px)}
+.s-ada .nlabel{position:absolute;left:22px;top:16px;font:italic 500 13px/1 "Times New Roman",Times,serif;color:#7A4E10}
+.gear{width:46%;aspect-ratio:1;fill:#C08A2E;stroke:#7A4E10;stroke-width:2}
+.gear .hub{fill:#7A4E10}
+.gA{right:-10%;bottom:-16%}.gB{right:24%;bottom:-12%;width:28%;fill:#D6A548}
+.gear g{transform-origin:0 0}
+.s-ada .ada-tab{left:13%;top:22%;width:58%;font:italic 400 clamp(15px,.8rem + .5vw,20px)/1 "Times New Roman",Times,serif;color:#3A2A10}
+.ada-tab .row{display:grid;grid-template-columns:22px 22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(122,78,16,.22);opacity:.18;transform:translateX(-8px);transition:opacity .4s,transform .4s var(--ease)}
+.ada-tab .row.on{opacity:1;transform:none}
+.ada-tab i{font:500 11px/1 var(--mono);color:#7A4E10;font-style:normal}
+.ada-tab b{font-weight:400}
+.ada-tab sub,.ada-tab sup{font-size:.62em}
+.ada-tab .ink{width:100%;height:18px;margin-top:6px;overflow:visible}
+.ada-tab .ink path{fill:none;stroke:#7A4E10;stroke-width:2;stroke-linecap:round;stroke-dasharray:320;stroke-dashoffset:320}
+
+/* 1936 */
+.s-tur .rules-card{right:7%;top:9%;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;font:500 13px/1.9 var(--mono);box-shadow:var(--shadow-2)}
+.s-tur .rules-card b{display:block;font:600 12px/1.6 var(--sans);color:var(--ink-3)}
+.s-tur .rules-card div{padding:0 6px;border-radius:6px;transition:background .2s,color .2s}
+.s-tur .rules-card div.hit{background:#2F6F8F;color:#fff}
+.s-tur .rules-card u{text-decoration:none;font-weight:700}
+.tape-wrap{left:0;right:0;top:54%;height:84px}
+.tape{position:absolute;left:50%;top:14px;display:flex;will-change:transform}
+.tape span{width:52px;height:56px;flex:none;display:grid;place-items:center;border:1px solid color-mix(in srgb,#2F6F8F 30%,var(--line));margin-left:-1px;background:var(--surface);font:600 22px/1 var(--mono);color:var(--ink);transition:background .25s,color .25s}
+.tape span.done{background:#2F6F8F;color:#fff;border-color:#2F6F8F}
+.tape span.blank{color:var(--ink-3)}
+.thead{position:absolute;left:50%;top:-30px;transform:translateX(-50%);display:grid;justify-items:center}
+.thead span{font:600 12px/1 var(--mono);background:var(--ink);color:var(--paper);padding:5px 8px;border-radius:6px}
+.thead::after{content:"";width:0;height:0;border:8px solid transparent;border-top-color:var(--ink);margin-top:-1px}
+.thead::before{content:"";position:absolute;top:40px;width:58px;height:64px;border:2px solid var(--ink);border-radius:8px;left:50%;transform:translateX(-50%)}
+.tape-note{left:8%;bottom:9%;font:500 14px/1.4 var(--sans);color:var(--ink-2)}
+
+/* 1969 */
+.win{background:#16201A;color:#D7E6CF;border-radius:12px;box-shadow:0 24px 50px -24px rgba(0,0,0,.6);overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+.win .bar{display:flex;align-items:center;gap:6px;padding:9px 12px;background:rgba(255,255,255,.05);font:500 11.5px/1 var(--mono);color:#9AAA9B}
+.win .bar i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.18)}
+.win .bar span{margin-left:8px}
+.win pre{margin:0;padding:14px 16px;font:500 clamp(12.5px,.7rem + .35vw,15px)/1.65 var(--mono);white-space:pre}
+.win.back{left:6%;top:9%;width:46%;opacity:.75;transform-origin:center}
+.win.back pre{color:#9AAA9B}
+.win.front{right:6%;bottom:9%;width:62%;min-height:58%}
+#cterm .s{color:#A9D486}#cterm .o{color:#fff;font-weight:700}
+#cterm .car{display:inline-block;width:.55em;height:1.1em;vertical-align:-3px;background:#8FBF6A;animation:blink 1s steps(1) infinite}
+
+/* today */
+.s-now{background:color-mix(in srgb,var(--hue) 8%,var(--paper))}
+.s-now .nnote{left:9%;top:8%;width:62%;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow-2)}
+.nnote .nh{display:flex;align-items:center;gap:10px;font-size:15px}
+.nnote p{margin:10px 0 6px;font-size:14px;color:var(--ink-2);line-height:1.5}
+.bub{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13.5px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:6px 10px 6px 6px;width:max-content;max-width:100%;opacity:0;transform:translateY(8px) scale(.96);transform-origin:left;transition:opacity .35s,transform .45s var(--ease)}
+.bub .av{width:22px;height:22px;font-size:10px}
+.bub.on{opacity:1;transform:none}
+.s-now .nline{left:0;right:0;bottom:0;height:30%;background:var(--moss);border-top:1px solid var(--live)}
+.nyes{position:absolute;left:28%;top:0;transform:translate(-50%,-50%) scale(.6);opacity:0;background:var(--accent);color:var(--on-accent);font:700 15px/1 var(--display);padding:10px 18px;border-radius:999px;box-shadow:0 0 0 5px color-mix(in srgb,var(--hue) 8%,var(--paper));transition:opacity .3s,transform .45s var(--ease)}
+.nyes.on{opacity:1;transform:translate(-50%,-50%)}
+.chip{position:absolute;top:44%;display:inline-flex;align-items:center;gap:7px;font:600 13px/1 var(--sans);color:var(--on-moss);background:rgba(238,241,232,.07);border:1px solid var(--moss-line-2);padding:8px 12px;border-radius:999px;opacity:0;transform:translateY(14px);transition:opacity .35s,transform .5s var(--ease)}
+.chip svg{color:var(--live)}
+.chip[data-k="0"]{left:8%}.chip[data-k="1"]{left:36%}.chip[data-k="2"]{left:63%}
+.chip.on{opacity:1;transform:none}
+.chip.on svg{animation:wob 1.2s ease-in-out infinite}
+
+@media (max-width:900px){
+  .js .eras-track{height:calc(100svh + 300svh)}
+  .eras-head{grid-template-columns:1fr;gap:10px}
+  .eras-title p{display:none}
+  .eras-meter{grid-template-columns:auto 1fr;justify-items:start;align-items:end;gap:16px}
+  .yr-big{font-size:44px}
+  .ticks{gap:14px;font-size:11.5px}
+  .era{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;gap:16px;align-items:stretch}
+  .scene{min-height:200px;max-height:none}
+  .era-cap h3{font-size:21px;margin-top:10px}
+  .era-cap p{font-size:14.5px;margin-top:8px}
+  .eras-dist{display:none}
+  .s-tur .rules-card{font-size:11.5px;padding:8px 12px;right:5%;top:6%}
+  .tape span{width:40px;height:44px;font-size:17px}
+  .thead::before{width:46px;height:52px}
+  .tape-note{display:none}
+  .win.front{width:78%;right:4%}.win.back{width:60%}
+  .s-now .nnote{width:78%;left:6%;padding:12px 14px}
+  .nnote p{display:none}
+  .chip{font-size:12px;padding:6px 9px}.chip[data-k="1"]{left:37%}.chip[data-k="2"]{left:66%}
+}
+@media (max-width:420px){.s-ada .ada-tab{left:9%;width:70%}.gA{width:56%}.win pre{font-size:11.5px}}
+/* no-JS or reduced motion: a plain stack */
+html:not(.js) .eras-rail,.rm .eras-rail{flex-direction:column;gap:56px}
+html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dist{display:none}
+.rm .eras-track{height:auto!important}.rm .eras-stage{position:static!important;height:auto!important;overflow:visible!important;padding:var(--sec) 0 0!important}
+.rm .scene{height:340px}.rm .era:not(.cur) .era-cap{opacity:1;transform:none}
+
+/* ledger: now side slides in after the strike */
+.ledger.arm .n2 span{opacity:0;transform:translateX(-10px)}
+.ledger.arm .n2 svg{opacity:0}
+.ledger.on .n2 span,.ledger.on .n2 svg{opacity:1;transform:none;transition:opacity .5s var(--ease),transform .6s var(--ease);transition-delay:calc(var(--i)*130ms + 380ms)}
+
+/* loop: a note travels the line forever */
+.loop svg.path .tok{fill:var(--live);stroke:var(--paper);stroke-width:3}
+.loop svg.path .halo{fill:rgba(143,191,106,.25)}
+
+/* activities live feed */
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent-fill);margin-left:6px;vertical-align:1px;animation:pulse 1.6s infinite}
+.tl li.enter{animation:feedin .7s var(--ease)}
+.tl li.leave{animation:feedout .4s ease-in forwards}
+@keyframes feedin{from{opacity:0;transform:translateY(-12px);background:var(--accent-soft)}60%{background:var(--accent-soft)}to{opacity:1;transform:none;background:transparent}}
+@keyframes feedout{to{opacity:0;transform:translateY(8px)}}
+.rows i:not(.off){animation:pulse 2s infinite}
+
+/* rules icons */
+.stratum{grid-template-columns:64px minmax(0,.8fr) minmax(0,1.2fr) minmax(0,1fr)}
+.rk{width:56px;height:56px;fill:none;stroke:var(--live);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;align-self:center}
+.rk-a .tick{stroke-dasharray:22;stroke-dashoffset:22;animation:tickd 3.2s var(--ease) infinite}
+@keyframes tickd{30%,80%{stroke-dashoffset:0}100%{stroke-dashoffset:0;opacity:0}}
+.rk-m .needle{transform-origin:32px 44px;animation:needle 3.6s var(--ease) infinite}
+.rk-m .ceil-mark{stroke:var(--warn);stroke-width:3}
+.rk-m circle{fill:var(--live)}
+@keyframes needle{0%{transform:rotate(-80deg)}45%,85%{transform:rotate(44deg)}100%{transform:rotate(-80deg)}}
+.rk-e .stamp{transform-origin:41px 42px;animation:stamp 3.4s var(--ease) infinite;fill:rgba(143,191,106,.18)}
+@keyframes stamp{0%,20%{opacity:0;transform:scale(1.8)}32%{opacity:1;transform:scale(.92)}40%,85%{opacity:1;transform:none}100%{opacity:0}}
+@media (max-width:860px){.stratum{grid-template-columns:1fr}.rk{width:44px;height:44px}}
+
+/* sessions: auto-advancing tabs */
+.kind-tabs button{position:relative}
+.kind-tabs .bar{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--accent-strong)}
+.kind-tabs button[aria-selected="true"] .bar{animation:fillbar 6.5s linear forwards}
+.kinds.hold .kind-tabs .bar,.kinds:hover .kind-tabs .bar,.kinds:focus-within .kind-tabs .bar{animation-play-state:paused}
+@keyframes fillbar{to{width:100%}}
+.flow > div .fi{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;margin-bottom:10px;background:var(--accent-soft);color:var(--accent-ink)}
+.flow > div.ag .fi{background:rgba(143,191,106,.14);color:var(--live)}
+.flow{position:relative}
+.flow > div:not(:last-child)::after{content:"";position:absolute}
+
+/* agents diagram */
+.agents-g{margin-top:clamp(40px,5vw,64px);display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(32px,5vw,72px);align-items:center}
+.agents-g .roster{margin-top:0}
+.roster td:first-child{font-size:clamp(19px,1rem + .5vw,24px)}
+.acp{width:100%;height:auto;overflow:visible}
+.acp .wires path{fill:none;stroke:rgba(238,241,232,.22);stroke-width:1.5;stroke-dasharray:4 5}
+.acp .wires path.main{stroke:var(--live);stroke-dasharray:none;stroke-width:2}
+.acp .flow circle{fill:var(--live)}
+.acp .flow circle.big{fill:#E3F2D2}
+.acp .tiles text{font:700 17px/1 var(--display);fill:#fff;text-anchor:middle}
+.acp .laptop rect,.acp .laptop path{fill:rgba(238,241,232,.08);stroke:var(--on-moss-2);stroke-width:1.5}
+.acp .laptop .scr{fill:rgba(143,191,106,.18);stroke:none;animation:scr 2.4s ease-in-out infinite}
+@keyframes scr{50%{fill:rgba(143,191,106,.38)}}
+.acp text{font:500 13px/1 var(--sans);fill:var(--on-moss-2);text-anchor:middle}
+.acp .kx rect{fill:var(--live)}
+.acp .kx .k{stroke:#1F2B20;stroke-width:4;fill:none;stroke-linecap:round}
+.acp .kx .ln{stroke:#1F2B20;stroke-width:2}
+.acp .lbl{font:600 12px/1 var(--mono);fill:var(--live)}
+@media (max-width:900px){.agents-g{grid-template-columns:1fr}.acp{max-width:480px}}
+
+/* learn icons */
+.offer .oi{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink);flex:none;transition:transform .3s var(--ease),background .3s}
+.offer li:hover .oi{transform:rotate(-8deg) scale(1.08);background:var(--accent-tint)}
+.offer .oi svg{width:18px;height:18px}
+
+/* close: the line keeps a pulse */
+.close-moss{position:relative}
+.close-moss::before{content:"";position:absolute;left:0;right:0;top:-2px;height:3px;background:linear-gradient(90deg,transparent,var(--live),#E3F2D2,var(--live),transparent) no-repeat;background-size:30% 100%;animation:runline 5s var(--ease) infinite}
+@keyframes runline{0%{background-position:-40% 0}60%,100%{background-position:140% 0}}
+
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 </head>
@@ -409,6 +603,20 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
   <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.3M8 13.2v1.3M1.5 8h1.3M13.2 8h1.3M3.4 3.4l.9.9M11.7 11.7l.9.9M3.4 12.6l.9-.9M11.7 4.3l.9-.9"/></symbol>
   <symbol id="i-menu" viewBox="0 0 16 16"><path d="M2.5 5h11M2.5 11h11"/></symbol>
   <symbol id="i-thumb" viewBox="0 0 16 16"><path d="M5 7v6.5H2.8V7H5Zm0 0 2.6-4.5c1 0 1.6.8 1.4 1.8L8.6 6.5h3.6c.9 0 1.5.8 1.3 1.6l-1 4.3c-.2.7-.8 1.1-1.5 1.1H5"/></symbol>
+  <symbol id="i-hammer" viewBox="0 0 16 16"><path d="m9.5 6.5-6 6a1.4 1.4 0 0 0 2 2l6-6M8 3.5l1.6-1.6a1 1 0 0 1 1.4 0l3.1 3.1a1 1 0 0 1 0 1.4L12.5 8 8 3.5Z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 16 16"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z"/><circle cx="8" cy="8" r="2.2"/></symbol>
+  <symbol id="i-pointer" viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="10" rx="1.6"/><path d="M1.5 5.5h13M7.5 8l1 4.5 1-1.8 1.8-.9L7.5 8Z"/></symbol>
+  <symbol id="i-note" viewBox="0 0 16 16"><path d="M3.5 2.5h6l3 3v8h-9v-11Z"/><path d="M9.5 2.5v3h3M5.5 8.5h5M5.5 11h3"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 16 16"><path d="m8 2 6 3-6 3-6-3 6-3ZM2 8l6 3 6-3M2 11l6 3 6-3"/></symbol>
+  <symbol id="i-ticket" viewBox="0 0 16 16"><path d="M2.5 4.5h11v2a1.5 1.5 0 0 0 0 3v2h-11v-2a1.5 1.5 0 0 0 0-3v-2Z"/><path d="M9.5 4.5v7" stroke-dasharray="1.4 1.4"/></symbol>
+  <symbol id="i-pr" viewBox="0 0 16 16"><circle cx="4" cy="3.5" r="1.5"/><circle cx="4" cy="12.5" r="1.5"/><circle cx="12" cy="12.5" r="1.5"/><path d="M4 5v6M12 11V6.5A2 2 0 0 0 10 4.5H7.5M9 3l-1.5 1.5L9 6"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 16 16"><path d="M3.5 1.5h9v13l-1.5-1-1.5 1-1.5-1-1.5 1-1.5-1-1.5 1v-13Z"/><path d="M5.5 5h5M5.5 7.5h5M5.5 10h3"/></symbol>
+  <symbol id="i-pulse" viewBox="0 0 16 16"><path d="M1.5 8.5h3l1.5-4 3 8 1.5-4h4"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 16 16"><path d="M8 2 14.5 13.5h-13L8 2Z"/><path d="M8 6.5v3M8 11.6v.1"/></symbol>
+  <symbol id="i-map" viewBox="0 0 16 16"><path d="M1.5 3.5 5.5 2l5 1.5 4-1.5v10.5l-4 1.5-5-1.5-4 1.5V3.5Z"/><path d="M5.5 2v10.5M10.5 3.5V14"/></symbol>
+  <symbol id="i-users" viewBox="0 0 16 16"><circle cx="6" cy="5.5" r="2.5"/><path d="M1.5 13.5c.4-2.4 2.2-3.8 4.5-3.8s4.1 1.4 4.5 3.8"/><path d="M10.5 3.2a2.4 2.4 0 0 1 0 4.6M12 9.9c1.4.5 2.3 1.7 2.5 3.6"/></symbol>
+  <symbol id="i-route" viewBox="0 0 16 16"><circle cx="3.5" cy="12.5" r="1.6"/><circle cx="12.5" cy="3.5" r="1.6"/><path d="M5 12.5h5.5a2 2 0 0 0 0-4h-5a2 2 0 0 1 0-4H11"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 16 16"><path d="M2.5 3.5h11v7.5h-6l-3 2.5V11h-2V3.5Z"/><path d="M5.5 6.5h5M5.5 8.5h3"/></symbol>
   <symbol id="i-replay" viewBox="0 0 16 16"><path d="M2.8 8a5.2 5.2 0 1 0 1.6-3.8M2.5 2.5v3h3"/></symbol>
 </svg>
 
@@ -435,7 +643,7 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
 <section class="hero" id="top" aria-labelledby="h1">
   <div class="h-copy">
     <h1 id="h1">People lead the vision. <span>Agents do the rest.</span></h1>
-    <p class="lede">For almost two centuries, telling a machine what to do meant learning its language. Now you write what should exist, in plain words. The coding agents you already use plan it, price it, build it, and test it on your own computer. Konteks keeps people in charge: nothing runs until you say yes.</p>
+    <p class="lede">For almost two centuries, telling a machine what to do meant learning its language. Now you write what should exist, in plain words, and the coding agents you already use plan, price, build and test it on your own computer. Konteks keeps people in charge: nothing runs until you say yes.</p>
   </div>
   <div class="h-act">
     <div class="connect" id="connect">
@@ -455,20 +663,22 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
     <div class="sheet-h"><span class="av r" aria-hidden="true">R</span><span>Rina · Product · Billing</span><span style="margin-left:auto" class="eg">Example</span></div>
     <h2>Invoices: export to CSV</h2>
     <p class="body">Finance wants to download this month’s invoices as a CSV. Keep the columns the same as the table.</p>
-    <div class="cmt"><span class="av d" aria-hidden="true">D</span><p><b>Dimas</b> <span>Include the tax column too.</span><span class="react" aria-label="2 reactions"><svg class="ico" style="width:12px;height:12px"><use href="#i-thumb"/></svg>2</span></p></div>
+    <div class="cmt"><span class="av d" aria-hidden="true">D</span><p><b>Dimas</b> <span>Include the tax column too.</span><span class="react" aria-label="2 reactions"><svg class="ico" style="width:12px;height:12px"><use href="#i-thumb"/></svg><span id="rcount">3</span></span></p></div>
+    <div class="cmt" id="ayu"><span class="av a" aria-hidden="true">A</span><p><b>Ayu</b> <span class="said">The ceiling looks fine to me.</span><span class="typing" aria-hidden="true"><i></i><i></i><i></i></span></p></div>
     <div class="plan">
       <div class="plan-h"><b>Plan · 4 steps</b><span class="ceil">ceiling $6.00</span></div>
       <ol><li>Add the export endpoint</li><li>Add an Export button to the table</li><li>Test the tax column</li><li>Check it in a real browser</li></ol>
     </div>
+    <div class="cursor" id="cursor" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M4 2.5 15.5 11l-5.2.9L13 17l-2.4 1.1-2.7-5.2L4 16.6V2.5Z"/></svg><span>Rina</span></div>
     <button class="yes" id="yes" type="button" aria-describedby="yes-note"><span class="dot"><svg class="ico"><use href="#i-check"/></svg></span><span id="yes-l">Yes</span></button>
   </figure>
 
   <span class="flash" aria-hidden="true"></span>
   <div class="lanes" aria-live="polite">
     <div class="lanes-h"><p id="yes-note">Nothing below this line runs until someone says yes.</p><span class="eg">Example session</span></div>
-    <div class="lane"><div class="who"><b>Builds</b><span>Claude Code · Dimas’s laptop</span></div><div class="log">Waiting for yes</div><span class="state"><i></i><span>Idle</span></span></div>
-    <div class="lane"><div class="who"><b>Reviews</b><span>Codex · build server</span></div><div class="log">Waiting for yes</div><span class="state"><i></i><span>Idle</span></span></div>
-    <div class="lane"><div class="who"><b>Tests in a browser</b><span>OpenCode · QA machine</span></div><div class="log">Waiting for yes</div><span class="state"><i></i><span>Idle</span></span></div>
+    <div class="lane"><span class="lic"><svg class="ico"><use href="#i-hammer"/></svg></span><div class="who"><b>Builds</b><span>Claude Code · Dimas’s laptop</span></div><div class="log">Waiting for yes</div><span class="state"><i></i><span>Idle</span></span></div>
+    <div class="lane"><span class="lic"><svg class="ico"><use href="#i-eye"/></svg></span><div class="who"><b>Reviews</b><span>Codex · build server</span></div><div class="log">Waiting for yes</div><span class="state"><i></i><span>Idle</span></span></div>
+    <div class="lane"><span class="lic"><svg class="ico"><use href="#i-pointer"/></svg></span><div class="who"><b>Tests in a browser</b><span>OpenCode · QA machine</span></div><div class="log">Waiting for yes</div><span class="state"><i></i><span>Idle</span></span></div>
   </div>
 
   <aside class="receipt" id="receipt" aria-label="Example receipt">
@@ -484,45 +694,67 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
   </aside>
 </section>
 
-<section class="sec" id="product" aria-labelledby="h-hist">
-  <div class="wrap">
-    <div class="sec-h">
-      <h2 id="h-hist">Four ways, one job: telling a machine what to do.</h2>
-      <p>1843 to now. Pen and paper, a tape, a programming language, and now a note in plain words.</p>
-    </div>
-    <div class="spec">
-      <article>
-        <span class="yr tab">1843</span>
-        <table class="glyph g-ada" aria-label="The first three operations of Note G">
-          <tr><td>1</td><td>×</td><td><sup>1</sup>V<sub>2</sub> × <sup>1</sup>V<sub>3</sub></td><td>= 2n</td></tr>
-          <tr><td>2</td><td>−</td><td><sup>1</sup>V<sub>4</sub> − <sup>1</sup>V<sub>1</sub></td><td>= 2n − 1</td></tr>
-          <tr><td>3</td><td>+</td><td><sup>1</sup>V<sub>5</sub> + <sup>1</sup>V<sub>1</sub></td><td>= 2n + 1</td></tr>
-        </table>
-        <div><h3>Ada Lovelace writes the first program.</h3><p>For Charles Babbage’s Analytical Engine, a machine that was never built. Her Note G sets out, step by step, how it would compute Bernoulli numbers.</p></div>
-      </article>
-      <article>
-        <span class="yr tab">1936</span>
-        <div class="glyph g-tur" aria-label="A rule table that flips every symbol on the tape">
-          <div>q1 <span>0</span> → 1 R q1</div><div>q1 <span>1</span> → 0 R q1</div><div>q1 <span>_</span> → _ halt</div>
-        </div>
-        <div><h3>Alan Turing turns computing into an idea.</h3><p>A tape, a head that reads and writes, and a table of rules. Turing showed this one simple machine can carry out any calculation that can be written as steps.</p></div>
-      </article>
-      <article>
-        <span class="yr tab">1969</span>
-        <pre class="glyph g-c" aria-label="A short C program">main()
-{
-    printf(<span class="s">"hello, world\n"</span>);
-}</pre>
-        <div><h3>Unix and C make software a team sport.</h3><p>At Bell Labs, from 1969 to 1972: an operating system and a language people could read and share. Code starts to outlive its authors, and teams build it together.</p></div>
-      </article>
-      <article class="now">
-        <span class="yr">Today</span>
-        <p class="glyph g-now">Finance wants this month’s invoices as a CSV. Keep the columns the same.</p>
-        <div><h3>People decide, and agents build in the background.</h3><p>Each person brings their own view to one note: a comment, a doubt, a yes. The agents follow the discussion and build what the team agreed on, on the team’s own computers.</p></div>
-      </article>
-    </div>
-    <p class="dist" aria-hidden="true">the machine’s language <i></i> your language</p>
+<section class="eras" id="product" aria-labelledby="h-hist">
+ <div class="eras-track" id="eras">
+  <div class="eras-stage">
+   <div class="wrap eras-head">
+    <div class="eras-title"><h2 id="h-hist">Four ways, one job: telling a machine what to do.</h2><p>Pen and paper, a tape, a programming language, and now a note in plain words. Each step moved the work closer to how people already talk.</p></div>
+    <div class="eras-meter" aria-hidden="true"><span class="yr-big tab" id="yrbig">1843</span>
+     <div class="ticks"><span class="on">1843</span><span>1936</span><span>1969</span><span>Today</span><i><b id="tickbar"></b></i></div></div>
+   </div>
+   <div class="eras-rail" id="erail">
+    <article class="era" style="--hue:#9A6212">
+     <div class="scene s-ada" aria-hidden="true">
+      <div class="L sheetp" data-d=".25"><span class="nlabel">Note G · 1843</span></div>
+      <svg class="L gear gA" data-d="1.2" data-teeth="14" viewBox="-100 -100 200 200"></svg>
+      <svg class="L gear gB" data-d=".9" data-teeth="9" viewBox="-100 -100 200 200"></svg>
+      <div class="L ada-tab" data-d=".55">
+       <div class="row" data-k="0"><i>1</i><b>×</b><span><sup>1</sup>V<sub>2</sub> × <sup>1</sup>V<sub>3</sub></span><em>= 2n</em></div>
+       <div class="row" data-k="1"><i>2</i><b>−</b><span><sup>1</sup>V<sub>4</sub> − <sup>1</sup>V<sub>1</sub></span><em>= 2n − 1</em></div>
+       <div class="row" data-k="2"><i>3</i><b>+</b><span><sup>1</sup>V<sub>5</sub> + <sup>1</sup>V<sub>1</sub></span><em>= 2n + 1</em></div>
+       <div class="row" data-k="3"><i>4</i><b>÷</b><span><sup>2</sup>V<sub>5</sub> ÷ <sup>2</sup>V<sub>4</sub></span><em>= <sup>2n − 1</sup>⁄<sub>2n + 1</sub></em></div>
+       <svg class="ink" viewBox="0 0 300 20" preserveAspectRatio="none"><path d="M4 12 C60 4 120 18 180 9 S270 6 296 11"/></svg>
+      </div>
+     </div>
+     <div class="era-cap"><span class="yr">1843 · Pen and paper</span><h3>Ada Lovelace writes the first program.</h3><p>For Charles Babbage’s Analytical Engine, a machine that was never built. Her Note G sets out, step by step, how it would compute Bernoulli numbers.</p></div>
+    </article>
+    <article class="era" style="--hue:#2F6F8F">
+     <div class="scene s-tur" aria-hidden="true">
+      <div class="L rules-card" data-d=".4"><b>Rules</b><div data-r="0">q1 <u>0</u> → 1 R q1</div><div data-r="1">q1 <u>1</u> → 0 R q1</div><div data-r="2">q1 <u>_</u> → _ halt</div></div>
+      <div class="L tape-wrap" data-d="1"><div class="tape" id="tape"></div><div class="thead"><span id="tstate">q1</span></div></div>
+      <div class="L tape-note" data-d=".7">Read a symbol. Write. Move right. Repeat.</div>
+     </div>
+     <div class="era-cap"><span class="yr">1936 · A tape</span><h3>Alan Turing turns computing into an idea.</h3><p>A tape, a head that reads and writes, and a table of rules. Turing showed this one simple machine can carry out any calculation that can be written as steps.</p></div>
+    </article>
+    <article class="era" style="--hue:#4F7044">
+     <div class="scene s-c" aria-hidden="true">
+      <div class="L win back" data-d=".35"><div class="bar"><i></i><i></i><i></i><span>~/team</span></div><pre>$ ls
+Makefile  hello.c  notes
+$ who
+alice  tty0
+bob    tty1</pre></div>
+      <div class="L win front" data-d=".95"><div class="bar"><i></i><i></i><i></i><span>hello.c</span></div><pre id="cterm"></pre></div>
+     </div>
+     <div class="era-cap"><span class="yr">1969 to 1972 · A language</span><h3>Unix and C make software a team sport.</h3><p>At Bell Labs, from 1969 to 1972: an operating system and a language people could read and share. Code starts to outlive its authors, and teams build it together.</p></div>
+    </article>
+    <article class="era now" style="--hue:#5F8D4E">
+     <div class="scene s-now" aria-hidden="true">
+      <div class="L nnote" data-d=".55">
+       <div class="nh"><span class="av r">R</span><b>Invoices: export to CSV</b></div>
+       <p>Finance wants this month’s invoices as a CSV. Keep the columns the same.</p>
+       <div class="bub" data-k="0"><span class="av d">D</span>Include the tax column too.</div>
+       <div class="bub" data-k="1"><span class="av a">A</span>Is a ceiling of $6 enough?</div>
+       <div class="bub" data-k="2"><span class="av r">R</span>Yes. Go ahead.</div>
+      </div>
+      <div class="L nline" data-d="1.1"><span class="nyes">Yes</span>
+       <span class="chip" data-k="0"><svg class="ico"><use href="#i-hammer"/></svg>Builds</span><span class="chip" data-k="1"><svg class="ico"><use href="#i-eye"/></svg>Reviews</span><span class="chip" data-k="2"><svg class="ico"><use href="#i-pointer"/></svg>Tests</span></div>
+     </div>
+     <div class="era-cap"><span class="yr">Today · A note</span><h3>People decide, and agents build in the background.</h3><p>Each person brings their own view to one note: a comment, a doubt, a yes. The agents follow the discussion and build what the team agreed on, on the team’s own computers.</p></div>
+    </article>
+   </div>
+   <div class="wrap eras-dist" aria-hidden="true"><span>the machine’s language</span><i><b id="edist"></b></i><span>your language</span></div>
   </div>
+ </div>
 </section>
 
 <section class="sec tight" aria-labelledby="h-2026">
@@ -533,18 +765,18 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
     </div>
     <div class="ledger" id="ledger" role="table" aria-label="What is gone and what does that job now">
       <div role="row" style="display:contents"><div class="col-h" role="columnheader">Gone</div><div class="col-h n" role="columnheader">Now</div></div>
-      <div role="row" style="display:contents"><div class="g" role="cell" style="--i:0"><s>Estimation meetings</s></div><div class="n2" role="cell"><svg class="ico"><use href="#i-arrow"/></svg>A plan comes back with a price ceiling in minutes</div></div>
-      <div role="row" style="display:contents"><div class="g" role="cell" style="--i:1"><s>Code review queues</s></div><div class="n2" role="cell"><svg class="ico"><use href="#i-arrow"/></svg>A second agent reviews</div></div>
-      <div role="row" style="display:contents"><div class="g" role="cell" style="--i:2"><s>Manual test passes</s></div><div class="n2" role="cell"><svg class="ico"><use href="#i-arrow"/></svg>A browser agent tests</div></div>
-      <div role="row" style="display:contents"><div class="g" role="cell" style="--i:3"><s>On-call at 3 a.m.</s></div><div class="n2" role="cell"><svg class="ico"><use href="#i-arrow"/></svg>An agent keeps watch</div></div>
-      <div role="row" style="display:contents"><div class="g" role="cell" style="--i:4"><s>Status reports</s></div><div class="n2" role="cell"><svg class="ico"><use href="#i-arrow"/></svg>The record is the report</div></div>
+      <div role="row" style="display:contents"><div class="g" role="cell" style="--i:0"><s>Estimation meetings</s></div><div class="n2" role="cell" style="--i:0"><svg class="ico"><use href="#i-arrow"/></svg><span>A plan comes back with a price ceiling in minutes</span></div></div>
+      <div role="row" style="display:contents"><div class="g" role="cell" style="--i:1"><s>Code review queues</s></div><div class="n2" role="cell" style="--i:1"><svg class="ico"><use href="#i-arrow"/></svg><span>A second agent reviews</span></div></div>
+      <div role="row" style="display:contents"><div class="g" role="cell" style="--i:2"><s>Manual test passes</s></div><div class="n2" role="cell" style="--i:2"><svg class="ico"><use href="#i-arrow"/></svg><span>A browser agent tests</span></div></div>
+      <div role="row" style="display:contents"><div class="g" role="cell" style="--i:3"><s>On-call at 3 a.m.</s></div><div class="n2" role="cell" style="--i:3"><svg class="ico"><use href="#i-arrow"/></svg><span>An agent keeps watch</span></div></div>
+      <div role="row" style="display:contents"><div class="g" role="cell" style="--i:4"><s>Status reports</s></div><div class="n2" role="cell" style="--i:4"><svg class="ico"><use href="#i-arrow"/></svg><span>The record is the report</span></div></div>
     </div>
   </div>
 </section>
 
 <section class="sec tight" aria-labelledby="h-people">
   <div class="wrap">
-    <div class="sec-h"><h2 id="h-people">Programming is theory building.</h2><p>What is left for people.</p></div>
+    <div class="sec-h"><h2 id="h-people">Programming is theory building.</h2><p>Agents write most of the code now. People still hold the theory: what the software is for, why it works the way it does, and what it should never do.</p></div>
     <div class="people">
       <blockquote class="naur">
         <p>“Programming properly should be regarded as an activity by which the programmers form or achieve a certain kind of insight, a theory, of the matters at hand.”</p>
@@ -584,8 +816,8 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
     <div class="sec-h"><h2 id="h-co">Many notes. Many agents. One record.</h2><p>Every team writes notes and runs agents. It all lands in one record, under the same rules.</p></div>
     <div class="record">
       <div class="panel">
-        <div class="panel-h"><span>Activities</span><span class="eg">Example</span></div>
-        <ol class="tl">
+        <div class="panel-h"><span>Activities <i class="live-dot"></i></span><span class="eg">Example</span></div>
+        <ol class="tl" id="feed">
           <li><span class="tag">Started</span><div><b>Invoices: export to CSV</b><q>Finance asked for this twice last month.</q><div class="m">Rina · 09:12</div></div></li>
           <li><span class="tag ap">Approved</span><div><b>Plan, ceiling $6.00</b><q>Fine by me, tax column included.</q><div class="m">Rina · 09:20</div></div></li>
           <li><span class="tag fx">Fixed</span><div><b>Empty tax rows broke the export</b><q>Good catch from the reviewer.</q><div class="m">Dimas · 10:02</div></div></li>
@@ -614,9 +846,9 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
   <div class="wrap">
     <div class="sec-h"><h2 id="h-rules">Authority, money, evidence.</h2><p>One set of rules. The same for every person and every agent.</p></div>
     <div class="strata">
-      <div class="stratum"><h3>Authority</h3><p>Enterprise IAM is built in.</p><span class="mono">Rina · Product lead<br>may approve plans in Billing</span></div>
-      <div class="stratum"><h3>Money</h3><p>Every piece of work is quoted as a ceiling before it runs.</p><span class="mono">ceiling $6.00<br>quoted before it runs</span></div>
-      <div class="stratum"><h3>Evidence</h3><p>A permanent receipt for every delivery.</p><span class="mono">receipt · Invoices CSV export<br>kept in the record</span></div>
+      <div class="stratum"><svg class="rk rk-a" viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="14" width="44" height="36" rx="6"/><circle cx="24" cy="30" r="6"/><path d="M16 44c1.5-4 4.5-6 8-6s6.5 2 8 6M38 26h10M38 33h7"/><path class="tick" d="m40 41 4 4 8-9"/></svg><h3>Authority</h3><p>Enterprise IAM is built in.</p><span class="mono">Rina · Product lead<br>may approve plans in Billing</span></div>
+      <div class="stratum"><svg class="rk rk-m" viewBox="0 0 64 64" aria-hidden="true"><path d="M10 44a22 22 0 0 1 44 0"/><path class="ceil-mark" d="M47 25 52 21"/><g class="needle"><path d="M32 44 32 24"/></g><circle cx="32" cy="44" r="3.5"/></svg><h3>Money</h3><p>Every piece of work is quoted as a ceiling before it runs.</p><span class="mono">ceiling $6.00<br>quoted before it runs</span></div>
+      <div class="stratum"><svg class="rk rk-e" viewBox="0 0 64 64" aria-hidden="true"><path d="M16 8h32v48l-4-3-4 3-4-3-4 3-4-3-4 3-4-3-4 3V8Z"/><path d="M22 18h20M22 25h20M22 32h12"/><g class="stamp"><rect x="30" y="36" width="22" height="13" rx="3" transform="rotate(-12 41 42)"/><path d="m35 43 3 3 6-6" transform="rotate(-12 41 42)"/></g></svg><h3>Evidence</h3><p>A permanent receipt for every delivery.</p><span class="mono">receipt · Invoices CSV export<br>kept in the record</span></div>
     </div>
     <div class="rules-end"><strong>Enforced on the server, never by a prompt.</strong><div><a class="lnk" href="https://konteks.io/security/">Security <svg class="ico"><use href="#i-arrow"/></svg></a><a class="lnk" href="https://konteks.io/pricing/">Pricing <svg class="ico"><use href="#i-arrow"/></svg></a></div></div>
   </div>
@@ -624,13 +856,13 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
 
 <section class="sec" id="sessions" aria-labelledby="h-kinds">
   <div class="wrap">
-    <div class="sec-h"><h2 id="h-kinds">Four kinds of session.</h2><p>Pick one to see what goes in and what comes back.</p></div>
+    <div class="sec-h"><h2 id="h-kinds">Four kinds of session.</h2><p>Every session starts from a note and waits for a yes. What changes is what goes in, and what comes back.</p></div>
     <div class="kinds">
       <div class="kind-tabs" role="tablist" aria-label="Kinds of session" id="ktabs">
-        <button role="tab" id="t0" aria-controls="kp" aria-selected="true">Project Management<svg class="ico"><use href="#i-arrow"/></svg></button>
-        <button role="tab" id="t1" aria-controls="kp" aria-selected="false" tabindex="-1">Engineering<svg class="ico"><use href="#i-arrow"/></svg></button>
-        <button role="tab" id="t2" aria-controls="kp" aria-selected="false" tabindex="-1">QA<svg class="ico"><use href="#i-arrow"/></svg></button>
-        <button role="tab" id="t3" aria-controls="kp" aria-selected="false" tabindex="-1">Ops<svg class="ico"><use href="#i-arrow"/></svg></button>
+        <button role="tab" id="t0" aria-controls="kp" aria-selected="true">Project Management<svg class="ico"><use href="#i-arrow"/></svg><span class="bar"></span></button>
+        <button role="tab" id="t1" aria-controls="kp" aria-selected="false" tabindex="-1">Engineering<svg class="ico"><use href="#i-arrow"/></svg><span class="bar"></span></button>
+        <button role="tab" id="t2" aria-controls="kp" aria-selected="false" tabindex="-1">QA<svg class="ico"><use href="#i-arrow"/></svg><span class="bar"></span></button>
+        <button role="tab" id="t3" aria-controls="kp" aria-selected="false" tabindex="-1">Ops<svg class="ico"><use href="#i-arrow"/></svg><span class="bar"></span></button>
       </div>
       <div class="kind-panel" id="kp" role="tabpanel" aria-labelledby="t0" tabindex="0"></div>
     </div>
@@ -640,6 +872,25 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
 <section class="sec moss" id="agents" aria-labelledby="h-agents">
   <div class="wrap">
     <div class="sec-h"><h2 id="h-agents">Five agents. Your own computer. One set of rules.</h2><p>Konteks speaks ACP, the Agent Client Protocol, so the agent your engineers already use connects as it is. No agent runs on a Konteks server.</p></div>
+    <div class="agents-g">
+    <svg class="acp" viewBox="0 0 520 380" role="img" aria-label="Five agents run on your computer, which connects to Konteks">
+     <g class="wires">
+      <path id="w0" d="M86 46 C170 46 170 190 236 190"/><path id="w1" d="M86 118 C170 118 170 190 236 190"/><path id="w2" d="M86 190 L236 190"/><path id="w3" d="M86 262 C170 262 170 190 236 190"/><path id="w4" d="M86 334 C170 334 170 190 236 190"/>
+      <path id="w5" class="main" d="M330 190 L420 190"/>
+     </g>
+     <g class="flow"><circle r="3.2"><animateMotion dur="2.4s" repeatCount="indefinite" begin="0s"><mpath href="#w0"/></animateMotion></circle><circle r="3.2"><animateMotion dur="2.4s" repeatCount="indefinite" begin=".5s"><mpath href="#w1"/></animateMotion></circle><circle r="3.2"><animateMotion dur="2.4s" repeatCount="indefinite" begin="1s"><mpath href="#w2"/></animateMotion></circle><circle r="3.2"><animateMotion dur="2.4s" repeatCount="indefinite" begin="1.5s"><mpath href="#w3"/></animateMotion></circle><circle r="3.2"><animateMotion dur="2.4s" repeatCount="indefinite" begin="2s"><mpath href="#w4"/></animateMotion></circle>
+      <circle r="4" class="big"><animateMotion dur="1.6s" repeatCount="indefinite"><mpath href="#w5"/></animateMotion></circle><circle r="4" class="big"><animateMotion dur="1.6s" repeatCount="indefinite" begin=".8s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#w5"/></animateMotion></circle></g>
+     <g class="tiles">
+      <g transform="translate(22 22)"><rect width="64" height="48" rx="12" fill="#5F8D4E"/><text x="32" y="30">CC</text></g>
+      <g transform="translate(22 94)"><rect width="64" height="48" rx="12" fill="#2F6F8F"/><text x="32" y="30">Cx</text></g>
+      <g transform="translate(22 166)"><rect width="64" height="48" rx="12" fill="#9A6212"/><text x="32" y="30">DS</text></g>
+      <g transform="translate(22 238)"><rect width="64" height="48" rx="12" fill="#4D644F"/><text x="32" y="30">OC</text></g>
+      <g transform="translate(22 310)"><rect width="64" height="48" rx="12" fill="#3F5C36"/><text x="32" y="30">AG</text></g>
+     </g>
+     <g class="laptop" transform="translate(236 150)"><rect x="6" y="0" width="82" height="56" rx="6"/><rect x="14" y="8" width="66" height="40" rx="2" class="scr"/><path d="M0 62h94l-6 8H6Z"/><text x="47" y="96">Your computer</text></g>
+     <g class="kx" transform="translate(420 154)"><rect width="78" height="72" rx="16"/><path d="M22 42h34" class="ln"/><path d="M30 22v30M30 37l12-14M35 37l10 15" class="k"/><text x="39" y="96">Konteks</text></g>
+     <text class="lbl" x="375" y="178">ACP</text>
+    </svg>
     <table class="roster">
       <thead><tr><th scope="col">Agent</th><th scope="col">Paid for by</th></tr></thead>
       <tbody>
@@ -650,6 +901,7 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
         <tr><td>Antigravity</td><td>Your organisation’s Gemini Enterprise, or a Gemini API key. Konteks downloads it from Google when you say yes.</td></tr>
       </tbody>
     </table>
+    </div>
     <div class="agents-end">
       <p>Your provider bills you. Never marked up. Secrets never reach a prompt, a screenshot, or a log.</p>
       <div><a class="lnk" href="https://konteks.io/docs/#mcp">Connect through MCP <svg class="ico"><use href="#i-arrow"/></svg></a><a class="lnk" href="https://konteks.io/security/">Security <svg class="ico"><use href="#i-arrow"/></svg></a><a class="lnk" href="https://konteks.io/pricing/">Pricing <svg class="ico"><use href="#i-arrow"/></svg></a></div>
@@ -659,7 +911,7 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
 
 <section class="sec" id="enablement" aria-labelledby="h-learn">
   <div class="wrap">
-    <div class="sec-h"><h2 id="h-learn">The work changed. So does how we learn it.</h2><p>Learning the new discipline.</p></div>
+    <div class="sec-h"><h2 id="h-learn">The work changed. So does how we learn it.</h2><p>Working with agents is a skill of its own, and each role learns a different part of it.</p></div>
     <div class="learn">
       <div>
         <p class="lead">Juniors learn to judge evidence they did not produce. Leads learn to write constraints. Product people learn to write the note.</p>
@@ -667,10 +919,10 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
       </div>
       <div>
         <ul class="offer">
-          <li><svg class="ico"><use href="#i-check"/></svg>Readiness mapping</li>
-          <li><svg class="ico"><use href="#i-check"/></svg>Role-based training</li>
-          <li><svg class="ico"><use href="#i-check"/></svg>Guided onboarding</li>
-          <li><svg class="ico"><use href="#i-check"/></svg>Coaching</li>
+          <li><span class="oi"><svg class="ico"><use href="#i-map"/></svg></span>Readiness mapping</li>
+          <li><span class="oi"><svg class="ico"><use href="#i-users"/></svg></span>Role-based training</li>
+          <li><span class="oi"><svg class="ico"><use href="#i-route"/></svg></span>Guided onboarding</li>
+          <li><span class="oi"><svg class="ico"><use href="#i-chat"/></svg></span>Coaching</li>
         </ul>
         <a class="lnk" href="mailto:hello@konteks.io?subject=Agentic%20training%20and%20onboarding">Talk to us about training <svg class="ico"><use href="#i-arrow"/></svg></a>
       </div>
