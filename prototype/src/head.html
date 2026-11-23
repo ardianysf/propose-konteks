@@ -2,3 +2,4 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <script>try{var t=localStorage.getItem("kx-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>@view-transition{navigation:auto}</style>
+<script>/* iOS zooms into any field under 16px; on iOS only, cap the focus zoom (pinch zoom still works there). */if(/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1)){var v=document.querySelector("meta[name=viewport]");if(v)v.content+=",maximum-scale=1"}</script>

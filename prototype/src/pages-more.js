@@ -207,21 +207,24 @@ function bindActivities() {
     const fold = e.target.closest("[data-cmts]");
     if (fold) { const open = fold.getAttribute("aria-expanded") !== "true"; fold.setAttribute("aria-expanded", open); card.querySelector(".tl-cmts").hidden = !open; band(card).hidden = !open && !card.querySelector(".tl-cmt"); return; }
     const b = e.target.closest("[data-cmt]"); if (!b) return;
-    const shut = () => { card.querySelector(".tl-cmt")?.remove(); b.setAttribute("aria-expanded", "false"); if (!card.querySelectorAll(".tl-cmts > li").length || card.querySelector(".tl-cmts").hidden) band(card).hidden = true; b.focus(); };
-    if (card.querySelector(".tl-cmt")) return shut();
+    const shut = () => { card.querySelector(".tl-cmt")?.remove(); b.setAttribute("aria-expanded", "false"); if (!card.querySelectorAll(".tl-cmts > li").length || card.querySelector(".tl-cmts").hidden) band(card).hidden = true; b.focus({ preventScroll: true }); };
+    if (card.querySelector(".tl-cmt")) { S.cmtDraft[card.dataset.ini] = card.querySelector(".tl-cmt textarea").value; return shut(); }
+    /* One comment box at a time: opening another closes this one and keeps what was typed for later. */
+    $$(".tl-cmt").forEach(o => { const oc = o.closest(".tl-card"); S.cmtDraft[oc.dataset.ini] = o.querySelector("textarea").value; o._shut?.(); });
     const i = iniById[card.dataset.ini];
     band(card).hidden = false;
     band(card).insertAdjacentHTML("beforeend", `<div class="tl-cmt"><span class="av">AY</span><div class="tl-cmt-b"><div class="compose"><textarea rows="1" placeholder="Add a comment…" aria-label="Comment on this card" aria-describedby="cmtNote-${i.id}"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp>Comment</button></div>
       <p class="hint tl-cmt-note" id="cmtNote-${i.id}">Stays on this card. To hand work to Konteks, use @konteks on a note in <a href="#initiative/activities" data-ini="${i.id}" title="${esc(i.title)}">the initiative</a>.</p></div></div>`);
     const box = card.querySelector(".tl-cmt"), ta = box.querySelector("textarea");
     box.querySelector("[data-ini]").onclick = () => { S.cur = i.id; };
-    b.setAttribute("aria-expanded", "true"); ta.focus();
-    box.querySelector("[data-cx]").onclick = shut;
+    b.setAttribute("aria-expanded", "true"); ta.value = S.cmtDraft[i.id] || ""; if (ta.value) composeGrow(ta); ta.focus();
+    box._shut = shut;
+    box.querySelector("[data-cx]").onclick = () => { delete S.cmtDraft[i.id]; shut(); };
     box.querySelector("[data-cp]").onclick = () => { const t = ta.value.trim(); if (!t) return ta.focus();
       const list = card.querySelector(".tl-cmts"); list.hidden = false;
       list.insertAdjacentHTML("beforeend", actCmt({ p: "ay", m: 0, text: t }).replace("<li>", '<li class="msg-in">'));
       list.lastElementChild.querySelector("time").outerHTML = "<time>now</time>";
-      bindNoteTools(list.lastElementChild); drawIcons(); setCount(card); card.querySelector("[data-cmts]")?.setAttribute("aria-expanded", "true"); shut(); sfx("send"); toast("Comment posted on this card"); };
+      delete S.cmtDraft[i.id]; ta.value = ""; bindNoteTools(list.lastElementChild); drawIcons(); setCount(card); card.querySelector("[data-cmts]")?.setAttribute("aria-expanded", "true"); shut(); sfx("send"); toast("Comment posted on this card"); };
     ta.onkeydown = ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); shut(); } };
   }));
   $("#moreAct")?.addEventListener("click", () => { S.actMore = true; render(); });

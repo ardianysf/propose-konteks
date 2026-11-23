@@ -1,5 +1,6 @@
 /* ---------- demo app state ---------- */
 const S = {
+  cmtDraft: {},
   viewAs: "contributor",   // contributor | approver: shows how permission changes the attention card
   cur: "INI-139",          // initiative shown on the detail page
   rt: "rf-01",             // runtime shown on the runtime page
