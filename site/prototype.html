@@ -3692,6 +3692,7 @@ function bindActivities() {
     band(card).insertAdjacentHTML("beforeend", `<div class="tl-cmt"><span class="av">AY</span><div class="tl-cmt-b"><p class="cx-ctx">Comment on <b>${esc(i.title)}</b></p><div class="compose"><textarea rows="1" placeholder="Add a comment…" aria-label="Comment on this card" aria-describedby="cmtNote-${i.id}"></textarea><button class="btn btn-ghost btn-sm" type="button" data-cx>Cancel</button><button class="btn btn-primary btn-sm" type="button" data-cp aria-label="Comment">${ic("arrow-up")}<span class="send-l">Comment</span></button></div>
       <p class="hint tl-cmt-note" id="cmtNote-${i.id}">Stays on this card. To hand work to Konteks, use @konteks on a note in <a href="#initiative/activities" data-ini="${i.id}" title="${esc(i.title)}">the initiative</a>.</p></div></div>`);
     const box = card.querySelector(".tl-cmt"), ta = box.querySelector("textarea");
+    drawIcons();
     box.querySelector("[data-ini]").onclick = () => { S.cur = i.id; };
     b.setAttribute("aria-expanded", "true"); ta.value = S.cmtDraft[i.id] || ""; if (ta.value) composeGrow(ta); ta.focus();
     box._shut = shut;
