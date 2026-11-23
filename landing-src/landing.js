@@ -394,44 +394,22 @@ let kCur = -1, kLen = 0, kNodes = [];
 const kVertical = () => innerWidth <= 900;
 const kLayout = () => {
   if (kCur < 0) return;
-  const V = kVertical(), n = kNodes.length, pad = V ? 16 : 22, gap = V ? 22 : 30;
-  kdia.style.height = V ? (n * 78 + (n - 1) * gap + pad * 2) + "px" : "";
+  // one line: every step sits on it, people light, agents dark, the yes on the line itself
+  const V = kVertical(), n = kNodes.length, pad = V ? 16 : 22, gap = V ? 18 : 26;
+  kdia.style.height = V ? (n * 70 + (n - 1) * gap + pad * 2) + "px" : "";
   const r = kdia.getBoundingClientRect();
-  if (!V) {
-    const colW = (r.width - pad * 2 - gap * (n - 1)) / n;
-    kNodes.forEach((el, i) => {
-      const side = el.dataset.side, cx = pad + i * (colW + gap) + colW / 2, cy = r.height * (side === "p" ? .25 : side === "a" ? .75 : .5);
-      el.style.width = side === "y" ? "" : colW + "px"; el.style.left = cx + "px"; el.style.top = cy + "px";
-    });
-  } else {
-    const rowH = (r.height - pad * 2 - gap * (n - 1)) / n, colW = r.width * .44;
-    kNodes.forEach((el, i) => {
-      const side = el.dataset.side, cy = pad + i * (rowH + gap) + rowH / 2, cx = r.width * (side === "p" ? .25 : side === "a" ? .75 : .5);
-      el.style.width = side === "y" ? "" : colW + "px"; el.style.left = cx + "px"; el.style.top = cy + "px";
-    });
-  }
-  // route edge to edge through the gaps, never across a node
-  const box = kNodes.map(el => { const b = el.getBoundingClientRect(); return { l: b.left - r.left, r: b.right - r.left, t: b.top - r.top, b: b.bottom - r.top, cx: b.left - r.left + b.width / 2, cy: b.top - r.top + b.height / 2 }; });
-  const R = 12; let d = "", entries = [];
-  box.forEach((q, i) => {
-    if (i === 0) { d = V ? `M${q.cx} ${q.b}` : `M${q.r} ${q.cy}`; entries.push(0); return; }
-    const p = box[i - 1];
-    if (!V) {
-      const mx = (p.r + q.l) / 2, y0 = p.cy, y1 = q.cy;
-      if (Math.abs(y1 - y0) < 8) d += ` L${q.l} ${y0}`;
-      else { const s = Math.sign(y1 - y0); d += ` L${mx - R} ${y0} Q${mx} ${y0} ${mx} ${y0 + s * R} L${mx} ${y1 - s * R} Q${mx} ${y1} ${mx + R} ${y1} L${q.l} ${y1}`; }
-      kpathEl.setAttribute("d", d); entries.push(kpathEl.getTotalLength());
-      d += ` M${q.r} ${q.cy}`;
-    } else {
-      const my = (p.b + q.t) / 2, x0 = p.cx, x1 = q.cx;
-      if (Math.abs(x1 - x0) < 2) d += ` L${x1} ${q.t}`;
-      else { const s = Math.sign(x1 - x0); d += ` L${x0} ${my - R} Q${x0} ${my} ${x0 + s * R} ${my} L${x1 - s * R} ${my} Q${x1} ${my} ${x1} ${my + R} L${x1} ${q.t}`; }
-      kpathEl.setAttribute("d", d); entries.push(kpathEl.getTotalLength());
-      d += ` M${q.cx} ${q.b}`;
-    }
+  const cell = ((V ? r.height : r.width) - pad * 2 - gap * (n - 1)) / n;
+  kNodes.forEach((el, i) => {
+    const c = pad + i * (cell + gap) + cell / 2;
+    el.style.width = el.dataset.side === "y" ? "" : (V ? Math.min(r.width * .72, 320) : cell) + "px";
+    el.style.left = (V ? r.width / 2 : c) + "px"; el.style.top = (V ? c : r.height / 2) + "px";
   });
+  const first = kNodes[0].getBoundingClientRect(), last = kNodes[n - 1].getBoundingClientRect();
+  const d = V ? `M${r.width / 2} ${first.top - r.top + first.height / 2} L${r.width / 2} ${last.top - r.top + last.height / 2}`
+              : `M${first.left - r.left + first.width / 2} ${r.height / 2} L${last.left - r.left + last.width / 2} ${r.height / 2}`;
   kpathEl.setAttribute("d", d); kLen = kpathEl.getTotalLength();
-  kNodes._t = entries;
+  const s0 = V ? first.top - r.top + first.height / 2 : first.left - r.left + first.width / 2;
+  kNodes._t = kNodes.map(el => { const b = el.getBoundingClientRect(); return (V ? b.top - r.top + b.height / 2 : b.left - r.left + b.width / 2) - s0; });
 };
 const kShow = i => {
   if (i === kCur) return; kCur = i;
@@ -473,16 +451,38 @@ const kFrame = now => {
     if (!kt0) kt0 = now;
     const T = 1600 * kNodes.length, f = ((now - kt0) % (T + 900)) / T, l = kLen * smooth(clamp(f));
     const q = kpathEl.getPointAtLength(l); ktok.setAttribute("cx", q.x); ktok.setAttribute("cy", q.y);
-    kNodes.forEach((n, j) => n.classList.toggle("hot", f <= 1 && Math.abs(l - kNodes._t[j]) < 26));
+    kNodes.forEach((n, j) => n.classList.toggle("hot", f <= 1 && Math.abs(l - kNodes._t[j]) < 30));
   }
   requestAnimationFrame(kFrame);
 };
 kShow(0); requestAnimationFrame(kFrame);
 if (RM) ktok.style.display = "none";
 
+/* ============ parallax: layers drift at their own speed as they pass ============ */
+const pxEls = RM ? [] : $$("[data-px]").map(el => [el, +el.dataset.px]);
+const pxDraw = () => {
+  const vh = innerHeight;
+  for (const [el, k] of pxEls) {
+    const r = el.getBoundingClientRect();
+    if (r.bottom < -200 || r.top > vh + 200) continue;
+    const off = (r.top + r.height / 2 - vh / 2) - (el._py || 0);
+    const y = -off * k; el._py = y;
+    el.style.transform = `translate3d(0,${y.toFixed(1)}px,0)`;
+  }
+};
+/* the note sheet leans toward the pointer */
+if (!RM && matchMedia("(pointer:fine)").matches) {
+  const sh = $("#sheet");
+  hero.addEventListener("pointermove", e => {
+    const r = hero.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    sh.style.transform = `perspective(1200px) rotateY(${(x * 4).toFixed(2)}deg) rotateX(${(-y * 3).toFixed(2)}deg)`;
+  });
+  hero.addEventListener("pointerleave", () => { sh.style.transform = ""; });
+}
+
 /* ============ scroll + resize ============ */
 let raf = 0;
-const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); };
+const onScroll = () => { nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); pxDraw(); };
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
 addEventListener("resize", () => { requestAnimationFrame(relayout); });
 const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); onScroll(); };

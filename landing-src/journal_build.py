@@ -11,61 +11,48 @@ def esc(s): return html.escape(s, quote=True)
 def month(e): return " ".join([e["date"].split()[0], e["date"].split()[-1]])
 
 # ---------- covers: authored SVG in the page's own world ----------
-def cover(kind, cls="cv"):
-    if kind == "plan":
-        return f'''<svg class="{cls} cv-plan" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-<rect width="640" height="360" class="c-moss"/><rect width="640" height="200" class="c-paper"/><path d="M0 200H640" class="c-line"/>
-<g class="c-note" transform="translate(84 46)"><rect width="250" height="128" rx="14" class="c-card"/><circle cx="26" cy="28" r="10" class="c-av"/><rect x="46" y="22" width="120" height="10" rx="5" class="c-ink"/>
-<rect x="18" y="54" width="210" height="8" rx="4" class="c-soft"/><rect x="18" y="72" width="180" height="8" rx="4" class="c-soft"/><rect x="18" y="98" width="88" height="16" rx="8" class="c-tag"/></g>
-<g class="c-tix"><rect x="380" y="40" width="170" height="34" rx="10" class="c-card"/><rect x="396" y="52" width="80" height="10" rx="5" class="c-ink"/>
-<rect x="400" y="86" width="170" height="34" rx="10" class="c-card"/><rect x="416" y="98" width="64" height="10" rx="5" class="c-ink"/>
-<rect x="420" y="132" width="170" height="34" rx="10" class="c-card"/><rect x="436" y="144" width="96" height="10" rx="5" class="c-ink"/></g>
-<path d="M334 110 C360 110 360 57 380 57 M334 110 C362 110 372 103 400 103 M334 110 C366 110 386 149 420 149" class="c-wire"/>
-<g transform="translate(272 200)"><rect x="-44" y="-21" width="88" height="42" rx="21" class="c-yes"/><text x="0" y="7" class="c-yt">Yes</text></g>
-<g class="c-agents"><rect x="96" y="254" width="132" height="40" rx="20" class="c-chip"/><circle cx="118" cy="274" r="6" class="c-dot"/><rect x="132" y="268" width="76" height="10" rx="5" class="c-chipink"/>
-<rect x="254" y="254" width="132" height="40" rx="20" class="c-chip"/><circle cx="276" cy="274" r="6" class="c-dot"/><rect x="290" y="268" width="66" height="10" rx="5" class="c-chipink"/>
-<rect x="412" y="254" width="132" height="40" rx="20" class="c-chip"/><circle cx="434" cy="274" r="6" class="c-dot"/><rect x="448" y="268" width="82" height="10" rx="5" class="c-chipink"/></g>
-</svg>'''
-    return f'''<svg class="{cls} cv-road" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-<rect width="640" height="360" class="c-paper2"/>
-<path d="M-20 320 C120 300 150 220 260 220 S420 260 470 170 S560 70 660 60" class="c-road"/>
-<path d="M-20 320 C120 300 150 220 260 220 S420 260 470 170 S560 70 660 60" class="c-roaddash"/>
-<g class="c-ms"><circle cx="118" cy="292" r="7"/><circle cx="260" cy="220" r="7"/><circle cx="398" cy="226" r="7"/></g>
-<g transform="translate(440 36)"><rect width="150" height="168" rx="16" class="c-card"/><rect width="150" height="44" rx="16" class="c-cal"/><rect y="26" width="150" height="18" class="c-cal"/>
-<text x="75" y="31" class="c-mon">AUG</text><text x="75" y="128" class="c-big">17</text><text x="75" y="156" class="c-sub">2026</text></g>
-<g transform="translate(60 64)"><rect width="230" height="96" rx="14" class="c-card"/><rect x="18" y="20" width="150" height="10" rx="5" class="c-ink"/><rect x="18" y="42" width="190" height="8" rx="4" class="c-soft"/><rect x="18" y="58" width="160" height="8" rx="4" class="c-soft"/><rect x="18" y="74" width="120" height="8" rx="4" class="c-soft"/></g>
-</svg>'''
+def cover(e, mode="full"):
+    """Typographic cover: the entry's own line, set large on a field from the palette."""
+    f = e.get("field", "moss")
+    if mode == "thumb":
+        return f'<span class="cv cv-{f} cv-thumb" aria-hidden="true"><span class="cv-mk">{esc(e["mark"])}</span><i class="cv-line"></i></span>'
+    return (f'<span class="cv cv-{f} cv-{mode}" aria-hidden="true"><span class="cv-q">\u201c{esc(e["pull"])}\u201d</span>'
+            f'<i class="cv-line"></i><span class="cv-foot"><span class="cv-mk">{esc(e["mark"])}</span><span class="cv-src">Konteks journal</span></span></span>')
 
 COVER_CSS = r'''
-.cv{display:block;width:100%;height:100%}
-.cv .c-moss{fill:#1F2B20}.cv .c-paper{fill:#F1EFE3}.cv .c-paper2{fill:#EEF3E6}
-.cv .c-line{stroke:#8FBF6A;stroke-width:2}
-.cv .c-card{fill:#FFFFFF;stroke:#D4D9C5}
-.cv .c-av{fill:#4F7044}.cv .c-ink{fill:#243025;opacity:.75}.cv .c-soft{fill:#D4D9C5}.cv .c-tag{fill:#E3EBD6}
-.cv .c-wire{fill:none;stroke:#5F8D4E;stroke-width:2;stroke-dasharray:4 5}
-.cv .c-yes{fill:#4F7044}.cv .c-yt{fill:#fff;font:700 20px var(--display);text-anchor:middle}
-.cv .c-chip{fill:rgba(238,241,232,.08);stroke:rgba(238,241,232,.22)}.cv .c-dot{fill:#8FBF6A}.cv .c-chipink{fill:#EEF1E8;opacity:.75}
-.cv .c-road{fill:none;stroke:#C9D8B6;stroke-width:26;stroke-linecap:round}
-.cv .c-roaddash{fill:none;stroke:#fff;stroke-width:3;stroke-dasharray:10 12}
-.cv .c-ms circle{fill:#4F7044;stroke:#fff;stroke-width:3}
-.cv .c-cal{fill:#4F7044}.cv .c-mon{fill:#fff;font:700 16px var(--sans);text-anchor:middle;letter-spacing:.08em}
-.cv .c-big{fill:#243025;font:700 72px var(--display);text-anchor:middle;letter-spacing:-3px}.cv .c-sub{fill:#5E705E;font:500 14px var(--sans);text-anchor:middle}
+.cv{position:relative;display:flex;flex-direction:column;justify-content:space-between;width:100%;height:100%;padding:7cqh 6cqw;box-sizing:border-box;overflow:hidden}
+.jthumb,.jth,.jpx,.jc,.acover{container-type:size}
+.cv-moss{background:var(--moss);color:var(--on-moss)}
+.cv-matcha{background:var(--split-panel);color:var(--split-ink)}
+.cv-q{font:600 clamp(16px,7.4cqw,64px)/1.08 var(--display);letter-spacing:-.03em;max-width:15ch;text-wrap:balance}
+.cv-moss .cv-q{color:var(--on-moss)}
+.cv-line{position:absolute;left:0;right:0;top:68%;height:1px;background:var(--live);opacity:.9}
+.cv-matcha .cv-line{background:var(--accent-strong)}
+.cv-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.cv-mk{font:640 clamp(18px,9cqw,84px)/.9 var(--display);letter-spacing:-.04em}
+.cv-moss .cv-mk{color:var(--live)}.cv-matcha .cv-mk{color:var(--accent-ink)}
+.cv-src{font:500 clamp(11px,2.2cqw,15px)/1.2 var(--sans);opacity:.75;padding-bottom:.4em}
+.cv-thumb{justify-content:flex-end;padding:10cqh 9cqw}
+.cv-thumb .cv-mk{font-size:clamp(16px,19cqw,40px);white-space:nowrap}
+.cv-thumb .cv-line{top:42%}
+.cv-wide .cv-q{font-size:clamp(20px,5.2cqw,68px);max-width:18ch}
+.cv-wide .cv-line{top:64%}
 '''
 
 # ---------- the landing section ----------
 def landing_section():
     f, rest = ENTRIES[0], ENTRIES[1:4]
-    rows = "".join(f'''<li><a class="jrow" href="/journal/{e["slug"]}"><span class="jthumb">{cover(e["cover"])}</span><span class="jrow-t"><span class="jmeta"><time datetime="{e["iso"]}">{e["date"]}</time><span class="jtag">{e["tag"]}</span></span><b>{esc(e["title"])}</b><span class="jdek">{esc(e["dek"])}</span></span></a></li>''' for e in rest)
+    rows = "".join(f'''<li><a class="jrow" href="/journal/{e["slug"]}"><span class="jthumb">{cover(e,"thumb")}</span><span class="jrow-t"><span class="jmeta"><time datetime="{e["iso"]}">{e["date"]}</time><span class="jtag">{e["tag"]}</span></span><b>{esc(e["title"])}</b><span class="jdek">{esc(e["dek"])}</span></span></a></li>''' for e in rest)
     return f'''<section class="jsec" id="journal" aria-labelledby="h-journal">
   <div class="wrap">
     <div class="sec-h"><h2 id="h-journal">Notes from the part where the product becomes real.</h2><p>Launch notes, engineering scars, and the decisions behind software that remembers. From the Konteks journal.</p></div>
     <div class="jgrid">
       <a class="jfeat" href="/journal/{f["slug"]}">
-        <span class="jcover">{cover(f["cover"])}<span class="jday">{f["day"]}</span></span>
+        <span class="jcover"><span class="jpx" data-px="-.08">{cover(f)}</span></span>
         <span class="jfeat-t"><span class="jmeta"><time datetime="{f["iso"]}">{f["date"]}</time><span class="jtag">{f["tag"]}</span><span>{f["read"]}</span></span>
         <b class="jtitle">{esc(f["title"])}</b><span class="jdek">{esc(f["dek"])}</span><span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span></span>
       </a>
-      <div class="jside">
+      <div class="jside" data-px=".06">
         <ul class="jlist">{rows}</ul>
         <a class="btn btn-line jall" href="/journal">All journal entries <svg class="ico"><use href="#i-arrow"/></svg></a>
       </div>
@@ -80,8 +67,10 @@ JSEC_CSS = r'''
 .jfeat{display:grid;text-decoration:none;border-radius:24px;overflow:hidden;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-1);transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
 .jfeat:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
 .jcover{position:relative;display:block;aspect-ratio:16/8.5;overflow:hidden;border-bottom:1px solid var(--line)}
-.jcover .cv{transition:transform .8s var(--ease)}
-.jfeat:hover .jcover .cv{transform:scale(1.03)}
+.jpx{position:absolute;inset:-6% 0;display:block}
+.jpx .cv{padding-block:13cqh 11cqh}
+.jcover .cv-q{transition:transform .8s var(--ease)}
+.jfeat:hover .jcover .cv-q{transform:translateY(-4px)}
 .jday{position:absolute;left:20px;bottom:16px;font:640 clamp(28px,1.2rem + 1.4vw,44px)/1 var(--display);letter-spacing:-.03em;color:#FAF8EF;text-shadow:0 2px 12px rgba(0,0,0,.35)}
 .jfeat-t{display:grid;gap:12px;padding:clamp(20px,2.4vw,30px)}
 .jmeta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:13px;color:var(--ink-3)}
@@ -180,8 +169,7 @@ PAGE_CSS = r'''
 .jlead{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);border-radius:28px;overflow:hidden;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-2);text-decoration:none;transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
 .jlead:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
 .jlead .jc{position:relative;min-height:340px;overflow:hidden}
-.jlead .jc .cv{position:absolute;inset:0;transition:transform .8s var(--ease)}
-.jlead:hover .jc .cv{transform:scale(1.03)}
+.jlead .jc .cv{position:absolute;inset:0}
 .jlead .jday{position:absolute;left:24px;bottom:20px;font:640 clamp(36px,1.6rem + 1.8vw,60px)/1 var(--display);letter-spacing:-.03em;color:#FAF8EF;text-shadow:0 2px 14px rgba(0,0,0,.35)}
 .jlead .jt{display:grid;gap:14px;align-content:center;padding:clamp(24px,3.4vw,48px)}
 .jlead h2{font-size:clamp(26px,1.2rem + 1.4vw,40px);line-height:1.1}
@@ -265,7 +253,7 @@ def index_page():
     for e in ENTRIES[1:]: months.setdefault(month(e), []).append(e)
     arch = ""
     for m, es in months.items():
-        items = "".join(f'''<li data-tag="{esc(e["tag"])}"><a class="jitem" href="/journal/{e["slug"]}"><span class="jt"><span class="jmeta"><time datetime="{e["iso"]}">{e["date"]}</time><span class="jtag">{e["tag"]}</span><span>{e["read"]}</span></span><h3>{esc(e["title"])}</h3><p>{esc(e["dek"])}</p><span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span></span><span class="jth">{cover(e["cover"])}</span></a></li>''' for e in es)
+        items = "".join(f'''<li data-tag="{esc(e["tag"])}"><a class="jitem" href="/journal/{e["slug"]}"><span class="jt"><span class="jmeta"><time datetime="{e["iso"]}">{e["date"]}</time><span class="jtag">{e["tag"]}</span><span>{e["read"]}</span></span><h3>{esc(e["title"])}</h3><p>{esc(e["dek"])}</p><span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span></span><span class="jth">{cover(e,"thumb")}</span></a></li>''' for e in es)
         arch += f'<section class="jmonth" data-month><h2>{m}</h2><ol>{items}</ol></section>'
     chips = f'<button type="button" aria-pressed="true" data-f="">All<span>{len(ENTRIES)}</span></button>' + "".join(f'<button type="button" aria-pressed="false" data-f="{esc(t)}">{t}<span>{sum(1 for e in ENTRIES if e["tag"] == t)}</span></button>' for t in tags)
     body = f'''<div class="wrap">
@@ -275,7 +263,7 @@ def index_page():
     <div class="jfilters" role="group" aria-label="Filter entries">{chips}</div>
   </header>
   <a class="jlead" href="/journal/{f["slug"]}" data-tag="{esc(f["tag"])}">
-    <span class="jc">{cover(f["cover"])}<span class="jday">{f["day"]}</span></span>
+    <span class="jc">{cover(f)}</span>
     <span class="jt"><span class="jmeta"><span>Latest</span><time datetime="{f["iso"]}">{f["date"]}</time><span class="jtag">{f["tag"]}</span><span>{f["read"]}</span></span><h2>{esc(f["title"])}</h2><p>{esc(f["dek"])}</p><span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span></span>
   </a>
   <div class="jarchive" id="archive"><h2 class="jarch-h">Earlier entries</h2>{arch}<p class="jempty" hidden>No entries with this tag yet.</p></div>
@@ -318,7 +306,7 @@ def article_page(i):
       <p class="dek">{esc(e["dek"])}</p>
       <div class="byline"><img src="@@IMG:konteks@@" alt="" width="44" height="23"><span>By the Konteks team</span></div>
     </header>
-    <div class="acover">{cover(e["cover"])}</div>
+    <div class="acover">{cover(e,"wide")}</div>
     <div class="alayout">
       <nav class="toc" aria-label="On this page"><b>On this page</b><ol>{tocl}</ol></nav>
       <div class="prose" id="prose">{"".join(parts)}</div>

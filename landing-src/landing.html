@@ -793,6 +793,23 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 @media (max-width:900px){.week-sum,.now-list{grid-column:1;grid-row:2}.ws-n b{font-size:56px}}
 .rm .week-sum{opacity:1;transform:none;grid-row:auto}.rm .now-list{opacity:1}
 
+/* ===== round 7: one-line flow, more air, parallax ===== */
+.kdia{height:clamp(190px,26vh,240px);background:var(--sunken)}
+.kline{display:none}
+.kpath .base{stroke:var(--accent-strong);stroke-width:2;stroke-dasharray:none;opacity:.7}
+.knode.y{box-shadow:0 0 0 6px var(--sunken)}
+@media (max-width:900px){.kdia{background:var(--sunken)}}
+/* more air above the big sections, without touching the pinned tracks */
+.lanes{padding-bottom:clamp(56px,7vw,104px)}
+.eras{padding-top:clamp(56px,8vw,128px)}
+.week-sec{padding-top:clamp(120px,14vw,220px)}
+.kinds-sec{padding-top:clamp(64px,8vw,128px)}
+.theory{padding-top:clamp(120px,14vw,220px)}
+.jsec{padding-top:clamp(120px,14vw,220px)}
+/* parallax layers */
+[data-px]{will-change:transform}
+.sheet{transform-style:preserve-3d;transition:transform .6s var(--ease)}
+
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
 </head>
@@ -1015,7 +1032,7 @@ bob    tty1</pre></div>
     <div class="theory-l">
       <h2 id="h-people">Programming is theory building.</h2>
       <p class="theory-p">Agents write most of the code now. People still hold the theory: what the software is for, why it works the way it does, and what it should never do.</p>
-      <blockquote class="naur" id="naur">
+      <blockquote class="naur" id="naur" data-px="-.04">
         <p>“Programming properly should be regarded as an activity by which the programmers form or achieve a certain kind of insight, a theory, of the matters at hand.”</p>
         <footer>Peter Naur, Programming as Theory Building, 1985</footer>
       </blockquote>
@@ -1032,7 +1049,7 @@ bob    tty1</pre></div>
 
 <section class="sec" id="workflow" aria-labelledby="h-how" style="padding-bottom:0">
   <div class="wrap">
-    <h2 class="h2" id="h-how" style="max-width:19ch">Write a note. Say yes to the plan. Accept tested pull requests and a receipt.</h2>
+    <h2 class="h2" id="h-how" data-px=".05" style="max-width:19ch">Write a note. Say yes to the plan. Accept tested pull requests and a receipt.</h2>
     <div class="how-notes">
       <p>Every comment and reaction reaches the agent’s session, in the same transcript you know from coding with an agent yourself.</p>
       <p>Every tool call and transcript stays in the record, for whenever you want to look.</p>
@@ -1050,15 +1067,15 @@ bob    tty1</pre></div>
 
 <section class="sec" id="record" aria-labelledby="h-co">
   <div class="wrap">
-    <div class="sec-h"><h2 id="h-co">Many notes. Many agents. One record.</h2><p>Every team writes notes and runs agents. It all lands in one record, under the same rules.</p></div>
+    <div class="sec-h"><h2 id="h-co" data-px=".05">Many notes. Many agents. One record.</h2><p>Every team writes notes and runs agents. It all lands in one record, under the same rules.</p></div>
     <div class="merge" id="merge">
-      <ul class="teams">
+      <ul class="teams" data-px=".07">
         <li><b>Billing</b><span class="nchip"><svg class="ico"><use href="#i-note"/></svg>Invoices: export to CSV</span><span class="achip"><svg class="ico"><use href="#i-hammer"/></svg>Claude Code</span></li>
         <li><b>Mobile</b><span class="nchip"><svg class="ico"><use href="#i-note"/></svg>Offline mode for orders</span><span class="achip"><svg class="ico"><use href="#i-eye"/></svg>Codex</span></li>
         <li><b>Data</b><span class="nchip"><svg class="ico"><use href="#i-note"/></svg>Nightly revenue report</span><span class="achip"><svg class="ico"><use href="#i-pulse"/></svg>OpenCode</span></li>
       </ul>
       <svg class="merge-lines" aria-hidden="true"></svg>
-      <div class="panel rec">
+      <div class="panel rec" data-px="-.05">
         <div class="panel-h"><span>Activities <i class="live-dot"></i></span><span class="eg">Example</span></div>
         <ol class="tl" id="feed">
           <li><span class="tag sh">Shipped</span><div><b>CSV export is live for Finance</b><q>Downloaded March. All 120 rows are there.</q><div class="m"><em>Billing</em> Ayu, 11:40</div></div></li>
@@ -1068,7 +1085,7 @@ bob    tty1</pre></div>
         <div class="rec-cap">One timeline of the turning points: started, approved, fixed, shipped, with people’s own words next to each.</div>
       </div>
     </div>
-    <dl class="also">
+    <dl class="also" data-px=".03">
       <div><dt><svg class="ico"><use href="#i-layers"/></svg>Software System</dt><dd>Each product lives in a Software System: a catalog of its repositories and components. Every session reads it, so each new note starts with the software already known.</dd></div>
       <div><dt><svg class="ico"><use href="#i-pointer"/></svg>Computers</dt><dd>Every computer is a place in the app, with a live status. Its page shows what runs there, every agent and how to connect it, and a New session button to chat with any of them.</dd></div>
       <div><dt><svg class="ico"><use href="#i-eye"/></svg>Where the team sees it</dt><dd class="sees"><span>Work In Progress</span><span>Issues</span><span>Releases</span><span>Leaderboard</span></dd></div>
@@ -1141,7 +1158,7 @@ bob    tty1</pre></div>
      <button role="tab" id="kt3" aria-controls="kp" aria-selected="false" tabindex="-1">Ops<i><b></b></i></button>
     </div>
     <div class="kpanel" id="kp" role="tabpanel" aria-labelledby="kt0">
-     <div class="kp-t"><h3 id="kp-h"></h3><p id="kp-p"></p><span class="eg">Example session. People above the line, agents below it.</span></div>
+     <div class="kp-t"><h3 id="kp-h"></h3><p id="kp-p"></p><span class="eg">Example session. Light steps are people, dark steps are agents.</span></div>
      <div class="kdia" id="kdia"><span class="kline" aria-hidden="true"></span><svg class="kpath" aria-hidden="true"><path class="base"/><circle class="tok" r="6"/></svg></div>
     </div>
    </div>
@@ -1151,9 +1168,9 @@ bob    tty1</pre></div>
 
 <section class="sec moss" id="agents" aria-labelledby="h-agents">
   <div class="wrap">
-    <div class="sec-h"><h2 id="h-agents">Five agents. Your own computer. One set of rules.</h2><p>Konteks speaks ACP, the Agent Client Protocol, so the agent your engineers already use connects as it is. No agent runs on a Konteks server.</p></div>
+    <div class="sec-h"><h2 id="h-agents" data-px=".05">Five agents. Your own computer. One set of rules.</h2><p>Konteks speaks ACP, the Agent Client Protocol, so the agent your engineers already use connects as it is. No agent runs on a Konteks server.</p></div>
     <div class="agents-g">
-    <svg class="acp" viewBox="0 0 520 380" role="img" aria-label="Five agents run on your computer, which connects to Konteks">
+    <svg class="acp" data-px=".09" viewBox="0 0 520 380" role="img" aria-label="Five agents run on your computer, which connects to Konteks">
      <g class="wires">
       <path id="w0" d="M86 46 C170 46 170 190 236 190"/><path id="w1" d="M86 118 C170 118 170 190 236 190"/><path id="w2" d="M86 190 L236 190"/><path id="w3" d="M86 262 C170 262 170 190 236 190"/><path id="w4" d="M86 334 C170 334 170 190 236 190"/>
       <path id="w5" class="main" d="M330 190 L420 190"/>
@@ -1191,14 +1208,14 @@ bob    tty1</pre></div>
 
 <section class="sec" id="enablement" aria-labelledby="h-learn">
   <div class="wrap">
-    <div class="sec-h"><h2 id="h-learn">The work changed. So does how we learn it.</h2><p>Working with agents is a skill of its own, and each role learns a different part of it.</p></div>
+    <div class="sec-h"><h2 id="h-learn" data-px=".05">The work changed. So does how we learn it.</h2><p>Working with agents is a skill of its own, and each role learns a different part of it.</p></div>
     <div class="learn2">
-      <ul class="roles">
+      <ul class="roles" data-px=".04">
         <li><span class="role"><svg class="ico"><use href="#i-users"/></svg>Juniors</span><p>learn to judge evidence they did not produce.</p></li>
         <li><span class="role"><svg class="ico"><use href="#i-route"/></svg>Leads</span><p>learn to write constraints.</p></li>
         <li><span class="role"><svg class="ico"><use href="#i-note"/></svg>Product people</span><p>learn to write the note.</p></li>
       </ul>
-      <div class="train moss">
+      <div class="train moss" data-px="-.06">
         <p class="train-p">Refactory, the team behind Konteks, trains for exactly this, with Konteks or on its own.</p>
         <ul class="offer">
           <li><span class="oi"><svg class="ico"><use href="#i-map"/></svg></span>Readiness mapping</li>
@@ -1215,7 +1232,7 @@ bob    tty1</pre></div>
 <!--@@JOURNAL@@-->
 
 <section class="close" aria-labelledby="h-close">
-  <div class="wrap"><h2 id="h-close">Unlearn the old way. <span>Learn to work with agents.</span></h2></div>
+  <div class="wrap"><h2 id="h-close" data-px=".05">Unlearn the old way. <span>Learn to work with agents.</span></h2></div>
   <div class="wrap close-bar">
     <div class="close-acts">
       <a class="btn btn-go" href="#connect">Connect your agent <svg class="ico"><use href="#i-up"/></svg></a>

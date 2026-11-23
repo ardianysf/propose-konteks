@@ -5,7 +5,7 @@ ENTRIES = [
   "title": "Day 1: introducing Project Management mode, and why it matters",
   "short": "Delivery was never the hard part. The plan was.",
   "dek": "Konteks is live in beta on August 17. Delivery was never the hard part. Deciding what to build, in what order, at what cost, that was. Here is what we shipped for it.",
-  "date": "August 17, 2026", "iso": "2026-08-17", "tag": "Launch notes", "read": "6 min read", "day": "Day 1", "cover": "plan",
+  "date": "August 17, 2026", "iso": "2026-08-17", "tag": "Launch notes", "read": "6 min read", "day": "Day 1", "cover": "plan", "mark": "Day 1", "field": "moss", "pull": "We had solved delivery. We had not solved the plan.",
   "body": [
    ("p", "Konteks is live today at app.konteks.io, in beta, on Indonesia’s Independence Day. 🇮🇩"),
    ("p", "In July we wrote about the road to this date. This note is about one thing we found on that road, and what we built because of it."),
@@ -48,7 +48,7 @@ ENTRIES = [
   "title": "The road to August 17: software should remember",
   "short": "Software should remember.",
   "dek": "A launch countdown, and the story of how years of real engineering work turned into a system that gives humans and agents the same durable context.",
-  "date": "July 16, 2026", "iso": "2026-07-16", "tag": "Launch notes", "read": "6 min read", "day": "32 days out", "cover": "road",
+  "date": "July 16, 2026", "iso": "2026-07-16", "tag": "Launch notes", "read": "6 min read", "day": "17 Aug", "cover": "road", "mark": "17 Aug", "field": "matcha", "pull": "We were arranging the furniture while the house had no memory.",
   "body": [
    ("p", "There is a particular kind of confidence that only appears in product demos."),
    ("p", "The repository is clean. The prompt is tidy. The agent knows exactly what to do. Nothing has an owner, a budget, a history, a dependency, or a customer waiting on the other side."),
