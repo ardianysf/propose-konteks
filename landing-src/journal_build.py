@@ -98,7 +98,7 @@ def page(title, desc, body, extra_css, js, active="journal"):
     footh = land[land.index('<footer class="foot moss">'):land.index("</footer>") + 9]
     for a in ("product", "workflow", "sessions", "enablement", "connect", "top"):
         navh = navh.replace(f'href="#{a}"', f'href="/landingpage#{a}"'); footh = footh.replace(f'href="#{a}"', f'href="/landingpage#{a}"')
-    navh = navh.replace('href="/journal"', 'href="/journal" aria-current="page"')
+    navh = navh.replace(f'href="/{active}"', f'href="/{active}" aria-current="page"', 1)
     logo = "data:image/png;base64," + base64.b64encode(open(os.path.join(HERE, "assets/konteks.png"), "rb").read()).decode()
     out = f'''<!doctype html>
 <html lang="en">

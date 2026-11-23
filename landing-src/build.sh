@@ -19,3 +19,4 @@ open('../site/landingpage.html','w').write(out)
 print(len(out))
 PY
 python3 journal_build.py ../site ../prototype/src
+python3 pages_build.py ../site ../prototype/src
