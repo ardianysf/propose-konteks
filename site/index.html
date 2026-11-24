@@ -35,7 +35,13 @@
   --t12:12px; --t13:13px; --t14:14px; --t16:16px; --t20:20px; --t28:28px;
   --r4:4px; --r6:6px; --r10:10px; --scrim:rgba(15,21,16,.32);
   --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
-  --ease:cubic-bezier(.16,1,.3,1);
+  /* Motion. One curve family, a short duration scale; see Foundations > Motion and docs/MOTION.md. */
+  --ease:cubic-bezier(.16,1,.3,1);          /* strong ease-out: anything entering, leaving, or answering a press */
+  --ease-out:var(--ease);
+  --ease-in-out:cubic-bezier(.77,0,.175,1); /* on-screen movement and morphs (indicators, reflow) */
+  --ease-drawer:cubic-bezier(.32,.72,0,1);  /* sheets and docked composers rising from the edge */
+  --d-press:160ms; --d-tip:125ms; --d-pop:180ms; --d-page:200ms; --d-modal:250ms; --d-sheet:400ms; --d-toast:400ms;
+  --d-reveal:800ms; --stagger:60ms;         /* marketing reveals only */
   /* Sign-in: a deep moss panel (Split) and the night ground (Night); both stay dark in either theme. */
   --deep:#1F2B20; --deep-2:#152016; --on-deep:#EEF1E8; --on-deep-2:#B4C2B2;
   --night:#EEF2E6; --night-glow:rgba(143,191,106,.38); --night-glow-2:rgba(95,141,78,.16);
@@ -175,12 +181,41 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
 @media (max-width:380px){.beta{display:none}}
 html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
 
+/* ================= MOTION (shared by every marketing page) =================
+   Tokens from tokens.css: --ease, --ease-in-out, --d-press, --d-reveal, --stagger. Catalogued in Foundations > Motion.
+   reveal.js tags headings (.rv-h), their paragraphs (.rv-p) and cards in groups (.rv-i), then adds .rv-in once each enters. */
+.rv-on .rv-h{clip-path:inset(0 0 100% 0);translate:0 .3em;opacity:0;transition:clip-path var(--d-reveal) var(--ease),translate var(--d-reveal) var(--ease),opacity var(--d-reveal) var(--ease)}
+.rv-on .rv-h.rv-in{clip-path:inset(-.25em -.25em -.35em -.25em);translate:0 0;opacity:1}
+.rv-on .rv-p{opacity:0;translate:0 16px;transition:opacity var(--d-reveal) var(--ease) .14s,translate var(--d-reveal) var(--ease) .14s}
+.rv-on .rv-p.rv-in{opacity:1;translate:0 0}
+.rv-on .rv-i{opacity:0;translate:0 24px;transition:opacity var(--d-reveal) var(--ease) calc(var(--i,0) * var(--stagger)),translate var(--d-reveal) var(--ease) calc(var(--i,0) * var(--stagger))}
+.rv-on .rv-i.rv-in{opacity:1;translate:0 0}
+/* The menu grows out of its button. */
+.menu[open] .menu-pop{transform-origin:top right;animation:mpop var(--d-pop) var(--ease)}
+@keyframes mpop{from{opacity:0;scale:.96}}
+/* Press: buttons answer the finger. */
+.btn,.copy,.icon-btn{transition-property:background-color,border-color,color,box-shadow,scale;transition-duration:.15s,.15s,.15s,.15s,var(--d-press);transition-timing-function:var(--ease)}
+.btn:active,.copy:active,.icon-btn:active{scale:.97}
+/* Hover motion only for a real pointer; a tap on a phone is not a hover. */
+@media (hover:none),(pointer:coarse){.offer li:hover .oi,.journal:hover .arr{transform:none}}
+/* Reduced motion: things still fade in, nothing travels. */
+.rm .rv-h,.rm .rv-p,.rm .rv-i{clip-path:none!important;translate:none!important;transition:opacity .3s ease!important}
+
 /* ================= HERO ================= */
 .hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);column-gap:clamp(32px,5vw,88px);max-width:var(--wrap);margin:0 auto;padding:0 var(--gut);grid-template-areas:"copy sheet" "act lanes";grid-template-rows:auto auto}
 .hero::before{content:"";grid-row:2/3;grid-column:1/-1;margin:0 calc(50% - 50vw);background:var(--moss);border-top:1px solid var(--live);z-index:-1}
 .h-copy{grid-area:copy;padding:clamp(36px,4.5vw,64px) 0 clamp(40px,4.5vw,64px);align-self:end;min-width:0}
 .h-copy h1{font-size:clamp(2.75rem,1.6rem + 3.6vw,4.75rem);font-weight:660;letter-spacing:-.04em;line-height:.98;max-width:12ch}
-.h-copy h1 span{display:block;color:var(--accent)}
+.h-copy h1 span{display:block}.h-copy h1 .h1b{color:var(--accent)}
+/* Hero on load: each line wipes up out of its own mask, then the sentence, the actions, and the note rise after it. Rare (once per visit), so it may take its time. */
+.js:not(.rm) .h-copy h1>span{animation:rvline 1s var(--ease) both}
+.js:not(.rm) .h-copy h1 .h1b{animation-delay:.14s}
+.js:not(.rm) .h-copy .lede{animation:rvup .9s var(--ease) .32s both}
+.js:not(.rm) .h-act{animation:rvup .9s var(--ease) .44s both}
+.js:not(.rm) .sheet{animation:rvsheet 1.1s var(--ease) .2s both}
+@keyframes rvline{from{clip-path:inset(0 0 100% 0);translate:0 .45em}to{clip-path:inset(-.2em -.2em -.3em -.2em);translate:0 0}}
+@keyframes rvup{from{opacity:0;translate:0 18px}}
+@keyframes rvsheet{from{opacity:0;translate:0 40px;scale:.98}}
 .lede{margin-top:24px;max-width:58ch;font-size:clamp(17px,1rem + .2vw,19px);line-height:1.6;color:var(--ink-2)}
 .h-act{grid-area:act;padding:48px 0 40px;min-width:0;color:var(--on-moss)}
 .connect{max-width:600px;border:1px solid var(--moss-line-2);background:rgba(238,241,232,.04);border-radius:18px;padding:18px 18px 16px}
@@ -644,7 +679,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .rec-cap{padding:14px 18px;border-top:1px solid var(--line);background:var(--sunken);font-size:14.5px;color:var(--ink-2)}
 .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent-fill);margin-left:6px;vertical-align:1px;animation:pulse 1.6s infinite}
 .tl li.enter{animation:feedin .7s var(--ease)}
-.tl li.leave{animation:feedout .4s ease-in forwards}
+.tl li.leave{animation:feedout .4s var(--ease) forwards}
 @keyframes feedin{from{opacity:0;transform:translateY(-12px);background:var(--accent-soft)}60%{background:var(--accent-soft)}to{opacity:1;transform:none;background:transparent}}
 @keyframes feedout{to{opacity:0;transform:translateY(8px)}}
 .also{margin:clamp(40px,5vw,64px) 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 40px;border-top:1px solid var(--line-strong)}
@@ -1006,7 +1041,7 @@ a:hover .cv-shot{transform:translate(-6px,-6px)}
 [data-rise] > .wrap{will-change:transform}
 .moss[data-rise]{border-radius:var(--lift,0px) var(--lift,0px) 0 0}
 
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-property:opacity,color,background-color,border-color,box-shadow!important}}
 
 /* ===== round: massive hero, smaller example note, mobile nav, rules + record on phones ===== */
 @media (min-width:961px){.hero{grid-template-columns:minmax(0,1fr) minmax(0,380px)}}
@@ -1152,7 +1187,7 @@ a:hover .cv-shot{transform:translate(-6px,-6px)}
 <div class="hero-pin" id="heroPin"><div class="hero-stick">
 <section class="hero" id="top" aria-labelledby="h1">
   <div class="h-copy">
-    <h1 id="h1">People lead the vision. <span>Agents do the rest.</span></h1>
+    <h1 id="h1"><span class="h1a">People lead the vision.</span> <span class="h1b">Agents do the rest.</span></h1>
     <p class="lede">Write what should exist, in plain words. The coding agents you already use plan, price, build and test it on your own computer. Nothing runs until you say yes.</p>
   </div>
   <div class="h-act">
@@ -2062,6 +2097,36 @@ const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); dra
 document.fonts && document.fonts.ready.then(relayout);
 addEventListener("load", relayout);
 relayout();
+})();
+
+/* ===== Reveal on scroll (marketing pages only) =====
+   Headings wipe up into place, the paragraph under them follows, and groups of cards arrive one after another.
+   Each fires once. Tokens: --d-reveal, --stagger, --ease (tokens.css). Without JS, or with reduced motion,
+   everything is simply there (reduced motion keeps a short fade). Catalogued in Foundations > Motion. */
+(() => {
+  const root = document.documentElement;
+  if (!("IntersectionObserver" in window) || window.__kxReveal) return; window.__kxReveal = 1;
+  const skip = "figure, .sheet, .rec, .lanes, .rstage, .rule-v, .auth, .scope-fig, .kflow, .week, .eras, [aria-hidden=true], .foot";
+  const heads = [...document.querySelectorAll("main h1, main h2, section h2, .sec-h > p, .theory-p, .sec-lead, .ph > p, .page-h > p, .lede-s")]
+    .filter(el => el.id !== "h1" && !el.closest(skip) && !el.closest(".hero"));
+  const groups = [...document.querySelectorAll(".roster, .tiles, .offer, .roles, .learn2, .close-acts, .jgrid, .jlist, .bills, .tiers, .dgrid, .smap, .beliefs, .explore, .ctrl")]
+    .filter(g => !g.closest(skip));
+  heads.forEach(el => el.classList.add(el.matches("h1, h2") ? "rv-h" : "rv-p"));
+  groups.forEach(g => [...g.children].forEach((c, i) => { c.classList.add("rv-i"); c.style.setProperty("--i", Math.min(i, 8)); }));
+  root.classList.add("rv-on");
+  /* A clipped heading does not count as visible to IntersectionObserver, so each element is watched through its parent. */
+  const reveal = el => {
+    el.classList.add("rv-in");
+    /* Once it has landed, hand the element back to its own styles (hover transitions, shadows). */
+    setTimeout(() => el.classList.remove("rv-h", "rv-p", "rv-i", "rv-in"), 1100 + (+el.style.getPropertyValue("--i") || 0) * 60);
+  };
+  const waiting = new Map();
+  [...heads, ...groups.flatMap(g => [...g.children])].forEach(el => { const t = el.parentElement; if (!waiting.has(t)) waiting.set(t, []); waiting.get(t).push(el); });
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    io.unobserve(e.target); (waiting.get(e.target) || []).forEach(reveal);
+  }), { rootMargin: "0px 0px -12% 0px", threshold: 0.01 });
+  waiting.forEach((_, t) => io.observe(t));
 })();
 
 </script>

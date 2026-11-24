@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Docs | Konteks</title>
 <meta name="description" content="Three surfaces. One product contract. Konteks for people, MCP for agents, tenant-scoped APIs underneath both.">
-<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("kx-theme")||localStorage.getItem("kx-lp-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>document.documentElement.classList.add("js");if(matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("rm");try{var t=localStorage.getItem("kx-theme")||localStorage.getItem("kx-lp-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
 @view-transition{navigation:auto}
 /* Inter and JetBrains Mono (SIL OFL 1.1), latin subset, embedded so the page never falls back */
@@ -35,7 +35,13 @@
   --t12:12px; --t13:13px; --t14:14px; --t16:16px; --t20:20px; --t28:28px;
   --r4:4px; --r6:6px; --r10:10px; --scrim:rgba(15,21,16,.32);
   --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
-  --ease:cubic-bezier(.16,1,.3,1);
+  /* Motion. One curve family, a short duration scale; see Foundations > Motion and docs/MOTION.md. */
+  --ease:cubic-bezier(.16,1,.3,1);          /* strong ease-out: anything entering, leaving, or answering a press */
+  --ease-out:var(--ease);
+  --ease-in-out:cubic-bezier(.77,0,.175,1); /* on-screen movement and morphs (indicators, reflow) */
+  --ease-drawer:cubic-bezier(.32,.72,0,1);  /* sheets and docked composers rising from the edge */
+  --d-press:160ms; --d-tip:125ms; --d-pop:180ms; --d-page:200ms; --d-modal:250ms; --d-sheet:400ms; --d-toast:400ms;
+  --d-reveal:800ms; --stagger:60ms;         /* marketing reveals only */
   /* Sign-in: a deep moss panel (Split) and the night ground (Night); both stay dark in either theme. */
   --deep:#1F2B20; --deep-2:#152016; --on-deep:#EEF1E8; --on-deep-2:#B4C2B2;
   --night:#EEF2E6; --night-glow:rgba(143,191,106,.38); --night-glow-2:rgba(95,141,78,.16);
@@ -174,6 +180,26 @@ html[data-theme="dark"] .sun{display:block} html[data-theme="dark"] .moon{displa
 }
 @media (max-width:380px){.beta{display:none}}
 html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
+
+/* ================= MOTION (shared by every marketing page) =================
+   Tokens from tokens.css: --ease, --ease-in-out, --d-press, --d-reveal, --stagger. Catalogued in Foundations > Motion.
+   reveal.js tags headings (.rv-h), their paragraphs (.rv-p) and cards in groups (.rv-i), then adds .rv-in once each enters. */
+.rv-on .rv-h{clip-path:inset(0 0 100% 0);translate:0 .3em;opacity:0;transition:clip-path var(--d-reveal) var(--ease),translate var(--d-reveal) var(--ease),opacity var(--d-reveal) var(--ease)}
+.rv-on .rv-h.rv-in{clip-path:inset(-.25em -.25em -.35em -.25em);translate:0 0;opacity:1}
+.rv-on .rv-p{opacity:0;translate:0 16px;transition:opacity var(--d-reveal) var(--ease) .14s,translate var(--d-reveal) var(--ease) .14s}
+.rv-on .rv-p.rv-in{opacity:1;translate:0 0}
+.rv-on .rv-i{opacity:0;translate:0 24px;transition:opacity var(--d-reveal) var(--ease) calc(var(--i,0) * var(--stagger)),translate var(--d-reveal) var(--ease) calc(var(--i,0) * var(--stagger))}
+.rv-on .rv-i.rv-in{opacity:1;translate:0 0}
+/* The menu grows out of its button. */
+.menu[open] .menu-pop{transform-origin:top right;animation:mpop var(--d-pop) var(--ease)}
+@keyframes mpop{from{opacity:0;scale:.96}}
+/* Press: buttons answer the finger. */
+.btn,.copy,.icon-btn{transition-property:background-color,border-color,color,box-shadow,scale;transition-duration:.15s,.15s,.15s,.15s,var(--d-press);transition-timing-function:var(--ease)}
+.btn:active,.copy:active,.icon-btn:active{scale:.97}
+/* Hover motion only for a real pointer; a tap on a phone is not a hover. */
+@media (hover:none),(pointer:coarse){.offer li:hover .oi,.journal:hover .arr{transform:none}}
+/* Reduced motion: things still fade in, nothing travels. */
+.rm .rv-h,.rm .rv-p,.rm .rv-i{clip-path:none!important;translate:none!important;transition:opacity .3s ease!important}
 
 
 /* footer */
@@ -383,6 +409,37 @@ $("#theme").onclick = () => { const r = document.documentElement, dark = r.datas
 $$("[data-theme-alt]").forEach(b => b.onclick = () => $("#theme").onclick());
 $$(".menu-pop a").forEach(a => a.addEventListener("click", () => $(".menu").removeAttribute("open")));
 const nav = $("#nav"); const stuck = () => nav.classList.toggle("stuck", scrollY > 8); addEventListener("scroll", stuck, { passive: true }); stuck();
+
+/* ===== Reveal on scroll (marketing pages only) =====
+   Headings wipe up into place, the paragraph under them follows, and groups of cards arrive one after another.
+   Each fires once. Tokens: --d-reveal, --stagger, --ease (tokens.css). Without JS, or with reduced motion,
+   everything is simply there (reduced motion keeps a short fade). Catalogued in Foundations > Motion. */
+(() => {
+  const root = document.documentElement;
+  if (!("IntersectionObserver" in window) || window.__kxReveal) return; window.__kxReveal = 1;
+  const skip = "figure, .sheet, .rec, .lanes, .rstage, .rule-v, .auth, .scope-fig, .kflow, .week, .eras, [aria-hidden=true], .foot";
+  const heads = [...document.querySelectorAll("main h1, main h2, section h2, .sec-h > p, .theory-p, .sec-lead, .ph > p, .page-h > p, .lede-s")]
+    .filter(el => el.id !== "h1" && !el.closest(skip) && !el.closest(".hero"));
+  const groups = [...document.querySelectorAll(".roster, .tiles, .offer, .roles, .learn2, .close-acts, .jgrid, .jlist, .bills, .tiers, .dgrid, .smap, .beliefs, .explore, .ctrl")]
+    .filter(g => !g.closest(skip));
+  heads.forEach(el => el.classList.add(el.matches("h1, h2") ? "rv-h" : "rv-p"));
+  groups.forEach(g => [...g.children].forEach((c, i) => { c.classList.add("rv-i"); c.style.setProperty("--i", Math.min(i, 8)); }));
+  root.classList.add("rv-on");
+  /* A clipped heading does not count as visible to IntersectionObserver, so each element is watched through its parent. */
+  const reveal = el => {
+    el.classList.add("rv-in");
+    /* Once it has landed, hand the element back to its own styles (hover transitions, shadows). */
+    setTimeout(() => el.classList.remove("rv-h", "rv-p", "rv-i", "rv-in"), 1100 + (+el.style.getPropertyValue("--i") || 0) * 60);
+  };
+  const waiting = new Map();
+  [...heads, ...groups.flatMap(g => [...g.children])].forEach(el => { const t = el.parentElement; if (!waiting.has(t)) waiting.set(t, []); waiting.get(t).push(el); });
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    io.unobserve(e.target); (waiting.get(e.target) || []).forEach(reveal);
+  }), { rootMargin: "0px 0px -12% 0px", threshold: 0.01 });
+  waiting.forEach((_, t) => io.observe(t));
+})();
+
 
 const links = $$(".toc a"), heads = links.map(a => document.getElementById(a.getAttribute("href").slice(1))).filter(Boolean);
 const onS = () => { let cur = 0; heads.forEach((h, i) => { if (h.getBoundingClientRect().top < innerHeight * .3) cur = i; }); links.forEach((a, i) => a.classList.toggle("on", i === cur)); };

@@ -126,7 +126,8 @@ input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:16px;hei
 [data-tip]{position:relative}
 [data-tip]:hover::after,[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;left:50%;top:calc(100% + 6px);translate:-50% 0;background:var(--ink);color:var(--ink-inv);font-size:var(--t12);font-weight:500;padding:4px 7px;border-radius:var(--r4);white-space:nowrap;pointer-events:none;z-index:45}
 .toasts{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:8px;z-index:90}
-.toast{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--ink);color:var(--ink-inv);border-radius:var(--r10);box-shadow:var(--shadow-3);font-size:var(--t13);animation:tin .25s var(--ease)}
+.toast{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--ink);color:var(--ink-inv);border-radius:var(--r10);box-shadow:var(--shadow-3);font-size:var(--t13);transition:opacity var(--d-toast) ease,translate var(--d-toast) ease}
+@starting-style{.toast{opacity:0;translate:0 100%}}
 .toast svg{width:16px;height:16px;color:var(--accent-fill)}
 @keyframes tin{from{opacity:0;translate:0 8px}}
 .scrim{position:fixed;inset:0;background:var(--scrim);z-index:70;animation:fade .2s}
@@ -377,7 +378,7 @@ input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:16px;hei
 @media (max-width:1100px){.det{grid-template-columns:minmax(0,1fr)}.det-side{position:static;border-left:0;border-top:1px solid var(--line)}.split{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:860px){
   .app{grid-template-columns:1fr}
-  .side{position:fixed;left:0;top:var(--pb);bottom:0;width:272px;height:auto;z-index:65;translate:-100% 0;transition:translate .25s var(--ease);box-shadow:var(--shadow-3);padding-left:max(8px,env(safe-area-inset-left,0px))}
+  .side{position:fixed;left:0;top:var(--pb);bottom:0;width:272px;height:auto;z-index:65;translate:-100% 0;transition:translate var(--d-modal) var(--ease-drawer);box-shadow:var(--shadow-3);padding-left:max(8px,env(safe-area-inset-left,0px))}
   .app.nav-open .side{translate:0 0}
   .mobile-nav{display:inline-flex}
   .top{padding:8px 16px;top:var(--pb)}
@@ -1223,18 +1224,18 @@ tr.clickable{cursor:pointer} tr.clickable:hover td{background:var(--hover)} tr.c
 .ar-reply.streaming>:last-child::after{content:"";display:inline-block;width:2px;height:1em;margin-left:2px;vertical-align:-2px;background:var(--accent-strong);animation:caret 1s steps(1) infinite}
 @keyframes caret{50%{opacity:0}}
 .ar-acts{display:flex}
-.msg-in{animation:msgin .26s var(--ease)}
+.msg-in{animation:msgin var(--d-modal) var(--ease)}
 @keyframes msgin{from{opacity:0;translate:0 8px}}
 .sess-live{display:grid;gap:16px}
 .toast.ask svg{color:var(--info)}
 /* ---------- Motion: exits are faster than entries ---------- */
-.toast.leaving{animation:tout .18s ease-in forwards}
+.toast.leaving{opacity:0;translate:0 100%}
 @keyframes tout{to{opacity:0;translate:0 6px}}
-.drawer.leaving{animation:dout .15s ease-in forwards;pointer-events:none}
+.drawer.leaving{animation:dout .15s var(--ease) forwards;pointer-events:none}
 @keyframes dout{to{translate:16px 0;opacity:0}}
-.dialog.leaving{animation:pout .12s ease-in forwards;pointer-events:none}
+.dialog.leaving{animation:pout .12s var(--ease) forwards;pointer-events:none}
 @keyframes pout{to{opacity:0;scale:.98}}
-.scrim.leaving{animation:fout .15s ease-in forwards;pointer-events:none}
+.scrim.leaving{animation:fout .15s var(--ease) forwards;pointer-events:none}
 @keyframes fout{to{opacity:0}}
 .count.bump{animation:bump .32s var(--ease)}
 @keyframes bump{40%{scale:1.25}}
@@ -1945,3 +1946,53 @@ html,body{overflow-x:clip}
   .dtable.inv td:not(:first-child)::before{font-size:var(--t12);color:var(--ink-3)}
   .dtable.inv .cell-links{display:flex;flex-wrap:wrap;gap:4px 10px}
 }
+
+/* ===================== Motion system (app) =====================
+   Tokens live in tokens.css (--ease, --ease-in-out, --ease-drawer, --d-*). Catalogued in Foundations > Motion.
+   Rule of thumb: occasional things (menus, dialogs, drawers, toasts) move; things used all day (tooltips, keyboard
+   actions, list hover) change instantly or nearly so. Only transform and opacity move. */
+
+/* Press: every button answers the finger, 160ms, strong ease-out. */
+.btn{transition:background .15s,border-color .15s,box-shadow .15s,scale var(--d-press) var(--ease)}
+.btn:active:not(:disabled){scale:.97}
+
+/* Menus and popovers grow out of their trigger (origin set by ui.js from where the menu opened). */
+.menu{transform-origin:top left;transition:opacity var(--d-pop) var(--ease),scale var(--d-pop) var(--ease)}
+@starting-style{.menu{opacity:0;scale:.96}}
+.cx-pop{transform-origin:bottom left}
+.cx-pop.cx-pop-m{transform-origin:bottom center}
+
+/* Changing page: the content settles in place instead of teleporting. Navigation is frequent, so it is short and small. */
+.main.view-in>:not(.top):not(.newver):not(.tabbar){animation:viewin var(--d-page) var(--ease)}
+@keyframes viewin{from{opacity:0;translate:0 4px}}
+
+/* Phone: a comment box rises from the bottom edge, the way it will leave. */
+@media (max-width:860px){
+  .tl-cmt,.cmt-new{transition:translate var(--d-sheet) var(--ease-drawer),opacity var(--d-sheet) var(--ease-drawer)}
+  @starting-style{.tl-cmt,.cmt-new{translate:0 100%;opacity:0}}
+}
+
+
+/* Touch screens fire hover on tap: hover motion only where there is a real pointer. */
+@media (hover:none),(pointer:coarse){
+  .react-pick button:hover,.auth .btn.google:hover:not(:disabled),.qs-row:hover .qs-go svg,.start-sticker:hover{transform:none;translate:none;rotate:none}
+}
+
+/* Foundations > Gerak: the motion catalogue's specimens */
+.mo-curves{display:grid;gap:14px}
+.mo-row{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,260px);gap:16px;align-items:center}
+.mo-name{display:grid;gap:2px}.mo-name small{font:var(--t12)/1.3 var(--mono);color:var(--ink-3)}
+.mo-track{position:relative;height:28px;border-radius:9999px;background:var(--sunken);border:1px solid var(--line)}
+.mo-dot{position:absolute;left:4px;top:3px;width:20px;height:20px;border-radius:9999px;background:var(--accent)}
+.mo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.mo-card{display:grid;gap:8px;padding:16px;align-content:start}
+.mo-card-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mo-demo{min-height:40px;display:flex;align-items:center}
+.mo-fmt code{font-size:var(--t12);line-height:1.5;white-space:normal}
+.mo-live{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}.mo-live li{padding:10px 12px;font-size:var(--t13)}
+.mo-t td,.mo-t th{vertical-align:top}
+.mo-no{margin:0;padding-left:18px;display:grid;gap:6px;font-size:var(--t13);color:var(--ink-2)}
+.mo-wipe{flex:1;font-size:var(--t20);font-weight:600}
+.mo-wipe.go{animation:mowipe var(--d-reveal) var(--ease)}
+@keyframes mowipe{from{clip-path:inset(0 0 100% 0);translate:0 .3em;opacity:0}to{clip-path:inset(-.2em);translate:0 0;opacity:1}}
+@media (max-width:760px){.mo-row{grid-template-columns:minmax(0,1fr)}}

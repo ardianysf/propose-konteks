@@ -149,3 +149,5 @@
 /* Kode page package groups */
 .pkg-g{display:grid;gap:8px}
 .pkg-g h3{font-size:var(--t14);font-weight:600}
+
+@media (hover:none),(pointer:coarse){.ov-stage:hover .ov-front,.ov-stage:hover .ov-b1,.ov-stage:hover .ov-b2{translate:none}}

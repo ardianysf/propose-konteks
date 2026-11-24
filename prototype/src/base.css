@@ -15,7 +15,9 @@ svg.lucide{width:16px;height:16px;flex:none;vertical-align:-3px}
 .prop svg.lucide,.hint svg.lucide,.matrix svg.lucide{width:14px;height:14px}
 .card-h svg.lucide,.drawer-h svg.lucide{width:16px;height:16px;color:var(--ink-3)}
 *{scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
-@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+/* Reduced motion: fewer and gentler, not none. Keyframe movement stops; transitions keep only what is not movement
+   (opacity, colour), so state changes still read. */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-property:opacity,color,background-color,border-color,box-shadow,outline-color!important}}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* Tabular figures only where numbers line up; on body it would widen Inter's hyphen ("rf-01"). */

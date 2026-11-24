@@ -83,6 +83,7 @@ function render() {
   document.getElementById("root").innerHTML = topbar(section) + page();
   drawIcons(); bindShell(); bind();
   bindTopbar();
+  if (!keepScroll) $(".main")?.classList.add("view-in");
   scrollTo(0, keepScroll ? y : 0);
   render._last = key + (sub ? "/" + sub : "");
   document.title = (typeof title === "function" ? title() : title) + " · Konteks";

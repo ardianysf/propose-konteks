@@ -132,7 +132,49 @@ function pageFoundations() {
       <div class="sec-sub"><h3>Tanda khusus</h3><p class="hint">Digambar sendiri, bukan dari Lucide: tanda Konteks, glyph tahap, dan logo agen di runtime.</p></div>
       <div class="panel specimen"><div class="specimen-row ico-marks"><span class="ico-mark"><span class="brand-mark">K</span><small>Konteks</small></span>${[["Planning", "waiting"], ["Executing", "running"], ["Planning", "blocked"], ["Done", "done"]].map(([a, t]) => `<span class="ico-mark">${sg(a, t)}<small>Stage · ${t}</small></span>`).join("")}${Object.keys(HARNESS_SVG).map(n => `<span class="ico-mark ico-harn">${harnMark(n)}<small>${esc(n)}</small></span>`).join("")}</div></div>
     </section>
-    <section class="sec" id="f5"><div class="sec-head"><h2>Gerak</h2><p>150–250 ms dengan ease-out eksponensial. Gerak hanya menyampaikan perubahan state: drawer masuk dari kanan, toast naik, tombol berubah menjadi “Approving”. Tidak ada animasi saat halaman dimuat. Mode reduced-motion dihormati.</p></div></section>
+    <section class="sec" id="f5"><div class="sec-head"><h2>Gerak</h2><p>Gerak menjelaskan perubahan, tidak menghias. Sebelum sesuatu dianimasikan, ada dua pertanyaan: seberapa sering orang melihatnya, dan apa gunanya. Yang dipakai puluhan kali sehari berubah seketika; yang sesekali (menu, dialog, drawer, toast) bergerak singkat; yang jarang (hero, halaman pemasaran) boleh lebih lama. Hanya <code>transform</code> dan <code>opacity</code> yang bergerak. Semua nilai di bawah adalah token di <code>tokens.css</code>, dipakai bersama oleh aplikasi dan landing page.</p></div>
+
+      <div class="sec-sub"><h3>Kurva</h3><p class="hint">Tekan Putar untuk membandingkan. Tidak pernah <code>ease-in</code> pada UI: ia mulai pelan tepat saat orang sedang melihat.</p></div>
+      <div class="panel specimen mo-curves" id="moCurves">
+        ${[["--ease", "cubic-bezier(.16,1,.3,1)", "Ease-out kuat. Semua yang masuk, keluar, atau menjawab tekanan.", "var(--ease)"], ["--ease-in-out", "cubic-bezier(.77,0,.175,1)", "Gerak di layar dan perubahan bentuk: indikator, susunan ulang.", "var(--ease-in-out)"], ["--ease-drawer", "cubic-bezier(.32,.72,0,1)", "Sheet dan composer yang naik dari tepi bawah ponsel.", "var(--ease-drawer)"], ["linear", "linear", "Hanya untuk progres dan gerak konstan. Pembanding.", "linear"]].map(([n, v, use, e]) => `<div class="mo-row"><div class="mo-name"><code>${n}</code><small>${v}</small></div><div class="mo-track"><span class="mo-dot" style="--mo-e:${e}"></span></div><p class="hint">${use}</p></div>`).join("")}
+        <div class="specimen-row"><button class="btn btn-sm" type="button" id="moPlay">${ic("play")}Putar</button><span class="hint">Durasi demo 700 ms agar perbedaannya terlihat.</span></div>
+      </div>
+
+      <div class="sec-sub"><h3>Durasi</h3><p class="hint">UI di bawah 300 ms. Pengecualian yang tercatat: sheet, toast, dan reveal pemasaran.</p></div>
+      <div class="panel"><table class="dtable mo-t"><thead><tr><th>Token</th><th>Nilai</th><th>Dipakai untuk</th></tr></thead><tbody>
+        ${[["--d-tip", "125 ms", "Cadangan untuk tooltip bila kelak bergerak. Saat ini tooltip muncul seketika."], ["--d-press", "160 ms", "Tombol ditekan: scale .97."], ["--d-pop", "180 ms", "Menu, popover, panel skill."], ["--d-page", "200 ms", "Pindah halaman di aplikasi: isi turun 4 px dan muncul."], ["--d-modal", "250 ms", "Dialog, sidebar ponsel, pesan atau komentar baru."], ["--d-sheet", "400 ms", "Composer yang naik dari bawah di ponsel."], ["--d-toast", "400 ms", "Toast masuk dan keluar lewat jalur yang sama."], ["--d-reveal", "800 ms", "Pemasaran saja: judul, paragraf, dan kartu yang muncul saat di-scroll."], ["--stagger", "60 ms", "Jeda antar kartu dalam satu kelompok."]].map(([t, v, u]) => `<tr><td><code>${t}</code></td><td class="num">${v}</td><td>${u}</td></tr>`).join("")}
+      </tbody></table></div>
+
+      <div class="sec-sub"><h3>Pola di aplikasi</h3><p class="hint">Setiap pola bisa dicoba di sini. Kolom kanan mencatat format yang dipakai kode.</p></div>
+      <div class="mo-grid">
+        ${[["press", "Tekan tombol", "Umpan balik", "Setiap tombol, <code>:active</code>", "scale .97 · --d-press · --ease", `<button class="btn" type="button">Tekan saya</button>`],
+           ["menu", "Menu dari pemicunya", "Konsistensi ruang", "Menu, popover, panel skill", "opacity 0 → 1, scale .96 → 1 · --d-pop · --ease · transform-origin di titik pemicu (ui.js)", `<button class="btn" type="button" id="moMenu" aria-haspopup="menu">${ic("more-horizontal")}Buka menu</button>`],
+           ["toast", "Toast", "Umpan balik", "Konfirmasi singkat di kanan bawah", "transition (bukan keyframes) · naik dari translateY(100%) dan keluar lewat jalur yang sama · --d-toast · ease", `<button class="btn" type="button" id="moToast">Tampilkan toast</button>`],
+           ["dialog", "Dialog", "Mencegah perubahan mendadak", "Konfirmasi, keputusan berisiko", "opacity + scale .98 → 1 · 220 ms · --ease · origin tengah (dialog tidak menempel ke pemicu) · keluar 120 ms", `<button class="btn" type="button" id="moDialog">Buka dialog</button>`],
+           ["drawer", "Drawer", "Konsistensi ruang", "PRD, Breakdown, Updates, detail", "masuk dari kanan 24 px · 280 ms · --ease · keluar 150 ms", `<button class="btn" type="button" id="moDrawer">Buka drawer</button>`],
+           ["page", "Pindah halaman", "Mencegah perubahan mendadak", "Setiap rute di aplikasi", "isi halaman: opacity 0 → 1, translateY 4 px → 0 · --d-page · --ease · bilah atas tidak ikut", `<a class="btn" href="#foundations" id="moPage">Muat ulang halaman ini</a>`],
+           ["msg", "Pesan dan komentar baru", "Indikasi state", "Note, komentar, balasan Konteks", "naik 8 px dan muncul · --d-modal · --ease (<code>.msg-in</code>)", `<button class="btn" type="button" id="moMsg">Tambah komentar</button>`],
+           ["sheet", "Composer naik di ponsel", "Konsistensi ruang", "Komentar kartu dan note, layar ≤ 860 px", "dari translateY(100%) · --d-sheet · --ease-drawer (<code>@starting-style</code>)", `<span class="hint">Coba di layar ponsel: Activities, lalu Comment.</span>`]].map(([k, t, why, where, fmt, demo]) => `<article class="panel mo-card" data-mo="${k}"><div class="mo-card-h"><b>${t}</b><span class="chip">${why}</span></div><p class="hint">${where}</p><div class="mo-demo">${demo}</div><p class="mo-fmt"><code>${fmt}</code></p></article>`).join("")}
+      </div>
+      <ol class="mo-live" id="moLive" aria-live="polite"></ol>
+
+      <div class="sec-sub"><h3>Pola di landing page</h3><p class="hint">Permukaan pemasaran mendapat jatah gerak lebih besar karena dilihat jarang. Semua muncul sekali, tidak diulang saat scroll balik.</p></div>
+      <div class="panel"><table class="dtable mo-t"><thead><tr><th>Pola</th><th>Format</th><th>Di mana</th></tr></thead><tbody>
+        ${[["Hero masuk", "dua baris judul naik dari masker masing-masing (clip-path + translate .45em, 1 s, jeda .14 s), lalu kalimat (.32 s), aksi (.44 s), dan catatan contoh (.2 s, naik 40 px)", "Landing, sekali per kunjungan"], ["Judul muncul", "<code>.rv-h</code>: clip-path dari bawah + translate .3em · --d-reveal · --ease", "Setiap h1/h2 di landing, pricing, security, docs, journal"], ["Paragraf menyusul", "<code>.rv-p</code>: naik 16 px · --d-reveal · jeda 140 ms", "Kalimat pendamping judul"], ["Kartu berurutan", "<code>.rv-i</code>: naik 24 px · --d-reveal · jeda --i × --stagger", "Agen, pelatihan, harga, docs, journal"], ["Rule muncul satu per satu", "ikon, judul, kalimat, contoh berjeda .08–.42 s; meteran terisi dan angka menghitung", "Authority, Money, Evidence di ponsel"], ["Adegan mengikuti scroll", "hero ter-pin, minggu kerja, rel record: progres mengikuti posisi scroll, tidak berdurasi", "Landing"], ["Pindah view", "cross-document view transition; tab View tetap diam", "Landing, design system, sign in, demo app"]].map(([a, b, c]) => `<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join("")}
+      </tbody></table>
+      <div class="specimen-row" style="padding:16px"><h3 class="mo-wipe" id="moWipe">Judul ini muncul seperti di landing.</h3><button class="btn btn-sm" type="button" id="moWipeBtn">${ic("play")}Putar</button></div></div>
+
+      <div class="sec-sub"><h3>Yang sengaja tidak bergerak</h3></div>
+      <ul class="mo-no">${["Tooltip: muncul seketika. Dipakai puluhan kali sehari.", "Pintasan keyboard dan command palette: tanpa animasi.", "Hover pada baris tabel dan daftar: hanya warna.", "Data yang sedang dibaca (angka, tabel, grafik) tidak bergerak demi gaya.", "Hover yang menggerakkan sesuatu hanya untuk pointer sungguhan; di layar sentuh, ketukan bukan hover."].map(x => `<li>${x}</li>`).join("")}</ul>
+
+      <div class="sec-sub"><h3>Reduced motion</h3><p class="hint">Lebih sedikit dan lebih lembut, bukan nol. Gerakan berpindah tempat dihentikan; transisi opacity dan warna tetap, jadi perubahan state masih terbaca. Pulse, caret, dan adegan scroll berhenti di keadaan akhirnya.</p></div>
+
+      <div class="sec-sub"><h3>Jangan dirilis</h3></div>
+      <div class="panel"><table class="dtable mo-t"><thead><tr><th>Jangan</th><th>Gantinya</th></tr></thead><tbody>
+        ${[["transition: all", "Sebut properti yang bergerak"], ["ease-in pada UI", "--ease"], ["scale(0) saat masuk", "scale .95–.97 + opacity 0"], ["Keyframes pada toast atau toggle", "Transition, supaya bisa disela"], ["Animasi width, height, top, left", "transform dan opacity"], ["Durasi UI di atas 300 ms tanpa alasan", "--d-pop atau --d-modal"], ["Semua masuk bersamaan", "--stagger 60 ms"], ["Hover bergerak tanpa gerbang pointer", "@media (hover:hover) and (pointer:fine)"]].map(([a, b]) => `<tr><td><code>${a}</code></td><td>${b}</td></tr>`).join("")}
+      </tbody></table></div>
+      <p class="hint" style="margin-top:12px">Catatan lengkap ada di <code>docs/MOTION.md</code>.</p>
+    </section>
 
     <section class="sec" id="f6"><div class="sec-head"><h2>Bahasa</h2><p>Tulis dari sisi pengguna. Tombol menyebut aksinya; pesan error menyebut masalah dan cara memperbaikinya.</p></div>
       <div class="dodont">
@@ -210,7 +252,23 @@ function bindCodeViews() {
     }
   });
 }
+function bindMotion() {
+  if (!$("#moCurves")) return;
+  $("#moPlay").onclick = () => $$("#moCurves .mo-dot").forEach(dot => {
+    const w = dot.parentElement.clientWidth - dot.offsetWidth - 8;
+    dot.style.transition = "none"; dot.style.translate = "0 0"; void dot.offsetWidth;
+    dot.style.transition = `translate 700ms ${getComputedStyle(dot).getPropertyValue("--mo-e")}`; dot.style.translate = w + "px 0";
+  });
+  $("#moMenu").onclick = e => menu(e.currentTarget, [{ label: "Edit", icon: "pencil" }, { label: "Duplicate", icon: "copy" }, "-", { label: "Delete", icon: "trash-2", danger: true }]);
+  $("#moToast").onclick = () => toast("Saved");
+  $("#moDialog").onclick = () => dialog("Delete this draft?", "The draft and its two comments go away. This cannot be undone.", "Delete", () => toast("Draft deleted"), true);
+  $("#moDrawer").onclick = () => drawer("Updates", `<p class="hint">A drawer enters from the right in 280 ms and leaves in 150 ms.</p>`);
+  $("#moPage").onclick = e => { e.preventDefault(); render._last = ""; render(); };
+  let n = 0; $("#moMsg").onclick = () => { $("#moLive").insertAdjacentHTML("beforeend", `<li class="msg-in panel">Comment ${++n}: a new comment rises 8px into its list.</li>`); };
+  $("#moWipeBtn").onclick = () => { const h = $("#moWipe"); h.classList.remove("go"); void h.offsetWidth; h.classList.add("go"); };
+}
 function bindDocs() {
+  bindMotion();
   $$("[data-font]").forEach(b => b.onclick = () => setFont(b.dataset.font));
   bindCodeViews();
   $$("[data-jump]").forEach(a => a.onclick = e => { e.preventDefault(); document.getElementById(a.dataset.jump)?.scrollIntoView({ behavior: "smooth", block: "start" }); });
