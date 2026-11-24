@@ -249,7 +249,7 @@ theoryDraw = () => {
 };
 }
 
-/* ============ THE DIORAMA: a room tour. Four rooms in one square isometric house (art/house.svg), divided by low walls with a doorway in each, joined by one line of instructions laid in the floor that runs round through every doorway. The tour starts on the
+/* ============ THE DIORAMA: a room tour. Four rooms in one square isometric house (art/house.svg), divided by low walls with a doorway in each, a whole wall between 1843 and Today; one line of instructions in the floor runs from 1843 through the doorways to Today; rooms out of focus turn grey and fade. The tour starts on the
    whole house, then the camera (the svg viewBox) moves into each room, holds it to be read, and moves on. ============ */
 const dio = $("#dio");
 if (dio) {

@@ -559,38 +559,45 @@ body.push(ac("plinth")(S(box(-4, -4, N2 + 4, N2 + 4, -14, 14, 0.8, 2), { tone: "
 // quadrants: [key, ox, oy, floor]
 const QUADS = [["1843", 0, 0, "fl1843"], ["1936", Q, 0, "fl1936"], ["1969", Q, Q, "fl1969"], ["today", 0, Q, "flToday"]];
 for (const [key, ox, oy, fl] of QUADS) {
-  body.push(ac(fl)(S(box(ox + 0.5, oy + 0.5, Q - 1, Q - 1, 0, 0.8, 0.2, 2), { tone: "hi", crease: "none" })));
+  const flo = ac(fl)(S(box(ox + 0.5, oy + 0.5, Q - 1, Q - 1, 0, 0.8, 0.2, 2), { tone: "hi", crease: "none" }));
   const ls = [], z = 0.85, x0 = ox + 0.5, x1 = ox + Q - 0.5, y0 = oy + 0.5, y1 = oy + Q - 0.5;
   if (key === "1843") for (let x = ox + 12; x < x1; x += 12) ls.push(k.lineOnTop([x, y0], [x, y1], z, P));
   if (key === "1936") { for (let x = ox + 24; x < x1; x += 24) ls.push(k.lineOnTop([x, y0], [x, y1], z, P)); for (let y = oy + 24; y < y1; y += 24) ls.push(k.lineOnTop([x0, y], [x1, y], z, P)); }
   if (key === "1969") { for (let x = ox + 17; x < x1; x += 17) ls.push(k.lineOnTop([x, y0], [x, y1], z, P)); for (let y = oy + 17; y < y1; y += 17) ls.push(k.lineOnTop([x0, y], [x1, y], z, P)); }
   if (key === "today") for (let y = oy + 10; y < y1; y += 10) ls.push(k.lineOnTop([x0, y], [x1, y], z, P));
-  body.push(ac(fl)(L(ls.join(""), { tone: "faint" })));
+  body.push(`<g class="dw-room" data-room="${key}">${flo}${ac(fl)(L(ls.join(""), { tone: "faint" }))}</g>`);
 }
-// the ring: one line of instructions laid into the floor, through a doorway in every wall,
-// round from 1843 to 1936 to 1969 to today and back; its marks change with each room
+// the line of instructions: laid into the floor, from 1843 through a doorway into 1936, through
+// another into 1969 and on into today; its marks change with each room it passes
 {
-  const r = RING, zr = 0.9, w = 3.2;
-  const outer = [[C - r - w, C - r - w], [C + r + w, C - r - w], [C + r + w, C + r + w], [C - r - w, C + r + w]];
-  const inner = [[C - r + w, C - r + w], [C + r - w, C - r + w], [C + r - w, C + r - w], [C - r + w, C + r - w]];
-  body.push(ac("strip")(`<path d="${k.pathOf(outer.map(([x, y]) => at([x, y, zr])), true)}${k.pathOf(inner.reverse().map(([x, y]) => at([x, y, zr])), true)}" style="${flat("top", "lo")};fill-rule:evenodd"/>`));
+  const r = RING, zr = 0.9, w = 3.2, E = 78;
+  const route = [[C - E, C - r], [C + r, C - r], [C + r, C + r], [C - E, C + r]];
+  const band = [];
+  // the band as one flat outline: outer edge out, inner edge back
+  const outer = [[C - E, C - r - w], [C + r + w, C - r - w], [C + r + w, C + r + w], [C - E, C + r + w]];
+  const inner = [[C - E, C + r - w], [C + r - w, C + r - w], [C + r - w, C - r + w], [C - E, C - r + w]];
+  body.push(ac("strip")(`<path d="${k.pathOf([...outer, ...inner].map(([x, y]) => at([x, y, zr])), true)}" style="${flat("top", "lo")}"/>`));
+  const room = (x, y) => (x < C ? (y < C ? 0 : 3) : y < C ? 1 : 2);
+  const mark = (x, y, along) => {
+    const q = room(x, y), p0 = at([x, y, zr + 0.1]);
+    const d = along === "x" ? [[x, y - 2.4], [x, y + 2.4]] : [[x - 2.4, y], [x + 2.4, y]];
+    if (q === 0) return `<path class="hw-sm0" d="${k.lineOnTop(along === "x" ? [x - 2.4, y] : [x, y - 2.4], along === "x" ? [x + 2.4, y] : [x, y + 2.4], zr + 0.1, P)}"/>`;
+    if (q === 1) return `<path class="hw-sm1" d="${k.lineOnTop(d[0], d[1], zr + 0.1, P)}"/>`;
+    if (q === 2) return `<circle class="hw-sm2" cx="${p0[0].toFixed(1)}" cy="${p0[1].toFixed(1)}" r=".8"/>`;
+    return `<circle class="hw-sm3" cx="${p0[0].toFixed(1)}" cy="${p0[1].toFixed(1)}" r=".9"/>`;
+  };
   const marks = [];
-  for (let t = -r + 6; t <= r - 6; t += 8) {
-    marks.push(`<path class="hw-sm0" d="${k.lineOnTop([C - r - 1.6, C + t - 2.4], [C - r - 1.6, C + t + 2.4], zr + 0.1, P)}"/>`);          // left edge in 1843/today — pen strokes
-    marks.push(`<path class="hw-sm1" d="${k.lineOnTop([C + t, C - r - 2.4], [C + t, C - r + 2.4], zr + 0.1, P)}"/>`);                       // tape cells
-    marks.push(`<circle class="hw-sm2" cx="${at([C + r, C + t, zr])[0].toFixed(1)}" cy="${at([C + r, C + t, zr])[1].toFixed(1)}" r=".8"/>`);   // holes
-    marks.push(`<circle class="hw-sm3" cx="${at([C + t, C + r, zr])[0].toFixed(1)}" cy="${at([C + t, C + r, zr])[1].toFixed(1)}" r=".9"/>`);   // light
-  }
+  for (let x = C - E + 6; x <= C + r - 6; x += 8) marks.push(mark(x, C - r, "x"));
+  for (let y = C - r + 8; y <= C + r - 8; y += 8) marks.push(mark(C + r, y, "y"));
+  for (let x = C + r - 6; x >= C - E + 6; x -= 8) marks.push(mark(x, C + r, "x"));
   body.push(marks.join(""));
-  const loop = [[C - r, C - r], [C + r, C - r], [C + r, C + r], [C - r, C + r]].map(([x, y]) => at([x, y, zr + 0.2]));
-  const path = k.pathOf([...loop, loop[0]]);
-  body.push(`<g class="dw-pks">${Array.from({ length: 8 }, (_, i) => `<circle r="1.6" class="hw-pk"><animateMotion dur="12s" begin="${(-i * 1.5).toFixed(1)}s" repeatCount="indefinite" calcMode="linear" path="${path}"/></circle>`).join("")}</g>`);
+  const path = k.pathOf(route.map(([x, y]) => at([x, y, zr + 0.2])));
+  body.push(`<g class="dw-pks">${Array.from({ length: 6 }, (_, i) => `<circle r="1.6" class="hw-pk" opacity="0"><animateMotion dur="9s" begin="${(-i * 1.5).toFixed(1)}s" repeatCount="indefinite" calcMode="linear" path="${path}"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.06;.92;1" dur="9s" begin="${(-i * 1.5).toFixed(1)}s" repeatCount="indefinite"/></circle>`).join("")}</g>`);
 }
 // the two outer walls, each room's stretch in its own colour, with skirting
-body.push(ac("w3")(S(box(-4, Q, 4, Q, 0, WH2, 0.3, 2), { tone: "hi" })));
-body.push(ac("w0")(S(box(-4, -4, 4, Q + 4, 0, WH2, 0.3, 2), { tone: "hi" })));
-body.push(ac("w0")(S(box(0, -4, Q, 4, 0, WH2, 0.3, 2), { tone: "hi" })));
-body.push(ac("w1")(S(box(Q, -4, Q, 4, 0, WH2, 0.3, 2), { tone: "hi" })));
+body.push(`<g class="dw-room" data-room="today">${ac("w3")(S(box(-4, Q, 4, Q, 0, WH2, 0.3, 2), { tone: "hi" }))}</g>`);
+body.push(`<g class="dw-room" data-room="1843">${ac("w0")(S(box(-4, -4, 4, Q + 4, 0, WH2, 0.3, 2), { tone: "hi" }))}${ac("w0")(S(box(0, -4, Q, 4, 0, WH2, 0.3, 2), { tone: "hi" }))}</g>`);
+body.push(`<g class="dw-room" data-room="1936">${ac("w1")(S(box(Q, -4, Q, 4, 0, WH2, 0.3, 2), { tone: "hi" }))}</g>`);
 body.push(L(k.segment([0, 0, 0.8], [0, 0, WH2], P), { tone: "lo" }));
 body.push(L(faceY(0.1, 0, N2, 0.8, 5) + faceX(0.1, 0, N2, 0.8, 5), { tone: "faint" }));
 // low walls of the crossing, in short pieces, with a doorway where the ring passes
@@ -603,7 +610,7 @@ const arm = (axis, from, to) => {
 const roomSvg = (key, fn, ox, oy) => `<g class="dw-room" data-room="${key}">${placed(fn, [ox, oy, 0], 1)}</g>`;
 body.push(roomSvg("1843", room1843b, 0, 0));
 body.push(arm("y", 0, C - GAP1), arm("y", C - GAP0, C - 2.5));   // between 1843 and 1936
-body.push(arm("x", 0, C - GAP1), arm("x", C - GAP0, C - 2.5));   // between 1843 and today
+body.push(arm("x", 0, C - 2.5));   // between 1843 and today: a whole wall, no way through
 body.push(ac("wall")(S(box(C - 4, C - 4, 8, 8, 0, PH + 10, 0.6, 2, 0.3), { tone: "hi" })) + ac("frame")(S(box(C - 5, C - 5, 10, 10, PH + 10, 2.4, 0.6, 2), { tone: "mid" })));
 body.push(roomSvg("today", roomTodayb, 0, Q));
 body.push(roomSvg("1936", room1936b, Q, 0));
@@ -675,6 +682,8 @@ const css = `
 #house .hw-sm2{fill:#3B3A36}
 #house .hw-pk{fill:#E4FFD6;filter:drop-shadow(0 0 1.6px #6FB24E)}
 @media (prefers-reduced-motion:reduce){#house .dw-pks{display:none}}
+#house .dw-room{transition:opacity .8s cubic-bezier(.23,1,.32,1),filter .8s cubic-bezier(.23,1,.32,1)}
+#house[data-cur] .dw-room:not(.on){opacity:.3;filter:grayscale(1)}
 #house .hw-sm3{fill:#5FB24A;filter:drop-shadow(0 0 1.2px #9BEA82)}
 #house .am-step{animation:hw-step var(--am-period) steps(1,end) infinite}
 #house .am-step{animation-name:hw-step}
