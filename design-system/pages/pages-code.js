@@ -23,8 +23,9 @@ const DOC_LIST = [
 ];
 const PROTO_LIST = [
   ["prototype/index.html", "Prototipe ini dalam satu berkas. Buka di browser untuk melihat target setiap layar, misalnya index.html#work."],
-  ["prototype/src/", "Sumber prototipe: token, komponen, dan setiap halaman sebagai JS dan CSS biasa, tanpa framework."],
-  ["prototype/build.sh, tools/", "Menyusun ulang index.html dan paket kode dari src/, dan menolak warna mentah di luar tokens.css."],
+  ["prototype/components/", "Fondasi bersama: token, font, CSS komponen, dan primitif UI (drawer, modal, menu, toast, composer) sebagai JS dan CSS biasa, tanpa framework."],
+  ["prototype/app/, prototype/design-system/", "Login dan demo app (shell, data contoh, halaman) serta halaman design system (overview, foundations, katalog, kode), masing-masing di foldernya sendiri."],
+  ["prototype/build.sh, prototype/tools/", "Menyusun ulang index.html dan paket kode dari bagian-bagian itu, dan menolak warna mentah di luar tokens.css."],
 ];
 const REACT_LIST = [
   ["Button.tsx", "Default, primary, ghost, danger; tiga ukuran; ikon saja; loading; jumlah biaya di dalam tombol."],

@@ -2,39 +2,52 @@
 
 Live: https://propose-konteks.vercel.app
 
-| Path | What it is |
-|---|---|
-| `/` | The landing page, with `/pricing`, `/security`, `/docs`, `/journal`, `/about`, `/contact`, `/privacy`, `/terms`. |
-| `/design-system` | Pitch, foundations, component catalog and code package (`#foundations`, `#components`, `#code`). |
-| `/login` | The sign-in page and its variants (`#night`, `#split`). |
-| `/app` | The full demo app with sample data (`#session`, `#releases`, `#runtimes`, …). |
+The repo holds four parts that each have their own folder, plus the shared components they are built from. Every part ships to its own address.
 
-Every page carries the same "View" tab (`site/kx-views.js`) to move between the four, with Alt+1…4 as shortcuts; on a phone the demo app lists them in its More drawer. Old links (`/#components`, `/#work`, `/landingpage`) forward to the new addresses. Moves between views use cross-document view transitions, and the theme carries across.
+| Part | Folder | Address | What it is |
+|---|---|---|---|
+| Landing page | [`landing/`](landing/README.md) | `/`, `/pricing`, `/security`, `/docs`, `/journal`, `/about`, `/contact`, `/privacy`, `/terms` | The marketing site. |
+| Design system | [`design-system/`](design-system/README.md) | `/design-system` (`#foundations`, `#components`, `#code`) | Pitch, foundations, component catalog, code package. |
+| Login & demo app | [`app/`](app/README.md) | `/login` (`#night`, `#split`), `/app` (`#session`, `#releases`, `#runtimes`, …) | The sign-in page and the full demo app with sample data. |
+| Components | [`components/`](components/README.md) | (used by all of the above) | Tokens, fonts, component CSS, UI primitives, the View tab, React components, the developer package. |
 
-The redesign keeps every process and flow of app.konteks.io and changes only how it looks and behaves on screen. All data in the demo is synthetic.
+Supporting folders: [`tools/`](tools/README.md) (build, lint, generators), `docs/` (audit, parity spec, motion, overlays), `site/` (the built output Vercel serves; never edit by hand).
 
-## Repository
+**Building the existing app somewhere else?** Start with [`IMPLEMENTING.md`](IMPLEMENTING.md): it maps every screen to its source file, the data it reads and the components it uses.
 
-| Path | Purpose |
-|---|---|
-| `site/` | What Vercel serves (static, no build step). `index.html` is the landing page (built by `landing-src/build.sh`), `prototype.html` the built prototype served at `/design-system`, `/login` and `/app`; `code/` holds the developer package the Kode page downloads; `docs/` the reference documents; `downloads/konteks-ui-lengkap.zip` the full package (code, documents, prototype). |
-| `prototype/` | Source of the prototype: `src/` (tokens, components, pages as plain JS/CSS), `tools/` (package generator, colour lint), `build.sh`, `publish.sh`. |
-| `DESIGN.md` | The design system: tokens, type, components, overlay grammar, motion, sound, decisions. |
-| `PRODUCT.md` | Product truth used for design decisions. |
-| `AGENTS.md` | Rules for coding agents applying the redesign to the live codebase. |
-| `AUDIT-STATUS.md` | Status of every finding from the UI/UX audit, with evidence. |
-| `docs/` | The UI/UX audit of the live app (`konteks-audit-ui-ux.pdf`, Markdown source `audit-ui-ux.md`, rebuilt with `python3 docs/tools/build_audit_pdf.py`), the live-app parity spec, and the overlay decisions. Names of Systems, people, devices and credentials are anonymised. |
+## Repository map
 
-## Update the site
-
-```sh
-sh prototype/publish.sh      # rebuilds the prototype into site/prototype.html
-(cd landing-src && sh build.sh)   # rebuilds the landing page and its pages into site/
-git add -A && git commit -m "Update prototype" && git push
+```
+landing/                 Landing page + marketing pages (Python builders, one HTML template, one JS file)
+design-system/           Design-system view: pages/ (overview, foundations, catalog, code), inventory.js, pitch.css, generated/
+app/                     Login + demo app: shell/ (router, app chrome), data/ (sample data), login/, pages/ (one file per module)
+components/              Shared: tokens/, css/, js/ (ui primitives, composer, View tab), react/, package/ (developer handoff)
+tools/                   build_prototype.sh, publish.sh, colour lint, package and zip generators, icon collectors
+docs/                    Audit (PDF + Markdown), LIVE_PARITY.md, MOTION.md, overlays.md
+site/                    Build output served by Vercel
+DESIGN.md                The design system: tokens, type, components, overlay grammar, motion, sound, decisions
+PRODUCT.md               Product truth used for design decisions
+AUDIT-STATUS.md          Status of every audit finding, with evidence and acceptance criteria
+AGENTS.md                Rules for agents applying the redesign to the live codebase (copied from components/package/)
+build.sh                 Builds everything into site/
 ```
 
-`build.sh` fails if a raw colour appears outside `tokens.css` (`tools/lint_colors.py`). The prototype needs no dependencies; Python 3 runs the package generator.
+## Build
+
+```sh
+sh build.sh                 # everything: prototype (design system, login, app) + landing pages, into site/
+sh tools/publish.sh         # only the prototype → site/prototype.html, site/code/, site/docs/, site/downloads/
+sh landing/build.sh         # only the landing page and marketing pages → site/
+```
+
+The design system, login and demo app are one single-file build (`tools/build_prototype.sh` stitches the parts in a fixed order into `.build/prototype.html`); the address decides which view it shows. No dependencies beyond Python 3. The build fails if a raw colour appears outside `components/tokens/tokens.css` (`tools/lint_colors.py`).
 
 ## Deploy
 
-`vercel.json` sets the project to a static site: no install, no build, output `site/`, clean URLs, rewrites of `/design-system`, `/login` and `/app` to `prototype.html`, and a redirect from `/landingpage` to `/`. It overrides the framework settings of the old Vite project, so no dashboard change is needed.
+`vercel.json` serves `site/` as a static site: no install, no build, clean URLs, rewrites of `/design-system`, `/login` and `/app` to `prototype.html`, and redirects from `/landingpage` and `/index` to `/`. Commit the built `site/` with the source change.
+
+## Moving between the four
+
+Every page carries the same "View" tab (`components/js/kx-views.js`) to move between them, with Alt+1…4 as shortcuts; on a phone the demo app lists them in its More drawer. Moves use cross-document view transitions, and the theme carries across.
+
+The redesign keeps every process and flow of app.konteks.io and changes only how it looks and behaves on screen. All data in the demo is synthetic.

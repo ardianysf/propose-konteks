@@ -1,8 +1,8 @@
 .DS_Store
 node_modules/
 .vercel/
-prototype/index.html
 .impeccable/
 docs/tools/audit.html
-prototype/react/demo/out/
+components/react/demo/out/
 __pycache__/
+.build/

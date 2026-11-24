@@ -13,7 +13,7 @@ How Konteks moves, for the app (`/app`, `/login`, `/design-system`) and the mark
 7. **Hover motion only for a real pointer** (`(hover:hover) and (pointer:fine)`); on touch screens a tap is not a hover.
 8. **Reduced motion is fewer and gentler, not none.** Movement stops; opacity and colour transitions stay so state changes still read.
 
-## Tokens (`prototype/src/tokens.css`, shared by app and site)
+## Tokens (`components/tokens/tokens.css`, shared by app and site)
 
 | Token | Value | Use |
 | --- | --- | --- |
@@ -46,7 +46,7 @@ How Konteks moves, for the app (`/app`, `/login`, `/design-system`) and the mark
 
 Kept still on purpose: tooltips (instant), keyboard shortcuts, table and list hover (colour only), data being read.
 
-## Site patterns (`landing-src`)
+## Site patterns (`landing/`)
 
 | Pattern | Format | Where |
 | --- | --- | --- |

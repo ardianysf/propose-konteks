@@ -2,7 +2,7 @@
 Fails the build if base.css or components.css contain a raw colour: hex, rgb()/hsl(), or color-mix().
 Raw colours live only in tokens.css. Run: python3 tools/lint_colors.py"""
 import re, sys, pathlib
-ROOT = pathlib.Path(__file__).resolve().parent.parent / "src"
+ROOT = pathlib.Path(__file__).resolve().parent.parent / "components" / "css"
 RAW = re.compile(r"#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|color-mix)\(")
 bad = []
 for name in ["base.css", "components.css"]:

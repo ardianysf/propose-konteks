@@ -25,7 +25,7 @@ Paket lengkap `konteks-ui-lengkap.zip` (tombol utama di halaman Kode) berisi sem
 | `parity/LIVE_PARITY.md` | Spesifikasi alur aplikasi live yang dipakai sebagai acuan, termasuk token yang dibaca dari stylesheet live. |
 | `docs/konteks-audit-ui-ux.pdf` | Audit UI/UX app.konteks.io (27 Oktober 2026). Versi Markdown: `docs/audit-ui-ux.md`. |
 | `docs/overlays.md` | Keputusan modal, drawer, dialog, dan popover. |
-| `prototype/` | Prototipe dalam satu berkas (`index.html`) dan sumbernya: `src/*.js`, `src/*.css`, `tools/`, `build.sh`. |
+| `prototype/` | Prototipe dalam satu berkas (`index.html`) dan sumbernya per bagian: `components/` (token, CSS, primitif UI), `app/` (login dan demo app), `design-system/`, `tools/`, `build.sh`. |
 
 ## Langkah adopsi
 
