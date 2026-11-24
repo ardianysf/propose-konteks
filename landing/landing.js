@@ -146,8 +146,14 @@ if (shift) {
   const rows = $$(".sh-row", shift);
   if (RM || !("IntersectionObserver" in window)) rows.forEach(r => r.classList.add("on"));
   else {
-    // a row plays when it reaches the reading line (62% down the screen), once
-    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("on"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -38% 0px", threshold: 0 });
+    // a row plays when it reaches the reading line, once; rows that arrive in the same moment play one after another
+    let next = 0;
+    const io = new IntersectionObserver(es => es.filter(e => e.isIntersecting).forEach(e => {
+      const now = performance.now(), wait = Math.max(0, next - now);
+      e.target.style.setProperty("--d", (wait / 1000).toFixed(2) + "s");
+      e.target.classList.add("on"); io.unobserve(e.target);
+      next = now + wait + 450;
+    }), { rootMargin: "0px 0px -38% 0px", threshold: 0 });
     rows.forEach(r => io.observe(r));
   }
 }
