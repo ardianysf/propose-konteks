@@ -39,7 +39,7 @@ function toast(msg, kind) {
   t.innerHTML = `${ic(kind === "err" ? "circle-alert" : kind === "ask" ? "message-circle-question" : "check-circle-2")}<span>${esc(msg)}</span>`;
   host.append(t); drawIcons();
   if (kind === "err") sfx("error"); else if (kind !== "ask") sfx("ok");
-  setTimeout(() => { t.classList.add("leaving"); setTimeout(() => t.remove(), 180); }, 4200);
+  setTimeout(() => { t.classList.add("leaving"); setTimeout(() => t.remove(), 400); }, 4200);
 }
 /* Demo clock that keeps moving from NOW, so new messages get a real-looking time. */
 const PAGE_T0 = performance.now();
@@ -170,8 +170,11 @@ function menu(anchor, items) {
   m.style.position = "fixed"; document.body.append(m); drawIcons();
   const h = m.offsetHeight, w = m.offsetWidth;
   /* Open below the trigger, or above it when the trigger sits low (the account button at the foot of the sidebar). */
-  m.style.top = (r.bottom + 4 + h > innerHeight ? Math.max(8, r.top - 4 - h) : r.bottom + 4) + "px";
-  m.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + "px";
+  const up = r.bottom + 4 + h > innerHeight, left = Math.max(8, Math.min(r.left, innerWidth - w - 8));
+  m.style.top = (up ? Math.max(8, r.top - 4 - h) : r.bottom + 4) + "px";
+  m.style.left = left + "px";
+  /* Grow out of the trigger: from its edge, on the side the menu opened. */
+  m.style.transformOrigin = `${Math.round(Math.min(w, Math.max(0, r.left + r.width / 2 - left)))}px ${up ? "100%" : "0"}`;
   const btns = $$("button", m); btns[0]?.focus();
   const close = () => { m.remove(); document.removeEventListener("mousedown", out); document.removeEventListener("keydown", key); anchor.focus(); };
   const out = e => { if (!m.contains(e.target)) close(); };

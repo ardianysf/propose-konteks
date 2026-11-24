@@ -287,7 +287,7 @@ function bindRelease() {
   $$("[data-unrel]").forEach(b => b.addEventListener("click", () => dialog("Remove from release?", "The initiative stays accepted and joins the next release candidate.", "Remove", () => toast("Demo: not removed"))));
   const ta = $(".rel-compose textarea");
   $("#relPost").onclick = () => { const t = ta.value.trim(); if (!t) return ta.focus();
-    $("#relCmts").insertAdjacentHTML("beforeend", actCmt({ p: "ay", m: 0, text: t })); $("#relCmts").lastElementChild.querySelector("time").outerHTML = "<time>now</time>";
+    $("#relCmts").insertAdjacentHTML("beforeend", actCmt({ p: "ay", m: 0, text: t }).replace("<li>", '<li class="msg-in">')); $("#relCmts").lastElementChild.querySelector("time").outerHTML = "<time>now</time>";
     bindNoteTools($("#relCmts").lastElementChild); drawIcons(); ta.value = ""; sfx("send"); toast("Comment posted"); };
   $$("#relCmts > li").forEach(li => bindNoteTools(li));
 }

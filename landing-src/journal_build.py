@@ -107,7 +107,7 @@ def page(title, desc, body, extra_css, js, active="journal"):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
-<script>document.documentElement.classList.add("js");try{{var t=localStorage.getItem("kx-theme")||localStorage.getItem("kx-lp-theme");if(t)document.documentElement.dataset.theme=t}}catch(e){{}}</script>
+<script>document.documentElement.classList.add("js");if(matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("rm");try{{var t=localStorage.getItem("kx-theme")||localStorage.getItem("kx-lp-theme");if(t)document.documentElement.dataset.theme=t}}catch(e){{}}</script>
 <style>
 @view-transition{{navigation:auto}}
 {fonts}
@@ -142,6 +142,8 @@ $("#theme").onclick = () => { const r = document.documentElement, dark = r.datas
 $$("[data-theme-alt]").forEach(b => b.onclick = () => $("#theme").onclick());
 $$(".menu-pop a").forEach(a => a.addEventListener("click", () => $(".menu").removeAttribute("open")));
 const nav = $("#nav"); const stuck = () => nav.classList.toggle("stuck", scrollY > 8); addEventListener("scroll", stuck, { passive: true }); stuck();
+
+'''+open(os.path.join(HERE, 'reveal.js')).read()+r'''
 '''
 
 PAGE_CSS = r'''

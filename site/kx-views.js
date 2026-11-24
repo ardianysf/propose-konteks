@@ -17,7 +17,7 @@
   const css = `
 .kxv{--kxv-bg:#171b16;--kxv-ink:#eef2ea;--kxv-ink2:#b7c0b1;--kxv-line:#2c3329;--kxv-hi:#232a20;--kxv-acc:#9dc47b;--kxv-on:#13200c;
   position:fixed;z-index:95;right:max(16px,env(safe-area-inset-right,0px));top:var(--kxv-top,0px);font:500 13px/1.2 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
-  view-transition-name:kx-views;transition:translate .3s cubic-bezier(.2,.8,.2,1),opacity .3s}
+  view-transition-name:kx-views;transition:translate .3s var(--ease,cubic-bezier(.16,1,.3,1)),opacity .3s}
 .kxv.away{translate:0 -120%;opacity:0;pointer-events:none}
 .kxv-tab{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px 0 9px;border:0;border-radius:0 0 9px 9px;background:var(--kxv-bg);color:var(--kxv-ink);font:inherit;cursor:pointer;box-shadow:0 6px 18px -8px rgba(0,0,0,.45)}
 .kxv-tab:hover{background:var(--kxv-hi)}
@@ -27,9 +27,9 @@
 .kxv[data-open] .kxv-tab .chev{rotate:180deg}
 .kxv-tab b{font-weight:600}
 .kxv-tab .k{color:var(--kxv-ink2);font-weight:500}
-.kxv-menu{position:absolute;right:0;top:calc(100% + 6px);width:min(300px,calc(100vw - 32px));padding:6px;border-radius:14px;background:var(--kxv-bg);color:var(--kxv-ink);border:1px solid var(--kxv-line);box-shadow:0 18px 48px -16px rgba(0,0,0,.55);
-  opacity:0;translate:0 -6px;visibility:hidden;transition:opacity .18s,translate .22s cubic-bezier(.2,.8,.2,1),visibility 0s .22s}
-.kxv[data-open] .kxv-menu{opacity:1;translate:0 0;visibility:visible;transition:opacity .18s,translate .22s cubic-bezier(.2,.8,.2,1)}
+.kxv-menu{transform-origin:top right;position:absolute;right:0;top:calc(100% + 6px);width:min(300px,calc(100vw - 32px));padding:6px;border-radius:14px;background:var(--kxv-bg);color:var(--kxv-ink);border:1px solid var(--kxv-line);box-shadow:0 18px 48px -16px rgba(0,0,0,.55);
+  opacity:0;translate:0 -6px;scale:.97;visibility:hidden;transition:opacity .18s,translate .18s var(--ease,cubic-bezier(.16,1,.3,1)),scale .18s var(--ease,cubic-bezier(.16,1,.3,1)),visibility 0s .18s}
+.kxv[data-open] .kxv-menu{opacity:1;translate:0 0;scale:1;visibility:visible;transition:opacity .18s,translate .18s var(--ease,cubic-bezier(.16,1,.3,1)),scale .18s var(--ease,cubic-bezier(.16,1,.3,1))}
 .kxv-menu p{margin:0;padding:8px 10px 6px;font-size:12px;color:var(--kxv-ink2)}
 .kxv-menu a{display:grid;grid-template-columns:auto 1fr auto;column-gap:10px;align-items:center;padding:9px 10px;border-radius:9px;color:inherit;text-decoration:none}
 .kxv-menu a:hover{background:var(--kxv-hi)}
