@@ -65,7 +65,7 @@ The composer (chat input with slash commands and agent replies) is shared: `comp
 
 | Address | Source |
 |---|---|
-| `/` (Home) | `landing.html` blocks marked `<!--@@PAGE:home-->`: the hero with the room tour: one isometric house of four rooms (1843, 1936, 1969, Today; `art/rooms.svg`, built by `art/rooms.build.mjs`) and a camera that moves between them, the work week, Programming is theory building, How it works (links to Features), the blog section |
+| `/` (Home) | `landing.html` blocks marked `<!--@@PAGE:home-->`: the hero with the room tour: one isometric house of four connected rooms (1843, 1936, 1969, Today; `art/house.svg`, built by `art/house.build.mjs`) and a camera that walks along it, the work week, Programming is theory building, How it works (links to Features), the blog section |
 | `/features` | `landing.html` blocks marked `<!--@@PAGE:features-->`: the note-to-receipt demo hero, one record, authority/money/evidence, four kinds of session, five agents, enablement |
 | (both) | `landing.js` (every scene guarded by its section), `reveal.js` (reveal on scroll); `build.sh` writes both pages from the one template |
 | `/pricing`, `/security` | `pages_build.py` |

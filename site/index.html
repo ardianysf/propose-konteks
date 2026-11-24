@@ -1325,7 +1325,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   </div>
   <div class="dio" id="dio" aria-roledescription="carousel" aria-label="Four rooms, one job: telling a machine what to do">
     <div class="dio-stage" id="dioStage">
-      <div class="dio-world" id="dioWorld"><img src="/art/rooms.svg" alt="Four rooms in one house: 1843, Ada Lovelace writing beside the Analytical Engine; 1936, a tape machine and its rules on a blackboard; 1969, a minicomputer, a terminal and a teletype; today, a team talking around one table while the agents work in the corner." width="927" height="696" decoding="async"></div>
+      <div class="dio-world" id="dioWorld"><img src="/art/house.svg" alt="One house of four rooms along one wall, joined by a strip of instructions that runs through them all: 1843, Ada Lovelace writing Note G while punched cards feed the Analytical Engine; 1936, a tape machine stepping cell by cell while its rule lights up on the blackboard; 1969, minicomputers, a terminal printing a C program and a teletype; today, a team at a board of explorations and one decision, and a screen working on its own." width="1007" height="755" decoding="async"></div>
       <span class="room-label" id="dioLabel">1843 to now</span>
     </div>
   </div>
@@ -1333,11 +1333,11 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
     <div class="dio-bar"><div class="dio-tabs" role="tablist" aria-label="Four rooms"><button class="dio-tab" type="button" role="tab" id="dio-t0" aria-controls="dioStage" aria-selected="true" tabindex="0" style="--hue:#9A6212">1843<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t1" aria-controls="dioStage" aria-selected="false" tabindex="-1" style="--hue:#2F6F8F">1936<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t2" aria-controls="dioStage" aria-selected="false" tabindex="-1" style="--hue:#4F7044">1969<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t3" aria-controls="dioStage" aria-selected="false" tabindex="-1" style="--hue:#5F8D4E">Today<i aria-hidden="true"><b></b></i></button></div>
       <button class="dio-pause" id="dioPause" type="button" aria-label="Pause the tour" aria-pressed="false"><svg class="ico pz" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg><svg class="ico pl" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg></button></div>
     <div class="dio-caps" aria-live="polite">
-      <div class="dio-cap cur" data-k="all"><div class="era-cap"><span class="yr">1843 to now</span><h3>Four rooms, one job: telling a machine what to do.</h3><p>Pen and paper, a tape, a programming language, and now a team that talks in plain words. Pick a room, or let the tour play.</p></div></div>
+      <div class="dio-cap cur" data-k="all"><div class="era-cap"><span class="yr">1843 to now</span><h3>Four rooms, one job: telling a machine what to do.</h3><p>One house, one line of instructions running through it: pen and paper, a tape, a programming language, and now a team that talks in plain words. Pick a room, or let the tour play.</p></div></div>
       <div class="dio-cap" data-k="0"><div class="era-cap"><span class="yr">1843 · Pen and paper</span><h3>Ada Lovelace writes the first program.</h3><p>For Charles Babbage’s Analytical Engine, a machine that was never built. Her Note G sets out, step by step, how it would compute Bernoulli numbers.</p></div></div>
       <div class="dio-cap" data-k="1"><div class="era-cap"><span class="yr">1936 · A tape</span><h3>Alan Turing turns computing into an idea.</h3><p>A tape, a head that reads and writes, and a table of rules. Turing showed this one simple machine can carry out any calculation that can be written as steps.</p></div></div>
       <div class="dio-cap" data-k="2"><div class="era-cap"><span class="yr">1969 to 1972 · A language</span><h3>Unix and C make software a team sport.</h3><p>At Bell Labs, from 1969 to 1972: an operating system and a language people could read and share. Code starts to outlive its authors, and teams build it together.</p></div></div>
-      <div class="dio-cap" data-k="3"><div class="era-cap"><span class="yr">Today · A team and its agents</span><h3>People decide, and agents build in the background.</h3><p>Each person brings their own view: a question, a doubt, a yes. The agents follow the conversation and build what the team agreed on.</p></div></div>
+      <div class="dio-cap" data-k="3"><div class="era-cap"><span class="yr">Today · A team and its agents</span><h3>People decide, and agents build in the background.</h3><p>The team explores on the board and settles on one decision. The agents take it from there: the screen writes the change, runs the checks and shows the result.</p></div></div>
     </div>
     <p class="dio-note">Each step moved the work closer to how people already talk.</p>
   </div>
@@ -1733,13 +1733,13 @@ theoryDraw = () => {
 };
 }
 
-/* ============ THE DIORAMA: a room tour. Four rooms in one isometric house (art/rooms.svg). The tour starts on the
+/* ============ THE DIORAMA: a room tour. Four rooms side by side in one isometric house (art/house.svg), joined by one strip of instructions along the back wall. The tour starts on the
    whole house, then the camera (the svg viewBox) moves into each room, holds it to be read, and moves on. ============ */
 const dio = $("#dio");
 if (dio) {
 const world = $("#dioWorld"), label = $("#dioLabel"), dtabs = $$(".dio-tab"), dcaps = $$(".dio-cap"), dpause = $("#dioPause");
 const KEYS = ["1843", "1936", "1969", "today"];
-const CAMS = { all: [-400.1, -238.3, 927.4, 695.5], "1843": [-211.2, -209.9, 422.5, 316.9], "1936": [127.7, -97.7, 422.5, 316.9], "1969": [-423.1, -30.3, 422.5, 316.9], today: [-84.1, 81.9, 422.5, 316.9] };
+const CAMS = { all: [-134.3,  -242.1,  1007.1,  755.3], "1843": [-169.6,  -132.6,  435.7,  326.8], "1936": [45,  -61.5,  435.7,  326.8], "1969": [259.5,  9.5,  435.7,  326.8], today: [474,  80.6,  435.7,  326.8] };
 const LABELS = { all: "1843 to now", "1843": "1843 · The Analytical Engine", "1936": "1936 · A tape and its rules", "1969": "1969 · Unix and C", today: "Today · A team and its agents" };
 const inOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 const HOLD = 7000, OVERVIEW = 3200;          // a room is held long enough to read its caption; the whole house briefly
@@ -1748,7 +1748,7 @@ let cur = -1, playing = !RM, on = false, held = false, t0 = 0;
 const setView = v => { cam = v; if (svg) svg.setAttribute("viewBox", v.map(n => n.toFixed(1)).join(" ")); };
 const moveTo = (to, dur) => { camFrom = cam.slice(); camTo = to; c0 = performance.now(); cDur = RM ? 0 : dur; if (!cDur) setView(to); };
 /* the house is inlined once fetched, so the camera can move; until then (or without script) the picture shows the whole house */
-fetch("/art/rooms.svg").then(r => r.ok ? r.text() : Promise.reject()).then(txt => {
+fetch("/art/house.svg").then(r => r.ok ? r.text() : Promise.reject()).then(txt => {
   world.innerHTML = txt; svg = world.querySelector("svg");
   svg.removeAttribute("width"); svg.removeAttribute("height"); svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
   svg.setAttribute("aria-hidden", "true");
@@ -1771,7 +1771,7 @@ const go = (i, focus) => {
   const from = cur; cur = i; t0 = 0;
   show(i);
   const far = from < 0 || i < 0;            // zooming in or out takes a little longer than walking next door
-  moveTo(CAMS[i < 0 ? "all" : KEYS[i]], far ? 1500 : 1150);
+  moveTo(CAMS[i < 0 ? "all" : KEYS[i]], far ? 1900 : 1500 + Math.max(0, Math.abs(i - from) - 1) * 400);
   if (focus) dtabs[i].focus();
 };
 const setPlaying = v => { playing = v; dio.classList.toggle("paused", !v); dpause.setAttribute("aria-pressed", !v); dpause.setAttribute("aria-label", v ? "Pause the tour" : "Play the tour"); t0 = 0; };
