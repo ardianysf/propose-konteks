@@ -12,6 +12,12 @@
     .filter(g => !g.closest(skip));
   heads.forEach(el => el.classList.add(el.matches("h1, h2") ? "rv-h" : "rv-p"));
   groups.forEach(g => [...g.children].forEach((c, i) => { c.classList.add("rv-i"); c.style.setProperty("--i", Math.min(i, 8)); }));
+  /* Section pictures arrive with the animation-on-scroll pattern (keyframes paused until seen). */
+  const big = [...document.querySelectorAll("#loop, .acp, .train, .smap, .auth, .scope-fig, .jfeature")]
+    .concat(matchMedia("(min-width:901px)").matches ? [...document.querySelectorAll("#record .rec, #record .teams")] : []);
+  big.forEach(el => el.classList.add("animate-on-scroll"));
+  const aio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("animate"); aio.unobserve(e.target); } }), { threshold: 0.15, rootMargin: "0px 0px -10% 0px" });
+  big.forEach(el => aio.observe(el));
   root.classList.add("rv-on");
   /* A clipped heading does not count as visible to IntersectionObserver, so each element is watched through its parent. */
   const reveal = el => {

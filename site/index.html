@@ -191,6 +191,13 @@ html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
 .rv-on .rv-i{opacity:0;translate:0 24px;transition:opacity var(--d-reveal) var(--ease) calc(var(--i,0) * var(--stagger)),translate var(--d-reveal) var(--ease) calc(var(--i,0) * var(--stagger));will-change:translate,opacity}
 .rv-on .rv-i.rv-in{opacity:1;translate:0 0}
 @media (max-width:900px){.nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--paper)}}
+/* Section arrivals (animation-on-scroll): the main picture of a section rises out of a soft blur as the section
+   comes in. Paused until reveal.js adds .animate. Fill "backwards" only, so after it ends the element's own
+   transforms (parallax) take over again. */
+@keyframes animationIn{0%{opacity:0;translate:0 30px;filter:blur(8px)}100%{opacity:1;translate:0 0;filter:blur(0)}}
+.animate-on-scroll{animation:animationIn .9s var(--ease) var(--aos-d,.1s) backwards;animation-play-state:paused}
+.animate-on-scroll.animate{animation-play-state:running}
+.rm .animate-on-scroll{animation:none}
 /* The menu grows out of its button. */
 .menu[open] .menu-pop{transform-origin:top right;animation:mpop var(--d-pop) var(--ease)}
 @keyframes mpop{from{opacity:0;scale:.96}}
@@ -214,6 +221,7 @@ html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
 .js:not(.rm) .h-copy .lede{animation:rvup .9s var(--ease) .32s both}
 .js:not(.rm) .h-act{animation:rvup .9s var(--ease) .44s both}
 .js:not(.rm) .sheet{animation:rvsheet 1.1s var(--ease) .2s both}
+.js:not(.rm) .lanes{animation:rvup .9s var(--ease) .56s both}
 @keyframes rvline{from{opacity:0;translate:0 .5em}}
 @keyframes rvup{from{opacity:0;translate:0 18px}}
 @keyframes rvsheet{from{opacity:0;translate:0 40px;scale:.98}}
@@ -422,7 +430,7 @@ html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
 /* ===== four eras: scroll-driven rail with parallax scenes ===== */
 .eras{position:relative}
 .eras-track{position:relative}
-.js .eras-track{height:calc(100svh + 270svh)}
+.js .eras-track{height:calc(100svh + 560svh)}
 .eras-stage{padding:clamp(72px,8vw,112px) 0 48px}
 .js .eras-stage{position:sticky;top:64px;height:calc(100svh - 64px);overflow:hidden;padding:clamp(20px,3.2vh,40px) 0 clamp(16px,2.5vh,28px);display:flex;flex-direction:column}
 .eras-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 48px;align-items:end;width:100%}
@@ -512,7 +520,7 @@ html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
 .chip.on svg{animation:wob 1.2s ease-in-out infinite}
 
 @media (max-width:900px){
-  .js .eras-track{height:calc(100svh + 300svh)}
+  .js .eras-track{height:calc(100svh + 600svh)}
   .eras-head{grid-template-columns:1fr;gap:10px}
   .eras-title p{display:none}
   .eras-meter{grid-template-columns:auto 1fr;justify-items:start;align-items:end;gap:16px}
@@ -619,6 +627,8 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 /* theory */
 .theory-g{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(40px,7vw,112px);align-items:start}
 .theory-l{position:sticky;top:120px}
+.js:not(.rm) .duties2{padding-bottom:38vh}
+@media (max-width:900px){.js:not(.rm) .theory-l::after{content:"";display:block;height:70svh}.js:not(.rm) .naur{position:sticky;top:96px}}
 .theory-l h2{font-size:clamp(2.1rem,1.25rem + 2.7vw,3.75rem)}
 .theory-p{margin-top:18px;font-size:18px;color:var(--ink-2);max-width:46ch}
 .naur{margin:clamp(40px,5vw,64px) 0 0;padding-top:clamp(28px,3vw,40px);border-top:1px solid var(--line-strong)}
@@ -1790,12 +1800,18 @@ const weekDraw = () => {
 });
 
 /* ============ theory: the quote writes itself, the duty in view comes forward ============ */
-const naurP = $("#naur p"), theory = $("#theory"), duties = $$("#duties li");
+const naurP = $("#naur p"), theory = $("#theory"), duties = $$("#duties li"), theoryL = $(".theory-l");
+const naurPrev = $("#naur").previousElementSibling;
+let naurGap = 0, theoryHold = 0; const measureTheory = () => { naurGap = parseFloat(getComputedStyle($("#naur")).marginTop) || 0; theoryHold = parseFloat(getComputedStyle(theoryL, "::after").height) || 0; };
 naurP.innerHTML = naurP.textContent.split(/(\s+)/).map(w => /\s+/.test(w) ? w : `<span class="w${/theory|insight/.test(w) ? " key" : ""}">${escT(w)}</span>`).join("");
 const words = $$(".w", naurP);
 const theoryDraw = () => {
   const r = theory.getBoundingClientRect(), vh = innerHeight;
-  const q = RM ? 1 : clamp((vh * .75 - r.top) / (vh * .9));
+  /* The quote lights word by word while it is held on screen, finishing with room to read it before it moves on. */
+  const wide = innerWidth > 900;
+  let q = 1;
+  if (!RM && wide) q = clamp((vh * .55 - r.top) / (r.height * .42));
+  else if (!RM) { const natural = naurPrev.getBoundingClientRect().bottom + naurGap; q = clamp((vh * .8 - natural) / (vh * .8 - 96 + theoryHold * .55)); }
   words.forEach((w, i) => w.classList.toggle("on", i / words.length < q));
   let best = -1, bd = 1e9;
   duties.forEach((d, i) => { const b = d.getBoundingClientRect(), c = b.top + b.height / 2, dd = Math.abs(c - vh * .5); if (dd < bd) { bd = dd; best = i; } });
@@ -1855,9 +1871,9 @@ let erasOn = false, gearA = $(".gA g"), gearB = $(".gB g"), spin = 0;
 const erasDraw = () => {
   const r = eras.getBoundingClientRect(), stageH = innerHeight - 64;
   const p = clamp(-r.top / Math.max(1, r.height - stageH));
-  const pos = p * (N - 1 + .6);                         // each era holds for a while, then slides
+  const pos = p * (N - 1 + .75);                        // each era plays, holds still to be read, then slides
   const i = Math.min(N - 1, Math.floor(pos)), f = pos - i;
-  const s = i < N - 1 ? smooth(clamp((f - .6) / .4)) : 0;
+  const s = i < N - 1 ? smooth(clamp((f - .78) / .22)) : 0;
   const off = i + s;
   rail.style.transform = `translate3d(${-off * 100}%,0,0)`;
   const curI = Math.round(off);
@@ -1865,7 +1881,7 @@ const erasDraw = () => {
     e.classList.toggle("cur", k === curI);
     const u = k - off;                                    // -1..1 around the current panel
     layers[k].forEach(([l, d]) => { l.style.transform = `translate3d(${u * d * -90}px,${(Math.abs(u)) * d * 24}px,0) rotate(${u * d * -2}deg)`; });
-    const t = k < i ? 1 : k > i ? 0 : clamp(f / .6);
+    const t = k < i ? 1 : k > i ? 0 : clamp(f / .48);
     scene[k](ease(t), e);
   });
   // year counter, ticks, distance bar
@@ -2108,7 +2124,7 @@ const onScroll = () => {
 };
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
 addEventListener("resize", () => { requestAnimationFrame(relayout); });
-const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); measureZones(); ZONES.forEach(z => z.fn()); onScroll(); };
+const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); measureTheory(); measureZones(); ZONES.forEach(z => z.fn()); onScroll(); };
 document.fonts && document.fonts.ready.then(relayout);
 addEventListener("load", relayout);
 relayout();
@@ -2128,6 +2144,12 @@ relayout();
     .filter(g => !g.closest(skip));
   heads.forEach(el => el.classList.add(el.matches("h1, h2") ? "rv-h" : "rv-p"));
   groups.forEach(g => [...g.children].forEach((c, i) => { c.classList.add("rv-i"); c.style.setProperty("--i", Math.min(i, 8)); }));
+  /* Section pictures arrive with the animation-on-scroll pattern (keyframes paused until seen). */
+  const big = [...document.querySelectorAll("#loop, .acp, .train, .smap, .auth, .scope-fig, .jfeature")]
+    .concat(matchMedia("(min-width:901px)").matches ? [...document.querySelectorAll("#record .rec, #record .teams")] : []);
+  big.forEach(el => el.classList.add("animate-on-scroll"));
+  const aio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("animate"); aio.unobserve(e.target); } }), { threshold: 0.15, rootMargin: "0px 0px -10% 0px" });
+  big.forEach(el => aio.observe(el));
   root.classList.add("rv-on");
   /* A clipped heading does not count as visible to IntersectionObserver, so each element is watched through its parent. */
   const reveal = el => {

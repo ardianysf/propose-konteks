@@ -189,12 +189,18 @@ const weekDraw = () => {
 });
 
 /* ============ theory: the quote writes itself, the duty in view comes forward ============ */
-const naurP = $("#naur p"), theory = $("#theory"), duties = $$("#duties li");
+const naurP = $("#naur p"), theory = $("#theory"), duties = $$("#duties li"), theoryL = $(".theory-l");
+const naurPrev = $("#naur").previousElementSibling;
+let naurGap = 0, theoryHold = 0; const measureTheory = () => { naurGap = parseFloat(getComputedStyle($("#naur")).marginTop) || 0; theoryHold = parseFloat(getComputedStyle(theoryL, "::after").height) || 0; };
 naurP.innerHTML = naurP.textContent.split(/(\s+)/).map(w => /\s+/.test(w) ? w : `<span class="w${/theory|insight/.test(w) ? " key" : ""}">${escT(w)}</span>`).join("");
 const words = $$(".w", naurP);
 const theoryDraw = () => {
   const r = theory.getBoundingClientRect(), vh = innerHeight;
-  const q = RM ? 1 : clamp((vh * .75 - r.top) / (vh * .9));
+  /* The quote lights word by word while it is held on screen, finishing with room to read it before it moves on. */
+  const wide = innerWidth > 900;
+  let q = 1;
+  if (!RM && wide) q = clamp((vh * .55 - r.top) / (r.height * .42));
+  else if (!RM) { const natural = naurPrev.getBoundingClientRect().bottom + naurGap; q = clamp((vh * .8 - natural) / (vh * .8 - 96 + theoryHold * .55)); }
   words.forEach((w, i) => w.classList.toggle("on", i / words.length < q));
   let best = -1, bd = 1e9;
   duties.forEach((d, i) => { const b = d.getBoundingClientRect(), c = b.top + b.height / 2, dd = Math.abs(c - vh * .5); if (dd < bd) { bd = dd; best = i; } });
@@ -254,9 +260,9 @@ let erasOn = false, gearA = $(".gA g"), gearB = $(".gB g"), spin = 0;
 const erasDraw = () => {
   const r = eras.getBoundingClientRect(), stageH = innerHeight - 64;
   const p = clamp(-r.top / Math.max(1, r.height - stageH));
-  const pos = p * (N - 1 + .6);                         // each era holds for a while, then slides
+  const pos = p * (N - 1 + .75);                        // each era plays, holds still to be read, then slides
   const i = Math.min(N - 1, Math.floor(pos)), f = pos - i;
-  const s = i < N - 1 ? smooth(clamp((f - .6) / .4)) : 0;
+  const s = i < N - 1 ? smooth(clamp((f - .78) / .22)) : 0;
   const off = i + s;
   rail.style.transform = `translate3d(${-off * 100}%,0,0)`;
   const curI = Math.round(off);
@@ -264,7 +270,7 @@ const erasDraw = () => {
     e.classList.toggle("cur", k === curI);
     const u = k - off;                                    // -1..1 around the current panel
     layers[k].forEach(([l, d]) => { l.style.transform = `translate3d(${u * d * -90}px,${(Math.abs(u)) * d * 24}px,0) rotate(${u * d * -2}deg)`; });
-    const t = k < i ? 1 : k > i ? 0 : clamp(f / .6);
+    const t = k < i ? 1 : k > i ? 0 : clamp(f / .48);
     scene[k](ease(t), e);
   });
   // year counter, ticks, distance bar
@@ -507,7 +513,7 @@ const onScroll = () => {
 };
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
 addEventListener("resize", () => { requestAnimationFrame(relayout); });
-const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); measureZones(); ZONES.forEach(z => z.fn()); onScroll(); };
+const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); measureTheory(); measureZones(); ZONES.forEach(z => z.fn()); onScroll(); };
 document.fonts && document.fonts.ready.then(relayout);
 addEventListener("load", relayout);
 relayout();

@@ -191,6 +191,13 @@ html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
 .rv-on .rv-i{opacity:0;translate:0 24px;transition:opacity var(--d-reveal) var(--ease) calc(var(--i,0) * var(--stagger)),translate var(--d-reveal) var(--ease) calc(var(--i,0) * var(--stagger));will-change:translate,opacity}
 .rv-on .rv-i.rv-in{opacity:1;translate:0 0}
 @media (max-width:900px){.nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--paper)}}
+/* Section arrivals (animation-on-scroll): the main picture of a section rises out of a soft blur as the section
+   comes in. Paused until reveal.js adds .animate. Fill "backwards" only, so after it ends the element's own
+   transforms (parallax) take over again. */
+@keyframes animationIn{0%{opacity:0;translate:0 30px;filter:blur(8px)}100%{opacity:1;translate:0 0;filter:blur(0)}}
+.animate-on-scroll{animation:animationIn .9s var(--ease) var(--aos-d,.1s) backwards;animation-play-state:paused}
+.animate-on-scroll.animate{animation-play-state:running}
+.rm .animate-on-scroll{animation:none}
 /* The menu grows out of its button. */
 .menu[open] .menu-pop{transform-origin:top right;animation:mpop var(--d-pop) var(--ease)}
 @keyframes mpop{from{opacity:0;scale:.96}}
@@ -429,6 +436,12 @@ const nav = $("#nav"); const stuck = () => nav.classList.toggle("stuck", scrollY
     .filter(g => !g.closest(skip));
   heads.forEach(el => el.classList.add(el.matches("h1, h2") ? "rv-h" : "rv-p"));
   groups.forEach(g => [...g.children].forEach((c, i) => { c.classList.add("rv-i"); c.style.setProperty("--i", Math.min(i, 8)); }));
+  /* Section pictures arrive with the animation-on-scroll pattern (keyframes paused until seen). */
+  const big = [...document.querySelectorAll("#loop, .acp, .train, .smap, .auth, .scope-fig, .jfeature")]
+    .concat(matchMedia("(min-width:901px)").matches ? [...document.querySelectorAll("#record .rec, #record .teams")] : []);
+  big.forEach(el => el.classList.add("animate-on-scroll"));
+  const aio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("animate"); aio.unobserve(e.target); } }), { threshold: 0.15, rootMargin: "0px 0px -10% 0px" });
+  big.forEach(el => aio.observe(el));
   root.classList.add("rv-on");
   /* A clipped heading does not count as visible to IntersectionObserver, so each element is watched through its parent. */
   const reveal = el => {
