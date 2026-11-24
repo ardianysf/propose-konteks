@@ -1200,6 +1200,44 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   .dio-hero .connect small{font-size:12.5px;margin-top:8px;color:var(--on-moss-2)}
   .dio-hero .h-more{margin-top:16px;font-size:14px;color:var(--on-moss-2)}.dio-hero .h-more .lnk{color:var(--live)}.dio-hero .h-more .fine{font-size:12.5px;color:var(--on-moss-2)}
 }
+/* Home hero, clean: no band. Left, the headline, the sentence and a small connect box; right, the diorama card
+   with its tour under it. The connect box and the tabs start on one line. Everything sits on the page colour. */
+.dio-hero::before{display:none}
+.dio-hero{padding-bottom:clamp(56px,7vw,104px)}
+.dio-hero .dio{margin-top:clamp(24px,3vw,40px)}
+.dio-hero .dio-stage{border:1px solid var(--line);border-radius:20px;box-shadow:0 1px 2px rgba(36,48,37,.06),0 24px 48px -28px rgba(36,48,37,.28)}
+.dio-hero .h-act{color:var(--ink);padding:24px 0 0;border:0;align-self:start}
+.dio-hero .h-copy{align-self:end}
+.dio-hero .connect{max-width:460px;border:1px solid var(--line);background:var(--surface);box-shadow:none;padding:14px 14px 12px;border-radius:14px}
+.dio-hero .connect p{font-size:13px;line-height:1.5;color:var(--ink-2)}
+.dio-hero .connect strong{color:var(--ink)}
+.dio-hero .cline{margin-top:10px;background:var(--sunken);border:1px solid var(--line);padding:4px 4px 4px 12px;border-radius:10px}
+.dio-hero .cline code{font-size:12.5px;color:var(--ink);padding:4px 0}
+.dio-hero .copy{min-height:34px;padding:0 12px;font-size:13px;background:var(--accent);color:var(--on-accent)}
+.dio-hero .copy:hover{background:var(--accent-hover)}
+.dio-hero .connect small{font-size:12px;margin-top:8px;color:var(--ink-3)}
+.dio-hero .dio-meta{color:var(--ink);padding:24px 0 0}
+.dio-hero .dio-tab{border-color:var(--line);color:var(--ink-2);font-size:13.5px;padding:9px 14px 11px}
+.dio-hero .dio-tab:hover{color:var(--ink)}
+.dio-hero .dio-tab[aria-selected="true"]{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--line-accent)}
+.dio-hero .dio-tab i{background:var(--line)}
+.dio-hero .dio-tab b{background:var(--accent-strong)}
+.dio-hero .dio-tab:focus-visible,.dio-hero .dio-pause:focus-visible{outline-color:var(--accent-strong)}
+.dio-hero .dio-pause{width:36px;height:36px;border-color:var(--line);color:var(--ink-2)}
+.dio-hero .dio-pause:hover{color:var(--ink);border-color:var(--line-strong)}
+.dio-hero .dio-caps{margin-top:16px}
+.dio-hero .dio-meta .era-cap .yr,.dio-hero .dio-note{display:none}
+.dio-hero .dio-meta .era-cap h3{color:var(--ink);font-size:clamp(18px,.85rem + .45vw,21px)}
+.dio-hero .dio-meta .era-cap p{color:var(--ink-2);font-size:14.5px;max-width:58ch;margin-top:6px}
+@media (min-width:961px){.dio-hero{grid-template-columns:minmax(0,1fr) minmax(0,620px);column-gap:clamp(48px,6vw,96px)}}
+@media (max-width:960px){
+  .dio-hero{padding-bottom:56px}
+  .dio-hero .h-copy{padding-bottom:4px}
+  .dio-hero .dio{margin-top:28px}
+  .dio-hero .dio-stage{border-radius:16px}
+  .dio-hero .dio-meta{padding:18px 0 0}
+  .dio-hero .h-act{padding:28px 0 0;border:0}
+}
 @media (max-width:420px){.dio-tab{padding:10px 12px 12px;font-size:13px}}
 /* the hand-off from How it works to the features page */
 .how-more{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px 32px;margin-top:clamp(40px,5vw,64px);padding:28px 0 clamp(64px,8vw,112px);border-top:1px solid var(--line)}
@@ -1270,11 +1308,6 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
       <div class="cline"><code id="cl">Connect this project to Konteks by following https://konteks.io/connect</code>
         <button class="copy" id="copy" type="button"><svg class="ico cp"><use href="#i-copy"/></svg><svg class="ico ok"><use href="#i-check"/></svg><span>Copy</span></button></div>
       <small>Your agent follows the link and connects this computer.</small>
-    </div>
-    <div class="h-more">
-      <span>Already connected? <a class="lnk" href="/login">Open the app <svg class="ico"><use href="#i-arrow"/></svg></a></span>
-      <a class="lnk" href="#workflow">See how it works <svg class="ico"><use href="#i-down"/></svg></a>
-      <span class="fine">Public beta. Your agents stay signed in as you.</span>
     </div>
   </div>
   <div class="dio" id="dio" aria-roledescription="carousel" aria-label="Four rooms, one job: telling a machine what to do">
