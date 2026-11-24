@@ -14,6 +14,7 @@
 /*@@TOKENS@@*/
 :root{
   --display:"Bricolage","Inter",ui-sans-serif,system-ui,sans-serif;
+  --dio-paper:#F6F1E4;--dio-ink:#6B6A5F;
   --paper:var(--bg); --moss:var(--deep); --on-moss:var(--on-deep); --on-moss-2:var(--on-deep-2);
   --moss-line:rgba(238,241,232,.12); --moss-line-2:rgba(238,241,232,.2);
   --live:#8FBF6A; --wrap:1240px; --gut:clamp(16px,4vw,48px);
@@ -1092,10 +1093,13 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 /* ===== Home: the diorama. Four rooms stand on the line where the note sheet stands on Features; the tour runs below it ===== */
 @media (min-width:961px){.dio-hero{grid-template-columns:minmax(0,1fr) minmax(0,600px)}}
 .dio{grid-area:sheet;align-self:end;position:relative;margin-top:clamp(32px,5vw,72px);min-width:0}
-.dio-stage{position:relative;height:clamp(340px,33vw,470px);border-radius:22px 22px 0 0;overflow:hidden;border:1px solid var(--line);border-bottom:0;background:var(--surface);box-shadow:0 30px 60px -40px rgba(36,48,37,.35)}
-.dio-room{position:absolute;inset:0;opacity:0;visibility:hidden;transform:translateX(24px);transition:opacity .7s var(--ease),transform .9s var(--ease),visibility 0s linear .7s}
-.dio-room.cur{opacity:1;visibility:visible;transform:none;transition:opacity .7s var(--ease),transform .9s var(--ease),visibility 0s}
-.dio-room .scene{height:100%;max-height:none;min-height:0;border:0;border-radius:0;box-shadow:none}
+.dio-stage{position:relative;height:clamp(340px,33vw,470px);border-radius:22px 22px 0 0;overflow:hidden;border:1px solid var(--line);border-bottom:0;background:var(--dio-paper);box-shadow:0 30px 60px -40px rgba(36,48,37,.35)}
+/* the tour: four rooms in one house; the camera (the svg viewBox) moves from the whole house into each room */
+.dio-world{position:absolute;inset:0}
+.dio-world svg,.dio-world img{display:block;width:100%;height:100%;object-fit:contain}
+.room-label{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:2;white-space:nowrap;font:500 11px/1 var(--mono);letter-spacing:.08em;color:var(--dio-ink);background:var(--dio-paper);padding:5px 9px;border-radius:6px;transition:opacity .4s var(--ease)}
+.room-label.swap{opacity:0}
+@media (max-width:960px){.room-label{font-size:10.5px;top:10px}}
 .js:not(.rm) .dio{animation:rvsheet 1.1s var(--ease) .2s both}
 .dio-meta{grid-area:lanes;padding:22px 0 44px;min-width:0;color:var(--on-moss)}
 .js:not(.rm) .dio-meta{animation:rvup .9s var(--ease) .56s both}
@@ -1200,65 +1204,22 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
     </div>
   </div>
   <div class="dio" id="dio" aria-roledescription="carousel" aria-label="Four rooms, one job: telling a machine what to do">
-    <div class="dio-stage">
-     <div class="dio-room cur" style="--hue:#9A6212" role="tabpanel" id="dio-p0" aria-labelledby="dio-t0">
-      <div class="scene s-ada" aria-hidden="true">
-      <div class="L sheetp" data-d=".25"><span class="nlabel">Note G · 1843</span></div>
-      <img class="L engine" data-d="1.1" src="/art/babbage.svg" alt="" width="560" height="560" decoding="async">
-      <div class="L ada-tab" data-d=".55">
-       <div class="row" data-k="0"><i>1</i><b>×</b><span><sup>1</sup>V<sub>2</sub> × <sup>1</sup>V<sub>3</sub></span><em>= 2n</em></div>
-       <div class="row" data-k="1"><i>2</i><b>−</b><span><sup>1</sup>V<sub>4</sub> − <sup>1</sup>V<sub>1</sub></span><em>= 2n − 1</em></div>
-       <div class="row" data-k="2"><i>3</i><b>+</b><span><sup>1</sup>V<sub>5</sub> + <sup>1</sup>V<sub>1</sub></span><em>= 2n + 1</em></div>
-       <div class="row" data-k="3"><i>4</i><b>÷</b><span><sup>2</sup>V<sub>5</sub> ÷ <sup>2</sup>V<sub>4</sub></span><em>= <sup>2n − 1</sup>⁄<sub>2n + 1</sub></em></div>
-       <svg class="ink" viewBox="0 0 300 20" preserveAspectRatio="none"><path d="M4 12 C60 4 120 18 180 9 S270 6 296 11"/></svg>
-      </div>
-     </div>
-     </div>
-     <div class="dio-room" style="--hue:#2F6F8F" role="tabpanel" id="dio-p1" aria-labelledby="dio-t1">
-      <div class="scene s-tur" aria-hidden="true">
-      <img class="L era-bg bg-tur" data-d=".2" src="/art/turing.svg" alt="" width="560" height="360" loading="lazy" decoding="async">
-      <div class="L rules-card" data-d=".4"><b>Rules</b><div data-r="0">q1 <u>0</u> → 1 R q1</div><div data-r="1">q1 <u>1</u> → 0 R q1</div><div data-r="2">q1 <u>_</u> → _ halt</div></div>
-      <div class="L tape-wrap" data-d="1"><div class="tape" id="tape"></div><div class="thead"><span id="tstate">q1</span></div></div>
-      <div class="L tape-note" data-d=".7">Read a symbol. Write. Move right. Repeat.</div>
-     </div>
-     </div>
-     <div class="dio-room" style="--hue:#4F7044" role="tabpanel" id="dio-p2" aria-labelledby="dio-t2">
-      <div class="scene s-c" aria-hidden="true">
-      <img class="L era-bg bg-c" data-d=".2" src="/art/pdp.svg" alt="" width="420" height="520" loading="lazy" decoding="async">
-      <div class="L win back" data-d=".35"><div class="bar"><i></i><i></i><i></i><span>~/team</span></div><pre>$ ls
-Makefile  hello.c  notes
-$ who
-alice  tty0
-bob    tty1</pre></div>
-      <div class="L win front" data-d=".95"><div class="bar"><i></i><i></i><i></i><span>hello.c</span></div><pre id="cterm"></pre></div>
-     </div>
-     </div>
-     <div class="dio-room" style="--hue:#5F8D4E" role="tabpanel" id="dio-p3" aria-labelledby="dio-t3">
-      <div class="scene s-now" aria-hidden="true">
-      <img class="L era-bg bg-now" data-d=".2" src="/art/chip.svg" alt="" width="440" height="340" loading="lazy" decoding="async">
-      <div class="L nnote" data-d=".55">
-       <div class="nh"><span class="av r">R</span><b>Invoices: export to CSV</b></div>
-       <p>Finance wants this month’s invoices as a CSV. Keep the columns the same.</p>
-       <div class="bub" data-k="0"><span class="av d">D</span>Include the tax column too.</div>
-       <div class="bub" data-k="1"><span class="av a">A</span>Is a ceiling of $6 enough?</div>
-       <div class="bub" data-k="2"><span class="av r">R</span>Yes. Go ahead.</div>
-      </div>
-      <div class="L nline" data-d="1.1"><span class="nyes">Yes</span>
-       <span class="npipe"><span class="chip" data-k="0"><svg class="ico"><use href="#i-hammer"/></svg>Builds<i class="st"></i></span><i class="pl" data-k="0"><b></b></i><span class="chip" data-k="1"><svg class="ico"><use href="#i-eye"/></svg>Reviews<i class="st"></i></span><i class="pl" data-k="1"><b></b></i><span class="chip" data-k="2"><svg class="ico"><use href="#i-pointer"/></svg>Tests<i class="st"></i></span></span></div>
-     </div>
-     </div>
+    <div class="dio-stage" id="dioStage">
+      <div class="dio-world" id="dioWorld"><img src="/art/rooms.svg" alt="Four rooms in one house: 1843, Ada Lovelace writing beside the Analytical Engine; 1936, a tape machine and its rules on a blackboard; 1969, a minicomputer, a terminal and a teletype; today, a team talking around one table while the agents work in the corner." width="927" height="696" decoding="async"></div>
+      <span class="room-label" id="dioLabel">1843 to now</span>
     </div>
   </div>
   <div class="dio-meta">
-    <div class="dio-bar"><div class="dio-tabs" role="tablist" aria-label="Four rooms"><button class="dio-tab" type="button" role="tab" id="dio-t0" aria-controls="dio-p0" aria-selected="true" tabindex="0" style="--hue:#9A6212">1843<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t1" aria-controls="dio-p1" aria-selected="false" tabindex="-1" style="--hue:#2F6F8F">1936<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t2" aria-controls="dio-p2" aria-selected="false" tabindex="-1" style="--hue:#4F7044">1969<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t3" aria-controls="dio-p3" aria-selected="false" tabindex="-1" style="--hue:#5F8D4E">Today<i aria-hidden="true"><b></b></i></button></div>
+    <div class="dio-bar"><div class="dio-tabs" role="tablist" aria-label="Four rooms"><button class="dio-tab" type="button" role="tab" id="dio-t0" aria-controls="dioStage" aria-selected="true" tabindex="0" style="--hue:#9A6212">1843<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t1" aria-controls="dioStage" aria-selected="false" tabindex="-1" style="--hue:#2F6F8F">1936<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t2" aria-controls="dioStage" aria-selected="false" tabindex="-1" style="--hue:#4F7044">1969<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t3" aria-controls="dioStage" aria-selected="false" tabindex="-1" style="--hue:#5F8D4E">Today<i aria-hidden="true"><b></b></i></button></div>
       <button class="dio-pause" id="dioPause" type="button" aria-label="Pause the tour" aria-pressed="false"><svg class="ico pz" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg><svg class="ico pl" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg></button></div>
     <div class="dio-caps" aria-live="polite">
-      <div class="dio-cap cur" data-k="0"><div class="era-cap"><span class="yr">1843 · Pen and paper</span><h3>Ada Lovelace writes the first program.</h3><p>For Charles Babbage’s Analytical Engine, a machine that was never built. Her Note G sets out, step by step, how it would compute Bernoulli numbers.</p></div></div>
+      <div class="dio-cap cur" data-k="all"><div class="era-cap"><span class="yr">1843 to now</span><h3>Four rooms, one job: telling a machine what to do.</h3><p>Pen and paper, a tape, a programming language, and now a team that talks in plain words. Pick a room, or let the tour play.</p></div></div>
+      <div class="dio-cap" data-k="0"><div class="era-cap"><span class="yr">1843 · Pen and paper</span><h3>Ada Lovelace writes the first program.</h3><p>For Charles Babbage’s Analytical Engine, a machine that was never built. Her Note G sets out, step by step, how it would compute Bernoulli numbers.</p></div></div>
       <div class="dio-cap" data-k="1"><div class="era-cap"><span class="yr">1936 · A tape</span><h3>Alan Turing turns computing into an idea.</h3><p>A tape, a head that reads and writes, and a table of rules. Turing showed this one simple machine can carry out any calculation that can be written as steps.</p></div></div>
       <div class="dio-cap" data-k="2"><div class="era-cap"><span class="yr">1969 to 1972 · A language</span><h3>Unix and C make software a team sport.</h3><p>At Bell Labs, from 1969 to 1972: an operating system and a language people could read and share. Code starts to outlive its authors, and teams build it together.</p></div></div>
-      <div class="dio-cap" data-k="3"><div class="era-cap"><span class="yr">Today · A note</span><h3>People decide, and agents build in the background.</h3><p>Each person brings their own view to one note: a comment, a doubt, a yes. The agents follow the discussion and build what the team agreed on, on the team’s own computers.</p></div></div>
+      <div class="dio-cap" data-k="3"><div class="era-cap"><span class="yr">Today · A team and its agents</span><h3>People decide, and agents build in the background.</h3><p>Each person brings their own view: a question, a doubt, a yes. The agents follow the conversation and build what the team agreed on.</p></div></div>
     </div>
-    <p class="dio-note">Four rooms, one job: telling a machine what to do. Each step moved the work closer to how people already talk.</p>
+    <p class="dio-note">Each step moved the work closer to how people already talk.</p>
   </div>
 </section>
 <!--@@/PAGE-->
