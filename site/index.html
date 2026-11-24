@@ -1176,6 +1176,15 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .js:not(.rm) .close.in .unlearn s::after{transform:none}
 .js:not(.rm) .close.in .unlearn b{opacity:1;translate:0 0}
 @media (max-width:900px){.close-g{grid-template-columns:minmax(0,1fr);grid-template-areas:"h" "l" "a"}.unlearn{align-self:stretch}}
+
+/* eras: a quiet object behind each scene, same camera as the 1843 engine */
+.era-bg{height:auto;pointer-events:none;opacity:.42;filter:saturate(.85)}
+.bg-tur{left:-6%;top:2%;width:64%}
+.bg-c{right:3%;top:5%;width:30%}
+.bg-now{right:-5%;top:3%;width:46%}
+:root[data-theme="dark"] .era-bg{opacity:.22}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .era-bg{opacity:.22}}
+@media (max-width:900px){.bg-tur{width:84%;left:-10%}.bg-c{width:40%;right:-2%}.bg-now{width:60%;right:-12%}}
 </style>
 </head>
 <body>
@@ -1313,6 +1322,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
     </article>
     <article class="era" style="--hue:#2F6F8F">
      <div class="scene s-tur" aria-hidden="true">
+      <img class="L era-bg bg-tur" data-d=".2" src="/art/turing.svg" alt="" width="560" height="360" loading="lazy" decoding="async">
       <div class="L rules-card" data-d=".4"><b>Rules</b><div data-r="0">q1 <u>0</u> → 1 R q1</div><div data-r="1">q1 <u>1</u> → 0 R q1</div><div data-r="2">q1 <u>_</u> → _ halt</div></div>
       <div class="L tape-wrap" data-d="1"><div class="tape" id="tape"></div><div class="thead"><span id="tstate">q1</span></div></div>
       <div class="L tape-note" data-d=".7">Read a symbol. Write. Move right. Repeat.</div>
@@ -1321,6 +1331,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
     </article>
     <article class="era" style="--hue:#4F7044">
      <div class="scene s-c" aria-hidden="true">
+      <img class="L era-bg bg-c" data-d=".2" src="/art/pdp.svg" alt="" width="420" height="520" loading="lazy" decoding="async">
       <div class="L win back" data-d=".35"><div class="bar"><i></i><i></i><i></i><span>~/team</span></div><pre>$ ls
 Makefile  hello.c  notes
 $ who
@@ -1332,6 +1343,7 @@ bob    tty1</pre></div>
     </article>
     <article class="era now" style="--hue:#5F8D4E">
      <div class="scene s-now" aria-hidden="true">
+      <img class="L era-bg bg-now" data-d=".2" src="/art/laptop.svg" alt="" width="520" height="420" loading="lazy" decoding="async">
       <div class="L nnote" data-d=".55">
        <div class="nh"><span class="av r">R</span><b>Invoices: export to CSV</b></div>
        <p>Finance wants this month’s invoices as a CSV. Keep the columns the same.</p>
