@@ -193,7 +193,174 @@ function laptop() {
   return { body: out.join(""), points, accents: { alu: "#C9C6BD", green: "#5F8D4E", screen: "#5F8D4E", mug: "#E6DCC8" }, label: "An isometric open laptop on a desk, a note on its screen with a green Yes that pulses gently, and a mug beside it." };
 }
 
-const OBJECTS = [["turing", turing, 560, 360], ["pdp", pdp, 420, 520], ["laptop", laptop, 520, 420]];
+
+// ======================================================================================
+// Today: a rubber stamp says yes. A stack of note cards, the top one already stamped
+// with a green tick; the stamp (oak handle, green rubber) presses again; an ink pad beside.
+// ======================================================================================
+function stamp() {
+  const oak = ac("oak"), green = ac("green"), card = ac("card"), tin = ac("tin"), ink = ac("ink");
+  const out = [];
+  // the ink pad: a tin with a green pad inset, lid leaning behind it
+  const PAD = { x: 30, y: -30, w: 30, d: 22, r: 3 };
+  out.push(`<path class="iso-halo" d="${k.haloOf(k.insetPlan(PAD, -3), 0, 3, P)}"/>`);
+  out.push(tin(S(k.slabOf(PAD, 0, 5, P, 4, 0.6), { tone: "mid", inner: L(k.sideSeam(PAD, 2, P, 4), { tone: "faint" }) })));
+  out.push(green(S(k.slabOf(k.insetPlan(PAD, 2.4), 5, 0.6, P, 3), { tone: "mid", crease: "none" })));
+  // the note cards, a little askew, the top one stamped
+  const C = { x: -44, y: -26, w: 66, d: 46, r: 1.6 };
+  out.push(`<path class="iso-halo" d="${k.haloOf(k.insetPlan(C, -4), 0, 4, P)}"/>`);
+  const offs = [[0, 0], [1.2, -0.8], [-0.8, 0.6], [0.4, 0.3]];
+  offs.forEach(([dx, dy], i) => out.push(card(S(k.slabOf({ ...C, x: C.x + dx, y: C.y + dy }, i * 0.9, 0.9, P, 2), { tone: "hi", crease: "faint" }))));
+  const zt = offs.length * 0.9;
+  const T = { ...C, x: C.x + 0.4, y: C.y + 0.3 };
+  // rule lines for the note's words, a heading line
+  out.push(L(k.lineOnTop([T.x + 6, T.y + 7], [T.x + 34, T.y + 7], zt, P), { tone: "mid", free: true }));
+  out.push(L([0, 1, 2, 3].map((i) => k.lineOnTop([T.x + 6, T.y + 13 + i * 5], [T.x + T.w - 8 - (i % 2) * 14, T.y + 13 + i * 5], zt, P)).join(""), { tone: "lo", free: true }));
+  // the stamped mark: a green rounded frame with a tick
+  const M = { x: T.x + 30, y: T.y + 28, w: 28, d: 13, r: 3 };
+  out.push(ink(L(k.planOutline(M, zt, P, 4) + k.planOutline(k.insetPlan(M, 1.4), zt, P, 4), { tone: "lit" })));
+  out.push(ink(L(k.lineOnTop([M.x + 7, M.y + 7], [M.x + 10, M.y + 10], zt, P) + k.lineOnTop([M.x + 10, M.y + 10], [M.x + 17, M.y + 3], zt, P), { tone: "lit", free: true })));
+  // the stamp, hovering over the mark and pressing
+  const SX = M.x + M.w / 2, SY = M.y + M.d / 2, Z0 = zt + 9;
+  const R = { x: SX - 15, y: SY - 7.5, w: 30, d: 15, r: 2 };
+  const st = [];
+  st.push(green(S(k.slabOf(R, Z0, 2.2, P, 3, 0.4), { tone: "mid" })));
+  st.push(oak(S(k.slabOf(k.insetPlan(R, -1), Z0 + 2.2, 7, P, 3, 0.8), { tone: "mid", inner: L(k.sideSeam(k.insetPlan(R, -1), Z0 + 5.6, P, 3), { tone: "faint" }) })));
+  st.push(L(k.planOutline(k.insetPlan(R, 2.4), Z0 + 9.2, P, 3), { tone: "faint" }));
+  st.push(oak(S(k.cylinder(SX, SY, 3.2, Z0 + 9.2, 10, P, 24), { tone: "mid", inner: L(k.sideArc(SX, SY, 3.2, Z0 + 12, P, 20), { tone: "faint" }) })));
+  st.push(oak(S(G.sphereOf([SX, SY, Z0 + 24], 7, P), { tone: "hi" })));
+  out.push(a.amPress(st.join(""), [0, 0, -8], P, { period: 3600 }));
+  const points = [...k.boxCorners(k.insetPlan(C, -4), 0, 1), ...k.boxCorners(PAD, 0, 6), [SX, SY, Z0 + 31]];
+  return { body: out.join(""), points, accents: { oak: "#B48A5A", green: "#5F8D4E", ink: { hex: "#4F8A3E", mode: "ink" }, card: "#F3EEDF", tin: "#9A968C" }, label: "An isometric rubber stamp with an oak handle and green rubber pressing on a stack of note cards, the top card already stamped with a green tick, an ink pad beside it." };
+}
+
+
+// ======================================================================================
+// Today: an agent. A small robot hovering over a digital pad (a disc ruled in a grid),
+// a floating panel of code beside it, loose pixels drifting up; its eyes blink.
+// ======================================================================================
+function bot() {
+  const shell = ac("shell"), green = ac("green"), pad = ac("pad"), glow = ac("glow"), holo = ac("holo"), face = ac("face"), gink = ac("gink");
+  const nearY = depth([0, 1, 0]) > depth([0, 0, 0]) ? 1 : -1;
+  const nearX = depth([1, 0, 0]) > depth([0, 0, 0]) ? 1 : -1;
+  const out = [];
+  // the pad: a low disc with a lit ring and a grid on its face
+  const PR = 44;
+  out.push(`<path class="iso-halo" d="${k.haloOf({ x: -PR - 4, y: -PR - 4, w: 2 * PR + 8, d: 2 * PR + 8, r: PR + 4 }, 0, 3, P)}"/>`);
+  out.push(pad(S(k.cylinder(0, 0, PR, 0, 4, P, 72, 0.6), { tone: "mid", inner: L(k.sideArc(0, 0, PR, 1.6, P, 64), { tone: "faint" }) })));
+  out.push(face(S(k.cylinder(0, 0, PR - 4, 4, 0.6, P, 72), { tone: "hi", crease: "none" })));
+  const grid = [];
+  for (let g = -32; g <= 32; g += 8) {
+    const h = Math.sqrt(Math.max(0, (PR - 6) ** 2 - g * g));
+    grid.push(k.lineOnTop([g, -h], [g, h], 4.6, P), k.lineOnTop([-h, g], [h, g], 4.6, P));
+  }
+  out.push(gink(L(grid.join(""), { tone: "lit", free: true })));
+  out.push(gink(L(k.ring(0, 0, 16, 4.6, P, 48), { tone: "lit" })));
+  // the robot, floating
+  const rb = [];
+  const ZB = 18;
+  rb.push(shell(S(k.cylinder(0, 0, 4, ZB - 6, 6, P, 24), { tone: "lo" })));                         // thruster
+  rb.push(glow(S(k.cylinder(0, 0, 2.6, ZB - 7, 1, P, 20), { tone: "hi", lit: true })));
+  const BODY = { x: -13, y: -11, w: 26, d: 22, r: 8 };
+  rb.push(shell(S(k.slabOf(BODY, ZB, 24, P, 8, 1), { tone: "hi", inner: L(k.sideSeam(BODY, ZB + 8, P, 8), { tone: "faint" }) })));
+  // chest light on the front face
+  const FY = nearY > 0 ? BODY.y + BODY.d : BODY.y;
+  rb.push(glow(S(k.slabOf({ x: -4, y: nearY > 0 ? FY : FY - 0.6, w: 8, d: 0.6, r: 0.3 }, ZB + 12, 5, P, 2), { tone: "hi", lit: true })));
+  // arms: two short rounded posts at the sides, one raised a little
+  for (const sx of byDepth([-1, 1], (sx) => [sx * 16, 0, ZB + 14])) {
+    const x = sx * 15.5;
+    rb.push(shell(S(k.slabOf({ x: x - 2.6, y: -3, w: 5.2, d: 6, r: 2.4 }, ZB + 6 + (sx > 0 ? 4 : 0), 13, P, 4), { tone: "mid" })));
+  }
+  // neck and head with a dark visor and two eyes
+  rb.push(shell(S(k.cylinder(0, 0, 3.4, ZB + 24, 3, P, 20), { tone: "mid" })));
+  const HEAD = { x: -15, y: -12, w: 30, d: 24, r: 7 };
+  const HZ = ZB + 27;
+  rb.push(shell(S(k.slabOf(HEAD, HZ, 18, P, 8, 1.2), { tone: "hi" })));
+  const HY = nearY > 0 ? HEAD.y + HEAD.d : HEAD.y;
+  const visor = { x: -11, y: nearY > 0 ? HY : HY - 1, w: 22, d: 1, r: 0.5 };
+  rb.push(pad(S(k.slabOf(visor, HZ + 4, 10, P, 2, 0.3), { tone: "lo" })));
+  const eyes = (open) => glow(open
+    ? S(k.slabOf({ x: -6.5, y: visor.y + (nearY > 0 ? 1 : -0.4), w: 4, d: 0.4, r: 0.2 }, HZ + 7, 4, P, 2), { tone: "hi", lit: true }) + S(k.slabOf({ x: 2.5, y: visor.y + (nearY > 0 ? 1 : -0.4), w: 4, d: 0.4, r: 0.2 }, HZ + 7, 4, P, 2), { tone: "hi", lit: true })
+    : S(k.slabOf({ x: -6.5, y: visor.y + (nearY > 0 ? 1 : -0.4), w: 4, d: 0.4, r: 0.2 }, HZ + 8.6, 0.8, P, 2), { tone: "hi" }) + S(k.slabOf({ x: 2.5, y: visor.y + (nearY > 0 ? 1 : -0.4), w: 4, d: 0.4, r: 0.2 }, HZ + 8.6, 0.8, P, 2), { tone: "hi" }));
+  rb.push(a.amFlip([eyes(true), eyes(true), eyes(true), eyes(true), eyes(false)], { period: 3000 }));
+  // antenna with a glowing tip
+  rb.push(shell(S(k.cylinder(0, 0, 0.9, HZ + 18, 8, P, 12), { tone: "mid" })));
+  rb.push(a.amPulse(glow(S(G.sphereOf([0, 0, HZ + 28], 2.6, P), { tone: "hi" })), { period: 2400, min: 0.4 }));
+  out.push(a.amFloat(rb.join(""), P, { rise: 3, period: 4200 }));
+  // a floating panel of code to the side, and pixels drifting up
+  const PX = nearX > 0 ? -34 : 34;
+  const panel = [];
+  const pz0 = 40, pz1 = 66, py0 = -18, py1 = 10;
+  panel.push(holo(S(k.slabOf({ x: PX - 0.6, y: py0, w: 1.2, d: py1 - py0, r: 0.4 }, pz0, pz1 - pz0, P, 2), { tone: "hi" })));
+  const fx = PX + (nearX > 0 ? 0.6 : -0.6) * -1;
+  const faceX = (x, y0, y1, z) => k.segment([x, y0, z], [x, y1, z], P);
+  const xf = nearX > 0 ? PX + 0.6 : PX - 0.6;
+  panel.push(L([0, 1, 2, 3].map((i) => faceX(xf, py0 + 4 + (i % 2) * 4, py1 - 4 - i * 3, pz1 - 6 - i * 5)).join(""), { tone: "lo", free: true }));
+  out.push(a.amFloat(panel.join(""), P, { rise: 2.4, period: 5200, delay: 1200 }));
+  const pixels = [[22, -20, 52], [28, 4, 70], [-8, 24, 74], [16, 20, 46], [-24, -24, 62]];
+  pixels.forEach(([x, y, z], i) => out.push(a.amFloat(glow(S(k.slabOf({ x: x - 1.8, y: y - 1.8, w: 3.6, d: 3.6, r: 0.4 }, z, 3.6, P, 2), { tone: i % 2 ? "hi" : "mid" })), P, { rise: 5, period: 3600 + i * 700, delay: i * 500 })));
+  const points = [[-PR - 4, -PR - 4, 0], [PR + 4, PR + 4, 0], [-PR, PR, 0], [PR, -PR, 0], [0, 0, HZ + 32], [PX, py0, pz1], [PX, py1, pz1], [28, 4, 76]];
+  return { body: out.join(""), points, accents: { shell: "#E8E6DE", green: "#5F8D4E", pad: "#3E4A40", face: "#33443A", glow: "#7FBF5A", holo: "#CFE3C2", gink: { hex: "#8FD06A", mode: "ink" } }, label: "An isometric agent: a small robot hovering over a digital pad ruled in a glowing grid, a floating code panel beside it and pixels drifting up, its eyes blinking." };
+}
+
+
+// ======================================================================================
+// Today: a friendly agent. A round, bean-shaped companion floating over a soft digital pad,
+// big round eyes and a smile, a leaf sprout on its head, one hand waving; lights drift up.
+// ======================================================================================
+function pal() {
+  const skin = ac("skin"), leaf = ac("leaf"), pad = ac("pad"), face = ac("face"), gink = ac("gink"), blush = ac("blush"), dark = ac("dark");
+  const V = G.viewOf(P);
+  const f = (() => { const l = Math.hypot(V[0], V[1]); return [V[0] / l, V[1] / l, 0]; })();
+  const side = [-f[1], f[0], 0];
+  const onSphere = (c, r, dx, dz) => { const d = [f[0] + side[0] * dx, f[1] + side[1] * dx, dz]; const l = Math.hypot(...d); return [c[0] + (d[0] / l) * r, c[1] + (d[1] / l) * r, c[2] + (d[2] / l) * r]; };
+  const out = [];
+  // the pad: a soft rounded disc with a ring of lights
+  const PR = 40;
+  out.push(`<path class="iso-halo" d="${k.haloOf({ x: -PR - 4, y: -PR - 4, w: 2 * PR + 8, d: 2 * PR + 8, r: PR + 4 }, 0, 3, P)}"/>`);
+  out.push(pad(S(k.cylinder(0, 0, PR, 0, 4, P, 72, 1), { tone: "mid" })));
+  out.push(face(S(k.cylinder(0, 0, PR - 5, 4, 0.5, P, 72), { tone: "hi", crease: "none" })));
+  out.push(gink(L(k.ring(0, 0, PR - 9, 4.5, P, 64) + k.ring(0, 0, 14, 4.5, P, 40), { tone: "lit" })));
+  const lights = [];
+  for (let i = 0; i < 20; i++) { const t = (i / 20) * Math.PI * 2; lights.push(at([Math.cos(t) * (PR - 9), Math.sin(t) * (PR - 9), 4.5])); }
+  out.push(a.amBlink(gink(D(lights.filter((_, i) => i % 2), { size: 1.5, tone: "lit" })), { period: 2600, min: 0.3 }));
+  out.push(gink(D(lights.filter((_, i) => !(i % 2)), { size: 1.5, tone: "lit" })));
+  // the companion
+  const c = [];
+  const ZB = 16;
+  const F = G.frameOf([0, 0, ZB], [0, 0, 1], [1, 0, 0], [0, 1, 0]);
+  c.push(skin(S(G.solidOf([[0, 7, 1], [4, 12, 1], [12, 14.5, 1], [22, 13.5, 1], [30, 10, 1]], F, P), { tone: "hi" })));
+  const H = [0, 0, ZB + 42], HR = 17;
+  // hands: the far one rests, the near one waves
+  const handAt = (sgn) => [side[0] * sgn * 15.5, side[1] * sgn * 15.5, ZB + 16];
+  const hands = byDepth([1, -1], (sgn) => handAt(sgn));
+  const hand = (sgn) => skin(S(G.sphereOf(handAt(sgn), 4.6, P), { tone: "hi" }));
+  c.push(hand(hands[0]));
+  c.push(skin(S(G.sphereOf(H, HR, P), { tone: "hi" })));
+  // the face: two round eyes with a glint, a smile, soft cheeks
+  const eye = (dx) => onSphere(H, HR, dx, 0.12);
+  const eyes = [eye(-0.36), eye(0.36)];
+  c.push(dark(D(eyes.map(at), { size: 4.2, tone: "hi" })));
+  c.push(D(eyes.map((p) => { const q = at(p); return [q[0] + 1.4, q[1] - 1.5]; }), { size: 1.2, tone: "lit" }));
+  const smile = [];
+  for (let i = 0; i <= 12; i++) { const t = -0.3 + (i / 12) * 0.6; smile.push(onSphere(H, HR, t, -0.26 + 0.6 * t * t)); }
+  c.push(dark(L(k.pathOf(smile.map(at)), { tone: "hi", free: true })));
+  c.push(blush(D([onSphere(H, HR, -0.62, -0.12), onSphere(H, HR, 0.62, -0.12)].map(at), { size: 3.6, tone: "lit" })));
+  // a leaf sprout on top
+  const top = [0, 0, ZB + 42 + HR];
+  c.push(leaf(S(k.cylinder(0, 0, 0.8, top[2] - 1, 5, P, 12), { tone: "mid" })));
+  const leafPath = (sx) => `<path d="M0,0C${sx * 3},-5 ${sx * 9},-7 ${sx * 12},-3C${sx * 8},1 ${sx * 3},1 0,0Z" style="fill:var(--anatomy-top);stroke:var(--anatomy-hi);stroke-width:var(--anatomy-weight);vector-effect:non-scaling-stroke;stroke-linejoin:round"/>`;
+  c.push(leaf(`<g transform="${a.planeMatrix([0, 0, top[2] + 4], [side[0], side[1], 0], [0, 0, -1], P)}">${leafPath(1)}${leafPath(-1)}</g>`));
+  c.push(a.amFloat(hand(hands[1]), P, { rise: 4, period: 1600 }));
+  out.push(a.amFloat(c.join(""), P, { rise: 3, period: 4200 }));
+  // soft lights drifting up around it
+  const motes = [[24, -18, 40], [26, 10, 62], [-20, 22, 70], [-28, -10, 50], [10, -28, 78]];
+  motes.forEach(([x, y, z], i) => out.push(a.amFloat(gink(D([at([x, y, z])], { size: 1.6 + (i % 2), tone: "lit" })), P, { rise: 6, period: 3400 + i * 600, delay: i * 500 })));
+  const points = [[-PR - 4, -PR - 4, 0], [PR + 4, PR + 4, 0], [-PR, PR, 0], [PR, -PR, 0], [0, 0, ZB + 42 + HR + 12], [-28, -10, 56], [26, 10, 68], [10, -28, 84]];
+  return { body: out.join(""), points, accents: { skin: "#FFF6E6", leaf: "#6FA65A", pad: "#55705A", face: "#DCEBD3", gink: { hex: "#6FB24E", mode: "ink" }, blush: { hex: "#E8A58E", mode: "ink" }, dark: { hex: "#2C3A30", mode: "ink" } }, label: "An isometric friendly agent: a round, bean-shaped companion with big eyes, a smile and a leaf sprout, floating over a soft digital pad ringed with lights and waving one hand." };
+}
+
+const OBJECTS = [["turing", turing, 560, 360], ["pdp", pdp, 420, 520], ["agent", pal, 400, 420]];
 for (const [name, fn, W, H] of OBJECTS) {
   P = { origin: [0, 0], scale: 1, azimuth: AZ, elevation: EL };
   const first = fn();
