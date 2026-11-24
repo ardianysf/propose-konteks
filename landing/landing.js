@@ -144,8 +144,12 @@ else { seen(hero, v => heroVisible = v, .15); measurePin(); requestAnimationFram
 const shift = $("#shift");
 if (shift) {
   const rows = $$(".sh-row", shift);
-  if (RM) rows.forEach(r => r.classList.add("on"));
-  else seen(shift, v => { if (!v || shift._played) return; shift._played = true; rows.forEach((r, i) => setTimeout(() => r.classList.add("on"), 160 + i * 260)); }, .3);
+  if (RM || !("IntersectionObserver" in window)) rows.forEach(r => r.classList.add("on"));
+  else {
+    // a row plays when it reaches the reading line (62% down the screen), once
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("on"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -38% 0px", threshold: 0 });
+    rows.forEach(r => io.observe(r));
+  }
 }
 
 /* ============ theory: the quote writes itself, the duty in view comes forward ============ */
