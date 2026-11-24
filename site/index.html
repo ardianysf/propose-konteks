@@ -1325,7 +1325,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   </div>
   <div class="dio" id="dio" aria-roledescription="carousel" aria-label="Four rooms, one job: telling a machine what to do">
     <div class="dio-stage" id="dioStage">
-      <div class="dio-world" id="dioWorld"><img src="/art/house.svg" alt="One house of four rooms along one wall, joined by a strip of instructions that runs through them all: 1843, Ada Lovelace writing Note G while punched cards feed the Analytical Engine; 1936, a tape machine stepping cell by cell while its rule lights up on the blackboard; 1969, minicomputers, a terminal printing a C program and a teletype; today, a team at a board of explorations and one decision, and a screen working on its own." width="1007" height="755" decoding="async"></div>
+      <div class="dio-world" id="dioWorld"><img src="/art/house.svg" alt="One square house of four rooms around a crossing of low walls, joined by a line of instructions in the floor that runs through a doorway into every room: 1843, Ada Lovelace writing Note G while punched cards feed the Analytical Engine; 1936, a tape machine stepping cell by cell while its rule lights up on the blackboard; 1969, minicomputers, a terminal printing a C program and a teletype; today, a team at a board of explorations and one decision, beside a screen working on its own." width="631" height="474" decoding="async"></div>
       <span class="room-label" id="dioLabel">1843 to now</span>
     </div>
   </div>
@@ -1333,7 +1333,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
     <div class="dio-bar"><div class="dio-tabs" role="tablist" aria-label="Four rooms"><button class="dio-tab" type="button" role="tab" id="dio-t0" aria-controls="dioStage" aria-selected="true" tabindex="0" style="--hue:#9A6212">1843<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t1" aria-controls="dioStage" aria-selected="false" tabindex="-1" style="--hue:#2F6F8F">1936<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t2" aria-controls="dioStage" aria-selected="false" tabindex="-1" style="--hue:#4F7044">1969<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t3" aria-controls="dioStage" aria-selected="false" tabindex="-1" style="--hue:#5F8D4E">Today<i aria-hidden="true"><b></b></i></button></div>
       <button class="dio-pause" id="dioPause" type="button" aria-label="Pause the tour" aria-pressed="false"><svg class="ico pz" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg><svg class="ico pl" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg></button></div>
     <div class="dio-caps" aria-live="polite">
-      <div class="dio-cap cur" data-k="all"><div class="era-cap"><span class="yr">1843 to now</span><h3>Four rooms, one job: telling a machine what to do.</h3><p>One house, one line of instructions running through it: pen and paper, a tape, a programming language, and now a team that talks in plain words. Pick a room, or let the tour play.</p></div></div>
+      <div class="dio-cap cur" data-k="all"><div class="era-cap"><span class="yr">1843 to now</span><h3>Four rooms, one job: telling a machine what to do.</h3><p>One house, one line of instructions running round through every room: pen and paper, a tape, a programming language, and now a team that talks in plain words. Pick a room, or let the tour play.</p></div></div>
       <div class="dio-cap" data-k="0"><div class="era-cap"><span class="yr">1843 · Pen and paper</span><h3>Ada Lovelace writes the first program.</h3><p>For Charles Babbage’s Analytical Engine, a machine that was never built. Her Note G sets out, step by step, how it would compute Bernoulli numbers.</p></div></div>
       <div class="dio-cap" data-k="1"><div class="era-cap"><span class="yr">1936 · A tape</span><h3>Alan Turing turns computing into an idea.</h3><p>A tape, a head that reads and writes, and a table of rules. Turing showed this one simple machine can carry out any calculation that can be written as steps.</p></div></div>
       <div class="dio-cap" data-k="2"><div class="era-cap"><span class="yr">1969 to 1972 · A language</span><h3>Unix and C make software a team sport.</h3><p>At Bell Labs, from 1969 to 1972: an operating system and a language people could read and share. Code starts to outlive its authors, and teams build it together.</p></div></div>
@@ -1733,13 +1733,13 @@ theoryDraw = () => {
 };
 }
 
-/* ============ THE DIORAMA: a room tour. Four rooms side by side in one isometric house (art/house.svg), joined by one strip of instructions along the back wall. The tour starts on the
+/* ============ THE DIORAMA: a room tour. Four rooms in one square isometric house (art/house.svg), divided by low walls with a doorway in each, joined by one line of instructions laid in the floor that runs round through every doorway. The tour starts on the
    whole house, then the camera (the svg viewBox) moves into each room, holds it to be read, and moves on. ============ */
 const dio = $("#dio");
 if (dio) {
 const world = $("#dioWorld"), label = $("#dioLabel"), dtabs = $$(".dio-tab"), dcaps = $$(".dio-cap"), dpause = $("#dioPause");
 const KEYS = ["1843", "1936", "1969", "today"];
-const CAMS = { all: [-134.3,  -242.1,  1007.1,  755.3], "1843": [-169.6,  -132.6,  435.7,  326.8], "1936": [45,  -61.5,  435.7,  326.8], "1969": [259.5,  9.5,  435.7,  326.8], today: [474,  80.6,  435.7,  326.8] };
+const CAMS = { all: [-247.3,  -134.4,  631.3,  473.5], "1843": [-168.8,  -128.4,  406,  304.5], "1936": [13.6,  -68,  406,  304.5], "1969": [-74.6,  67.2,  354.5,  265.9], today: [-282.7,  -31.8,  406,  304.5] };
 const LABELS = { all: "1843 to now", "1843": "1843 · The Analytical Engine", "1936": "1936 · A tape and its rules", "1969": "1969 · Unix and C", today: "Today · A team and its agents" };
 const inOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 const HOLD = 7000, OVERVIEW = 3200;          // a room is held long enough to read its caption; the whole house briefly

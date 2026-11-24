@@ -249,13 +249,13 @@ theoryDraw = () => {
 };
 }
 
-/* ============ THE DIORAMA: a room tour. Four rooms side by side in one isometric house (art/house.svg), joined by one strip of instructions along the back wall. The tour starts on the
+/* ============ THE DIORAMA: a room tour. Four rooms in one square isometric house (art/house.svg), divided by low walls with a doorway in each, joined by one line of instructions laid in the floor that runs round through every doorway. The tour starts on the
    whole house, then the camera (the svg viewBox) moves into each room, holds it to be read, and moves on. ============ */
 const dio = $("#dio");
 if (dio) {
 const world = $("#dioWorld"), label = $("#dioLabel"), dtabs = $$(".dio-tab"), dcaps = $$(".dio-cap"), dpause = $("#dioPause");
 const KEYS = ["1843", "1936", "1969", "today"];
-const CAMS = { all: [-134.3,  -242.1,  1007.1,  755.3], "1843": [-169.6,  -132.6,  435.7,  326.8], "1936": [45,  -61.5,  435.7,  326.8], "1969": [259.5,  9.5,  435.7,  326.8], today: [474,  80.6,  435.7,  326.8] };
+const CAMS = { all: [-247.3,  -134.4,  631.3,  473.5], "1843": [-168.8,  -128.4,  406,  304.5], "1936": [13.6,  -68,  406,  304.5], "1969": [-74.6,  67.2,  354.5,  265.9], today: [-282.7,  -31.8,  406,  304.5] };
 const LABELS = { all: "1843 to now", "1843": "1843 · The Analytical Engine", "1936": "1936 · A tape and its rules", "1969": "1969 · Unix and C", today: "Today · A team and its agents" };
 const inOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 const HOLD = 7000, OVERVIEW = 3200;          // a room is held long enough to read its caption; the whole house briefly

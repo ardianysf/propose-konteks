@@ -19,7 +19,7 @@ const at = (p) => k.iso(p, P);
 const S = (paths, style) => k.solidSvg(paths, style);
 const L = (d, style) => k.lineSvg(d, style);
 const D = (pts, style) => k.dotsSvg(pts, style);
-const depth = (p) => k.depthOf([p[0], p[1], p[2] ?? 0], W0);
+const depth = (p) => k.depthOf([p[0], p[1], p[2] ?? 0], P);
 const ac = (name) => (s) => `<g class="ac-${name}">${s}</g>`;
 const flat = (fill, edge) => `fill:var(--anatomy-${fill});stroke:var(--anatomy-${edge});stroke-width:var(--anatomy-weight);vector-effect:non-scaling-stroke;stroke-linejoin:round`;
 const unit = (v) => { const l = Math.hypot(...v); return v.map((c) => c / l); };
@@ -215,53 +215,6 @@ function cardFeed(x0, y0) {
   return out.join("");
 }
 
-function room1843(x0) {
-  const out = [], items = [];
-  out.push(windowOnBack(x0 + 18, x0 + 50, 38, 70, { arch: true }));
-  // Note G pinned on the end wall
-  for (let i = 0; i < 3; i++) {
-    const y0 = 40 + i * 20;
-    out.push(flatFace(faceX(0.2, y0, y0 + 15, 54, 74), "paper"));
-    out.push(L([0, 1, 2, 3].map((j) => k.segment([0.3, y0 + 2, 70 - j * 4], [0.3, y0 + 12 - (j % 2) * 3, 70 - j * 4], P)).join(""), { tone: "faint", free: true }));
-  }
-  // bookshelf
-  {
-    const bx = x0 + 60, bw = 30, bd = 12, bh = 80;
-    let sh = ac("desk")(S(box(bx, 0, bw, bd, 0, bh, 0.5, 2, 0.3), { tone: "mid" }));
-    const books = [];
-    for (let r = 0; r < 4; r++) {
-      const z = 5 + r * 18.5;
-      sh += L(faceY(bd + 0.05, bx + 2, bx + bw - 2, z, z + 15.5), { tone: "lo" });
-      for (let i = 0; i < 8; i++) { const xx = bx + 3 + i * 3.1; const hh = 10 + ((i * 7 + r * 3) % 5); books.push(flatFace(faceY(bd + 0.1, xx, xx + 2.5, z, z + hh), ["bookA", "bookB", "bookC"][(i + r) % 3], "mid")); }
-    }
-    items.push([[bx + bw / 2, 6, 0], sh + books.join("")]);
-  }
-  items.push([[x0 + 140, 18, 0], engine(x0 + 112, 6)]);
-  items.push([[x0 + 104, 30, 0], cardFeed(x0 + 82, 22)]);
-  // rug, desk, chair, Ada
-  out.push(ac("rug")(S(box(x0 + 18, 92, 76, 58, 0, 0.6, 1, 2), { tone: "mid", crease: "none" })));
-  out.push(ac("rug")(L(k.planOutline({ x: x0 + 22, y: 96, w: 68, d: 50, r: 1 }, 0.6, P, 2) + k.planOutline({ x: x0 + 26, y: 100, w: 60, d: 42, r: 1 }, 0.6, P, 2), { tone: "lo" })));
-  {
-    const tx = x0 + 28, ty = 98, tw = 48, td = 24, th = 26;
-    let t = table(tx, ty, tw, td, th);
-    t += ac("paper")(S(box(tx + 12, ty + 5, 18, 13, th, 0.4, 0.3), { tone: "hi", crease: "none" }));
-    const rows = [0, 1, 2, 3, 4].map((i) => k.lineOnTop([tx + 14, ty + 7 + i * 2.2], [tx + 28 - (i % 2) * 4, ty + 7 + i * 2.2], th + 0.6, P)).join("");
-    t += ac("ink")(a.amDraw(rows, { tone: "hi", period: 7000, free: true }));
-    t += ac("glassk")(S(k.cylinder(tx + 36, ty + 7, 2.2, th, 3.6, P, 16), { tone: "mid" }));
-    t += ac("ink")(S(k.cylinder(tx + 36.6, ty + 7, 0.35, th + 3.6, 9, P, 8), { tone: "hi" }));
-    // oil lamp: brass foot, glass chimney, a flame that breathes
-    t += ac("brass")(S(k.cylinder(tx + 6, ty + 6, 3.4, th, 2, P, 20), { tone: "mid" }));
-    t += ac("brass")(S(G.sphereOf([tx + 6, ty + 6, th + 5], 3.4, P), { tone: "hi" }));
-    t += ac("flame")(a.amPulse(`<path d="${k.haloOf({ x: tx + 1, y: ty + 1, w: 10, d: 10, r: 5 }, th + 9, 2, P)}" style="fill:var(--anatomy-top);filter:blur(3px)"/>`, { period: 1300, min: 0.5 }));
-    t += ac("glass")(S(k.cylinder(tx + 6, ty + 6, 1.8, th + 8, 8, P, 16), { tone: "hi" }));
-    t += ac("flame")(a.amPulse(S(G.sphereOf([tx + 6, ty + 6, th + 11], 1.2, P), { tone: "hi", lit: true }), { period: 900, min: 0.6 }));
-    items.push([[tx + tw / 2, ty + td / 2, 0], t]);
-    items.push([[tx + 20, ty + td + 10, 0], chair(tx + 20, ty + td + 11, -Math.PI / 2) + person({ x: tx + 20, y: ty + td + 10, seated: true, facing: -Math.PI / 2, coat: "coatA", hair: "hairB", pose: "write" })]);
-  }
-  out.push(sortItems(items));
-  return out.join("");
-}
-
 // ======================================================================================
 // 1936 · A tape and its rules. The head reads a cell, the rule lights on the board, the head
 // writes and the tape steps. Turing points at the rule in play.
@@ -306,33 +259,6 @@ function turing() {
     out.push(steel(a.amSpin(spokes, a.planeMatrix([x, 9.4, AX], [1, 0, 0], [0, 0, -1], P), { period: PER * 6 })));
   }
   for (const x of [-SX, SX]) out.push(upright(x, 11));
-  return out.join("");
-}
-
-function room1936(x0) {
-  const out = [], items = [];
-  out.push(windowOnBack(x0 + 150, x0 + 180, 40, 70, { arch: true }));
-  // the blackboard: three rules, the one in play boxed in chalk, cycling with the head
-  {
-    const bx0 = x0 + 24, bx1 = x0 + 134, bz0 = 42, bz1 = 92;
-    out.push(ac("frame")(S(box(bx0 - 3, 0, bx1 - bx0 + 6, 2.2, bz0 - 3, bz1 - bz0 + 6, 0.3), { tone: "mid" })));
-    out.push(ac("board")(S(box(bx0, 2.2, bx1 - bx0, 0.5, bz0, bz1 - bz0, 0.2), { tone: "mid", crease: "none" })));
-    const M = yMat([bx0 + 10, 2.8, bz1 - 13]);
-    const rules = ["q1  0 → 1  R  q2", "q2  1 → 0  L  q1", "q2  _ → _     halt"];
-    out.push(texts(M, rules, "hw-chalk", 8, 12.5));
-    out.push(`<g transform="${M}"><path class="hw-chalkline" d="M0 32H88M0 -10H40"/></g>`);
-    const frames = rules.map((_, i) => `<g transform="${M}"><rect class="hw-box" x="-3.5" y="${(i * 12.5 - 8.6).toFixed(1)}" width="92" height="11.4" rx="2"/></g>`);
-    out.push(a.amFlip(frames, { period: 7200 }));
-    out.push(ac("frame")(S(box(bx0, 2.2, bx1 - bx0, 4, bz0 - 4, 1.4, 0.3), { tone: "hi" })));
-    out.push(ac("paper")(S(box(bx0 + 70, 3, 4, 1.4, bz0 - 2.6, 1, 0.3), { tone: "hi" })));
-  }
-  {
-    const bx = x0 + 22, by = 84, bw = 116, bd = 30, bh = 26;
-    items.push([[bx + bw / 2, by + bd / 2, 0], table(bx, by, bw, bd, bh, { drawer: false }) + placed(turing, [bx + bw / 2, by + bd / 2, bh], 0.62)]);
-    items.push([[x0 + 160, 112, 0], person({ x: x0 + 160, y: 112, facing: Math.PI + 0.55, coat: "coatB", hair: "hairA", pose: "point", lift: "l" })]);
-  }
-  items.push([[x0 + 150, 154, 0], ac("desk")(S(k.cylinder(x0 + 150, 154, 6, 0, 16, P, 24, 0.5), { tone: "mid" })) + ac("paper")(S(box(x0 + 146, 150, 8, 6, 16, 0.4, 0.3), { tone: "hi", crease: "none" }))]);
-  out.push(sortItems(items));
   return out.join("");
 }
 
@@ -411,34 +337,6 @@ function teletype(x, y) {
   const win = faceY(py + 0.6, x - 10, x + 10, 38.5, 62);
   out.push(clipped(win, a.amLoop(L(lines.join(""), { tone: "lo", free: true }), [0, 0, 3], P, { period: 1600 })));
   out.push(a.amSlide(iron(S(box(x - 10, y - 5, 4, 3.4, 38, 3, 0.6, 2), { tone: "hi" })), [16, 0, 0], P, { period: 1600 }));
-  return out.join("");
-}
-
-function room1969(x0) {
-  const out = [], items = [];
-  // a printout on the partition, facing this room
-  out.push(flatFace(faceX(x0 + 3.2, 14, 34, 50, 84), "paper"));
-  out.push(L(Array.from({ length: 8 }, (_, i) => k.segment([x0 + 3.3, 16, 80 - i * 3.6], [x0 + 3.3, 31 - (i % 3) * 4, 80 - i * 3.6], P)).join(""), { tone: "faint", free: true }));
-  // a wall clock
-  {
-    const M = yMat([x0 + 150, 0.3, 88]);
-    out.push(`<g transform="${M}"><circle r="7" class="hw-clock"/><path class="hw-hand" d="M0 0V-5"/></g>`);
-    out.push(`<g transform="${M}"><g class="hw-minute"><path class="hw-hand" d="M0 0L3.6 0"/></g></g>`);
-  }
-  items.push([[x0 + 40, 14, 0], placed(pdp, [x0 + 40, 14, 0], 0.62)]);
-  items.push([[x0 + 82, 14, 0], placed(pdp, [x0 + 82, 14, 0], 0.62)]);
-  // a cable from the cabinets to the teletype, on the floor
-  out.push(ac("dark")(L(k.onTop([[x0 + 56, 26], [x0 + 56, 120], [x0 + 112, 120]], 0.3, P), { tone: "hi" })));
-  {
-    const tx = x0 + 118, ty = 6, tw = 54, td = 30, th = 26;
-    let t = table(tx, ty, tw, td, th);
-    t += terminal(tx + 14, ty + 2, th);
-    items.push([[tx + tw / 2, ty + td / 2, 0], t]);
-    items.push([[tx + 27, ty + td + 14, 0], chair(tx + 27, ty + td + 14, -Math.PI / 2) + person({ x: tx + 27, y: ty + td + 13, seated: true, facing: -Math.PI / 2, coat: "coatC", hair: "hairC", pose: "type" })]);
-  }
-  items.push([[x0 + 126, 124, 0], teletype(x0 + 126, 122)]);
-  items.push([[x0 + 76, 138, 0], person({ x: x0 + 76, y: 138, facing: -0.3, coat: "coatA", hair: "hairA", pose: "hold" }) + ac("paper")(`<path d="${poly([[x0 + 84, 134, 34], [x0 + 88, 140, 34], [x0 + 88, 140, 46], [x0 + 84, 134, 46]])}" style="${flat("top", "lo")}"/>`)]);
-  out.push(sortItems(items));
   return out.join("");
 }
 
@@ -530,7 +428,7 @@ function workScreen(tx, ty, th) {
 }
 
 function bubble(x, y, z, kind) {
-  const V = G.viewOf(W0), l = Math.hypot(V[0], V[1]);
+  const V = G.viewOf(P), l = Math.hypot(V[0], V[1]);
   const M = a.planeMatrix([x, y, z], [V[1] / l, -V[0] / l, 0], [0, 0, -1], P);
   const mark = kind === "q" ? `<path class="hw-bm" d="M-2.2 -3.6C-2.2 -6.2 2.4 -6.2 2.4 -3.6C2.4 -1.8 0 -1.6 0 0.4"/><circle class="hw-bd" cx="0" cy="2.6" r=".8"/>`
     : kind === "y" ? `<path class="hw-bm" d="M-3.4 -0.6L-1 2L3.6 -3.4"/>`
@@ -538,19 +436,113 @@ function bubble(x, y, z, kind) {
   return `<g transform="${M}"><path class="hw-bb" d="M-8 -7H8Q10 -7 10 -5V4Q10 6 8 6H-1L-4 9.5L-4.6 6H-8Q-10 6 -10 4V-5Q-10 -7 -8 -7Z"/>${mark}</g>`;
 }
 
-function roomToday(x0) {
+// ---------- the box: one square house, four rooms around a crossing of low walls ----------
+const Q = 170, WH2 = 116, PH = 52, GAP0 = 26, GAP1 = 58, RING = 40;
+function placedRot(fn, pos, f, rot) {
+  const keep = P;
+  P = { origin: k.iso(pos, keep), scale: keep.scale * f, azimuth: AZ + rot, elevation: EL };
+  const s = fn();
+  P = keep;
+  return s;
+}
+
+function room1843b() {
   const out = [], items = [];
-  out.push(board(x0 + 14, x0 + 122, 34, 96));
-  out.push(windowOnBack(x0 + 140, x0 + 192, 52, 92, { cols: 3 }));
-  {
-    const tx = x0 + 134, ty = 4, tw = 62, td = 30, th = 26;
-    items.push([[tx + tw / 2, ty + td / 2, 0], table(tx, ty, tw, td, th) + workScreen(tx + 5, ty, th)]);
+  out.push(windowOnBack(48, 74, 38, 64, { arch: true }));
+  for (let i = 0; i < 3; i++) {
+    const y0 = 34 + i * 20;
+    out.push(flatFace(faceX(0.2, y0, y0 + 15, 54, 74), "paper"));
+    out.push(L([0, 1, 2, 3].map((j) => k.segment([0.3, y0 + 2, 70 - j * 4], [0.3, y0 + 12 - (j % 2) * 3, 70 - j * 4], P)).join(""), { tone: "faint", free: true }));
   }
-  items.push([[x0 + 112, 52, 0], person({ x: x0 + 112, y: 50, facing: -Math.PI / 2 - 0.75, coat: "coatB", hair: "hairC", pose: "point", lift: "r" }) + `<g class="hw-bub">${a.amFloat(bubble(x0 + 112, 50, 72, "q"), P, { rise: 3, period: 3600 })}</g>`]);
-  items.push([[x0 + 64, 112, 0], chair(x0 + 64, 112, -Math.PI / 2 - 0.2) + person({ x: x0 + 64, y: 111, seated: true, facing: -Math.PI / 2 - 0.2, coat: "coatA", hair: "hairA", pose: "hold" }) + `<g class="hw-bub">${a.amFloat(bubble(x0 + 64, 111, 66, "d"), P, { rise: 3, period: 3600, delay: 1200 })}</g>`]);
-  items.push([[x0 + 160, 76, 0], person({ x: x0 + 160, y: 74, facing: -Math.PI / 2 + 0.25, coat: "coatC", hair: "hairB", pose: "hold", lift: "l" }) + `<g class="hw-bub">${a.amFloat(bubble(x0 + 160, 74, 72, "y"), P, { rise: 3, period: 3600, delay: 2400 })}</g>`]);
   {
-    const px = x0 + 186, py = 150;
+    const bx = 10, bw = 30, bd = 12, bh = 80;
+    let sh = ac("desk")(S(box(bx, 0, bw, bd, 0, bh, 0.5, 2, 0.3), { tone: "mid" }));
+    const books = [];
+    for (let r = 0; r < 4; r++) {
+      const z = 5 + r * 18.5;
+      sh += L(faceY(bd + 0.05, bx + 2, bx + bw - 2, z, z + 15.5), { tone: "lo" });
+      for (let i = 0; i < 8; i++) { const xx = bx + 3 + i * 3.1; const hh = 10 + ((i * 7 + r * 3) % 5); books.push(flatFace(faceY(bd + 0.1, xx, xx + 2.5, z, z + hh), ["bookA", "bookB", "bookC"][(i + r) % 3], "mid")); }
+    }
+    items.push([[bx + bw / 2, 6, 0], sh + books.join("")]);
+  }
+  items.push([[133, 18, 0], engine(100, 6)]);
+  items.push([[86, 28, 0], cardFeed(70, 22)]);
+  out.push(ac("rug")(S(box(14, 70, 76, 56, 0, 0.6, 1, 2), { tone: "mid", crease: "none" })));
+  out.push(ac("rug")(L(k.planOutline({ x: 18, y: 74, w: 68, d: 48, r: 1 }, 0.6, P, 2) + k.planOutline({ x: 22, y: 78, w: 60, d: 40, r: 1 }, 0.6, P, 2), { tone: "lo" })));
+  {
+    const tx = 26, ty = 76, tw = 48, td = 24, th = 26;
+    let t = table(tx, ty, tw, td, th);
+    t += ac("paper")(S(box(tx + 12, ty + 5, 18, 13, th, 0.4, 0.3), { tone: "hi", crease: "none" }));
+    const rows = [0, 1, 2, 3, 4].map((i) => k.lineOnTop([tx + 14, ty + 7 + i * 2.2], [tx + 28 - (i % 2) * 4, ty + 7 + i * 2.2], th + 0.6, P)).join("");
+    t += ac("ink")(a.amDraw(rows, { tone: "hi", period: 7000, free: true }));
+    t += ac("glassk")(S(k.cylinder(tx + 36, ty + 7, 2.2, th, 3.6, P, 16), { tone: "mid" }));
+    t += ac("ink")(S(k.cylinder(tx + 36.6, ty + 7, 0.35, th + 3.6, 9, P, 8), { tone: "hi" }));
+    t += ac("brass")(S(k.cylinder(tx + 6, ty + 6, 3.4, th, 2, P, 20), { tone: "mid" }));
+    t += ac("brass")(S(G.sphereOf([tx + 6, ty + 6, th + 5], 3.4, P), { tone: "hi" }));
+    t += ac("flame")(a.amPulse(`<path d="${k.haloOf({ x: tx + 1, y: ty + 1, w: 10, d: 10, r: 5 }, th + 9, 2, P)}" style="fill:var(--anatomy-top);filter:blur(3px)"/>`, { period: 1300, min: 0.5 }));
+    t += ac("glass")(S(k.cylinder(tx + 6, ty + 6, 1.8, th + 8, 8, P, 16), { tone: "hi" }));
+    t += ac("flame")(a.amPulse(S(G.sphereOf([tx + 6, ty + 6, th + 11], 1.2, P), { tone: "hi", lit: true }), { period: 900, min: 0.6 }));
+    items.push([[tx + tw / 2, ty + td / 2, 0], t]);
+    items.push([[tx + 20, ty + td + 10, 0], chair(tx + 20, ty + td + 11, -Math.PI / 2) + person({ x: tx + 20, y: ty + td + 10, seated: true, facing: -Math.PI / 2, coat: "coatA", hair: "hairB", pose: "write" })]);
+  }
+  out.push(sortItems(items));
+  return out.join("");
+}
+
+function room1936b() {
+  const out = [], items = [];
+  out.push(windowOnBack(128, 156, 40, 66, { arch: true }));
+  {
+    const bx0 = 12, bx1 = 114, bz0 = 42, bz1 = 92;
+    out.push(ac("frame")(S(box(bx0 - 3, 0, bx1 - bx0 + 6, 2.2, bz0 - 3, bz1 - bz0 + 6, 0.3), { tone: "mid" })));
+    out.push(ac("board")(S(box(bx0, 2.2, bx1 - bx0, 0.5, bz0, bz1 - bz0, 0.2), { tone: "mid", crease: "none" })));
+    const M = yMat([bx0 + 7, 2.8, bz1 - 13]);
+    const rules = ["q1  0 → 1  R  q2", "q2  1 → 0  L  q1", "q2  _ → _     halt"];
+    out.push(texts(M, rules, "hw-chalk", 8, 12.5));
+    out.push(`<g transform="${M}"><path class="hw-chalkline" d="M0 32H86M0 -10H40"/></g>`);
+    const frames = rules.map((_, i) => `<g transform="${M}"><rect class="hw-box" x="-3.5" y="${(i * 12.5 - 8.6).toFixed(1)}" width="92" height="11.4" rx="2"/></g>`);
+    out.push(a.amFlip(frames, { period: 7200 }));
+    out.push(ac("frame")(S(box(bx0, 2.2, bx1 - bx0, 4, bz0 - 4, 1.4, 0.3), { tone: "hi" })));
+    out.push(ac("paper")(S(box(bx0 + 70, 3, 4, 1.4, bz0 - 2.6, 1, 0.3), { tone: "hi" })));
+  }
+  {
+    const bx = 14, by = 56, bw = 116, bd = 30, bh = 26;
+    items.push([[bx + bw / 2, by + bd / 2, 0], table(bx, by, bw, bd, bh, { drawer: false }) + placed(turing, [bx + bw / 2, by + bd / 2, bh], 0.62)]);
+    items.push([[146, 96, 0], person({ x: 146, y: 96, facing: Math.PI + 0.55, coat: "coatB", hair: "hairA", pose: "point", lift: "l" })]);
+  }
+  items.push([[118, 136, 0], ac("desk")(S(k.cylinder(118, 136, 6, 0, 16, P, 24, 0.5), { tone: "mid" })) + ac("paper")(S(box(114, 132, 8, 6, 16, 0.4, 0.3), { tone: "hi", crease: "none" }))]);
+  out.push(sortItems(items));
+  return out.join("");
+}
+
+function room1969b() {
+  const out = [], items = [];
+  // two minicomputers with their backs to the low wall, facing into the room
+  items.push([[16, 86, 0], placedRot(pdp, [16, 86, 0], 0.55, 90)]);
+  items.push([[16, 124, 0], placedRot(pdp, [16, 124, 0], 0.55, 90)]);
+  out.push(ac("dark")(L(k.onTop([[30, 104], [70, 104], [70, 114], [104, 114]], 0.3, P), { tone: "hi" })));
+  {
+    const tx = 82, ty = 6, tw = 54, td = 30, th = 26;
+    items.push([[tx + tw / 2, ty + td / 2, 0], table(tx, ty, tw, td, th) + terminal(tx + 14, ty + 2, th)]);
+    items.push([[tx + 27, ty + td + 14, 0], chair(tx + 27, ty + td + 14, -Math.PI / 2) + person({ x: tx + 27, y: ty + td + 13, seated: true, facing: -Math.PI / 2, coat: "coatC", hair: "hairC", pose: "type" })]);
+  }
+  items.push([[122, 112, 0], teletype(122, 110)]);
+  items.push([[74, 146, 0], person({ x: 74, y: 146, facing: -0.3, coat: "coatA", hair: "hairA", pose: "hold" }) + ac("paper")(`<path d="${poly([[82, 142, 34], [86, 148, 34], [86, 148, 46], [82, 142, 46]])}" style="${flat("top", "lo")}"/>`)]);
+  out.push(sortItems(items));
+  return out.join("");
+}
+
+function roomTodayb() {
+  const out = [], items = [];
+  // the board of explorations and one decision, on the left wall
+  out.push(placedRot(() => board(-42, 40, 34, 96), [0, 68, 0], 1, 90));
+  // the desk with the screen at work, against the same wall
+  out.push(placedRot(() => table(-28, 2, 56, 30, 26) + workScreen(-26, 2, 26), [0, 140, 0], 1, 90));
+  items.push([[44, 62, 0], person({ x: 44, y: 62, facing: Math.PI + 0.45, coat: "coatB", hair: "hairC", pose: "point", lift: "l" }) + `<g class="hw-bub">${a.amFloat(bubble(44, 62, 72, "q"), P, { rise: 3, period: 3600 })}</g>`]);
+  items.push([[78, 108, 0], chair(78, 108, Math.PI + 0.5) + person({ x: 78, y: 107, seated: true, facing: Math.PI + 0.5, coat: "coatA", hair: "hairA", pose: "hold" }) + `<g class="hw-bub">${a.amFloat(bubble(78, 107, 66, "d"), P, { rise: 3, period: 3600, delay: 1200 })}</g>`]);
+  items.push([[58, 140, 0], person({ x: 58, y: 138, facing: Math.PI - 0.15, coat: "coatC", hair: "hairB", pose: "hold", lift: "l" }) + `<g class="hw-bub">${a.amFloat(bubble(58, 138, 72, "y"), P, { rise: 3, period: 3600, delay: 2400 })}</g>`]);
+  {
+    const px = 150, py = 150;
     let s = ac("pot")(S(k.cylinder(px, py, 7, 0, 12, P, 24, 0.6), { tone: "mid" }));
     s += ac("leaf")(S(G.sphereOf([px, py, 23], 10, P), { tone: "hi" })) + ac("leaf")(S(G.sphereOf([px - 4, py + 4, 31], 6.6, P), { tone: "hi" }));
     items.push([[px, py, 0], s]);
@@ -559,60 +551,67 @@ function roomToday(x0) {
   return out.join("");
 }
 
-// ---------- assemble the house ----------
+// ---------- assemble the box ----------
 const body = [];
-const floorNames = ["fl1843", "fl1936", "fl1969", "flToday"];
-body.push(`<path class="iso-halo" d="${k.haloOf({ x: -10, y: -10, w: LEN + 20, d: DEP + 20, r: 6 }, -14, 6, P)}"/>`);
-body.push(ac("plinth")(S(box(-4, -4, LEN + 4, DEP + 4, -14, 14, 0.8, 2), { tone: "mid", inner: L(k.sideSeam({ x: -4, y: -4, w: LEN + 4, d: DEP + 4, r: 0.8 }, -7, P, 2), { tone: "faint" }) })));
-// era names engraved on the floor's front edge
-const NAMES = ["1843", "1936", "1969", "Today"];
-for (let i = 0; i < NR; i++) body.push(texts(yMat([i * RW + 10, DEP + 0.1, -4.4]), [NAMES[i]], "hw-era", 7.2, 0));
-// each room's floor finish
-for (let i = 0; i < NR; i++) {
-  const x0 = i * RW;
-  body.push(ac(floorNames[i])(S(box(x0 + 0.5, 0, RW - 1, DEP - 0.5, 0, 0.8, 0.2, 2), { tone: "hi", crease: "none" })));
-  const ls = [], z = 0.85;
-  if (i === 0) for (let x = x0 + 12; x < x0 + RW - 1; x += 12) ls.push(k.lineOnTop([x, 0], [x, DEP - 0.5], z, P));
-  if (i === 1) { for (let x = x0 + 25; x < x0 + RW - 1; x += 25) ls.push(k.lineOnTop([x, 0], [x, DEP - 0.5], z, P)); for (let y = 22; y < DEP - 1; y += 22) ls.push(k.lineOnTop([x0 + 0.5, y], [x0 + RW - 0.5, y], z, P)); }
-  if (i === 2) { for (let x = x0 + 20; x < x0 + RW - 1; x += 20) ls.push(k.lineOnTop([x, 0], [x, DEP - 0.5], z, P)); for (let y = 20; y < DEP - 1; y += 20) ls.push(k.lineOnTop([x0 + 0.5, y], [x0 + RW - 0.5, y], z, P)); }
-  if (i === 3) for (let y = 10; y < DEP - 1; y += 10) ls.push(k.lineOnTop([x0 + 0.5, y], [x0 + RW - 0.5, y], z, P));
-  body.push(ac(floorNames[i])(L(ls.join(""), { tone: "faint" })));
+const N2 = 2 * Q, C = Q;
+body.push(`<path class="iso-halo" d="${k.haloOf({ x: -12, y: -12, w: N2 + 24, d: N2 + 24, r: 8 }, -14, 6, P)}"/>`);
+body.push(ac("plinth")(S(box(-4, -4, N2 + 4, N2 + 4, -14, 14, 0.8, 2), { tone: "mid", inner: L(k.sideSeam({ x: -4, y: -4, w: N2 + 4, d: N2 + 4, r: 0.8 }, -7, P, 2), { tone: "faint" }) })));
+// quadrants: [key, ox, oy, floor]
+const QUADS = [["1843", 0, 0, "fl1843"], ["1936", Q, 0, "fl1936"], ["1969", Q, Q, "fl1969"], ["today", 0, Q, "flToday"]];
+for (const [key, ox, oy, fl] of QUADS) {
+  body.push(ac(fl)(S(box(ox + 0.5, oy + 0.5, Q - 1, Q - 1, 0, 0.8, 0.2, 2), { tone: "hi", crease: "none" })));
+  const ls = [], z = 0.85, x0 = ox + 0.5, x1 = ox + Q - 0.5, y0 = oy + 0.5, y1 = oy + Q - 0.5;
+  if (key === "1843") for (let x = ox + 12; x < x1; x += 12) ls.push(k.lineOnTop([x, y0], [x, y1], z, P));
+  if (key === "1936") { for (let x = ox + 24; x < x1; x += 24) ls.push(k.lineOnTop([x, y0], [x, y1], z, P)); for (let y = oy + 24; y < y1; y += 24) ls.push(k.lineOnTop([x0, y], [x1, y], z, P)); }
+  if (key === "1969") { for (let x = ox + 17; x < x1; x += 17) ls.push(k.lineOnTop([x, y0], [x, y1], z, P)); for (let y = oy + 17; y < y1; y += 17) ls.push(k.lineOnTop([x0, y], [x1, y], z, P)); }
+  if (key === "today") for (let y = oy + 10; y < y1; y += 10) ls.push(k.lineOnTop([x0, y], [x1, y], z, P));
+  body.push(ac(fl)(L(ls.join(""), { tone: "faint" })));
 }
-// the back wall and the end wall, each room's stretch of back wall in its own colour
-body.push(ac("wall")(S(box(-4, -4, 4, DEP + 4, 0, WH, 0.3), { tone: "hi" })));
-for (let i = 0; i < NR; i++) body.push(ac(`w${i}`)(S(box(i * RW, -4, RW, 4, 0, WH, 0.3, 2), { tone: "hi" })));
-body.push(L(k.segment([0, 0, 0.8], [0, 0, WH], P), { tone: "lo" }));
-body.push(L(faceY(0.1, 0, LEN, 0.8, 5) + faceX(0.1, 0, DEP - 0.5, 0.8, 5), { tone: "faint" }));
-// the instruction strip: one band along the whole back wall, marks travelling from 1843 to today
+// the ring: one line of instructions laid into the floor, through a doorway in every wall,
+// round from 1843 to 1936 to 1969 to today and back; its marks change with each room
 {
-  const [z0, z1] = STRIP, y = 0.25;
-  body.push(ac("strip")(`<path d="${faceY(y, 0, LEN, z0, z1)}" style="${flat("top", "lo")}"/>`));
-  const step = 10, marks = [];
-  for (let x = -step; x < LEN + step; x += step) {
-    const era = Math.min(NR - 1, Math.max(0, Math.floor(x / RW)));
-    // the mark changes with the era: a pen stroke, a tape cell, a punched hole, a point of light
-    if (era === 0) marks.push(`<path class="hw-sm0" d="${k.segment([x + 2, y + 0.05, z0 + 3], [x + 7, y + 0.05, z0 + 3], P)}"/>`);
-    else if (era === 1) marks.push(`<path class="hw-sm1" d="${k.segment([x + 1, y + 0.05, z0 + 1.4], [x + 1, y + 0.05, z1 - 1.4], P)}"/><circle class="hw-sm1d" cx="${at([x + 5, y, z0 + 3])[0].toFixed(1)}" cy="${at([x + 5, y, z0 + 3])[1].toFixed(1)}" r=".9"/>`);
-    else if (era === 2) marks.push(`<circle class="hw-sm2" cx="${at([x + 3, y, z0 + 3])[0].toFixed(1)}" cy="${at([x + 3, y, z0 + 3])[1].toFixed(1)}" r=".9"/><circle class="hw-sm2" cx="${at([x + 6, y, z0 + 3])[0].toFixed(1)}" cy="${at([x + 6, y, z0 + 3])[1].toFixed(1)}" r=".9"/>`);
-    else marks.push(`<circle class="hw-sm3" cx="${at([x + 5, y, z0 + 3])[0].toFixed(1)}" cy="${at([x + 5, y, z0 + 3])[1].toFixed(1)}" r="1.1"/>`);
+  const r = RING, zr = 0.9, w = 3.2;
+  const outer = [[C - r - w, C - r - w], [C + r + w, C - r - w], [C + r + w, C + r + w], [C - r - w, C + r + w]];
+  const inner = [[C - r + w, C - r + w], [C + r - w, C - r + w], [C + r - w, C + r - w], [C - r + w, C + r - w]];
+  body.push(ac("strip")(`<path d="${k.pathOf(outer.map(([x, y]) => at([x, y, zr])), true)}${k.pathOf(inner.reverse().map(([x, y]) => at([x, y, zr])), true)}" style="${flat("top", "lo")};fill-rule:evenodd"/>`));
+  const marks = [];
+  for (let t = -r + 6; t <= r - 6; t += 8) {
+    marks.push(`<path class="hw-sm0" d="${k.lineOnTop([C - r - 1.6, C + t - 2.4], [C - r - 1.6, C + t + 2.4], zr + 0.1, P)}"/>`);          // left edge in 1843/today — pen strokes
+    marks.push(`<path class="hw-sm1" d="${k.lineOnTop([C + t, C - r - 2.4], [C + t, C - r + 2.4], zr + 0.1, P)}"/>`);                       // tape cells
+    marks.push(`<circle class="hw-sm2" cx="${at([C + r, C + t, zr])[0].toFixed(1)}" cy="${at([C + r, C + t, zr])[1].toFixed(1)}" r=".8"/>`);   // holes
+    marks.push(`<circle class="hw-sm3" cx="${at([C + t, C + r, zr])[0].toFixed(1)}" cy="${at([C + t, C + r, zr])[1].toFixed(1)}" r=".9"/>`);   // light
   }
-  body.push(clipped(faceY(y, 0, LEN, z0, z1), a.amLoop(marks.join(""), [step, 0, 0], P, { period: 1600 })));
-  // brackets holding the strip, one per room
-  for (let i = 0; i < NR; i++) for (const fx of [0.3, 0.7]) body.push(ac("iron")(S(box(i * RW + RW * fx - 1, 0, 2, 2.2, z0 - 2.4, 2.4, 0.3), { tone: "mid" })));
+  body.push(marks.join(""));
+  const loop = [[C - r, C - r], [C + r, C - r], [C + r, C + r], [C - r, C + r]].map(([x, y]) => at([x, y, zr + 0.2]));
+  const path = k.pathOf([...loop, loop[0]]);
+  body.push(`<g class="dw-pks">${Array.from({ length: 8 }, (_, i) => `<circle r="1.6" class="hw-pk"><animateMotion dur="12s" begin="${(-i * 1.5).toFixed(1)}s" repeatCount="indefinite" calcMode="linear" path="${path}"/></circle>`).join("")}</g>`);
 }
-// rooms back to front; partitions sit at the start of each next room, drawn with that room's things
-const rooms = [room1843, room1936, room1969, roomToday];
-for (let i = 0; i < NR; i++) {
-  const x0 = i * RW;
-  let s = rooms[i](x0);
-  if (i > 0) {
-    // the partition: a stub wall from the back wall, a slot for the strip, a cap and a skirting
-    const part = ac("wall")(S(box(x0 - 3, 0, 6, PART, 0, WH, 0.4, 2, 0.4), { tone: "hi", inner: L(faceX(x0 + 3.05, 0.5, PART - 0.5, 0.8, 5), { tone: "faint" }) }));
-    const slot = ac("strip")(`<path d="${faceX(x0 + 3.1, 0.2, 2.2, STRIP[0], STRIP[1])}" style="${flat("top", "lo")}"/>`);
-    s = part + slot + s;
-  }
-  body.push(`<g class="dw-room" data-room="${["1843", "1936", "1969", "today"][i]}">${s}</g>`);
-}
+// the two outer walls, each room's stretch in its own colour, with skirting
+body.push(ac("w3")(S(box(-4, Q, 4, Q, 0, WH2, 0.3, 2), { tone: "hi" })));
+body.push(ac("w0")(S(box(-4, -4, 4, Q + 4, 0, WH2, 0.3, 2), { tone: "hi" })));
+body.push(ac("w0")(S(box(0, -4, Q, 4, 0, WH2, 0.3, 2), { tone: "hi" })));
+body.push(ac("w1")(S(box(Q, -4, Q, 4, 0, WH2, 0.3, 2), { tone: "hi" })));
+body.push(L(k.segment([0, 0, 0.8], [0, 0, WH2], P), { tone: "lo" }));
+body.push(L(faceY(0.1, 0, N2, 0.8, 5) + faceX(0.1, 0, N2, 0.8, 5), { tone: "faint" }));
+// low walls of the crossing, in short pieces, with a doorway where the ring passes
+const wallPiece = (x, y, w, d) => ac("wall")(S(box(x, y, w, d, 0, PH, 0.4, 2, 0.3), { tone: "hi" })) + ac("frame")(S(box(x - 0.6, y - 0.6, w + 1.2, d + 1.2, PH, 2.2, 0.4, 2), { tone: "mid" }));
+const arm = (axis, from, to) => {
+  // axis "x": a wall along x at y=C, from x=from to x=to; axis "y": along y at x=C
+  const lo = Math.min(from, to), hi = Math.max(from, to);
+  return axis === "x" ? wallPiece(lo, C - 2.5, hi - lo, 5) : wallPiece(C - 2.5, lo, 5, hi - lo);
+};
+const roomSvg = (key, fn, ox, oy) => `<g class="dw-room" data-room="${key}">${placed(fn, [ox, oy, 0], 1)}</g>`;
+body.push(roomSvg("1843", room1843b, 0, 0));
+body.push(arm("y", 0, C - GAP1), arm("y", C - GAP0, C - 2.5));   // between 1843 and 1936
+body.push(arm("x", 0, C - GAP1), arm("x", C - GAP0, C - 2.5));   // between 1843 and today
+body.push(ac("wall")(S(box(C - 4, C - 4, 8, 8, 0, PH + 10, 0.6, 2, 0.3), { tone: "hi" })) + ac("frame")(S(box(C - 5, C - 5, 10, 10, PH + 10, 2.4, 0.6, 2), { tone: "mid" })));
+body.push(roomSvg("today", roomTodayb, 0, Q));
+body.push(roomSvg("1936", room1936b, Q, 0));
+body.push(arm("x", C + 2.5, C + GAP0), arm("x", C + GAP1, N2));   // between 1936 and 1969
+body.push(arm("y", C + 2.5, C + GAP0), arm("y", C + GAP1, N2));   // between today and 1969
+body.push(roomSvg("1969", room1969b, Q, Q));
+// era plaques on the floor, by each room's doorway
+const plaque = (x, y, t) => `<g transform="${a.planeMatrix([x, y, 0.95], [1, 0, 0], [0, 1, 0], P)}"><text class="hw-era" x="0" y="0" font-size="9">${t}</text></g>`;
 
 // ---------- cameras ----------
 function boundsOf(pts) { const f = pts.map(at); const xs = f.map((p) => p[0]), ys = f.map((p) => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]; }
@@ -623,10 +622,14 @@ function cam([x0, y0, x1, y1], pad) {
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
   return [+(cx - w / 2).toFixed(1), +(cy - h / 2).toFixed(1), +w.toFixed(1), +h.toFixed(1)];
 }
-const roomBox = (i) => { const x0 = i * RW - 6, x1 = (i + 1) * RW + 6; return [[x0, 0, WH], [x1, 0, WH], [x0, DEP, -14], [x1, DEP, -14], [x0, 0, -14], [x1, DEP, 0]]; };
-const cams = {};
-["1843", "1936", "1969", "today"].forEach((key, i) => { cams[key] = cam(boundsOf(roomBox(i)), 6); });
-cams.all = cam(boundsOf([[-4, -4, WH], [LEN, -4, WH], [-4, DEP, -14], [LEN, DEP, -14]]), 12);
+const qBox = (ox, oy, top) => [[ox, oy, top], [ox + Q, oy, top], [ox, oy + Q, top], [ox + Q, oy + Q, -14], [ox, oy + Q, -14], [ox + Q, oy, -14]];
+const cams = {
+  "1843": cam(boundsOf(qBox(0, 0, WH2)), 4),
+  "1936": cam(boundsOf(qBox(Q, 0, WH2)), 4),
+  "1969": cam(boundsOf(qBox(Q, Q, 80)), 4),
+  today: cam(boundsOf(qBox(0, Q, WH2)), 4),
+  all: cam(boundsOf([[0, 0, WH2], [N2, 0, WH2], [0, N2, WH2], [N2, N2, -14], [0, N2, -14], [N2, 0, -14]]), 10),
+};
 const VB = cams.all;
 
 const accents = {
@@ -643,7 +646,7 @@ const accents = {
 };
 const MONO = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
 const css = `
-#house .hw-era{font:600 7.2px ${MONO};letter-spacing:.18em;fill:#6B6A5F;text-transform:uppercase}
+#house .hw-era{font:600 9px ${MONO};letter-spacing:.18em;fill:#6B6A5F;text-transform:uppercase}
 #house .hw-chalk{font-family:${MONO};fill:#EDEFE6;opacity:.92}
 #house .hw-chalkline{stroke:#EDEFE6;opacity:.45;stroke-width:.5;fill:none}
 #house .hw-box{fill:rgba(242,184,75,.16);stroke:#F2B84B;stroke-width:.7}
@@ -670,6 +673,8 @@ const css = `
 #house .hw-sm0{stroke:#2C3A30;stroke-width:.7;stroke-linecap:round}
 #house .hw-sm1{stroke:#2F6F8F;stroke-width:.5}#house .hw-sm1d{fill:#2F6F8F}
 #house .hw-sm2{fill:#3B3A36}
+#house .hw-pk{fill:#E4FFD6;filter:drop-shadow(0 0 1.6px #6FB24E)}
+@media (prefers-reduced-motion:reduce){#house .dw-pks{display:none}}
 #house .hw-sm3{fill:#5FB24A;filter:drop-shadow(0 0 1.2px #9BEA82)}
 #house .am-step{animation:hw-step var(--am-period) steps(1,end) infinite}
 #house .am-step{animation-name:hw-step}
@@ -685,10 +690,10 @@ const css = `
 `;
 const svg = a.assetSvg({
   width: VB[2], height: VB[3],
-  label: "One house of four rooms along one wall, joined by a strip of instructions that runs through them all: 1843, Ada Lovelace writing Note G while punched cards feed the Analytical Engine; 1936, a tape machine stepping cell by cell while its rule lights up on the blackboard; 1969, minicomputers, a terminal printing a C program and a teletype; today, a team at a board of explorations and one decision, and a screen working on its own.",
+  label: "One square house of four rooms around a crossing of low walls, joined by a line of instructions laid in the floor that runs through a doorway into every room: 1843, Ada Lovelace writing Note G while punched cards feed the Analytical Engine; 1936, a tape machine stepping cell by cell while its rule lights up on the blackboard; 1969, minicomputers, a terminal printing a C program and a teletype; today, a team at a board of explorations and one decision, and a screen working on its own.",
   body: minify(body.join("")), paper: PAPER, accents, weight: 0.6, id: "house", css,
 }).replace(/viewBox="[^"]*"/, `viewBox="${VB.join(" ")}"`).replace(/ width="[^"]*" height="[^"]*"/, "");
-writeFileSync(join(HERE, "house.svg"), svg);
-writeFileSync(join(HERE, "house.cams.json"), JSON.stringify(cams));
-writeFileSync(join(HERE, "house.html"), a.previewHtml({ title: "house", svg, paper: PAPER, width: 1400 }));
-console.log(`wrote house.svg (${(svg.length / 1024).toFixed(0)} KB)`, JSON.stringify(cams));
+writeFileSync(join(HERE, "box.svg"), svg);
+writeFileSync(join(HERE, "box.cams.json"), JSON.stringify(cams));
+writeFileSync(join(HERE, "box.html"), a.previewHtml({ title: "box", svg, paper: PAPER, width: 1400 }));
+console.log(`wrote box.svg (${(svg.length / 1024).toFixed(0)} KB)`, JSON.stringify(cams));
