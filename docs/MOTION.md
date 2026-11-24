@@ -57,7 +57,7 @@ Kept still on purpose: tooltips (instant), keyboard shortcuts, table and list ho
 | Rules arrive (phone) | icon, name, promise, detail, example, .08–.42s apart; the meter fills and counts | Authority, Money, Evidence |
 | Section arrivals (animation-on-scroll) | `animationIn`: rises 30px out of an 8px blur, .9s `--ease`, paused until seen, fill `backwards` so parallax takes over after | The loop, the agents diagram, training, record panel (desktop), docs map, security panel |
 | Scroll scenes | progress follows scroll position, no duration: pinned hero, the work week (chores hand off one by one, then gather; 240svh pin; kept as it was by request), the record rail, the eras | Landing |
-| Reading holds | the eras track is 560svh (600 on phones): each era plays in the first half of its stretch, holds still until 78%, then slides. The Naur quote is held on screen (pinned column on desktop, a sticky quote with a 70svh hold on phones) while it lights word by word, and stays lit a while before it moves on | Four ways, one job; Programming is theory building |
+| Reading hold | the Naur quote is held on screen (pinned column on desktop, a sticky quote with a 70svh hold on phones) while it lights word by word | Programming is theory building |
 | Menu | grows from its button, `--d-pop` | Site nav, View tab |
 | View switch | cross-document view transition; the View tab stays still | All four views |
 
@@ -69,7 +69,7 @@ Kept still on purpose: tooltips (instant), keyboard shortcuts, table and list ho
 - Scroll scenes run only while their section is near the screen; section extents are measured on layout, not every frame.
 - Progress bars move with `transform: scaleX()` set directly on the bar, never `width`, and never through a CSS variable on a large parent (that restyles the whole subtree every frame).
 - Nothing that repaints a large area changes per scroll frame (`border-radius`, `clip-path`, filters). The moss sections flatten their corners once, with a class.
-- Scroll scenes follow the scroll with inertia (`follow()` in landing.js: exponential approach, frame-rate independent), so a trackpad flick or wheel notch glides instead of jumping. The eras rail glides on its own slower clock (τ 420ms) so a whole era never snaps across; scene content τ 160ms; the Naur quote lights at τ 320ms.
+- Scroll scenes follow the scroll with inertia (`follow()` in landing.js: exponential approach, frame-rate independent), so a trackpad flick or wheel notch glides instead of jumping. The Naur quote lights at τ 320ms. The eras (Four ways, one job) keep this morning's direct scroll mapping and 270svh track, by request.
 - Parallax layers carry `will-change: transform`. Phones get a solid sticky nav instead of a blurred one.
 - Measured on a 4× throttled phone profile scrolling the whole landing page: frame time p90 went from 33ms to 16.7ms, with no frames over 50ms.
 

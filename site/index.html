@@ -430,7 +430,7 @@ html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
 /* ===== four eras: scroll-driven rail with parallax scenes ===== */
 .eras{position:relative}
 .eras-track{position:relative}
-.js .eras-track{height:calc(100svh + 560svh)}
+.js .eras-track{height:calc(100svh + 270svh)}
 .eras-stage{padding:clamp(72px,8vw,112px) 0 48px}
 .js .eras-stage{position:sticky;top:64px;height:calc(100svh - 64px);overflow:hidden;padding:clamp(20px,3.2vh,40px) 0 clamp(16px,2.5vh,28px);display:flex;flex-direction:column}
 .eras-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 48px;align-items:end;width:100%}
@@ -520,7 +520,7 @@ html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
 .chip.on svg{animation:wob 1.2s ease-in-out infinite}
 
 @media (max-width:900px){
-  .js .eras-track{height:calc(100svh + 600svh)}
+  .js .eras-track{height:calc(100svh + 300svh)}
   .eras-head{grid-template-columns:1fr;gap:10px}
   .eras-title p{display:none}
   .eras-meter{grid-template-columns:auto 1fr;justify-items:start;align-items:end;gap:16px}
@@ -1849,11 +1849,8 @@ $$(".gear").forEach(g => {
 });
 // tape
 const TAPE = "0110100101110010".split("").concat(["_"]), tape = $("#tape");
-/* The tape runs past both edges of the window (a Turing tape has no ends), with blank cells before and after the
-   input, so the head starts on the first symbol of a tape that already fills the view. */
-const PAD = 14, padCells = n => Array.from({ length: n }, () => '<span class="blank pad" aria-hidden="true">_</span>').join("");
-tape.innerHTML = padCells(PAD) + TAPE.map(c => `<span class="${c === "_" ? "blank" : ""}">${c}</span>`).join("") + padCells(PAD);
-const cells = $$("span:not(.pad)", tape), tstate = $("#tstate"), rrows = $$(".rules-card div");
+tape.innerHTML = TAPE.map(c => `<span class="${c === "_" ? "blank" : ""}">${c}</span>`).join("");
+const cells = $$("span", tape), tstate = $("#tstate"), rrows = $$(".rules-card div");
 // terminal
 const CODE = [["main()\n{\n    printf(", ""], ['"hello, world\\n"', "s"], [");\n}\n\n$ cc hello.c\n$ ./a.out\n", ""], ["hello, world", "o"]];
 const CLEN = CODE.reduce((n, c) => n + c[0].length, 0), cterm = $("#cterm");
@@ -1874,7 +1871,7 @@ const scene = [
   (t, el) => { // 1936: the head walks the tape and flips each symbol
     const k = Math.min(cells.length - 1, Math.floor(clamp(t) * cells.length));
     const w = cells[0].getBoundingClientRect().width - 1;
-    tape.style.transform = `translateX(${-(PAD + k + .5) * w}px)`;
+    tape.style.transform = `translateX(${-(k + .5) * w}px)`;
     cells.forEach((c, i) => { const done = i < k && TAPE[i] !== "_"; c.classList.toggle("done", done); c.textContent = TAPE[i] === "_" ? "_" : done ? (TAPE[i] === "0" ? "1" : "0") : TAPE[i]; });
     const sym = TAPE[k]; rrows.forEach((r, i) => r.classList.toggle("hit", (sym === "0" && i === 0) || (sym === "1" && i === 1) || (sym === "_" && i === 2)));
     tstate.textContent = sym === "_" ? "halt" : "q1";
@@ -1889,31 +1886,29 @@ const scene = [
 let erasOn = false, gearA = $(".gA g"), gearB = $(".gB g"), spin = 0;
 const erasDraw = () => {
   const r = eras.getBoundingClientRect(), stageH = innerHeight - 64;
-  erasGo(clamp(-r.top / Math.max(1, r.height - stageH)));
-};
-const erasGo = follow(p => {
-  const pos = p * (N - 1 + .75);                        // each era plays, holds still to be read, then slides
+  const p = clamp(-r.top / Math.max(1, r.height - stageH));
+  const pos = p * (N - 1 + .6);                         // each era holds for a while, then slides
   const i = Math.min(N - 1, Math.floor(pos)), f = pos - i;
-  const s = i < N - 1 ? smooth(clamp((f - .78) / .22)) : 0;
-  eraEls.forEach((e, k) => { const t = k < i ? 1 : k > i ? 0 : clamp(f / .48); scene[k](ease(t), e); });
-  railGo(i + s);
-  spin = p * 720;
-}, 160);
-/* The rail itself glides on its own, slower clock, so a fast flick never snaps a whole era across the screen. */
-const railGo = follow(off => {
+  const s = i < N - 1 ? smooth(clamp((f - .6) / .4)) : 0;
+  const off = i + s;
   rail.style.transform = `translate3d(${-off * 100}%,0,0)`;
-  const curI = Math.round(off), i = Math.min(N - 1, Math.floor(off)), s = off - i;
+  const curI = Math.round(off);
   eraEls.forEach((e, k) => {
     e.classList.toggle("cur", k === curI);
     const u = k - off;                                    // -1..1 around the current panel
     layers[k].forEach(([l, d]) => { l.style.transform = `translate3d(${u * d * -90}px,${(Math.abs(u)) * d * 24}px,0) rotate(${u * d * -2}deg)`; });
+    const t = k < i ? 1 : k > i ? 0 : clamp(f / .6);
+    scene[k](ease(t), e);
   });
+  // year counter, ticks, distance bar
   const y = Math.round(YEARS[i] + (YEARS[Math.min(N - 1, i + 1)] - YEARS[i]) * s);
-  yrbig.textContent = off > N - 1.001 ? "Today" : y;
+  yrbig.textContent = curI === N - 1 && s === 0 ? "Today" : y;
   yrbig.style.color = HUES[curI];
   ticks.forEach((t, k) => t.classList.toggle("on", k <= curI));
   tickbar.style.transform = edist.style.transform = `scaleX(${off / (N - 1)})`;
-}, 420);
+  spin = p * 720;
+};
+
 if (RM) { eraEls.forEach((e, k) => { e.classList.add("cur"); scene[k](1, e); }); }
 else {
   seen(eras, v => { erasOn = v; }, 0);
