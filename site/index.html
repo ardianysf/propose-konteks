@@ -910,19 +910,9 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 }
 
 
-.cv{position:relative;display:block;width:100%;height:100%;overflow:hidden}
-.cv-moss{background:var(--moss)}
-.cv-matcha{background:var(--split-panel)}
-.cv-mk{position:absolute;left:6%;top:9%;font:640 clamp(20px,7cqw,64px)/.9 var(--display);letter-spacing:-.04em;z-index:1}
-.cv-moss .cv-mk{color:var(--live)}.cv-matcha .cv-mk{color:var(--accent-ink)}
-/* The screen sits whole on its field: framed, never sliced at the side. It only runs off the bottom edge when the
-   cover is shorter than the screen, so its header (what the screen is) always reads. */
-.cv-shot{position:absolute;left:8%;top:24%;width:84%;height:auto;border-radius:12px;border:1px solid rgba(36,48,37,.14);box-shadow:0 24px 48px -20px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.12);transition:transform .8s var(--ease)}
-.cv-thumb .cv-shot{left:9%;top:13%;width:82%;border-radius:6px;box-shadow:0 10px 22px -10px rgba(0,0,0,.45)}
-.cv-wide .cv-shot{left:auto;right:6%;top:14%;width:56%}
-.cv-wide .cv-mk{font-size:clamp(28px,6cqw,88px)}
-.cv-full .cv-mk{font-size:clamp(22px,6cqw,56px)}
-@media (hover:hover) and (pointer:fine){a:hover .cv-shot{transform:translateY(-6px)}}
+.cv{position:relative;display:block;width:100%;height:100%;overflow:hidden;background:var(--split-panel)}
+.cv-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
+@media (hover:hover) and (pointer:fine){a:hover .cv-art{transform:scale(1.03)}}
 
 /* journal on the landing page */
 .jsec{padding:var(--sec) 0}
@@ -1596,12 +1586,12 @@ bob    tty1</pre></div>
     <div class="sec-h"><h2 id="h-journal">Notes from the part where the product becomes real.</h2><p>Launch notes, engineering scars, and the decisions behind software that remembers. From the Konteks journal.</p></div>
     <div class="jgrid">
       <a class="jfeat" href="/journal/day-1-introducing-project-management-mode">
-        <span class="jcover"><span class="jpx" data-px="-.08"><span class="cv cv-moss cv-full" aria-hidden="true"><span class="cv-mk">Day 1</span><img class="cv-shot" src="/journal-assets/estimate.webp" alt="" loading="lazy" decoding="async"></span></span></span>
+        <span class="jcover"><span class="jpx" data-px="-.08"><span class="cv cv-full" aria-hidden="true"><img class="cv-art" src="/journal-assets/hike.webp" alt="" loading="lazy" decoding="async" style="object-position:35% 55%"></span></span></span>
         <span class="jfeat-t"><span class="jmeta"><time datetime="2026-08-17">August 17, 2026</time><span class="jtag">Launch notes</span><span>6 min read</span></span>
         <b class="jtitle">Day 1: introducing Project Management mode, and why it matters</b><span class="jdek">Konteks is live in beta on August 17. Delivery was never the hard part. Deciding what to build, in what order, at what cost, that was. Here is what we shipped for it.</span><span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span></span>
       </a>
       <div class="jside" data-px=".06">
-        <ul class="jlist"><li><a class="jrow" href="/journal/the-road-to-august-17"><span class="jthumb"><span class="cv cv-matcha cv-thumb" aria-hidden="true"><img class="cv-shot" src="/journal-assets/activities.webp" alt="" loading="lazy" decoding="async"></span></span><span class="jrow-t"><span class="jmeta"><time datetime="2026-07-16">July 16, 2026</time><span class="jtag">Launch notes</span></span><b>The road to August 17: software should remember</b><span class="jdek">A launch countdown, and the story of how years of real engineering work turned into a system that gives humans and agents the same durable context.</span></span></a></li></ul>
+        <ul class="jlist"><li><a class="jrow" href="/journal/the-road-to-august-17"><span class="jthumb"><span class="cv cv-thumb" aria-hidden="true"><img class="cv-art" src="/journal-assets/map-sm.webp" alt="" loading="lazy" decoding="async" style="object-position:40% 60%"></span></span><span class="jrow-t"><span class="jmeta"><time datetime="2026-07-16">July 16, 2026</time><span class="jtag">Launch notes</span></span><b>The road to August 17: software should remember</b><span class="jdek">A launch countdown, and the story of how years of real engineering work turned into a system that gives humans and agents the same durable context.</span></span></a></li></ul>
         <a class="btn btn-line jall" href="/journal">All journal entries <svg class="ico"><use href="#i-arrow"/></svg></a>
       </div>
     </div>
