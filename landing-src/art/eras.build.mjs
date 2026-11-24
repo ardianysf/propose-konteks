@@ -440,16 +440,6 @@ function chip() {
   const out = [];
   const SUB = { x: -42, y: -42, w: 84, d: 84, r: 3 };
   out.push(`<path class="iso-halo" d="${k.haloOf(k.insetPlan(SUB, -12), 0, 3, P)}"/>`);
-  // packets: small lights travelling along a path, outward or inward (SMIL, so they run inside <img>)
-  let pk = 0;
-  const packet = (pts3, { inward = false, dur = 2.4, r = 1.5, delay = 0 } = {}) => {
-    const d = k.pathOf(pts3.map(at));
-    pk++;
-    return `<circle class="pk" r="${r}" fill="#E4FFD6" filter="url(#chip-pk)"><animateMotion dur="${dur}s" begin="${(-delay).toFixed(2)}s" repeatCount="indefinite" calcMode="linear" keyPoints="${inward ? "1;0" : "0;1"}" keyTimes="0;1" path="${d}"/></circle>`;
-  };
-  out.push(`<defs><filter id="chip-pk" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="1.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`);
-  const rnd = (i) => ((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1;
-
   // pins: 11 per side, gull-wing (out along the top, down, then a foot)
   const pins = [];
   const N = 11, step = 6.6, start = -((N - 1) * step) / 2;
@@ -469,49 +459,41 @@ function chip() {
   const sorted = byDepth(pins, (p) => p.key);
   const far = sorted.filter((p) => depth(p.key) < depth([0, 0, 3]));
   const near = sorted.filter((p) => depth(p.key) >= depth([0, 0, 3]));
-  { const DIE0 = k.insetPlan(SUB, 1); out.push(a.amPulse(core(`<path d="${k.haloOf(k.insetPlan(DIE0, -6), 4, 6, P)}" style="fill:var(--anatomy-top);filter:blur(10px)"/>`), { period: 3200, min: 0.3 })); }
   far.forEach((p) => out.push(p.svg));
-  // no substrate: the dark package body runs out to the pins, the die window inset in it
-  const DIE = k.insetPlan(SUB, 1);
-  out.push(die(S(k.slabOf(DIE, 3.6, 6.4, P, 4, 1), { tone: "mid", inner: L(k.sideSeam(DIE, 6, P, 4), { tone: "faint" }) })));
-  const zt = 10;
-  out.push(L(k.planOutline(k.insetPlan(DIE, 4), zt, P, 3), { tone: "faint" }));
-  out.push(D([at([DIE.x + 8, DIE.y + DIE.d - 8, zt])], { size: 1.6, tone: "lo" }));
+  // substrate
+  out.push(sub(S(k.slabOf(SUB, 4, 5, P, 3, 0.8), { tone: "hi", inner: L(k.sideSeam(SUB, 5.6, P, 3), { tone: "faint" }) })));
+  out.push(L(k.planOutline(k.insetPlan(SUB, 4), 9, P, 3), { tone: "faint" }));
+  out.push(D([at([SUB.x + 7, SUB.y + SUB.d - 7, 9])], { size: 1.4, tone: "lo" }));
+  // glow round the die
+  const DIE = k.insetPlan(SUB, 17);
+  const glow = `<path d="${k.haloOf(k.insetPlan(DIE, -8), 9, 6, P)}" style="fill:var(--anatomy-top);filter:blur(9px)"/>`;
+  out.push(a.amPulse(core(glow), { period: 3200, min: 0.35 }));
+  // die with a bevel and a thin rim
+  out.push(die(S(k.slabOf(DIE, 9, 4.5, P, 4, 0.9), { tone: "mid" })));
+  const zt = 13.5;
+  out.push(L(k.planOutline(k.insetPlan(DIE, 3), zt, P, 3), { tone: "faint" }));
   // circuit: orthogonal traces from the core out to the die's edges, current flowing
   const traces = [
     [[0, -6], [0, -14], [8, -14], [8, -22]], [[6, 0], [14, 0], [14, 8], [22, 8]], [[0, 6], [0, 12], [-10, 12], [-10, 22]], [[-6, 0], [-16, 0], [-16, -10], [-22, -10]],
     [[-6, -6], [-12, -12], [-12, -20]], [[6, 6], [12, 12], [20, 12]], [[6, -6], [16, -6], [16, -16], [22, -16]], [[-6, 6], [-14, 6], [-14, 16], [-20, 16]],
   ];
-  traces.forEach((pts) => pts.forEach((q) => { q[0] *= 1.55; q[1] *= 1.55; }));
-  // fan-out from the pin roots inward to the edge of the circuit, packets in and out
-  const fan = [], fanPk = [];
-  let fi = 0;
-  for (const [ax, sign] of [["x", 1], ["x", -1], ["y", 1], ["y", -1]]) {
-    for (let i = 0; i < N; i++, fi++) {
-      const t = start + i * step;
-      const a0 = ax === "x" ? [sign * 30, t * 0.7] : [t * 0.7, sign * 30];
-      const a1 = ax === "x" ? [sign * 35, t] : [t, sign * 35];
-      const a2 = ax === "x" ? [sign * 40.5, t] : [t, sign * 40.5];
-      fan.push(k.onTop([a0, a1, a2], zt, P));
-      if (i % 2 === 0) fanPk.push(packet([[...a0, zt], [...a1, zt], [...a2, zt]], { inward: rnd(fi) > 0.5, dur: 1.4 + rnd(fi + 7) * 1.2, delay: rnd(fi + 3) * 3, r: 1.3 }));
-    }
-  }
-  out.push(ink(L(fan.join(""), { tone: "lit", free: true })));
-  out.push(`<g class="pks">${fanPk.join("")}</g>`);
   const tr = traces.map((pts) => k.onTop(pts, zt, P)).join("");
   out.push(ink(L(tr, { tone: "lit", free: true })));
   out.push(ink(L(tr, { tone: "lit", flow: true, free: true })));
   out.push(ink(D(traces.map((pts) => at([...pts[pts.length - 1], zt])), { size: 1.3, tone: "lit" })));
-  out.push(`<g class="pks">${traces.flatMap((pts, i) => [0, 1].map((j) => packet(pts.map((q) => [...q, zt + 0.2]), { inward: (i + j) % 2 === 1, dur: 1.4 + rnd(i * 3 + j) * 1.2, delay: rnd(i * 5 + j + 11) * 2.6, r: 1.5 }))).join("")}</g>`);
+  // four lights near the core: two leaving it, two coming in
+  out.push(`<defs><filter id="chip-pk" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="1.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`);
+  const packet = (pts3, inward, dur, delay) => `<circle r="1.6" fill="#E4FFD6" filter="url(#chip-pk)"><animateMotion dur="${dur}s" begin="${-delay}s" repeatCount="indefinite" calcMode="linear" keyPoints="${inward ? "1;0" : "0;1"}" keyTimes="0;1" path="${k.pathOf(pts3.map(at))}"/></circle>`;
+  out.push(`<g class="pks">${[[0, false, 2.2, 0], [1, true, 2.6, 0.9], [2, false, 2.4, 1.6], [3, true, 2.0, 0.4]].map(([i, inw, dur, dl]) => packet(traces[i].map((q) => [...q, zt + 0.2]), inw, dur, dl)).join("")}</g>`);
   // the core: a small lit square, breathing
-  const C = { x: -9, y: -9, w: 18, d: 18, r: 1.6 };
+  const C = { x: -6, y: -6, w: 12, d: 12, r: 1.2 };
   out.push(core(S(k.slabOf(C, zt, 1, P, 2), { tone: "hi", lit: true })));
   out.push(a.amPulse(core(`<path d="${k.haloOf(k.insetPlan(C, -3), zt, 1, P)}" style="fill:var(--anatomy-top);filter:blur(4px)"/>`), { period: 1600, min: 0.3 }));
   // glints at two corners of the substrate
-  out.push(a.amBlink(ink(D([at([DIE.x + DIE.w - 3, DIE.y + 3, zt]), at([DIE.x + 3, DIE.y + DIE.d - 3, zt])], { size: 1.6, tone: "lit" })), { period: 2800, min: 0.25 }));
+  out.push(a.amBlink(ink(D([at([SUB.x + SUB.w - 2, SUB.y + 2, 9]), at([SUB.x + 2, SUB.y + SUB.d - 2, 9])], { size: 1.6, tone: "lit" })), { period: 2800, min: 0.25 }));
   near.forEach((p) => out.push(p.svg));
   const points = [...k.boxCorners(k.insetPlan(SUB, -12), 0, 16)];
-  return { body: out.join(""), points, accents: { sub: "#3F6A38", pin: "#4A4339", die: "#1E2621", core: "#C9F5B6", ink: { hex: "#9BEA82", mode: "ink" } }, css: "#chip .ac-ink{--anatomy-lit:#A8F08F;--anatomy-dot:#A8F08F}@media (prefers-reduced-motion:reduce){#chip .pks{display:none}}", label: "An isometric semiconductor chip at work: a green substrate on gull-wing pins, a dark die whose glowing circuit traces carry flowing current to a pulsing core." };
+  return { body: out.join(""), points, accents: { sub: "#5F8D4E", pin: "#4A4339", die: "#1E2621", core: "#C9F5B6", ink: { hex: "#9BEA82", mode: "ink" } }, css: "#chip .ac-ink{--anatomy-lit:#A8F08F;--anatomy-dot:#A8F08F}@media (prefers-reduced-motion:reduce){#chip .pks{display:none}}", label: "An isometric semiconductor chip at work: a green substrate on gull-wing pins, a dark die whose glowing circuit traces carry flowing current to a pulsing core." };
 }
 
 const OBJECTS = [["turing", turing, 560, 360], ["pdp", pdp, 420, 520], ["chip", chip, 440, 340]];
