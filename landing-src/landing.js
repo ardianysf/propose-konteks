@@ -216,17 +216,8 @@ const follow = (render, tau) => {
 };
 const naurP = $("#naur p"), theory = $("#theory"), duties = $$("#duties li"), theoryL = $(".theory-l");
 const naurPrev = $("#naur").previousElementSibling;
-/* "Lead the vision." holds still for a moment when it reaches the reading line, then the list scrolls on.
-   The list is moved by transform against the scroll for that stretch, and a matching margin keeps the page length. */
-const dutiesEl = $("#duties"); let dutiesTop = 0, dutiesHold = 0, dutiesOff = 0;
-const holdDuties = () => {
-  if (RM) return;
-  const start = dutiesTop - innerHeight * .3, off = Math.round(Math.max(0, Math.min(dutiesHold, scrollY - start)));
-  if (off !== dutiesOff) { dutiesOff = off; dutiesEl.style.transform = off ? `translate3d(0,${off}px,0)` : ""; }
-};
 let naurGap = 0, theoryHold = 0; const measureTheory = () => {
-  dutiesHold = RM ? 0 : Math.round(innerHeight * .45); dutiesEl.style.marginBottom = dutiesHold + "px";
-  dutiesTop = dutiesEl.getBoundingClientRect().top + scrollY - dutiesOff; naurGap = parseFloat(getComputedStyle($("#naur")).marginTop) || 0; theoryHold = parseFloat(getComputedStyle(theoryL, "::after").height) || 0; };
+  naurGap = parseFloat(getComputedStyle($("#naur")).marginTop) || 0; theoryHold = parseFloat(getComputedStyle(theoryL, "::after").height) || 0; };
 naurP.innerHTML = naurP.textContent.split(/(\s+)/).map(w => /\s+/.test(w) ? w : `<span class="w${/theory|insight/.test(w) ? " key" : ""}">${escT(w)}</span>`).join("");
 const words = $$(".w", naurP);
 const lightNaur = follow(q => words.forEach((w, i) => w.classList.toggle("on", i / words.length < q)), 320);
@@ -238,9 +229,10 @@ const theoryDraw = () => {
   if (!RM && wide) q = clamp((vh * .55 - r.top) / (r.height * .42));
   else if (!RM) { const natural = naurPrev.getBoundingClientRect().bottom + naurGap; q = clamp((vh * .8 - natural) / (vh * .8 - 96 + theoryHold * .55)); }
   lightNaur(q);
-  holdDuties();
-  let best = -1, bd = 1e9;
-  duties.forEach((d, i) => { const b = d.getBoundingClientRect(), c = b.top + b.height / 2, dd = Math.abs(c - vh * .5); if (dd < bd) { bd = dd; best = i; } });
+  /* A duty stays lit until the next one has clearly taken the reading line (no flicker near the middle),
+     so "Lead the vision." keeps the stage a little longer before the list moves on. */
+  let best = 0;
+  duties.forEach((d, i) => { const b = d.getBoundingClientRect(); if (i && b.top + b.height / 2 < vh * .42) best = i; });
   if (!document.documentElement.classList.contains("rvm")) duties.forEach((d, i) => d.classList.toggle("on", RM || i === best));
 };
 

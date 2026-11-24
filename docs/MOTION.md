@@ -58,7 +58,7 @@ Kept still on purpose: tooltips (instant), keyboard shortcuts, table and list ho
 | Section arrivals (animation-on-scroll) | `animationIn`: rises 30px out of an 8px blur, .9s `--ease`, paused until seen, fill `backwards` so parallax takes over after | The loop, the agents diagram, training, record panel (desktop), docs map, security panel |
 | The work week | plays on its own once 35% is on screen: the five chores go to agents one by one over 4.2s and the hours count up; only the hand-off (gathering into one column) waits for the scroll, and the scroll cue appears only then | The same work, done differently |
 | Scroll scenes | progress follows scroll position, no duration: pinned hero, the record rail, the eras | Landing |
-| Reading hold | the Naur quote is held on screen (pinned column on desktop, a sticky quote with a 70svh hold on phones) while it lights word by word | Programming is theory building |
+| Reading hold | the Naur quote is held on screen (pinned column on desktop, a sticky quote with a 70svh hold on phones) while it lights word by word; on desktop the duties sit far apart and a duty stays lit until the next one has clearly passed the reading line (42% of the screen), so nothing is held or moved against the scroll | Programming is theory building |
 | Menu | grows from its button, `--d-pop` | Site nav, View tab |
 | View switch | cross-document view transition; the View tab stays still | All four views |
 

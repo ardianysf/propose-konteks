@@ -542,18 +542,18 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 /* theory */
 .theory-g{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(40px,7vw,112px);align-items:start}
 .theory-l{position:sticky;top:120px}
-.js:not(.rm) .duties2{padding-bottom:38vh;will-change:transform}
 @media (max-width:900px){.js:not(.rm) .theory-l::after{content:"";display:block;height:70svh}.js:not(.rm) .naur{position:sticky;top:96px}}
 .theory-l h2{font-size:clamp(2.1rem,1.25rem + 2.7vw,3.75rem)}
 .theory-p{margin-top:18px;font-size:18px;color:var(--ink-2);max-width:46ch}
 .naur{margin:clamp(40px,5vw,64px) 0 0;padding-top:clamp(28px,3vw,40px);border-top:1px solid var(--line-strong)}
 .naur p{font:600 clamp(30px,1rem + 2.5vw,48px)/1.12 var(--display);letter-spacing:-.035em;text-wrap:pretty}
+@media (min-width:901px){.naur p{font-size:clamp(26px,.55rem + 1.5vw,34px);line-height:1.18;letter-spacing:-.025em}}
 .naur .w{color:color-mix(in srgb,var(--ink) 18%,var(--paper));transition:color .3s}
 .naur .w.on{color:var(--ink)}
 .naur .w.key.on{color:var(--accent)}
 .naur footer{margin-top:20px;font-size:14px;color:var(--ink-3)}
 .duties2{list-style:none;margin:0;padding:0;display:grid;gap:clamp(56px,10vh,120px);padding-block:8vh 12vh}
-.duties2 li{display:grid;grid-template-columns:88px minmax(0,1fr);gap:24px;align-items:center;opacity:.35;transition:opacity .5s var(--ease),transform .5s var(--ease);transform:translateX(12px)}
+.duties2 li{display:grid;grid-template-columns:88px minmax(0,1fr);gap:24px;align-items:center;opacity:.35;transition:opacity .7s var(--ease),transform .7s var(--ease);transform:translateX(12px)}
 .duties2 li.on{opacity:1;transform:none}
 .duties2 h3{font-size:clamp(26px,1.2rem + 1.4vw,40px);font-weight:620}
 .duties2 p{margin-top:8px;font-size:17px;color:var(--ink-2);max-width:34ch}
@@ -575,6 +575,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .dz-x rect{fill:var(--paper);transition:transform .7s var(--ease)}
 .duties2 li.on .dz-x .n3{transform:translate(4px,-3px)}.duties2 li.on .dz-x .n1{transform:translate(-3px,3px)}
 @media (max-width:900px){.theory-g{grid-template-columns:1fr}.theory-l{position:static}.duties2{gap:36px;padding:0}.duties2 li{grid-template-columns:64px minmax(0,1fr);gap:16px;transform:none}.dz{width:64px;height:64px;padding:8px;border-radius:18px}}
+@media (min-width:901px){.duties2{gap:clamp(140px,24vh,260px);padding-block:14vh 30vh}}
 
 /* record: many teams into one timeline */
 .merge{margin-top:clamp(48px,6vw,80px);position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(48px,.35fr) minmax(0,1.15fr);align-items:center}
