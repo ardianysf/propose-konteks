@@ -69,6 +69,7 @@ Kept still on purpose: tooltips (instant), keyboard shortcuts, table and list ho
 - Scroll scenes run only while their section is near the screen; section extents are measured on layout, not every frame.
 - Progress bars move with `transform: scaleX()` set directly on the bar, never `width`, and never through a CSS variable on a large parent (that restyles the whole subtree every frame).
 - Nothing that repaints a large area changes per scroll frame (`border-radius`, `clip-path`, filters). The moss sections flatten their corners once, with a class.
+- Scroll scenes follow the scroll with inertia (`follow()` in landing.js: exponential approach, frame-rate independent), so a trackpad flick or wheel notch glides instead of jumping. The eras rail glides on its own slower clock (τ 420ms) so a whole era never snaps across; scene content τ 160ms; the Naur quote lights at τ 320ms.
 - Parallax layers carry `will-change: transform`. Phones get a solid sticky nav instead of a blurred one.
 - Measured on a 4× throttled phone profile scrolling the whole landing page: frame time p90 went from 33ms to 16.7ms, with no frames over 50ms.
 

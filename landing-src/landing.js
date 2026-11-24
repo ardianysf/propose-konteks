@@ -189,11 +189,25 @@ const weekDraw = () => {
 });
 
 /* ============ theory: the quote writes itself, the duty in view comes forward ============ */
+/* Scroll scenes follow the scroll with a little inertia instead of jumping to it: a trackpad flick or a mouse
+   wheel notch moves the target, and the scene glides there (time constant tau, frame-rate independent). */
+const follow = (render, tau) => {
+  let cur = null, tgt = 0, last = 0, on = false;
+  const step = now => {
+    const dt = last ? Math.min(64, now - last) : 16; last = now;
+    cur += (tgt - cur) * (1 - Math.exp(-dt / tau));
+    if (Math.abs(tgt - cur) < .0003) cur = tgt;
+    render(cur);
+    if (cur !== tgt) requestAnimationFrame(step); else { on = false; last = 0; }
+  };
+  return v => { tgt = v; if (cur === null || RM) { cur = v; render(v); return; } if (!on) { on = true; requestAnimationFrame(step); } };
+};
 const naurP = $("#naur p"), theory = $("#theory"), duties = $$("#duties li"), theoryL = $(".theory-l");
 const naurPrev = $("#naur").previousElementSibling;
 let naurGap = 0, theoryHold = 0; const measureTheory = () => { naurGap = parseFloat(getComputedStyle($("#naur")).marginTop) || 0; theoryHold = parseFloat(getComputedStyle(theoryL, "::after").height) || 0; };
 naurP.innerHTML = naurP.textContent.split(/(\s+)/).map(w => /\s+/.test(w) ? w : `<span class="w${/theory|insight/.test(w) ? " key" : ""}">${escT(w)}</span>`).join("");
 const words = $$(".w", naurP);
+const lightNaur = follow(q => words.forEach((w, i) => w.classList.toggle("on", i / words.length < q)), 320);
 const theoryDraw = () => {
   const r = theory.getBoundingClientRect(), vh = innerHeight;
   /* The quote lights word by word while it is held on screen, finishing with room to read it before it moves on. */
@@ -201,7 +215,7 @@ const theoryDraw = () => {
   let q = 1;
   if (!RM && wide) q = clamp((vh * .55 - r.top) / (r.height * .42));
   else if (!RM) { const natural = naurPrev.getBoundingClientRect().bottom + naurGap; q = clamp((vh * .8 - natural) / (vh * .8 - 96 + theoryHold * .55)); }
-  words.forEach((w, i) => w.classList.toggle("on", i / words.length < q));
+  lightNaur(q);
   let best = -1, bd = 1e9;
   duties.forEach((d, i) => { const b = d.getBoundingClientRect(), c = b.top + b.height / 2, dd = Math.abs(c - vh * .5); if (dd < bd) { bd = dd; best = i; } });
   if (!document.documentElement.classList.contains("rvm")) duties.forEach((d, i) => d.classList.toggle("on", RM || i === best));
@@ -259,28 +273,31 @@ const scene = [
 let erasOn = false, gearA = $(".gA g"), gearB = $(".gB g"), spin = 0;
 const erasDraw = () => {
   const r = eras.getBoundingClientRect(), stageH = innerHeight - 64;
-  const p = clamp(-r.top / Math.max(1, r.height - stageH));
+  erasGo(clamp(-r.top / Math.max(1, r.height - stageH)));
+};
+const erasGo = follow(p => {
   const pos = p * (N - 1 + .75);                        // each era plays, holds still to be read, then slides
   const i = Math.min(N - 1, Math.floor(pos)), f = pos - i;
   const s = i < N - 1 ? smooth(clamp((f - .78) / .22)) : 0;
-  const off = i + s;
+  eraEls.forEach((e, k) => { const t = k < i ? 1 : k > i ? 0 : clamp(f / .48); scene[k](ease(t), e); });
+  railGo(i + s);
+  spin = p * 720;
+}, 160);
+/* The rail itself glides on its own, slower clock, so a fast flick never snaps a whole era across the screen. */
+const railGo = follow(off => {
   rail.style.transform = `translate3d(${-off * 100}%,0,0)`;
-  const curI = Math.round(off);
+  const curI = Math.round(off), i = Math.min(N - 1, Math.floor(off)), s = off - i;
   eraEls.forEach((e, k) => {
     e.classList.toggle("cur", k === curI);
     const u = k - off;                                    // -1..1 around the current panel
     layers[k].forEach(([l, d]) => { l.style.transform = `translate3d(${u * d * -90}px,${(Math.abs(u)) * d * 24}px,0) rotate(${u * d * -2}deg)`; });
-    const t = k < i ? 1 : k > i ? 0 : clamp(f / .48);
-    scene[k](ease(t), e);
   });
-  // year counter, ticks, distance bar
   const y = Math.round(YEARS[i] + (YEARS[Math.min(N - 1, i + 1)] - YEARS[i]) * s);
-  yrbig.textContent = curI === N - 1 && s === 0 ? "Today" : y;
+  yrbig.textContent = off > N - 1.001 ? "Today" : y;
   yrbig.style.color = HUES[curI];
   ticks.forEach((t, k) => t.classList.toggle("on", k <= curI));
   tickbar.style.transform = edist.style.transform = `scaleX(${off / (N - 1)})`;
-  spin = p * 720;
-};
+}, 420);
 if (RM) { eraEls.forEach((e, k) => { e.classList.add("cur"); scene[k](1, e); }); }
 else {
   seen(eras, v => { erasOn = v; }, 0);
