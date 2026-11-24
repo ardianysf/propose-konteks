@@ -547,4 +547,7 @@ const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); dra
 document.fonts && document.fonts.ready.then(relayout);
 addEventListener("load", relayout);
 relayout();
+/* close: strike the old habits once the section is on screen */
+{ const c = $(".close"); if (c) { let done = false; seen(c, v => { if (v && !done) { done = true; c.classList.add("in"); } }, .12); } }
 })();
+

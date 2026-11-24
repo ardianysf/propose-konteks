@@ -1041,6 +1041,20 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .kind h3,.journal .t{font-size:clamp(18px,.9rem + .6vw,24px)}
 .role{font-size:clamp(18px,.95rem + .4vw,22px)}
 @media (max-width:900px){.naur p{font-size:26px}.rlist h3,.rule h3{font-size:clamp(26px,7vw,32px)}}
+
+/* close: the old habit is struck through, the new one takes its place */
+.close-g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"h l" "a l";grid-template-rows:auto 1fr;column-gap:clamp(40px,7vw,112px);row-gap:clamp(32px,4vw,56px);align-items:start;padding-bottom:clamp(56px,7vw,96px)}
+.close-g h2{grid-area:h}.close-g .close-acts{grid-area:a;align-self:start}
+.unlearn{grid-area:l;list-style:none;margin:0;padding:0;align-self:start;border-bottom:1px solid var(--line)}
+.unlearn li{display:grid;gap:6px;padding:clamp(16px,1.6vw,22px) 0;border-top:1px solid var(--line)}
+.unlearn s{position:relative;justify-self:start;text-decoration:none;font-size:15px;color:var(--ink-3)}
+.unlearn s::after{content:"";position:absolute;left:-2px;right:-2px;top:52%;height:1.5px;background:currentColor;transform-origin:left center}
+.unlearn b{font:600 clamp(20px,1rem + .7vw,26px)/1.2 var(--display);letter-spacing:-.02em;color:var(--ink);text-wrap:balance}
+.js:not(.rm) .unlearn s::after{transform:scaleX(0);transition:transform .55s var(--ease) calc(.25s + var(--i) * .22s)}
+.js:not(.rm) .unlearn b{opacity:0;translate:0 8px;transition:opacity .6s var(--ease) calc(.6s + var(--i) * .22s),translate .7s var(--ease) calc(.6s + var(--i) * .22s)}
+.js:not(.rm) .close.in .unlearn s::after{transform:none}
+.js:not(.rm) .close.in .unlearn b{opacity:1;translate:0 0}
+@media (max-width:900px){.close-g{grid-template-columns:minmax(0,1fr);grid-template-areas:"h" "l" "a"}.unlearn{align-self:stretch}}
 </style>
 </head>
 <body>
@@ -1463,8 +1477,14 @@ bob    tty1</pre></div>
 <!--@@JOURNAL@@-->
 
 <section class="close" data-rise aria-labelledby="h-close">
-  <div class="wrap"><h2 id="h-close" data-px=".05">Unlearn the old way. <span>Learn to work with agents.</span></h2></div>
-  <div class="wrap close-bar">
+  <div class="wrap close-g">
+    <h2 id="h-close" data-px=".05">Unlearn the old way. <span>Learn to work with agents.</span></h2>
+    <ol class="unlearn" aria-label="What changes">
+      <li style="--i:0"><s>Write every line yourself</s><b>Write what should exist</b></li>
+      <li style="--i:1"><s>Guess the effort in hours</s><b>Approve a plan with a price ceiling</b></li>
+      <li style="--i:2"><s>Read the diff and hope</s><b>Check the evidence before you merge</b></li>
+      <li style="--i:3"><s>Keep the reasons in your head</s><b>Keep them in one record</b></li>
+    </ol>
     <div class="close-acts">
       <a class="btn btn-go" href="#connect">Connect your agent <svg class="ico"><use href="#i-up"/></svg></a>
       <a class="btn btn-line" href="/login">Open the app <svg class="ico"><use href="#i-arrow"/></svg></a>
