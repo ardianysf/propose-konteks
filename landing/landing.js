@@ -255,7 +255,7 @@ const dio = $("#dio");
 if (dio) {
 const world = $("#dioWorld"), label = $("#dioLabel"), dtabs = $$(".dio-tab"), dcaps = $$(".dio-cap"), dpause = $("#dioPause");
 const KEYS = ["1843", "1936", "1969", "today"];
-const CAMS = { all: [-247.3,  -134.4,  631.3,  473.5], "1843": [-168.8,  -128.4,  406,  304.5], "1936": [13.6,  -68,  406,  304.5], "1969": [-74.6,  67.2,  354.5,  265.9], today: [-282.7,  -31.8,  406,  304.5] };
+const CAMS = { all: [-247.3,  -134.4,  631.3,  473.5], "1843": [-88.6,  -121.4,  300,  225], "1936": [13.6,  -68,  406,  304.5], "1969": [-24.6,  73.3,  300,  225], today: [-270.6,  -9.3,  300,  225] };
 const LABELS = { all: "1843 to now", "1843": "1843 · The Analytical Engine", "1936": "1936 · A tape and its rules", "1969": "1969 · Unix and C", today: "Today · A team and its agents" };
 const inOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 const HOLD = 7000, OVERVIEW = 3200;          // a room is held long enough to read its caption; the whole house briefly

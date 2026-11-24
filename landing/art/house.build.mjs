@@ -182,16 +182,17 @@ function engine(ex, ey) {
       out.push(brass(S(k.cylinder(cx, cy, 6.6, z, 3.6, P, 32, 0.4), { tone: "hi", inner: L(rimTicks(cx, cy, 6.6, z + 0.7, z + 2.9), { tone: "lo" }) })));
     }
     const ci = cols.findIndex((c) => c[0] === cx);
-    out.push(ac("lit")(`<g>${Array.from({ length: 8 }, (_, i) => a.amBlink(D([at([cx + 4.2, cy + 5.2, 12.8 + i * 7])], { size: 1.1, tone: "lit" }), { period: 3200, delay: 3200 - (i * 260 + ci * 120), min: 0.08 })).join("")}</g>`));
+    out.push(ac("flame")(Array.from({ length: 8 }, (_, i) => a.amBlink(`<path d="${k.haloOf({ x: cx - 8.4, y: cy - 8.4, w: 16.8, d: 16.8, r: 8.4 }, 10.6 + i * 7, 4.4, P)}" style="fill:var(--anatomy-top);filter:blur(1.2px);opacity:.55"/>`, { period: 2000, delay: 2000 - ((i * 220 + ci * 90) % 2000), min: 0 })).join("")));
+    out.push(ac("lit")(Array.from({ length: 8 }, (_, i) => a.amBlink(D([at([cx + 4.2, cy + 5.2, 12.8 + i * 7])], { size: 1.6, tone: "lit" }), { period: 2000, delay: 2000 - ((i * 220 + ci * 90) % 2000), min: 0.1 })).join("")));
   }
   for (const [px, py] of nearPosts) out.push(iron(S(box(px, py, 3, 3, 7, 62, 0.4), { tone: "mid" })));
   out.push(brass(S(box(ex, ey, W, Dd, 69, 3.5, 1, 3, 0.4), { tone: "mid" })));
   out.push(L(k.planOutline({ x: ex + 3, y: ey + 3, w: W - 6, d: Dd - 6, r: 0.6 }, 72.5, P, 2), { tone: "faint" }));
   // the crank on the right cheek, turning
   const cr = [ex + W + 0.6, ey + Dd / 2, 34];
-  out.push(iron(S(G.disc(0, 1.6, 9, G.frameAlong([ex + W, ey + Dd / 2, 34], [1, 0, 0]), P), { tone: "hi", crease: "lo" })));
-  const crank = `<circle r="2" style="${flat("shade-0", "mid")}"/><path d="M0 0L8 0" style="stroke:var(--anatomy-hi);stroke-width:2.2;stroke-linecap:round"/><circle cx="8" cy="0" r="1.7" style="${flat("top", "hi")}"/>` + [0, 1, 2, 3, 4, 5].map((i) => { const t = (i / 6) * Math.PI * 2; return `<circle cx="${(Math.cos(t) * 6).toFixed(2)}" cy="${(Math.sin(t) * 6).toFixed(2)}" r=".7" style="fill:var(--anatomy-lo)"/>`; }).join("");
-  out.push(iron(a.amSpin(crank, a.planeMatrix([cr[0] + 1, cr[1], cr[2]], [0, 1, 0], [0, 0, -1], P), { period: 3200 })));
+  out.push(iron(S(G.disc(0, 1.6, 12, G.frameAlong([ex + W, ey + Dd / 2, 34], [1, 0, 0]), P), { tone: "hi", crease: "lo" })));
+  const crank = `<circle r="2" style="${flat("shade-0", "mid")}"/><path d="M0 0L11 0" style="stroke:var(--anatomy-hi);stroke-width:2.6;stroke-linecap:round"/><circle cx="11" cy="0" r="2.4" style="${flat("top", "hi")}"/>` + [0, 1, 2, 3, 4, 5].map((i) => { const t = (i / 6) * Math.PI * 2; return `<circle cx="${(Math.cos(t) * 8.4).toFixed(2)}" cy="${(Math.sin(t) * 8.4).toFixed(2)}" r=".9" style="fill:var(--anatomy-lo)"/>`; }).join("");
+  out.push(iron(a.amSpin(crank, a.planeMatrix([cr[0] + 1, cr[1], cr[2]], [0, 1, 0], [0, 0, -1], P), { period: 2000 })));
   return out.join("");
 }
 
@@ -211,7 +212,7 @@ function cardFeed(x0, y0) {
   const win = poly([[x0, y0, Z + 2.2], [x0 + TW, y0, Z + 2.2], [x0 + TW, y0 + TD, Z + 2.2], [x0, y0 + TD, Z + 2.2]]);
   // clip to the tray, raised a little so the cards' thickness shows
   const winHi = k.pathOf([[x0, y0, Z + 2.2], [x0 + TW, y0, Z + 2.2], [x0 + TW, y0, Z + 4], [x0 + TW, y0 + TD, Z + 4], [x0 + TW, y0 + TD, Z + 2.2], [x0, y0 + TD, Z + 2.2], [x0, y0 + TD, Z + 4], [x0, y0, Z + 4]].map(at), true);
-  out.push(clipped(winHi, a.amLoop(cards.join(""), [PITCH, 0, 0], P, { period: 3200 })));
+  out.push(clipped(winHi, `<g class="am-step" style="--am-period:2s;--am-dx:${(at([PITCH, 0, 0])[0] - at([0, 0, 0])[0]).toFixed(2)}px;--am-dy:${(at([PITCH, 0, 0])[1] - at([0, 0, 0])[1]).toFixed(2)}px">${cards.join("")}</g>`));
   return out.join("");
 }
 
@@ -279,7 +280,7 @@ function pdp() {
   for (const x of [-13.5, 13.5]) {
     out.push(reel(S(G.disc(0, 1.6, RR, G.frameAlong([x, FY, RZ], [0, 1, 0]), P), { tone: "hi", crease: "lo" })));
     const hub = `<circle r="3.4" style="${flat("shade-0", "mid")}"/>` + [0, 1, 2].map((i) => { const t = (i * 2 * Math.PI) / 3; return `<path d="M${(Math.cos(t - 0.42) * 5).toFixed(2)},${(Math.sin(t - 0.42) * 5).toFixed(2)}L${(Math.cos(t - 0.3) * 9.6).toFixed(2)},${(Math.sin(t - 0.3) * 9.6).toFixed(2)}L${(Math.cos(t + 0.3) * 9.6).toFixed(2)},${(Math.sin(t + 0.3) * 9.6).toFixed(2)}L${(Math.cos(t + 0.42) * 5).toFixed(2)},${(Math.sin(t + 0.42) * 5).toFixed(2)}Z" style="${flat("shade-1", "lo")}"/>`; }).join("");
-    out.push(reel(a.amSpin(hub, a.planeMatrix([x, FY + 1.6, RZ], [1, 0, 0], [0, 0, -1], P), { period: 4200, reverse: x > 0 })));
+    out.push(reel(a.amSpin(hub, a.planeMatrix([x, FY + 1.6, RZ], [1, 0, 0], [0, 0, -1], P), { period: 1300, reverse: x > 0 })));
   }
   // the tape between the reels, over a capstan
   out.push(L(k.segment([-13.5, FY + 0.9, RZ - RR], [-4, FY + 0.9, 44], P) + k.segment([-4, FY + 0.9, 44], [4, FY + 0.9, 44], P) + k.segment([4, FY + 0.9, 44], [13.5, FY + 0.9, RZ - RR], P), { tone: "mid" }));
@@ -335,8 +336,8 @@ function teletype(x, y) {
   const lines = [];
   for (let i = -2; i < 9; i++) lines.push(k.segment([x - 8, py + 0.6, 40 + i * 3], [x + 6 - ((i + 9) % 3) * 4, py + 0.6, 40 + i * 3], P));
   const win = faceY(py + 0.6, x - 10, x + 10, 38.5, 62);
-  out.push(clipped(win, a.amLoop(L(lines.join(""), { tone: "lo", free: true }), [0, 0, 3], P, { period: 1600 })));
-  out.push(a.amSlide(iron(S(box(x - 10, y - 5, 4, 3.4, 38, 3, 0.6, 2), { tone: "hi" })), [16, 0, 0], P, { period: 1600 }));
+  out.push(clipped(win, a.amLoop(L(lines.join(""), { tone: "lo", free: true }), [0, 0, 3], P, { period: 900 })));
+  out.push(a.amSlide(iron(S(box(x - 10, y - 5, 4, 3.4, 38, 3, 0.6, 2), { tone: "hi" })), [16, 0, 0], P, { period: 900 }));
   return out.join("");
 }
 
@@ -372,7 +373,8 @@ function board(bx0, bx1, bz0, bz1) {
     s += `<g transform="${m}">${draw}${kind === "x" ? `<path class="hw-ink" d="M0 1H${(NW - 4).toFixed(1)}M0 3.2H${(NW - 6).toFixed(1)}"/><path class="hw-strike" d="M-1 -1L${(NW - 2.6).toFixed(1)} 7M-1 7L${(NW - 2.6).toFixed(1)} -1"/>` : ""}</g>`;
     return s;
   };
-  notes.forEach((n) => out.push(noteSvg(n)));
+  const upTo = (n) => notes.slice(0, n).map(noteSvg).join("");
+  out.push(a.amFlip([upTo(8), upTo(1), upTo(2), upTo(3), upTo(4), upTo(5), upTo(6), upTo(7), upTo(8), upTo(8), upTo(8), upTo(8)], { period: 12000 }));
   // a new idea arrives now and then
   out.push(a.amFlip(["", "", noteSvg([2, 2, "noteC", "flow"]), noteSvg([2, 2, "noteC", "flow"]), noteSvg([2, 2, "noteC", "flow"])], { period: 9000 }));
   // arrows from two ideas to the decision
@@ -395,6 +397,7 @@ function workScreen(tx, ty, th) {
   // the checks turning green one by one, under them a preview being drawn, and a progress bar
   const out = [], alu = ac("alu");
   const W = 52, H = 32, z0 = th + 10, sy = ty + 6;
+  out.push(ac("go")(a.amPulse(`<path d="${k.haloOf({ x: tx - 4, y: sy - 2, w: W + 8, d: 10, r: 6 }, z0 - 2, H + 4, P)}" style="fill:var(--anatomy-lit);filter:blur(8px);opacity:.35"/>`, { period: 2400, min: 0.2 })));
   out.push(alu(S(box(tx + W / 2 - 8, ty + 2, 16, 10, th, 1.2, 1.4, 3, 0.3), { tone: "hi" })));
   out.push(alu(S(box(tx + W / 2 - 2, ty + 3, 4, 2.4, th + 1.2, z0 - th - 0.4, 0.8, 2), { tone: "mid" })));
   out.push(ac("bezel")(S(box(tx, sy, W, 2.4, z0, H, 1, 3, 0.4), { tone: "mid" })));
@@ -520,7 +523,11 @@ function room1969b() {
   // two minicomputers with their backs to the low wall, facing into the room
   items.push([[16, 86, 0], placedRot(pdp, [16, 86, 0], 0.55, 90)]);
   items.push([[16, 124, 0], placedRot(pdp, [16, 124, 0], 0.55, 90)]);
-  out.push(ac("dark")(L(k.onTop([[30, 104], [70, 104], [70, 114], [104, 114]], 0.3, P), { tone: "hi" })));
+  const cable = k.onTop([[30, 104], [70, 104], [70, 114], [104, 114]], 0.3, P);
+  out.push(ac("dark")(L(cable, { tone: "hi" })));
+  out.push(`<g class="dw-pks">${[0, 0.5, 1].map((d) => `<circle r="1.5" class="hw-pk2"><animateMotion dur="1.5s" begin="${-d}s" repeatCount="indefinite" calcMode="linear" path="${cable}"/></circle>`).join("")}</g>`);
+  // the terminal glows on the wall behind it
+  out.push(ac("phos")(a.amPulse(`<path d="${k.haloOf({ x: 92, y: 4, w: 34, d: 14, r: 6 }, 34, 26, P)}" style="fill:var(--anatomy-top);filter:blur(7px);opacity:.5"/>`, { period: 2200, min: 0.3 })));
   {
     const tx = 82, ty = 6, tw = 54, td = 30, th = 26;
     items.push([[tx + tw / 2, ty + td / 2, 0], table(tx, ty, tw, td, th) + terminal(tx + 14, ty + 2, th)]);
@@ -538,6 +545,12 @@ function roomTodayb() {
   out.push(placedRot(() => board(-42, 40, 34, 96), [0, 68, 0], 1, 90));
   // the desk with the screen at work, against the same wall
   out.push(placedRot(() => table(-28, 2, 56, 30, 26) + workScreen(-26, 2, 26), [0, 140, 0], 1, 90));
+  // the decision runs down the wall and along to the screen
+  {
+    const flow = k.pathOf([[5, 43, 60], [5, 43, 29], [5, 120, 29], [12, 128, 40]].map(at));
+    out.push(`<path class="hw-flow" d="${flow}"/>`);
+    out.push(`<g class="dw-pks">${[0, 0.8, 1.6].map((d) => `<circle r="1.7" class="hw-pk" opacity="0"><animateMotion dur="2.4s" begin="${-d}s" repeatCount="indefinite" calcMode="linear" path="${flow}"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="2.4s" begin="${-d}s" repeatCount="indefinite"/></circle>`).join("")}</g>`);
+  }
   items.push([[44, 62, 0], person({ x: 44, y: 62, facing: Math.PI + 0.45, coat: "coatB", hair: "hairC", pose: "point", lift: "l" }) + `<g class="hw-bub">${a.amFloat(bubble(44, 62, 72, "q"), P, { rise: 3, period: 3600 })}</g>`]);
   items.push([[78, 108, 0], chair(78, 108, Math.PI + 0.5) + person({ x: 78, y: 107, seated: true, facing: Math.PI + 0.5, coat: "coatA", hair: "hairA", pose: "hold" }) + `<g class="hw-bub">${a.amFloat(bubble(78, 107, 66, "d"), P, { rise: 3, period: 3600, delay: 1200 })}</g>`]);
   items.push([[58, 140, 0], person({ x: 58, y: 138, facing: Math.PI - 0.15, coat: "coatC", hair: "hairB", pose: "hold", lift: "l" }) + `<g class="hw-bub">${a.amFloat(bubble(58, 138, 72, "y"), P, { rise: 3, period: 3600, delay: 2400 })}</g>`]);
@@ -630,11 +643,12 @@ function cam([x0, y0, x1, y1], pad) {
   return [+(cx - w / 2).toFixed(1), +(cy - h / 2).toFixed(1), +w.toFixed(1), +h.toFixed(1)];
 }
 const qBox = (ox, oy, top) => [[ox, oy, top], [ox + Q, oy, top], [ox, oy + Q, top], [ox + Q, oy + Q, -14], [ox, oy + Q, -14], [ox + Q, oy, -14]];
+const focus = (pts, w) => { const [x0, y0, x1, y1] = boundsOf(pts); const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, h = w / ASPECT; return [+(cx - w / 2).toFixed(1), +(cy - h / 2).toFixed(1), +w.toFixed(1), +h.toFixed(1)]; };
 const cams = {
-  "1843": cam(boundsOf(qBox(0, 0, WH2)), 4),
+  "1843": focus([[10, 0, 96], [166, 0, 96], [26, 124, 0], [166, 40, 0]], 300),
   "1936": cam(boundsOf(qBox(Q, 0, WH2)), 4),
-  "1969": cam(boundsOf(qBox(Q, Q, 80)), 4),
-  today: cam(boundsOf(qBox(0, Q, WH2)), 4),
+  "1969": focus([[Q + 6, Q + 6, 70], [Q + 150, Q + 6, 56], [Q + 60, Q + 160, 0], [Q + 150, Q + 130, 0]], 300),
+  today: focus([[0, Q + 28, 96], [0, Q + 168, 70], [90, Q + 120, 0], [130, Q + 60, 0]], 300),
   all: cam(boundsOf([[0, 0, WH2], [N2, 0, WH2], [0, N2, WH2], [N2, N2, -14], [0, N2, -14], [N2, 0, -14]]), 10),
 };
 const VB = cams.all;
@@ -684,6 +698,8 @@ const css = `
 @media (prefers-reduced-motion:reduce){#house .dw-pks{display:none}}
 #house .dw-room{transition:opacity .8s cubic-bezier(.23,1,.32,1),filter .8s cubic-bezier(.23,1,.32,1)}
 #house[data-cur] .dw-room:not(.on){opacity:.3;filter:grayscale(1)}
+#house .hw-pk2{fill:#FFD58A;filter:drop-shadow(0 0 1.6px #E8743B)}
+#house .hw-flow{fill:none;stroke:#6FB24E;stroke-width:.7;stroke-dasharray:1.4 1.8;opacity:.7}
 #house .hw-sm3{fill:#5FB24A;filter:drop-shadow(0 0 1.2px #9BEA82)}
 #house .am-step{animation:hw-step var(--am-period) steps(1,end) infinite}
 #house .am-step{animation-name:hw-step}
