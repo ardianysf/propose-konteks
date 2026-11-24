@@ -405,7 +405,7 @@ const nav = $("#nav"); const stuck = () => nav.classList.toggle("stuck", scrollY
 (() => {
   const root = document.documentElement;
   if (!("IntersectionObserver" in window) || window.__kxReveal) return; window.__kxReveal = 1;
-  const skip = "figure, .sheet, .rec, .lanes, .rstage, .rule-v, .auth, .scope-fig, .kflow, .week, .eras, [aria-hidden=true], .foot";
+  const skip = "#week-sec, figure, .sheet, .rec, .lanes, .rstage, .rule-v, .auth, .scope-fig, .kflow, .week, .eras, [aria-hidden=true], .foot";
   const heads = [...document.querySelectorAll("main h1, main h2, section h2, .sec-h > p, .theory-p, .sec-lead, .ph > p, .page-h > p, .lede-s")]
     .filter(el => el.id !== "h1" && !el.closest(skip) && !el.closest(".hero"));
   const groups = [...document.querySelectorAll(".roster, .tiles, .offer, .roles, .learn2, .close-acts, .jgrid, .jlist, .bills, .tiers, .dgrid, .smap, .beliefs, .explore, .ctrl")]

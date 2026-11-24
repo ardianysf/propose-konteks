@@ -820,7 +820,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 /*@@JCSS@@*/
 /* ===== round 6: week pinned with a hold, sessions diagram, journal ===== */
 .week-sec{padding-bottom:0}
-.week-track.wpin{height:calc(var(--wh,100svh) + 130svh)}
+.week-track.wpin{height:calc(var(--wh,100svh) + 240svh)}
 .wpin .week-stick{position:sticky;top:var(--wt,64px)}
 @media (min-width:901px){.week-sec .cal-b{grid-template-rows:repeat(16,22px) 12px repeat(3,22px)}.week-sec .hours{grid-template-rows:repeat(4,88px) 12px 66px}.week-sec .grid{background:repeating-linear-gradient(var(--line) 0 1px,transparent 1px 44px)}.week-sec .grid::after{top:calc(16*22px + 5px)}.week-sec .sec-h p{font-size:16.5px}}
 .week-stick > .wrap{padding-bottom:clamp(40px,5vw,72px)}
@@ -846,9 +846,6 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .week-meter i{width:120px;height:2px;background:var(--line);border-radius:2px;overflow:hidden;position:relative}
 .week-meter i b{position:absolute;inset:0;background:var(--accent-strong);transform-origin:left;transform:scaleX(var(--wk,0))}
 .week.done .week-meter{opacity:0}
-/* The scroll cue only appears once the week has played; until then there is nothing to scroll for. */
-.week:not(.ready) .week-meter{opacity:0}
-.week-meter{transition:opacity .4s var(--ease)}
 .week-track:not(.wpin) .week-meter{display:none}
 @media (min-width:901px) and (max-height:860px){.week-sec .cal-b{grid-template-rows:repeat(16,19px) 10px repeat(3,19px)}.week-sec .hours{grid-template-rows:repeat(4,76px) 10px 57px}.week-sec .grid{background:repeating-linear-gradient(var(--line) 0 1px,transparent 1px 38px)}.week-sec .grid::after{top:calc(16*19px + 4px)}.week-sec .sec-h h2{font-size:2.5rem}.week-sec .blk small{display:none}.now-list li{padding:12px 16px}.week-stick > .wrap{padding-bottom:40px}.week{margin-top:28px}}
 
@@ -1202,7 +1199,7 @@ bob    tty1</pre></div>
   <div class="wrap">
     <div class="sec-h">
       <h2 id="h-2026">The same work, done differently.</h2>
-      <p>A normal week fills up with work around the work. Watch each chore go to an agent while the hours come back to the team.</p>
+      <p>A normal week fills up with work around the work. Scroll, and each chore goes to an agent while the hours come back to the team.</p>
     </div>
     <div class="week" id="week">
       <div class="cal" aria-hidden="true">
