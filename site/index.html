@@ -462,7 +462,7 @@ html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
 .s-ada .nlabel{position:absolute;left:22px;top:16px;font:italic 500 13px/1 "Times New Roman",Times,serif;color:#7A4E10}
 .gear{width:46%;aspect-ratio:1;fill:#C08A2E;stroke:#7A4E10;stroke-width:2}
 .gear .hub{fill:#7A4E10}
-.gA{right:-10%;bottom:-16%}.gB{right:24%;bottom:-12%;width:28%;fill:#D6A548}
+.s-ada .engine{right:-6%;bottom:-12%;width:52%;height:auto;filter:drop-shadow(0 18px 24px rgba(80,50,10,.18))}
 .gear g{transform-origin:0 0}
 .s-ada .ada-tab{left:13%;top:22%;width:58%;font:italic 400 clamp(15px,.8rem + .5vw,20px)/1 "Times New Roman",Times,serif;color:#3A2A10}
 .ada-tab .row{display:grid;grid-template-columns:22px 22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(122,78,16,.22);opacity:.18;transform:translateX(-8px);transition:opacity .4s,transform .4s var(--ease)}
@@ -540,7 +540,7 @@ html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
   .nnote p{display:none}
   .chip{font-size:12px;padding:6px 9px}.chip[data-k="1"]{left:37%}.chip[data-k="2"]{left:66%}
 }
-@media (max-width:420px){.s-ada .ada-tab{left:9%;width:70%}.gA{width:56%}.win pre{font-size:11.5px}}
+@media (max-width:420px){.s-ada .ada-tab{left:9%;width:70%}.s-ada .engine{width:64%;right:-10%}.win pre{font-size:11.5px}}
 /* no-JS or reduced motion: a plain stack */
 html:not(.js) .eras-rail,.rm .eras-rail{flex-direction:column;gap:56px}
 html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dist{display:none}
@@ -1300,8 +1300,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
     <article class="era" style="--hue:#9A6212">
      <div class="scene s-ada" aria-hidden="true">
       <div class="L sheetp" data-d=".25"><span class="nlabel">Note G · 1843</span></div>
-      <svg class="L gear gA" data-d="1.2" data-teeth="14" viewBox="-100 -100 200 200"></svg>
-      <svg class="L gear gB" data-d=".9" data-teeth="9" viewBox="-100 -100 200 200"></svg>
+      <img class="L engine" data-d="1.1" src="/art/babbage.svg" alt="" width="560" height="560" loading="lazy" decoding="async">
       <div class="L ada-tab" data-d=".55">
        <div class="row" data-k="0"><i>1</i><b>×</b><span><sup>1</sup>V<sub>2</sub> × <sup>1</sup>V<sub>3</sub></span><em>= 2n</em></div>
        <div class="row" data-k="1"><i>2</i><b>−</b><span><sup>1</sup>V<sub>4</sub> − <sup>1</sup>V<sub>1</sub></span><em>= 2n − 1</em></div>
@@ -1965,7 +1964,7 @@ else {
   // gears keep turning on their own, faster while you scroll
   let gt = 0;
   const gearLoop = now => {
-    if (erasOn) { gt = now / 1000; gearA.style.transform = `rotate(${gt * 14 + spin}deg)`; gearB.style.transform = `rotate(${-(gt * 14 + spin) * 14 / 9 + 10}deg)`; }
+    if (erasOn && gearA) { gt = now / 1000; gearA.style.transform = `rotate(${gt * 14 + spin}deg)`; gearB.style.transform = `rotate(${-(gt * 14 + spin) * 14 / 9 + 10}deg)`; }
     requestAnimationFrame(gearLoop);
   };
   requestAnimationFrame(gearLoop);

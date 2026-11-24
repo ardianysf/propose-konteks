@@ -317,7 +317,7 @@ else {
   // gears keep turning on their own, faster while you scroll
   let gt = 0;
   const gearLoop = now => {
-    if (erasOn) { gt = now / 1000; gearA.style.transform = `rotate(${gt * 14 + spin}deg)`; gearB.style.transform = `rotate(${-(gt * 14 + spin) * 14 / 9 + 10}deg)`; }
+    if (erasOn && gearA) { gt = now / 1000; gearA.style.transform = `rotate(${gt * 14 + spin}deg)`; gearB.style.transform = `rotate(${-(gt * 14 + spin) * 14 / 9 + 10}deg)`; }
     requestAnimationFrame(gearLoop);
   };
   requestAnimationFrame(gearLoop);

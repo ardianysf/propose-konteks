@@ -32,4 +32,5 @@ python3 journal_build.py ../site ../prototype/src
 python3 pages_build.py ../site ../prototype/src
 python3 site_pages.py ../site ../prototype/src
 
+mkdir -p ../site/art && cp art/*.svg ../site/art/
 mkdir -p ../site/journal-assets && cp journal-assets/*.webp ../site/journal-assets/
