@@ -1231,6 +1231,16 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .js:not(.rm) .sh-row.on .sh-was s{background-size:100% 2px}
 .js:not(.rm) .sh-row.on .sh-now{opacity:1;transform:none}
 @media (max-width:760px){.sh-head{display:none}.sh-row{grid-template-columns:1fr;gap:8px}.sh-stage{font-size:14px}}
+/* desktop: the step is the hook, then what it was, then what it is now */
+@media (min-width:761px){
+  .sh-head,.sh-row{grid-template-columns:minmax(0,1fr) minmax(0,.95fr) minmax(0,1.35fr)}
+  .sh-row{align-items:center;padding:clamp(20px,2.4vw,30px) 0}
+  .sh-stage{gap:14px;font:620 clamp(26px,1rem + 1.3vw,36px)/1 var(--display);letter-spacing:-.03em}
+  .sh-stage .ico{width:22px;height:22px;flex:none}
+  .sh-was{font:450 17px/1.35 var(--sans);letter-spacing:0}
+  .sh-now p{font:560 clamp(18px,.85rem + .45vw,21px)/1.3 var(--display)}
+  .sh-now .sh-you{font-size:14.5px}
+}
 
 /* ===== Home: the diorama. Four rooms stand on the line where the note sheet stands on Features; the tour runs below it ===== */
 @media (min-width:961px){.dio-hero{grid-template-columns:minmax(0,1fr) minmax(0,600px)}}
