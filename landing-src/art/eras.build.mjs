@@ -430,7 +430,7 @@ function chatbot() {
   return { body: out.join(""), points, accents: { shell: "#FFFFFF", visor: "#1F2A24", eye: { hex: "#8FE07A", mode: "ink" }, panel: "#CFE6C6", ringc: "#B9D8B0" }, css: "#agent .ac-eye{--anatomy-lit:#9BEA82;--anatomy-dot:#9BEA82;--anatomy-hi:#9BEA82;--anatomy-mid:#9BEA82}#agent .ac-shell{--anatomy-paper:#f7f7f4;--anatomy-face:#fcfcfa;--anatomy-top:#ffffff;--anatomy-shade-0:#e2e4df;--anatomy-shade-1:#eaebe7;--anatomy-shade-2:#f1f2ee;--anatomy-shade-3:#f7f8f5;--anatomy-lit-top:#ffffff;--anatomy-lit-shade:#f2f3ef;--anatomy-hi:#8b918a;--anatomy-mid:#aab0a8;--anatomy-lo:#c6cac3;--anatomy-faint:#d8dbd5}", label: "An isometric friendly chat agent: a glossy white round head with a dark visor and glowing green eyes that blink and smile, a ring and ball antenna, a round body with a soft green chest panel and floating arms, one of them waving as it hovers." };
 }
 
-const OBJECTS = [["turing", turing, 560, 360], ["pdp", pdp, 420, 520], ["agent", chatbot, 360, 420]];
+const OBJECTS = [["turing", turing, 560, 360], ["pdp", pdp, 420, 520]];  // agent.svg is drawn by hand from the front (art/agent.svg)
 for (const [name, fn, W, H] of OBJECTS) {
   P = { origin: [0, 0], scale: 1, azimuth: AZ, elevation: EL };
   const first = fn();
