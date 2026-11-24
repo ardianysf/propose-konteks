@@ -140,74 +140,12 @@ if (RM) renderHero(TOTAL);
 else { seen(hero, v => heroVisible = v, .15); measurePin(); requestAnimationFrame(heroFrame); }
 }
 
-/* ============ the same week: pinned; blocks hand off, gather on Monday morning, then a held summary ============ */
-const week = $("#week");
-if (week) {
-const blks = $$(".blk", week), nows = $$(".now-list li", week), hback = $("#hback");
-const wTrack = $("#weekTrack"), wStick = $("#weekStick");
-let wTop = 64, wH = 0, wGathered = false;
-measureWeek = () => {
-  if (RM) return;
-  wTrack.classList.remove("wpin");
-  wH = wStick.offsetHeight; const air = 40;
-  wTop = Math.min(64 + air, innerHeight - wH);
-  wTrack.classList.toggle("wpin", wH <= innerHeight - 64 - 8);
-  wTrack.style.setProperty("--wh", wH + "px"); wTrack.style.setProperty("--wt", wTop + "px");
-  wGathered = false;
-};
-const weekProgress = () => {
-  if (!wTrack.classList.contains("wpin")) { const r = week.getBoundingClientRect(); return clamp((innerHeight * .8 - r.top) / (r.height * 1.4)); }
-  const r = wTrack.getBoundingClientRect(), span = wTrack.offsetHeight - wH;
-  return clamp((wTop - r.top) / Math.max(1, span));
-};
-const gatherTargets = () => {
-  // each agent chip flies to a stacked slot in Monday's first hours
-  const handoff = $(".handoff", week);
-  week.classList.remove("gather");
-  const hb = handoff.getBoundingClientRect();
-  let y = hb.top + 30, total = 0;
-  blks.forEach(b => { const ag = $(".ag", b); ag.style.setProperty("--gw", (hb.width - 12) + "px"); ag.style.width = (hb.width - 12) + "px"; });
-  blks.forEach((b, i) => {
-    const ag = $(".ag", b); ag.style.removeProperty("--gx"); ag.style.removeProperty("--gy");
-    const a = ag.getBoundingClientRect();
-    ag.style.setProperty("--gx", (hb.left + 6 - a.left) + "px");
-    ag.style.setProperty("--gy", (y - a.top) + "px");
-    y += a.height + 4; total += a.height + 4;
-  });
-  blks.forEach(b => { $(".ag", b).style.width = ""; });
-  const rowPx = parseFloat(getComputedStyle($(".cal-b", week)).gridTemplateRows) || 26;
-  const chipH = $(".ag", blks[0]).getBoundingClientRect().height || 30;
-  week.style.setProperty("--he", Math.min(17, Math.ceil((30 + total + 8) / rowPx) + 1));
-  wGathered = true;
-};
-/* The week plays on its own once you see it: the five chores go to agents one by one and the hours count up.
-   Only the hand-off (the chores gathering into one column) waits for the scroll. */
-let wAuto = RM ? 1 : 0, wAutoOn = false, wLast = 0;
-const weekTick = now => {
-  const dt = wLast ? Math.min(64, now - wLast) : 16; wLast = now;
-  const sp = weekProgress(), fast = sp > .3 ? 5 : 1;          // scrolled ahead: finish the chores quickly
-  wAuto = Math.min(1, wAuto + dt * fast / 4200);
-  weekDraw();
-  if (wAuto < 1 && wAutoOn) requestAnimationFrame(weekTick); else wLast = 0;
-};
-seen(week, v => { wAutoOn = v; if (v && wAuto < 1) requestAnimationFrame(weekTick); }, .35);
-weekDraw = () => {
-  const sp = RM ? 1 : weekProgress();
-  let hrs = 0;
-  blks.forEach((b, i) => { const on = wAuto >= (i + 1) / 5 - .001; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); if (on) hrs += +b.dataset.h; });
-  if (hback._v !== hrs) { hback._v = hrs; hback.textContent = (hrs % 1 ? hrs.toFixed(1) : hrs) + " h"; }
-  const g = wAuto >= 1 && sp > .35;
-  if (g && !week.classList.contains("gather")) { if (!wGathered) gatherTargets(); week.classList.add("gather"); }
-  if (!g && week.classList.contains("gather")) week.classList.remove("gather");
-  week.classList.toggle("done", g && sp > .6);
-  week.classList.toggle("ready", wAuto >= 1);
-  if (wkBar) wkBar.style.transform = `scaleX(${clamp(sp / .6)})`;
-};
-[...blks, ...nows].forEach(el => {
-  const i = el.dataset.i;
-  el.addEventListener("pointerenter", () => { blks[i].classList.add("hl"); nows[i].classList.add("hl"); });
-  el.addEventListener("pointerleave", () => { blks[i].classList.remove("hl"); nows[i].classList.remove("hl"); });
-});
+/* ============ the same work, done differently: row by row, the ritual is struck out and what replaces it comes in ============ */
+const shift = $("#shift");
+if (shift) {
+  const rows = $$(".sh-row", shift);
+  if (RM) rows.forEach(r => r.classList.add("on"));
+  else seen(shift, v => { if (!v || shift._played) return; shift._played = true; rows.forEach((r, i) => setTimeout(() => r.classList.add("on"), 160 + i * 260)); }, .3);
 }
 
 /* ============ theory: the quote writes itself, the duty in view comes forward ============ */

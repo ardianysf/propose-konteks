@@ -1210,6 +1210,28 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 @media (max-width:560px){.npipe{left:5%;right:5%}.npipe .chip{font-size:12px;gap:6px;padding:7px 8px}.npipe .chip svg{display:none}.npipe .pl{margin:0 4px}}
 .rm .npipe .pl b,.rm .st::before,.rm .st::after{animation:none}.rm .st::after{opacity:1;transform:none}.rm .st::before{opacity:0}
 
+/* ===== Home: the same work, done differently. Each step of the engineering loop, the ritual it used to be, and what does it now ===== */
+.shift{margin-top:clamp(36px,5vw,64px);border-top:1px solid var(--line)}
+.sh-head,.sh-row{display:grid;grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr) minmax(0,1.6fr);gap:clamp(16px,3vw,48px);align-items:baseline}
+.sh-head{padding:14px 0 12px;font-size:13px;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.sh-list{list-style:none;margin:0;padding:0}
+.sh-row{padding:clamp(18px,2.2vw,26px) 0;border-bottom:1px solid var(--line)}
+.sh-stage{display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:var(--ink)}
+.sh-stage .ico{width:18px;height:18px;color:var(--accent-strong)}
+.sh-was{margin:0;font:500 clamp(18px,.9rem + .6vw,24px)/1.25 var(--display);letter-spacing:-.015em;color:var(--ink-3)}
+.sh-was s{text-decoration:none;position:relative;display:inline}
+.sh-was s{background:linear-gradient(currentColor,currentColor) no-repeat 0 58%/100% 2px}
+.sh-now p{margin:0;font:560 clamp(18px,.9rem + .6vw,24px)/1.25 var(--display);letter-spacing:-.015em;color:var(--ink)}
+.sh-now .sh-you{margin-top:6px;font:400 15px/1.5 var(--sans);letter-spacing:0;color:var(--ink-2)}
+.sh-close{margin:clamp(24px,3vw,36px) 0 0;max-width:52ch;font-size:17px;color:var(--ink-2)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+/* the one moment: row by row, the ritual is struck out and its replacement comes in */
+.js:not(.rm) .sh-was s{background-size:0% 2px;transition:background-size .5s var(--ease),color .5s var(--ease)}
+.js:not(.rm) .sh-now{opacity:0;transform:translateY(8px);transition:opacity .5s var(--ease) .2s,transform .5s var(--ease) .2s}
+.js:not(.rm) .sh-row.on .sh-was s{background-size:100% 2px}
+.js:not(.rm) .sh-row.on .sh-now{opacity:1;transform:none}
+@media (max-width:760px){.sh-head{display:none}.sh-row{grid-template-columns:1fr;gap:8px}.sh-stage{font-size:14px}}
+
 /* ===== Home: the diorama. Four rooms stand on the line where the note sheet stands on Features; the tour runs below it ===== */
 @media (min-width:961px){.dio-hero{grid-template-columns:minmax(0,1fr) minmax(0,600px)}}
 .dio{grid-area:sheet;align-self:end;position:relative;margin-top:clamp(32px,5vw,72px);min-width:0}
@@ -1716,74 +1738,12 @@ if (RM) renderHero(TOTAL);
 else { seen(hero, v => heroVisible = v, .15); measurePin(); requestAnimationFrame(heroFrame); }
 }
 
-/* ============ the same week: pinned; blocks hand off, gather on Monday morning, then a held summary ============ */
-const week = $("#week");
-if (week) {
-const blks = $$(".blk", week), nows = $$(".now-list li", week), hback = $("#hback");
-const wTrack = $("#weekTrack"), wStick = $("#weekStick");
-let wTop = 64, wH = 0, wGathered = false;
-measureWeek = () => {
-  if (RM) return;
-  wTrack.classList.remove("wpin");
-  wH = wStick.offsetHeight; const air = 40;
-  wTop = Math.min(64 + air, innerHeight - wH);
-  wTrack.classList.toggle("wpin", wH <= innerHeight - 64 - 8);
-  wTrack.style.setProperty("--wh", wH + "px"); wTrack.style.setProperty("--wt", wTop + "px");
-  wGathered = false;
-};
-const weekProgress = () => {
-  if (!wTrack.classList.contains("wpin")) { const r = week.getBoundingClientRect(); return clamp((innerHeight * .8 - r.top) / (r.height * 1.4)); }
-  const r = wTrack.getBoundingClientRect(), span = wTrack.offsetHeight - wH;
-  return clamp((wTop - r.top) / Math.max(1, span));
-};
-const gatherTargets = () => {
-  // each agent chip flies to a stacked slot in Monday's first hours
-  const handoff = $(".handoff", week);
-  week.classList.remove("gather");
-  const hb = handoff.getBoundingClientRect();
-  let y = hb.top + 30, total = 0;
-  blks.forEach(b => { const ag = $(".ag", b); ag.style.setProperty("--gw", (hb.width - 12) + "px"); ag.style.width = (hb.width - 12) + "px"; });
-  blks.forEach((b, i) => {
-    const ag = $(".ag", b); ag.style.removeProperty("--gx"); ag.style.removeProperty("--gy");
-    const a = ag.getBoundingClientRect();
-    ag.style.setProperty("--gx", (hb.left + 6 - a.left) + "px");
-    ag.style.setProperty("--gy", (y - a.top) + "px");
-    y += a.height + 4; total += a.height + 4;
-  });
-  blks.forEach(b => { $(".ag", b).style.width = ""; });
-  const rowPx = parseFloat(getComputedStyle($(".cal-b", week)).gridTemplateRows) || 26;
-  const chipH = $(".ag", blks[0]).getBoundingClientRect().height || 30;
-  week.style.setProperty("--he", Math.min(17, Math.ceil((30 + total + 8) / rowPx) + 1));
-  wGathered = true;
-};
-/* The week plays on its own once you see it: the five chores go to agents one by one and the hours count up.
-   Only the hand-off (the chores gathering into one column) waits for the scroll. */
-let wAuto = RM ? 1 : 0, wAutoOn = false, wLast = 0;
-const weekTick = now => {
-  const dt = wLast ? Math.min(64, now - wLast) : 16; wLast = now;
-  const sp = weekProgress(), fast = sp > .3 ? 5 : 1;          // scrolled ahead: finish the chores quickly
-  wAuto = Math.min(1, wAuto + dt * fast / 4200);
-  weekDraw();
-  if (wAuto < 1 && wAutoOn) requestAnimationFrame(weekTick); else wLast = 0;
-};
-seen(week, v => { wAutoOn = v; if (v && wAuto < 1) requestAnimationFrame(weekTick); }, .35);
-weekDraw = () => {
-  const sp = RM ? 1 : weekProgress();
-  let hrs = 0;
-  blks.forEach((b, i) => { const on = wAuto >= (i + 1) / 5 - .001; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); if (on) hrs += +b.dataset.h; });
-  if (hback._v !== hrs) { hback._v = hrs; hback.textContent = (hrs % 1 ? hrs.toFixed(1) : hrs) + " h"; }
-  const g = wAuto >= 1 && sp > .35;
-  if (g && !week.classList.contains("gather")) { if (!wGathered) gatherTargets(); week.classList.add("gather"); }
-  if (!g && week.classList.contains("gather")) week.classList.remove("gather");
-  week.classList.toggle("done", g && sp > .6);
-  week.classList.toggle("ready", wAuto >= 1);
-  if (wkBar) wkBar.style.transform = `scaleX(${clamp(sp / .6)})`;
-};
-[...blks, ...nows].forEach(el => {
-  const i = el.dataset.i;
-  el.addEventListener("pointerenter", () => { blks[i].classList.add("hl"); nows[i].classList.add("hl"); });
-  el.addEventListener("pointerleave", () => { blks[i].classList.remove("hl"); nows[i].classList.remove("hl"); });
-});
+/* ============ the same work, done differently: row by row, the ritual is struck out and what replaces it comes in ============ */
+const shift = $("#shift");
+if (shift) {
+  const rows = $$(".sh-row", shift);
+  if (RM) rows.forEach(r => r.classList.add("on"));
+  else seen(shift, v => { if (!v || shift._played) return; shift._played = true; rows.forEach((r, i) => setTimeout(() => r.classList.add("on"), 160 + i * 260)); }, .3);
 }
 
 /* ============ theory: the quote writes itself, the duty in view comes forward ============ */

@@ -1090,6 +1090,28 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 @media (max-width:560px){.npipe{left:5%;right:5%}.npipe .chip{font-size:12px;gap:6px;padding:7px 8px}.npipe .chip svg{display:none}.npipe .pl{margin:0 4px}}
 .rm .npipe .pl b,.rm .st::before,.rm .st::after{animation:none}.rm .st::after{opacity:1;transform:none}.rm .st::before{opacity:0}
 
+/* ===== Home: the same work, done differently. Each step of the engineering loop, the ritual it used to be, and what does it now ===== */
+.shift{margin-top:clamp(36px,5vw,64px);border-top:1px solid var(--line)}
+.sh-head,.sh-row{display:grid;grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr) minmax(0,1.6fr);gap:clamp(16px,3vw,48px);align-items:baseline}
+.sh-head{padding:14px 0 12px;font-size:13px;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.sh-list{list-style:none;margin:0;padding:0}
+.sh-row{padding:clamp(18px,2.2vw,26px) 0;border-bottom:1px solid var(--line)}
+.sh-stage{display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:var(--ink)}
+.sh-stage .ico{width:18px;height:18px;color:var(--accent-strong)}
+.sh-was{margin:0;font:500 clamp(18px,.9rem + .6vw,24px)/1.25 var(--display);letter-spacing:-.015em;color:var(--ink-3)}
+.sh-was s{text-decoration:none;position:relative;display:inline}
+.sh-was s{background:linear-gradient(currentColor,currentColor) no-repeat 0 58%/100% 2px}
+.sh-now p{margin:0;font:560 clamp(18px,.9rem + .6vw,24px)/1.25 var(--display);letter-spacing:-.015em;color:var(--ink)}
+.sh-now .sh-you{margin-top:6px;font:400 15px/1.5 var(--sans);letter-spacing:0;color:var(--ink-2)}
+.sh-close{margin:clamp(24px,3vw,36px) 0 0;max-width:52ch;font-size:17px;color:var(--ink-2)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+/* the one moment: row by row, the ritual is struck out and its replacement comes in */
+.js:not(.rm) .sh-was s{background-size:0% 2px;transition:background-size .5s var(--ease),color .5s var(--ease)}
+.js:not(.rm) .sh-now{opacity:0;transform:translateY(8px);transition:opacity .5s var(--ease) .2s,transform .5s var(--ease) .2s}
+.js:not(.rm) .sh-row.on .sh-was s{background-size:100% 2px}
+.js:not(.rm) .sh-row.on .sh-now{opacity:1;transform:none}
+@media (max-width:760px){.sh-head{display:none}.sh-row{grid-template-columns:1fr;gap:8px}.sh-stage{font-size:14px}}
+
 /* ===== Home: the diorama. Four rooms stand on the line where the note sheet stands on Features; the tour runs below it ===== */
 @media (min-width:961px){.dio-hero{grid-template-columns:minmax(0,1fr) minmax(0,600px)}}
 .dio{grid-area:sheet;align-self:end;position:relative;margin-top:clamp(32px,5vw,72px);min-width:0}
@@ -1288,45 +1310,44 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 
 
 <!--@@PAGE:home-->
-<section class="sec week-sec" id="week-sec" aria-labelledby="h-2026">
- <div class="week-track" id="weekTrack"><div class="week-stick" id="weekStick">
+<section class="sec shift-sec" id="week-sec" aria-labelledby="h-2026">
   <div class="wrap">
     <div class="sec-h">
       <h2 id="h-2026">The same work, done differently.</h2>
-      <p>A normal week fills up with work around the work. Watch each chore go to an agent while the hours come back to the team.</p>
+      <p>Software still gets planned, reviewed, tested, watched and reported. What changed is who does each step, and what is left for a person to do in it.</p>
     </div>
-    <div class="week" id="week">
-      <div class="cal" aria-hidden="true">
-        <div class="cal-top"><span>Time handed back this week</span><b class="tab" id="hback">0 h</b><span class="eg">Example week</span></div>
-        <div class="cal-h"><span></span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span></div>
-        <div class="cal-b">
-          <div class="hours"><span>9:00</span><span>11:00</span><span>13:00</span><span>15:00</span><span class="nt">3 a.m.</span></div>
-          <div class="grid"></div>
-          <div class="handoff" aria-hidden="true"><span>Handed off</span></div>
-          <div class="blk" data-i="0" data-h="2" style="--c:2;--r1:2;--r2:6"><b>Estimation meetings</b><small>Mon, 10:00 to 12:00</small><span class="ag"><svg class="ico"><use href="#i-note"/></svg>Plan in minutes</span><span class="free">2 h back</span></div>
-          <div class="blk" data-i="1" data-h="3" style="--c:3;--r1:9;--r2:15"><b>Code review queues</b><small>Tue afternoon</small><span class="ag"><svg class="ico"><use href="#i-eye"/></svg>Agent review</span><span class="free">3 h back</span></div>
-          <div class="blk" data-i="2" data-h="3.5" style="--c:5;--r1:1;--r2:8"><b>Manual test passes</b><small>Thu morning</small><span class="ag"><svg class="ico"><use href="#i-pointer"/></svg>Browser test</span><span class="free">3.5 h back</span></div>
-          <div class="blk night" data-i="3" data-h="1" style="--c:4;--r1:18;--r2:20"><b>On-call at 3 a.m.</b><span class="ag"><svg class="ico"><use href="#i-pulse"/></svg>On watch</span><span class="free">1 h back</span></div>
-          <div class="blk" data-i="4" data-h="2" style="--c:6;--r1:12;--r2:16"><b>Status reports</b><small>Fri, 15:00</small><span class="ag"><svg class="ico"><use href="#i-receipt"/></svg>From the record</span><span class="free">2 h back</span></div>
-        </div>
-      </div>
-      <ol class="now-list" role="table" aria-label="What is gone and what does that job now">
-        <li data-i="0" role="row"><s role="cell">Estimation meetings, 2 h</s><span role="cell">A plan comes back with a price ceiling in minutes.</span></li>
-        <li data-i="1" role="row"><s role="cell">Code review queues, 3 h</s><span role="cell">A second agent reviews.</span></li>
-        <li data-i="2" role="row"><s role="cell">Manual test passes, 3.5 h</s><span role="cell">A browser agent tests.</span></li>
-        <li data-i="3" role="row"><s role="cell">On-call at 3 a.m., 1 h of sleep</s><span role="cell">An agent keeps watch.</span></li>
-        <li data-i="4" role="row"><s role="cell">Status reports, 2 h</s><span role="cell">The record is the report.</span></li>
+    <div class="shift" id="shift">
+      <div class="sh-head" aria-hidden="true"><span></span><span>Until now</span><span>Now</span></div>
+      <ol class="sh-list">
+      <li class="sh-row" data-i="0">
+        <span class="sh-stage"><svg class="ico" aria-hidden="true"><use href="#i-note"/></svg>Plan</span>
+        <p class="sh-was"><span class="vh">Until now: </span><s>Estimation meetings</s></p>
+        <div class="sh-now"><p><span class="vh">Now: </span>A plan comes back with a price ceiling, in minutes.</p><p class="sh-you">You decide whether it is worth it.</p></div>
+      </li>
+      <li class="sh-row" data-i="1">
+        <span class="sh-stage"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg>Review</span>
+        <p class="sh-was"><span class="vh">Until now: </span><s>Code review queues</s></p>
+        <div class="sh-now"><p><span class="vh">Now: </span>A second agent reviews every change.</p><p class="sh-you">You read what it flagged.</p></div>
+      </li>
+      <li class="sh-row" data-i="2">
+        <span class="sh-stage"><svg class="ico" aria-hidden="true"><use href="#i-pointer"/></svg>Test</span>
+        <p class="sh-was"><span class="vh">Until now: </span><s>Manual test passes</s></p>
+        <div class="sh-now"><p><span class="vh">Now: </span>A browser agent clicks through what was built.</p><p class="sh-you">You judge the evidence.</p></div>
+      </li>
+      <li class="sh-row" data-i="3">
+        <span class="sh-stage"><svg class="ico" aria-hidden="true"><use href="#i-pulse"/></svg>Run</span>
+        <p class="sh-was"><span class="vh">Until now: </span><s>On-call at 3 a.m.</s></p>
+        <div class="sh-now"><p><span class="vh">Now: </span>An agent keeps watch and opens the issue.</p><p class="sh-you">You decide what gets fixed.</p></div>
+      </li>
+      <li class="sh-row" data-i="4">
+        <span class="sh-stage"><svg class="ico" aria-hidden="true"><use href="#i-receipt"/></svg>Report</span>
+        <p class="sh-was"><span class="vh">Until now: </span><s>Status reports</s></p>
+        <div class="sh-now"><p><span class="vh">Now: </span>The record is the report.</p><p class="sh-you">You read it when you need it.</p></div>
+      </li>
       </ol>
-      <div class="week-sum" aria-live="polite">
-        <p class="ws-k">Five chores, handed to agents on Monday morning.</p>
-        <p class="ws-n"><b class="tab">11.5 h</b> back to the team this week</p>
-        <p class="ws-d">Time for what agents cannot do: the vision, the constraints, the yes, and judging the evidence.</p>
-        <p class="ws-f"><b>How we counted.</b> 11.5 h is the meeting, review, testing, on-call and reporting time in this sample week. How long an agent takes depends on the work: each run is quoted before it starts, and its receipt records what it took.</p>
-      </div>
-      <div class="week-meter" aria-hidden="true"><i><b></b></i><span>Keep scrolling</span></div>
+      <p class="sh-close">The rituals around the work moved to agents. What stays with people is the part only they can do.</p>
     </div>
   </div>
- </div></div>
 </section>
 
 <section class="sec theory" id="theory" aria-labelledby="h-people">
