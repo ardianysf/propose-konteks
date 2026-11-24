@@ -1225,17 +1225,28 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .sh-now .sh-you{margin-top:6px;font:400 15px/1.5 var(--sans);letter-spacing:0;color:var(--ink-2)}
 .sh-close{margin:clamp(24px,3vw,36px) 0 0;max-width:52ch;font-size:17px;color:var(--ink-2)}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-/* the one moment, in reading order for each row: the step is already there; the old ritual is struck out
-   (the line draws left to right), then greys; only then is what does the step now revealed from the left,
-   and last, the person's part. Rows that arrive together play one after another (--d set by the script). */
-.js:not(.rm) .sh-was{color:var(--ink);transition:color .4s var(--ease) calc(var(--d,0s) + .4s)}
-.js:not(.rm) .sh-was s{background-size:0% 2px;transition:background-size .45s var(--ease-in-out) var(--d,0s)}
-.js:not(.rm) .sh-now p:first-child{opacity:0;clip-path:inset(0 100% 0 0);transition:clip-path .6s var(--ease) calc(var(--d,0s) + .65s),opacity .2s var(--ease) calc(var(--d,0s) + .65s)}
-.js:not(.rm) .sh-now .sh-you{opacity:0;transform:translateY(6px);transition:opacity .4s var(--ease) calc(var(--d,0s) + 1.05s),transform .4s var(--ease) calc(var(--d,0s) + 1.05s)}
-.js:not(.rm) .sh-row.on .sh-was{color:var(--ink-3)}
-.js:not(.rm) .sh-row.on .sh-was s{background-size:100% 2px}
-.js:not(.rm) .sh-row.on .sh-now p:first-child{opacity:1;clip-path:inset(0 0 0 0)}
-.js:not(.rm) .sh-row.on .sh-now .sh-you{opacity:1;transform:none}
+/* the story, told one step at a time: the step appears; then the ritual it used to be; the ritual is struck
+   out and greys; what does the step now is written in from the left; the person's part follows; then the next
+   step. A rail joins the steps as the story moves down the loop. Phases are classes the script adds in turn. */
+.sh-list{position:relative}
+.sh-rail{display:none}
+@media (min-width:761px){
+  .sh-rail{display:block;position:absolute;left:21px;width:2px;border-radius:2px;background:var(--accent-strong);opacity:.35;transform-origin:top;transform:scaleY(var(--r,1));transition:transform .5s var(--ease-in-out)}
+  .sh-stage .ico{position:relative;z-index:1}
+}
+.js:not(.rm) .sh-stage{opacity:0;transform:translateY(10px);transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.js:not(.rm) .sh-was{opacity:0;transform:translateY(8px);color:var(--ink);transition:opacity .35s var(--ease),transform .35s var(--ease),color .35s var(--ease)}
+.js:not(.rm) .sh-was s{background-size:0% 2px;transition:background-size .4s var(--ease-in-out)}
+.js:not(.rm) .sh-now p:first-child{opacity:0;clip-path:inset(0 100% 0 0);transition:clip-path .55s var(--ease),opacity .15s linear}
+.js:not(.rm) .sh-now .sh-you{opacity:0;transform:translateY(6px);transition:opacity .35s var(--ease),transform .35s var(--ease)}
+.js:not(.rm) .sh-row.p1 .sh-stage{opacity:1;transform:none}
+.js:not(.rm) .sh-row.p2 .sh-was{opacity:1;transform:none}
+.js:not(.rm) .sh-row.p3 .sh-was s{background-size:100% 2px}
+.js:not(.rm) .sh-row.p3 .sh-was{color:var(--ink-3)}
+.js:not(.rm) .sh-row.p4 .sh-now p:first-child{opacity:1;clip-path:inset(0 0 0 0)}
+.js:not(.rm) .sh-row.p5 .sh-now .sh-you{opacity:1;transform:none}
+.js:not(.rm) .sh-close{opacity:0;transform:translateY(8px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.js:not(.rm) .shift.done .sh-close{opacity:1;transform:none}
 @media (max-width:760px){.sh-head{display:none}.sh-row{grid-template-columns:1fr;gap:8px}.sh-stage{font-size:14px}}
 /* desktop: the step is the hook, then what it was, then what it is now; the ledger keeps its own width */
 @media (min-width:761px){
@@ -1760,18 +1771,30 @@ else { seen(hero, v => heroVisible = v, .15); measurePin(); requestAnimationFram
 /* ============ the same work, done differently: row by row, the ritual is struck out and what replaces it comes in ============ */
 const shift = $("#shift");
 if (shift) {
-  const rows = $$(".sh-row", shift);
-  if (RM || !("IntersectionObserver" in window)) rows.forEach(r => r.classList.add("on"));
+  const rows = $$(".sh-row", shift), rail = $(".sh-rail", shift), list = $(".sh-list", shift);
+  const PH = ["p1", "p2", "p3", "p4", "p5"];
+  // per step: the step, the old ritual (+.3s), struck out (+.75s), the new practice (+1.15s), the person's part (+1.5s); next step at +1.9s
+  const AT = [0, 300, 750, 1150, 1500], NEXT = 1900;
+  // the rail runs from the first step's icon to the current one
+  const icoY = r => { const i = $(".sh-stage .ico", r), l = list.getBoundingClientRect(), b = i.getBoundingClientRect(); return b.top - l.top + b.height / 2; };
+  const placeRail = upto => {
+    if (!rail || !rail.offsetParent) return;
+    const y0 = icoY(rows[0]), y1 = icoY(rows[rows.length - 1]);
+    rail.style.top = y0 + "px"; rail.style.height = (y1 - y0) + "px";
+    rail.style.setProperty("--r", upto < 0 ? 0 : ((icoY(rows[upto]) - y0) / Math.max(1, y1 - y0)).toFixed(3));
+  };
+  let shown = -1;
+  const finish = () => { rows.forEach(r => r.classList.add(...PH)); shift.classList.add("done"); shown = rows.length - 1; placeRail(shown); };
+  addEventListener("resize", () => placeRail(shown));
+  if (RM || !("IntersectionObserver" in window)) finish();
   else {
-    // a row plays when it reaches the reading line, once; rows that arrive in the same moment play one after another
-    let next = 0;
-    const io = new IntersectionObserver(es => es.filter(e => e.isIntersecting).forEach(e => {
-      const now = performance.now(), wait = Math.max(0, next - now);
-      e.target.style.setProperty("--d", (wait / 1000).toFixed(2) + "s");
-      e.target.classList.add("on"); io.unobserve(e.target);
-      next = now + wait + 450;
-    }), { rootMargin: "0px 0px -38% 0px", threshold: 0 });
-    rows.forEach(r => io.observe(r));
+    placeRail(-1);
+    const play = () => rows.forEach((r, i) => {
+      PH.forEach((c, k) => setTimeout(() => { r.classList.add(c); if (k === 0) { shown = i; placeRail(i); } }, i * NEXT + AT[k]));
+      if (i === rows.length - 1) setTimeout(() => shift.classList.add("done"), i * NEXT + AT[4] + 300);
+    });
+    const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); play(); } }, { rootMargin: "0px 0px -35% 0px", threshold: 0 });
+    io.observe(list);
   }
 }
 

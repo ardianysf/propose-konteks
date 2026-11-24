@@ -143,18 +143,30 @@ else { seen(hero, v => heroVisible = v, .15); measurePin(); requestAnimationFram
 /* ============ the same work, done differently: row by row, the ritual is struck out and what replaces it comes in ============ */
 const shift = $("#shift");
 if (shift) {
-  const rows = $$(".sh-row", shift);
-  if (RM || !("IntersectionObserver" in window)) rows.forEach(r => r.classList.add("on"));
+  const rows = $$(".sh-row", shift), rail = $(".sh-rail", shift), list = $(".sh-list", shift);
+  const PH = ["p1", "p2", "p3", "p4", "p5"];
+  // per step: the step, the old ritual (+.3s), struck out (+.75s), the new practice (+1.15s), the person's part (+1.5s); next step at +1.9s
+  const AT = [0, 300, 750, 1150, 1500], NEXT = 1900;
+  // the rail runs from the first step's icon to the current one
+  const icoY = r => { const i = $(".sh-stage .ico", r), l = list.getBoundingClientRect(), b = i.getBoundingClientRect(); return b.top - l.top + b.height / 2; };
+  const placeRail = upto => {
+    if (!rail || !rail.offsetParent) return;
+    const y0 = icoY(rows[0]), y1 = icoY(rows[rows.length - 1]);
+    rail.style.top = y0 + "px"; rail.style.height = (y1 - y0) + "px";
+    rail.style.setProperty("--r", upto < 0 ? 0 : ((icoY(rows[upto]) - y0) / Math.max(1, y1 - y0)).toFixed(3));
+  };
+  let shown = -1;
+  const finish = () => { rows.forEach(r => r.classList.add(...PH)); shift.classList.add("done"); shown = rows.length - 1; placeRail(shown); };
+  addEventListener("resize", () => placeRail(shown));
+  if (RM || !("IntersectionObserver" in window)) finish();
   else {
-    // a row plays when it reaches the reading line, once; rows that arrive in the same moment play one after another
-    let next = 0;
-    const io = new IntersectionObserver(es => es.filter(e => e.isIntersecting).forEach(e => {
-      const now = performance.now(), wait = Math.max(0, next - now);
-      e.target.style.setProperty("--d", (wait / 1000).toFixed(2) + "s");
-      e.target.classList.add("on"); io.unobserve(e.target);
-      next = now + wait + 450;
-    }), { rootMargin: "0px 0px -38% 0px", threshold: 0 });
-    rows.forEach(r => io.observe(r));
+    placeRail(-1);
+    const play = () => rows.forEach((r, i) => {
+      PH.forEach((c, k) => setTimeout(() => { r.classList.add(c); if (k === 0) { shown = i; placeRail(i); } }, i * NEXT + AT[k]));
+      if (i === rows.length - 1) setTimeout(() => shift.classList.add("done"), i * NEXT + AT[4] + 300);
+    });
+    const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); play(); } }, { rootMargin: "0px 0px -35% 0px", threshold: 0 });
+    io.observe(list);
   }
 }
 

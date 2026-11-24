@@ -1105,17 +1105,28 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .sh-now .sh-you{margin-top:6px;font:400 15px/1.5 var(--sans);letter-spacing:0;color:var(--ink-2)}
 .sh-close{margin:clamp(24px,3vw,36px) 0 0;max-width:52ch;font-size:17px;color:var(--ink-2)}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-/* the one moment, in reading order for each row: the step is already there; the old ritual is struck out
-   (the line draws left to right), then greys; only then is what does the step now revealed from the left,
-   and last, the person's part. Rows that arrive together play one after another (--d set by the script). */
-.js:not(.rm) .sh-was{color:var(--ink);transition:color .4s var(--ease) calc(var(--d,0s) + .4s)}
-.js:not(.rm) .sh-was s{background-size:0% 2px;transition:background-size .45s var(--ease-in-out) var(--d,0s)}
-.js:not(.rm) .sh-now p:first-child{opacity:0;clip-path:inset(0 100% 0 0);transition:clip-path .6s var(--ease) calc(var(--d,0s) + .65s),opacity .2s var(--ease) calc(var(--d,0s) + .65s)}
-.js:not(.rm) .sh-now .sh-you{opacity:0;transform:translateY(6px);transition:opacity .4s var(--ease) calc(var(--d,0s) + 1.05s),transform .4s var(--ease) calc(var(--d,0s) + 1.05s)}
-.js:not(.rm) .sh-row.on .sh-was{color:var(--ink-3)}
-.js:not(.rm) .sh-row.on .sh-was s{background-size:100% 2px}
-.js:not(.rm) .sh-row.on .sh-now p:first-child{opacity:1;clip-path:inset(0 0 0 0)}
-.js:not(.rm) .sh-row.on .sh-now .sh-you{opacity:1;transform:none}
+/* the story, told one step at a time: the step appears; then the ritual it used to be; the ritual is struck
+   out and greys; what does the step now is written in from the left; the person's part follows; then the next
+   step. A rail joins the steps as the story moves down the loop. Phases are classes the script adds in turn. */
+.sh-list{position:relative}
+.sh-rail{display:none}
+@media (min-width:761px){
+  .sh-rail{display:block;position:absolute;left:21px;width:2px;border-radius:2px;background:var(--accent-strong);opacity:.35;transform-origin:top;transform:scaleY(var(--r,1));transition:transform .5s var(--ease-in-out)}
+  .sh-stage .ico{position:relative;z-index:1}
+}
+.js:not(.rm) .sh-stage{opacity:0;transform:translateY(10px);transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.js:not(.rm) .sh-was{opacity:0;transform:translateY(8px);color:var(--ink);transition:opacity .35s var(--ease),transform .35s var(--ease),color .35s var(--ease)}
+.js:not(.rm) .sh-was s{background-size:0% 2px;transition:background-size .4s var(--ease-in-out)}
+.js:not(.rm) .sh-now p:first-child{opacity:0;clip-path:inset(0 100% 0 0);transition:clip-path .55s var(--ease),opacity .15s linear}
+.js:not(.rm) .sh-now .sh-you{opacity:0;transform:translateY(6px);transition:opacity .35s var(--ease),transform .35s var(--ease)}
+.js:not(.rm) .sh-row.p1 .sh-stage{opacity:1;transform:none}
+.js:not(.rm) .sh-row.p2 .sh-was{opacity:1;transform:none}
+.js:not(.rm) .sh-row.p3 .sh-was s{background-size:100% 2px}
+.js:not(.rm) .sh-row.p3 .sh-was{color:var(--ink-3)}
+.js:not(.rm) .sh-row.p4 .sh-now p:first-child{opacity:1;clip-path:inset(0 0 0 0)}
+.js:not(.rm) .sh-row.p5 .sh-now .sh-you{opacity:1;transform:none}
+.js:not(.rm) .sh-close{opacity:0;transform:translateY(8px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.js:not(.rm) .shift.done .sh-close{opacity:1;transform:none}
 @media (max-width:760px){.sh-head{display:none}.sh-row{grid-template-columns:1fr;gap:8px}.sh-stage{font-size:14px}}
 /* desktop: the step is the hook, then what it was, then what it is now; the ledger keeps its own width */
 @media (min-width:761px){
@@ -1338,6 +1349,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
     <div class="shift" id="shift">
       <div class="sh-head" aria-hidden="true"><span></span><span>Until now</span><span>Now</span></div>
       <ol class="sh-list">
+      <li class="sh-rail" aria-hidden="true" role="presentation"></li>
       <li class="sh-row" data-i="0">
         <span class="sh-stage"><svg class="ico" aria-hidden="true"><use href="#i-note"/></svg>Plan</span>
         <p class="sh-was"><span class="vh">Until now: </span><s>Estimation meetings</s></p>
