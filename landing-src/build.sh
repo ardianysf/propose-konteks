@@ -13,6 +13,15 @@ import re, sys
 sys.path.insert(0,'.')
 import journal_build as jb
 out=out.replace('<!--@@JOURNAL@@-->',jb.landing_section()).replace('/*@@JCSS@@*/',jb.COVER_CSS+jb.JSEC_CSS)
+# Agent marks from the design system (prototype/src/data.js, Foundations > Ikon > Tanda khusus), monochrome, currentColor.
+import json
+_d=open('../prototype/src/data.js').read(); _i=_d.index('const HARNESS_SVG = '); _e=_d.index('};',_i)+1
+HARN=json.loads(_d[_i+len('const HARNESS_SVG = '):_e])
+def _mark(m):
+    parts=m.group(1).split('|'); name=parts[0]; vb,body=HARN[name][0],HARN[name][1]
+    if len(parts)==1: return f'<svg class="hm" viewBox="{vb}" fill="none" aria-hidden="true" focusable="false">{body}</svg>'
+    x,y,w=parts[1:4]; return f'<svg class="hm" x="{x}" y="{y}" width="{w}" height="{w}" viewBox="{vb}" fill="none" aria-hidden="true">{body}</svg>'
+out=re.sub(r'@@HARN:([^@]+)@@',_mark,out)
 for n in ['claude','codex','konteks']:
     out=out.replace('@@IMG:'+n+'@@','data:image/png;base64,'+base64.b64encode(open('assets/'+n+'.png','rb').read()).decode())
 open('../site/index.html','w').write(out)

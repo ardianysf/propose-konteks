@@ -24,11 +24,14 @@ COVER_CSS = r'''
 .cv-matcha{background:var(--split-panel)}
 .cv-mk{position:absolute;left:6%;top:9%;font:640 clamp(20px,7cqw,64px)/.9 var(--display);letter-spacing:-.04em;z-index:1}
 .cv-moss .cv-mk{color:var(--live)}.cv-matcha .cv-mk{color:var(--accent-ink)}
-.cv-shot{position:absolute;left:30%;top:28%;width:88%;height:auto;border-radius:14px;border:1px solid rgba(36,48,37,.12);box-shadow:0 30px 60px -24px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.12);transition:transform .8s var(--ease)}
-.cv-thumb .cv-shot{left:12%;top:16%;width:150%;border-radius:8px}
-.cv-wide .cv-shot{left:34%;top:16%;width:62%}
+/* The screen sits whole on its field: framed, never sliced at the side. It only runs off the bottom edge when the
+   cover is shorter than the screen, so its header (what the screen is) always reads. */
+.cv-shot{position:absolute;left:8%;top:24%;width:84%;height:auto;border-radius:12px;border:1px solid rgba(36,48,37,.14);box-shadow:0 24px 48px -20px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.12);transition:transform .8s var(--ease)}
+.cv-thumb .cv-shot{left:9%;top:13%;width:82%;border-radius:6px;box-shadow:0 10px 22px -10px rgba(0,0,0,.45)}
+.cv-wide .cv-shot{left:auto;right:6%;top:14%;width:56%}
 .cv-wide .cv-mk{font-size:clamp(28px,6cqw,88px)}
-a:hover .cv-shot{transform:translate(-6px,-6px)}
+.cv-full .cv-mk{font-size:clamp(22px,6cqw,56px)}
+@media (hover:hover) and (pointer:fine){a:hover .cv-shot{transform:translateY(-6px)}}
 '''
 
 # ---------- the landing section ----------

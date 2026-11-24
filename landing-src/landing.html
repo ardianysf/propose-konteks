@@ -542,7 +542,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 /* theory */
 .theory-g{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(40px,7vw,112px);align-items:start}
 .theory-l{position:sticky;top:120px}
-.js:not(.rm) .duties2{padding-bottom:38vh}
+.js:not(.rm) .duties2{padding-bottom:38vh;will-change:transform}
 @media (max-width:900px){.js:not(.rm) .theory-l::after{content:"";display:block;height:70svh}.js:not(.rm) .naur{position:sticky;top:96px}}
 .theory-l h2{font-size:clamp(2.1rem,1.25rem + 2.7vw,3.75rem)}
 .theory-p{margin-top:18px;font-size:18px;color:var(--ink-2);max-width:46ch}
@@ -692,6 +692,10 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .roster td:last-child{font-size:15.5px;color:var(--on-moss-2)}
 .lg{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#F4F2E8;margin-right:12px;vertical-align:middle}
 .lg img{width:22px;height:22px;object-fit:contain}
+/* Agent marks: the same monochrome marks as the design system (Foundations > Ikon > Tanda khusus). */
+.lg .hm{width:22px;height:22px;color:#243025}
+.acp .tiles .hm{color:#243025}
+.achip .hm{width:16px;height:16px;flex:none;color:var(--live)}
 .lg.mono-t{background:var(--b);color:#fff;font:700 13px/1 var(--display)}
 .agents-end{margin-top:36px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 40px;align-items:center}
 .agents-end p{font-size:18px;max-width:52ch}
@@ -705,7 +709,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .roles li{display:grid;grid-template-columns:200px minmax(0,1fr);gap:20px;align-items:baseline;padding:24px 0;border-bottom:1px solid var(--line)}
 .roles li:first-child{border-top:1px solid var(--line-strong)}
 .role{display:inline-flex;align-items:center;gap:10px;font:640 clamp(20px,1rem + .7vw,26px)/1.1 var(--display);letter-spacing:-.02em}
-.role svg{width:20px;height:20px;color:var(--accent)}
+.role svg{width:24px;height:24px;padding:4px;box-sizing:content-box;border-radius:9px;background:var(--accent-soft);color:var(--accent-ink);stroke-width:1.5}
 .roles p{font:500 clamp(18px,1rem + .4vw,22px)/1.35 var(--display);color:var(--ink-2);letter-spacing:-.01em}
 .train{border-radius:24px;padding:clamp(24px,3vw,36px);display:grid;gap:22px;align-content:start}
 .train-p{font:540 clamp(19px,1rem + .5vw,23px)/1.35 var(--display);letter-spacing:-.015em}
@@ -1040,7 +1044,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   <symbol id="i-hammer" viewBox="0 0 16 16"><path d="m9.5 6.5-6 6a1.4 1.4 0 0 0 2 2l6-6M8 3.5l1.6-1.6a1 1 0 0 1 1.4 0l3.1 3.1a1 1 0 0 1 0 1.4L12.5 8 8 3.5Z"/></symbol>
   <symbol id="i-eye" viewBox="0 0 16 16"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z"/><circle cx="8" cy="8" r="2.2"/></symbol>
   <symbol id="i-pointer" viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="10" rx="1.6"/><path d="M1.5 5.5h13M7.5 8l1 4.5 1-1.8 1.8-.9L7.5 8Z"/></symbol>
-  <symbol id="i-note" viewBox="0 0 16 16"><path d="M3.5 2.5h6l3 3v8h-9v-11Z"/><path d="M9.5 2.5v3h3M5.5 8.5h5M5.5 11h3"/></symbol>
+  <symbol id="i-judge" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.75"/><path d="m10.5 10.5 3 3M5 7l1.4 1.4L9 5.8"/></symbol><symbol id="i-limits" viewBox="0 0 16 16"><path d="M2.5 4h6M11.5 4h2M2.5 8h2M7.5 8h6M2.5 12h7M12.5 12h1"/><path d="M10 2.5v3M6 6.5v3M11 10.5v3"/></symbol><symbol id="i-write" viewBox="0 0 16 16"><path d="M8.5 13.5h5"/><path d="M10.8 2.7a1.4 1.4 0 0 1 2 2L5.5 12l-2.8.8.8-2.8Z"/></symbol><symbol id="i-note" viewBox="0 0 16 16"><path d="M3.5 2.5h6l3 3v8h-9v-11Z"/><path d="M9.5 2.5v3h3M5.5 8.5h5M5.5 11h3"/></symbol>
   <symbol id="i-layers" viewBox="0 0 16 16"><path d="m8 2 6 3-6 3-6-3 6-3ZM2 8l6 3 6-3M2 11l6 3 6-3"/></symbol>
   <symbol id="i-ticket" viewBox="0 0 16 16"><path d="M2.5 4.5h11v2a1.5 1.5 0 0 0 0 3v2h-11v-2a1.5 1.5 0 0 0 0-3v-2Z"/><path d="M9.5 4.5v7" stroke-dasharray="1.4 1.4"/></symbol>
   <symbol id="i-pr" viewBox="0 0 16 16"><circle cx="4" cy="3.5" r="1.5"/><circle cx="4" cy="12.5" r="1.5"/><circle cx="12" cy="12.5" r="1.5"/><path d="M4 5v6M12 11V6.5A2 2 0 0 0 10 4.5H7.5M9 3l-1.5 1.5L9 6"/></symbol>
@@ -1281,9 +1285,9 @@ bob    tty1</pre></div>
     <div class="sec-h"><h2 id="h-co" data-px=".05">Many notes. Many agents. One record.</h2><p>Every team writes notes and runs agents. It all lands in one record, under the same rules.</p></div>
     <div class="merge" id="merge">
       <ul class="teams" data-px=".07">
-        <li><b>Billing</b><span class="nchip"><svg class="ico"><use href="#i-note"/></svg>Invoices: export to CSV</span><span class="achip"><svg class="ico"><use href="#i-hammer"/></svg>Claude Code</span></li>
-        <li><b>Mobile</b><span class="nchip"><svg class="ico"><use href="#i-note"/></svg>Offline mode for orders</span><span class="achip"><svg class="ico"><use href="#i-eye"/></svg>Codex</span></li>
-        <li><b>Data</b><span class="nchip"><svg class="ico"><use href="#i-note"/></svg>Nightly revenue report</span><span class="achip"><svg class="ico"><use href="#i-pulse"/></svg>OpenCode</span></li>
+        <li><b>Billing</b><span class="nchip"><svg class="ico"><use href="#i-note"/></svg>Invoices: export to CSV</span><span class="achip">@@HARN:Claude Code@@Claude Code</span></li>
+        <li><b>Mobile</b><span class="nchip"><svg class="ico"><use href="#i-note"/></svg>Offline mode for orders</span><span class="achip">@@HARN:Codex@@Codex</span></li>
+        <li><b>Data</b><span class="nchip"><svg class="ico"><use href="#i-note"/></svg>Nightly revenue report</span><span class="achip">@@HARN:OpenCode@@OpenCode</span></li>
       </ul>
       <svg class="merge-lines" aria-hidden="true"></svg>
       <p class="merge-cap" aria-hidden="true">All three land in one record</p>
@@ -1390,11 +1394,11 @@ bob    tty1</pre></div>
      <g class="flow"><circle r="3.2"><animateMotion dur="2.4s" repeatCount="indefinite"><mpath href="#w0"/></animateMotion></circle><circle r="3.2"><animateMotion dur="2.4s" repeatCount="indefinite" begin=".5s"><mpath href="#w1"/></animateMotion></circle><circle r="3.2"><animateMotion dur="2.4s" repeatCount="indefinite" begin="1s"><mpath href="#w2"/></animateMotion></circle><circle r="3.2"><animateMotion dur="2.4s" repeatCount="indefinite" begin="1.5s"><mpath href="#w3"/></animateMotion></circle><circle r="3.2"><animateMotion dur="2.4s" repeatCount="indefinite" begin="2s"><mpath href="#w4"/></animateMotion></circle>
       <circle r="4" class="big"><animateMotion dur="1.6s" repeatCount="indefinite"><mpath href="#w5"/></animateMotion></circle><circle r="4" class="big"><animateMotion dur="1.6s" repeatCount="indefinite" begin=".8s" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#w5"/></animateMotion></circle></g>
      <g class="tiles">
-      <g transform="translate(22 22)"><rect width="64" height="48" rx="12" class="lt"/><image href="@@IMG:claude@@" x="16" y="8" width="32" height="32"/></g>
-      <g transform="translate(22 94)"><rect width="64" height="48" rx="12" class="lt"/><image href="@@IMG:codex@@" x="16" y="8" width="32" height="32"/></g>
-      <g transform="translate(22 166)"><rect width="64" height="48" rx="12" fill="#9A6212"/><text x="32" y="30">DS</text></g>
-      <g transform="translate(22 238)"><rect width="64" height="48" rx="12" fill="#4D644F"/><text x="32" y="30">OC</text></g>
-      <g transform="translate(22 310)"><rect width="64" height="48" rx="12" fill="#2F6F8F"/><text x="32" y="30">AG</text></g>
+      <g transform="translate(22 22)"><rect width="64" height="48" rx="12" class="lt"/>@@HARN:Claude Code|18|6|36@@</g>
+      <g transform="translate(22 94)"><rect width="64" height="48" rx="12" class="lt"/>@@HARN:Codex|18|6|36@@</g>
+      <g transform="translate(22 166)"><rect width="64" height="48" rx="12" class="lt"/>@@HARN:DeepSeek Harness|18|6|36@@</g>
+      <g transform="translate(22 238)"><rect width="64" height="48" rx="12" class="lt"/>@@HARN:OpenCode|18|6|36@@</g>
+      <g transform="translate(22 310)"><rect width="64" height="48" rx="12" class="lt"/>@@HARN:Google Antigravity|18|6|36@@</g>
      </g>
      <g class="laptop" transform="translate(236 150)"><rect x="6" y="0" width="82" height="56" rx="6"/><rect x="14" y="8" width="66" height="40" rx="2" class="scr"/><path d="M0 62h94l-6 8H6Z"/><text x="47" y="96">Your computer</text></g>
      <g class="kx" transform="translate(410 150)"><rect width="98" height="80" rx="18"/><image href="@@IMG:konteks@@" x="12" y="20" width="74" height="38"/><text x="49" y="104">Konteks</text></g>
@@ -1403,11 +1407,11 @@ bob    tty1</pre></div>
     <table class="roster">
       <thead><tr><th scope="col">Agent</th><th scope="col">How it signs in</th></tr></thead>
       <tbody>
-        <tr><td><span class="lg"><img src="@@IMG:claude@@" alt="" width="22" height="22"></span>Claude Code</td><td>Your Claude subscription.</td></tr>
-        <tr><td><span class="lg"><img src="@@IMG:codex@@" alt="" width="22" height="22"></span>Codex</td><td>Your ChatGPT subscription.</td></tr>
-        <tr><td><span class="lg mono-t" style="--b:#9A6212">DS</span>DeepSeek Harness</td><td>Your DeepSeek API key.</td></tr>
-        <tr><td><span class="lg mono-t" style="--b:#4D644F">OC</span>OpenCode</td><td>A subscription or an API key, for any provider OpenCode supports.</td></tr>
-        <tr><td><span class="lg mono-t" style="--b:#2F6F8F">AG</span>Antigravity</td><td>Your organisation’s Gemini Enterprise, or a Gemini API key. Konteks downloads it from Google when you say yes.</td></tr>
+        <tr><td><span class="lg">@@HARN:Claude Code@@</span>Claude Code</td><td>Your Claude subscription.</td></tr>
+        <tr><td><span class="lg">@@HARN:Codex@@</span>Codex</td><td>Your ChatGPT subscription.</td></tr>
+        <tr><td><span class="lg">@@HARN:DeepSeek Harness@@</span>DeepSeek Harness</td><td>Your DeepSeek API key.</td></tr>
+        <tr><td><span class="lg">@@HARN:OpenCode@@</span>OpenCode</td><td>A subscription or an API key, for any provider OpenCode supports.</td></tr>
+        <tr><td><span class="lg">@@HARN:Google Antigravity@@</span>Antigravity</td><td>Your organisation’s Gemini Enterprise, or a Gemini API key. Konteks downloads it from Google when you say yes.</td></tr>
       </tbody>
     </table>
     </div>
@@ -1423,9 +1427,9 @@ bob    tty1</pre></div>
     <div class="sec-h"><h2 id="h-learn" data-px=".05">The work changed. So does how we learn it.</h2><p>Working with agents is a skill of its own, and each role learns a different part of it.</p></div>
     <div class="learn2">
       <ul class="roles" data-px=".04">
-        <li><span class="role"><svg class="ico"><use href="#i-users"/></svg>Juniors</span><p>learn to judge evidence they did not produce.</p></li>
-        <li><span class="role"><svg class="ico"><use href="#i-route"/></svg>Leads</span><p>learn to write constraints.</p></li>
-        <li><span class="role"><svg class="ico"><use href="#i-note"/></svg>Product people</span><p>learn to write the note.</p></li>
+        <li><span class="role"><svg class="ico"><use href="#i-judge"/></svg>Juniors</span><p>learn to judge evidence they did not produce.</p></li>
+        <li><span class="role"><svg class="ico"><use href="#i-limits"/></svg>Leads</span><p>learn to write constraints.</p></li>
+        <li><span class="role"><svg class="ico"><use href="#i-write"/></svg>Product people</span><p>learn to write the note.</p></li>
       </ul>
       <div class="train moss" data-px="-.06">
         <p class="train-p">Refactory, the team behind Konteks, trains for exactly this, with Konteks or on its own.</p>
