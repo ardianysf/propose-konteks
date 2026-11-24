@@ -1350,33 +1350,39 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .dio-hero .dio-meta .era-cap h3{color:var(--ink);font-size:clamp(18px,.85rem + .45vw,21px)}
 .dio-hero .dio-meta .era-cap p{color:var(--ink-2);font-size:14.5px;max-width:58ch;margin-top:6px}
 @media (min-width:961px){.dio-hero{grid-template-columns:minmax(0,1fr) minmax(0,620px);column-gap:clamp(48px,6vw,96px)}}
-/* the hero is its own room: one deep green stage under everything in it, so the paper section after it reads
-   as the next section. The diorama card stays cream on it, as on konteks.io. */
-.dio-hero{isolation:isolate;color:var(--on-moss)}
-.dio-hero::before{display:block;grid-row:1/-1;grid-column:1/-1;margin:0 calc(50% - 50vw);background:var(--moss);background-image:var(--grain);border:0;z-index:-1}
+/* the hero is its own room, in the brand's primary green (the same in both themes), so the section after it
+   reads as the next one. The diorama card stays cream on it. */
+.dio-hero{--hbg:#4F7044;--hfg:#FBF8EF;--hfg2:rgba(251,248,239,.8);--hline:rgba(251,248,239,.18);--hline2:rgba(251,248,239,.3);--hl:#D2E8B4}
+.dio-hero{isolation:isolate;color:var(--hfg)}
+.dio-hero::before{display:block;grid-row:1/-1;grid-column:1/-1;margin:0 calc(50% - 50vw);background:var(--hbg);background-image:var(--grain);border:0;z-index:-1}
 .dio-hero .h-copy{padding-top:clamp(56px,6vw,96px)}
 .dio-hero .dio{margin-top:clamp(56px,6vw,96px)}
-.dio-hero .h-copy h1{color:var(--on-moss)}.dio-hero .h-copy h1 .h1b{color:var(--live)}
-.dio-hero .lede{color:var(--on-moss-2)}
+.dio-hero .h-copy h1{color:var(--hfg)}.dio-hero .h-copy h1 .h1b{color:var(--hl)}
+.dio-hero .lede{color:var(--hfg2)}
 .dio-hero .dio-stage{border-color:rgba(238,241,232,.14);box-shadow:0 30px 60px -30px rgba(0,0,0,.55)}
-.dio-hero .h-act{color:var(--on-moss)}
-.dio-hero .connect{border-color:var(--moss-line-2);background:rgba(238,241,232,.04)}
-.dio-hero .connect p{color:var(--on-moss-2)}.dio-hero .connect strong{color:var(--on-moss)}
-.dio-hero .cline{background:rgba(0,0,0,.22);border-color:var(--moss-line)}
-.dio-hero .cline code{color:var(--on-moss)}
-.dio-hero .copy{background:var(--live);color:#1F2B20}.dio-hero .copy:hover{background:#A3CC83}
-.dio-hero .connect small{color:var(--on-moss-2)}
-.dio-hero .dio-meta{color:var(--on-moss)}
-.dio-hero .dio-tab{border-color:var(--moss-line-2);color:var(--on-moss-2)}
-.dio-hero .dio-tab:hover{color:var(--on-moss)}
-.dio-hero .dio-tab[aria-selected="true"]{background:rgba(238,241,232,.1);color:var(--on-moss);border-color:rgba(238,241,232,.28)}
-.dio-hero .dio-tab i{background:rgba(238,241,232,.14)}.dio-hero .dio-tab b{background:var(--live)}
-.dio-hero .dio-tab:focus-visible,.dio-hero .dio-pause:focus-visible{outline-color:var(--live)}
-.dio-hero .dio-pause{border-color:var(--moss-line-2);color:var(--on-moss-2)}
-.dio-hero .dio-pause:hover{color:var(--on-moss);border-color:rgba(238,241,232,.28)}
-.dio-hero .dio-meta .era-cap h3{color:var(--on-moss)}
-.dio-hero .dio-meta .era-cap p{color:var(--on-moss-2)}
-.dio-hero ::selection{background:var(--live);color:#1F2B20}
+.dio-hero .h-act{color:var(--hfg)}
+.dio-hero .connect{border-color:var(--hline2);background:rgba(20,32,18,.12)}
+.dio-hero .connect p{color:var(--hfg2)}.dio-hero .connect strong{color:var(--hfg)}
+.dio-hero .cline{background:rgba(20,32,18,.22);border-color:var(--hline)}
+.dio-hero .cline code{color:var(--hfg)}
+.dio-hero .copy{background:var(--dio-paper);color:#2E4527}.dio-hero .copy:hover{background:#FFFFFF}
+.dio-hero .connect small{color:var(--hfg2)}
+.dio-hero .dio-meta{color:var(--hfg)}
+.dio-hero .dio-tab{border-color:var(--hline2);color:var(--hfg2)}
+.dio-hero .dio-tab:hover{color:var(--hfg)}
+.dio-hero .dio-tab[aria-selected="true"]{background:rgba(238,241,232,.1);color:var(--hfg);border-color:rgba(238,241,232,.28)}
+.dio-hero .dio-tab i{background:rgba(238,241,232,.14)}.dio-hero .dio-tab b{background:var(--hl)}
+.dio-hero .dio-tab:focus-visible,.dio-hero .dio-pause:focus-visible{outline-color:var(--hl)}
+.dio-hero .dio-pause{border-color:var(--hline2);color:var(--hfg2)}
+.dio-hero .dio-pause:hover{color:var(--hfg);border-color:rgba(238,241,232,.28)}
+.dio-hero .dio-meta .era-cap h3{color:var(--hfg)}
+.dio-hero .dio-meta .era-cap p{color:var(--hfg2)}
+.dio-hero ::selection{background:var(--hfg);color:#2E4527}
+/* each section on its own ground: hero green, then paper and a light green tint taking turns down the page */
+.shift-sec{background:var(--bg)}
+.theory,.jsec{background:var(--accent-soft);padding-top:clamp(88px,9vw,136px);padding-bottom:clamp(88px,9vw,136px)}
+.shift-sec{padding-bottom:clamp(88px,9vw,136px)}
+#workflow{padding-top:clamp(88px,9vw,136px)}
 .dio-hero{padding-bottom:0}
 .dio-hero .h-act,.dio-hero .dio-meta{padding-bottom:clamp(56px,6vw,96px)}
 .shift-sec{padding-top:clamp(72px,8vw,128px)}
