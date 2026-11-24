@@ -1058,14 +1058,12 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 
 /* eras: an object for each scene, same camera as the 1843 engine; Today's sits back as a background */
 .era-bg{height:auto;pointer-events:none}
-.bg-tur{left:3%;top:4%;width:50%}
-.bg-c{left:2%;bottom:3%;height:84%;width:auto;max-width:60%}
+.bg-tur{left:-9%;top:-7%;width:80%}
+.bg-c{left:-7%;bottom:1%;height:98%;width:auto;max-width:none}
 .s-c .win.back{left:auto;right:5%;top:7%;width:42%}
 .s-c .win.front{right:5%;bottom:8%;width:50%}
-.bg-now{right:1%;top:auto;bottom:29%;width:30%;opacity:.6}
-:root[data-theme="dark"] .bg-now{opacity:.3}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bg-now{opacity:.3}}
-@media (max-width:900px){.bg-tur{width:56%;left:2%;top:3%}.bg-now{width:24%;right:3%;bottom:30%}.bg-c{height:70%}}
+.bg-now{right:-6%;top:9%;bottom:auto;width:46%}
+@media (max-width:900px){.bg-tur{width:96%;left:-12%;top:-6%}.bg-c{height:86%}.bg-now{width:46%;right:-8%;top:4%}}
 </style>
 </head>
 <body>
@@ -1224,7 +1222,7 @@ bob    tty1</pre></div>
     </article>
     <article class="era now" style="--hue:#5F8D4E">
      <div class="scene s-now" aria-hidden="true">
-      <img class="L era-bg bg-now" data-d=".2" src="/art/agent.svg" alt="" width="400" height="420" loading="lazy" decoding="async">
+      <img class="L era-bg bg-now" data-d=".2" src="/art/agent.svg" alt="" width="360" height="420" loading="lazy" decoding="async">
       <div class="L nnote" data-d=".55">
        <div class="nh"><span class="av r">R</span><b>Invoices: export to CSV</b></div>
        <p>Finance wants this month’s invoices as a CSV. Keep the columns the same.</p>

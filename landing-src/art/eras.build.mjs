@@ -360,13 +360,83 @@ function pal() {
   return { body: out.join(""), points, accents: { skin: "#FFF6E6", leaf: "#6FA65A", pad: "#55705A", face: "#DCEBD3", gink: { hex: "#6FB24E", mode: "ink" }, blush: { hex: "#E8A58E", mode: "ink" }, dark: { hex: "#2C3A30", mode: "ink" } }, label: "An isometric friendly agent: a round, bean-shaped companion with big eyes, a smile and a leaf sprout, floating over a soft digital pad ringed with lights and waving one hand." };
 }
 
-const OBJECTS = [["turing", turing, 560, 360], ["pdp", pdp, 420, 520], ["agent", pal, 400, 420]];
+
+// ======================================================================================
+// Today: a friendly chat agent. A glossy round head with a wide dark visor and lit eyes,
+// a ring-and-ball antenna, a round body with a chest panel, floating capsule arms.
+// It hovers, waves, blinks and smiles; the antenna tip breathes.
+// ======================================================================================
+function chatbot() {
+  const shell = ac("shell"), visorC = ac("visor"), eyeC = ac("eye"), panel = ac("panel"), ring = ac("ringc");
+  const V = G.viewOf(P);
+  const f = (() => { const l = Math.hypot(V[0], V[1]); return [V[0] / l, V[1] / l, 0]; })();
+  const side = [-f[1], f[0], 0];
+  const unit = (v) => { const l = Math.hypot(...v); return v.map((x) => x / l); };
+  const onSphere = (c, r, dx, dz) => { const d = unit([f[0] + side[0] * dx, f[1] + side[1] * dx, dz]); return [c[0] + d[0] * r, c[1] + d[1] * r, c[2] + d[2] * r]; };
+  const out = [];
+  out.push(`<path class="iso-halo" d="${k.haloOf({ x: -15, y: -15, w: 30, d: 30, r: 15 }, 0, 2, P)}" style="filter:blur(5px);opacity:.35"/>`);
+  const bot = [];
+  // body: a round, slightly squat egg
+  const ZB = 22;
+  const BF = G.frameOf([0, 0, ZB], [0, 0, 1], [1, 0, 0], [0, 1, 0]);
+  const BODY = [[0, 6, 1], [3, 13, 1], [10, 16, 1], [18, 15, 1], [24, 11, 1], [27, 5, 1]];
+  const rAt = (s) => { for (let i = 0; i < BODY.length - 1; i++) { const [s0, r0] = BODY[i], [s1, r1] = BODY[i + 1]; if (s >= s0 && s <= s1) return r0 + (r1 - r0) * (s - s0) / (s1 - s0); } return 0; };
+  // arms: capsules hanging just off the body, the far one first
+  const armAt = (sgn) => [side[0] * sgn * 19.5, side[1] * sgn * 19.5, ZB + 17];
+  const arm = (sgn) => { const o = armAt(sgn); const F = G.frameAlong(o, unit([side[0] * sgn * 0.35, side[1] * sgn * 0.35, -1])); return shell(S(G.solidOf([[0, 2.2, 1], [2, 3.4, 1], [9, 3, 1], [13, 1.8, 1]], F, P), { tone: "hi" })); };
+  const arms = byDepth([1, -1], (sgn) => armAt(sgn));
+  bot.push(arms[0] === 1 ? a.amSwing ? arm(1) : arm(1) : arm(-1));
+  bot.push(shell(S(G.solidOf(BODY, BF, P), { tone: "hi" })));
+  // the chest panel: a soft rounded patch on the body's front
+  const pts = [];
+  const N = 28;
+  for (let i = 0; i < N; i++) {
+    const t = (i / N) * Math.PI * 2;
+    const ang = Math.cos(t) * 0.62, s0 = 13 + Math.sin(t) * 4.6;
+    const r = rAt(s0) + 0.2;
+    const d = [f[0] * Math.cos(ang) + side[0] * Math.sin(ang), f[1] * Math.cos(ang) + side[1] * Math.sin(ang)];
+    pts.push(at([d[0] * r, d[1] * r, ZB + s0]));
+  }
+  bot.push(panel(`<path d="${k.pathOf(pts, true)}" style="fill:var(--anatomy-top);stroke:var(--anatomy-hi);stroke-width:var(--anatomy-weight);vector-effect:non-scaling-stroke"/>`));
+  // head
+  const H = [0, 0, ZB + 50], HR = 19;
+  bot.push(shell(S(G.sphereOf(H, HR, P), { tone: "hi" })));
+  // the visor: a wide rounded dark window on the head's front
+  const vis = [];
+  const VN = 40;
+  for (let i = 0; i < VN; i++) {
+    const t = (i / VN) * Math.PI * 2;
+    const c = Math.cos(t), sn = Math.sin(t);
+    const sx = Math.sign(c) * Math.pow(Math.abs(c), 0.6) * 0.8, sz = Math.sign(sn) * Math.pow(Math.abs(sn), 0.6) * 0.4 + 0.06;
+    vis.push(at(onSphere(H, HR + 0.3, sx, sz)));
+  }
+  bot.push(visorC(`<path d="${k.pathOf(vis, true)}" style="fill:var(--anatomy-top);stroke:var(--anatomy-hi);stroke-width:var(--anatomy-weight);vector-effect:non-scaling-stroke;stroke-linejoin:round"/>`));
+  // eyes: open (round), shut (a gentle arc), happy (an upturned arc)
+  const eyeC2 = [-0.32, 0.32].map((dx) => onSphere(H, HR + 0.4, dx, 0.08));
+  const arc = (dx, up) => k.pathOf(Array.from({ length: 9 }, (_, i) => { const t = -1 + (i / 8) * 2; return at(onSphere(H, HR + 0.4, dx + t * 0.12, 0.08 + (up ? 1 : -1) * (0.06 - 0.06 * t * t))); }));
+  const open = eyeC(D(eyeC2.map(at), { size: 5.4, tone: "lit" }));
+  const shut = eyeC(L(arc(-0.32, false) + arc(0.32, false), { tone: "lit", free: true }));
+  const happy = eyeC(L(arc(-0.32, true) + arc(0.32, true), { tone: "lit", free: true }));
+  bot.push(a.amFlip([open, open, open, open, shut, open, open, happy, happy], { period: 5400 }));
+  // antenna: a stem, a flat ring, a ball that breathes
+  const top = [0, 0, H[2] + HR];
+  bot.push(ring(S(G.ringBand(0, 1.4, 2.4, 6, G.frameOf([0, 0, top[2] - 0.6], [0, 0, 1], [1, 0, 0], [0, 1, 0]), P), { tone: "hi" })));
+  bot.push(shell(S(k.cylinder(0, 0, 1.2, top[2], 5, P, 14), { tone: "mid" })));
+  bot.push(a.amPulse(ring(S(G.sphereOf([0, 0, top[2] + 7.4], 3.2, P), { tone: "hi" })), { period: 2400, min: 0.55 }));
+  // the near arm waves
+  bot.push(a.amFloat(arm(arms[1]), P, { rise: 5, period: 1400 }));
+  out.push(a.amFloat(bot.join(""), P, { rise: 4, period: 4400, halo: "" }));
+  const points = [[-26, -26, 0], [26, 26, 0], [-26, 26, 0], [26, -26, 0], [0, 0, top[2] + 12], armAt(1), armAt(-1), [...armAt(1).slice(0, 2), ZB], [...armAt(-1).slice(0, 2), ZB]];
+  return { body: out.join(""), points, accents: { shell: "#FFFFFF", visor: "#1F2A24", eye: { hex: "#8FE07A", mode: "ink" }, panel: "#CFE6C6", ringc: "#B9D8B0" }, css: "#agent .ac-eye{--anatomy-lit:#9BEA82;--anatomy-dot:#9BEA82;--anatomy-hi:#9BEA82;--anatomy-mid:#9BEA82}#agent .ac-shell{--anatomy-paper:#f7f7f4;--anatomy-face:#fcfcfa;--anatomy-top:#ffffff;--anatomy-shade-0:#e2e4df;--anatomy-shade-1:#eaebe7;--anatomy-shade-2:#f1f2ee;--anatomy-shade-3:#f7f8f5;--anatomy-lit-top:#ffffff;--anatomy-lit-shade:#f2f3ef;--anatomy-hi:#8b918a;--anatomy-mid:#aab0a8;--anatomy-lo:#c6cac3;--anatomy-faint:#d8dbd5}", label: "An isometric friendly chat agent: a glossy white round head with a dark visor and glowing green eyes that blink and smile, a ring and ball antenna, a round body with a soft green chest panel and floating arms, one of them waving as it hovers." };
+}
+
+const OBJECTS = [["turing", turing, 560, 360], ["pdp", pdp, 420, 520], ["agent", chatbot, 360, 420]];
 for (const [name, fn, W, H] of OBJECTS) {
   P = { origin: [0, 0], scale: 1, azimuth: AZ, elevation: EL };
   const first = fn();
   P = k.fitProjection(first.points, W, H, { pad: 16, azimuth: AZ, elevation: EL });
   const o = fn();
-  const svg = a.assetSvg({ width: W, height: H, label: o.label, body: minify(o.body), paper: PAPER, accents: o.accents, weight: 0.6, id: name });
+  const svg = a.assetSvg({ width: W, height: H, label: o.label, body: minify(o.body), paper: PAPER, accents: o.accents, weight: 0.6, id: name, css: o.css || "" });
   writeFileSync(join(HERE, `${name}.svg`), svg);
   writeFileSync(join(HERE, `${name}.html`), a.previewHtml({ title: name, svg, paper: PAPER, width: W }));
   console.log(`wrote ${name}.svg (${(svg.length / 1024).toFixed(0)} KB)`);
