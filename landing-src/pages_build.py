@@ -117,10 +117,10 @@ def pricing():
 
 SHARED_CSS = r'''
 .nav-links a[aria-current="page"]{color:var(--ink);background:var(--hover)}
-h1{font-size:clamp(2.5rem,1.4rem + 3.8vw,5rem);letter-spacing:-.04em;line-height:.98;max-width:16ch}
+h1{font-size:clamp(2.25rem,1.2rem + 2.9vw,3.75rem);letter-spacing:-.04em;line-height:.98;max-width:16ch}
 h1 span{display:block;color:var(--accent)}
 .lede{margin-top:24px;font-size:clamp(17px,1rem + .3vw,19.5px);color:var(--ink-2);max-width:62ch;line-height:1.6}
-.sec-h2{font-size:clamp(2rem,1.2rem + 2.4vw,3.5rem)}
+.sec-h2{font-size:clamp(1.75rem,1.1rem + 1.6vw,2.625rem)}
 @keyframes flowx{from{transform:translateX(-10%)}to{transform:translateX(110%)}}
 @media (prefers-reduced-motion:reduce){.d{display:none}}
 '''
@@ -147,7 +147,7 @@ PRICING_CSS = r'''
 @media (max-width:700px){.bill-line span{white-space:normal;width:86%;text-align:center}.bills{background:linear-gradient(var(--paper) 0 48%,var(--moss) 48% 100%)}.bill.dn{justify-self:start}}
 .plans-sec{padding:clamp(80px,10vw,152px) 0 0}
 .plans-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 40px;align-items:end}
-.plans-top h2{font-size:clamp(2rem,1.2rem + 2.4vw,3.5rem)}
+.plans-top h2{font-size:clamp(1.75rem,1.1rem + 1.6vw,2.625rem)}
 .seats{display:grid;grid-template-columns:auto auto;gap:10px 16px;align-items:center;justify-items:start}
 .seats label{font:600 14px/1 var(--sans)}
 .seats small{grid-column:1/-1;font-size:12.5px;color:var(--ink-3);max-width:44ch}
@@ -197,7 +197,7 @@ PRICING_CSS = r'''
 .theatre{padding:clamp(96px,12vw,176px) 0 0}
 .theatre-g{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(32px,6vw,96px);align-items:start}
 .theatre-l{position:sticky;top:120px}
-.theatre-l h2{font-size:clamp(2.2rem,1.3rem + 3vw,4rem)}
+.theatre-l h2{font-size:clamp(2rem,1.2rem + 2vw,3rem)}
 .theatre-l p{margin-top:14px;font-size:17px;color:var(--ink-2)}
 .prin{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-strong)}
 .prin li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:20px;padding:26px 0;border-bottom:1px solid var(--line)}
@@ -212,7 +212,7 @@ PRICING_CSS = r'''
 .notes li::marker{color:var(--accent)}
 .px-close{padding:clamp(72px,9vw,128px) 0;border-top:1px solid var(--live)}
 .px-close-in{display:grid;gap:28px}
-.px-close h2{font-size:clamp(2.2rem,1.3rem + 3vw,4.25rem);max-width:18ch;color:var(--on-moss)}
+.px-close h2{font-size:clamp(2rem,1.2rem + 2vw,3rem);max-width:18ch;color:var(--on-moss)}
 .px-close .acts{display:flex;flex-wrap:wrap;gap:12px}
 .px-close .btn-go{background:var(--live);color:#1F2B20}
 .px-close .btn-line{background:transparent;color:var(--on-moss);border-color:var(--moss-line-2)}
@@ -368,11 +368,11 @@ SECURITY_CSS = r'''
 .ctrl li.on{opacity:1;transform:none}
 .pi{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink);transition:background .4s,color .4s}
 .ctrl li.on .pi{background:var(--accent);color:var(--on-accent)}
-.ctrl h3{font-size:clamp(28px,1.2rem + 1.8vw,44px);font-weight:620}
+.ctrl h3{font-size:clamp(24px,1rem + 1.1vw,32px);font-weight:620}
 .ctrl p{margin-top:12px;font-size:17px;color:var(--ink-2);max-width:48ch;line-height:1.6}
 .disclose{padding:clamp(72px,9vw,128px) 0;border-top:1px solid var(--live)}
 .disc-g{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(32px,6vw,96px);align-items:start}
-.disc-g h2{font-size:clamp(2rem,1.2rem + 2.4vw,3.5rem);color:var(--on-moss)}
+.disc-g h2{font-size:clamp(1.75rem,1.1rem + 1.6vw,2.625rem);color:var(--on-moss)}
 .disc-g p{font-size:18px;color:var(--on-moss-2);max-width:52ch;margin-bottom:24px}
 .disclose .btn-go{background:var(--live);color:#1F2B20}
 @media (max-width:900px){.sx-g,.disc-g{grid-template-columns:1fr}.sx-l{position:static}.scope-fig .auth-rows li{opacity:1}.auth-foot{display:none}.auth-who,.auth-rows li{grid-template-columns:minmax(0,1.2fr) auto auto;padding:0 14px}.auth-rows li{padding-top:11px;padding-bottom:11px;font-size:13px}.auth-rows em{font-size:11.5px;padding:5px 7px}.ctrl{padding:24px 0 30vh;gap:56px}.ctrl li{grid-template-columns:44px minmax(0,1fr);gap:14px}.pi{width:44px;height:44px;border-radius:12px}}

@@ -1158,6 +1158,20 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   .rvm .teams li:nth-child(2){transition-delay:.08s}.rvm .teams li:nth-child(3){transition-delay:.16s}
   .rvm .duties2 li .dz{transition:background .5s var(--ease) .25s,stroke .5s var(--ease) .25s}
 }
+
+/* ===== type scale, calmer (Nov 24): headings step down ~25% on desktop, a little on phones; body and lede unchanged ===== */
+.h-copy h1{font-size:clamp(3.4rem,1.2rem + 4.2vw,5rem)}
+.sec-h h2,.h2,.theory-l h2,.rules-l h2,.week-sec .sec-h h2,.eras-title h2{font-size:clamp(1.75rem,1.1rem + 1.6vw,2.625rem)}
+.close h2{font-size:clamp(2.25rem,1.2rem + 2.9vw,3.75rem)}
+.yr-big{font-size:clamp(40px,1.5rem + 3.4vw,76px)}
+.era-cap h3{font-size:clamp(20px,.9rem + .95vw,28px)}
+.duties2 h3,.kp-t h3{font-size:clamp(22px,.9rem + 1.1vw,30px)}
+.rule h3,.rlist h3{font-size:clamp(28px,1rem + 1.7vw,40px)}
+.meter-l b{font-size:clamp(32px,1.3rem + 1.4vw,42px)}
+.ws-n b{font-size:clamp(42px,1.8rem + 1.9vw,56px)}
+.kind h3,.journal .t{font-size:clamp(18px,.9rem + .6vw,24px)}
+.role{font-size:clamp(18px,.95rem + .4vw,22px)}
+@media (max-width:900px){.naur p{font-size:26px}.rlist h3,.rule h3{font-size:clamp(26px,7vw,32px)}}
 </style>
 </head>
 <body>
