@@ -1140,7 +1140,6 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   .sh-now .sh-you{font-size:14.5px}
 }
 @media (max-width:760px){.sh-stage .ico{box-sizing:border-box;width:30px;height:30px;padding:7px;border-radius:8px;background:var(--accent-soft);color:var(--accent-ink)}}
-}
 
 /* ===== Home: the diorama. Four rooms stand on the line where the note sheet stands on Features; the tour runs below it ===== */
 @media (min-width:961px){.dio-hero{grid-template-columns:minmax(0,1fr) minmax(0,600px)}}
@@ -1178,6 +1177,29 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .dio-meta .era-cap .yr::before{background:currentColor}
 .dio-note{margin-top:18px;padding-top:14px;border-top:1px solid var(--moss-line);font-size:13.5px;color:var(--on-moss-2);max-width:60ch}
 @media (max-width:960px){.dio{margin-top:8px}.dio-stage{height:clamp(300px,82vw,420px);border-radius:18px 18px 0 0}.dio-meta{padding:20px 0 40px}}
+/* Home: the connect box stays small beside the picture, so the order reads title, picture, box */
+.dio-hero .connect{max-width:480px;padding:14px 14px 12px;border-radius:14px}
+.dio-hero .connect p{font-size:14px}
+.dio-hero .cline{margin-top:10px;padding:4px 4px 4px 12px;border-radius:10px}
+.dio-hero .cline code{font-size:12.5px;padding:4px 0}
+.dio-hero .copy{min-height:36px;padding:0 12px;font-size:13px}
+.dio-hero .connect small{font-size:12.5px;margin-top:8px}
+.dio-hero .h-more{margin-top:16px;font-size:14px}.dio-hero .h-more .fine{font-size:12.5px}
+/* one column (Home): the title, then the picture and its tour, then the connect box on the moss, kept small */
+@media (max-width:960px){
+  .dio-hero{grid-template-areas:"copy" "sheet" "lanes" "act"}
+  .dio-hero::before{grid-row:3/5}
+  .dio-hero .h-copy{padding-bottom:8px}
+  .dio-hero .dio-meta{padding:20px 0 8px}
+  .dio-hero .h-act{color:var(--on-moss);padding:20px 0 40px;border-top:1px solid var(--moss-line)}
+  .dio-hero .connect{max-width:520px;border-color:var(--moss-line-2);background:rgba(238,241,232,.04);box-shadow:none;padding:14px 14px 12px;border-radius:14px}
+  .dio-hero .connect p{font-size:14px;color:var(--on-moss-2)}.dio-hero .connect strong{color:var(--on-moss)}
+  .dio-hero .cline{margin-top:10px;background:rgba(0,0,0,.22);border-color:var(--moss-line);padding:4px 4px 4px 12px;border-radius:10px}
+  .dio-hero .cline code{font-size:12.5px;color:var(--on-moss);padding:4px 0}
+  .dio-hero .copy{min-height:36px;padding:0 12px;font-size:13px;background:var(--live);color:#1F2B20}
+  .dio-hero .connect small{font-size:12.5px;margin-top:8px;color:var(--on-moss-2)}
+  .dio-hero .h-more{margin-top:16px;font-size:14px;color:var(--on-moss-2)}.dio-hero .h-more .lnk{color:var(--live)}.dio-hero .h-more .fine{font-size:12.5px;color:var(--on-moss-2)}
+}
 @media (max-width:420px){.dio-tab{padding:10px 12px 12px;font-size:13px}}
 /* the hand-off from How it works to the features page */
 .how-more{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px 32px;margin-top:clamp(40px,5vw,64px);padding:28px 0 clamp(64px,8vw,112px);border-top:1px solid var(--line)}
