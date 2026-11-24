@@ -1928,8 +1928,6 @@
 .kx .mo-t td,.kx .mo-t th{vertical-align:top}
 .kx .mo-no{margin:0;padding-left:18px;display:grid;gap:6px;font-size:var(--t13);color:var(--ink-2)}
 .kx .mo-wipe{flex:1;font-size:var(--t20);font-weight:600}
-.kx .mo-wipe.go{animation:kx-mowipe var(--d-reveal) var(--ease)}
-@keyframes kx-mowipe{from{clip-path:inset(0 0 100% 0);translate:0 .3em;opacity:0}to{clip-path:inset(-.2em);translate:0 0;opacity:1}}
 @media (max-width:760px){
 .kx .mo-row{grid-template-columns:minmax(0,1fr)}
 }

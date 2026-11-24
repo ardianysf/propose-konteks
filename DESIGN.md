@@ -801,8 +801,8 @@ The marketing page is a Persuade surface on top of the app's tokens. It adds one
   4. A receipt prints.
 
   Supporting motion:
-  - On load, each line of the hero heading wipes up out of its own mask, then the sentence, the actions and the example note rise after it.
-  - Every heading on the site wipes up as it scrolls in, its paragraph follows 140ms later, and cards in a group arrive 60ms apart (`reveal.js`, once each).
+  - On load, each line of the hero heading rises and fades in, then the sentence, the actions and the example note rise after it.
+  - Every heading on the site rises into place as it scrolls in, its paragraph follows 140ms later, and cards in a group arrive 60ms apart (`reveal.js`, once each).
   - On phones the rules (Authority, Money, Evidence) arrive one piece at a time; the meter fills and counts.
   - The *Gone* items get a strike drawn through them.
   - The loop path draws with scroll and lights each node it reaches.

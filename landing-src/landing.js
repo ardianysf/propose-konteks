@@ -41,6 +41,7 @@ copyBtn.onclick = async () => {
 };
 
 /* ============ HERO: pinned until the demo is done. Time plays it; scrolling plays it faster. ============ */
+const ppBar = document.querySelector(".pin-meter i b"), wkBar = document.querySelector(".week-meter i b");
 const pin = $("#heroPin"), hero = $(".hero"), sheet = $("#sheet"), yes = $("#yes"), yesL = $("#yes-l"), lanes = $$(".lane"), cur = $("#cursor"), rc = $("#rcount"), react = $(".react", sheet);
 const SCRIPT = [
   [300, 0, "run", "Reading the Software System: <b>billing-web</b>, <b>invoices-api</b>"],
@@ -89,7 +90,7 @@ const renderHero = ms => {
   const lm = ms - YES_AT; for (let i = 0; i < lanes.length; i++) drawLane(i, lm);
   hero.classList.toggle("folded", ms >= FOLD_AT);
   hero.classList.toggle("printed", ms >= PRINT_AT);
-  pin.style.setProperty("--pp", clamp(ms / TOTAL));
+  if (ppBar) ppBar.style.transform = `scaleX(${clamp(ms / TOTAL)})`;
   lastMs = ms;
 };
 let clock = 0, heroVisible = true, replayFrom = 0, scrollMs = 0, pinned = false, prevT = 0;
@@ -124,7 +125,7 @@ const heroFrame = now => {
   let ms = Math.min(TOTAL, Math.max(clock, scrollMs));
   // after a long hold at the top, play it again
   if (clock > TOTAL + 9000 && sp < .02) { clock = 0; replayFrom = 0; }
-  renderHero(ms);
+  if (heroVisible || ms !== lastMs) renderHero(ms);
   requestAnimationFrame(heroFrame);
 };
 yes.addEventListener("click", () => { clock = Math.max(clock, YES_AT); });
@@ -179,7 +180,7 @@ const weekDraw = () => {
   if (g && !week.classList.contains("gather")) { if (!wGathered) gatherTargets(); week.classList.add("gather"); }
   if (!g && week.classList.contains("gather")) week.classList.remove("gather");
   week.classList.toggle("done", k > .7);
-  week.style.setProperty("--wk", clamp(k / .7));
+  if (wkBar) wkBar.style.transform = `scaleX(${clamp(k / .7)})`;
 };
 [...blks, ...nows].forEach(el => {
   const i = el.dataset.i;
@@ -271,8 +272,7 @@ const erasDraw = () => {
   yrbig.textContent = curI === N - 1 && s === 0 ? "Today" : y;
   yrbig.style.color = HUES[curI];
   ticks.forEach((t, k) => t.classList.toggle("on", k <= curI));
-  tickbar.style.width = `${(off / (N - 1)) * 100}%`;
-  edist.style.width = `${(off / (N - 1)) * 100}%`;
+  tickbar.style.transform = edist.style.transform = `scaleX(${off / (N - 1)})`;
   spin = p * 720;
 };
 if (RM) { eraEls.forEach((e, k) => { e.classList.add("cur"); scene[k](1, e); }); }
@@ -445,7 +445,7 @@ const kFrame = now => {
   if (kOn && !RM && kFlow) {
     if (!kt0) kt0 = now;
     const n = kSteps.length, T = 1300 * n, f = ((now - kt0) % (T + 1000)) / T, p = smooth(clamp(f));
-    kFlow.style.setProperty("--tp", p);
+    (kFlow.querySelector(".ktrack") || kFlow).style.setProperty("--tp", p);
     const at = p * (n - 1);
     kSteps.forEach((s, j) => { s.classList.toggle("hot", f <= 1 && Math.abs(at - j) < .22); s.classList.toggle("past", f <= 1 && at > j + .2); });
   }
@@ -486,16 +486,28 @@ const riseDraw = () => {
     const enter = clamp((vh - r.top) / (vh * .75));        // 0 when the top touches the fold, 1 well inside
     const leave = clamp((-r.bottom + vh * .55) / (vh * .55)); // starts as the bottom passes the upper half
     if (wrap) wrap.style.transform = `translate3d(0,${((1 - ease(enter)) * 90 - leave * 40).toFixed(1)}px,0)`;
-    if (moss) sec.style.setProperty("--lift", ((1 - ease(enter)) * 64).toFixed(1) + "px");
+    if (moss) sec.classList.toggle("flat", enter > .55);
   }
 };
 
 /* ============ scroll + resize ============ */
 let raf = 0;
-const onScroll = () => { if (typeof railDraw === "function") railDraw(); nav.classList.toggle("stuck", scrollY > 8); if (!RM) erasDraw(); narrowLit(); weekDraw(); theoryDraw(); rulesDraw(); kDraw(); pxDraw(); riseDraw(); };
+/* Each scroll scene only runs while its section is near the screen. Section extents are measured once per layout
+   (not every frame), so a frame no longer reads layout for scenes far away; that read-write churn is what made
+   scrolling stutter on phones. */
+const ZONES = [["#product", () => { if (!RM) erasDraw(); }], ["#week-sec", () => weekDraw()], ["#theory", () => theoryDraw()],
+  ["#workflow", () => narrowLit()], ["#record", () => { if (typeof railDraw === "function") railDraw(); }], ["#rules", () => rulesDraw()], ["#sessions", () => kDraw()]]
+  .map(([sel, fn]) => ({ el: document.querySelector(sel), fn, top: 0, bot: 0 })).filter(z => z.el);
+const measureZones = () => ZONES.forEach(z => { const r = z.el.getBoundingClientRect(); z.top = r.top + scrollY; z.bot = r.bottom + scrollY; });
+const onScroll = () => {
+  const y = scrollY, vh = innerHeight;
+  nav.classList.toggle("stuck", y > 8);
+  for (const z of ZONES) if (y + vh * 1.6 > z.top && y - vh * .6 < z.bot) z.fn();
+  pxDraw(); riseDraw();
+};
 addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; onScroll(); }); }, { passive: true });
 addEventListener("resize", () => { requestAnimationFrame(relayout); });
-const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); onScroll(); };
+const relayout = () => { if (!RM) { measurePin(); measureWeek(); } layout(); drawMerge(); kLayout(); measureZones(); ZONES.forEach(z => z.fn()); onScroll(); };
 document.fonts && document.fonts.ready.then(relayout);
 addEventListener("load", relayout);
 relayout();

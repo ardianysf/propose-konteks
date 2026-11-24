@@ -50,8 +50,8 @@ Kept still on purpose: tooltips (instant), keyboard shortcuts, table and list ho
 
 | Pattern | Format | Where |
 | --- | --- | --- |
-| Hero on load | each h1 line wipes up out of its own mask (`clip-path` + `translate .45em`, 1s `--ease`, second line +.14s), then the sentence (+.32s), the actions (+.44s) and the example note (+.2s, rising 40px from scale .98) | Landing, once per visit |
-| Heading reveal | `.rv-h`: `clip-path` from the bottom + `translate .3em`, `--d-reveal --ease` | Every h1/h2 on every marketing page |
+| Hero on load | each h1 line rises and fades in (`translate .5em` + opacity, 1s `--ease`, second line +.14s), then the sentence (+.32s), the actions (+.44s) and the example note (+.2s, rising 40px from scale .98) | Landing, once per visit |
+| Heading reveal | `.rv-h`: rises `.45em` + opacity, `--d-reveal --ease` | Every h1/h2 on every marketing page |
 | Paragraph follows | `.rv-p`: rises 16px, `--d-reveal`, 140ms after | The line beside a heading |
 | Group stagger | `.rv-i`: rises 24px, `--d-reveal`, delay `--i × --stagger` | Agents, training, pricing, docs, journal, about |
 | Rules arrive (phone) | icon, name, promise, detail, example, .08–.42s apart; the meter fills and counts | Authority, Money, Evidence |
@@ -59,7 +59,16 @@ Kept still on purpose: tooltips (instant), keyboard shortcuts, table and list ho
 | Menu | grows from its button, `--d-pop` | Site nav, View tab |
 | View switch | cross-document view transition; the View tab stays still | All four views |
 
-`reveal.js` tags the elements, watches each through its parent (a clipped heading never reports as visible), fires once, then removes its classes so hover styles return. Without JS everything is simply there.
+`reveal.js` tags the elements, watches each through its parent, fires once, then removes its classes so hover styles return. Without JS everything is simply there.
+
+## Smooth scrolling (performance)
+
+- Reveals use only `opacity` and `translate` (compositor). No `clip-path` on large text.
+- Scroll scenes run only while their section is near the screen; section extents are measured on layout, not every frame.
+- Progress bars move with `transform: scaleX()` set directly on the bar, never `width`, and never through a CSS variable on a large parent (that restyles the whole subtree every frame).
+- Nothing that repaints a large area changes per scroll frame (`border-radius`, `clip-path`, filters). The moss sections flatten their corners once, with a class.
+- Parallax layers carry `will-change: transform`. Phones get a solid sticky nav instead of a blurred one.
+- Measured on a 4× throttled phone profile scrolling the whole landing page: frame time p90 went from 33ms to 16.7ms, with no frames over 50ms.
 
 ## Checklist before shipping motion
 
@@ -68,4 +77,5 @@ Kept still on purpose: tooltips (instant), keyboard shortcuts, table and list ho
 - A token for the curve and the duration; no hand-typed cubic-bezier.
 - Exit path matches the entrance; rapid triggers use transitions.
 - Hover motion gated to fine pointers.
+- No per-frame writes that restyle a big subtree or repaint a large area.
 - Checked with reduced motion on (DevTools › Rendering) and at 10% playback (Animations panel).

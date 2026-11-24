@@ -1993,6 +1993,4 @@ html,body{overflow-x:clip}
 .mo-t td,.mo-t th{vertical-align:top}
 .mo-no{margin:0;padding-left:18px;display:grid;gap:6px;font-size:var(--t13);color:var(--ink-2)}
 .mo-wipe{flex:1;font-size:var(--t20);font-weight:600}
-.mo-wipe.go{animation:mowipe var(--d-reveal) var(--ease)}
-@keyframes mowipe{from{clip-path:inset(0 0 100% 0);translate:0 .3em;opacity:0}to{clip-path:inset(-.2em);translate:0 0;opacity:1}}
 @media (max-width:760px){.mo-row{grid-template-columns:minmax(0,1fr)}}

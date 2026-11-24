@@ -160,7 +160,7 @@ function pageFoundations() {
 
       <div class="sec-sub"><h3>Pola di landing page</h3><p class="hint">Permukaan pemasaran mendapat jatah gerak lebih besar karena dilihat jarang. Semua muncul sekali, tidak diulang saat scroll balik.</p></div>
       <div class="panel"><table class="dtable mo-t"><thead><tr><th>Pola</th><th>Format</th><th>Di mana</th></tr></thead><tbody>
-        ${[["Hero masuk", "dua baris judul naik dari masker masing-masing (clip-path + translate .45em, 1 s, jeda .14 s), lalu kalimat (.32 s), aksi (.44 s), dan catatan contoh (.2 s, naik 40 px)", "Landing, sekali per kunjungan"], ["Judul muncul", "<code>.rv-h</code>: clip-path dari bawah + translate .3em · --d-reveal · --ease", "Setiap h1/h2 di landing, pricing, security, docs, journal"], ["Paragraf menyusul", "<code>.rv-p</code>: naik 16 px · --d-reveal · jeda 140 ms", "Kalimat pendamping judul"], ["Kartu berurutan", "<code>.rv-i</code>: naik 24 px · --d-reveal · jeda --i × --stagger", "Agen, pelatihan, harga, docs, journal"], ["Rule muncul satu per satu", "ikon, judul, kalimat, contoh berjeda .08–.42 s; meteran terisi dan angka menghitung", "Authority, Money, Evidence di ponsel"], ["Adegan mengikuti scroll", "hero ter-pin, minggu kerja, rel record: progres mengikuti posisi scroll, tidak berdurasi", "Landing"], ["Pindah view", "cross-document view transition; tab View tetap diam", "Landing, design system, sign in, demo app"]].map(([a, b, c]) => `<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join("")}
+        ${[["Hero masuk", "dua baris judul naik dan muncul bergantian (translate .5em + opacity, 1 s, jeda .14 s), lalu kalimat (.32 s), aksi (.44 s), dan catatan contoh (.2 s, naik 40 px)", "Landing, sekali per kunjungan"], ["Judul muncul", "<code>.rv-h</code>: naik .45em + opacity · --d-reveal · --ease", "Setiap h1/h2 di landing, pricing, security, docs, journal"], ["Paragraf menyusul", "<code>.rv-p</code>: naik 16 px · --d-reveal · jeda 140 ms", "Kalimat pendamping judul"], ["Kartu berurutan", "<code>.rv-i</code>: naik 24 px · --d-reveal · jeda --i × --stagger", "Agen, pelatihan, harga, docs, journal"], ["Rule muncul satu per satu", "ikon, judul, kalimat, contoh berjeda .08–.42 s; meteran terisi dan angka menghitung", "Authority, Money, Evidence di ponsel"], ["Adegan mengikuti scroll", "hero ter-pin, minggu kerja, rel record: progres mengikuti posisi scroll, tidak berdurasi. Hanya berjalan saat seksinya dekat layar; bilah progres digerakkan dengan transform langsung, bukan variabel di induk", "Landing"], ["Pindah view", "cross-document view transition; tab View tetap diam", "Landing, design system, sign in, demo app"]].map(([a, b, c]) => `<tr><td><b>${a}</b></td><td>${b}</td><td>${c}</td></tr>`).join("")}
       </tbody></table>
       <div class="specimen-row" style="padding:16px"><h3 class="mo-wipe" id="moWipe">Judul ini muncul seperti di landing.</h3><button class="btn btn-sm" type="button" id="moWipeBtn">${ic("play")}Putar</button></div></div>
 
@@ -171,7 +171,7 @@ function pageFoundations() {
 
       <div class="sec-sub"><h3>Jangan dirilis</h3></div>
       <div class="panel"><table class="dtable mo-t"><thead><tr><th>Jangan</th><th>Gantinya</th></tr></thead><tbody>
-        ${[["transition: all", "Sebut properti yang bergerak"], ["ease-in pada UI", "--ease"], ["scale(0) saat masuk", "scale .95–.97 + opacity 0"], ["Keyframes pada toast atau toggle", "Transition, supaya bisa disela"], ["Animasi width, height, top, left", "transform dan opacity"], ["Durasi UI di atas 300 ms tanpa alasan", "--d-pop atau --d-modal"], ["Semua masuk bersamaan", "--stagger 60 ms"], ["Hover bergerak tanpa gerbang pointer", "@media (hover:hover) and (pointer:fine)"]].map(([a, b]) => `<tr><td><code>${a}</code></td><td>${b}</td></tr>`).join("")}
+        ${[["transition: all", "Sebut properti yang bergerak"], ["Variabel CSS di induk untuk menggerakkan anak", "Set transform langsung di elemennya"], ["clip-path, border-radius, width berubah tiap frame scroll", "transform scaleX/translate, atau ganti lewat class sekali"], ["ease-in pada UI", "--ease"], ["scale(0) saat masuk", "scale .95–.97 + opacity 0"], ["Keyframes pada toast atau toggle", "Transition, supaya bisa disela"], ["Animasi width, height, top, left", "transform dan opacity"], ["Durasi UI di atas 300 ms tanpa alasan", "--d-pop atau --d-modal"], ["Semua masuk bersamaan", "--stagger 60 ms"], ["Hover bergerak tanpa gerbang pointer", "@media (hover:hover) and (pointer:fine)"]].map(([a, b]) => `<tr><td><code>${a}</code></td><td>${b}</td></tr>`).join("")}
       </tbody></table></div>
       <p class="hint" style="margin-top:12px">Catatan lengkap ada di <code>docs/MOTION.md</code>.</p>
     </section>
@@ -254,10 +254,14 @@ function bindCodeViews() {
 }
 function bindMotion() {
   if (!$("#moCurves")) return;
+  /* Specimens play with the Web Animations API: they run on the compositor, can be replayed mid-flight, and play
+     even when reduced motion is on, because the reader asked for them. */
   $("#moPlay").onclick = () => $$("#moCurves .mo-dot").forEach(dot => {
-    const w = dot.parentElement.clientWidth - dot.offsetWidth - 8;
-    dot.style.transition = "none"; dot.style.translate = "0 0"; void dot.offsetWidth;
-    dot.style.transition = `translate 700ms ${getComputedStyle(dot).getPropertyValue("--mo-e")}`; dot.style.translate = w + "px 0";
+    const w = dot.parentElement.clientWidth - dot.offsetWidth - 8, e = getComputedStyle(dot).getPropertyValue("--mo-e").trim() || "linear";
+    dot.getAnimations().forEach(a => a.cancel());
+    /* each leg uses the curve itself: out in 700ms, a short hold, back in 700ms */
+    const out = dot.animate([{ transform: "translateX(0)" }, { transform: `translateX(${w}px)` }], { duration: 700, easing: e, fill: "forwards" });
+    out.onfinish = () => setTimeout(() => { const back = dot.animate([{ transform: `translateX(${w}px)` }, { transform: "translateX(0)" }], { duration: 700, easing: e, fill: "forwards" }); back.onfinish = () => { out.cancel(); back.cancel(); }; }, 250);
   });
   $("#moMenu").onclick = e => menu(e.currentTarget, [{ label: "Edit", icon: "pencil" }, { label: "Duplicate", icon: "copy" }, "-", { label: "Delete", icon: "trash-2", danger: true }]);
   $("#moToast").onclick = () => toast("Saved");
@@ -265,7 +269,7 @@ function bindMotion() {
   $("#moDrawer").onclick = () => drawer("Updates", `<p class="hint">A drawer enters from the right in 280 ms and leaves in 150 ms.</p>`);
   $("#moPage").onclick = e => { e.preventDefault(); render._last = ""; render(); };
   let n = 0; $("#moMsg").onclick = () => { $("#moLive").insertAdjacentHTML("beforeend", `<li class="msg-in panel">Comment ${++n}: a new comment rises 8px into its list.</li>`); };
-  $("#moWipeBtn").onclick = () => { const h = $("#moWipe"); h.classList.remove("go"); void h.offsetWidth; h.classList.add("go"); };
+  $("#moWipeBtn").onclick = () => { const h = $("#moWipe"); h.getAnimations().forEach(a => a.cancel()); h.animate([{ opacity: 0, transform: "translateY(.45em)" }, { opacity: 1, transform: "none" }], { duration: 800, easing: "cubic-bezier(.16,1,.3,1)" }); };
 }
 function bindDocs() {
   bindMotion();
