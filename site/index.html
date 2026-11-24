@@ -582,7 +582,9 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .lane-sum .ok{margin-left:auto;color:var(--live);font-weight:600;font-size:13px}
 .receipt{display:none}
 .hero.printed .pin-meter{opacity:0}
-.hero.measure *{transition:none!important;animation:none!important}
+/* Measuring the hero turns its scripted states off for a moment; the intro (opacity and translate only, no effect on
+   size) is left alone, otherwise every measure restarted it and the heading flashed bright, then dim, on refresh. */
+.hero.measure *:not(.h-copy h1>span):not(.lede):not(.h-act):not(.sheet):not(.lanes){transition:none!important;animation:none!important}
 .hero.measure .lane-box{grid-template-rows:1fr}
 .hero.measure.folded .lane-box{grid-template-rows:0fr}
 .hero.printed .receipt{display:block;animation:print 1s var(--ease) both}
