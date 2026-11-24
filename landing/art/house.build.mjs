@@ -646,7 +646,7 @@ const qBox = (ox, oy, top) => [[ox, oy, top], [ox + Q, oy, top], [ox, oy + Q, to
 const focus = (pts, w) => { const [x0, y0, x1, y1] = boundsOf(pts); const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, h = w / ASPECT; return [+(cx - w / 2).toFixed(1), +(cy - h / 2).toFixed(1), +w.toFixed(1), +h.toFixed(1)]; };
 const cams = {
   "1843": focus([[10, 0, 96], [166, 0, 96], [26, 124, 0], [166, 40, 0]], 300),
-  "1936": cam(boundsOf(qBox(Q, 0, WH2)), 4),
+  "1936": focus([[Q + 10, 0, 94], [Q + 160, 0, 70], [Q + 14, 90, 0], [Q + 150, 112, 0]], 300),
   "1969": focus([[Q + 6, Q + 6, 70], [Q + 150, Q + 6, 56], [Q + 60, Q + 160, 0], [Q + 150, Q + 130, 0]], 300),
   today: focus([[0, Q + 28, 96], [0, Q + 168, 70], [90, Q + 120, 0], [130, Q + 60, 0]], 300),
   all: cam(boundsOf([[0, 0, WH2], [N2, 0, WH2], [0, N2, WH2], [N2, N2, -14], [0, N2, -14], [N2, 0, -14]]), 10),
