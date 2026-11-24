@@ -767,7 +767,7 @@ One composer for notes and the agent session. The textarea grows to 200px; a bar
 
 ## Implementation
 
-The developer package lives in `konteks-redesign/code/` and is generated from `konteks-redesign/src/` by `tools/make_package.py` (run through `build.sh`); edit the sources, not the outputs.
+The developer package lives in `components/package/` and is generated from `components/tokens/`, `components/css/` and `design-system/inventory.js` by `tools/make_package.py` (run through `build.sh`); edit the sources, not the outputs. The repo layout is in `README.md`; `IMPLEMENTING.md` maps every screen to its source.
 
 - **`tokens.css`:** every token on `:root`, with the dark values under `.dark` and `:root[data-theme="dark"]`. There is no `prefers-color-scheme` query because the live app sets `.dark` itself from Settings › Appearance (System / Light / Dark).
 - **`tokens.live-map.css`:** load after `tokens.css`. It fills the variables the live app already reads, in both themes, so existing components take the new palette and radius without a rewrite:
