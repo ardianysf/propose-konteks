@@ -258,9 +258,9 @@ CONTROLS = [
   ("revoke", "i-route", "Revocable access", "MCP and connector credentials can be scoped, rotated, revoked, and replaced. Access should be removed promptly when a person, agent, or integration no longer needs it."),
 ]
 
-SCOPE_SVG = r'''<div class="auth" role="img" aria-label="Example: what Rina may do, and what the agent acting for her may do">
+SCOPE_SVG = r'''<div class="auth" role="img" aria-label="Example: what Rachel may do, and what the agent acting for her may do">
   <div class="auth-h"><b>Authority in one session</b><span class="eg">Example</span></div>
-  <div class="auth-who"><span></span><span class="who-p"><i class="av-s">R</i>Rina<small>Product lead</small></span><span class="who-a"><i class="av-s ag">CC</i>Claude Code<small>acts for Rina</small></span></div>
+  <div class="auth-who"><span></span><span class="who-p"><i class="av-s">R</i>Rachel<small>Product lead</small></span><span class="who-a"><i class="av-s ag">CC</i>Claude Code<small>acts for Rachel</small></span></div>
   <ul class="auth-rows">
     <li data-r="tenant"><span>Read billing-web and invoices-api</span><em class="ok">Allowed</em><em class="ok">Allowed</em></li>
     <li data-r="human"><span>Run costed work</span><em class="ok">Allowed</em><em class="ask">Waits for her yes</em></li>
@@ -269,7 +269,7 @@ SCOPE_SVG = r'''<div class="auth" role="img" aria-label="Example: what Rina may 
     <li data-r="tenant"><span>Another tenant’s data</span><em class="no">Never</em><em class="no">Never</em></li>
   </ul>
   <div class="auth-foot">
-    <div class="af af-audit"><b>Record</b><ol><li><time>09:20</time>Rina approved plan v2</li><li><time>09:21</time>Claude Code opened pull request #318</li><li><time>09:40</time>Tests passed, receipt settled</li></ol></div>
+    <div class="af af-audit"><b>Record</b><ol><li><time>09:20</time>Rachel approved plan v2</li><li><time>09:21</time>Claude Code opened pull request #318</li><li><time>09:40</time>Tests passed, receipt settled</li></ol></div>
     <div class="af af-revoke"><b>MCP credential for Claude Code</b><div class="cred"><code>kx_live_••••••7f2</code><span class="st">Active</span><span class="st off">Revoked</span></div><div class="cred-acts"><span>Rotate</span><span class="rv">Revoke</span></div></div>
     <div class="af af-secret"><b>Never shown</b><div class="nv"><span>Prompts</span><span>Screenshots</span><span>Logs</span><span>MCP discovery</span></div></div>
     <div class="af af-tenant"><b>Tenant</b><p>Refactory workspace only. Nothing crosses to another tenant.</p></div>

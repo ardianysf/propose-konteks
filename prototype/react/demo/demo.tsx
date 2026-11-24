@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { Box, Check, Download, FileDiff, LogOut, Mic, Settings, Trash2, LifeBuoy } from "lucide-react";
 import { Button, Combobox, Composer, Dialog, Drawer, Field, Input, Menu, Modal, Textarea } from "../src";
 
-const SYSTEMS = ["Rentify", "Ledgerline", "SensePortal", "HRIS Nusantara", "Kurir Hub", "Portal Vendor", "Kanteen", "Personal Blog"];
+const SYSTEMS = ["Rentify", "Ledgerline", "SensePortal", "HRIS Meridian", "Courier Hub", "Vendor Portal", "Canteen", "Personal Blog"];
 const SKILLS = [
   { kind: "skill" as const, name: "write-prd", desc: "Draft or revise a PRD from notes and the System's source." },
   { kind: "skill" as const, name: "estimate", desc: "Re-estimate tickets with the current breakdown." },
@@ -40,7 +40,7 @@ function App() {
       </section>
       <section className="grid grid-cols-2 gap-4">
         <h2 className="col-span-2 text-md font-semibold">Field & input</h2>
-        <Field label="Display name" hint="How your name appears to your team."><Input defaultValue="Ardian Yusuf" /></Field>
+        <Field label="Display name" hint="How your name appears to your team."><Input defaultValue="Adrian Young" /></Field>
         <Field label="Repository URL" error={/^https:\/\//.test(url) ? undefined : "Enter a full URL, like https://github.com/owner/skills"}>
           <Input value={url} onChange={e => setUrl(e.target.value)} />
         </Field>
@@ -53,9 +53,9 @@ function App() {
         <Field label="Software System"><Combobox options={SYSTEMS.map(s => ({ value: s, label: s }))} value={sys} onChange={setSys} placeholder="Choose a System" /></Field>
         <Field label="Repository for TKT-1">
           <Combobox value={conn} onChange={setConn} options={[
-            { value: "hris-azure", label: "HRIS Azure", hint: "Azure DevOps", group: "Connected to HRIS Nusantara" },
-            { value: "gitea-sari", label: "Gitea Sari", hint: "gitea.example.id", group: "Other connections" },
-            { value: "gitea-bagus", label: "Gitea Bagus", hint: "gitea.example.id", group: "Other connections" },
+            { value: "hris-azure", label: "HRIS Azure", hint: "Azure DevOps", group: "Connected to HRIS Meridian" },
+            { value: "gitea-sarah", label: "Gitea Sarah", hint: "gitea.example.id", group: "Other connections" },
+            { value: "gitea-bagus", label: "Gitea Ben", hint: "gitea.example.id", group: "Other connections" },
           ]} />
         </Field>
         <div><Combobox icon={<Box strokeWidth={1.75} />} width="auto" options={[{ value: "", label: "All systems" }, ...SYSTEMS.map(s => ({ value: s, label: s }))]} value={sys ?? ""} onChange={v => setSys(v || null)} aria-label="Filter by System" /></div>
@@ -64,7 +64,7 @@ function App() {
         <h2 className="text-md font-semibold">Menu & overlays</h2>
         <div className="flex flex-wrap gap-2">
           <Menu label="Account" trigger={<Button id="acct">Account</Button>} items={[
-            { head: <div><b className="block text-sm font-semibold">Ardian Yusuf</b><small className="text-xs text-app-text-tertiary">ardian@refactory.id</small></div> },
+            { head: <div><b className="block text-sm font-semibold">Adrian Young</b><small className="text-xs text-app-text-tertiary">adrian@refactory.id</small></div> },
             { label: "Settings", icon: <Settings strokeWidth={1.75} />, onSelect: () => say("menu:settings") },
             { label: "Support", icon: <LifeBuoy strokeWidth={1.75} />, onSelect: () => say("menu:support") },
             "divider",

@@ -1,6 +1,6 @@
 # Audit UI/UX Konteks (app.konteks.io)
 
-27 Oktober 2026 · Ardian Yusuf
+27 Oktober 2026 · Adrian Young
 
 ## Ringkasan eksekutif
 
@@ -31,7 +31,7 @@ Audit ini (versi 2) mencakup **10 modul** dan **56 temuan unik**: 45 temuan UX/f
 
 | Aspek | Keterangan |
 | --- | --- |
-| Akun | Ardian Yusuf, peran Engineering Contributor (91 izin, bukan workspace owner) |
+| Akun | Adrian Young, peran Engineering Contributor (91 izin, bukan workspace owner) |
 | Aturan aksi | Sesuai kesepakatan: setiap form, modal, drawer, dan menu dibuka sampai titik terakhir sebelum disimpan, lalu dibatalkan. Tidak ada data yang diubah. |
 | Teks uji | Satu kali di New initiative; sudah dihapus dan dibatalkan |
 | Efek samping yang terlihat | Membuka panel Updates menghapus badge "new updates" (ditandai sudah dibaca) |
@@ -39,7 +39,7 @@ Audit ini (versi 2) mencakup **10 modul** dan **56 temuan unik**: 45 temuan UX/f
 | Pengukuran | Token CSS dibaca dari stylesheet; ukuran font, radius, warna, dan ukuran target diukur dari computed style; kontras dihitung dengan rumus WCAG 2.x |
 | Waktu | 27 Oktober 2026, 13.20–14.15 WIB |
 
-Screenshot hanya dilihat selama sesi audit dan tidak disimpan, jadi bukti ditulis sebagai deskripsi, URL, dan nilai terukur. Nama System, orang, perangkat, dan kredensial di dokumen ini disamarkan; contoh System memakai nama dari prototipe redesign (Rentify, SensePortal, HRIS Nusantara, Kurir Hub).
+Screenshot hanya dilihat selama sesi audit dan tidak disimpan, jadi bukti ditulis sebagai deskripsi, URL, dan nilai terukur. Nama System, orang, perangkat, dan kredensial di dokumen ini disamarkan; contoh System memakai nama dari prototipe redesign (Rentify, SensePortal, HRIS Meridian, Courier Hub).
 
 **Status verifikasi:** *Terverifikasi* = diamati atau diukur langsung. *Indikasi* = ada bukti awal. *Perlu validasi* = bergantung pada aturan bisnis atau aksi yang tidak dijalankan.
 
@@ -158,7 +158,7 @@ Yang diperiksa: daftar 8 inisiatif, filter System, kedelapan halaman detail, pan
 
 #### UX-007 Judul terpotong atau hampir kembar
 
-- **Observasi:** "Rental Feature Documentation Objective Create comprehensive…". Dua judul Kurir Hub hanya berbeda koma di akhir, dan di 375 px keduanya identik. Modal New initiative tidak punya field judul.
+- **Observasi:** "Rental Feature Documentation Objective Create comprehensive…". Dua judul Courier Hub hanya berbeda koma di akhir, dan di 375 px keduanya identik. Modal New initiative tidak punya field judul.
 - **Rekomendasi:** Judul pendek opsional, atau judul otomatis dari PRD (yang sudah lebih baik, misalnya "Dokumentasi Fitur Pertama Rental"), dengan tanda baca di akhir dipangkas.
 - **Kriteria penerimaan:** Dua judul mirip tetap bisa dibedakan di 375 px.
 
@@ -170,7 +170,7 @@ Yang diperiksa: daftar 8 inisiatif, filter System, kedelapan halaman detail, pan
 
 #### UX-009 Badge sidebar ikut filter
 
-- **Observasi:** Badge berubah dari 7 menjadi 3 saat filter Kurir Hub aktif.
+- **Observasi:** Badge berubah dari 7 menjadi 3 saat filter Courier Hub aktif.
 - **Rekomendasi dan kriteria:** Badge selalu menampilkan total global.
 
 #### UX-010 Default System dan validasi New initiative
@@ -198,8 +198,8 @@ Yang diperiksa: daftar 8 inisiatif, filter System, kedelapan halaman detail, pan
 
 #### UX-014 Picker repositori tidak difilter per System
 
-- **Langkah:** HRIS frontend (System HRIS Nusantara) → Review breakdown → Choose repository.
-- **Observasi:** Dropdown VCS connection berisi 19 koneksi pribadi yang dinamai orang ("Gitea &lt;nama rekan&gt;", …). Koneksi yang relevan, "HRIS Nusantara · Azure", berada di urutan ke-17.
+- **Langkah:** HRIS frontend (System HRIS Meridian) → Review breakdown → Choose repository.
+- **Observasi:** Dropdown VCS connection berisi 19 koneksi pribadi yang dinamai orang ("Gitea &lt;nama rekan&gt;", …). Koneksi yang relevan, "HRIS Meridian · Azure", berada di urutan ke-17.
 - **Rekomendasi:** Tampilkan dulu koneksi yang terhubung dengan System tersebut, kelompokkan sisanya di bawah "Koneksi lain", dan tandai koneksi milik orang lain.
 - **Kriteria penerimaan:** Untuk System yang punya koneksi terdaftar, koneksi itu menjadi opsi pertama.
 

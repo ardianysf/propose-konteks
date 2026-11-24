@@ -391,12 +391,12 @@ const drawMerge = () => {
 };
 const feed = $("#feed");
 const EVENTS = [
-  ["", "Started", "Export invoices as PDF", "Same columns as the CSV, please.", "Billing", "Rina"],
-  ["ap", "Approved", "Plan, ceiling $3.20", "Offline first, sync later.", "Mobile", "Ayu"],
-  ["fx", "Fixed", "Revenue report missed refunds", "The second agent spotted it.", "Data", "Dimas"],
-  ["sh", "Shipped", "Offline mode for orders", "Tested on a slow train. Works.", "Mobile", "Ayu"],
-  ["sh", "Shipped", "Nightly revenue report", "Finance has it by 7 a.m.", "Data", "Rina"],
-  ["", "Started", "Dark mode for the billing portal", "Customers keep asking for it.", "Billing", "Dimas"],
+  ["", "Started", "Export invoices as PDF", "Same columns as the CSV, please.", "Billing", "Rachel"],
+  ["ap", "Approved", "Plan, ceiling $3.20", "Offline first, sync later.", "Mobile", "Anna"],
+  ["fx", "Fixed", "Revenue report missed refunds", "The second agent spotted it.", "Data", "Daniel"],
+  ["sh", "Shipped", "Offline mode for orders", "Tested on a slow train. Works.", "Mobile", "Anna"],
+  ["sh", "Shipped", "Nightly revenue report", "Finance has it by 7 a.m.", "Data", "Rachel"],
+  ["", "Started", "Dark mode for the billing portal", "Customers keep asking for it.", "Billing", "Daniel"],
 ];
 let ev = 0, feedOn = false;
 const stamp = () => { const d = new Date(); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };

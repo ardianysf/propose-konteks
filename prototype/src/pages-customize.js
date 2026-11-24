@@ -46,7 +46,7 @@ function bindRuntimes() {
 function connectRuntime() {
   /* One modal, two steps: the form, then the installation it leads to. */
   const d = modal("Connect a runtime", `
-    <div class="field"><label for="rtName">Name</label><input id="rtName" class="input" placeholder="e.g. ardian's Mac"><span class="hint">Teammates see this name in the sidebar.</span></div>
+    <div class="field"><label for="rtName">Name</label><input id="rtName" class="input" placeholder="e.g. adrian's Mac"><span class="hint">Teammates see this name in the sidebar.</span></div>
     <fieldset class="fs"><legend class="flabel">Workloads this computer may take</legend><div class="wl-grid">
       ${WORKLOADS.map(([t, dsc], n) => `<label class="optcard"><input type="checkbox" ${n !== 5 ? "checked" : ""}><span><b>${t}</b><small>${dsc}</small></span></label>`).join("")}</div></fieldset>
     <p class="hint">${ic("shield-check")}Your computers run the agents. Konteks never holds a provider key or account.</p>`,
@@ -66,7 +66,7 @@ function connectRuntime() {
 }
 function revokedRuntimes() {
   drawer("Revoked runtimes", `<p class="hint">Kept for the record. A revoked runtime can never take work again.</p>
-    <div class="card res">${[["yoga-fedora (old)", "e0138cce", "30 Sep 2026", "5 Oct 2026"], ["hana-laptop", "aeb39004", "30 Sep 2026", "4 Oct 2026"], ["rizky-windows", "d498d982", "30 Sep 2026", "7 Oct 2026"]].map(([n, id, r, s]) => `<div class="res-item">${ic("server-off", "os")}<div><div class="ttl" title="Runtime id ${id}">${n} ${st("muted", "Revoked")}</div><div class="meta"><span>Registered ${r}</span><span>Last seen ${s}</span></div></div></div>`).join("")}</div>`);
+    <div class="card res">${[["yuki-fedora (old)", "e0138cce", "30 Sep 2026", "5 Oct 2026"], ["hana-laptop", "aeb39004", "30 Sep 2026", "4 Oct 2026"], ["ryan-windows", "d498d982", "30 Sep 2026", "7 Oct 2026"]].map(([n, id, r, s]) => `<div class="res-item">${ic("server-off", "os")}<div><div class="ttl" title="Runtime id ${id}">${n} ${st("muted", "Revoked")}</div><div class="meta"><span>Registered ${r}</span><span>Last seen ${s}</span></div></div></div>`).join("")}</div>`);
 }
 
 /* ---------- Runtime detail: harness tiles, sessions, commands, On this computer. Updating = the connector
@@ -361,7 +361,7 @@ function pageVcs() {
   const inner = `<div class="lockrow">${ic("eye")}<span class="grow">You can see these connectors. Adding, testing or changing one needs a Workspace Owner.</span><button class="btn btn-ghost btn-sm" type="button" id="vcsCheck">${ic("rotate-cw")}Check again</button><button class="btn btn-sm" type="button" data-reqrole="Workspace Owner">Review or request access</button></div>
     <p class="hint">${VCS.length} connectors</p>
     <div class="tablewrap"><table class="dtable"><thead><tr><th>Connector</th><th>Provider</th><th>Owner</th><th>URL</th><th>Token</th><th>Status</th></tr></thead><tbody>
-      ${VCS.map(([n, p, u, t, o], i) => `<tr class="clickable" data-vcs="${i}" tabindex="0"><td><b style="font-weight:500">${esc(n)}</b></td><td>${p}</td><td>${o === "Ardian Yusuf" ? "You" : esc(o)}</td><td class="mono">${esc(u.replace("https://", ""))}</td><td class="mono">${t}••••</td><td>${st("ok", "Connected")}</td></tr>`).join("")}
+      ${VCS.map(([n, p, u, t, o], i) => `<tr class="clickable" data-vcs="${i}" tabindex="0"><td><b style="font-weight:500">${esc(n)}</b></td><td>${p}</td><td>${o === "Adrian Young" ? "You" : esc(o)}</td><td class="mono">${esc(u.replace("https://", ""))}</td><td class="mono">${t}••••</td><td>${st("ok", "Connected")}</td></tr>`).join("")}
     </tbody></table></div>`;
   return czShell("vcs", "VCS Connectors", "Connections Konteks uses to read repositories and open pull requests.", "", inner);
 }
@@ -369,8 +369,8 @@ function bindVcs() {
   bindCz(); bindLock(); $("#vcsCheck")?.addEventListener("click", () => toast("Still view-only for your role"));
   /* Row → drawer with what the connector is and who it belongs to (UX-030). View-only, like the page. */
   $$("[data-vcs]").forEach(r => { const go = () => { const [n, p, u, tk, o, sys] = VCS[+r.dataset.vcs];
-    drawer(n, `<div class="props">${[["Provider", p], ["URL", `<span class="mono">${esc(u.replace("https://", ""))}</span>`], ["Token", `<span class="mono">${tk}••••</span>`], ["Owner", o === "Ardian Yusuf" ? "You" : esc(o)], ["Used by", sys.map(s => esc(s)).join(", ")], ["Status", st("ok", "Connected")]].map(([k, v]) => `<div class="prop"><span>${k}</span><div>${v}</div></div>`).join("")}</div>
-      <p class="hint">${o === "Organization" ? "An organization connection: Konteks reads with the organization's credentials." : "A personal connection: Konteks reads with " + (o === "Ardian Yusuf" ? "your" : esc(o.split(" ")[0]) + "'s") + " credentials, so pick it on purpose."}</p>
+    drawer(n, `<div class="props">${[["Provider", p], ["URL", `<span class="mono">${esc(u.replace("https://", ""))}</span>`], ["Token", `<span class="mono">${tk}••••</span>`], ["Owner", o === "Adrian Young" ? "You" : esc(o)], ["Used by", sys.map(s => esc(s)).join(", ")], ["Status", st("ok", "Connected")]].map(([k, v]) => `<div class="prop"><span>${k}</span><div>${v}</div></div>`).join("")}</div>
+      <p class="hint">${o === "Organization" ? "An organization connection: Konteks reads with the organization's credentials." : "A personal connection: Konteks reads with " + (o === "Adrian Young" ? "your" : esc(o.split(" ")[0]) + "'s") + " credentials, so pick it on purpose."}</p>
       <div class="lockrow">${ic("eye")}<span class="grow">Testing or changing this connector needs a Workspace Owner.</span></div>`); };
     r.onclick = go; r.onkeydown = e => { if (e.key === "Enter") go(); }; });
 }

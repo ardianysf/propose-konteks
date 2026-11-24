@@ -17,12 +17,12 @@ function pageSession() {
       <div class="evgroup">
       <div class="evline ok">${ic("receipt")}<b>Analysis quote ready: 2.15 SP</b><span>· valid until 27 Oct 2026, 14.34</span></div>
       <div class="evline ok">${ic("receipt")}<b>Execution quote ready: 2.15 SP</b><span>· valid until 27 Oct 2026, 16.20</span></div>
-      <div class="evline ok">${ic("circle-check")}<b>Maya Lestari approved this delivery</b><span>· 15.22</span></div>
+      <div class="evline ok">${ic("circle-check")}<b>Maya Larsen approved this delivery</b><span>· 15.22</span></div>
       <div class="evline">${ic("play")}<span>Task 1 of 1 started: Refresh and validate the support-api README · 15.22</span></div>
       <div class="evline">${ic("flag")}<span>The run has ended. Story Points settled · 17.19</span></div>
       </div>
       <div class="run"><div class="run-h">${ic("circle-stop")}<b style="font-weight:600">Not finished · your changes are kept on the pull request</b><span class="hint" style="margin-left:auto">0.47 SP</span></div>
-        <div class="run-b"><p>Stopped by Maya Lestari. Work resumes only when someone chooses Continue.</p><div class="run-acts"><span class="tag">${ic("git-pull-request")}PR #41 · open</span><button class="btn btn-sm" id="viewChanges">${ic("file-diff")}View changes</button><button class="btn btn-sm" id="viewReceipt">${ic("receipt")}View receipt</button></div></div></div>
+        <div class="run-b"><p>Stopped by Maya Larsen. Work resumes only when someone chooses Continue.</p><div class="run-acts"><span class="tag">${ic("git-pull-request")}PR #41 · open</span><button class="btn btn-sm" id="viewChanges">${ic("file-diff")}View changes</button><button class="btn btn-sm" id="viewReceipt">${ic("receipt")}View receipt</button></div></div></div>
       <div class="msg-user">Before we retry: run the documented checks again on rf-01 and tell me which ones fail, and why.</div>
       <div class="msg-agent"><span class="agent-av">${ic("bot")}</span><div class="msg-b">
         <span class="who"><b>Konteks</b>Codex · GPT-6-Luna · 17.26</span>
@@ -43,7 +43,7 @@ run    curl /health/ready         ok    0.1s  200</pre></details>
       <div class="msg-agent"><span class="agent-av">${ic("bot")}</span><div class="msg-b">
         <span class="who"><b>Konteks</b>Codex · GPT-6-Luna · 17.32</span>
         <p>I'll ask for a fresh estimate using the original ticket and your instruction. The new proposal accounts for the earlier misread check, and it needs approval before anything runs.</p>
-        <div class="summary"><dl><dt>Last run</dt><dd>Stopped by Maya Lestari · 0.47 SP settled</dd><dt>Kept</dt><dd>PR #41 with the README changes, unmerged</dd><dt>Next</dt><dd>A new quote appears here for approval</dd></dl></div>
+        <div class="summary"><dl><dt>Last run</dt><dd>Stopped by Maya Larsen · 0.47 SP settled</dd><dt>Kept</dt><dd>PR #41 with the README changes, unmerged</dd><dt>Next</dt><dd>A new quote appears here for approval</dd></dl></div>
         <details class="trace"><summary title="30.5s · 990 tokens in, 22 out">${ic("chevron-right")}Agent trace</summary><pre>read   delivery receipt TKT-1 (stopped by user)
 read   last proposal request: cancelled before a result
 decide new proposal; no second delivery or charge started
@@ -52,7 +52,7 @@ submit proposal (ticket verbatim + retry instruction)</pre></details>
       <div class="dc ${S.approved ? "waiting" : "decision"}"><div class="dc-top">${S.approved ? st("info", "Delivering") : st("ok", "Needs a decision")}<span>${S.approved ? "Started just now" : "Waiting 18m"}</span></div>
         <div class="dc-body"><div class="dc-title">${S.approved ? "TKT-1's delivery started" : "TKT-1's estimate is ready"}</div>
           ${S.approved ? `<p class="dc-why">Approved up to 2.15 SP. You'll be asked to review when the pull request is ready.</p>` : `<div class="quote"><div class="qrow"><span>Story Points, at most</span><b>2.15 SP</b></div><div class="qrow"><span>Model cost on your subscription</span><b>$0.57 – $2.02</b></div></div>
-          <div class="dc-acts">${can ? `<button class="btn btn-primary btn-sm" id="sApprove">${ic("check")}Approve<span class="cost">2.15 SP</span></button>` : `<span class="gate">${ic("lock")}Waiting for a Delivery Approver (Maya Lestari)</span>`}<a class="btn btn-sm" href="#initiative">Change in the initiative${ic("arrow-right")}</a></div>`}</div></div>
+          <div class="dc-acts">${can ? `<button class="btn btn-primary btn-sm" id="sApprove">${ic("check")}Approve<span class="cost">2.15 SP</span></button>` : `<span class="gate">${ic("lock")}Waiting for a Delivery Approver (Maya Larsen)</span>`}<a class="btn btn-sm" href="#initiative">Change in the initiative${ic("arrow-right")}</a></div>`}</div></div>
       <details class="inline-disc"><summary>${ic("chevron-right")}Konteks learned · 1 note</summary><div class="disc-in hint">The verify script prints an expected Asana error from a rejection-logging test. It is not the cause of a failed check.</div></details>
       <div class="sess-live" id="sessLive"></div>
     </div></div>
@@ -70,7 +70,7 @@ function bindSession() {
   $("#files")?.addEventListener("click", () => drawer("Session files", `<div class="empty"><div class="ic">${ic("folder-open")}</div><h3>No files in this session</h3><p>Attach screenshots, specs or logs with the paperclip in the message box. The agent reads them for this ticket only.</p></div>`));
   $("#viewChanges")?.addEventListener("click", changesDrawer);
   $("#viewReceipt")?.addEventListener("click", () => drawer("Receipt · TKT-1", `<div class="quote"><div class="qrow"><span>Result</span><b style="font-family:var(--sans)">Not finished, work kept</b></div><div class="qrow"><span>Settled</span><b>0.47 SP</b></div><div class="qrow"><span>Approved limit</span><b>2.15 SP</b></div><div class="qrow"><span>Model cost on your subscription</span><b>$0.41</b></div><div class="qrow"><span>Pull request</span><b>#41 · open</b></div></div>
-    <div class="props">${[["Runtime", "rf-01"], ["Started", "27 Oct 2026, 15.22"], ["Ended", "27 Oct 2026, 17.19"], ["Stopped by", "Maya Lestari"]].map(([a, b]) => `<div class="prop"><span>${a}</span><div>${b}</div></div>`).join("")}</div>`));
+    <div class="props">${[["Runtime", "rf-01"], ["Started", "27 Oct 2026, 15.22"], ["Ended", "27 Oct 2026, 17.19"], ["Stopped by", "Maya Larsen"]].map(([a, b]) => `<div class="prop"><span>${a}</span><div>${b}</div></div>`).join("")}</div>`));
   $("#rtChip")?.addEventListener("click", () => { S.rt = "rf-01"; location.hash = "runtime"; });
   $("#vcsChip")?.addEventListener("click", () => drawer("Repository", `<div class="props">${[["Connection", "Rentify org · Gitea"], ["URL", `<span class="mono">https://gitea.example.id/rentify/support-api</span>`], ["Branch", `<span class="mono">konteks/tkt-1-readme</span>`], ["Pull request", "#41 · open"]].map(([a, b]) => `<div class="prop"><span>${a}</span><div>${b}</div></div>`).join("")}</div>`));
   $("#progPill")?.addEventListener("click", e => {
@@ -144,7 +144,7 @@ function actCard({ e, earlier }) { const i = iniById[e.ini], live = e.reply?.kin
       ${actBody(e, i)}${actReply(e, i)}
       ${earlier.length ? `<details class="tl-thread"><summary>${ic("chevron-right")}${earlier.length} earlier ${e.m < 1440 ? "today" : "that day"}</summary><ol>${earlier.map(x => `<li>${actAv(x.p)}<span><b>${actWho(x.p)}</b> ${x.kind === "started" ? "started it" : ACT_VERB[x.kind](x).replace(/ (in|for)$/, "")}</span>${tlTime(x.m)}</li>`).join("")}</ol></details>` : ""}
       <footer class="tl-f"><div class="reacts">${e.re.map(([em, n]) => `<button class="react" type="button" aria-pressed="false" data-react>${em} <span>${n}</span></button>`).join("")}<button class="react react-add" type="button" aria-label="Add a reaction" aria-haspopup="true" aria-expanded="false">${ic("smile-plus")}</button><button class="btn btn-ghost btn-sm" type="button" data-cmt aria-label="Comment on ${esc(i.title)}">${ic("message-square")}Comment</button>${(e.cm || []).length ? `<button class="cmt-count" type="button" data-cmts aria-expanded="false">${[...new Set(e.cm.map(c => c.p))].slice(0, 3).map(p => actAv(p)).join("")}<span>${e.cm.length} comment${e.cm.length > 1 ? "s" : ""}</span></button>` : ""}</div>
-        ${cta ? `<a class="btn btn-primary btn-sm" href="#initiative/activities" data-ini="${i.id}">${esc(i.action)}${ic("arrow-right")}</a>` : e.reply?.kind === "estimate" && !S.approved ? `<span class="hint">${ic("lock")}Maya Lestari approves</span>` : ""}</footer>
+        ${cta ? `<a class="btn btn-primary btn-sm" href="#initiative/activities" data-ini="${i.id}">${esc(i.action)}${ic("arrow-right")}</a>` : e.reply?.kind === "estimate" && !S.approved ? `<span class="hint">${ic("lock")}Maya Larsen approves</span>` : ""}</footer>
       <div class="tl-band" hidden><ol class="tl-cmts" hidden>${(e.cm || []).map(actCmt).join("")}</ol></div>
     </article></li>`; }
 /* Start something: each idle System is one row and one button. The name reads as a name (box icon, ink, no frame);

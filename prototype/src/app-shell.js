@@ -30,7 +30,7 @@ function shell(active, top, body, { flush = false } = {}) {
   /* Runtimes, compact: one segmented bar for the fleet (it links to the Runtimes table), then only what is yours:
      your own computers and Work Locally. Other people's runtimes are one click away behind the bar. */
   const cnt = k => RUNTIMES.filter(r => r.status === k).length, ready = cnt("ready"), paused = cnt("paused"), off = cnt("offline");
-  const mine = RUNTIMES.filter(r => r.owner === "Ardian Yusuf");
+  const mine = RUNTIMES.filter(r => r.owner === "Adrian Young");
   const fleet = `${ready} of ${RUNTIMES.length} runtimes ready`;
   const mineRow = r => { const [k, l] = RT_STATUS[r.status]; return `<a href="#runtime" data-rtgo="${r.id}" data-tip="${esc(r.name)}: ${l}" aria-label="${esc(r.name)}, your computer: ${l}" ${active === "runtime" && S.rt === r.id ? 'aria-current="page"' : ""}><span class="ic-dot">${ic(r.os === "macOS" ? "laptop" : "monitor")}<span class="rt-dot ${k}" aria-hidden="true"></span></span><span class="lbl">${esc(r.name)}</span><span class="rt-st lbl">${l}</span></a>`; };
   return `<a class="skip" href="#main" id="skipLink">Skip to content</a><div class="app ${S.rail ? "railed" : ""}" id="app" style="--side-w:${S.sideW || 240}px">
@@ -55,7 +55,7 @@ function shell(active, top, body, { flush = false } = {}) {
     </section>
     <div class="side-foot">
       <div class="side-resize" id="sideResize" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" aria-valuemin="200" aria-valuemax="360" aria-valuenow="${S.sideW || 240}" tabindex="0"></div>
-      <div class="side-me"><button class="me" type="button" id="meBtn" aria-haspopup="menu" aria-label="Account menu" data-tip="Ardian Yusuf">${av("ay")}<span style="min-width:0"><b>Ardian Yusuf</b><small>ardian@refactory.id</small></span></button>
+      <div class="side-me"><button class="me" type="button" id="meBtn" aria-haspopup="menu" aria-label="Account menu" data-tip="Adrian Young">${av("ay")}<span style="min-width:0"><b>Adrian Young</b><small>adrian@refactory.id</small></span></button>
         <button class="btn btn-ghost btn-icon btn-sm rail-btn" type="button" id="railBtn" data-tip="${S.rail ? "Expand sidebar" : "Collapse sidebar"}" aria-label="${S.rail ? "Expand sidebar" : "Collapse sidebar"}">${ic(S.rail ? "panel-left-open" : "panel-left-close")}</button></div>
     </div>
   </aside>
@@ -130,7 +130,7 @@ function bindViewAs(rerender) {
 function accountMenuItems() {
   const setLang = l => { S.lang = l; document.documentElement.lang = l; toast(l === "en" ? "Language: English" : "Bahasa: Indonesia. Teks demo ini hanya dalam bahasa Inggris"); };
   return [
-    { head: `${av("ay")}<span><b>Ardian Yusuf</b><small>ardian@refactory.id</small><small>Engineering Contributor</small></span>` }, "-",
+    { head: `${av("ay")}<span><b>Adrian Young</b><small>adrian@refactory.id</small><small>Engineering Contributor</small></span>` }, "-",
     { label: "Settings", icon: "settings", run: () => { location.hash = "general"; } },
     { choice: "Language", options: [["EN", "English", S.lang === "en", () => setLang("en")], ["ID", "Bahasa Indonesia", S.lang === "id", () => setLang("id")]] }, "-",
     { label: "Support", icon: "life-buoy", run: supportDialog },

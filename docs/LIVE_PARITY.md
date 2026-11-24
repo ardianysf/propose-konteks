@@ -1,6 +1,6 @@
 # Konteks live app: process parity spec (read 27 Oct 2026, 19.40–20.10 WIB, read-only)
 
-Source: app.konteks.io as Ardian Yusuf (Engineering Contributor) + audit report v2. The redesign may change
+Source: app.konteks.io as Adrian Young (Engineering Contributor) + audit report v2. The redesign may change
 presentation only. Every page, entry point, field, step and action below must exist in the redesign with the
 same meaning; nothing may be added that needs new backend behaviour.
 

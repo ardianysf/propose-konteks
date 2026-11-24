@@ -178,7 +178,7 @@ function pageFoundations() {
 
     <section class="sec" id="f6"><div class="sec-head"><h2>Bahasa</h2><p>Tulis dari sisi pengguna. Tombol menyebut aksinya; pesan error menyebut masalah dan cara memperbaikinya.</p></div>
       <div class="dodont">
-        ${[["Approve · 2.15 SP", "Proceed"], ["Plan could not be saved: you don't have Plan Save in SensePortal", "access_denied"], ["Maya Lestari approved this delivery", "mlestari-20260811-53ad94 approved this delivery"], ["10 registered · 6 ready · 3 not connected", "19 connected"]].map(([g, b]) => `<div class="panel dd do"><span class="label">${ic("check")}Tulis</span><p>${esc(g)}</p></div><div class="panel dd dont"><span class="label">${ic("x")}Bukan</span><p class="mono" style="font-size:12px">${esc(b)}</p></div>`).join("")}
+        ${[["Approve · 2.15 SP", "Proceed"], ["Plan could not be saved: you don't have Plan Save in SensePortal", "access_denied"], ["Maya Larsen approved this delivery", "mlestari-20260811-53ad94 approved this delivery"], ["10 registered · 6 ready · 3 not connected", "19 connected"]].map(([g, b]) => `<div class="panel dd do"><span class="label">${ic("check")}Tulis</span><p>${esc(g)}</p></div><div class="panel dd dont"><span class="label">${ic("x")}Bukan</span><p class="mono" style="font-size:12px">${esc(b)}</p></div>`).join("")}
       </div>
     </section>
 

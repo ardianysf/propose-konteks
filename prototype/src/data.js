@@ -1,23 +1,23 @@
 /* Synthetic demo data. Every name, System and number is invented for the pitch, but each object has the same
    fields, states and wording as its counterpart in the live app (see parity/LIVE_PARITY.md). */
-const ME = { id: "ay", name: "Ardian Yusuf", email: "ardian@refactory.id", role: "Engineering Contributor" };
+const ME = { id: "ay", name: "Adrian Young", email: "adrian@refactory.id", role: "Engineering Contributor" };
 
 const PEOPLE = {
-  ay: { name: "Ardian Yusuf", ini: "AY" },
-  ds: { name: "Dimas Pratama", ini: "DP" },
-  sw: { name: "Sari Wulandari", ini: "SW" },
-  bh: { name: "Bagus Hartono", ini: "BH" },
-  np: { name: "Nadia Putri", ini: "NP" },
-  ra: { name: "Rizky Aditya", ini: "RA" },
-  ml: { name: "Maya Lestari", ini: "ML" },
-  ys: { name: "Yoga Saputra", ini: "YS" },
+  ay: { name: "Adrian Young", ini: "AY" },
+  ds: { name: "Daniel Park", ini: "DP" },
+  sw: { name: "Sarah Walsh", ini: "SW" },
+  bh: { name: "Ben Harper", ini: "BH" },
+  np: { name: "Nina Patel", ini: "NP" },
+  ra: { name: "Ryan Alvarez", ini: "RA" },
+  ml: { name: "Maya Larsen", ini: "ML" },
+  ys: { name: "Yuki Sato", ini: "YS" },
 };
 
 /* Systems carry no colour: colour is reserved for state. A System is named, with a box icon. */
 const SYSTEMS = [
   { id: "rentify", name: "Rentify" }, { id: "ledger", name: "Ledgerline" }, { id: "sense", name: "SensePortal" },
-  { id: "hris", name: "HRIS Nusantara" }, { id: "kurir", name: "Kurir Hub" }, { id: "vendor", name: "Portal Vendor" },
-  { id: "kanteen", name: "Kanteen" }, { id: "blog", name: "Personal Blog" },
+  { id: "hris", name: "HRIS Meridian" }, { id: "kurir", name: "Courier Hub" }, { id: "vendor", name: "Vendor Portal" },
+  { id: "kanteen", name: "Canteen" }, { id: "blog", name: "Personal Blog" },
 ];
 const sysById = Object.fromEntries(SYSTEMS.map(s => [s.id, s]));
 
@@ -30,11 +30,11 @@ const INITIATIVES = [
     cause: "The plan is ready. Break it into tickets", action: "Create tickets", wait: "7h 11m", fresh: 21, updates: 21 },
   { id: "INI-131", head: "Nothing is moving: the plan could not be saved", detail: "Konteks revised the plan as often as it may this hour, then stopped: saving needs Plan Save in SensePortal, which your role does not include.", title: "Role editor for SensePortal", sys: "sense", driver: "ay", stage: "Planning", tone: "blocked", kind: "stalled",
     cause: "Plan could not be saved: you don't have Plan Save in SensePortal", action: "See what happened", wait: "4d 2h", updates: 12 },
-  { id: "INI-137", head: "The breakdown is ready for review", detail: "Konteks proposed one ticket. It cannot be accepted until TKT-1 has a repository; Sari chooses it in the breakdown.", title: "HRIS frontend developer README", sys: "hris", driver: "sw", stage: "Planning", tone: "decision", kind: "breakdown",
+  { id: "INI-137", head: "The breakdown is ready for review", detail: "Konteks proposed one ticket. It cannot be accepted until TKT-1 has a repository; Sarah chooses it in the breakdown.", title: "HRIS frontend developer README", sys: "hris", driver: "sw", stage: "Planning", tone: "decision", kind: "breakdown",
     cause: "The breakdown is ready for review. TKT-1 still needs a repository", action: "Review", wait: "7h 31m", fresh: 12, updates: 12 },
-  { id: "INI-128", head: "TKT-1 was stopped. Its work is kept", detail: "Bagus stopped TKT-1 after its third repair round. The changes so far are kept on the pull request. Continue resumes from there.", title: "SensePortal performance pass", sys: "sense", driver: "bh", stage: "Executing", tone: "blocked", kind: "stopped",
+  { id: "INI-128", head: "TKT-1 was stopped. Its work is kept", detail: "Ben stopped TKT-1 after its third repair round. The changes so far are kept on the pull request. Continue resumes from there.", title: "SensePortal performance pass", sys: "sense", driver: "bh", stage: "Executing", tone: "blocked", kind: "stopped",
     cause: "TKT-1 was stopped. Its work is kept", action: "Continue", wait: "1d 3h", fresh: 35, updates: 35 },
-  { id: "INI-120", head: "Planning ended without a plan", detail: "The planning agent ended 12 times without a plan or a question. Try again starts a new planning run from the same request and notes.", title: "Kurir Hub user manual", sys: "kurir", driver: "ra", stage: "Planning", tone: "blocked", kind: "no-plan",
+  { id: "INI-120", head: "Planning ended without a plan", detail: "The planning agent ended 12 times without a plan or a question. Try again starts a new planning run from the same request and notes.", title: "Courier Hub user manual", sys: "kurir", driver: "ra", stage: "Planning", tone: "blocked", kind: "no-plan",
     cause: "Planning ended without a plan", action: "Try again", more: "Konteks asked a question about the plan", wait: "1d 3h", updates: 39 },
   { id: "INI-125", head: "Nothing is moving on this initiative", detail: "No agent is working and nobody has added a note for a day. The last update was Konteks asking for the reproduction steps.", title: "Reproduce staging bug findings", sys: "vendor", driver: "np", stage: "Planning", tone: "waiting", kind: "stalled",
     cause: "Nothing is moving. Last update 1d 2h ago", action: "See what happened", wait: "1d 2h", updates: 4 },
@@ -59,15 +59,15 @@ const WL_ALL = WORKLOADS.map(w => w[0]);
 const RUNTIMES = [
   { id: "rf-01", name: "rf-01", desc: "Refactory Server 01", os: "Linux", owner: "Organization", status: "ready", sessions: "Open sessions 3 · Running 1", wl: WL_ALL, version: "0.19.26", seen: "Now",
     harness: [["Claude Code", "signin"], ["Codex", "ready"], ["DeepSeek Harness", "ready"], ["OpenCode", "failed"], ["Google Antigravity", "na"]], attested: true },
-  { id: "maya", name: "maya-mac", desc: "", os: "macOS", owner: "Maya Lestari", status: "ready", sessions: "Idle", wl: WL_ALL, version: "0.19.26", seen: "Now", harness: [["Claude Code", "ready"], ["Codex", "ready"]] },
-  { id: "dimas", name: "dimas-pc", desc: "", os: "Windows", owner: "Dimas Pratama", status: "ready", sessions: "Open sessions 1 · Running 0", wl: WL_ALL.slice(0, 5).concat("Catalog onboarding"), version: "0.19.25", update: true, seen: "Now", harness: [["Claude Code", "ready"], ["Codex", "ready"]] },
-  { id: "bagus", name: "bagus-arc", desc: "", os: "Linux", owner: "Bagus Hartono", status: "ready", sessions: "Open sessions 1 · Running 0", wl: WL_ALL.filter(w => w !== "Operations"), version: "0.19.26", seen: "Now", harness: [["Claude Code", "ready"], ["Codex", "ready"], ["OpenCode", "ready"]] },
-  { id: "fedora", name: "yoga-fedora", desc: "", os: "Linux", owner: "Yoga Saputra", status: "ready", sessions: "Open sessions 1 · Running 0", wl: WL_ALL.filter(w => w !== "Operations"), version: "0.19.26", seen: "Now", harness: [["Codex", "ready"]] },
-  { id: "bazzite", name: "yoga-bazzite", desc: "", os: "Linux", owner: "Yoga Saputra", status: "ready", sessions: "Idle", wl: [], version: "0.19.26", seen: "Now", harness: [] },
-  { id: "rizky", name: "rizky-mac", desc: "", os: "macOS", owner: "Rizky Aditya", status: "paused", reasons: "No live connection", sessions: "", wl: WL_ALL.filter(w => w !== "Operations"), version: "0.19.25", update: true, seen: "16 Oct 2026", harness: [["Codex", "ready"]] },
-  { id: "mymac", name: "ardian's Mac", desc: "", os: "macOS", owner: "Ardian Yusuf", status: "offline", reasons: "Lease expired, last known healthy, no live connection", sessions: "", wl: WL_ALL.filter(w => w !== "Operations"), version: "0.19.25", update: true, seen: "24 Oct 2026", mine: true, harness: [["Codex", "ready"]] },
+  { id: "maya", name: "maya-mac", desc: "", os: "macOS", owner: "Maya Larsen", status: "ready", sessions: "Idle", wl: WL_ALL, version: "0.19.26", seen: "Now", harness: [["Claude Code", "ready"], ["Codex", "ready"]] },
+  { id: "daniel", name: "daniel-pc", desc: "", os: "Windows", owner: "Daniel Park", status: "ready", sessions: "Open sessions 1 · Running 0", wl: WL_ALL.slice(0, 5).concat("Catalog onboarding"), version: "0.19.25", update: true, seen: "Now", harness: [["Claude Code", "ready"], ["Codex", "ready"]] },
+  { id: "ben", name: "ben-arc", desc: "", os: "Linux", owner: "Ben Harper", status: "ready", sessions: "Open sessions 1 · Running 0", wl: WL_ALL.filter(w => w !== "Operations"), version: "0.19.26", seen: "Now", harness: [["Claude Code", "ready"], ["Codex", "ready"], ["OpenCode", "ready"]] },
+  { id: "fedora", name: "yuki-fedora", desc: "", os: "Linux", owner: "Yuki Sato", status: "ready", sessions: "Open sessions 1 · Running 0", wl: WL_ALL.filter(w => w !== "Operations"), version: "0.19.26", seen: "Now", harness: [["Codex", "ready"]] },
+  { id: "bazzite", name: "yuki-bazzite", desc: "", os: "Linux", owner: "Yuki Sato", status: "ready", sessions: "Idle", wl: [], version: "0.19.26", seen: "Now", harness: [] },
+  { id: "ryan", name: "ryan-mac", desc: "", os: "macOS", owner: "Ryan Alvarez", status: "paused", reasons: "No live connection", sessions: "", wl: WL_ALL.filter(w => w !== "Operations"), version: "0.19.25", update: true, seen: "16 Oct 2026", harness: [["Codex", "ready"]] },
+  { id: "mymac", name: "adrian's Mac", desc: "", os: "macOS", owner: "Adrian Young", status: "offline", reasons: "Lease expired, last known healthy, no live connection", sessions: "", wl: WL_ALL.filter(w => w !== "Operations"), version: "0.19.25", update: true, seen: "24 Oct 2026", mine: true, harness: [["Codex", "ready"]] },
   { id: "rf-02", name: "rf-02", desc: "Rack 3", os: "Linux", owner: "Organization", status: "offline", reasons: "Lease expired, last known healthy, no live connection", sessions: "", wl: WL_ALL.filter(w => w !== "Operations"), version: "0.19.25", update: true, seen: "20 Oct 2026", harness: [["Codex", "ready"]] },
-  { id: "sari", name: "sari-linux", desc: "", os: "Linux", owner: "Sari Wulandari", status: "offline", reasons: "Lease expired, last known healthy, no live connection", sessions: "", wl: ["Assistant & Search", "Catalog onboarding", "Planning"], version: "0.19.25", update: true, seen: "19 Oct 2026", harness: [["Codex", "ready"]] },
+  { id: "sarah", name: "sarah-linux", desc: "", os: "Linux", owner: "Sarah Walsh", status: "offline", reasons: "Lease expired, last known healthy, no live connection", sessions: "", wl: ["Assistant & Search", "Catalog onboarding", "Planning"], version: "0.19.25", update: true, seen: "19 Oct 2026", harness: [["Codex", "ready"]] },
 ];
 const rtById = Object.fromEntries(RUNTIMES.map(r => [r.id, r]));
 const HARNESS_STATUS = { ready: ["ok", "Ready"], signin: ["warn", "Needs sign-in"], failed: ["danger", "Failed"], na: ["muted", "Not available"] };
@@ -144,12 +144,12 @@ const TOOLS = [
 ];
 const VCS = [
   ["Rentify org", "Gitea", "https://gitea.example.id", "29cf", "Organization", ["Rentify"]],
-  ["Gitea Sari", "Gitea", "https://gitea.example.id", "36ac", "Sari Wulandari", ["HRIS Nusantara"]],
-  ["Gitea Bagus", "Gitea", "https://gitea.example.id", "d941", "Bagus Hartono", ["SensePortal"]],
-  ["Ledgerline GitHub", "GitHub", "https://api.github.com", "gith", "Dimas Pratama", ["Ledgerline"]],
-  ["HRIS Azure", "Azure DevOps", "https://dev.azure.com/hris-nusantara", "Daer", "Sari Wulandari", ["HRIS Nusantara"]],
-  ["Kurir Gitea", "Gitea", "https://git.kurirhub.id", "7887", "Rizky Aditya", ["Kurir Hub"]],
-  ["Gitea Ardian", "Gitea", "https://gitea.example.id", "aedd", "Ardian Yusuf", []],
+  ["Gitea Sarah", "Gitea", "https://gitea.example.id", "36ac", "Sarah Walsh", ["HRIS Meridian"]],
+  ["Gitea Ben", "Gitea", "https://gitea.example.id", "d941", "Ben Harper", ["SensePortal"]],
+  ["Ledgerline GitHub", "GitHub", "https://api.github.com", "gith", "Daniel Park", ["Ledgerline"]],
+  ["HRIS Azure", "Azure DevOps", "https://dev.azure.com/hris-meridian", "Daer", "Sarah Walsh", ["HRIS Meridian"]],
+  ["Courier Gitea", "Gitea", "https://git.kurirhub.id", "7887", "Ryan Alvarez", ["Courier Hub"]],
+  ["Gitea Adrian", "Gitea", "https://gitea.example.id", "aedd", "Adrian Young", []],
 ];
 const MODEL_MODES = [
   ["Planning", "Understand the requirements and plan the work. Also inspects your repositories when you onboard a System.", "Auto", "Default (recommended) · $5 / $25 per 1M tokens"],
@@ -177,7 +177,7 @@ const THREADS = {
     { who: "kx", m: 1712, r: 1, uses: [["tool", "document"]], steps: ["Read README.md and package.json in rentify/support-api", "Listed the routes in src/routes", "Used tool · document", "Compared the README with the source"], text: "I read the repository and the current README. Three things to settle before I draft the PRD:\n\n1. The README documents `npm run seed:all`, which no longer exists. Should I document the two seed scripts that replaced it, or only the one support uses?\n2. The Troubleshooting section covers the old queue worker. Keep it, rewrite it, or drop it?\n3. Do you want the run outcomes in the README itself, or only in the pull request description?" },
     { who: "ay", m: 1650, r: 1, text: "1. Only `seed:support`; the other one is for the billing team.\n2. Keep it, ops still uses it. Rewrite it for the current worker.\n3. Outcomes in the PR description. The README should stay a guide, not a log." },
     { who: "sw", m: 1580, text: "Heads-up from the HRIS side: the readiness endpoint moved to `/health/ready` in v2.4. The old `/status` still answers but is deprecated and will go in v3.", re: [["👀", 1]] },
-    { who: "kx", m: 1576, r: 1, steps: ["Searched src for /status and /health/ready", "Checked the v2.4 changelog"], text: "Thanks, Sari. Confirmed in the source: `/health/ready` is the readiness check and `/status` is marked deprecated. I'll document the new one and add a one-line deprecation note for the old." },
+    { who: "kx", m: 1576, r: 1, steps: ["Searched src for /status and /health/ready", "Checked the v2.4 changelog"], text: "Thanks, Sarah. Confirmed in the source: `/health/ready` is the readiness check and `/status` is marked deprecated. I'll document the new one and add a one-line deprecation note for the old." },
     { who: "ay", m: 1490, atts: [["architecture-notes.md", "8 KB"], ["support-api-flows.png", "214 KB"]], text: "Here are the architecture notes and the flow diagram from the last review. The diagram is a bit old but the request flow is still right." },
     { who: "kx", m: 1474, r: 1, uses: [["tool", "document"]], steps: ["Used tool · document", "Read architecture-notes.md", "Drafted PRD revision 1", "Proposed one ticket"], text: "PRD revision 1 is ready, with one ticket.\n\n**What changes**\n- Purpose and boundaries, from the architecture notes\n- Request flow for the three public routes, checked against `src/routes`\n- Configuration: environment variable names only, never values\n- Readiness: `/health/ready`, with `/status` marked deprecated\n- Troubleshooting, rewritten for the current worker\n\n**What does not change**\n- Application code, tests, security, IAM and billing\n\nEvery documented command will be run on rf-01, and the outcomes go into the pull request description. Have a look at the PRD and the breakdown." },
     { who: "ml", m: 420, text: "Before I approve: will the command checks run against staging or production data? The support-api seeds touch the customer tables." },
@@ -214,8 +214,8 @@ const REQUESTS = {
   "INI-131": "Let workspace admins create and edit roles in SensePortal instead of asking us to change the seed file. Keep the existing permissions as they are.",
   "INI-137": "New frontend developers lose their first day getting HRIS running. Write a README that takes them from clone to a green build, including the Azure DevOps access they need.",
   "INI-128": "The SensePortal dashboard takes 6 seconds to load for large tenants. Find the slow queries and fix the worst ones without changing what the dashboard shows.",
-  "INI-120": "Write a user manual for Kurir Hub dispatchers: creating a delivery, assigning a courier, and handling a failed drop-off.",
-  "INI-125": "QA filed four bugs against Portal Vendor staging last week. Reproduce each one and write down the exact steps, or say why it does not reproduce.",
+  "INI-120": "Write a user manual for Courier Hub dispatchers: creating a delivery, assigning a courier, and handling a failed drop-off.",
+  "INI-125": "QA filed four bugs against Vendor Portal staging last week. Reproduce each one and write down the exact steps, or say why it does not reproduce.",
   "INI-144": "Finance needs invoices exported as CSV and PDF from Ledgerline, filtered by month and client, matching the totals on screen.",
 };
 const threadFor = i => THREADS[i.id] || [
@@ -227,7 +227,7 @@ const threadFor = i => THREADS[i.id] || [
    into a numbered release. List: candidates first, then what shipped. Sample data, same fields as live. */
 const RELEASES = [
   { id: "rel-ledger", status: "candidate", sys: "ledger", m: 1140, summary: "Invoice export for Ledgerline and the rounding fix on tax lines, ready for customers.",
-    items: [{ title: "Invoice export for Ledgerline", p: "ds", note: "Accepted by Dimas Pratama" }, { title: "Round tax lines per invoice, not per item", p: "np", note: "Accepted by Maya Lestari" }],
+    items: [{ title: "Invoice export for Ledgerline", p: "ds", note: "Accepted by Daniel Park" }, { title: "Round tax lines per invoice, not per item", p: "np", note: "Accepted by Maya Larsen" }],
     deliveries: 4, sp: "2.62", cm: [] },
   { id: "rel-rentify-110", status: "released", version: "v1.1.0", sys: "rentify", m: 5760, by: "ml", summary: "Updated the Support API README: run, test and the health endpoints.",
     items: [{ title: "Refresh the Support API README", p: "ay", note: "Added when its last ticket merged" }], deliveries: 3, sp: "0.88",

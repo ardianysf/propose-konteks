@@ -48,8 +48,8 @@ Colours come from the preset's `app-*` names (filled by `tokens.live-map.css`). 
   value={connection}
   onChange={setConnection}
   options={[
-    { value: "hris-azure", label: "HRIS Azure", hint: "Azure DevOps", group: "Connected to HRIS Nusantara" },
-    { value: "gitea-sari", label: "Gitea Sari", hint: "gitea.example.id", group: "Other connections" },
+    { value: "hris-azure", label: "HRIS Azure", hint: "Azure DevOps", group: "Connected to HRIS Meridian" },
+    { value: "gitea-sarah", label: "Gitea Sarah", hint: "gitea.example.id", group: "Other connections" },
   ]}
 />
 
@@ -77,7 +77,7 @@ Colours come from the preset's `app-*` names (filled by `tokens.live-map.css`). 
 <QueueFilter value={who} onChange={setWho}
   options={[{ key: "all", label: "All", count: 8 }, { key: "mine", label: "Needs you", count: 2 }]} />
 <Queue>
-  <QueueRow mover={{ name: "Ardian Yusuf", initials: "AY", label: "Your move", you: true }} wait="7h 11m"
+  <QueueRow mover={{ name: "Adrian Young", initials: "AY", label: "Your move", you: true }} wait="7h 11m"
     title="Rental checkout documentation" system="Rentify" fresh={21} tone="decision"
     cause="The plan is ready. Break it into tickets" flow={{ current: 0 }} onOpen={open}
     action={<Button size="sm" variant="primary">Create tickets</Button>} />
@@ -85,7 +85,7 @@ Colours come from the preset's `app-*` names (filled by `tokens.live-map.css`). 
 
 <ActivityFeed>
   <ActivityDay day="Today" date="27 Oct 2026" />
-  <ActivityCard actor={{ name: "Dimas Pratama", initials: "DP" }} verb="approved TKT-2's delivery in"
+  <ActivityCard actor={{ name: "Daniel Park", initials: "DP" }} verb="approved TKT-2's delivery in"
     initiative={{ title: "Invoice export for Ledgerline", onOpen: open }} time="19.26" live
     system="Ledgerline" stage="Executing" updates={10} reactions={reactions} onReactions={setReactions}
     reply={<AgentReply did="Delivering TKT-2 of 3 on rf-01" time="19.28"><TicketBar done={1} of={3} ticket="TKT-2" /></AgentReply>} />

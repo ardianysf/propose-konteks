@@ -87,7 +87,7 @@ cover = f"""
   </div>
   <dl class="c-facts">
     <div><dt>Tanggal</dt><dd>27 Oktober 2026</dd></div>
-    <div><dt>Penulis</dt><dd>Ardian Yusuf</dd></div>
+    <div><dt>Penulis</dt><dd>Adrian Young</dd></div>
     <div><dt>Cakupan</dt><dd>10 modul · 46 fitur</dd></div>
     <div><dt>Temuan</dt><dd>56 (45 UX, 11 sistem desain)</dd></div>
   </dl>

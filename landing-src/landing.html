@@ -317,13 +317,13 @@ html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
 /* ===== motion additions ===== */
 .moss,.hero::before{background-image:var(--grain)}
 .av.a{background:#9A6212}
-/* hero: Ayu types, Rina's cursor presses yes */
-#ayu .typing{display:none;gap:3px;align-items:center;margin-left:6px;vertical-align:2px}
-#ayu .typing i{width:5px;height:5px;border-radius:50%;background:var(--ink-3);animation:dots 1s infinite}
-#ayu .typing i:nth-child(2){animation-delay:.15s}#ayu .typing i:nth-child(3){animation-delay:.3s}
+/* hero: Anna types, Rachel's cursor presses yes */
+#anna .typing{display:none;gap:3px;align-items:center;margin-left:6px;vertical-align:2px}
+#anna .typing i{width:5px;height:5px;border-radius:50%;background:var(--ink-3);animation:dots 1s infinite}
+#anna .typing i:nth-child(2){animation-delay:.15s}#anna .typing i:nth-child(3){animation-delay:.3s}
 @keyframes dots{0%,60%,100%{opacity:.25;transform:none}30%{opacity:1;transform:translateY(-2px)}}
-.sheet.wait #ayu .said{display:none}.sheet.wait #ayu .typing{display:inline-flex}
-#ayu .said{animation:rise .45s var(--ease)}
+.sheet.wait #anna .said{display:none}.sheet.wait #anna .typing{display:inline-flex}
+#anna .said{animation:rise .45s var(--ease)}
 .react.bump{animation:bump .5s var(--ease)}
 @keyframes bump{40%{transform:scale(1.25);border-color:var(--accent-strong);color:var(--accent-ink)}}
 .cursor{position:absolute;left:calc(50% + 6px);top:calc(100% - 8px);transform:translate(130px,-170px);z-index:4;display:flex;align-items:flex-start;gap:2px;opacity:0;pointer-events:none;transition:transform .9s cubic-bezier(.65,0,.35,1),opacity .3s}
@@ -1099,16 +1099,16 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   </div>
 
   <figure class="sheet" id="sheet" aria-label="Example note with a plan waiting for a yes" style="margin-bottom:0">
-    <div class="sheet-h"><span class="av r" aria-hidden="true">R</span><span>Rina, Product, Billing</span><span style="margin-left:auto" class="eg">Example</span></div>
+    <div class="sheet-h"><span class="av r" aria-hidden="true">R</span><span>Rachel, Product, Billing</span><span style="margin-left:auto" class="eg">Example</span></div>
     <h2>Invoices: export to CSV</h2>
     <p class="body">Finance wants to download this month’s invoices as a CSV. Keep the columns the same as the table.</p>
-    <div class="cmt"><span class="av d" aria-hidden="true">D</span><p><b>Dimas</b> <span>Include the tax column too.</span><span class="react" aria-label="2 reactions"><svg class="ico" style="width:12px;height:12px"><use href="#i-thumb"/></svg><span id="rcount">3</span></span></p></div>
-    <div class="cmt" id="ayu"><span class="av a" aria-hidden="true">A</span><p><b>Ayu</b> <span class="said">The ceiling looks fine to me.</span><span class="typing" aria-hidden="true"><i></i><i></i><i></i></span></p></div>
+    <div class="cmt"><span class="av d" aria-hidden="true">D</span><p><b>Daniel</b> <span>Include the tax column too.</span><span class="react" aria-label="2 reactions"><svg class="ico" style="width:12px;height:12px"><use href="#i-thumb"/></svg><span id="rcount">3</span></span></p></div>
+    <div class="cmt" id="anna"><span class="av a" aria-hidden="true">A</span><p><b>Anna</b> <span class="said">The ceiling looks fine to me.</span><span class="typing" aria-hidden="true"><i></i><i></i><i></i></span></p></div>
     <div class="plan">
       <div class="plan-h"><b>Plan, 4 steps</b><span class="ceil">ceiling $6.00</span></div>
       <ol><li>Add the export endpoint</li><li>Add an Export button to the table</li><li>Test the tax column</li><li>Check it in a real browser</li></ol>
     </div>
-    <div class="cursor" id="cursor" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M4 2.5 15.5 11l-5.2.9L13 17l-2.4 1.1-2.7-5.2L4 16.6V2.5Z"/></svg><span>Rina</span></div>
+    <div class="cursor" id="cursor" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M4 2.5 15.5 11l-5.2.9L13 17l-2.4 1.1-2.7-5.2L4 16.6V2.5Z"/></svg><span>Rachel</span></div>
     <button class="yes" id="yes" type="button" aria-describedby="yes-note"><span class="dot"><svg class="ico"><use href="#i-check"/></svg></span><span id="yes-l">Yes</span></button>
   </figure>
 
@@ -1117,7 +1117,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   <div class="lanes" aria-live="polite">
     <div class="lanes-h"><p id="yes-note">Nothing below this line runs until someone says yes.</p><span class="eg">Example session</span></div>
     <div class="lane-box"><div class="lane-in">
-    <div class="lane"><span class="lic"><svg class="ico"><use href="#i-hammer"/></svg></span><div class="who"><b>Builds</b><span>Claude Code on Dimas’s laptop</span></div><div class="log">Waiting for yes</div><span class="state"><i></i><span>Idle</span></span></div>
+    <div class="lane"><span class="lic"><svg class="ico"><use href="#i-hammer"/></svg></span><div class="who"><b>Builds</b><span>Claude Code on Daniel’s laptop</span></div><div class="log">Waiting for yes</div><span class="state"><i></i><span>Idle</span></span></div>
     <div class="lane"><span class="lic"><svg class="ico"><use href="#i-eye"/></svg></span><div class="who"><b>Reviews</b><span>Codex on the build server</span></div><div class="log">Waiting for yes</div><span class="state"><i></i><span>Idle</span></span></div>
     <div class="lane"><span class="lic"><svg class="ico"><use href="#i-pointer"/></svg></span><div class="who"><b>Tests in a browser</b><span>OpenCode on the QA machine</span></div><div class="log">Waiting for yes</div><span class="state"><i></i><span>Idle</span></span></div>
     </div></div>
@@ -1125,7 +1125,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   <aside class="receipt" id="receipt" aria-label="Example receipt">
     <div class="receipt-h"><b>Receipt: Invoices CSV export</b><span class="eg">Example</span></div>
     <dl>
-      <dt>Plan approved by</dt><dd>Rina</dd>
+      <dt>Plan approved by</dt><dd>Rachel</dd>
       <dt>Pull requests</dt><dd>2, tests passed</dd>
       <dt>Second agent</dt><dd>approved</dd>
       <dt>Browser check</dt><dd>3 steps run</dd>
@@ -1294,9 +1294,9 @@ bob    tty1</pre></div>
       <div class="panel rec" data-px="-.05">
         <div class="panel-h"><span>Activities <i class="live-dot"></i></span><span class="eg">Example</span></div>
         <ol class="tl" id="feed">
-          <li><span class="tag sh">Shipped</span><div><b>CSV export is live for Finance</b><q>Downloaded March. All 120 rows are there.</q><div class="m"><em>Billing</em> Ayu, 11:40</div></div></li>
-          <li><span class="tag fx">Fixed</span><div><b>Orders lost when the app goes offline</b><q>The browser agent caught it twice.</q><div class="m"><em>Mobile</em> Dimas, 11:02</div></div></li>
-          <li><span class="tag ap">Approved</span><div><b>Plan, ceiling $4.50</b><q>Two steps, fine by me.</q><div class="m"><em>Data</em> Rina, 10:20</div></div></li>
+          <li><span class="tag sh">Shipped</span><div><b>CSV export is live for Finance</b><q>Downloaded March. All 120 rows are there.</q><div class="m"><em>Billing</em> Anna, 11:40</div></div></li>
+          <li><span class="tag fx">Fixed</span><div><b>Orders lost when the app goes offline</b><q>The browser agent caught it twice.</q><div class="m"><em>Mobile</em> Daniel, 11:02</div></div></li>
+          <li><span class="tag ap">Approved</span><div><b>Plan, ceiling $4.50</b><q>Two steps, fine by me.</q><div class="m"><em>Data</em> Rachel, 10:20</div></div></li>
         </ol>
         <div class="rec-cap">One timeline of the turning points: started, approved, fixed, shipped, with people’s own words next to each.</div>
       </div>
@@ -1319,8 +1319,8 @@ bob    tty1</pre></div>
           <table class="mx" aria-label="Example permissions">
             <thead><tr><th></th><th scope="col">Write a note</th><th scope="col">Say yes</th><th scope="col">Touch billing-web</th></tr></thead>
             <tbody>
-              <tr><th scope="row">Rina<small>Product lead</small></th><td class="y" style="--d:0">Yes</td><td class="y" style="--d:1">Yes</td><td class="n" style="--d:2">No</td></tr>
-              <tr><th scope="row">Dimas<small>Engineer</small></th><td class="y" style="--d:3">Yes</td><td class="n" style="--d:4">No</td><td class="y" style="--d:5">Yes</td></tr>
+              <tr><th scope="row">Rachel<small>Product lead</small></th><td class="y" style="--d:0">Yes</td><td class="y" style="--d:1">Yes</td><td class="n" style="--d:2">No</td></tr>
+              <tr><th scope="row">Daniel<small>Engineer</small></th><td class="y" style="--d:3">Yes</td><td class="n" style="--d:4">No</td><td class="y" style="--d:5">Yes</td></tr>
               <tr><th scope="row">Claude Code<small>Agent</small></th><td class="n" style="--d:6">No</td><td class="n" style="--d:7">No</td><td class="y" style="--d:8">Yes</td></tr>
             </tbody>
           </table>
@@ -1331,7 +1331,7 @@ bob    tty1</pre></div>
           <span class="eg">Example</span>
         </div></div>
         <div class="rule-v-wrap rule" data-k="e"><div class="rule-v">
-          <ul class="ev"><li style="--d:0"><svg class="ico"><use href="#i-note"/></svg>Plan approved by Rina</li><li style="--d:1"><svg class="ico"><use href="#i-pr"/></svg>Pull requests #318, #319</li><li style="--d:2"><svg class="ico"><use href="#i-check"/></svg>18 tests passed</li><li style="--d:3"><svg class="ico"><use href="#i-pointer"/></svg>Browser check, 3 steps run</li></ul>
+          <ul class="ev"><li style="--d:0"><svg class="ico"><use href="#i-note"/></svg>Plan approved by Rachel</li><li style="--d:1"><svg class="ico"><use href="#i-pr"/></svg>Pull requests #318, #319</li><li style="--d:2"><svg class="ico"><use href="#i-check"/></svg>18 tests passed</li><li style="--d:3"><svg class="ico"><use href="#i-pointer"/></svg>Browser check, 3 steps run</li></ul>
           <span class="seal">Kept</span>
           <span class="eg">Example</span>
         </div></div>
@@ -1342,8 +1342,8 @@ bob    tty1</pre></div>
           <table class="mx" aria-label="Example permissions">
             <thead><tr><th></th><th scope="col">Write a note</th><th scope="col">Say yes</th><th scope="col">Touch billing-web</th></tr></thead>
             <tbody>
-              <tr><th scope="row">Rina<small>Product lead</small></th><td class="y" style="--d:0">Yes</td><td class="y" style="--d:1">Yes</td><td class="n" style="--d:2">No</td></tr>
-              <tr><th scope="row">Dimas<small>Engineer</small></th><td class="y" style="--d:3">Yes</td><td class="n" style="--d:4">No</td><td class="y" style="--d:5">Yes</td></tr>
+              <tr><th scope="row">Rachel<small>Product lead</small></th><td class="y" style="--d:0">Yes</td><td class="y" style="--d:1">Yes</td><td class="n" style="--d:2">No</td></tr>
+              <tr><th scope="row">Daniel<small>Engineer</small></th><td class="y" style="--d:3">Yes</td><td class="n" style="--d:4">No</td><td class="y" style="--d:5">Yes</td></tr>
               <tr><th scope="row">Claude Code<small>Agent</small></th><td class="n" style="--d:6">No</td><td class="n" style="--d:7">No</td><td class="y" style="--d:8">Yes</td></tr>
             </tbody>
           </table>
@@ -1354,7 +1354,7 @@ bob    tty1</pre></div>
           <span class="eg">Example</span>
         </div></li>
       <li data-k="e"><svg class="dz" viewBox="0 0 64 64" aria-hidden="true"><path d="M16 8h32v48l-4-3-4 3-4-3-4 3-4-3-4 3-4-3-4 3V8Z"/><path d="M22 18h20M22 25h20M22 32h12"/></svg><div class="rule-t"><h3>Evidence</h3><p class="big">A permanent receipt for every delivery.</p><p>The plan, who said yes, the pull requests, the tests and what the browser agent ran. Every tool call and transcript stays in the record too.</p></div><div class="rule-v inline">
-          <ul class="ev"><li style="--d:0"><svg class="ico"><use href="#i-note"/></svg>Plan approved by Rina</li><li style="--d:1"><svg class="ico"><use href="#i-pr"/></svg>Pull requests #318, #319</li><li style="--d:2"><svg class="ico"><use href="#i-check"/></svg>18 tests passed</li><li style="--d:3"><svg class="ico"><use href="#i-pointer"/></svg>Browser check, 3 steps run</li></ul>
+          <ul class="ev"><li style="--d:0"><svg class="ico"><use href="#i-note"/></svg>Plan approved by Rachel</li><li style="--d:1"><svg class="ico"><use href="#i-pr"/></svg>Pull requests #318, #319</li><li style="--d:2"><svg class="ico"><use href="#i-check"/></svg>18 tests passed</li><li style="--d:3"><svg class="ico"><use href="#i-pointer"/></svg>Browser check, 3 steps run</li></ul>
           <span class="seal">Kept</span>
           <span class="eg">Example</span>
         </div><div class="rules-end"><a class="lnk" href="/security">Security <svg class="ico"><use href="#i-arrow"/></svg></a><a class="lnk" href="/pricing">Pricing <svg class="ico"><use href="#i-arrow"/></svg></a></div></li>
