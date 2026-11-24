@@ -171,16 +171,28 @@ const gatherTargets = () => {
   week.style.setProperty("--he", Math.min(17, Math.ceil((30 + total + 8) / rowPx) + 1));
   wGathered = true;
 };
+/* The week plays on its own once you see it: the five chores go to agents one by one and the hours count up.
+   Only the hand-off (the chores gathering into one column) waits for the scroll. */
+let wAuto = RM ? 1 : 0, wAutoOn = false, wLast = 0;
+const weekTick = now => {
+  const dt = wLast ? Math.min(64, now - wLast) : 16; wLast = now;
+  const sp = weekProgress(), fast = sp > .3 ? 5 : 1;          // scrolled ahead: finish the chores quickly
+  wAuto = Math.min(1, wAuto + dt * fast / 4200);
+  weekDraw();
+  if (wAuto < 1 && wAutoOn) requestAnimationFrame(weekTick); else wLast = 0;
+};
+seen(week, v => { wAutoOn = v; if (v && wAuto < 1) requestAnimationFrame(weekTick); }, .35);
 const weekDraw = () => {
-  const k = RM ? 1 : weekProgress();
+  const sp = RM ? 1 : weekProgress();
   let hrs = 0;
-  blks.forEach((b, i) => { const on = k > (i + 1) / 5 * .48; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); if (on) hrs += +b.dataset.h; });
+  blks.forEach((b, i) => { const on = wAuto >= (i + 1) / 5 - .001; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); if (on) hrs += +b.dataset.h; });
   if (hback._v !== hrs) { hback._v = hrs; hback.textContent = (hrs % 1 ? hrs.toFixed(1) : hrs) + " h"; }
-  const g = k > .55;
+  const g = wAuto >= 1 && sp > .35;
   if (g && !week.classList.contains("gather")) { if (!wGathered) gatherTargets(); week.classList.add("gather"); }
   if (!g && week.classList.contains("gather")) week.classList.remove("gather");
-  week.classList.toggle("done", k > .7);
-  if (wkBar) wkBar.style.transform = `scaleX(${clamp(k / .7)})`;
+  week.classList.toggle("done", g && sp > .6);
+  week.classList.toggle("ready", wAuto >= 1);
+  if (wkBar) wkBar.style.transform = `scaleX(${clamp(sp / .6)})`;
 };
 [...blks, ...nows].forEach(el => {
   const i = el.dataset.i;
@@ -236,8 +248,11 @@ $$(".gear").forEach(g => {
 });
 // tape
 const TAPE = "0110100101110010".split("").concat(["_"]), tape = $("#tape");
-tape.innerHTML = TAPE.map(c => `<span class="${c === "_" ? "blank" : ""}">${c}</span>`).join("");
-const cells = $$("span", tape), tstate = $("#tstate"), rrows = $$(".rules-card div");
+/* The tape runs past both edges of the window (a Turing tape has no ends), with blank cells before and after the
+   input, so the head starts on the first symbol of a tape that already fills the view. */
+const PAD = 14, padCells = n => Array.from({ length: n }, () => '<span class="blank pad" aria-hidden="true">_</span>').join("");
+tape.innerHTML = padCells(PAD) + TAPE.map(c => `<span class="${c === "_" ? "blank" : ""}">${c}</span>`).join("") + padCells(PAD);
+const cells = $$("span:not(.pad)", tape), tstate = $("#tstate"), rrows = $$(".rules-card div");
 // terminal
 const CODE = [["main()\n{\n    printf(", ""], ['"hello, world\\n"', "s"], [");\n}\n\n$ cc hello.c\n$ ./a.out\n", ""], ["hello, world", "o"]];
 const CLEN = CODE.reduce((n, c) => n + c[0].length, 0), cterm = $("#cterm");
@@ -258,7 +273,7 @@ const scene = [
   (t, el) => { // 1936: the head walks the tape and flips each symbol
     const k = Math.min(cells.length - 1, Math.floor(clamp(t) * cells.length));
     const w = cells[0].getBoundingClientRect().width - 1;
-    tape.style.transform = `translateX(${-(k + .5) * w}px)`;
+    tape.style.transform = `translateX(${-(PAD + k + .5) * w}px)`;
     cells.forEach((c, i) => { const done = i < k && TAPE[i] !== "_"; c.classList.toggle("done", done); c.textContent = TAPE[i] === "_" ? "_" : done ? (TAPE[i] === "0" ? "1" : "0") : TAPE[i]; });
     const sym = TAPE[k]; rrows.forEach((r, i) => r.classList.toggle("hit", (sym === "0" && i === 0) || (sym === "1" && i === 1) || (sym === "_" && i === 2)));
     tstate.textContent = sym === "_" ? "halt" : "q1";
