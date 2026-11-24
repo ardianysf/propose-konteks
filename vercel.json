@@ -41,6 +41,16 @@
       "source": "/index",
       "destination": "/",
       "permanent": false
+    },
+    {
+      "source": "/journal",
+      "destination": "/blog",
+      "permanent": true
+    },
+    {
+      "source": "/journal/:slug",
+      "destination": "/blog/:slug",
+      "permanent": true
     }
   ]
 }

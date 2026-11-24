@@ -182,7 +182,7 @@ def about():
   <header class="rd-hero"><h1>We did not need another agent. <span>We needed the company to stop forgetting.</span></h1></header>
   <div class="about-p">{"".join(f"<p>{esc(p)}</p>" for p in paras)}</div>
   <div class="beliefs">{"".join(f"<div><h2>{esc(t)}</h2><p>{esc(p)}</p></div>" for t, p in beliefs)}</div>
-  <div class="explore"><h2>Read more</h2><ul class="exl"><li><a href="/journal/the-road-to-august-17">The road to August 17 <svg class="ico"><use href="#i-arrow"/></svg></a></li><li><a href="https://refactory.id/">Refactory <svg class="ico"><use href="#i-out"/></svg></a></li><li><a href="/contact">Contact us <svg class="ico"><use href="#i-arrow"/></svg></a></li></ul></div>
+  <div class="explore"><h2>Read more</h2><ul class="exl"><li><a href="/blog/the-road-to-august-17">The road to August 17 <svg class="ico"><use href="#i-arrow"/></svg></a></li><li><a href="https://refactory.id/">Refactory <svg class="ico"><use href="#i-out"/></svg></a></li><li><a href="/contact">Contact us <svg class="ico"><use href="#i-arrow"/></svg></a></li></ul></div>
 </div>'''
     return jb.page("About | Konteks", "We did not need another agent. We needed the company to stop forgetting.", body, SHARED_CSS + READ_CSS, READ_JS, active="about")
 

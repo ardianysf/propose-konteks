@@ -4,7 +4,12 @@ const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const ease = t => 1 - Math.pow(1 - t, 3);
 const smooth = t => t * t * (3 - 2 * t);
-const seen = (el, cb, th = .25) => new IntersectionObserver(es => es.forEach(e => cb(e.isIntersecting)), { threshold: th }).observe(el);
+const seen = (el, cb, th = .25) => el && new IntersectionObserver(es => es.forEach(e => cb(e.isIntersecting)), { threshold: th }).observe(el);
+const escT = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+const noop = () => {};
+/* Home and Features share this file; every block runs only when its section is on the page. */
+let measurePin = noop, measureWeek = noop, weekDraw = noop, measureTheory = noop, theoryDraw = noop, layout = noop, narrowLit = noop, drawMerge = noop, railDraw = noop, rulesDraw = noop, kDraw = noop, kLayout = noop;
+let duties = [], rItems = [];
 
 /* theme */
 const flipTheme = () => {
@@ -16,7 +21,7 @@ const flipTheme = () => {
 $("#theme").onclick = flipTheme;
 $$("[data-theme-alt]").forEach(b => b.onclick = flipTheme);
 /* record on a phone: the rail fills as the teams scroll into the record */
-const railDraw = () => { if (innerWidth > 900) return; const r = merge.getBoundingClientRect(); const p = Math.min(1, Math.max(0, (innerHeight * .8 - r.top) / (r.height * .9))); merge.style.setProperty("--railp", (RM ? 100 : p * 100).toFixed(1) + "%"); };
+railDraw = () => { if (innerWidth > 900 || !merge) return; const r = merge.getBoundingClientRect(); const p = Math.min(1, Math.max(0, (innerHeight * .8 - r.top) / (r.height * .9))); merge.style.setProperty("--railp", (RM ? 100 : p * 100).toFixed(1) + "%"); };
 
 
 /* nav edge, menu closes on pick */
@@ -25,7 +30,7 @@ $$(".menu-pop a").forEach(a => a.addEventListener("click", () => $(".menu").remo
 
 /* copy the connect line */
 const copyBtn = $("#copy");
-copyBtn.onclick = async () => {
+if (copyBtn) copyBtn.onclick = async () => {
   const text = $("#cl").textContent.trim();
   let ok = false;
   try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {
@@ -42,7 +47,9 @@ copyBtn.onclick = async () => {
 
 /* ============ HERO: pinned until the demo is done. Time plays it; scrolling plays it faster. ============ */
 const ppBar = document.querySelector(".pin-meter i b"), wkBar = document.querySelector(".week-meter i b");
-const pin = $("#heroPin"), hero = $(".hero"), sheet = $("#sheet"), yes = $("#yes"), yesL = $("#yes-l"), lanes = $$(".lane"), cur = $("#cursor"), rc = $("#rcount"), react = $(".react", sheet);
+const pin = $("#heroPin"), hero = $(".hero"), sheet = $("#sheet");
+if (sheet) {
+const yes = $("#yes"), yesL = $("#yes-l"), lanes = $$(".lane"), cur = $("#cursor"), rc = $("#rcount"), react = $(".react", sheet);
 const SCRIPT = [
   [300, 0, "run", "Reading the Software System: <b>billing-web</b>, <b>invoices-api</b>"],
   [1900, 0, "run", "Editing <b>export.ts</b> and <b>InvoiceTable.tsx</b>"],
@@ -60,7 +67,6 @@ const LABEL = { run: "Running", done: "Done", idle: "Idle" };
 const YES_AT = 3700, FOLD_AT = 16000, PRINT_AT = 16400, TOTAL = 17200;
 const laneKey = [];
 const strip = h => h.replace(/<[^>]+>/g, "");
-const escT = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 const drawLane = (i, lm) => {
   let step = null; for (const s of SCRIPT) if (s[1] === i && s[0] <= lm) step = s;
   const st = step ? step[2] : "idle";
@@ -95,7 +101,7 @@ const renderHero = ms => {
 };
 let clock = 0, heroVisible = true, replayFrom = 0, scrollMs = 0, pinned = false, prevT = 0;
 let stTop = 64, heroH = 0;
-const measurePin = () => {
+measurePin = () => {
   document.documentElement.classList.remove("pinned");
   const had = [hero.classList.contains("folded"), hero.classList.contains("printed")];
   const lanesEl = $(".lanes", hero); lanesEl.style.minHeight = "";
@@ -132,12 +138,15 @@ yes.addEventListener("click", () => { clock = Math.max(clock, YES_AT); });
 $("#replay").addEventListener("click", () => { clock = 0; replayFrom = pinProgress(); });
 if (RM) renderHero(TOTAL);
 else { seen(hero, v => heroVisible = v, .15); measurePin(); requestAnimationFrame(heroFrame); }
+}
 
 /* ============ the same week: pinned; blocks hand off, gather on Monday morning, then a held summary ============ */
-const week = $("#week"), blks = $$(".blk", week), nows = $$(".now-list li", week), hback = $("#hback");
+const week = $("#week");
+if (week) {
+const blks = $$(".blk", week), nows = $$(".now-list li", week), hback = $("#hback");
 const wTrack = $("#weekTrack"), wStick = $("#weekStick");
 let wTop = 64, wH = 0, wGathered = false;
-const measureWeek = () => {
+measureWeek = () => {
   if (RM) return;
   wTrack.classList.remove("wpin");
   wH = wStick.offsetHeight; const air = 40;
@@ -182,7 +191,7 @@ const weekTick = now => {
   if (wAuto < 1 && wAutoOn) requestAnimationFrame(weekTick); else wLast = 0;
 };
 seen(week, v => { wAutoOn = v; if (v && wAuto < 1) requestAnimationFrame(weekTick); }, .35);
-const weekDraw = () => {
+weekDraw = () => {
   const sp = RM ? 1 : weekProgress();
   let hrs = 0;
   blks.forEach((b, i) => { const on = wAuto >= (i + 1) / 5 - .001; b.classList.toggle("gone", on); nows[i].classList.toggle("on", on); if (on) hrs += +b.dataset.h; });
@@ -199,6 +208,7 @@ const weekDraw = () => {
   el.addEventListener("pointerenter", () => { blks[i].classList.add("hl"); nows[i].classList.add("hl"); });
   el.addEventListener("pointerleave", () => { blks[i].classList.remove("hl"); nows[i].classList.remove("hl"); });
 });
+}
 
 /* ============ theory: the quote writes itself, the duty in view comes forward ============ */
 /* Scroll scenes follow the scroll with a little inertia instead of jumping to it: a trackpad flick or a mouse
@@ -214,14 +224,16 @@ const follow = (render, tau) => {
   };
   return v => { tgt = v; if (cur === null || RM) { cur = v; render(v); return; } if (!on) { on = true; requestAnimationFrame(step); } };
 };
-const naurP = $("#naur p"), theory = $("#theory"), duties = $$("#duties li"), theoryL = $(".theory-l");
+const theory = $("#theory");
+if (theory) {
+const naurP = $("#naur p"), theoryL = $(".theory-l"); duties = $$("#duties li");
 const naurPrev = $("#naur").previousElementSibling;
-let naurGap = 0, theoryHold = 0; const measureTheory = () => {
+let naurGap = 0, theoryHold = 0; measureTheory = () => {
   naurGap = parseFloat(getComputedStyle($("#naur")).marginTop) || 0; theoryHold = parseFloat(getComputedStyle(theoryL, "::after").height) || 0; };
 naurP.innerHTML = naurP.textContent.split(/(\s+)/).map(w => /\s+/.test(w) ? w : `<span class="w${/theory|insight/.test(w) ? " key" : ""}">${escT(w)}</span>`).join("");
 const words = $$(".w", naurP);
 const lightNaur = follow(q => words.forEach((w, i) => w.classList.toggle("on", i / words.length < q)), 320);
-const theoryDraw = () => {
+theoryDraw = () => {
   const r = theory.getBoundingClientRect(), vh = innerHeight;
   /* The quote lights word by word while it is held on screen, finishing with room to read it before it moves on. */
   const wide = innerWidth > 900;
@@ -235,20 +247,12 @@ const theoryDraw = () => {
   duties.forEach((d, i) => { const b = d.getBoundingClientRect(); if (i && b.top + b.height / 2 < vh * .42) best = i; });
   if (!document.documentElement.classList.contains("rvm")) duties.forEach((d, i) => d.classList.toggle("on", RM || i === best));
 };
+}
 
-/* ============ FOUR ERAS: vertical scroll drives a horizontal rail; each scene runs on its own clock ============ */
-const eras = $("#eras"), rail = $("#erail"), eraEls = $$(".era", rail), N = eraEls.length;
-const yrbig = $("#yrbig"), ticks = $$(".ticks span"), tickbar = $("#tickbar"), edist = $("#edist");
-const YEARS = [1843, 1936, 1969, 2026], HUES = ["#9A6212", "#2F6F8F", "#4F7044", "#5F8D4E"];
-// gears
-$$(".gear").forEach(g => {
-  const T = +g.dataset.teeth, r1 = 78, r2 = 94, pts = [];
-  for (let i = 0; i < T * 4; i++) {
-    const a = (i / (T * 4)) * Math.PI * 2, r = (i % 4 < 2) ? r2 : r1;
-    pts.push(`${(Math.cos(a) * r).toFixed(1)},${(Math.sin(a) * r).toFixed(1)}`);
-  }
-  g.innerHTML = `<g><path d="M${pts.join("L")}Z"/><circle r="40" fill="none" stroke-width="2"/><circle class="hub" r="12"/>${[0, 1, 2, 3, 4, 5].map(k => { const a = k * Math.PI / 3; return `<circle r="9" cx="${(Math.cos(a) * 58).toFixed(1)}" cy="${(Math.sin(a) * 58).toFixed(1)}" fill="none"/>`; }).join("")}</g>`;
-});
+/* ============ THE DIORAMA: four rooms, one job. The tour plays on its own; a tab picks a room. ============ */
+const dio = $("#dio");
+if (dio) {
+const rooms = $$(".dio-room", dio), dtabs = $$(".dio-tab"), dcaps = $$(".dio-cap"), dpause = $("#dioPause");
 // tape
 const TAPE = "0110100101110010".split("").concat(["_"]), tape = $("#tape");
 tape.innerHTML = TAPE.map(c => `<span class="${c === "_" ? "blank" : ""}">${c}</span>`).join("");
@@ -256,17 +260,15 @@ const cells = $$("span", tape), tstate = $("#tstate"), rrows = $$(".rules-card d
 // terminal
 const CODE = [["main()\n{\n    printf(", ""], ['"hello, world\\n"', "s"], [");\n}\n\n$ cc hello.c\n$ ./a.out\n", ""], ["hello, world", "o"]];
 const CLEN = CODE.reduce((n, c) => n + c[0].length, 0), cterm = $("#cterm");
-const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 let lastCN = -1;
 const drawTerm = t => {
   const n = Math.round(CLEN * clamp(t * 1.1)); if (n === lastCN) return; lastCN = n;
   let left = n, out = "";
-  for (const [txt, cls] of CODE) { if (left <= 0) break; const part = txt.slice(0, left); left -= part.length; out += cls ? `<span class="${cls}">${esc(part)}</span>` : esc(part); }
+  for (const [txt, cls] of CODE) { if (left <= 0) break; const part = txt.slice(0, left); left -= part.length; out += cls ? `<span class="${cls}">${escT(part)}</span>` : escT(part); }
   cterm.innerHTML = out + '<span class="car"></span>';
 };
-const layers = eraEls.map(e => $$(".L", e).map(l => [l, +(l.dataset.d || 0)]));
 const scene = [
-  (t, el) => { // 1843: rows written one by one, ink underline, gears turn
+  (t, el) => { // 1843: rows written one by one, ink underline
     $$(".row", el).forEach((r, k) => r.classList.toggle("on", t > k * .18 + .02));
     $(".ink path", el).style.strokeDashoffset = 320 * (1 - clamp((t - .7) / .3));
   },
@@ -285,48 +287,47 @@ const scene = [
     $$(".chip", el).forEach((c, k) => c.classList.toggle("on", t > .74 + k * .08));
   },
 ];
-let erasOn = false, gearA = $(".gA g"), gearB = $(".gB g"), spin = 0;
-const erasDraw = () => {
-  const r = eras.getBoundingClientRect(), stageH = innerHeight - 64;
-  const p = clamp(-r.top / Math.max(1, r.height - stageH));
-  const pos = p * (N - 1 + .6);                         // each era holds for a while, then slides
-  const i = Math.min(N - 1, Math.floor(pos)), f = pos - i;
-  const s = i < N - 1 ? smooth(clamp((f - .6) / .4)) : 0;
-  const off = i + s;
-  rail.style.transform = `translate3d(${-off * 100}%,0,0)`;
-  const curI = Math.round(off);
-  eraEls.forEach((e, k) => {
-    e.classList.toggle("cur", k === curI);
-    const u = k - off;                                    // -1..1 around the current panel
-    layers[k].forEach(([l, d]) => { l.style.transform = `translate3d(${u * d * -90}px,${(Math.abs(u)) * d * 24}px,0) rotate(${u * d * -2}deg)`; });
-    const t = k < i ? 1 : k > i ? 0 : clamp(f / .6);
-    scene[k](ease(t), e);
-  });
-  // year counter, ticks, distance bar
-  const y = Math.round(YEARS[i] + (YEARS[Math.min(N - 1, i + 1)] - YEARS[i]) * s);
-  yrbig.textContent = curI === N - 1 && s === 0 ? "Today" : y;
-  yrbig.style.color = HUES[curI];
-  ticks.forEach((t, k) => t.classList.toggle("on", k <= curI));
-  tickbar.style.transform = edist.style.transform = `scaleX(${off / (N - 1)})`;
-  spin = p * 720;
+const PLAY = 5600, ROOM = 8200;                 // each room plays its scene, holds it to be read, then hands over
+let cur = 0, t0 = 0, playing = !RM, on = false, held = false;
+const show = (i, focus) => {
+  cur = i; t0 = 0;
+  rooms.forEach((r, k) => { r.classList.toggle("cur", k === i); r.inert = k !== i; });
+  dtabs.forEach((b, k) => { b.setAttribute("aria-selected", k === i); b.tabIndex = k === i ? 0 : -1; b.style.setProperty("--f", k < i ? 1 : 0); });
+  dcaps.forEach((c, k) => c.classList.toggle("cur", k === i));
+  if (focus) dtabs[i].focus();
+  scene[i](RM || !playing ? 1 : 0, rooms[i]);
 };
-
-if (RM) { eraEls.forEach((e, k) => { e.classList.add("cur"); scene[k](1, e); }); }
-else {
-  seen(eras, v => { erasOn = v; }, 0);
-  // gears keep turning on their own, faster while you scroll
-  let gt = 0;
-  const gearLoop = now => {
-    if (erasOn && gearA) { gt = now / 1000; gearA.style.transform = `rotate(${gt * 14 + spin}deg)`; gearB.style.transform = `rotate(${-(gt * 14 + spin) * 14 / 9 + 10}deg)`; }
-    requestAnimationFrame(gearLoop);
-  };
-  requestAnimationFrame(gearLoop);
+const setPlaying = v => { playing = v; dio.classList.toggle("paused", !v); dpause.setAttribute("aria-pressed", !v); dpause.setAttribute("aria-label", v ? "Pause the tour" : "Play the tour"); if (!v) scene[cur](1, rooms[cur]); };
+const frame = now => {
+  if (on && playing) {
+    if (!t0) t0 = now;
+    const el = now - t0;
+    scene[cur](ease(clamp(el / PLAY)), rooms[cur]);
+    dtabs[cur].style.setProperty("--f", clamp(el / ROOM));
+    if (el > ROOM && !held) show((cur + 1) % rooms.length);
+  }
+  requestAnimationFrame(frame);
+};
+dtabs.forEach((b, i) => {
+  b.addEventListener("click", () => show(i));
+  b.addEventListener("keydown", e => { const d = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (!d) return; e.preventDefault(); show((i + d + rooms.length) % rooms.length, true); });
+});
+dpause.addEventListener("click", () => setPlaying(!playing));
+/* reading a room holds the tour there; it moves on again when the pointer or focus leaves */
+dio.addEventListener("pointerenter", () => held = true); dio.addEventListener("pointerleave", () => held = false);
+dio.parentElement.addEventListener("focusin", () => held = true); dio.parentElement.addEventListener("focusout", () => held = false);
+if (RM) { setPlaying(false); dpause.hidden = true; }
+show(0);
+seen(dio, v => { on = v; if (v) t0 = 0; }, .2);
+requestAnimationFrame(frame);
 }
 
 /* ============ the loop: a note travels the line, out past the yes and back ============ */
-const loop = $("#loop"), steps = $$(".step", loop), NS = "http://www.w3.org/2000/svg";
+const loop = $("#loop");
+if (loop) {
+const steps = $$(".step", loop), NS = "http://www.w3.org/2000/svg";
 let svg, base, tok, halo, len = 0, wide = false, segs = [], loopOn = false;
-const layout = () => {
+layout = () => {
   wide = innerWidth > 900;
   if (!wide) { if (svg) svg.remove(), svg = null; return; }
   if (!svg) {
@@ -361,15 +362,18 @@ const loopFrame = now => {
   }
   requestAnimationFrame(loopFrame);
 };
-const narrowLit = () => { if (wide) return; const vh = innerHeight; steps.forEach(s => s.classList.toggle("lit", RM || s.getBoundingClientRect().top < vh * .7)); };
+narrowLit = () => { if (wide) return; const vh = innerHeight; steps.forEach(s => s.classList.toggle("lit", RM || s.getBoundingClientRect().top < vh * .7)); };
 seen(loop, v => { loopOn = v; if (!v) lt0 = 0; }, .2);
 if (RM) steps.forEach(s => s.classList.add("lit"));
 requestAnimationFrame(loopFrame);
+}
 
 
 /* ============ the record: three teams flow into one timeline ============ */
-const merge = $("#merge"), mlines = $(".merge-lines", merge), teamEls = $$(".teams li", merge), recEl = $(".rec", merge);
-const drawMerge = () => {
+const merge = $("#merge");
+if (merge) {
+const mlines = $(".merge-lines", merge), teamEls = $$(".teams li", merge), recEl = $(".rec", merge);
+drawMerge = () => {
   if (innerWidth <= 900) { mlines.innerHTML = ""; return; }
   const mr = merge.getBoundingClientRect(), rr = recEl.getBoundingClientRect();
   const x1 = rr.left - mr.left, y1 = rr.top - mr.top + rr.height * .42;
@@ -401,9 +405,10 @@ const pushEvent = () => {
   setTimeout(() => { last.remove(); feed.prepend(li); }, 380);
 };
 if (!RM) { seen(feed, v => feedOn = v, .3); setInterval(pushEvent, 3400); }
+}
 
 /* ============ rules: the item in view drives the example on the left ============ */
-const spent = $("#spent"), rItems = $$("#rlist > li"), rVis = $$(".rstage .rule");
+const spent = $("#spent"); rItems = $$("#rlist > li"); const rVis = $$(".rstage .rule");
 let rCur = -1, spentRun = false;
 const runSpent = () => {
   if (spentRun) return; spentRun = true;
@@ -412,7 +417,7 @@ const runSpent = () => {
   const tick = now => { const k = clamp((now - t0 - 200) / 2200); spent.textContent = "$" + (3.4 * ease(k)).toFixed(2); if (k < 1) requestAnimationFrame(tick); };
   requestAnimationFrame(tick);
 };
-const rulesDraw = () => {
+rulesDraw = () => {
   const vh = innerHeight; let best = 0, bd = 1e9;
   rItems.forEach((li, i) => { const b = li.getBoundingClientRect(), c = b.top + Math.min(b.height, 260) / 2, d = Math.abs(c - vh * .45); if (d < bd) { bd = d; best = i; } });
   if (best === rCur) return; rCur = best;
@@ -421,7 +426,7 @@ const rulesDraw = () => {
   if (rVis[best] && rVis[best].dataset.k === "m") runSpent();
 };
 /* Phones: each rule arrives on its own as it scrolls in (no pinned stage there). */
-if (!RM && "IntersectionObserver" in window && matchMedia("(max-width:900px)").matches) {
+if (!RM && "IntersectionObserver" in window && matchMedia("(max-width:900px)").matches && (rItems.length || duties.length)) {
   document.documentElement.classList.add("rvm");
   const rio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); const mb = e.target.querySelector(".rule-v.inline .meter-l b"); if (mb) { const t0 = performance.now(); const tick = now => { const k = clamp((now - t0 - 700) / 1200); mb.textContent = "$" + (3.4 * ease(k)).toFixed(2); if (k < 1) requestAnimationFrame(tick); }; mb.textContent = "$0.00"; requestAnimationFrame(tick); } } }), { rootMargin: "0px 0px -18% 0px" });
   rItems.forEach(li => rio.observe(li));
@@ -429,7 +434,7 @@ if (!RM && "IntersectionObserver" in window && matchMedia("(max-width:900px)").m
   const aio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in", "on"); aio.unobserve(e.target); } }), { rootMargin: "0px 0px -12% 0px" });
   [...duties, ...$$(".teams li"), $(".merge-cap"), $(".rec")].forEach(el => el && aio.observe(el));
 }
-if (RM) { rItems.forEach(li => li.classList.add("on")); rVis.forEach(v => v.classList.add("on", "show")); spent.textContent = "$3.40"; }
+if (RM && spent) { rItems.forEach(li => li.classList.add("on")); rVis.forEach(v => v.classList.add("on", "show")); spent.textContent = "$3.40"; }
 
 /* ============ four kinds of session: scroll moves across the tabs ============ */
 const KINDS = [
@@ -442,9 +447,11 @@ const KINDS = [
   { h: "Ops", p: "The agent watches logs and alerts, opens the issue, and works the fix.",
     s: [["a", "i-pulse", "Watches", "Logs and alerts"], ["a", "i-alert", "Opens the issue", "Export times out past 5,000 rows"], ["a", "i-hammer", "Works the fix", "A plan with a ceiling"], ["y", "", "Yes", ""], ["a", "i-pr", "Fix shipped", "Tested pull request"]] },
 ];
-const ktrack = $("#ktrack"), ktabs = $$("#ktabs [role=tab]"), kdia = $("#kdia"), kpH = $("#kp-h"), kpP = $("#kp-p"), kpan = $("#kp");
+const ktrack = $("#ktrack");
+if (ktrack) {
+const ktabs = $$("#ktabs [role=tab]"), kdia = $("#kdia"), kpH = $("#kp-h"), kpP = $("#kp-p"), kpan = $("#kp");
 let kCur = -1, kSteps = [], kTok = null, kFlow = null;
-const kLayout = () => {};
+
 const kShow = i => {
   if (i === kCur) return; kCur = i;
   ktabs.forEach((b, j) => { b.setAttribute("aria-selected", j === i); b.tabIndex = j === i ? 0 : -1; });
@@ -458,7 +465,7 @@ const kShow = i => {
   kFlow = $(".kflow", kdia); kTok = $(".ktok", kdia); kSteps = $$(".kst", kdia); kt0 = 0;
 };
 const kTrackP = () => { const r = ktrack.getBoundingClientRect(), span = ktrack.offsetHeight - (innerHeight - 64); return clamp((64 - r.top) / Math.max(1, span)); };
-const kDraw = () => {
+kDraw = () => {
   if (RM) return;
   const p = kTrackP(), pos = p * KINDS.length * .999, i = Math.min(KINDS.length - 1, Math.floor(pos));
   ktabs.forEach((b, j) => $("b", b).style.setProperty("--f", j < i ? 1 : j > i ? 0 : pos - i));
@@ -488,6 +495,7 @@ const kFrame = now => {
   requestAnimationFrame(kFrame);
 };
 kShow(0); requestAnimationFrame(kFrame);
+}
 
 
 /* ============ parallax: layers drift at their own speed as they pass ============ */
@@ -503,7 +511,7 @@ const pxDraw = () => {
   }
 };
 /* the note sheet leans toward the pointer */
-if (!RM && matchMedia("(pointer:fine)").matches) {
+if (!RM && matchMedia("(pointer:fine)").matches && $("#sheet")) {
   const sh = $("#sheet");
   hero.addEventListener("pointermove", e => {
     const r = hero.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
@@ -531,8 +539,8 @@ let raf = 0;
 /* Each scroll scene only runs while its section is near the screen. Section extents are measured once per layout
    (not every frame), so a frame no longer reads layout for scenes far away; that read-write churn is what made
    scrolling stutter on phones. */
-const ZONES = [["#product", () => { if (!RM) erasDraw(); }], ["#week-sec", () => weekDraw()], ["#theory", () => theoryDraw()],
-  ["#workflow", () => narrowLit()], ["#record", () => { if (typeof railDraw === "function") railDraw(); }], ["#rules", () => rulesDraw()], ["#sessions", () => kDraw()]]
+const ZONES = [["#week-sec", () => weekDraw()], ["#theory", () => theoryDraw()],
+  ["#workflow", () => narrowLit()], ["#record", () => railDraw()], ["#rules", () => rulesDraw()], ["#sessions", () => kDraw()]]
   .map(([sel, fn]) => ({ el: document.querySelector(sel), fn, top: 0, bot: 0 })).filter(z => z.el);
 const measureZones = () => ZONES.forEach(z => { const r = z.el.getBoundingClientRect(); z.top = r.top + scrollY; z.bot = r.bottom + scrollY; });
 const onScroll = () => {

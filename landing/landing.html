@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Konteks · People lead the vision. Agents do the rest.</title>
-<meta name="description" content="Write what should exist, in plain words. The coding agents you already use plan it, price it, build it, and test it on your own computer. Nothing runs until you say yes.">
+<!--@@PAGE:home--><title>Konteks · People lead the vision. Agents do the rest.</title>
+<meta name="description" content="Write what should exist, in plain words. The coding agents you already use plan it, price it, build it, and test it on your own computer. Nothing runs until you say yes."><!--@@/PAGE--><!--@@PAGE:features--><title>Features · Konteks</title>
+<meta name="description" content="From a note to a receipt: plans with a price ceiling, one yes, agents that build, review and test on your own computer, one record, and the rules every person and agent works under."><!--@@/PAGE-->
 <script>document.documentElement.classList.add("js");if(matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("rm");try{var t=localStorage.getItem("kx-theme")||localStorage.getItem("kx-lp-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}(function f(){if(!f.on){f.on=1;addEventListener("hashchange",f)}var h=location.hash.slice(1),k=h.split("/")[0],s=h.split("/")[1]||"",D={overview:1,foundations:1,components:1,code:1};var A="overview foundations components code login work initiative session activities issues releases release leaders runtimes runtime access models context skills tools mcps connectors vcs operations general plan usage budgets payments".split(" ");if(A.indexOf(k)<0)return;location.replace(D[k]?"/design-system"+(k==="overview"?"":"#"+k):k==="login"?"/login"+(s?"#"+s:""):"/app"+(k==="work"&&!s?"":"#"+h))})();</script>
 <style>
 @view-transition{navigation:auto}
@@ -1087,6 +1088,46 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 @keyframes done-c{0%,74%{opacity:0;transform:scale(.6)}79%,91%{opacity:1;transform:none}96%,100%{opacity:0;transform:scale(.6)}}
 @media (max-width:560px){.npipe{left:5%;right:5%}.npipe .chip{font-size:12px;gap:6px;padding:7px 8px}.npipe .chip svg{display:none}.npipe .pl{margin:0 4px}}
 .rm .npipe .pl b,.rm .st::before,.rm .st::after{animation:none}.rm .st::after{opacity:1;transform:none}.rm .st::before{opacity:0}
+
+/* ===== Home: the diorama. Four rooms stand on the line where the note sheet stands on Features; the tour runs below it ===== */
+@media (min-width:961px){.dio-hero{grid-template-columns:minmax(0,1fr) minmax(0,600px)}}
+.dio{grid-area:sheet;align-self:end;position:relative;margin-top:clamp(32px,5vw,72px);min-width:0}
+.dio-stage{position:relative;height:clamp(340px,33vw,470px);border-radius:22px 22px 0 0;overflow:hidden;border:1px solid var(--line);border-bottom:0;background:var(--surface);box-shadow:0 30px 60px -40px rgba(36,48,37,.35)}
+.dio-room{position:absolute;inset:0;opacity:0;visibility:hidden;transform:translateX(24px);transition:opacity .7s var(--ease),transform .9s var(--ease),visibility 0s linear .7s}
+.dio-room.cur{opacity:1;visibility:visible;transform:none;transition:opacity .7s var(--ease),transform .9s var(--ease),visibility 0s}
+.dio-room .scene{height:100%;max-height:none;min-height:0;border:0;border-radius:0;box-shadow:none}
+.js:not(.rm) .dio{animation:rvsheet 1.1s var(--ease) .2s both}
+.dio-meta{grid-area:lanes;padding:22px 0 44px;min-width:0;color:var(--on-moss)}
+.js:not(.rm) .dio-meta{animation:rvup .9s var(--ease) .56s both}
+.dio-bar{display:flex;align-items:center;gap:12px}
+.dio-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.dio-tab{all:unset;box-sizing:border-box;cursor:pointer;position:relative;overflow:hidden;font:600 14px/1 var(--sans);padding:11px 15px 13px;border-radius:999px;border:1px solid var(--moss-line-2);color:var(--on-moss-2);transition:background .25s,color .25s,border-color .25s}
+.dio-tab:hover{color:var(--on-moss)}
+.dio-tab[aria-selected="true"]{background:rgba(238,241,232,.1);color:var(--on-moss);border-color:rgba(238,241,232,.28)}
+.dio-tab i{position:absolute;left:14px;right:14px;bottom:5px;height:2px;border-radius:2px;background:rgba(238,241,232,.14);overflow:hidden;opacity:0;transition:opacity .25s}
+.dio-tab[aria-selected="true"] i{opacity:1}
+.dio-tab b{position:absolute;inset:0;background:var(--live);transform-origin:left center;transform:scaleX(var(--f,0))}
+.dio-tab:focus-visible,.dio-pause:focus-visible{outline:2px solid var(--live);outline-offset:2px}
+.dio-pause{margin-left:auto;flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;border:1px solid var(--moss-line-2);background:none;color:var(--on-moss-2);cursor:pointer;transition:color .2s,border-color .2s}
+.dio-pause:hover{color:var(--on-moss);border-color:rgba(238,241,232,.28)}
+.dio-pause .ico{stroke-width:2}.dio-pause .pl{display:none}
+.dio-pause[aria-pressed="true"] .pz{display:none}.dio-pause[aria-pressed="true"] .pl{display:block}
+.dio-caps{margin-top:20px}
+.dio-cap{display:none}
+.dio-cap.cur{display:block}
+.js:not(.rm) .dio-cap.cur{animation:rvup .6s var(--ease) both}
+.dio-meta .era-cap h3{color:var(--on-moss);font-size:clamp(20px,.9rem + .7vw,26px)}
+.dio-meta .era-cap p{color:var(--on-moss-2);font-size:15px;max-width:52ch;margin-top:8px}
+.dio-meta .era-cap .yr{color:var(--live);margin-top:12px}
+.dio-meta .era-cap .yr::before{background:currentColor}
+.dio-note{margin-top:18px;padding-top:14px;border-top:1px solid var(--moss-line);font-size:13.5px;color:var(--on-moss-2);max-width:60ch}
+@media (max-width:960px){.dio{margin-top:8px}.dio-stage{height:clamp(300px,82vw,420px);border-radius:18px 18px 0 0}.dio-meta{padding:20px 0 40px}}
+@media (max-width:420px){.dio-tab{padding:10px 12px 12px;font-size:13px}}
+/* the hand-off from How it works to the features page */
+.how-more{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px 32px;margin-top:clamp(40px,5vw,64px);padding:28px 0 clamp(64px,8vw,112px);border-top:1px solid var(--line)}
+.how-more p{max-width:54ch;font-size:16px;color:var(--ink-2)}
+.nav-links a[aria-current="page"]{color:var(--ink);background:var(--hover)}
+.menu-pop a[aria-current="page"]{color:var(--ink);font-weight:650}
 </style>
 </head>
 <body>
@@ -1121,17 +1162,17 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 
 <header class="nav" id="nav">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="Konteks home">
+    <a class="brand" href="/" aria-label="Konteks home">
       <img class="brand-mark" src="@@IMG:konteks@@" alt="" width="48" height="25">
       Konteks <span class="beta">Beta</span>
     </a>
     <nav class="nav-links" aria-label="Main">
-      <a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/journal">Journal</a>
+      <a href="/">Home</a><a href="/features">Features</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/blog">Blog</a>
     </nav>
     <div class="nav-end">
       <button class="icon-btn" id="theme" type="button" aria-label="Switch between light and dark"><svg class="ico moon"><use href="#i-moon"/></svg><svg class="ico sun"><use href="#i-sun"/></svg></button>
       <details class="menu"><summary class="icon-btn" aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></summary>
-        <div class="menu-pop"><a href="#product">Product</a><a href="#workflow">How it works</a><a href="#sessions">Four kinds of session</a><a href="#enablement">Enablement</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/journal">Journal</a><button class="menu-theme" type="button" data-theme-alt><svg class="ico moon"><use href="#i-moon"/></svg><svg class="ico sun"><use href="#i-sun"/></svg>Switch theme</button></div>
+        <div class="menu-pop"><a href="/">Home</a><a href="/features">Features</a><a href="/pricing">Pricing</a><a href="/docs">Docs</a><a href="/blog">Blog</a></div>
       </details>
       <a class="btn btn-go" href="/login" aria-label="Open the app"><span class="long">Open the app</span><svg class="ico"><use href="#i-arrow"/></svg></a>
     </div>
@@ -1139,11 +1180,11 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 </header>
 
 <main id="main">
-<div class="hero-pin" id="heroPin"><div class="hero-stick">
-<section class="hero" id="top" aria-labelledby="h1">
+<!--@@PAGE:home-->
+<section class="hero dio-hero" id="top" aria-labelledby="h1">
   <div class="h-copy">
     <h1 id="h1"><span class="h1a">People lead the vision.</span> <span class="h1b">Agents do the rest.</span></h1>
-    <p class="lede">Write what should exist, in plain words. The coding agents you already use plan, price, build and test it on your own computer. Nothing runs until you say yes.</p>
+    <p class="lede">For almost two centuries, telling a machine what to do meant learning its language. Now you write what should exist, in plain words. The coding agents you already use plan it, price it, build it and test it on your own computer. Nothing runs until you say yes.</p>
   </div>
   <div class="h-act">
     <div class="connect" id="connect">
@@ -1155,6 +1196,89 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
     <div class="h-more">
       <span>Already connected? <a class="lnk" href="/login">Open the app <svg class="ico"><use href="#i-arrow"/></svg></a></span>
       <a class="lnk" href="#workflow">See how it works <svg class="ico"><use href="#i-down"/></svg></a>
+      <span class="fine">Public beta. Your agents stay signed in as you.</span>
+    </div>
+  </div>
+  <div class="dio" id="dio" aria-roledescription="carousel" aria-label="Four rooms, one job: telling a machine what to do">
+    <div class="dio-stage">
+     <div class="dio-room cur" style="--hue:#9A6212" role="tabpanel" id="dio-p0" aria-labelledby="dio-t0">
+      <div class="scene s-ada" aria-hidden="true">
+      <div class="L sheetp" data-d=".25"><span class="nlabel">Note G · 1843</span></div>
+      <img class="L engine" data-d="1.1" src="/art/babbage.svg" alt="" width="560" height="560" decoding="async">
+      <div class="L ada-tab" data-d=".55">
+       <div class="row" data-k="0"><i>1</i><b>×</b><span><sup>1</sup>V<sub>2</sub> × <sup>1</sup>V<sub>3</sub></span><em>= 2n</em></div>
+       <div class="row" data-k="1"><i>2</i><b>−</b><span><sup>1</sup>V<sub>4</sub> − <sup>1</sup>V<sub>1</sub></span><em>= 2n − 1</em></div>
+       <div class="row" data-k="2"><i>3</i><b>+</b><span><sup>1</sup>V<sub>5</sub> + <sup>1</sup>V<sub>1</sub></span><em>= 2n + 1</em></div>
+       <div class="row" data-k="3"><i>4</i><b>÷</b><span><sup>2</sup>V<sub>5</sub> ÷ <sup>2</sup>V<sub>4</sub></span><em>= <sup>2n − 1</sup>⁄<sub>2n + 1</sub></em></div>
+       <svg class="ink" viewBox="0 0 300 20" preserveAspectRatio="none"><path d="M4 12 C60 4 120 18 180 9 S270 6 296 11"/></svg>
+      </div>
+     </div>
+     </div>
+     <div class="dio-room" style="--hue:#2F6F8F" role="tabpanel" id="dio-p1" aria-labelledby="dio-t1">
+      <div class="scene s-tur" aria-hidden="true">
+      <img class="L era-bg bg-tur" data-d=".2" src="/art/turing.svg" alt="" width="560" height="360" loading="lazy" decoding="async">
+      <div class="L rules-card" data-d=".4"><b>Rules</b><div data-r="0">q1 <u>0</u> → 1 R q1</div><div data-r="1">q1 <u>1</u> → 0 R q1</div><div data-r="2">q1 <u>_</u> → _ halt</div></div>
+      <div class="L tape-wrap" data-d="1"><div class="tape" id="tape"></div><div class="thead"><span id="tstate">q1</span></div></div>
+      <div class="L tape-note" data-d=".7">Read a symbol. Write. Move right. Repeat.</div>
+     </div>
+     </div>
+     <div class="dio-room" style="--hue:#4F7044" role="tabpanel" id="dio-p2" aria-labelledby="dio-t2">
+      <div class="scene s-c" aria-hidden="true">
+      <img class="L era-bg bg-c" data-d=".2" src="/art/pdp.svg" alt="" width="420" height="520" loading="lazy" decoding="async">
+      <div class="L win back" data-d=".35"><div class="bar"><i></i><i></i><i></i><span>~/team</span></div><pre>$ ls
+Makefile  hello.c  notes
+$ who
+alice  tty0
+bob    tty1</pre></div>
+      <div class="L win front" data-d=".95"><div class="bar"><i></i><i></i><i></i><span>hello.c</span></div><pre id="cterm"></pre></div>
+     </div>
+     </div>
+     <div class="dio-room" style="--hue:#5F8D4E" role="tabpanel" id="dio-p3" aria-labelledby="dio-t3">
+      <div class="scene s-now" aria-hidden="true">
+      <img class="L era-bg bg-now" data-d=".2" src="/art/chip.svg" alt="" width="440" height="340" loading="lazy" decoding="async">
+      <div class="L nnote" data-d=".55">
+       <div class="nh"><span class="av r">R</span><b>Invoices: export to CSV</b></div>
+       <p>Finance wants this month’s invoices as a CSV. Keep the columns the same.</p>
+       <div class="bub" data-k="0"><span class="av d">D</span>Include the tax column too.</div>
+       <div class="bub" data-k="1"><span class="av a">A</span>Is a ceiling of $6 enough?</div>
+       <div class="bub" data-k="2"><span class="av r">R</span>Yes. Go ahead.</div>
+      </div>
+      <div class="L nline" data-d="1.1"><span class="nyes">Yes</span>
+       <span class="npipe"><span class="chip" data-k="0"><svg class="ico"><use href="#i-hammer"/></svg>Builds<i class="st"></i></span><i class="pl" data-k="0"><b></b></i><span class="chip" data-k="1"><svg class="ico"><use href="#i-eye"/></svg>Reviews<i class="st"></i></span><i class="pl" data-k="1"><b></b></i><span class="chip" data-k="2"><svg class="ico"><use href="#i-pointer"/></svg>Tests<i class="st"></i></span></span></div>
+     </div>
+     </div>
+    </div>
+  </div>
+  <div class="dio-meta">
+    <div class="dio-bar"><div class="dio-tabs" role="tablist" aria-label="Four rooms"><button class="dio-tab" type="button" role="tab" id="dio-t0" aria-controls="dio-p0" aria-selected="true" tabindex="0" style="--hue:#9A6212">1843<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t1" aria-controls="dio-p1" aria-selected="false" tabindex="-1" style="--hue:#2F6F8F">1936<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t2" aria-controls="dio-p2" aria-selected="false" tabindex="-1" style="--hue:#4F7044">1969<i aria-hidden="true"><b></b></i></button><button class="dio-tab" type="button" role="tab" id="dio-t3" aria-controls="dio-p3" aria-selected="false" tabindex="-1" style="--hue:#5F8D4E">Today<i aria-hidden="true"><b></b></i></button></div>
+      <button class="dio-pause" id="dioPause" type="button" aria-label="Pause the tour" aria-pressed="false"><svg class="ico pz" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg><svg class="ico pl" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg></button></div>
+    <div class="dio-caps" aria-live="polite">
+      <div class="dio-cap cur" data-k="0"><div class="era-cap"><span class="yr">1843 · Pen and paper</span><h3>Ada Lovelace writes the first program.</h3><p>For Charles Babbage’s Analytical Engine, a machine that was never built. Her Note G sets out, step by step, how it would compute Bernoulli numbers.</p></div></div>
+      <div class="dio-cap" data-k="1"><div class="era-cap"><span class="yr">1936 · A tape</span><h3>Alan Turing turns computing into an idea.</h3><p>A tape, a head that reads and writes, and a table of rules. Turing showed this one simple machine can carry out any calculation that can be written as steps.</p></div></div>
+      <div class="dio-cap" data-k="2"><div class="era-cap"><span class="yr">1969 to 1972 · A language</span><h3>Unix and C make software a team sport.</h3><p>At Bell Labs, from 1969 to 1972: an operating system and a language people could read and share. Code starts to outlive its authors, and teams build it together.</p></div></div>
+      <div class="dio-cap" data-k="3"><div class="era-cap"><span class="yr">Today · A note</span><h3>People decide, and agents build in the background.</h3><p>Each person brings their own view to one note: a comment, a doubt, a yes. The agents follow the discussion and build what the team agreed on, on the team’s own computers.</p></div></div>
+    </div>
+    <p class="dio-note">Four rooms, one job: telling a machine what to do. Each step moved the work closer to how people already talk.</p>
+  </div>
+</section>
+<!--@@/PAGE-->
+<!--@@PAGE:features-->
+<div class="hero-pin" id="heroPin"><div class="hero-stick">
+<section class="hero" id="top" aria-labelledby="h1">
+  <div class="h-copy">
+    <h1 id="h1"><span class="h1a">From a note</span> <span class="h1b">to a receipt.</span></h1>
+    <p class="lede">A note becomes a plan with a price ceiling. After one yes, the coding agents you already use build, review and test it on your own computer, and you accept the result with a receipt.</p>
+  </div>
+  <div class="h-act">
+    <div class="connect" id="connect">
+      <p><strong>Start here.</strong> Paste this line into Claude Code, Codex, DeepSeek Harness, OpenCode, or Antigravity.</p>
+      <div class="cline"><code id="cl">Connect this project to Konteks by following https://konteks.io/connect</code>
+        <button class="copy" id="copy" type="button"><svg class="ico cp"><use href="#i-copy"/></svg><svg class="ico ok"><use href="#i-check"/></svg><span>Copy</span></button></div>
+      <small>Your agent follows the link and connects this computer.</small>
+    </div>
+    <div class="h-more">
+      <span>Already connected? <a class="lnk" href="/login">Open the app <svg class="ico"><use href="#i-arrow"/></svg></a></span>
+      <a class="lnk" href="#record">See every feature <svg class="ico"><use href="#i-down"/></svg></a>
       <span class="fine">Public beta. Your agents stay signed in as you.</span>
     </div>
   </div>
@@ -1198,72 +1322,11 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 
 </section>
 </div></div>
+<!--@@/PAGE-->
 
-<section class="eras" id="product" aria-labelledby="h-hist">
- <div class="eras-track" id="eras">
-  <div class="eras-stage">
-   <div class="wrap eras-head">
-    <div class="eras-title"><h2 id="h-hist">Four ways, one job: telling a machine what to do.</h2><p>Pen and paper, a tape, a programming language, and now a note in plain words. Each step moved the work closer to how people already talk.</p></div>
-    <div class="eras-meter" aria-hidden="true"><span class="yr-big tab" id="yrbig">1843</span>
-     <div class="ticks"><span class="on">1843</span><span>1936</span><span>1969</span><span>Today</span><i><b id="tickbar"></b></i></div></div>
-   </div>
-   <div class="eras-rail" id="erail">
-    <article class="era" style="--hue:#9A6212">
-     <div class="scene s-ada" aria-hidden="true">
-      <div class="L sheetp" data-d=".25"><span class="nlabel">Note G · 1843</span></div>
-      <img class="L engine" data-d="1.1" src="/art/babbage.svg" alt="" width="560" height="560" loading="lazy" decoding="async">
-      <div class="L ada-tab" data-d=".55">
-       <div class="row" data-k="0"><i>1</i><b>×</b><span><sup>1</sup>V<sub>2</sub> × <sup>1</sup>V<sub>3</sub></span><em>= 2n</em></div>
-       <div class="row" data-k="1"><i>2</i><b>−</b><span><sup>1</sup>V<sub>4</sub> − <sup>1</sup>V<sub>1</sub></span><em>= 2n − 1</em></div>
-       <div class="row" data-k="2"><i>3</i><b>+</b><span><sup>1</sup>V<sub>5</sub> + <sup>1</sup>V<sub>1</sub></span><em>= 2n + 1</em></div>
-       <div class="row" data-k="3"><i>4</i><b>÷</b><span><sup>2</sup>V<sub>5</sub> ÷ <sup>2</sup>V<sub>4</sub></span><em>= <sup>2n − 1</sup>⁄<sub>2n + 1</sub></em></div>
-       <svg class="ink" viewBox="0 0 300 20" preserveAspectRatio="none"><path d="M4 12 C60 4 120 18 180 9 S270 6 296 11"/></svg>
-      </div>
-     </div>
-     <div class="era-cap"><span class="yr">1843 · Pen and paper</span><h3>Ada Lovelace writes the first program.</h3><p>For Charles Babbage’s Analytical Engine, a machine that was never built. Her Note G sets out, step by step, how it would compute Bernoulli numbers.</p></div>
-    </article>
-    <article class="era" style="--hue:#2F6F8F">
-     <div class="scene s-tur" aria-hidden="true">
-      <img class="L era-bg bg-tur" data-d=".2" src="/art/turing.svg" alt="" width="560" height="360" loading="lazy" decoding="async">
-      <div class="L rules-card" data-d=".4"><b>Rules</b><div data-r="0">q1 <u>0</u> → 1 R q1</div><div data-r="1">q1 <u>1</u> → 0 R q1</div><div data-r="2">q1 <u>_</u> → _ halt</div></div>
-      <div class="L tape-wrap" data-d="1"><div class="tape" id="tape"></div><div class="thead"><span id="tstate">q1</span></div></div>
-      <div class="L tape-note" data-d=".7">Read a symbol. Write. Move right. Repeat.</div>
-     </div>
-     <div class="era-cap"><span class="yr">1936 · A tape</span><h3>Alan Turing turns computing into an idea.</h3><p>A tape, a head that reads and writes, and a table of rules. Turing showed this one simple machine can carry out any calculation that can be written as steps.</p></div>
-    </article>
-    <article class="era" style="--hue:#4F7044">
-     <div class="scene s-c" aria-hidden="true">
-      <img class="L era-bg bg-c" data-d=".2" src="/art/pdp.svg" alt="" width="420" height="520" loading="lazy" decoding="async">
-      <div class="L win back" data-d=".35"><div class="bar"><i></i><i></i><i></i><span>~/team</span></div><pre>$ ls
-Makefile  hello.c  notes
-$ who
-alice  tty0
-bob    tty1</pre></div>
-      <div class="L win front" data-d=".95"><div class="bar"><i></i><i></i><i></i><span>hello.c</span></div><pre id="cterm"></pre></div>
-     </div>
-     <div class="era-cap"><span class="yr">1969 to 1972 · A language</span><h3>Unix and C make software a team sport.</h3><p>At Bell Labs, from 1969 to 1972: an operating system and a language people could read and share. Code starts to outlive its authors, and teams build it together.</p></div>
-    </article>
-    <article class="era now" style="--hue:#5F8D4E">
-     <div class="scene s-now" aria-hidden="true">
-      <img class="L era-bg bg-now" data-d=".2" src="/art/chip.svg" alt="" width="440" height="340" loading="lazy" decoding="async">
-      <div class="L nnote" data-d=".55">
-       <div class="nh"><span class="av r">R</span><b>Invoices: export to CSV</b></div>
-       <p>Finance wants this month’s invoices as a CSV. Keep the columns the same.</p>
-       <div class="bub" data-k="0"><span class="av d">D</span>Include the tax column too.</div>
-       <div class="bub" data-k="1"><span class="av a">A</span>Is a ceiling of $6 enough?</div>
-       <div class="bub" data-k="2"><span class="av r">R</span>Yes. Go ahead.</div>
-      </div>
-      <div class="L nline" data-d="1.1"><span class="nyes">Yes</span>
-       <span class="npipe"><span class="chip" data-k="0"><svg class="ico"><use href="#i-hammer"/></svg>Builds<i class="st"></i></span><i class="pl" data-k="0"><b></b></i><span class="chip" data-k="1"><svg class="ico"><use href="#i-eye"/></svg>Reviews<i class="st"></i></span><i class="pl" data-k="1"><b></b></i><span class="chip" data-k="2"><svg class="ico"><use href="#i-pointer"/></svg>Tests<i class="st"></i></span></span></div>
-     </div>
-     <div class="era-cap"><span class="yr">Today · A note</span><h3>People decide, and agents build in the background.</h3><p>Each person brings their own view to one note: a comment, a doubt, a yes. The agents follow the discussion and build what the team agreed on, on the team’s own computers.</p></div>
-    </article>
-   </div>
-   <div class="wrap eras-dist" aria-hidden="true"><span>the machine’s language</span><i><b id="edist"></b></i><span>your language</span></div>
-  </div>
- </div>
-</section>
 
+
+<!--@@PAGE:home-->
 <section class="sec week-sec" id="week-sec" aria-labelledby="h-2026">
  <div class="week-track" id="weekTrack"><div class="week-stick" id="weekStick">
   <div class="wrap">
@@ -1340,9 +1403,12 @@ bob    tty1</pre></div>
       <li class="step dn"><span class="node">5</span><p>It clicks through the result in a real browser.</p></li>
       <li class="step up"><span class="node">6</span><p>You accept: tested pull requests and a receipt.</p><span class="in">You can step in here</span></li>
     </ol>
+    <div class="how-more"><p>That is one session. Plans, the record, the rules every agent works under, four kinds of session and the agents you bring are on the features page.</p><a class="btn btn-go" href="/features">See every feature <svg class="ico"><use href="#i-arrow"/></svg></a></div>
   </div>
 </section>
+<!--@@/PAGE-->
 
+<!--@@PAGE:features-->
 <section class="sec" id="record" data-rise aria-labelledby="h-co">
   <div class="wrap">
     <div class="sec-h"><h2 id="h-co" data-px=".05">Many notes. Many agents. One record.</h2><p>Every team writes notes and runs agents. It all lands in one record, under the same rules.</p></div>
@@ -1507,8 +1573,9 @@ bob    tty1</pre></div>
     </div>
   </div>
 </section>
+<!--@@/PAGE-->
 
-<!--@@JOURNAL@@-->
+<!--@@PAGE:home--><!--@@JOURNAL@@--><!--@@/PAGE-->
 
 <section class="close" data-rise aria-labelledby="h-close">
   <div class="wrap close-g">
@@ -1532,12 +1599,12 @@ bob    tty1</pre></div>
   <div class="wrap">
     <div class="foot-g">
       <div>
-        <a class="brand" href="#top"><img class="brand-mark inv" src="@@IMG:konteks@@" alt="" width="48" height="25">Konteks</a>
+        <a class="brand" href="/"><img class="brand-mark inv" src="@@IMG:konteks@@" alt="" width="48" height="25">Konteks</a>
         <p class="tagline">The AI control plane for software engineering.</p>
         <a class="mail" href="mailto:hello@konteks.io">hello@konteks.io</a>
       </div>
-      <div><h3>Product</h3><ul><li><a href="#product">Product overview</a></li><li><a href="#workflow">How it works</a></li><li><a href="#sessions">Four kinds of session</a></li><li><a href="#enablement">Training &amp; onboarding</a></li><li><a href="/pricing">Pricing</a></li><li><a href="#connect">Connect your agent</a></li><li><a href="/login">Open the app</a></li></ul></div>
-      <div><h3>Resources</h3><ul><li><a href="/docs#app">Konteks</a></li><li><a href="/docs#mcp">MCP</a></li><li><a href="/docs#api-reference">API reference</a></li><li><a href="/journal">Journal</a></li><li><a href="/design-system">Design system</a></li></ul></div>
+      <div><h3>Product</h3><ul><li><a href="/features">Features</a></li><li><a href="/#workflow">How it works</a></li><li><a href="/features#sessions">Four kinds of session</a></li><li><a href="/features#enablement">Training &amp; onboarding</a></li><li><a href="/pricing">Pricing</a></li><li><a href="/#connect">Connect your agent</a></li><li><a href="/login">Open the app</a></li></ul></div>
+      <div><h3>Resources</h3><ul><li><a href="/docs#app">Konteks</a></li><li><a href="/docs#mcp">MCP</a></li><li><a href="/docs#api-reference">API reference</a></li><li><a href="/blog">Blog</a></li><li><a href="/design-system">Design system</a></li></ul></div>
       <div><h3>Company</h3><ul><li><a href="/about">About</a></li><li><a href="/contact">Contact</a></li><li><a href="/security">Security</a></li><li><a href="/privacy">Privacy</a></li><li><a href="/terms">Terms</a></li></ul></div>
     </div>
     <div class="foot-b"><span>Made by <a href="https://refactory.id/">Refactory ↗</a>, the team behind Konteks.</span><span>© 2026 Konteks · konteks.io</span></div>

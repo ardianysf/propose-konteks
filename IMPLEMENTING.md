@@ -65,10 +65,12 @@ The composer (chat input with slash commands and agent replies) is shared: `comp
 
 | Address | Source |
 |---|---|
-| `/` | `landing.html` (markup + CSS), `landing.js` (scroll scenes), `reveal.js` (reveal on scroll), `art/*.svg` (era illustrations) |
+| `/` (Home) | `landing.html` blocks marked `<!--@@PAGE:home-->`: the hero with the four-room diorama (1843, 1936, 1969, Today; `art/*.svg`), the work week, Programming is theory building, How it works (links to Features), the blog section |
+| `/features` | `landing.html` blocks marked `<!--@@PAGE:features-->`: the note-to-receipt demo hero, one record, authority/money/evidence, four kinds of session, five agents, enablement |
+| (both) | `landing.js` (every scene guarded by its section), `reveal.js` (reveal on scroll); `build.sh` writes both pages from the one template |
 | `/pricing`, `/security` | `pages_build.py` |
 | `/docs`, `/about`, `/contact`, `/privacy`, `/terms` | `site_pages.py` |
-| `/journal`, `/journal/<slug>` | `journal_build.py` + `journal_data.py` (entries), `journal-assets/` (covers) |
+| `/blog`, `/blog/<slug>` (was `/journal`) | `journal_build.py` + `journal_data.py` (entries), `journal-assets/` (covers) |
 
 ## Order to rebuild in
 

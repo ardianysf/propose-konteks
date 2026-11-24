@@ -1,4 +1,4 @@
-"""Builds the journal: a section for the landing page, /journal, and /journal/<slug>."""
+"""Builds the blog: a section for the landing page, /blog, and /blog/<slug> (formerly /journal)."""
 import html, os, re, base64, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from journal_data import ENTRIES
@@ -26,19 +26,19 @@ COVER_CSS = r'''
 # ---------- the landing section ----------
 def landing_section():
     f, rest = ENTRIES[0], ENTRIES[1:4]
-    rows = "".join(f'''<li><a class="jrow" href="/journal/{e["slug"]}"><span class="jthumb">{cover(e,"thumb")}</span><span class="jrow-t"><span class="jmeta"><time datetime="{e["iso"]}">{e["date"]}</time><span class="jtag">{e["tag"]}</span></span><b>{esc(e["title"])}</b><span class="jdek">{esc(e["dek"])}</span></span></a></li>''' for e in rest)
-    return f'''<section class="jsec" id="journal" data-rise aria-labelledby="h-journal">
+    rows = "".join(f'''<li><a class="jrow" href="/blog/{e["slug"]}"><span class="jthumb">{cover(e,"thumb")}</span><span class="jrow-t"><span class="jmeta"><time datetime="{e["iso"]}">{e["date"]}</time><span class="jtag">{e["tag"]}</span></span><b>{esc(e["title"])}</b><span class="jdek">{esc(e["dek"])}</span></span></a></li>''' for e in rest)
+    return f'''<section class="jsec" id="blog" data-rise aria-labelledby="h-journal">
   <div class="wrap">
-    <div class="sec-h"><h2 id="h-journal">Notes from the part where the product becomes real.</h2><p>Launch notes, engineering scars, and the decisions behind software that remembers. From the Konteks journal.</p></div>
+    <div class="sec-h"><h2 id="h-journal">Notes from the part where the product becomes real.</h2><p>Launch notes, engineering scars, and the decisions behind software that remembers. From the Konteks blog.</p></div>
     <div class="jgrid">
-      <a class="jfeat" href="/journal/{f["slug"]}">
+      <a class="jfeat" href="/blog/{f["slug"]}">
         <span class="jcover"><span class="jpx" data-px="-.08">{cover(f)}</span></span>
         <span class="jfeat-t"><span class="jmeta"><time datetime="{f["iso"]}">{f["date"]}</time><span class="jtag">{f["tag"]}</span><span>{f["read"]}</span></span>
-        <b class="jtitle">{esc(f["title"])}</b><span class="jdek">{esc(f["dek"])}</span><span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span></span>
+        <b class="jtitle">{esc(f["title"])}</b><span class="jdek">{esc(f["dek"])}</span><span class="jlink">Read the post <svg class="ico"><use href="#i-arrow"/></svg></span></span>
       </a>
       <div class="jside" data-px=".06">
         <ul class="jlist">{rows}</ul>
-        <a class="btn btn-line jall" href="/journal">All journal entries <svg class="ico"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-line jall" href="/blog">All posts <svg class="ico"><use href="#i-arrow"/></svg></a>
       </div>
     </div>
   </div>
@@ -77,7 +77,7 @@ JSEC_CSS = r'''
 '''
 
 # ---------- standalone pages ----------
-def page(title, desc, body, extra_css, js, active="journal"):
+def page(title, desc, body, extra_css, js, active="blog"):
     fonts = open(os.path.join(SRC, "fonts.css")).read()
     tokens = open(os.path.join(SRC, "tokens.css")).read()
     fb = base64.b64encode(open(os.path.join(HERE, "fonts/bricolage-grotesque-latin-wght-normal.woff2"), "rb").read()).decode()
@@ -242,7 +242,7 @@ def index_page():
     for e in ENTRIES[1:]: months.setdefault(month(e), []).append(e)
     arch = ""
     for m, es in months.items():
-        items = "".join(f'''<li data-tag="{esc(e["tag"])}"><a class="jitem" href="/journal/{e["slug"]}"><span class="jt"><span class="jmeta"><time datetime="{e["iso"]}">{e["date"]}</time><span class="jtag">{e["tag"]}</span><span>{e["read"]}</span></span><h3>{esc(e["title"])}</h3><p>{esc(e["dek"])}</p><span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span></span><span class="jth">{cover(e,"thumb")}</span></a></li>''' for e in es)
+        items = "".join(f'''<li data-tag="{esc(e["tag"])}"><a class="jitem" href="/blog/{e["slug"]}"><span class="jt"><span class="jmeta"><time datetime="{e["iso"]}">{e["date"]}</time><span class="jtag">{e["tag"]}</span><span>{e["read"]}</span></span><h3>{esc(e["title"])}</h3><p>{esc(e["dek"])}</p><span class="jlink">Read the post <svg class="ico"><use href="#i-arrow"/></svg></span></span><span class="jth">{cover(e,"thumb")}</span></a></li>''' for e in es)
         arch += f'<section class="jmonth" data-month><h2>{m}</h2><ol>{items}</ol></section>'
     chips = f'<button type="button" aria-pressed="true" data-f="">All<span>{len(ENTRIES)}</span></button>' + "".join(f'<button type="button" aria-pressed="false" data-f="{esc(t)}">{t}<span>{sum(1 for e in ENTRIES if e["tag"] == t)}</span></button>' for t in tags)
     body = f'''<div class="wrap">
@@ -251,9 +251,9 @@ def index_page():
     <p>Launch notes, engineering scars, and the decisions behind software that remembers.</p>
     <div class="jfilters" role="group" aria-label="Filter entries">{chips}</div>
   </header>
-  <a class="jlead" href="/journal/{f["slug"]}" data-tag="{esc(f["tag"])}">
+  <a class="jlead" href="/blog/{f["slug"]}" data-tag="{esc(f["tag"])}">
     <span class="jc">{cover(f)}</span>
-    <span class="jt"><span class="jmeta"><span>Latest</span><time datetime="{f["iso"]}">{f["date"]}</time><span class="jtag">{f["tag"]}</span><span>{f["read"]}</span></span><h2>{esc(f["title"])}</h2><p>{esc(f["dek"])}</p><span class="jlink">Read the entry <svg class="ico"><use href="#i-arrow"/></svg></span></span>
+    <span class="jt"><span class="jmeta"><span>Latest</span><time datetime="{f["iso"]}">{f["date"]}</time><span class="jtag">{f["tag"]}</span><span>{f["read"]}</span></span><h2>{esc(f["title"])}</h2><p>{esc(f["dek"])}</p><span class="jlink">Read the post <svg class="ico"><use href="#i-arrow"/></svg></span></span>
   </a>
   <div class="jarchive" id="archive"><h2 class="jarch-h">Earlier entries</h2>{arch}<p class="jempty" hidden>No entries with this tag yet.</p></div>
 </div>'''
@@ -267,7 +267,7 @@ btns.forEach(b => b.addEventListener("click", () => {
   $(".jempty").hidden = shown > 0;
 }));
 '''
-    return page("Konteks journal: notes from the part where the product becomes real", "Launch notes, engineering scars, and the decisions behind software that remembers.", body, PAGE_CSS, js)
+    return page("Konteks blog: notes from the part where the product becomes real", "Launch notes, engineering scars, and the decisions behind software that remembers.", body, PAGE_CSS, js)
 
 def article_page(i):
     e = ENTRIES[i]
@@ -283,13 +283,13 @@ def article_page(i):
         elif kind == "pre": parts.append(f"<pre>{esc(val)}</pre>")
         elif kind in ("ul", "ol"): parts.append(f"<{kind}>" + "".join(f"<li>{esc(x)}</li>" for x in val) + f"</{kind}>")
     tocl = "".join(f'<li><a href="#{sid}">{esc(t)}</a></li>' for sid, t in toc)
-    prev = f'<a class="prev" href="/journal/{older["slug"]}"><span><svg class="ico"><use href="#i-arrow"/></svg>Older entry</span><b>{esc(older["title"])}</b></a>' if older else '<span class="none">This is the first entry.</span>'
-    nxt = f'<a class="next" href="/journal/{newer["slug"]}"><span>Newer entry<svg class="ico"><use href="#i-arrow"/></svg></span><b>{esc(newer["title"])}</b></a>' if newer else '<span class="none">You are reading the latest entry.</span>'
+    prev = f'<a class="prev" href="/blog/{older["slug"]}"><span><svg class="ico"><use href="#i-arrow"/></svg>Older post</span><b>{esc(older["title"])}</b></a>' if older else '<span class="none">This is the first entry.</span>'
+    nxt = f'<a class="next" href="/blog/{newer["slug"]}"><span>Newer post<svg class="ico"><use href="#i-arrow"/></svg></span><b>{esc(newer["title"])}</b></a>' if newer else '<span class="none">You are reading the latest entry.</span>'
     body = f'''<div class="progress" aria-hidden="true"><b></b></div>
 <article>
   <div class="wrap">
     <header class="ahead">
-      <a class="crumb" href="/journal"><svg class="ico"><use href="#i-arrow"/></svg>Konteks journal</a>
+      <a class="crumb" href="/blog"><svg class="ico"><use href="#i-arrow"/></svg>Konteks blog</a>
       <div class="jmeta"><time datetime="{e["iso"]}">{e["date"]}</time><span class="jtag">{e["tag"]}</span><span>{e["read"]}</span></div>
       <h1>{esc(e["title"])}</h1>
       <p class="dek">{esc(e["dek"])}</p>
@@ -322,11 +322,11 @@ addEventListener("scroll", onS, { passive: true }); onS();
 const sh = $("#share");
 sh.onclick = async () => { let ok = false; try { await navigator.clipboard.writeText(location.href); ok = true; } catch (e) {} sh.querySelector("span").textContent = ok ? "Link copied" : "Copy the address bar"; setTimeout(() => sh.querySelector("span").textContent = "Copy link", 2200); };
 '''
-    return page(e["title"] + " | Konteks journal", e["dek"], body, PAGE_CSS, js)
+    return page(e["title"] + " | Konteks blog", e["dek"], body, PAGE_CSS, js)
 
 if __name__ == "__main__":
-    os.makedirs(os.path.join(SITE, "journal"), exist_ok=True)
-    open(os.path.join(SITE, "journal.html"), "w").write(index_page())
+    os.makedirs(os.path.join(SITE, "blog"), exist_ok=True)
+    open(os.path.join(SITE, "blog.html"), "w").write(index_page())
     for i, e in enumerate(ENTRIES):
-        open(os.path.join(SITE, "journal", e["slug"] + ".html"), "w").write(article_page(i))
-    print("journal pages:", 1 + len(ENTRIES))
+        open(os.path.join(SITE, "blog", e["slug"] + ".html"), "w").write(article_page(i))
+    print("blog pages:", 1 + len(ENTRIES))

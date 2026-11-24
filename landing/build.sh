@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds the landing page and the marketing pages (pricing, security, docs, about, contact, privacy, terms, journal) into ../site/.
+# Builds Home (/) and Features (/features) from landing.html, and the marketing pages (pricing, security, docs, about, contact, privacy, terms, journal) into ../site/.
 # Shared inputs: components/tokens (fonts, tokens), app/data/data.js (agent marks), components/js/kx-views.js (View tab).
 cd "$(dirname "$0")"
 python3 - <<'PY'
@@ -26,7 +26,12 @@ def _mark(m):
 out=re.sub(r'@@HARN:([^@]+)@@',_mark,out)
 for n in ['claude','codex','konteks']:
     out=out.replace('@@IMG:'+n+'@@','data:image/png;base64,'+base64.b64encode(open('assets/'+n+'.png','rb').read()).decode())
-open('../site/index.html','w').write(out)
+# One template, two pages: blocks marked <!--@@PAGE:home--> or <!--@@PAGE:features--> go to that page only.
+def for_page(name, href):
+    o=re.sub(r'<!--@@PAGE:(\w+)-->(.*?)<!--@@/PAGE-->', lambda m: m.group(2) if m.group(1)==name else '', out, flags=re.S)
+    return o.replace(f'<a href="{href}">', f'<a href="{href}" aria-current="page">')
+open('../site/index.html','w').write(for_page('home','/'))
+open('../site/features.html','w').write(for_page('features','/features'))
 print(len(out))
 PY
 cp ../components/js/kx-views.js ../site/kx-views.js
