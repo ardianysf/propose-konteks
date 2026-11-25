@@ -41,3 +41,6 @@ python3 site_pages.py ../site ../components/tokens
 
 mkdir -p ../site/art && cp art/*.svg ../site/art/
 mkdir -p ../site/journal-assets && cp journal-assets/*.webp ../site/journal-assets/
+
+# Indonesian pages (/id/...) from the English ones; also points every language switch at its pair.
+python3 i18n.py ../site
