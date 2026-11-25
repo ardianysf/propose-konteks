@@ -103,15 +103,28 @@ function person({ x, y, facing = 0, coat = "coatA", hair = "hairA", seated = fal
   };
   const arms = [1, -1].sort((p, q) => depth(sh(p)) - depth(sh(q)));
   const farSide = arms[0], nearSide = arms[1];
-  out.push(arm(farSide));
+  // small, out-of-phase motion so nobody stands frozen: the upper body breathes, the head turns a little,
+  // hands that write or type keep working, a pointing hand nods
+  const seed = Math.abs(Math.sin(x * 12.9898 + y * 78.233)) * 1000;
+  const breath = 3000 + (seed % 900), dl = seed % 2400;
+  const working = pose === "write" || pose === "type";
+  const moveArm = (sg, svg) => {
+    const mine = sg === (lift === "r" ? -1 : 1);
+    if (working) return a.amSlide(svg, [f[0] * 1.1 + s[0] * sg * 0.4, f[1] * 1.1 + s[1] * sg * 0.4, 0.5], P, { period: pose === "type" ? 520 + (sg > 0 ? 0 : 90) : 900, delay: sg > 0 ? 0 : 260 });
+    if (pose === "point" && mine) return a.amSlide(svg, [0, 0, 1.2], P, { period: 1900, delay: dl });
+    return svg;
+  };
+  const upper = [];
+  upper.push(moveArm(farSide, arm(farSide)));
   const F = G.frameOf([x, y, zb], [0, 0, 1], [1, 0, 0], [0, 1, 0]);
-  out.push(cloth(S(G.solidOf([[0, 7.2, 1], [5, 8.2, 1], [15, 8, 1], [20, 7, 1], [23, 4.4, 1], [24, 2.4, 1]], F, P), { tone: "hi" })));
-  out.push(cloth(L(k.segment([x + f[0] * 7.9, y + f[1] * 7.9, zb + 4], [x + f[0] * 7.6, y + f[1] * 7.6, zb + 19], P), { tone: "faint", free: true })));
-  out.push(arm(nearSide));
-  out.push(skin(S(k.cylinder(x, y, 2.1, zb + 23.5, 3.5, P, 14), { tone: "mid" })));
+  upper.push(cloth(S(G.solidOf([[0, 7.2, 1], [5, 8.2, 1], [15, 8, 1], [20, 7, 1], [23, 4.4, 1], [24, 2.4, 1]], F, P), { tone: "hi" })));
+  upper.push(cloth(L(k.segment([x + f[0] * 7.9, y + f[1] * 7.9, zb + 4], [x + f[0] * 7.6, y + f[1] * 7.6, zb + 19], P), { tone: "faint", free: true })));
+  upper.push(moveArm(nearSide, arm(nearSide)));
+  upper.push(skin(S(k.cylinder(x, y, 2.1, zb + 23.5, 3.5, P, 14), { tone: "mid" })));
   const H = [x, y, zb + 32.5];
-  out.push(skin(S(G.sphereOf(H, 6.4, P), { tone: "hi" })));
-  out.push(hr(S(G.solidOf([[-1.6, 6.7, 1], [1.5, 6.6, 1], [4, 5.5, 1], [5.9, 3.3, 1], [6.9, 0, 1]], G.frameOf([H[0] - f[0] * 1.1, H[1] - f[1] * 1.1, H[2]], [0, 0, 1], [1, 0, 0], [0, 1, 0]), P), { tone: "mid" })));
+  const head = skin(S(G.sphereOf(H, 6.4, P), { tone: "hi" })) + hr(S(G.solidOf([[-1.6, 6.7, 1], [1.5, 6.6, 1], [4, 5.5, 1], [5.9, 3.3, 1], [6.9, 0, 1]], G.frameOf([H[0] - f[0] * 1.1, H[1] - f[1] * 1.1, H[2]], [0, 0, 1], [1, 0, 0], [0, 1, 0]), P), { tone: "mid" }));
+  upper.push(a.amSlide(head, [s[0] * 0.9, s[1] * 0.9, working ? -0.5 : 0], P, { period: 5200 + (seed % 1600), delay: dl + 900 }));
+  out.push(a.amFloat(upper.join(""), P, { rise: 0.55, period: breath, delay: dl }));
   return out.join("");
 }
 
@@ -163,6 +176,7 @@ function windowOnBack(x0, x1, z0, z1, { arch = false, cols = 2 } = {}) {
 // wheels carry digit by digit up each column. Ada writes Note G by the oil lamp.
 // ======================================================================================
 const VIEW = (() => { const V = G.viewOf(W0); const l = Math.hypot(V[0], V[1]); return Math.atan2(V[1] / l, V[0] / l); })();
+const rimTicksAt = (cx, cy, r, z0, z1, ph) => { const step = 2.5 / 8; const out = []; for (let i = -1; i <= 9; i++) { const t = VIEW - 1.25 + (i + ph) * step; if (t < VIEW - 1.3 || t > VIEW + 1.3) continue; out.push(k.segment([cx + Math.cos(t) * r, cy + Math.sin(t) * r, z0], [cx + Math.cos(t) * r, cy + Math.sin(t) * r, z1], P)); } return out.join(""); };
 const rimTicks = (cx, cy, r, z0, z1) => Array.from({ length: 9 }, (_, i) => { const t = VIEW - 1.25 + (i / 8) * 2.5; return k.segment([cx + Math.cos(t) * r, cy + Math.sin(t) * r, z0], [cx + Math.cos(t) * r, cy + Math.sin(t) * r, z1], P); }).join("");
 function engine(ex, ey) {
   const brass = ac("brass"), iron = ac("iron"), card = ac("card"), oak = ac("desk");
@@ -179,9 +193,12 @@ function engine(ex, ey) {
     out.push(iron(S(k.cylinder(cx, cy, 1.3, 7, 62, P, 10), { tone: "mid" })));
     for (let i = 0; i < 8; i++) {
       const z = 11 + i * 7;
-      out.push(brass(S(k.cylinder(cx, cy, 6.6, z, 3.6, P, 32, 0.4), { tone: "hi", inner: L(rimTicks(cx, cy, 6.6, z + 0.7, z + 2.9), { tone: "lo" }) })));
+      out.push(brass(S(k.cylinder(cx, cy, 6.6, z, 3.6, P, 32, 0.4), { tone: "hi" })));
+      // the wheel turns: its figure ticks step round the rim (three phases), each column at its own pace
+      const ci = cols.findIndex((c) => c[0] === cx);
+      const ph = [0, 1, 2].map((q) => brass(L(rimTicksAt(cx, cy, 6.6, z + 0.7, z + 2.9, (ci % 2 ? 2 - q : q) / 3), { tone: "lo" })));
+      out.push(a.amFlip(ph, { period: 420 + ci * 90 + i * 25, delay: i * 70 }));
     }
-    const ci = cols.findIndex((c) => c[0] === cx);
   }
   for (const [px, py] of nearPosts) out.push(iron(S(box(px, py, 3, 3, 7, 62, 0.4), { tone: "mid" })));
   out.push(brass(S(box(ex, ey, W, Dd, 69, 3.5, 1, 3, 0.4), { tone: "mid" })));
