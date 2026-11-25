@@ -219,7 +219,7 @@
 #house .hw-pk{fill:#E4FFD6;filter:drop-shadow(0 0 1.6px #6FB24E)}
 @media (prefers-reduced-motion:reduce){#house .dw-pks{display:none}}
 #house .dw-room{transition:opacity .8s cubic-bezier(.23,1,.32,1),filter .8s cubic-bezier(.23,1,.32,1)}
-#house[data-cur] .dw-room:not(.on){opacity:.3;filter:grayscale(1)}
+#house[data-cur] .dw-room:not(.on){filter:grayscale(1)}
 #house .hw-pk2{fill:#FFD58A;filter:drop-shadow(0 0 1.6px #E8743B)}
 #house .hw-flow{fill:none;stroke:#6FB24E;stroke-width:.7;stroke-dasharray:1.4 1.8;opacity:.7}
 #house .hw-sm3{fill:#5FB24A;filter:drop-shadow(0 0 1.2px #9BEA82)}
