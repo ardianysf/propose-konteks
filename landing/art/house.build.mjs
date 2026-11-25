@@ -725,7 +725,7 @@ const css = `
 const NIGHT_KEEP = /^\.ac-(flame|lit|lamp|lampr|go)$|^\.hw-(chalk|chalkline|phos|code|code2|caret|ok|okm|pk|pk2|sm3|box|dot1|dot2|dot3|fill|flow)\b/;
 const dim = (hex) => {
   const [L, C, H] = a.hexToOklch(hex);
-  return a.oklchToHex([0.12 + L * 0.48, C * 0.9, H]);
+  return a.oklchToHex([0.06 + L * 0.64, C * 0.5, H]);
 };
 const nightRules = (src) => {
   const out = [];
