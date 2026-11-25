@@ -3,7 +3,7 @@
 The marketing site. Built into `../site/` by `sh landing/build.sh` (or `sh build.sh` at the root). Navbar: Home, Features, Pricing, Docs, Blog, then the language switch (EN/ID) and the theme button; on phones both sit at the bottom of the menu.
 
 - **Home (`/`)** tells the main idea: how telling a machine what to do changed (the hero diorama, four rooms from 1843 to today), the same work done differently, and Programming is theory building; then one How it works section that hands off to Features, and the blog.
-- **Features (`/features`)** covers everything else: the note-to-receipt demo, one record, the rules, four kinds of session, the agents, enablement.
+- **Features (`/how-it-works`)** covers everything else: the note-to-receipt demo, one record, the rules, four kinds of session, the agents, enablement.
 
 Both come from `landing.html`: blocks between `<!--@@PAGE:home-->` / `<!--@@PAGE:features-->` and `<!--@@/PAGE-->` go to that page only.
 

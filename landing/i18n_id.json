@@ -96,8 +96,6 @@
   "The agent builds. A second agent reviews.": "Agen membangun. Agen kedua meninjau.",
   "It clicks through the result in a real browser.": "Hasilnya dicoba langsung di browser sungguhan.",
   "You accept: tested pull requests and a receipt.": "Anda menerima: pull request yang sudah lolos tes dan tanda terima.",
-  "That is one session. Plans, the record, the rules every agent works under, four kinds of session and the agents you bring are on the features page.": "Itu satu sesi. Rencana, riwayat, aturan yang berlaku untuk setiap agen, empat jenis sesi, dan agen yang Anda bawa ada di halaman fitur.",
-  "See every feature": "Lihat semua fitur",
   "Notes from the part where the product becomes real.": "Catatan dari tahap ketika produk mulai nyata.",
   "Launch notes, engineering scars, and the decisions behind software that remembers. From the Konteks blog.": "Catatan peluncuran, pelajaran pahit dari engineering, dan keputusan di balik perangkat lunak yang mengingat. Dari blog Konteks.",
   "August 17, 2026": "17 Agustus 2026",
@@ -682,7 +680,9 @@
   "Done": "Selesai",
   "Bahasa Indonesia": "Bahasa Indonesia",
   "Baca dalam bahasa Indonesia": "Baca dalam bahasa Indonesia",
-  "How it works · Konteks": "Cara kerja · Konteks"
+  "How it works · Konteks": "Cara kerja · Konteks",
+  "That is one session. Plans, the record, the rules every agent works under, four kinds of session and the agents you bring are all on How it works.": "Itu satu sesi. Rencana, riwayat, aturan yang berlaku untuk setiap agen, empat jenis sesi, dan agen yang Anda bawa ada di halaman Cara kerja.",
+  "See how it works": "Lihat cara kerjanya"
  },
  "js": [
   [

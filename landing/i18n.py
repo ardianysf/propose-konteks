@@ -18,7 +18,7 @@ def docs_file():
 
 # English file -> (English URL, Indonesian file, Indonesian URL)
 def pages():
-    out = [("index.html", "/", "id/index.html", "/id"), ("features.html", "/features", "id/features.html", "/id/features"),
+    out = [("index.html", "/", "id/index.html", "/id"), ("how-it-works.html", "/how-it-works", "id/how-it-works.html", "/id/how-it-works"),
            ("pricing.html", "/pricing", "id/pricing.html", "/id/pricing"), ("security.html", "/security", "id/security.html", "/id/security"),
            (docs_file(), "/docs", "id/docs.html", "/id/docs"), ("about.html", "/about", "id/about.html", "/id/about"),
            ("contact.html", "/contact", "id/contact.html", "/id/contact"), ("blog.html", "/blog", "id/blog.html", "/id/blog")]
@@ -28,7 +28,7 @@ def pages():
     return out
 
 EN_ONLY = [("privacy.html", "/privacy"), ("terms.html", "/terms")]
-LOCAL = r"(?:features|pricing|security|docs|about|contact|blog)(?:/[a-z0-9-]+)?"
+LOCAL = r"(?:how-it-works|pricing|security|docs|about|contact|blog)(?:/[a-z0-9-]+)?"
 
 def norm(s): return " ".join(s.split())
 

@@ -51,6 +51,16 @@
       "source": "/journal/:slug",
       "destination": "/blog/:slug",
       "permanent": true
+    },
+    {
+      "source": "/features",
+      "destination": "/how-it-works",
+      "permanent": true
+    },
+    {
+      "source": "/id/features",
+      "destination": "/id/how-it-works",
+      "permanent": true
     }
   ]
 }

@@ -31,7 +31,7 @@ def for_page(name, href):
     o=re.sub(r'<!--@@PAGE:(\w+)-->(.*?)<!--@@/PAGE-->', lambda m: m.group(2) if m.group(1)==name else '', out, flags=re.S)
     return o.replace(f'<a href="{href}">', f'<a href="{href}" aria-current="page">')
 open('../site/index.html','w').write(for_page('home','/'))
-open('../site/features.html','w').write(for_page('features','/features'))
+open('../site/how-it-works.html','w').write(for_page('features','/how-it-works'))
 print(len(out))
 PY
 cp ../components/js/kx-views.js ../site/kx-views.js

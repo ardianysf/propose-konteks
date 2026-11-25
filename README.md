@@ -6,7 +6,7 @@ The repo holds four parts that each have their own folder, plus the shared compo
 
 | Part | Folder | Address | What it is |
 |---|---|---|---|
-| Landing page | [`landing/`](landing/README.md) | `/` (Home), `/features`, `/pricing`, `/docs`, `/blog`, plus `/security`, `/about`, `/contact`, `/privacy`, `/terms` | The marketing site. Navbar: Home, Features, Pricing, Docs, Blog. |
+| Landing page | [`landing/`](landing/README.md) | `/` (Home), `/how-it-works`, `/pricing`, `/docs`, `/blog`, plus `/security`, `/about`, `/contact`, `/privacy`, `/terms` | The marketing site. Navbar: Home, Features, Pricing, Docs, Blog. |
 | Design system | [`design-system/`](design-system/README.md) | `/design-system` (`#foundations`, `#components`, `#code`) | Pitch, foundations, component catalog, code package. |
 | Login & demo app | [`app/`](app/README.md) | `/login` (`#night`, `#split`), `/app` (`#session`, `#releases`, `#runtimes`, …) | The sign-in page and the full demo app with sample data. |
 | Components | [`components/`](components/README.md) | (used by all of the above) | Tokens, fonts, component CSS, UI primitives, the View tab, React components, the developer package. |
