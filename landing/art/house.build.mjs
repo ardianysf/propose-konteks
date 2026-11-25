@@ -718,11 +718,40 @@ const css = `
 @keyframes hw-turn{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){#house .am-step,#house .am-tap,#house .am-read,#house .hw-minute{animation:none}}
 `;
+// ---------- night: the same house in the page's dark mode ----------
+// Inlined on the page, the house follows the site theme (html[data-theme="dark"], or the system setting when no theme is chosen).
+// Every colour in the day palette is dimmed and cooled in OKLCH; light sources keep their day colour, so the lamp, the flame,
+// the screens, the chalk and the phosphor read as switched on in a dark room. Windows turn night blue. Nothing pulses.
+const NIGHT_KEEP = /^\.ac-(flame|lit|lamp|lampr|go)$|^\.hw-(chalk|chalkline|phos|code|code2|caret|ok|okm|pk|pk2|sm3|box|dot1|dot2|dot3|fill|flow)\b/;
+const dim = (hex) => {
+  const [L, C, H] = a.hexToOklch(hex);
+  return a.oklchToHex([0.12 + L * 0.48, C * 0.9, H]);
+};
+const nightRules = (src) => {
+  const out = [];
+  for (const m of src.matchAll(/#house(\.iso|\s+[^{]+)\{([^}]*#[0-9a-fA-F]{3,8}[^}]*)\}/g)) {
+    const sel = m[1].trim();
+    if (sel.startsWith("@") || NIGHT_KEEP.test(sel)) continue;
+    let body = m[2].replace(/#([0-9a-fA-F]{6})\b/g, (h) => dim(h)).replace(/#([0-9a-fA-F]{3})\b(?![0-9a-fA-F])/g, (h) => dim("#" + h.slice(1).split("").map((c) => c + c).join("")));
+    out.push([m[1].startsWith(".iso") ? "#house.iso" : "#house " + sel, body]);
+  }
+  out.push(["#house .ac-glass", Object.entries(a.accentTokens("#24344F", { theme: "light" })).map(([k, v]) => `--anatomy-${k}:${v}`).join(";")]);
+  out.push(["#house.iso", "--anatomy-halo:#050806;--anatomy-halo-opacity:.6"]);
+  out.push(["#house[data-cur] .dw-room:not(.on)", "filter:grayscale(1) contrast(.6) brightness(.6)"]);
+  return out;
+};
+const NIGHT = (() => {
+  const day = a.assetSvg({ width: 1, height: 1, label: "", body: "", paper: PAPER, accents, weight: 0.6, id: "house", css });
+  const style = day.slice(day.indexOf("#house.iso{"));
+  const rules = nightRules(style);
+  const on = (pre) => rules.map(([sel, body]) => sel.split(",").map((x) => pre + x.trim()).join(",") + "{" + body + "}").join("\n");
+  return "\n" + on('html[data-theme="dark"] ') + "\n@media (prefers-color-scheme:dark){\n" + on('html:not([data-theme="light"]) ') + "\n}\n";
+})();
 const svg = a.assetSvg({
   width: VB[2], height: VB[3],
   label: "One square house of four rooms around a crossing of low walls, joined by a line of instructions laid in the floor that runs through a doorway into every room: 1843, Ada Lovelace writing Note G while punched cards feed the Analytical Engine; 1936, a tape machine stepping cell by cell while its rule lights up on the blackboard; 1969, minicomputers, a terminal printing a C program and a teletype; today, a team at a board of explorations and one decision, and a screen working on its own.",
   body: minify(body.join("")), paper: PAPER, accents, weight: 0.6, id: "house", css,
-}).replace(/viewBox="[^"]*"/, `viewBox="${VB.join(" ")}"`).replace(/ width="[^"]*" height="[^"]*"/, "");
+}).replace(/viewBox="[^"]*"/, `viewBox="${VB.join(" ")}"`).replace(/ width="[^"]*" height="[^"]*"/, "").replace("]]></style>", () => NIGHT + "]]></style>");
 writeFileSync(join(HERE, "box.svg"), svg);
 writeFileSync(join(HERE, "box.cams.json"), JSON.stringify(cams));
 writeFileSync(join(HERE, "box.html"), a.previewHtml({ title: "box", svg, paper: PAPER, width: 1400 }));
