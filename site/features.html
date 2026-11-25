@@ -661,7 +661,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .dz-x rect{fill:var(--paper);transition:transform .7s var(--ease)}
 .duties2 li.on .dz-x .n3{transform:translate(4px,-3px)}.duties2 li.on .dz-x .n1{transform:translate(-3px,3px)}
 @media (max-width:900px){.theory-g{grid-template-columns:1fr}.theory-l{position:static}.duties2{gap:36px;padding:0}.duties2 li{grid-template-columns:64px minmax(0,1fr);gap:16px;transform:none}.dz{width:64px;height:64px;padding:8px;border-radius:18px}}
-@media (min-width:901px){.duties2{gap:clamp(140px,24vh,260px);padding-block:14vh 30vh}}
+@media (min-width:901px){.duties2{gap:clamp(56px,9vh,96px);padding-block:6vh 18vh}}
 
 /* record: many teams into one timeline */
 .merge{margin-top:clamp(48px,6vw,80px);position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(48px,.35fr) minmax(0,1.15fr);align-items:center}
@@ -846,7 +846,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .rstage .rule{display:block;padding:0;border:0;position:absolute;inset:0;opacity:0;transform:translateY(16px) scale(.98);transition:opacity .5s var(--ease),transform .6s var(--ease);pointer-events:none}
 .rstage .rule.show{opacity:1;transform:none;pointer-events:auto}
 .rstage .rule-v{height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center}
-.rlist{list-style:none;margin:0;padding:12vh 0 18vh;display:grid;gap:clamp(96px,22vh,220px)}
+.rlist{list-style:none;margin:0;padding:6vh 0 12vh;display:grid;gap:clamp(56px,10vh,104px)}
 .rlist li{display:grid;grid-template-columns:72px minmax(0,1fr);gap:22px;align-items:start;opacity:.32;transform:translateX(12px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
 .rlist li.on{opacity:1;transform:none}
 .rlist .dz{width:72px;height:72px;padding:12px;border-radius:20px;background:rgba(143,191,106,.12);border:1px solid rgba(143,191,106,.3);stroke:var(--live)}
@@ -1111,7 +1111,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
   .teams li{padding:16px}
   .merge-cap{margin:32px 0 22px}
   .rec::before{top:30px}
-  .rlist{gap:clamp(80px,14vh,120px)}
+  .rlist{gap:clamp(48px,8vh,72px)}
   .rlist .rule-v.inline{margin-top:24px;padding:22px 18px 40px}
   .rlist .rule-v.inline .eg{right:16px;bottom:12px}
   /* one by one: the icon, the name, the promise, the detail, then the example, each a little after the last */
@@ -1175,6 +1175,15 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .js:not(.rm) .close.in .unlearn s::after{transform:none}
 .js:not(.rm) .close.in .unlearn b{opacity:1;translate:0 0}
 @media (max-width:900px){.close-g{grid-template-columns:minmax(0,1fr);grid-template-areas:"h" "l" "a"}.unlearn{align-self:stretch}}
+/* Features close: the first session in four steps, numbered, each step drawn in turn */
+.firsts{grid-area:l;list-style:none;margin:0;padding:0;align-self:start;counter-reset:none;border-bottom:1px solid var(--line)}
+.firsts li{display:grid;grid-template-columns:36px minmax(0,1fr);column-gap:16px;row-gap:4px;padding:clamp(14px,1.4vw,20px) 0;border-top:1px solid var(--line)}
+.firsts .n{grid-row:1/3;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font:600 14px/1 var(--display);background:var(--accent-soft);color:var(--accent-ink);border:1px solid var(--line-accent)}
+.firsts b{font:600 clamp(18px,.95rem + .5vw,22px)/1.25 var(--display);letter-spacing:-.015em;color:var(--ink);text-wrap:balance}
+.firsts small{font-size:14.5px;color:var(--ink-2)}
+.js:not(.rm) .firsts li{opacity:0;translate:0 10px;transition:opacity .5s var(--ease) calc(.2s + var(--i) * .16s),translate .6s var(--ease) calc(.2s + var(--i) * .16s)}
+.js:not(.rm) .close.in .firsts li{opacity:1;translate:0 0}
+@media (max-width:900px){.firsts{align-self:stretch}}
 
 /* eras: an object for each scene, same camera as the 1843 engine; Today's sits back as a background */
 .era-bg{height:auto;pointer-events:none}
@@ -1211,11 +1220,11 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .rm .npipe .pl b,.rm .st::before,.rm .st::after{animation:none}.rm .st::after{opacity:1;transform:none}.rm .st::before{opacity:0}
 
 /* ===== Home: the same work, done differently. Each step of the engineering loop, the ritual it used to be, and what does it now ===== */
-.shift{margin-top:clamp(36px,5vw,64px);border-top:1px solid var(--line)}
+.shift{margin-top:clamp(28px,3.5vw,48px);border-top:1px solid var(--line)}
 .sh-head,.sh-row{display:grid;grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr) minmax(0,1.6fr);gap:clamp(16px,3vw,48px);align-items:baseline}
-.sh-head{padding:14px 0 12px;font-size:13px;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.sh-head{padding:10px 0 9px;font-size:13px;color:var(--ink-3);border-bottom:1px solid var(--line)}
 .sh-list{list-style:none;margin:0;padding:0}
-.sh-row{padding:clamp(18px,2.2vw,26px) 0;border-bottom:1px solid var(--line)}
+.sh-row{padding:clamp(14px,1.6vw,20px) 0;border-bottom:1px solid var(--line)}
 .sh-stage{display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:var(--ink)}
 .sh-stage .ico{width:18px;height:18px;color:var(--accent-strong)}
 .sh-was{margin:0;font:500 clamp(18px,.9rem + .6vw,24px)/1.25 var(--display);letter-spacing:-.015em;color:var(--ink-3)}
@@ -1223,7 +1232,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 .sh-was s{background:linear-gradient(currentColor,currentColor) no-repeat 0 58%/100% 2px}
 .sh-now p{margin:0;font:560 clamp(18px,.9rem + .6vw,24px)/1.25 var(--display);letter-spacing:-.015em;color:var(--ink)}
 .sh-now .sh-you{margin-top:6px;font:400 15px/1.5 var(--sans);letter-spacing:0;color:var(--ink-2)}
-.sh-close{margin:clamp(24px,3vw,36px) 0 0;max-width:52ch;font-size:17px;color:var(--ink-2)}
+.sh-close{margin:clamp(18px,2vw,26px) 0 0;max-width:52ch;font-size:17px;color:var(--ink-2)}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 /* the story, told one step at a time: the step appears; then the ritual it used to be; the ritual is struck
    out and greys; what does the step now is written in from the left; the person's part follows; then the next
@@ -1252,7 +1261,7 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 @media (min-width:761px){
   .shift{max-width:1060px;margin-inline:auto}
   .sh-head,.sh-row{grid-template-columns:minmax(0,250px) minmax(0,250px) minmax(0,440px);gap:clamp(24px,3.4vw,56px)}
-  .sh-row{align-items:center;padding:clamp(18px,2vw,26px) 0}
+  .sh-row{align-items:center;padding:clamp(12px,1.2vw,16px) 0}
   .sh-stage{gap:16px;font:620 clamp(26px,1rem + 1.3vw,36px)/1 var(--display);letter-spacing:-.03em}
   .sh-stage .ico{box-sizing:border-box;width:44px;height:44px;padding:11px;border-radius:12px;flex:none;background:var(--accent-soft);color:var(--accent-ink)}
   .sh-was{font:450 17px/1.35 var(--sans);letter-spacing:0}
@@ -1666,19 +1675,21 @@ html:not(.js) .eras-meter,.rm .eras-meter,html:not(.js) .eras-dist,.rm .eras-dis
 
 
 <section class="close" data-rise aria-labelledby="h-close">
-  <div class="wrap close-g">
-    <h2 id="h-close" data-px=".05">Unlearn the old way. <span>Learn to work with agents.</span></h2>
-    <ol class="unlearn" aria-label="What changes">
-      <li style="--i:0"><s>Write every line yourself</s><b>Write what should exist</b></li>
-      <li style="--i:1"><s>Guess the effort in hours</s><b>Approve a plan with a price ceiling</b></li>
-      <li style="--i:2"><s>Read the diff and hope</s><b>Check the evidence before you merge</b></li>
-      <li style="--i:3"><s>Keep the reasons in your head</s><b>Keep them in one record</b></li>
+
+  <div class="wrap close-g close-f">
+    <h2 id="h-close" data-px=".05">Start with one note. <span>Your agents, your computer, your yes.</span></h2>
+    <ol class="firsts" aria-label="Your first session">
+      <li style="--i:0"><span class="n">1</span><b>Paste one line into the coding agent you already use.</b><small>It connects this computer to Konteks.</small></li>
+      <li style="--i:1"><span class="n">2</span><b>Write a note about what should exist.</b><small>Teammates comment and react on it.</small></li>
+      <li style="--i:2"><span class="n">3</span><b>Read the plan and its price ceiling, then say yes.</b><small>Nothing runs before that.</small></li>
+      <li style="--i:3"><span class="n">4</span><b>Accept tested pull requests and a receipt.</b><small>Everything stays in the record.</small></li>
     </ol>
     <div class="close-acts">
-      <a class="btn btn-go" href="#connect">Connect your agent <svg class="ico"><use href="#i-up"/></svg></a>
-      <a class="btn btn-line" href="/login">Open the app <svg class="ico"><use href="#i-arrow"/></svg></a>
+      <a class="btn btn-go" href="/#connect">Connect your agent <svg class="ico"><use href="#i-arrow"/></svg></a>
+      <a class="btn btn-line" href="/pricing">See pricing <svg class="ico"><use href="#i-arrow"/></svg></a>
     </div>
   </div>
+
   <div class="moss close-moss"><div class="wrap"><p>Rolling out to a large team? Ask us about SSO/SCIM, dedicated runtimes, on-prem or VPC deployment, audit export, and onboarding. <a href="mailto:hello@konteks.io">hello@konteks.io</a></p></div></div>
 </section>
 </main>
