@@ -232,7 +232,7 @@ html[data-theme="dark"] .byline img{filter:invert(.92) hue-rotate(180deg)}
 .pn .prev span svg{transform:rotate(180deg)}
 .pn .none{border-style:dashed;background:transparent;color:var(--ink-3);display:grid;place-items:center;font-size:14px;border-radius:20px;border:1px dashed var(--line-strong);padding:22px}
 @media (max-width:1100px){.alayout{grid-template-columns:minmax(0,1fr) 200px}.toc{display:none}}
-@media (max-width:760px){.alayout{grid-template-columns:1fr}.aside{position:static;order:2;grid-template-columns:1fr 1fr}.aside p{grid-column:1/-1}.prose{font-size:17px}.acover{aspect-ratio:16/9;border-radius:20px}.cta{grid-template-columns:1fr}.pn{grid-template-columns:1fr}.pn .next{text-align:left}.pn .next span{justify-content:flex-start}}
+@media (max-width:760px){.alayout{grid-template-columns:minmax(0,1fr)}.aside{position:static;order:2;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.aside p{grid-column:1/-1}.prose{font-size:17px}.acover{aspect-ratio:16/9;border-radius:20px}.cta{grid-template-columns:1fr}.pn{grid-template-columns:1fr}.pn .next{text-align:left}.pn .next span{justify-content:flex-start}}
 '''
 
 def index_page():
