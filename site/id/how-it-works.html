@@ -173,6 +173,9 @@ html[lang="id"] .dio-hero .h-copy h1{max-width:none;font-size:clamp(2.5rem,1.3re
 /* The diorama stage at night: the house brings its own night palette (art/house.svg), the stage around it goes dark with the page. */
 html[data-theme="dark"]{--dio-paper:#161D17;--dio-ink:#A7B0A3}
 @media (prefers-color-scheme:dark){html:not([data-theme="light"]){--dio-paper:#161D17;--dio-ink:#A7B0A3}}
+/* How it works at night: the band under the waterline goes darker than the section, so steps 4 and 5 still read as a separate place, as they do by day. */
+html[data-theme="dark"] #workflow{--moss:#0A100B;--moss-line-2:rgba(143,191,106,.28)}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) #workflow{--moss:#0A100B;--moss-line-2:rgba(143,191,106,.28)}}
 /* Language: a small text button beside the theme button; on phones both move into the menu. */
 .lang-btn{min-width:40px;height:40px;padding:0 11px;display:grid;place-items:center;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);font:600 13px/1 var(--sans);letter-spacing:.02em;text-decoration:none}
 .lang-btn:hover{color:var(--ink);background:var(--hover)}
