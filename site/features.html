@@ -374,6 +374,25 @@ html:has(.menu[open]) .kxv{opacity:0;pointer-events:none}
   .step.on-line .node{position:static;transform:none}
   .step.on-line + .step.dn{border-top:1px solid var(--live)}
 }
+/* phones: the loop reads as a lit path. Each step lights as it reaches 70% of the screen: its node fills, its
+   words come up, and the rail to the next step turns green. "You say yes" sits centred on the waterline. */
+@media (max-width:900px){
+  .loop.animate-on-scroll{animation:none}
+  .step.on-line{display:flex;justify-content:center;padding:24px 0 0;margin-bottom:-24px;z-index:3}
+  .step.on-line .node{height:48px;padding:0 22px;box-shadow:0 8px 20px -10px rgba(36,48,37,.45)}
+  .step.on-line + .step.dn{padding-top:50px}
+  .step.on-line + .step.dn .node{top:46px}
+  .step:not(.on-line)::before{content:"";position:absolute;left:21px;top:66px;bottom:-16px;width:2px;border-radius:2px;background:var(--line-strong);transition:background-color .5s var(--ease)}
+  .step.on-line + .step.dn::before{top:94px}
+  .step.dn::before{left:calc(var(--gut) + 21px);background:var(--moss-line-2)}
+  .step:last-child::before,.step:has(+ .on-line)::before,.step.dn:has(+ .up)::before{display:none}
+  .step.lit::before{background:var(--accent-strong)}
+  .step.dn.lit::before{background:var(--live)}
+  .js:not(.rm) .step p,.js:not(.rm) .step .in{opacity:.28;translate:0 8px;transition:opacity .5s var(--ease),translate .55s var(--ease)}
+  .js:not(.rm) .step.lit p,.js:not(.rm) .step.lit .in{opacity:1;translate:0 0}
+  .js:not(.rm) .step .node{transition:background-color .45s var(--ease),color .45s var(--ease),border-color .45s var(--ease),scale .45s var(--ease)}
+  .js:not(.rm) .step:not(.lit) .node{scale:.92}
+}
 
 /* close: back on the line */
 .close{padding:clamp(56px,7vw,104px) 0 0}

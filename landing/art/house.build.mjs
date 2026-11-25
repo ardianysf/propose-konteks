@@ -111,8 +111,9 @@ function person({ x, y, facing = 0, coat = "coatA", hair = "hairA", seated = fal
   const moveArm = (sg, svg) => {
     const mine = sg === (lift === "r" ? -1 : 1);
     if (working) return a.amSlide(svg, [f[0] * 1.1 + s[0] * sg * 0.4, f[1] * 1.1 + s[1] * sg * 0.4, 0.5], P, { period: pose === "type" ? 520 + (sg > 0 ? 0 : 90) : 900, delay: sg > 0 ? 0 : 260 });
-    if (pose === "point" && mine) return a.amSlide(svg, [0, 0, 1.2], P, { period: 1900, delay: dl });
-    return svg;
+    if (pose === "point" && mine) return a.amSlide(svg, [f[0] * 1.2, f[1] * 1.2, 3.2], P, { period: 1700, delay: dl });
+    if (pose === "hold" && mine) return a.amSlide(svg, [f[0] * 0.8, f[1] * 0.8, 2.2], P, { period: 2600, delay: dl + 400 });
+    return a.amSlide(svg, [s[0] * sg * 0.6, s[1] * sg * 0.6, 0.6], P, { period: breath, delay: dl });
   };
   const upper = [];
   upper.push(moveArm(farSide, arm(farSide)));
@@ -123,8 +124,8 @@ function person({ x, y, facing = 0, coat = "coatA", hair = "hairA", seated = fal
   upper.push(skin(S(k.cylinder(x, y, 2.1, zb + 23.5, 3.5, P, 14), { tone: "mid" })));
   const H = [x, y, zb + 32.5];
   const head = skin(S(G.sphereOf(H, 6.4, P), { tone: "hi" })) + hr(S(G.solidOf([[-1.6, 6.7, 1], [1.5, 6.6, 1], [4, 5.5, 1], [5.9, 3.3, 1], [6.9, 0, 1]], G.frameOf([H[0] - f[0] * 1.1, H[1] - f[1] * 1.1, H[2]], [0, 0, 1], [1, 0, 0], [0, 1, 0]), P), { tone: "mid" }));
-  upper.push(a.amSlide(head, [s[0] * 0.9, s[1] * 0.9, working ? -0.5 : 0], P, { period: 5200 + (seed % 1600), delay: dl + 900 }));
-  out.push(a.amFloat(upper.join(""), P, { rise: 0.55, period: breath, delay: dl }));
+  upper.push(a.amSlide(head, [s[0] * 2.2, s[1] * 2.2, working ? -1.2 : 0.4], P, { period: 4200 + (seed % 1600), delay: dl + 900 }));
+  out.push(a.amSlide(upper.join(""), [s[0] * (seated ? 0.5 : 0.9), s[1] * (seated ? 0.5 : 0.9), seated ? 0.9 : 1.4], P, { period: breath, delay: dl }));
   return out.join("");
 }
 
