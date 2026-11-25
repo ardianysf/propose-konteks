@@ -725,7 +725,7 @@ const css = `
 const NIGHT_KEEP = /^\.ac-(flame|lit|lamp|lampr|go)$|^\.hw-(chalk|chalkline|phos|code|code2|caret|ok|okm|pk|pk2|sm3|box|dot1|dot2|dot3|fill|flow)\b/;
 const dim = (hex) => {
   const [L, C, H] = a.hexToOklch(hex);
-  return a.oklchToHex([0.06 + L * 0.64, C * 0.5, H]);
+  return a.oklchToHex([0.02 + L * 0.88, C, H]);
 };
 const nightRules = (src) => {
   const out = [];
@@ -737,7 +737,7 @@ const nightRules = (src) => {
   }
   out.push(["#house .ac-glass", Object.entries(a.accentTokens("#24344F", { theme: "light" })).map(([k, v]) => `--anatomy-${k}:${v}`).join(";")]);
   out.push(["#house.iso", "--anatomy-halo:#050806;--anatomy-halo-opacity:.6"]);
-  out.push(["#house[data-cur] .dw-room:not(.on)", "filter:grayscale(1) contrast(.6) brightness(.6)"]);
+  out.push(["#house[data-cur] .dw-room:not(.on)", "filter:grayscale(1) contrast(.45) brightness(.78)"]);
   return out;
 };
 const NIGHT = (() => {
